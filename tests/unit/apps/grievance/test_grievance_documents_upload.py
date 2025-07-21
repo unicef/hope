@@ -6,22 +6,22 @@ from django.test import override_settings
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import UploadDocumentsBase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     ReferralTicketWithoutExtrasFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 
 
 @override_settings(MEDIA_ROOT=UploadDocumentsBase.TEST_DIR)

@@ -5,21 +5,31 @@ import pytest
 from constance.test import override_config
 from parameterized import parameterized
 
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.models import DocumentType, Individual
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    DeliveryMechanism,
+    FinancialInstitution,
+)
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from tests.extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
     generate_data_collecting_types,
 )
-from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
-from hct_mis_api.apps.core.utils import encode_id_base64
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
@@ -28,21 +38,11 @@ from tests.extras.test_utils.factories.household import (
     IndividualFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import DocumentType, Individual
 from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    DeliveryMechanism,
-    FinancialInstitution,
-)
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

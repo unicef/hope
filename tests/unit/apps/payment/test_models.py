@@ -16,33 +16,14 @@ from django.utils import timezone
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.currencies import USDC
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
 from hct_mis_api.apps.household.models import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    ApprovalFactory,
-    ApprovalProcessFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     Account,
     AccountType,
@@ -59,11 +40,42 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.payment import (
+    AccountFactory,
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import (
+    BeneficiaryGroupFactory,
+    ProgramFactory,
+)
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 pytestmark = pytest.mark.django_db

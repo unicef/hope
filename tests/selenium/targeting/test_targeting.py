@@ -9,20 +9,12 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
-)
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_with_individual_with_collectors,
 )
 from hct_mis_api.apps.household.models import (
     HEARING,
@@ -32,13 +24,6 @@ from hct_mis_api.apps.household.models import (
     SEEING,
     Household,
     Individual,
-)
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
@@ -50,11 +35,31 @@ from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_with_individual_with_collectors,
+)
+from tests.extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting

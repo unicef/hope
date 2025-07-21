@@ -5,8 +5,8 @@ import pytest
 from dateutil.tz import tzlocal
 from graphql import GraphQLError
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.schema import resolve_assets_list
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import CountryFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)

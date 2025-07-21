@@ -9,24 +9,29 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
+from hct_mis_api.apps.household.models import HOST, Household, Individual
+from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
 from tests.extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import HOST, Household, Individual
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
 from tests.selenium.filters.test_filters import create_grievance
 from tests.selenium.helpers.date_time_format import FormatTime

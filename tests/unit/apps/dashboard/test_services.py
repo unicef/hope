@@ -8,7 +8,6 @@ from django.utils import timezone
 
 import pytest
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.dashboard.services import (
@@ -18,8 +17,14 @@ from hct_mis_api.apps.dashboard.services import (
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
-from tests.extras.test_utils.factories.household import HouseholdFactory, create_household
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    create_household,
+)
 from tests.extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
@@ -27,9 +32,7 @@ from tests.extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     create_payment_verification_plan_with_status,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),

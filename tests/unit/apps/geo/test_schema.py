@@ -1,9 +1,9 @@
 from django.conf import settings
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_ukraine
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_ukraine
 
 
 class TestSchema(APITestCase):

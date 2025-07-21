@@ -1,17 +1,17 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.payment import (
-    PaymentPlanFactory,
-    PaymentVerificationSummaryFactory,
-    create_payment_verification_plan_with_status,
-)
 from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     build_summary,
+)
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.payment import (
+    PaymentPlanFactory,
+    PaymentVerificationSummaryFactory,
+    create_payment_verification_plan_with_status,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 

@@ -1,5 +1,21 @@
-from tests.extras.test_utils.factories.account import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    MALE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
+from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
+)
+from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import PartnerFactory
 from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from tests.extras.test_utils.factories.household import (
@@ -12,25 +28,11 @@ from tests.extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import (
-    HEAD,
-    MALE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    Document,
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-)
 from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
 from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
-    import_program_population,
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
 
 HOUSEHOLD_FIELDS = (
     "consent_sign",

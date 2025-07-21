@@ -8,17 +8,19 @@ from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
-from tests.extras.test_utils.factories.account import RoleFactory
 from hct_mis_api.apps.account.models import Partner
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     BusinessAreaPartnerThrough,
     DataCollectingType,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.account import RoleFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,

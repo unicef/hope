@@ -11,24 +11,12 @@ from freezegun import freeze_time
 from parameterized import parameterized
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
@@ -39,10 +27,25 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSupportingDocument,
     PaymentVerificationPlan,
 )
-from tests.extras.test_utils.factories.program import ProgramCycleFactory
-from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
+from tests.extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import ProgramCycleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 
 def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:

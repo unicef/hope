@@ -7,18 +7,18 @@ from django.utils import timezone
 from parameterized import parameterized
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.reporting.models import Report
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.household import create_household_and_individuals
 from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.extras.test_utils.factories.reporting import ReportFactory
-from hct_mis_api.apps.reporting.models import Report
 
 
 class TestReportingMutation(APITestCase):

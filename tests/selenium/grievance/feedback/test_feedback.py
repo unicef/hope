@@ -5,17 +5,22 @@ import pytest
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
+from hct_mis_api.apps.household.models import HOST, Household
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
 from tests.extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import HOST, Household
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
 from tests.selenium.page_object.grievance.details_feedback_page import (
     FeedbackDetailsPage,

@@ -4,34 +4,43 @@ from unittest.mock import Mock, patch
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-    generate_data_collecting_types,
-)
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from tests.extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from tests.extras.test_utils.factories.core import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
 from tests.extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.program import (
+    BeneficiaryGroupFactory,
+    ProgramFactory,
+)
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 class TestUpdateProgram(APITestCase):

@@ -2,13 +2,13 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestDeleteProgram(APITestCase):

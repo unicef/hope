@@ -1,13 +1,13 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
-from tests.extras.test_utils.factories.geo import AreaFactory
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class UserPartnerTest(TestCase):

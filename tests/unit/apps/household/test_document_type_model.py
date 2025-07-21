@@ -2,8 +2,8 @@ from django.conf import settings
 from django.test import TestCase
 
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from tests.extras.test_utils.factories.household import DocumentTypeFactory
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from tests.extras.test_utils.factories.household import DocumentTypeFactory
 
 
 class TestDocumentTypeModel(TestCase):

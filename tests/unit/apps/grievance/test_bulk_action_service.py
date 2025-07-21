@@ -6,8 +6,6 @@ import pytest
 from faker.generator import random
 from flaky import flaky
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.constants import (
     PRIORITY_HIGH,
@@ -19,6 +17,8 @@ from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

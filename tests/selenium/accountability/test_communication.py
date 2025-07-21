@@ -1,12 +1,12 @@
 import pytest
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.accountability import CommunicationMessageFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.accountability import CommunicationMessageFactory
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,

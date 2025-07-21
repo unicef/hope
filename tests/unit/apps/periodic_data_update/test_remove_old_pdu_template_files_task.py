@@ -7,15 +7,15 @@ from django.utils import timezone
 
 import pytest
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from tests.extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
 )
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 
 pytestmark = pytest.mark.django_db
 

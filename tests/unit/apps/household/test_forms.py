@@ -1,11 +1,17 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Household
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class MassEnrollFormTest(TestCase):

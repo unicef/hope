@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

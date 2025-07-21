@@ -10,17 +10,17 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import PeriodicFieldData
 from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
 from tests.extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
 )
-from hct_mis_api.apps.core.models import PeriodicFieldData
 from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db

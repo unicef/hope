@@ -1,18 +1,20 @@
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCriteriaQueryingBase,
+)
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.grievance import (
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from tests.extras.test_utils.factories.household import (
     IndividualFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import Household
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.targeting.services.targeting_service import (
-    TargetingCriteriaQueryingBase,
-)
 
 
 class TestTargetingCriteriaFlags(APITestCase):

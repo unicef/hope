@@ -7,7 +7,6 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
@@ -36,9 +35,12 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import PartnerFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 faker = Faker()
 

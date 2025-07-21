@@ -4,15 +4,15 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.program.models import Program, ProgramCycle
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
 class TestChangeProgramStatus(APITestCase):

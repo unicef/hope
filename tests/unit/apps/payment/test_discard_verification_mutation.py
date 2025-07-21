@@ -2,13 +2,17 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.household import EntitlementCardFactory, create_household
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    EntitlementCardFactory,
+    create_household,
+)
 from tests.extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
@@ -16,9 +20,10 @@ from tests.extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 class TestDiscardVerificationMutation(APITestCase):

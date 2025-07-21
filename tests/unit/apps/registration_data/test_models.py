@@ -5,6 +5,9 @@ from django.test import TestCase
 
 from freezegun import freeze_time
 
+from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.extras.test_utils.factories.account import PartnerFactory
 from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.household import (
@@ -13,14 +16,11 @@ from tests.extras.test_utils.factories.household import (
     IndividualFactory,
     IndividualIdentityFactory,
 )
-from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 from tests.extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):

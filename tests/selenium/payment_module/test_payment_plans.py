@@ -12,27 +12,34 @@ from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import (
+    ProgramCycleFactory,
+    ProgramFactory,
+)
+from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule

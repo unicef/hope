@@ -7,9 +7,11 @@ from django.utils import timezone
 from parameterized import parameterized
 from pytz import utc
 
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.payment.models import PaymentVerificationSummary
+from hct_mis_api.apps.reporting.models import Report
 from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from tests.extras.test_utils.factories.core import create_afghanistan
-from hct_mis_api.apps.geo import models as geo_models
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.household import create_household_and_individuals
 from tests.extras.test_utils.factories.payment import (
@@ -18,10 +20,8 @@ from tests.extras.test_utils.factories.payment import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerificationSummary
 from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.extras.test_utils.factories.reporting import ReportFactory
-from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):

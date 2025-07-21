@@ -5,9 +5,16 @@ from django.test import TestCase
 
 from rest_framework.test import APIClient
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    IDENTIFICATION_TYPE_TAX_ID,
+    ROLE_NO_ROLE,
+    PendingIndividualRoleInHousehold,
+)
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from tests.extras.test_utils.factories.account import UserFactory
 from tests.extras.test_utils.factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
@@ -17,15 +24,10 @@ from tests.extras.test_utils.factories.household import (
     PendingIndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import (
-    HEAD,
-    IDENTIFICATION_TYPE_TAX_ID,
-    ROLE_NO_ROLE,
-    PendingIndividualRoleInHousehold,
-)
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 # used for ease of assertions, so it imitates serializer's behaviour

@@ -10,12 +10,7 @@ from django.test import TestCase
 
 import openpyxl
 
-from tests.extras.test_utils.factories.core import (
-    create_afghanistan,
-    create_pdu_flexible_attribute,
-)
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
@@ -27,9 +22,16 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_s
     PeriodicDataUpdateImportService,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.core import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 def add_pdu_data_to_xlsx(

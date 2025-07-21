@@ -7,16 +7,24 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.household import create_household
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
+from tests.extras.test_utils.factories.program import (
+    ProgramCycleFactory,
+    ProgramFactory,
+)
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,

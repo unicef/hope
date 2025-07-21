@@ -6,7 +6,6 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
@@ -16,7 +15,6 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -27,6 +25,8 @@ from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service impor
     Registration2024,
     UkraineBaseRegistrationService,
 )
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class BaseTestUkrainianRegistrationService(TestCase):

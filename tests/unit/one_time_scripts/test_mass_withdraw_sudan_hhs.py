@@ -1,19 +1,19 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
+from hct_mis_api.apps.household.models import Document
+from hct_mis_api.one_time_scripts.mass_withdraw_sudan_hhs import mass_withdraw_sudan_hhs
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import Document
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.one_time_scripts.mass_withdraw_sudan_hhs import mass_withdraw_sudan_hhs
 
 
 class TestMassWithdrawSudanHhs(TestCase):

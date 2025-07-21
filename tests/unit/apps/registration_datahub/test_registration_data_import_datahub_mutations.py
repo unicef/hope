@@ -8,14 +8,14 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedF
 from parameterized import parameterized
 from PIL import Image
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, KoboImportData
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestRegistrationDataImportDatahubMutations(APITestCase):

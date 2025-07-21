@@ -1,13 +1,7 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     AccountType,
     FinancialInstitution,
@@ -16,6 +10,15 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.one_time_scripts.create_financial_institutions import (
     create_financial_institutions,
+)
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
+from tests.extras.test_utils.factories.payment import (
+    AccountFactory,
+    generate_delivery_mechanisms,
 )
 
 

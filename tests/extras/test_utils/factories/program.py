@@ -10,9 +10,9 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 
 fake = Faker()
 

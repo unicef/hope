@@ -8,11 +8,15 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from tests.extras.test_utils.factories.payment import FinancialInstitutionFactory
 from hct_mis_api.apps.payment.models import FinancialInstitution
 from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.payment import FinancialInstitutionFactory
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

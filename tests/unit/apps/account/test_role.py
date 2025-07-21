@@ -2,8 +2,8 @@ from django.urls import reverse
 
 from django_webtest import WebTest
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import Role, User
+from tests.extras.test_utils.factories.account import UserFactory
 
 
 class RoleTest(WebTest):

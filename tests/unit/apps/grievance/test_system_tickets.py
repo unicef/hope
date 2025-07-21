@@ -1,17 +1,19 @@
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.services.system_ticket_service import (
+    close_system_flagging_ticket_service,
+)
+from hct_mis_api.apps.household.models import Individual
+from tests.extras.test_utils.factories.account import UserFactory
 from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketSystemFlaggingDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.system_ticket_service import (
-    close_system_flagging_ticket_service,
-)
 from tests.extras.test_utils.factories.household import create_household
-from hct_mis_api.apps.household.models import Individual
-from tests.extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from tests.extras.test_utils.factories.sanction_list import (
+    SanctionListIndividualFactory,
+)
 
 
 class TestSystemTickets(APITestCase):

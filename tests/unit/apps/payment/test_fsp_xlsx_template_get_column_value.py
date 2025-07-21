@@ -2,21 +2,8 @@ from typing import Any
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    create_household,
-)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -25,6 +12,19 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
+)
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 

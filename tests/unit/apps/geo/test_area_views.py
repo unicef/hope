@@ -9,13 +9,17 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.apps.account.permissions import Permissions
 from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
 
 pytestmark = pytest.mark.django_db
 

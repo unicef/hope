@@ -6,13 +6,13 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 faker = Faker()
 

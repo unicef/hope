@@ -18,12 +18,12 @@ import factory
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
-from tests.extras.test_utils.factories.account import PartnerFactory
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
+from tests.extras.test_utils.factories.account import PartnerFactory
 
 if TYPE_CHECKING:  # pragma: no_cover
     from hct_mis_api.apps.account.models import Partner, User

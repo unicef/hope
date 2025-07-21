@@ -9,11 +9,11 @@ import pytest
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
+from hct_mis_api.apps.program.models import BeneficiaryGroup
 from tests.extras.test_utils.factories.geo import AreaFactory
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup
 from tests.selenium.page_object.country_dashboard.country_dashboard import (
     CountryDashboard,
 )

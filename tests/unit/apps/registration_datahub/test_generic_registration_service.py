@@ -8,7 +8,6 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
@@ -21,7 +20,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -31,6 +29,8 @@ from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestGenericRegistrationService(TestCase):

@@ -9,11 +9,12 @@ import pytest
 from parameterized import parameterized
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
+from tests.extras.test_utils.factories.account import UserFactory
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import (
@@ -22,7 +23,6 @@ from tests.extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
 from tests.extras.test_utils.factories.program import ProgramFactory
 
 

@@ -3,13 +3,17 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.utils import encode_id_base64
-from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
-from tests.extras.test_utils.factories.grievance import TicketIndividualDataUpdateDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
+)
+from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from tests.extras.test_utils.factories.grievance import (
+    TicketIndividualDataUpdateDetailsFactory,
 )
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
@@ -17,9 +21,7 @@ from tests.extras.test_utils.factories.household import (
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import Document
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

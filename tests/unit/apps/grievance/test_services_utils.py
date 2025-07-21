@@ -8,19 +8,8 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -38,6 +27,29 @@ from hct_mis_api.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Document,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -46,16 +58,10 @@ from tests.extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    Document,
-    IndividualRoleInHousehold,
-)
 from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 class FlexibleAttribute:

@@ -5,16 +5,6 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    IndividualIdentityFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import (
     HEAD,
     MALE,
@@ -25,13 +15,25 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.extras.test_utils.factories.account import PartnerFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

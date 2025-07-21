@@ -7,25 +7,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
@@ -52,6 +38,20 @@ from hct_mis_api.apps.payment.services.payment_gateway import (
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
+)
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
+from tests.extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
 
 

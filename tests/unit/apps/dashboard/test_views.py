@@ -9,16 +9,16 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    RoleFactory,
-    UserFactory,
-)
 from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.services import DashboardGlobalDataCache
 from hct_mis_api.apps.dashboard.views import DashboardReportView
+from tests.extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
 

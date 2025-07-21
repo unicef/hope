@@ -10,15 +10,15 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanSupportingDocumentSerializer,
 )
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):

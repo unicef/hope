@@ -14,32 +14,14 @@ from freezegun import freeze_time
 from graphql import GraphQLError
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-    create_household_with_individual_with_collectors,
-)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
-)
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentPlanSplitFactory,
-    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
@@ -50,8 +32,33 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+    create_household_with_individual_with_collectors,
+)
+from tests.extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentPlanSplitFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import (
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 

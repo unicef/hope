@@ -5,10 +5,8 @@ from django.core.files.base import ContentFile
 import openpyxl
 import pytest
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
@@ -17,12 +15,14 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.payment.models import Account, AccountType, FinancialInstitution
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

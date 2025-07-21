@@ -2,21 +2,29 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import (
-    create_afghanistan,
-    generate_data_collecting_types,
-)
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     BusinessAreaPartnerThrough,
     DataCollectingType,
 )
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from tests.extras.test_utils.factories.account import (
+    PartnerFactory,
+    RoleFactory,
+    UserFactory,
+)
+from tests.extras.test_utils.factories.core import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestUpdateProgramPartners(APITestCase):

@@ -1,10 +1,14 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 from tests.extras.test_utils.factories.account import PartnerFactory
 from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class TestPartnerFullAreaAccessSignal(TestCase):

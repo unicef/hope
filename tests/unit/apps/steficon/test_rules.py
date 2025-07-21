@@ -3,11 +3,11 @@ from unittest.mock import Mock
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from tests.extras.test_utils.factories.household import HouseholdFactory
 from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.config import settings
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.household import HouseholdFactory
 
 CODE = """
 class SteficonConfig:

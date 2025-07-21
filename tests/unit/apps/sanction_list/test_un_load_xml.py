@@ -7,11 +7,11 @@ from django.utils import timezone
 import pytest
 from strategy_field.utils import fqn
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from tests.extras.test_utils.factories.core import create_afghanistan
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

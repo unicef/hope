@@ -2,12 +2,15 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.program import (
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 
 
 class CreateTPFromListTaskTest(TestCase):

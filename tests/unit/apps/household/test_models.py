@@ -2,18 +2,9 @@ from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
@@ -22,8 +13,21 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestHousehold(TestCase):

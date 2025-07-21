@@ -1,17 +1,13 @@
 import random
 import time
+from typing import Any, Callable, Iterable, List, Optional
 
 from django.contrib.auth import get_user_model
 
 import factory
+import pytest
 from factory.django import DjangoModelFactory
 
-
-from typing import Any, Callable, Iterable, List, Optional
-
-import pytest
-
-from tests.extras.test_utils.factories.account import PartnerFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
@@ -80,17 +76,17 @@ def create_user_role_with_permissions(update_partner_access_to_program: Any) -> 
     return _create_user_role_with_permissions
 
 
-@pytest.fixture()
-def partner_unicef(db: Any) -> PartnerFactory:
-    return PartnerFactory(name="UNICEF")
-
-
 class PartnerFactory(DjangoModelFactory):
     name = "UNICEF"
 
     class Meta:
         model = Partner
         django_get_or_create = ("name",)
+
+
+@pytest.fixture()
+def partner_unicef(db: Any) -> PartnerFactory:
+    return PartnerFactory(name="UNICEF")
 
 
 class BusinessAreaFactory(DjangoModelFactory):

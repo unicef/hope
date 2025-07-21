@@ -14,10 +14,6 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from tests.extras.test_utils.factories.household import (
-    DocumentTypeFactory,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
@@ -27,13 +23,19 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.household import (
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

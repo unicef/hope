@@ -6,7 +6,6 @@ import factory.fuzzy
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.accountability.models import (
     Feedback,
     FeedbackMessage,
@@ -16,6 +15,7 @@ from hct_mis_api.apps.accountability.models import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import Household
+from tests.extras.test_utils.factories.account import UserFactory
 
 
 class FeedbackFactory(DjangoModelFactory):

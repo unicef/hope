@@ -4,14 +4,14 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.payment.models import Payment
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import PaymentFactory
-from hct_mis_api.apps.payment.models import Payment
 
 
 class TestProgramChoices(APITestCase):

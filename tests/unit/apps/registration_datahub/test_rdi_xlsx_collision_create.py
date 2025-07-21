@@ -7,24 +7,26 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.core import (
-    create_afghanistan,
-    create_pdu_flexible_attribute,
-)
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.household.models import (
     Household,
     PendingHousehold,
     PendingIndividual,
 )
-from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.extras.test_utils.factories.account import PartnerFactory
+from tests.extras.test_utils.factories.core import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
+from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -7,30 +7,32 @@ from constance.test import override_config
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.household import (
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from tests.extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
 from tests.extras.test_utils.factories.program import ProgramCycleFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 class TestActionPaymentPlanMutation(APITestCase):

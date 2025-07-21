@@ -17,16 +17,9 @@ from django.utils.functional import classproperty
 import pytest
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    PendingHouseholdFactory,
-    PendingIndividualFactory,
-)
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -41,9 +34,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
     KoboImportData,
@@ -87,6 +78,17 @@ from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service imp
 from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
+)
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
 )
 
 SRI_LANKA_FIELDS: Dict = {

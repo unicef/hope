@@ -4,22 +4,27 @@ from time import sleep
 import pytest
 from selenium.webdriver.common.by import By
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from tests.extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-)
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.periodic_data_update import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from tests.extras.test_utils.factories.program import (
+    BeneficiaryGroupFactory,
+    ProgramFactory,
+)
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.page_object.programme_population.individuals import Individuals
 from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,

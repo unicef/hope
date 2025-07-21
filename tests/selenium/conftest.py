@@ -18,7 +18,6 @@ from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from tests.extras.test_utils.factories.account import RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
@@ -27,8 +26,9 @@ from hct_mis_api.apps.core.models import (
     DataCollectingType,
 )
 from hct_mis_api.apps.geo.models import Country
-from tests.extras.test_utils.factories.household import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from tests.extras.test_utils.factories.account import RoleFactory, UserFactory
+from tests.extras.test_utils.factories.household import DocumentTypeFactory
 from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,

@@ -2,16 +2,10 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
-)
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
     Document,
@@ -21,14 +15,22 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.registration_data.admin import RegistrationDataImportAdmin
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    create_household_and_individuals,
+)
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

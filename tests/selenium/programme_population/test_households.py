@@ -4,14 +4,19 @@ import pytest
 from pytz import utc
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import REFUGEE, Household
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.household import create_household
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.page_object.programme_population.households import Households
 from tests.selenium.page_object.programme_population.households_details import (
     HouseholdsDetails,

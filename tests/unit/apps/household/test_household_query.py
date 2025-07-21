@@ -6,31 +6,31 @@ import pytest
 from constance.test import override_config
 from parameterized import parameterized
 
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from tests.extras.test_utils.factories.core import (
     create_afghanistan,
     generate_data_collecting_types,
 )
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.geo import models as geo_models
+from tests.extras.test_utils.factories.fixtureses import ProgramFactory
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import DocumentType
-from tests.extras.test_utils.factories.fixtureses import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

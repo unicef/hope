@@ -5,16 +5,21 @@ from django.conf import settings
 import pytest
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Household, Individual
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

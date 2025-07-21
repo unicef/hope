@@ -5,10 +5,10 @@ from django.db import transaction
 import factory
 import pytest
 
+from hct_mis_api.apps.household.models import Household
 from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from tests.extras.test_utils.factories.geo import AreaFactory
 from tests.extras.test_utils.factories.household import create_household
-from hct_mis_api.apps.household.models import Household
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from tests.extras.test_utils.factories.program import ProgramFactory
 

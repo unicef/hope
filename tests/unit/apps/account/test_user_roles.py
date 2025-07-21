@@ -8,14 +8,14 @@ from hct_mis_api.apps.account.admin.forms import (
     UserRoleAdminForm,
     UserRoleInlineFormSet,
 )
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
 )
-from tests.extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan, create_ukraine
 
 
 class UserRolesTest(TestCase):

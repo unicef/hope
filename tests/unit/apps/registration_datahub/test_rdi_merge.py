@@ -12,16 +12,6 @@ import pytest
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.household import (
-    HouseholdCollectionFactory,
-    HouseholdFactory,
-    IndividualCollectionFactory,
-    IndividualFactory,
-    PendingHouseholdFactory,
-    PendingIndividualFactory,
-)
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
@@ -34,16 +24,28 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from tests.extras.test_utils.factories.steficon import SanctionListFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from tests.extras.test_utils.factories.household import (
+    HouseholdCollectionFactory,
+    HouseholdFactory,
+    IndividualCollectionFactory,
+    IndividualFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from tests.extras.test_utils.factories.steficon import SanctionListFactory
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

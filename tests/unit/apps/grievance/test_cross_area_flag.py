@@ -2,8 +2,13 @@ from django.test import TestCase
 
 from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from tests.extras.test_utils.factories.geo import AreaFactory
-from tests.extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from tests.extras.test_utils.factories.grievance import (
+    TicketNeedsAdjudicationDetailsFactory,
+)
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
 
 
 class TestCrossAreaTickets(TestCase):

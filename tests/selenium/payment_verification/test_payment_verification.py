@@ -9,9 +9,13 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentVerification as PV
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
@@ -22,12 +26,10 @@ from tests.extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hct_mis_api.apps.payment.models import PaymentVerification as PV
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )

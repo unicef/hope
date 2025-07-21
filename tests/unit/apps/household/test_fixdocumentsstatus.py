@@ -1,15 +1,15 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+from hct_mis_api.apps.household.management.commands.fixdocumentsstatus import (
+    fix_documents_statuses,
+)
+from hct_mis_api.apps.household.models import Document, Household, Individual
 from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_for_fixtures,
 )
-from hct_mis_api.apps.household.management.commands.fixdocumentsstatus import (
-    fix_documents_statuses,
-)
-from hct_mis_api.apps.household.models import Document, Household, Individual
 
 
 class TestDocumentStatusFixer(TestCase):

@@ -4,11 +4,19 @@ import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.account.models import User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentVerification as PV
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import (
     PaymentFactory,
@@ -17,13 +25,10 @@ from tests.extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.payment.models import PaymentVerification as PV
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,

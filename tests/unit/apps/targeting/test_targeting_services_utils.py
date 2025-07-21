@@ -1,11 +1,6 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Household, Individual
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
@@ -18,6 +13,14 @@ from hct_mis_api.apps.targeting.services.utils import (
     from_input_to_targeting_criteria,
     get_existing_unicef_ids,
 )
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestPaymentPlanModel(TestCase):

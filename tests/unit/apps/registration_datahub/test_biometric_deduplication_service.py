@@ -9,20 +9,12 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    IndividualFactory,
-    PendingIndividualFactory,
-)
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NOT_PROCESSED,
     UNIQUE,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
@@ -36,6 +28,16 @@ from hct_mis_api.apps.registration_datahub.services.biometric_deduplication impo
     BiometricDeduplicationService,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    IndividualFactory,
+    PendingIndividualFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 
 @pytest.fixture(autouse=True)

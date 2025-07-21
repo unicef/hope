@@ -9,22 +9,13 @@ from django.core.management import call_command
 import pytest
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualIdentityFactory,
-)
 from hct_mis_api.apps.household.models import (
     FEMALE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -36,15 +27,24 @@ from hct_mis_api.apps.household.models import (
     WIDOWED,
     DocumentType,
 )
+from hct_mis_api.apps.payment.models import AccountType
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+)
 from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialInstitutionFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import AccountType
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -4,29 +4,12 @@ from unittest.mock import patch
 import pytest
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from tests.extras.test_utils.factories.household import (
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from tests.extras.test_utils.factories.payment import (
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
@@ -38,6 +21,25 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
+from tests.extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from tests.extras.test_utils.factories.payment import (
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual

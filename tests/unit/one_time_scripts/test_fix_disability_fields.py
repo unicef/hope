@@ -2,8 +2,6 @@ from typing import Dict, List
 
 import pytest
 
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import (
     CANNOT_DO,
     COMMUNICATING,
@@ -17,6 +15,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.one_time_scripts.fix_disability_fields import fix_disability_fields
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import create_household
 
 pytestmark = pytest.mark.django_db
 

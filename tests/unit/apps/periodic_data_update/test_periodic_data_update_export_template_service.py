@@ -3,10 +3,7 @@ from django.test import TestCase
 import openpyxl
 from freezegun import freeze_time
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -19,20 +16,27 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from tests.extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-)
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from tests.extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.periodic_data_update import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from tests.extras.test_utils.factories.sanction_list import (
+    SanctionListIndividualFactory,
+)
 
 
 class TestPeriodicDataUpdateExportTemplateService(TestCase):

@@ -5,11 +5,14 @@ from django.utils import timezone
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.models import Program
 from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.program import (
+    BeneficiaryGroupFactory,
+    ProgramFactory,
+)
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

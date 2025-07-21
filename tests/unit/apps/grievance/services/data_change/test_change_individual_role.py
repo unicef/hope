@@ -3,25 +3,28 @@ from django.test import TestCase
 
 import pytest
 
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+)
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

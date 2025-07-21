@@ -7,8 +7,6 @@ from django.test import TestCase
 
 from celery.exceptions import Retry
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -18,6 +16,15 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
 )
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
+from hct_mis_api.apps.payment.utils import generate_cache_key
+from hct_mis_api.apps.steficon.models import Rule
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -25,15 +32,8 @@ from tests.extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-)
-from hct_mis_api.apps.payment.utils import generate_cache_key
 from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from hct_mis_api.apps.steficon.models import Rule
 
 
 class TestPaymentCeleryTask(TestCase):

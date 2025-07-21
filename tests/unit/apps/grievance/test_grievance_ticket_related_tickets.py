@@ -1,22 +1,22 @@
 from django.core.management import call_command
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    DocumentType,
+)
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
-)
-from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    DocumentType,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 

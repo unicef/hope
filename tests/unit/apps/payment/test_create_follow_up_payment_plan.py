@@ -1,12 +1,12 @@
 import datetime
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 
 CREATE_FOLLOW_UP_MUTATION = """
 mutation createFollowUpPaymentPlan($paymentPlanId: ID!, $dispersionStartDate: Date!, $dispersionEndDate: Date!) {

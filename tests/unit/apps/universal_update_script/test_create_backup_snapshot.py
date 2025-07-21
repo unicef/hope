@@ -8,17 +8,17 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from openpyxl import Workbook
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import MALE, Individual
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
     create_snapshot_content,
 )
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

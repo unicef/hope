@@ -2,18 +2,18 @@ from typing import Callable, Sequence, Union
 
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
-from tests.extras.test_utils.factories.accountability import CommunicationMessageFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.accountability import CommunicationMessageFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 
 
 class TestListQueryMessage(APITestCase):

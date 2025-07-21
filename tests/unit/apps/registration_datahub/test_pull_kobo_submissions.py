@@ -7,12 +7,12 @@ from django.conf import settings
 
 import pytest
 
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.registration_data.models import KoboImportData
 from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db(databases=(("default",)), transaction=True)
 

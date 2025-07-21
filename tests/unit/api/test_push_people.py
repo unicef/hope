@@ -10,10 +10,8 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hct_mis_api.api.models import Grant
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
@@ -25,10 +23,21 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from tests.extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.unit.api.base import HOPEApiTestCase
 
 

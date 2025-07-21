@@ -12,22 +12,10 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from tests.extras.test_utils.factories.geo import CountryFactory
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.household import (
-    EntitlementCardFactory,
-    HouseholdCollectionFactory,
-    HouseholdFactory,
-    IndividualCollectionFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household,
-)
 from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
     Account,
@@ -49,21 +37,35 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
-from tests.extras.test_utils.factories.program import (
-    BeneficiaryGroupFactory,
-    ProgramCycleFactory,
-)
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from tests.extras.test_utils.factories.targeting import (
-    TargetingCriteriaRuleFactory,
-    TargetingCriteriaRuleFilterFactory,
-)
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.geo import CountryFactory
+from tests.extras.test_utils.factories.household import (
+    EntitlementCardFactory,
+    HouseholdCollectionFactory,
+    HouseholdFactory,
+    IndividualCollectionFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.program import (
+    BeneficiaryGroupFactory,
+    ProgramCycleFactory,
+)
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from tests.extras.test_utils.factories.targeting import (
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+)
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:

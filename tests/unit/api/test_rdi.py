@@ -22,12 +22,12 @@ from hct_mis_api.apps.payment.models import (
     FinancialInstitution,
     PendingAccount,
 )
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.extras.test_utils.factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase
 from tests.unit.api.factories import UserFactory
 

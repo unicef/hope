@@ -9,26 +9,34 @@ from django.utils import timezone
 import pytest
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
     TicketSensitiveDetails,
 )
+from hct_mis_api.apps.program.models import Program
+from tests.extras.test_utils.factories.account import (
+    PartnerFactory,
+    RoleFactory,
+    UserFactory,
+)
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceQuery(APITestCase):

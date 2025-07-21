@@ -9,21 +9,11 @@ from graphql import GraphQLError
 from graphql.execution.base import ResolveInfo
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_required
 from hct_mis_api.apps.geo.models import Area
-from tests.extras.test_utils.factories.household import EntitlementCardFactory, create_household
-from tests.extras.test_utils.factories.payment import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-)
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
@@ -33,8 +23,23 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    EntitlementCardFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
 from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 
 EDIT_PAYMENT_VERIFICATION_MUTATION = """
 mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {

@@ -1,11 +1,17 @@
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.grievance import TicketHouseholdDataUpdateDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.household_data_update_service import (
     HouseholdDataUpdateService,
+)
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from tests.extras.test_utils.factories.grievance import (
+    TicketHouseholdDataUpdateDetailsFactory,
 )
 from tests.extras.test_utils.factories.household import create_household
 

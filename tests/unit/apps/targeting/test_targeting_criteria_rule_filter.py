@@ -9,30 +9,14 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-)
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from tests.extras.test_utils.factories.household import (
-    create_household,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     Household,
     Individual,
     IndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import AccountType
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
@@ -43,6 +27,22 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlock,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from tests.extras.test_utils.factories.household import (
+    create_household,
+    create_household_and_individuals,
+)
+from tests.extras.test_utils.factories.payment import (
+    AccountFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):

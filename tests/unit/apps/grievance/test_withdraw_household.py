@@ -1,19 +1,22 @@
 from django.core.management import call_command
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.models import Household, Individual
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from tests.extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketDeleteIndividualDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import Household, Individual
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
 from tests.extras.test_utils.factories.program import ProgramFactory
 
 

@@ -3,13 +3,16 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
-from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+)
 from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.extras.test_utils.factories.sanction_list import SanctionListFactory
 

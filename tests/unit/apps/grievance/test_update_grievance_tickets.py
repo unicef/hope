@@ -8,34 +8,16 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from factory import Factory
 from parameterized import parameterized
 
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     encode_id_base64,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceComplaintTicketWithoutExtrasFactory,
-    GrievanceTicketFactory,
-    PositiveFeedbackTicketWithoutExtrasFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory,
-    TicketAddIndividualDetailsFactory,
-    TicketHouseholdDataUpdateDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
 from hct_mis_api.apps.household.models import (
     DIVORCED,
     FEMALE,
@@ -49,9 +31,27 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualIdentity,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from tests.extras.test_utils.factories.grievance import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
+    GrievanceTicketFactory,
+    PositiveFeedbackTicketWithoutExtrasFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+    TicketAddIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+)
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestUpdateGrievanceTickets(APITestCase):

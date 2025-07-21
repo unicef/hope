@@ -5,7 +5,6 @@ import pytest
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.documents import get_individual_doc
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     FEMALE,
@@ -18,8 +17,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
     PendingIndividual,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
@@ -31,6 +28,11 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     rebuild_search_index,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.program import ProgramFactory
+from tests.extras.test_utils.factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from tests.unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

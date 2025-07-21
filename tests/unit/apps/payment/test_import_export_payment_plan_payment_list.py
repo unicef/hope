@@ -13,10 +13,8 @@ from django.urls import reverse
 
 from graphql import GraphQLError
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     DataCollectingType,
@@ -24,23 +22,12 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from tests.extras.test_utils.factories.household import DocumentFactory, create_household
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Document,
     Household,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentPlanSplitFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -64,6 +51,22 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
 )
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
+)
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import (
+    DocumentFactory,
+    create_household,
+)
+from tests.extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentPlanSplitFactory,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 

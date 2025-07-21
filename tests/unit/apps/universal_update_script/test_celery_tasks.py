@@ -1,18 +1,18 @@
 import pytest
 
-from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import MALE, Document, DocumentType, Individual
 from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
-from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import create_household_and_individuals
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

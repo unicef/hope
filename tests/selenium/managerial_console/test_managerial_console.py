@@ -7,14 +7,20 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
-from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import Partner, User
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from tests.extras.test_utils.factories.payment import ApprovalProcessFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.payment import (
+    ApprovalProcessFactory,
+    PaymentPlanFactory,
+)
+from tests.extras.test_utils.factories.program import (
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,
 )
