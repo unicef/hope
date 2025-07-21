@@ -22,7 +22,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialInstitution,
     PendingAccount,
 )
-from tests.extras.test_utils.factories.fixtures import (
+from tests.extras.test_utils.factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )

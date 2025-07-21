@@ -17,7 +17,7 @@ from tests.extras.test_utils.factories.household import (
     PendingHouseholdFactory,
     PendingIndividualFactory,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

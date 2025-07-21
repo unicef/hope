@@ -130,7 +130,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
 
     @factory.lazy_attribute
     def program(self) -> Any:
-        from tests.extras.test_utils.factories.fixtures import ProgramFactory
+        from tests.extras.test_utils.factories.program import ProgramFactory
 
         return ProgramFactory()
 

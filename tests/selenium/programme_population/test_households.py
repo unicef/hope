@@ -9,7 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import REFUGEE, Household
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.programme_population.households import Households

@@ -32,7 +32,7 @@ from hct_mis_api.apps.household.models import (
     SINGLE,
     DocumentType,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestGrievanceApproveDataChangeMutation(APITestCase):

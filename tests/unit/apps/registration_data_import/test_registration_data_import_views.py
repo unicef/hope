@@ -16,7 +16,7 @@ from tests.extras.test_utils.factories.account import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 

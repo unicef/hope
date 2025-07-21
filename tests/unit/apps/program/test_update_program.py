@@ -29,7 +29,7 @@ from tests.extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory, ProgramFactory
+from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 

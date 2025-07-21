@@ -39,7 +39,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialInstitution,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

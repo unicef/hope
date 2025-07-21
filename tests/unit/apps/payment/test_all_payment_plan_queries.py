@@ -39,7 +39,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSupportingDocument,
     PaymentVerificationPlan,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory
+from tests.extras.test_utils.factories.program import ProgramCycleFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem

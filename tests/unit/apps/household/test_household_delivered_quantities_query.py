@@ -12,7 +12,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestHouseholdDeliveredQuantitiesQuery(APITestCase):

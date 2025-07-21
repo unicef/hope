@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory
+from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory
 from tests.unit.api.base import HOPEApiTestCase
 
 

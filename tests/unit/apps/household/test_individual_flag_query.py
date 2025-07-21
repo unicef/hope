@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.models import (
     SANCTION_LIST_CONFIRMED_MATCH,
     SANCTION_LIST_POSSIBLE_MATCH,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestIndividualFlagQuery(APITestCase):

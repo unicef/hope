@@ -25,7 +25,7 @@ def sanction_list(db: Any) -> "SanctionList":
 
 @pytest.fixture
 def program(db: Any, sanction_list: "SanctionList") -> "Program":
-    from tests.extras.test_utils.factories.fixtures import ProgramFactory
+    from tests.extras.test_utils.factories.program import ProgramFactory
 
     create_afghanistan()
     program = ProgramFactory()

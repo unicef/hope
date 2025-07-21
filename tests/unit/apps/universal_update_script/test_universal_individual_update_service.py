@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.payment.models import Account, AccountType, FinancialInstitution
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (

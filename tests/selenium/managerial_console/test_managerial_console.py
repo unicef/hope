@@ -13,7 +13,7 @@ from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from tests.extras.test_utils.factories.payment import ApprovalProcessFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory, ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,

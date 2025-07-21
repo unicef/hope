@@ -10,7 +10,7 @@ from tests.extras.test_utils.factories.geo import AreaFactory
 from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class ModifiedPaymentFactory(PaymentFactory):

@@ -9,7 +9,7 @@ from tests.extras.test_utils.factories.household import (
     create_household_with_individual_with_collectors,
 )
 from hct_mis_api.apps.household.models import FEMALE, MARRIED, Household
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.programme_population.individuals import Individuals

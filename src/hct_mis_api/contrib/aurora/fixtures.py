@@ -5,7 +5,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 
 from tests.extras.test_utils.factories.account import BusinessAreaFactory
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 
 faker = Faker()

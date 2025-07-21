@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from tests.selenium.page_object.payment_module.program_cycle_details import (

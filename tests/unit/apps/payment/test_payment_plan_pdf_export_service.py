@@ -16,7 +16,7 @@ from hct_mis_api.apps.payment.models import Approval, DeliveryMechanism
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestPaymentPlanPDFExportService(TestCase):

@@ -15,7 +15,7 @@ from tests.extras.test_utils.factories.grievance import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 

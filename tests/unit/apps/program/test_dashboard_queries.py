@@ -14,7 +14,7 @@ from tests.extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 QUERY_CHART_PROGRAMMES_BY_SECTOR = """

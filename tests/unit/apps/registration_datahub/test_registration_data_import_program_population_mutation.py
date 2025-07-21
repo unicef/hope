@@ -12,7 +12,7 @@ from tests.extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory, ProgramFactory
+from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.extras.test_utils.factories.sanction_list import SanctionListFactory

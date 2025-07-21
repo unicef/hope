@@ -11,7 +11,7 @@ from tests.extras.test_utils.factories.account import UserFactory
 from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory, ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 

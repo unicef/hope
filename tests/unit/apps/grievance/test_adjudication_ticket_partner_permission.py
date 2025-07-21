@@ -13,7 +13,7 @@ from tests.extras.test_utils.factories.grievance import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudication(

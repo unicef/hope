@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from hct_mis_api.api.models import Grant
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,

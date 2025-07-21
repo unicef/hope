@@ -8,7 +8,7 @@ from tests.extras.test_utils.factories.household import (
 )
 from hct_mis_api.apps.household.models import Document, Household, Individual
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestHouseholdWithdraw(TestCase):

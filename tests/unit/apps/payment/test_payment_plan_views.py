@@ -24,7 +24,7 @@ from tests.extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 

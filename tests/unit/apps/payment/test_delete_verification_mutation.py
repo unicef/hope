@@ -14,7 +14,7 @@ from tests.extras.test_utils.factories.payment import (
     create_payment_verification_plan_with_status,
 )
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestDeleteVerificationMutation(APITestCase):

@@ -3,7 +3,7 @@ from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

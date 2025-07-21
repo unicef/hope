@@ -15,7 +15,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 

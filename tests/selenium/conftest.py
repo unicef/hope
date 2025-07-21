@@ -29,7 +29,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from tests.extras.test_utils.factories.household import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
-from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory
+from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
 )

@@ -12,7 +12,7 @@ from tests.extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, Household
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

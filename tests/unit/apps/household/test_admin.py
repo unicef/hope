@@ -5,7 +5,7 @@ from django_webtest import WebTest
 from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

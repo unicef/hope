@@ -20,7 +20,7 @@ from hct_mis_api.apps.household.models import (
 )
 from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,

@@ -32,7 +32,7 @@ from hct_mis_api.apps.household.models import (
     UNIQUE_IN_BATCH,
     DocumentType,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

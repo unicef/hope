@@ -25,7 +25,7 @@ from tests.extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
 )
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 

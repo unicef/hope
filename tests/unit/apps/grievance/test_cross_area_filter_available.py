@@ -6,7 +6,7 @@ from tests.extras.test_utils.factories.account import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from tests.extras.test_utils.factories.geo import AreaFactory
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 CROSS_AREA_FILTER_AVAILABLE_QUERY = """

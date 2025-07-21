@@ -23,7 +23,7 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory, ProgramFactory
+from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

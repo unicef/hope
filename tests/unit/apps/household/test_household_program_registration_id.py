@@ -11,7 +11,7 @@ from tests.extras.test_utils.factories.core import (
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from tests.extras.test_utils.factories.household import HouseholdFactory, create_household
 from hct_mis_api.apps.household.models import Household
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 

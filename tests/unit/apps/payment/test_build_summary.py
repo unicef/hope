@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     build_summary,
 )
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestBuildSummary(TestCase):

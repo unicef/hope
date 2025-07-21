@@ -49,7 +49,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
-from tests.extras.test_utils.factories.fixtures import (
+from tests.extras.test_utils.factories.program import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
 )

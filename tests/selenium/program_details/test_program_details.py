@@ -14,7 +14,7 @@ from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household
 from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory, ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.helpers.date_time_format import FormatTime

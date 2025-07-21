@@ -6,7 +6,7 @@ from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import MALE, Document, DocumentType, Individual
 from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,

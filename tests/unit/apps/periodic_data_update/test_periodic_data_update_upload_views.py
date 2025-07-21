@@ -32,7 +32,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
     PeriodicDataUpdateExportTemplateService,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.unit.apps.periodic_data_update.test_periodic_data_update_import_service import (
     add_pdu_data_to_xlsx,
 )

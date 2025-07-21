@@ -11,7 +11,7 @@ from hct_mis_api.apps.account.models import Partner, User
 from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport as RDI

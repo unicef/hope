@@ -21,7 +21,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.unit.conftest import disabled_locally_test
 
 

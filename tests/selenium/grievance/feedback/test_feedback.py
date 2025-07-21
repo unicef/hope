@@ -13,7 +13,7 @@ from tests.extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import HOST, Household
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name

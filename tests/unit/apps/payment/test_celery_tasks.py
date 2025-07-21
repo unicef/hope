@@ -31,7 +31,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.utils import generate_cache_key
-from tests.extras.test_utils.factories.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 

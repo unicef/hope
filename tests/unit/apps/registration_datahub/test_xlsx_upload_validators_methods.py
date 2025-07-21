@@ -17,7 +17,7 @@ from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from tests.extras.test_utils.factories.geo import CountryFactory
 from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from tests.extras.test_utils.factories.fixtures import get_program_with_dct_type_and_name
+from tests.extras.test_utils.factories.program import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 

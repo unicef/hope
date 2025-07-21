@@ -16,7 +16,7 @@ from tests.extras.test_utils.factories.payment import (
     RealProgramFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory
+from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory
 
 EXCLUDE_HOUSEHOLD_MUTATION = """
 mutation excludeHouseholds($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!, $exclusionReason: String) {
