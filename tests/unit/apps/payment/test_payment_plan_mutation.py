@@ -26,7 +26,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
+from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,

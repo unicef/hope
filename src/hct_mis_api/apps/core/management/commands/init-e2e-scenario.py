@@ -24,7 +24,7 @@ from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,

@@ -1,6 +1,6 @@
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from tests.extras.test_utils.factories.core import create_afghanistan
-from hct_mis_api.apps.steficon.fixtures import RuleFactory
+from tests.extras.test_utils.factories.steficon import RuleFactory
 from hct_mis_api.apps.steficon.forms import RuleForm
 from hct_mis_api.apps.steficon.models import Rule
 

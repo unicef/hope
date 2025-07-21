@@ -11,7 +11,7 @@ from hct_mis_api.apps.grievance.services.system_ticket_service import (
 )
 from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
+from tests.extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 
 
 class TestSystemTickets(APITestCase):

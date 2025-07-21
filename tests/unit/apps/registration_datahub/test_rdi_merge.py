@@ -41,7 +41,7 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListFactory
+from tests.extras.test_utils.factories.steficon import SanctionListFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

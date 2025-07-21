@@ -32,7 +32,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
+from tests.extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 
 
 class TestPeriodicDataUpdateExportTemplateService(TestCase):
