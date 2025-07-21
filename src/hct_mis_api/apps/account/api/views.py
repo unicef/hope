@@ -74,6 +74,7 @@ class UserViewSet(
                 Q(role_assignments__business_area__slug=business_area_slug)
                 | Q(partner__role_assignments__business_area__slug=business_area_slug)
             )
+            .distinct()
             .order_by("first_name")
         )
 

@@ -91,7 +91,7 @@ def generate_areas(country_names: Optional[List[str]] = None) -> None:
 def generate_small_areas_for_afghanistan_only() -> None:
     country = CountryFactory()
     business_area, _ = BusinessArea.objects.get_or_create(
-        code=country.iso_num,
+        code="0060",
         defaults=dict(
             name=country.short_name,
             long_name=country.name,
