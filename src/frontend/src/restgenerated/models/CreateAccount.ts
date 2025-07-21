@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type CreateAccount = {
     name: string;
-    dataFields: any;
     approveStatus: boolean;
+    value: any;
 };
 

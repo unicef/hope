@@ -238,6 +238,8 @@ describe('HouseholdMembersTable', () => {
     deduplicationGoldenRecordStatusChoices: [
       { value: 'SomeValue', label: 'SomeLabel' },
     ],
+    accountTypeChoices: [],
+    accountFinancialInstitutionChoices: [],
   };
 
   beforeEach(() => {
