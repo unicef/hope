@@ -171,7 +171,6 @@ export function RequestedHouseholdDataChange({
           .map((role) => role.individual_id),
       }}
       onSubmit={async (values) => {
-        console.log('values1', values);
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields
