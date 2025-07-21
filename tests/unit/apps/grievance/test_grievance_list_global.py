@@ -333,6 +333,7 @@ class TestGrievanceTicketGlobalList:
                     "slug": grievance_ticket.programs.first().slug,
                     "name": grievance_ticket.programs.first().name,
                     "status": grievance_ticket.programs.first().status,
+                    "screen_beneficiary": grievance_ticket.programs.first().screen_beneficiary,
                 }
             ]
             household = getattr(getattr(grievance_ticket, "ticket_details", None), "household", None)
