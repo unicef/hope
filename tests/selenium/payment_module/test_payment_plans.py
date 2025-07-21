@@ -30,7 +30,7 @@ from tests.extras.test_utils.factories.program import ProgramCycleFactory, Progr
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from tests.selenium.helpers.date_time_format import FormatTime

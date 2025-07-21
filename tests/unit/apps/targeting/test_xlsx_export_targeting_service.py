@@ -13,7 +13,7 @@ from tests.extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import AccountType, PaymentPlan
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )

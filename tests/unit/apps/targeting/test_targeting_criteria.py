@@ -16,7 +16,7 @@ from tests.extras.test_utils.factories.household import (
 from hct_mis_api.apps.household.models import Household, Individual
 from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,

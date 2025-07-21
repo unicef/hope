@@ -52,7 +52,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from tests.extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 
 class TestPaymentPlanServices(APITestCase):

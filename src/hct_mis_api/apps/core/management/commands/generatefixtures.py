@@ -32,7 +32,7 @@ from tests.extras.test_utils.factories.payment import (
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
+from tests.extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )

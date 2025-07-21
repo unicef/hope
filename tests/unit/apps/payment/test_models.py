@@ -64,7 +64,7 @@ from hct_mis_api.apps.program.models import ProgramCycle
 from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 pytestmark = pytest.mark.django_db
 

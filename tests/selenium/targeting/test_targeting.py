@@ -55,7 +55,7 @@ from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCy
 from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting
 from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
