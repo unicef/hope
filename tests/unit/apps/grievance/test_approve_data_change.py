@@ -10,7 +10,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -290,6 +290,14 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             },
         )
 
+        flex_field = FlexibleAttribute(
+            type=FlexibleAttribute.STRING,
+            name="flex_string_h_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            label={"English(EN)": "value"},
+        )
+        flex_field.save()
+
         cls.household_data_change_grv_new = GrievanceTicketFactory(
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5499",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -302,7 +310,13 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             household=cls.household_one,
             household_data={
                 "village": {"value": "Test new"},
-                "flex_fields": {},
+                "flex_fields": {
+                    "flex_string_h_f": {
+                        "previous_value": "Old_Value",
+                        "value": "Test_String_Flex",
+                        "approve_status": False,
+                    }
+                },
                 "roles": [
                     {
                         "value": "PRIMARY",
@@ -415,6 +429,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                         ],
                     }
                 ),
-                "flexFieldsApproveData": json.dumps({}),
+                "flexFieldsApproveData": json.dumps({"flex_string_h_f": True}),
             },
         )

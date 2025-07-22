@@ -92,7 +92,12 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_household
                 'householdDataUpdateTicketDetails': {
                     'householdData': {
                         'flex_fields': {
-                            'approve_status': False
+                            'approve_status': False,
+                            'flex_string_h_f': {
+                                'approve_status': True,
+                                'previous_value': 'Old_Value',
+                                'value': 'Test_String_Flex'
+                            }
                         },
                         'roles': [
                             {

@@ -153,11 +153,6 @@ function EditHouseholdDataChange({
           <Grid size={{ xs: 1 }}></Grid>
           {/* Render all roles, including added ones */}
           {(values.roles || []).map((roleItem, index) => {
-            // Find individual details from household
-            const individualObj =
-              fullHousehold.household.individuals.edges.find(
-                (ind) => ind.node.id === roleItem.individual,
-              );
             const currentRoleObj =
               fullHousehold.household.individualsAndRoles.find(
                 (r) => r.individual.id === roleItem.individual,
