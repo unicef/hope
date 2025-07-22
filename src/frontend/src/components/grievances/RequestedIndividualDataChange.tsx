@@ -104,9 +104,8 @@ export function RequestedIndividualDataChange({
       approvedIdentitiesToCreate,
       approvedIdentitiesToRemove,
       approvedIdentitiesToEdit,
-      approvedPaymentChannelsToCreate,
-      approvedPaymentChannelsToRemove,
-      approvedPaymentChannelsToEdit,
+      approvedAccountsToCreate,
+      approvedAccountsToEdit,
       flexFieldsApproveData,
     }: {
       individualApproveData: any;
@@ -116,9 +115,6 @@ export function RequestedIndividualDataChange({
       approvedIdentitiesToCreate?: number[];
       approvedIdentitiesToRemove?: number[];
       approvedIdentitiesToEdit?: number[];
-      approvedPaymentChannelsToCreate?: number[];
-      approvedPaymentChannelsToRemove?: number[];
-      approvedPaymentChannelsToEdit?: number[];
       flexFieldsApproveData?: any;
     }) => {
       const formData: GrievanceIndividualDataChangeApprove = {
@@ -129,10 +125,9 @@ export function RequestedIndividualDataChange({
         approvedIdentitiesToCreate,
         approvedIdentitiesToRemove,
         approvedIdentitiesToEdit,
-        approvedPaymentChannelsToCreate,
-        approvedPaymentChannelsToRemove,
-        approvedPaymentChannelsToEdit,
         flexFieldsApproveData,
+        approvedAccountsToCreate,
+        approvedAccountsToEdit,
       };
 
       return RestService.restBusinessAreasGrievanceTicketsApproveIndividualDataChangeCreate(

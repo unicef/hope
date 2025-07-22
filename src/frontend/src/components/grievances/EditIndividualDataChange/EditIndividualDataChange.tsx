@@ -224,7 +224,7 @@ function EditIndividualDataChange({
           )}
         </Box>
       </BoxWithBorders>
-       <BoxWithBorders>
+      <BoxWithBorders>
         <Box mt={3}>
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
@@ -233,9 +233,14 @@ function EditIndividualDataChange({
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual}
-            addIndividualFieldsData={addIndividualFieldsData}
+            individualChoicesData={individualChoicesData}
           />
-           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={addIndividualFieldsData}/>}
+          {!isEditTicket && (
+            <NewAccountFieldArray
+              values={values}
+              individualChoicesData={individualChoicesData}
+            />
+          )}
         </Box>
       </BoxWithBorders>
     </>

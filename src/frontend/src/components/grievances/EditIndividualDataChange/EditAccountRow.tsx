@@ -6,13 +6,15 @@ import React, { Fragment, ReactElement, useState } from 'react';
 import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 export interface EditAccountRowProps {
   values;
   account: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts']['edges'][number]['node'];
   arrayHelpers;
   id: string;
- addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  individualChoicesData: IndividualChoices
 }
 
 export function EditAccountRow({
@@ -20,7 +22,7 @@ export function EditAccountRow({
   account,
   arrayHelpers,
   id,
-  addIndividualFieldsData,
+                                 individualChoicesData,
 }: EditAccountRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -35,8 +37,8 @@ export function EditAccountRow({
         isEdited={isEdited}
         account={account}
         values={values}
-        accountTypeChoices={addIndividualFieldsData.accountTypeChoices}
-        accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
+        accountTypeChoices={individualChoicesData.accountTypeChoices}
+        accountFinancialInstitutionChoices={individualChoicesData.accountFinancialInstitutionChoices}
         onDelete={() => {}}
       />
       <Box display="flex" alignItems="center">
