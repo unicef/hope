@@ -1,11 +1,8 @@
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.account import (
-    PartnerFactory,
-    RoleFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
 
 
 class UserRolesTest(APITestCase):

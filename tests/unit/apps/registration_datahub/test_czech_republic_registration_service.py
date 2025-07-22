@@ -5,6 +5,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 import pytz
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
@@ -30,8 +32,6 @@ from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_service import (
     CzechRepublicFlexRegistration,
 )
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestCzechRepublicRegistrationService(TestCase):

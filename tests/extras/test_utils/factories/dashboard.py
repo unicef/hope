@@ -1,6 +1,5 @@
 import factory
-
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 
 
 class ModifiedPaymentFactory(PaymentFactory):

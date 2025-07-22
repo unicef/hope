@@ -5,25 +5,20 @@ from django.utils import timezone
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.payment import (
+    ApprovalProcessFactory,
+    PaymentPlanFactory,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from selenium.page_object.managerial_console.managerial_console import ManagerialConsole
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.payment import (
-    ApprovalProcessFactory,
-    PaymentPlanFactory,
-)
-from tests.extras.test_utils.factories.program import (
-    ProgramCycleFactory,
-    ProgramFactory,
-)
-from tests.selenium.page_object.managerial_console.managerial_console import (
-    ManagerialConsole,
-)
 
 pytestmark = pytest.mark.django_db()
 

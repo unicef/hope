@@ -1,19 +1,19 @@
 from typing import Any, List
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 PROGRAM_QUERY = """
     query Program($id: ID!) {

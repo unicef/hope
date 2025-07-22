@@ -3,6 +3,10 @@ from typing import Any, List
 from django.conf import settings
 
 import pytest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -11,15 +15,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-)
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

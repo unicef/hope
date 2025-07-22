@@ -6,6 +6,10 @@ from typing import Any
 from django.conf import settings
 from django.test import TestCase
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.household.models import MALE, Document, DocumentType
 from hct_mis_api.apps.program.models import Program
@@ -13,9 +17,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.one_time_scripts.south_sudan_update_script import (
     south_sudan_update_script,
 )
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class Capturing(list):

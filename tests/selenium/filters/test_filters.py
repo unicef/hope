@@ -2,6 +2,26 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.page_object.filters import Filters
+from selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium.page_object.grievance.new_ticket import NewTicket
+from selenium.page_object.programme_details.programme_details import ProgrammeDetails
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -12,32 +32,6 @@ from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.payment import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
-from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.programme_details.programme_details import (
-    ProgrammeDetails,
-)
 
 pytestmark = pytest.mark.django_db()
 

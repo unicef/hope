@@ -2,8 +2,7 @@ import base64
 from typing import Callable
 
 import pytest
-
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.account import BusinessAreaFactory
 
 
 @pytest.fixture()

@@ -2,6 +2,18 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 import pytest
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
+    TicketIndividualDataUpdateDetailsFactory,
+)
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualFactory,
+    create_household,
+)
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.models import Country
@@ -10,18 +22,6 @@ from hct_mis_api.apps.grievance.services.data_change.individual_data_update_serv
 )
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from tests.extras.test_utils.factories.grievance import (
-    TicketIndividualDataUpdateDetailsFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    IndividualFactory,
-    create_household,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

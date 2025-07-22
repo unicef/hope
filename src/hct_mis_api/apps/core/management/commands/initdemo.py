@@ -59,15 +59,15 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 import elasticsearch
-
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
-from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.payment import (
+from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
     generate_reconciled_payment_plan,
     update_fsps,
 )
+
+from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 

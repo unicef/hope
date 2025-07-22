@@ -3,6 +3,7 @@ from typing import Callable
 from unittest.mock import Mock, call, patch
 
 import pytest
+from extras.test_utils.factories.account import BusinessAreaFactory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import (
@@ -11,7 +12,6 @@ from hct_mis_api.apps.dashboard.celery_tasks import (
     update_recent_dashboard_figures,
 )
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)

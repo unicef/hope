@@ -3,10 +3,18 @@ from io import BytesIO
 from typing import Any
 
 import pytest
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from parameterized import parameterized
 from PIL import Image
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase
 
 from hct_mis_api.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hct_mis_api.api.models import Grant
@@ -25,20 +33,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.unit.api.base import HOPEApiTestCase
 
 
 class TestPushPeople(HOPEApiTestCase):

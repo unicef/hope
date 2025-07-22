@@ -7,6 +7,12 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 
 import pytest
+from extras.test_utils.factories.household import (
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -28,14 +34,6 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.household import (
-    DocumentTypeFactory,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

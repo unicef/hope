@@ -5,6 +5,30 @@ from typing import Optional
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.household import (
+    IndividualRoleInHouseholdFactory,
+    create_household,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.drawer.test_drawer import get_program_with_dct_type_and_name
+from selenium.filters.test_filters import create_grievance
+from selenium.helpers.date_time_format import FormatTime
+from selenium.page_object.admin_panel.admin_panel import AdminPanel
+from selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium.page_object.grievance.new_ticket import NewTicket
+from selenium.page_object.programme_population.households import Households
+from selenium.page_object.programme_population.households_details import (
+    HouseholdsDetails,
+)
+from selenium.page_object.programme_population.individuals import Individuals
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -18,34 +42,6 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.models import HOST, Household, Individual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.household import (
-    IndividualRoleInHouseholdFactory,
-    create_household,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
-from tests.selenium.filters.test_filters import create_grievance
-from tests.selenium.helpers.date_time_format import FormatTime
-from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
-from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.programme_population.households import Households
-from tests.selenium.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from tests.selenium.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db()
 

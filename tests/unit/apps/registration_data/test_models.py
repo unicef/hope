@@ -3,24 +3,24 @@ import datetime
 from django.conf import settings
 from django.test import TestCase
 
-from freezegun import freeze_time
-
-from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
+from freezegun import freeze_time
+
+from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):

@@ -5,6 +5,9 @@ from unittest import mock
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 from PIL import Image
 
@@ -13,9 +16,6 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, KoboImportData
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestRegistrationDataImportDatahubMutations(APITestCase):

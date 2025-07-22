@@ -4,8 +4,34 @@ from typing import Callable
 import factory
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_with_individual_with_collectors,
+)
+from extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from selenium.common import NoSuchElementException
+from selenium.page_object.filters import Filters
+from selenium.page_object.targeting.targeting import Targeting
+from selenium.page_object.targeting.targeting_create import TargetingCreate
+from selenium.page_object.targeting.targeting_details import TargetingDetails
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
@@ -37,34 +63,6 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_with_individual_with_collectors,
-)
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.targeting.targeting import Targeting
-from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
-from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 
 pytestmark = pytest.mark.django_db()
 

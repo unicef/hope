@@ -7,6 +7,17 @@ from django.core.cache import cache
 from django.test import TestCase
 
 import pytest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.models import (
@@ -23,19 +34,6 @@ from hct_mis_api.apps.program.utils import (
     generate_rdi_unique_name,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualIdentityFactory,
-    IndividualRoleInHouseholdFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 
 class TestEnrolHouseholdToProgram(TestCase):

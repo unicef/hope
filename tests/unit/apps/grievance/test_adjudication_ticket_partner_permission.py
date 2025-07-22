@@ -1,19 +1,20 @@
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from tests.extras.test_utils.factories.account import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import (
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudication(

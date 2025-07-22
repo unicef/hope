@@ -5,13 +5,13 @@ from typing import Any
 from django.utils import timezone
 
 import pytest
+from extras.test_utils.factories.core import create_afghanistan
 from strategy_field.utils import fqn
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from tests.extras.test_utils.factories.core import create_afghanistan
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -25,7 +25,7 @@ def sanction_list(db: Any) -> "SanctionList":
 
 @pytest.fixture
 def program(db: Any, sanction_list: "SanctionList") -> "Program":
-    from tests.extras.test_utils.factories.program import ProgramFactory
+    from extras.test_utils.factories.program import ProgramFactory
 
     create_afghanistan()
     program = ProgramFactory()

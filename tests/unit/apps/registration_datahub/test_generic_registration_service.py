@@ -6,6 +6,8 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -29,8 +31,6 @@ from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestGenericRegistrationService(TestCase):

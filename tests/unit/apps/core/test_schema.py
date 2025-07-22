@@ -1,3 +1,13 @@
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import (
     DataCollectingType,
@@ -6,15 +16,6 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestDataCollectionTypeSchema(APITestCase):

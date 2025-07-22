@@ -3,18 +3,18 @@ from unittest.mock import MagicMock, Mock
 from django.test import TestCase
 from django.urls import reverse
 
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-
-from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
-from hct_mis_api.api.models import APIToken, Grant
-from tests.extras.test_utils.factories.account import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from tests.unit.api.base import HOPEApiTestCase
-from tests.unit.api.factories import APITokenFactory
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+from unit.api.base import HOPEApiTestCase
+from unit.api.factories import APITokenFactory
+
+from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
+from hct_mis_api.api.models import APIToken, Grant
 
 
 class HOPEPermissionTest(TestCase):

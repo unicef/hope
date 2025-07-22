@@ -3,8 +3,11 @@ from uuid import UUID
 
 from django.core.management import call_command
 
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -18,9 +21,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.unit.api.base import HOPEApiTestCase
 
 
 class TestDelegatePeople(HOPEApiTestCase):

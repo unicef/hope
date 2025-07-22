@@ -15,6 +15,15 @@ from django.utils import timezone
 from django.utils.functional import classproperty
 
 import pytest
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -78,17 +87,6 @@ from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service imp
 from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    PendingHouseholdFactory,
-    PendingIndividualFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
 )
 
 SRI_LANKA_FIELDS: Dict = {

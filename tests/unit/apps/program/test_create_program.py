@@ -1,6 +1,19 @@
 from typing import Any, List
 
 import freezegun
+from extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    RoleFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.core import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -12,26 +25,6 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    RoleFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.program import (
-    BeneficiaryGroupFactory,
-    ProgramFactory,
-)
 
 
 @freezegun.freeze_time("2019-01-01")

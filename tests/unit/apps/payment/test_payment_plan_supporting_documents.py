@@ -7,6 +7,9 @@ from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import PaymentPlanFactory
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
@@ -16,9 +19,6 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanSupportingDocumentSerializer,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):

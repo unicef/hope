@@ -1,6 +1,10 @@
 from django.core.files.base import ContentFile
 
 import pytest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -17,13 +21,6 @@ from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -3,9 +3,9 @@ from typing import Any
 
 import pytest
 from dateutil.tz import tzlocal
+from extras.test_utils.factories.core import create_afghanistan
 
 from hct_mis_api.apps.core.schema import resolve_asset
-from tests.extras.test_utils.factories.core import create_afghanistan
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

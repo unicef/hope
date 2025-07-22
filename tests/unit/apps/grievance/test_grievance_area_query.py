@@ -3,21 +3,21 @@ from unittest import skip
 
 from django.core.management import call_command
 
+from extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 ALL_GRIEVANCE_QUERY = """
     query AllGrievanceTickets {

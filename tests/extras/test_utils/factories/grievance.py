@@ -5,6 +5,12 @@ from typing import Any
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 import factory
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentVerificationFactory,
+)
 from factory.django import DjangoModelFactory
 from pytz import utc
 
@@ -29,12 +35,6 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.payment import (
-    PaymentFactory,
-    PaymentVerificationFactory,
-)
 
 
 class GrievanceTicketFactory(DjangoModelFactory):

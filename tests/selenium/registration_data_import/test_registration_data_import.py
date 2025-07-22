@@ -5,6 +5,21 @@ from django.conf import settings
 
 import pytest
 from elasticsearch_dsl import connections
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from selenium.page_object.programme_population.households_details import (
+    HouseholdsDetails,
+)
+from selenium.page_object.registration_data_import.rdi_details_page import (
+    RDIDetailsPage,
+)
+from selenium.page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -13,21 +28,6 @@ from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport as RDI
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.selenium.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from tests.selenium.page_object.registration_data_import.rdi_details_page import (
-    RDIDetailsPage,
-)
-from tests.selenium.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
 
 pytestmark = pytest.mark.django_db()
 

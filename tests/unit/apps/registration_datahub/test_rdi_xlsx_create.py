@@ -13,6 +13,18 @@ from django.utils.dateparse import parse_datetime
 
 import pytest
 from django_countries.fields import Country
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
+from extras.test_utils.factories.household import (
+    IndividualFactory,
+    PendingIndividualFactory,
+)
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from PIL import Image
 
 from hct_mis_api.apps.core.models import (
@@ -39,20 +51,6 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.core import (
-    create_afghanistan,
-    create_pdu_flexible_attribute,
-)
-from tests.extras.test_utils.factories.household import (
-    IndividualFactory,
-    PendingIndividualFactory,
-)
-from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

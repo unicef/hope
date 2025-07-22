@@ -1,3 +1,20 @@
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    HouseholdCollectionFactory,
+    IndividualCollectionFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -15,24 +32,6 @@ from hct_mis_api.apps.registration_datahub.tasks.import_program_population impor
     import_program_population,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    HouseholdCollectionFactory,
-    IndividualCollectionFactory,
-    IndividualFactory,
-    IndividualIdentityFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 HOUSEHOLD_FIELDS = (
     "consent_sign",

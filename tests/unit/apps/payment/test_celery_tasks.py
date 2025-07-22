@@ -6,6 +6,17 @@ from django.core.cache import cache
 from django.test import TestCase
 
 from celery.exceptions import Retry
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -23,17 +34,6 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.steficon.models import Rule
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 
 
 class TestPaymentCeleryTask(TestCase):

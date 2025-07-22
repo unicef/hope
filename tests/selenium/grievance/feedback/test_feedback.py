@@ -2,6 +2,23 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.household import (
+    create_household,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.helpers.fixtures import get_program_with_dct_type_and_name
+from selenium.page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium.page_object.grievance.feedback import Feedback
+from selenium.page_object.grievance.new_feedback import NewFeedback
+from selenium.page_object.grievance.new_ticket import NewTicket
+from selenium.page_object.programme_details.programme_details import ProgrammeDetails
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
@@ -9,31 +26,6 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import HOST, Household
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.household import (
-    create_household,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
-from tests.selenium.page_object.grievance.details_feedback_page import (
-    FeedbackDetailsPage,
-)
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.feedback import Feedback
-from tests.selenium.page_object.grievance.new_feedback import NewFeedback
-from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.programme_details.programme_details import (
-    ProgrammeDetails,
-)
 
 pytestmark = pytest.mark.django_db()
 

@@ -2,6 +2,8 @@ import time
 from typing import Any
 
 import factory.fuzzy
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
@@ -11,8 +13,6 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 faker = Faker()
 

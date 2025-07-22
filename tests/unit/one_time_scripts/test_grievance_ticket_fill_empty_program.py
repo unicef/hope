@@ -1,5 +1,11 @@
 from django.test import TestCase
 
+from extras.test_utils.factories.accountability import FeedbackFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.grievance.models import (
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -14,11 +20,6 @@ from hct_mis_api.one_time_scripts.assign_program_to_grievance_tickets import (
     assign_program_to_feedback,
     assign_program_to_grievance_tickets,
 )
-from tests.extras.test_utils.factories.accountability import FeedbackFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestAssignProgramToGrievanceTickets(TestCase):

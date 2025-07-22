@@ -8,16 +8,16 @@ from django.test import TestCase
 from django.urls import reverse
 
 import pytest
-
-from hct_mis_api.apps.payment.admin import ArrayFieldWidget, CommaSeparatedArrayField
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.payment import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
+
+from hct_mis_api.apps.payment.admin import ArrayFieldWidget, CommaSeparatedArrayField
+from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 
 @pytest.fixture(autouse=True)

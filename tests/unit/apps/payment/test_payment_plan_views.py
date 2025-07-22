@@ -7,6 +7,17 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
+from extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.payment import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    PaymentPlanFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -14,17 +25,6 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.payment import (
-    ApprovalFactory,
-    ApprovalProcessFactory,
-    PaymentPlanFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 

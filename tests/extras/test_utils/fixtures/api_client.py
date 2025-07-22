@@ -1,9 +1,8 @@
 from typing import Callable, Optional
 
 import pytest
+from extras.test_utils.factories.account import UserFactory
 from rest_framework.test import APIClient
-
-from tests.extras.test_utils.factories.account import UserFactory
 
 
 @pytest.fixture()

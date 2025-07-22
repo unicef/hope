@@ -7,6 +7,11 @@ from django.conf import settings
 from django.core.management import call_command
 
 from elasticsearch import Elasticsearch
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
+from unit.conftest import disabled_locally_test
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -18,11 +23,6 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.unit.conftest import disabled_locally_test
 
 
 def execute_test_es_query(query_dict: Dict) -> List[str]:

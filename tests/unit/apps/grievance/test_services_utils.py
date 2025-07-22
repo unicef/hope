@@ -7,6 +7,27 @@ from django.core.files.base import ContentFile
 from django.test import TestCase
 
 import pytest
+from extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
@@ -35,33 +56,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 
 class FlexibleAttribute:

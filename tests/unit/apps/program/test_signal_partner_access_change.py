@@ -1,15 +1,12 @@
 from django.test import TestCase
 
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
-from tests.extras.test_utils.factories.account import PartnerFactory, RoleFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestPartnerAccessChangeSignal(TestCase):

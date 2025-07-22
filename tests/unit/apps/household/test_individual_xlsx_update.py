@@ -6,6 +6,10 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
@@ -20,11 +24,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
 )
 
 

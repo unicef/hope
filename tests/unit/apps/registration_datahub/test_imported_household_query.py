@@ -3,6 +3,15 @@ from typing import Any, List
 from django.conf import settings
 from django.core.management import call_command
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.factories.household import (
+    HouseholdFactory,
+    PendingDocumentFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -11,15 +20,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.geo import CountryFactory
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    PendingDocumentFactory,
-    PendingHouseholdFactory,
-    PendingIndividualFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestImportedHouseholdQuery(APITestCase):

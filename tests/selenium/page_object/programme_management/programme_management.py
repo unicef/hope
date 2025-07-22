@@ -1,11 +1,10 @@
 from time import sleep
 
 from selenium.common import NoSuchElementException
+from selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
-
-from tests.selenium.page_object.base_components import BaseComponents
 
 
 class ProgrammeManagement(BaseComponents):

@@ -4,18 +4,19 @@ from unittest import mock
 from django.core.management import call_command
 from django.test import TestCase
 
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
+
 from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     PendingHousehold,
     PendingIndividual,
-)
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    PendingHouseholdFactory,
-    PendingIndividualFactory,
 )
 
 

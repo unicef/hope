@@ -4,6 +4,30 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.periodic_data_update import (
+    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateUploadFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.page_object.people.people import People
+from selenium.page_object.people.people_details import PeopleDetails
+from selenium.page_object.programme_population.individuals import Individuals
+from selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from selenium.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from selenium.programme_population.test_periodic_data_update_upload import (
+    prepare_xlsx_file,
+)
 
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -22,32 +46,6 @@ from hct_mis_api.apps.periodic_data_update.utils import (
     populate_pdu_with_null_values,
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from tests.extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-    PeriodicDataUpdateUploadFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.page_object.people.people import People
-from tests.selenium.page_object.people.people_details import PeopleDetails
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
-from tests.selenium.programme_population.test_periodic_data_update_upload import (
-    prepare_xlsx_file,
-)
 
 pytestmark = pytest.mark.django_db()
 

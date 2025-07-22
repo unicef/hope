@@ -1,14 +1,15 @@
 from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.household.models import Document, Household, Individual
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_for_fixtures,
 )
-from tests.extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.household.models import Document, Household, Individual
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 
 
 class TestHouseholdWithdraw(TestCase):

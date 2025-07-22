@@ -6,20 +6,16 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.permissions import Permissions
-from tests.extras.test_utils.factories.account import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
 
 pytestmark = pytest.mark.django_db
 

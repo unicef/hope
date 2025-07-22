@@ -2,6 +2,9 @@ import random
 from typing import Any, Dict, List, Optional, Tuple
 
 import factory
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from factory import enums, fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -36,11 +39,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import PartnerFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 faker = Faker()
 

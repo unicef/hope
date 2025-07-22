@@ -2,17 +2,15 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
+from selenium.page_object.programme_details.programme_details import ProgrammeDetails
+from selenium.page_object.programme_management.programme_management import (
+    ProgrammeManagement,
+)
 
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.selenium.page_object.programme_details.programme_details import (
-    ProgrammeDetails,
-)
-from tests.selenium.page_object.programme_management.programme_management import (
-    ProgrammeManagement,
-)
 
 pytestmark = pytest.mark.django_db()
 

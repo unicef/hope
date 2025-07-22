@@ -9,6 +9,26 @@ from django.utils import timezone
 
 from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+    create_household_with_individual_with_collectors,
+)
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentPlanSplitFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from flaky import flaky
 from freezegun import freeze_time
 from graphql import GraphQLError
@@ -33,33 +53,6 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-    create_household_with_individual_with_collectors,
-)
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentPlanSplitFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import (
-    ProgramCycleFactory,
-    ProgramFactory,
-)
-from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 
 class TestPaymentPlanServices(APITestCase):

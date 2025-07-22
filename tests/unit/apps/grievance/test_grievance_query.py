@@ -7,6 +7,16 @@ from django.test import TestCase
 from django.utils import timezone
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.models import User
@@ -19,24 +29,6 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
 )
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.account import (
-    PartnerFactory,
-    RoleFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-)
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestGrievanceQuery(APITestCase):

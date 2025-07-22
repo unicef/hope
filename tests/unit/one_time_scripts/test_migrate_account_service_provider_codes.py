@@ -1,5 +1,12 @@
 from django.test import TestCase
 
+from extras.test_utils.factories.household import IndividualFactory
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.payment.models import (
@@ -11,14 +18,6 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.one_time_scripts.migrate_account_service_provider_codes import (
     migrate_account_service_provider_codes,
-)
-from tests.extras.test_utils.factories.household import IndividualFactory
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
 )
 
 

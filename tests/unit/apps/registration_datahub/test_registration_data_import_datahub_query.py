@@ -1,8 +1,9 @@
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.registration_data import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
 )
+
+from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestRegistrationDataImportDatahubQuery(APITestCase):

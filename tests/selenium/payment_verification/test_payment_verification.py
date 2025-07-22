@@ -6,6 +6,29 @@ from time import sleep
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium.page_object.payment_verification.payment_record import PaymentRecord
+from selenium.page_object.payment_verification.payment_verification import (
+    PaymentVerification,
+)
+from selenium.page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
+)
+from selenium.payment_module.test_payment_plans import find_file
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
@@ -15,33 +38,6 @@ from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentP
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
-from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
-from tests.selenium.page_object.payment_verification.payment_verification import (
-    PaymentVerification,
-)
-from tests.selenium.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
-from tests.selenium.payment_module.test_payment_plans import find_file
 
 pytestmark = pytest.mark.django_db()
 

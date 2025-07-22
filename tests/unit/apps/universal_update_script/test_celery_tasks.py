@@ -1,4 +1,7 @@
 import pytest
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
@@ -10,9 +13,6 @@ from hct_mis_api.apps.universal_update_script.celery_tasks import (
     run_universal_individual_update,
 )
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

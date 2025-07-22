@@ -7,6 +7,21 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+)
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.models import Partner
@@ -30,21 +45,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualIdentityFactory,
-)
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    FinancialInstitutionFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -1,19 +1,19 @@
 import pytest
+from extras.test_utils.factories.accountability import CommunicationMessageFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from selenium.helpers.fixtures import get_program_with_dct_type_and_name
+from selenium.page_object.accountability.communication import (
+    AccountabilityCommunication,
+)
+from selenium.page_object.accountability.comunication_details import (
+    AccountabilityCommunicationDetails,
+)
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
-from tests.extras.test_utils.factories.accountability import CommunicationMessageFactory
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
-from tests.selenium.page_object.accountability.communication import (
-    AccountabilityCommunication,
-)
-from tests.selenium.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
 
 pytestmark = pytest.mark.django_db()
 

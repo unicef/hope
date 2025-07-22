@@ -1,6 +1,20 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import (
     FEMALE,
@@ -19,19 +33,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlock,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestIndividualBlockFilter(TestCase):

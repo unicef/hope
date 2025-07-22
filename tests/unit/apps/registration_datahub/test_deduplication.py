@@ -2,6 +2,10 @@ from django.conf import settings
 from django.test import TestCase
 
 import pytest
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from unit.conftest import disabled_locally_test
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.documents import get_individual_doc
@@ -28,12 +32,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     rebuild_search_index,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

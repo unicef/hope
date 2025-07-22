@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
 
 
 class IncompatibleRolesTest(TestCase):

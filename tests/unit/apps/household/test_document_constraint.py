@@ -2,15 +2,13 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.test import TestCase
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import DocumentTypeFactory, create_household
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    DocumentTypeFactory,
-    create_household,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestDocumentConstraint(TestCase):

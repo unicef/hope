@@ -1,9 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+
 from hct_mis_api.apps.core.models import DataCollectingType
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 
 
 class TestDCTValidation(TestCase):

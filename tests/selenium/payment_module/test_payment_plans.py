@@ -7,7 +7,34 @@ import factory
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
+from extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
+from selenium.helpers.date_time_format import FormatTime
+from selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
+from selenium.page_object.payment_module.payment_module import PaymentModule
+from selenium.page_object.payment_module.payment_module_details import (
+    PaymentModuleDetails,
+)
+from selenium.page_object.payment_module.program_cycle import ProgramCyclePage
+from selenium.page_object.payment_module.program_cycle_details import (
+    ProgramCycleDetailsPage,
+)
 from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
@@ -20,36 +47,6 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
-from tests.extras.test_utils.factories.payment import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import (
-    ProgramCycleFactory,
-    ProgramFactory,
-)
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from tests.selenium.helpers.date_time_format import FormatTime
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import (
-    PaymentModuleDetails,
-)
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
 
 pytestmark = pytest.mark.django_db()
 

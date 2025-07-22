@@ -14,6 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 import requests
+from extras.test_utils.factories.account import UserFactory
 
 from hct_mis_api.apps.core.admin import XLSXKoboTemplateAdmin
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -22,7 +23,6 @@ from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields impo
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
 )
-from tests.extras.test_utils.factories.account import UserFactory
 
 
 class MockSuperUser:

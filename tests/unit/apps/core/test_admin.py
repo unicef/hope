@@ -3,6 +3,7 @@ from typing import List, Optional, Type
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from extras.test_utils.factories.core import DataCollectingTypeFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.admin import (
@@ -10,7 +11,6 @@ from hct_mis_api.apps.core.admin import (
     DataCollectingTypeForm,
 )
 from hct_mis_api.apps.core.models import DataCollectingType
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 
 
 class TestAcceptanceProcessThreshold(TestCase):

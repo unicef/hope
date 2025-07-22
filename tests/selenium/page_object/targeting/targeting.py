@@ -1,10 +1,10 @@
 from time import sleep
 
+from selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from tests.selenium.page_object.base_components import BaseComponents
 
 
 class Targeting(BaseComponents):

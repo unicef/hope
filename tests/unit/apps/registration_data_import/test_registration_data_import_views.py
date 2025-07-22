@@ -7,20 +7,18 @@ from django.test.utils import CaptureQueriesContext
 
 import freezegun
 import pytest
+from extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 pytestmark = pytest.mark.django_db
 

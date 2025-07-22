@@ -5,6 +5,16 @@ from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.utils import timezone
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
+)
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -13,19 +23,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-    TicketSystemFlaggingDetailsFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestGrievanceApproveAutomaticMutation(APITestCase):

@@ -3,17 +3,17 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from selenium.page_object.payment_module.program_cycle import ProgramCyclePage
+from selenium.page_object.payment_module.program_cycle_details import (
+    ProgramCycleDetailsPage,
+)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
 
 pytestmark = pytest.mark.django_db()
 

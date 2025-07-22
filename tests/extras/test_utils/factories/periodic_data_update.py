@@ -1,4 +1,6 @@
 import factory
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
@@ -7,8 +9,6 @@ from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 fake = Faker()
 

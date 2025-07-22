@@ -1,11 +1,11 @@
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 def get_program_with_dct_type_and_name(

@@ -4,6 +4,9 @@ from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
 from django.test import TestCase
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+
 from hct_mis_api.apps.account.admin.forms import (
     UserRoleAdminForm,
     UserRoleInlineFormSet,
@@ -14,8 +17,6 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan, create_ukraine
 
 
 class UserRolesTest(TestCase):

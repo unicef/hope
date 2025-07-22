@@ -1,5 +1,9 @@
 from typing import Any, Dict, List
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -11,10 +15,6 @@ from hct_mis_api.apps.household.models import (
     SANCTION_LIST_CONFIRMED_MATCH,
     SANCTION_LIST_POSSIBLE_MATCH,
 )
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestIndividualFlagQuery(APITestCase):

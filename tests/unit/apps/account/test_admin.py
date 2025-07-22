@@ -5,9 +5,9 @@ from django.urls import reverse
 
 import pytest
 from django_webtest import DjangoTestApp
+from extras.test_utils.factories.account import RoleFactory, UserFactory
 
 from hct_mis_api.apps.account.models import Partner, Role, User
-from tests.extras.test_utils.factories.account import RoleFactory, UserFactory
 
 
 @pytest.fixture()

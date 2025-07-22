@@ -1,9 +1,8 @@
 from time import sleep
 
+from selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-
-from tests.selenium.page_object.base_components import BaseComponents
 
 
 class NewTicket(BaseComponents):

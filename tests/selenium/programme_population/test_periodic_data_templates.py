@@ -2,6 +2,18 @@ import os
 from time import sleep
 
 import pytest
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.periodic_data_update import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.page_object.programme_population.individuals import Individuals
+from selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
@@ -13,23 +25,6 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-)
-from tests.extras.test_utils.factories.program import (
-    BeneficiaryGroupFactory,
-    ProgramFactory,
-)
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
 
 pytestmark = pytest.mark.django_db()
 

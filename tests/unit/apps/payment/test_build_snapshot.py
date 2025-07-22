@@ -2,6 +2,16 @@ from datetime import datetime
 
 from django.test import TestCase
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
+)
 from freezegun import freeze_time
 
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
@@ -15,19 +25,6 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
     create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-)
-from tests.extras.test_utils.factories.payment import (
-    AccountFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
-)
 
 
 class TestBuildSnapshot(TestCase):

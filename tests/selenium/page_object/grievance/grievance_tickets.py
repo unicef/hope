@@ -1,9 +1,8 @@
 from time import sleep
 
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
-
-from tests.selenium.page_object.base_components import BaseComponents
 
 
 class GrievanceTickets(BaseComponents):

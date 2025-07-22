@@ -5,6 +5,13 @@ from django.test import TestCase
 
 import pytest
 from constance.test import override_config
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from strategy_field.utils import fqn
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -22,15 +29,6 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
 )
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

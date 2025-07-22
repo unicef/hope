@@ -4,6 +4,21 @@ from typing import Any, List
 
 from django.core.management import call_command
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketAddIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+)
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -18,21 +33,6 @@ from hct_mis_api.apps.household.models import (
     SINGLE,
     DocumentType,
 )
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceTicketFactory,
-    TicketAddIndividualDetailsFactory,
-    TicketHouseholdDataUpdateDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestGrievanceApproveDataChangeMutation(APITestCase):

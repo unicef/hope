@@ -1,5 +1,9 @@
 from django.test import TestCase
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.grievance.services.data_change.utils import handle_role
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
@@ -8,12 +12,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    HouseholdFactory,
-    IndividualFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestHandleRole(TestCase):

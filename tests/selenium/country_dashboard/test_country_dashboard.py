@@ -6,17 +6,15 @@ from django.utils import timezone
 
 import factory
 import pytest
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from selenium.page_object.country_dashboard.country_dashboard import CountryDashboard
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 from hct_mis_api.apps.program.models import BeneficiaryGroup
-from tests.extras.test_utils.factories.geo import AreaFactory
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.selenium.page_object.country_dashboard.country_dashboard import (
-    CountryDashboard,
-)
 
 
 class ModifiedPaymentFactory(PaymentFactory):

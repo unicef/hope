@@ -5,6 +5,25 @@ from unittest import mock
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
+    GrievanceTicketFactory,
+    PositiveFeedbackTicketWithoutExtrasFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+    TicketAddIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+)
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
+from extras.test_utils.factories.program import ProgramFactory
 from factory import Factory
 from parameterized import parameterized
 
@@ -33,25 +52,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.grievance import (
-    GrievanceComplaintTicketWithoutExtrasFactory,
-    GrievanceTicketFactory,
-    PositiveFeedbackTicketWithoutExtrasFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory,
-    TicketAddIndividualDetailsFactory,
-    TicketHouseholdDataUpdateDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestUpdateGrievanceTickets(APITestCase):

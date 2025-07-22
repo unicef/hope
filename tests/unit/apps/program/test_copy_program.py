@@ -1,5 +1,21 @@
 from typing import Any
 
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    EntitlementCardFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
 from parameterized import parameterized
 
@@ -15,30 +31,6 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
-from tests.extras.test_utils.factories.account import (
-    PartnerFactory,
-    RoleFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.geo import (
-    AreaFactory,
-    AreaTypeFactory,
-    CountryFactory,
-)
-from tests.extras.test_utils.factories.household import (
-    DocumentFactory,
-    EntitlementCardFactory,
-    IndividualIdentityFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestCopyProgram(APITestCase):

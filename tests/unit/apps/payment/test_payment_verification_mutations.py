@@ -5,6 +5,21 @@ from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory
 from django.utils import timezone
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
+    EntitlementCardFactory,
+    create_household,
+)
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from graphql import GraphQLError
 from graphql.execution.base import ResolveInfo
 from parameterized import parameterized
@@ -22,23 +37,6 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
-)
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    EntitlementCardFactory,
-    create_household,
-)
-from tests.extras.test_utils.factories.payment import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
 )
 
 EDIT_PAYMENT_VERIFICATION_MUTATION = """

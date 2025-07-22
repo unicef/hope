@@ -1,26 +1,24 @@
 import pytest
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.household import (
+    create_household_with_individual_with_collectors,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from freezegun import freeze_time
+from selenium.page_object.programme_population.individuals import Individuals
+from selenium.page_object.programme_population.individuals_details import (
+    IndividualsDetails,
+)
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import FEMALE, MARRIED, Household
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from tests.extras.test_utils.factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from tests.extras.test_utils.factories.household import (
-    create_household_with_individual_with_collectors,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.individuals_details import (
-    IndividualsDetails,
-)
 
 pytestmark = pytest.mark.django_db()
 

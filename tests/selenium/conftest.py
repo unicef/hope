@@ -11,10 +11,82 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from environ import Env
+from extras.test_utils.factories.account import RoleFactory, UserFactory
+from extras.test_utils.factories.household import DocumentTypeFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from flags.models import FlagState
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from selenium import webdriver
+from selenium.page_object.accountability.communication import (
+    AccountabilityCommunication,
+)
+from selenium.page_object.accountability.comunication_details import (
+    AccountabilityCommunicationDetails,
+)
+from selenium.page_object.accountability.surveys import AccountabilitySurveys
+from selenium.page_object.accountability.surveys_details import (
+    AccountabilitySurveysDetails,
+)
+from selenium.page_object.admin_panel.admin_panel import AdminPanel
+from selenium.page_object.country_dashboard.country_dashboard import CountryDashboard
+from selenium.page_object.filters import Filters
+from selenium.page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium.page_object.grievance.feedback import Feedback
+from selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
+from selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium.page_object.grievance.new_feedback import NewFeedback
+from selenium.page_object.grievance.new_ticket import NewTicket
+from selenium.page_object.managerial_console.managerial_console import ManagerialConsole
+from selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
+from selenium.page_object.payment_module.payment_module import PaymentModule
+from selenium.page_object.payment_module.payment_module_details import (
+    PaymentModuleDetails,
+)
+from selenium.page_object.payment_module.program_cycle import ProgramCyclePage
+from selenium.page_object.payment_module.program_cycle_details import (
+    ProgramCycleDetailsPage,
+)
+from selenium.page_object.payment_verification.payment_record import PaymentRecord
+from selenium.page_object.payment_verification.payment_verification import (
+    PaymentVerification,
+)
+from selenium.page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
+)
+from selenium.page_object.people.people import People
+from selenium.page_object.people.people_details import PeopleDetails
+from selenium.page_object.program_log.payment_log import ProgramLog
+from selenium.page_object.programme_details.programme_details import ProgrammeDetails
+from selenium.page_object.programme_management.programme_management import (
+    ProgrammeManagement,
+)
+from selenium.page_object.programme_population.households import Households
+from selenium.page_object.programme_population.households_details import (
+    HouseholdsDetails,
+)
+from selenium.page_object.programme_population.individuals import Individuals
+from selenium.page_object.programme_population.individuals_details import (
+    IndividualsDetails,
+)
+from selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
+from selenium.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from selenium.page_object.programme_users.programme_users import ProgrammeUsers
+from selenium.page_object.registration_data_import.rdi_details_page import (
+    RDIDetailsPage,
+)
+from selenium.page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
+from selenium.page_object.targeting.targeting import Targeting
+from selenium.page_object.targeting.targeting_create import TargetingCreate
+from selenium.page_object.targeting.targeting_details import TargetingDetails
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -27,88 +99,6 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import DocumentType
-from tests.extras.test_utils.factories.account import RoleFactory, UserFactory
-from tests.extras.test_utils.factories.household import DocumentTypeFactory
-from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory
-from tests.selenium.page_object.accountability.communication import (
-    AccountabilityCommunication,
-)
-from tests.selenium.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
-from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
-from tests.selenium.page_object.accountability.surveys_details import (
-    AccountabilitySurveysDetails,
-)
-from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
-from tests.selenium.page_object.country_dashboard.country_dashboard import (
-    CountryDashboard,
-)
-from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.grievance.details_feedback_page import (
-    FeedbackDetailsPage,
-)
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.feedback import Feedback
-from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
-from tests.selenium.page_object.grievance.new_feedback import NewFeedback
-from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.managerial_console.managerial_console import (
-    ManagerialConsole,
-)
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import (
-    PaymentModuleDetails,
-)
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
-from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
-from tests.selenium.page_object.payment_verification.payment_verification import (
-    PaymentVerification,
-)
-from tests.selenium.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
-from tests.selenium.page_object.people.people import People
-from tests.selenium.page_object.people.people_details import PeopleDetails
-from tests.selenium.page_object.program_log.payment_log import ProgramLog
-from tests.selenium.page_object.programme_details.programme_details import (
-    ProgrammeDetails,
-)
-from tests.selenium.page_object.programme_management.programme_management import (
-    ProgrammeManagement,
-)
-from tests.selenium.page_object.programme_population.households import Households
-from tests.selenium.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.individuals_details import (
-    IndividualsDetails,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
-from tests.selenium.page_object.programme_users.programme_users import ProgrammeUsers
-from tests.selenium.page_object.registration_data_import.rdi_details_page import (
-    RDIDetailsPage,
-)
-from tests.selenium.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
-from tests.selenium.page_object.targeting.targeting import Targeting
-from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
-from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 
 
 def pytest_addoption(parser) -> None:  # type: ignore

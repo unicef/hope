@@ -6,6 +6,9 @@ from typing import Any, Tuple
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
 
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from faker import Faker
 
 from hct_mis_api.apps.account.models import User
@@ -28,11 +31,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 
 faker = Faker()
 

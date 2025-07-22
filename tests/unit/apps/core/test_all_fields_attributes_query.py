@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.management import call_command
 
+from extras.test_utils.factories.account import UserFactory
 from parameterized import parameterized
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -8,7 +9,6 @@ from rest_framework.test import APIClient
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.extras.test_utils.factories.account import UserFactory
 
 
 class TestMetaDataFilterType(APITestCase):

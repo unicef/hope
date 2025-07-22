@@ -2,12 +2,11 @@ from time import sleep
 from typing import List
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
-from tests.selenium.page_object.base_components import BaseComponents
 
 
 class CountryDashboard(BaseComponents):

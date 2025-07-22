@@ -2,6 +2,23 @@ from typing import TYPE_CHECKING, Any, List, Tuple
 from unittest.mock import patch
 
 import pytest
+from extras.test_utils.factories.account import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.payment import (
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -21,25 +38,6 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
-from tests.extras.test_utils.factories.account import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.payment import (
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.registration_data import (
-    RegistrationDataImportFactory,
-)
-from tests.extras.test_utils.factories.steficon import RuleCommitFactory
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual

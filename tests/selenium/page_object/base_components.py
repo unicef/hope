@@ -1,5 +1,6 @@
 from time import sleep
 
+from selenium.helpers.helper import Common
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -7,7 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from tests.selenium.helpers.helper import Common
 
 
 class BaseComponents(Common):

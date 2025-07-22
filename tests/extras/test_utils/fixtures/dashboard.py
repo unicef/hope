@@ -3,13 +3,13 @@ from typing import Callable, Dict, Optional
 from django.db import transaction
 
 import pytest
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.dashboard import ModifiedPaymentFactory
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.household.models import Household
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
-from tests.extras.test_utils.factories.dashboard import ModifiedPaymentFactory
-from tests.extras.test_utils.factories.geo import AreaFactory
-from tests.extras.test_utils.factories.household import create_household
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 @pytest.fixture()

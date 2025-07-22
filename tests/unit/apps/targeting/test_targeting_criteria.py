@@ -4,6 +4,14 @@ from typing import Any, Dict, List
 from django.core.management import call_command
 
 from dateutil.relativedelta import relativedelta
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
+    create_household,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -15,14 +23,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import (
-    create_household,
-    create_household_and_individuals,
-)
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from tests.extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 
 class TestTargetingCriteriaQuery(APITestCase):

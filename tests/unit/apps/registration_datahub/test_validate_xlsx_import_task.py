@@ -6,13 +6,14 @@ from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
     ValidateXlsxImport,
 )
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.program import get_program_with_dct_type_and_name
 
 
 class TestValidateXlsxImportTask(TestCase):

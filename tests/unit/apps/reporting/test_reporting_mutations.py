@@ -4,6 +4,12 @@ from typing import Any, List
 from django.core.management import call_command
 from django.utils import timezone
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.reporting import ReportFactory
 from parameterized import parameterized
 from pytz import utc
 
@@ -13,12 +19,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.reporting.models import Report
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
-from tests.extras.test_utils.factories.reporting import ReportFactory
 
 
 class TestReportingMutation(APITestCase):

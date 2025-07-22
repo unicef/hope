@@ -2,13 +2,13 @@ from datetime import timedelta
 from random import randint
 
 import factory
+from extras.test_utils.factories.account import UserFactory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
-from tests.extras.test_utils.factories.account import UserFactory
 
 
 class ReportFactory(DjangoModelFactory):

@@ -1,10 +1,11 @@
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import PaymentPlanFactory
+
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentPlan
-from tests.extras.test_utils.factories.account import UserFactory
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 
 EXPORT_PDF_MUTATION = """
 mutation exportPdfPPSummary($paymentPlanId: ID!) {

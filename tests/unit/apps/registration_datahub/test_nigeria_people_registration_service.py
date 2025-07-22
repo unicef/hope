@@ -5,6 +5,10 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area, AreaType
@@ -27,9 +31,6 @@ from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import (
     NigeriaPeopleRegistrationService,
 )
-from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 
 class TestNigeriaPeopleRegistrationService(TestCase):

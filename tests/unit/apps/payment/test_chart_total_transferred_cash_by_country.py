@@ -3,6 +3,12 @@ from typing import Any, List
 from django.core.management import call_command
 from django.utils import timezone
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
 from parameterized import parameterized
 from pytz import utc
 
@@ -10,12 +16,6 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import DeliveryMechanism
-from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
-from tests.extras.test_utils.factories.payment import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
 
 
 class TestChartTotalTransferredCashByCountry(APITestCase):

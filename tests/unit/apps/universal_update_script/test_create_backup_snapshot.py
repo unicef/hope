@@ -6,6 +6,9 @@ from django.core.files.base import ContentFile
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
 from openpyxl import Workbook
 
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
@@ -16,9 +19,6 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     create_and_save_snapshot_chunked,
     create_snapshot_content,
 )
-from tests.extras.test_utils.factories.core import create_afghanistan
-from tests.extras.test_utils.factories.household import create_household_and_individuals
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

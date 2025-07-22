@@ -1,12 +1,12 @@
 from typing import Any
 
 import factory
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
 from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
-from tests.extras.test_utils.factories.account import BusinessAreaFactory
-from tests.extras.test_utils.factories.program import ProgramFactory
 
 faker = Faker()
 
