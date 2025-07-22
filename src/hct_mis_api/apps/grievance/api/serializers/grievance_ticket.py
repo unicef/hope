@@ -26,6 +26,7 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualSimpleSerializer,
 )
 from hct_mis_api.apps.household.models import (
+    ROLE_CHOICE,
     Document,
     DocumentType,
     Household,
@@ -98,6 +99,11 @@ class TicketNoteSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+
+class HouseholdUpdateRolesSerializer(serializers.Serializer):
+    individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
+    new_role = serializers.ChoiceField(choices=ROLE_CHOICE, required=True)
 
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
@@ -310,6 +316,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     currency = serializers.CharField(required=False)
     unhcr_id = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
+    roles = serializers.ListField(child=HouseholdUpdateRolesSerializer(), required=False)
 
 
 class AddIndividualDataSerializer(serializers.Serializer):
@@ -338,7 +345,6 @@ class AddIndividualDataSerializer(serializers.Serializer):
     comms_disability = serializers.CharField(required=False)
     who_answers_phone = serializers.CharField(required=False)
     who_answers_alt_phone = serializers.CharField(required=False)
-    role = serializers.CharField()
     business_area = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentitySerializer(many=True, required=False)
@@ -378,7 +384,6 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     comms_disability = serializers.CharField(required=False, allow_blank=True)
     who_answers_phone = serializers.CharField(required=False)
     who_answers_alt_phone = serializers.CharField(required=False)
-    role = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     documents_to_remove = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()), required=False
