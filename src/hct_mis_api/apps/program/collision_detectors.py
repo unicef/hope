@@ -137,8 +137,7 @@ class AbstractCollisionDetector:
         }
         self._update_db_instance(household_source, household_destination, exclude, extra_fields={})
         household_source.delete(soft=False)
-        household_destination.head_of_household = head_of_household
-        household_destination.save()
+        Household.objects.filter(id=household_destination.id).update(head_of_household=head_of_household)
 
     def _update_db_instance(
         self,
