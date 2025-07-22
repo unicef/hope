@@ -217,7 +217,7 @@ def generate_feedback() -> None:
             "business_area": ba,
             "issue_type": "NEGATIVE_FEEDBACK",
             "description": "Negative Feedback",
-        }
+        },
     ]
     feedback_positive = FeedbackFactory(**feedback_data[0])
     feedback_positive.unicef_id = "FED-23-0001"
@@ -225,7 +225,3 @@ def generate_feedback() -> None:
     feedback_negative = FeedbackFactory(**feedback_data[1])
     feedback_negative.unicef_id = "FED-23-0002"
     feedback_negative.save()
-
-
-
-
