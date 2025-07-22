@@ -7,15 +7,16 @@ import { AccountField } from '../AccountField';
 import { removeItemById } from '../utils/helpers';
 import { ReactElement } from 'react';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 export interface NewAccountFieldArrayProps {
   values;
- addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  individualChoicesData: IndividualChoices;
 }
 
 export function NewAccountFieldArray({
   values,
-  addIndividualFieldsData,
+  individualChoicesData,
 }: NewAccountFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
@@ -41,8 +42,10 @@ export function NewAccountFieldArray({
                   }
                   baseName="individualDataUpdateFieldsAccounts"
                   values={values}
-                  accountTypeChoices={addIndividualFieldsData.accountTypeChoices}
-                  accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
+                  accountTypeChoices={individualChoicesData.accountTypeChoices}
+                  accountFinancialInstitutionChoices={
+                    individualChoicesData.accountFinancialInstitutionChoices
+                  }
                 />
               );
             })}

@@ -6,18 +6,19 @@ import { EditAccountRow } from './EditAccountRow';
 import { ReactElement } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import type { PaginatedFieldAttributeList } from '@restgenerated/models/PaginatedFieldAttributeList';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 export interface ExistingAccountsFieldArrayProps {
   setFieldValue;
   values;
   individual: IndividualDetail
-  addIndividualFieldsData: PaginatedFieldAttributeList;
+  individualChoicesData: IndividualChoices
 }
 
 export function ExistingAccountsFieldArray({
   values,
   individual,
-  addIndividualFieldsData,
+                                             individualChoicesData,
 }: ExistingAccountsFieldArrayProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -36,7 +37,7 @@ export function ExistingAccountsFieldArray({
                     account={item.node}
                     id={item.node.id}
                     arrayHelpers={arrayHelpers}
-                    addIndividualFieldsData={addIndividualFieldsData}
+                    individualChoicesData={individualChoicesData}
                   />
                 </Grid>
               </Grid>
