@@ -1,6 +1,6 @@
 from time import sleep
 
-from e2e.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException
 from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 

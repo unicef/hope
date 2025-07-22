@@ -4,7 +4,7 @@ from typing import Callable
 import factory
 import pytest
 from dateutil.relativedelta import relativedelta
-from e2e.common import NoSuchElementException
+from selenium.common import NoSuchElementException
 from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
