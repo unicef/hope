@@ -13,6 +13,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.program.collision_detectors import (
     IdentificationKeyCollisionDetector,
 )
@@ -61,8 +62,13 @@ def district(poland: Country, state: AreaType) -> AreaType:
     return AreaType.objects.create(name="District", parent=state, country=poland)
 
 
+@pytest.fixture()
+def account_type() -> AccountType:
+    return AccountType.objects.create(key="bank_account", label="Bank Account")
+
+
 @pytest.fixture
-def source_household(program: Program, admin1: Area) -> tuple[Household, Individual]:
+def source_household(program: Program, admin1: Area, account_type: AccountType) -> tuple[Household, Individual]:
     household, individuals = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.0002",
@@ -88,6 +94,10 @@ def source_household(program: Program, admin1: Area) -> tuple[Household, Individ
 
     ind = individuals[0]
 
+    Account.objects.create(
+        individual=ind, number="ACC-123456", rdi_merge_status=Individual.MERGED, account_type=account_type
+    )
+
     ind.flex_fields = {"muac": 0}
     ind.save()
     household.flex_fields = {"eggs": "SOURCE"}
@@ -97,7 +107,7 @@ def source_household(program: Program, admin1: Area) -> tuple[Household, Individ
 
 
 @pytest.fixture
-def destination_household(program: Program, admin1: Area) -> tuple[Household, Individual]:
+def destination_household(program: Program, admin1: Area, account_type: AccountType) -> tuple[Household, Individual]:
     household, individuals = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.2002",
@@ -134,7 +144,7 @@ def destination_household(program: Program, admin1: Area) -> tuple[Household, In
     )
 
     ind = individuals[0]
-
+    Account.objects.create(individual=ind, number="999", rdi_merge_status=Individual.MERGED, account_type=account_type)
     ind.flex_fields = {"muac": 10}
     ind.save()
     household.flex_fields = {"eggs": "DESTINATION"}
@@ -551,6 +561,11 @@ def test_update_household_collision(
     destination_household_obj = Household.objects.get(id=destination_original_id)
 
     additional_individual = Individual.objects.get(identification_key=additional_individual_key)
+
+    assert Account.all_objects.count() == 1
+    account = Account.objects.first()
+
+    assert account.number == "ACC-123456"
 
     assert destination_household_obj.id == destination_original_id
     assert destination_household_obj.unicef_id == destination_original_unicef_id
