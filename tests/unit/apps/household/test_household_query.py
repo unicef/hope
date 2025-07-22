@@ -14,13 +14,13 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
     generate_data_collecting_types,
 )
-from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     create_household,
 )
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions
