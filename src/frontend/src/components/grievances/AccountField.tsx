@@ -4,12 +4,14 @@ import { useLocation } from 'react-router-dom';
 import { Field, FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
+import {
+  AllAddIndividualFieldsQuery,
+  AllIndividualsQuery,
+} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
 import React, { Fragment, ReactElement } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-
 
 export interface AccountProps {
   id: string;
@@ -23,21 +25,18 @@ export interface AccountProps {
 }
 
 export function AccountField({
-                               id,
-                               baseName,
-                               onDelete,
-                               isEdited,
-                               account,
-                               values,
-                               accountTypeChoices,
-                               accountFinancialInstitutionChoices,
-                             }: AccountProps): ReactElement {
+  id,
+  baseName,
+  onDelete,
+  isEdited,
+  account,
+  values,
+  accountTypeChoices,
+  accountFinancialInstitutionChoices,
+}: AccountProps): ReactElement {
   const { t } = useTranslation();
 
-  const accountFieldName = `${baseName}.${getIndexForId(
-    values[baseName],
-    id,
-  )}`;
+  const accountFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
 
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -47,21 +46,18 @@ export function AccountField({
 
   return (
     <>
-      <Grid size={{ xs: 11 }}/>
+      <Grid size={{ xs: 11 }} />
       {!isEdited ? (
         <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
-            <Delete/>
+            <Delete />
           </IconButton>
         </Grid>
       ) : null}
 
       <Fragment key="type">
         <Grid size={{ xs: 4 }}>
-          <LabelizedField
-            label={t('Account Item')}
-            value="type"
-          />
+          <LabelizedField label={t('Account Item')} value="type" />
         </Grid>
 
         {account ? (
@@ -97,10 +93,7 @@ export function AccountField({
         <>
           <Fragment key="number">
             <Grid size={{ xs: 4 }}>
-              <LabelizedField
-                label={t('Account Item')}
-                value="number"
-              />
+              <LabelizedField label={t('Account Item')} value="number" />
             </Grid>
             <Grid size={{ xs: 8 }}>
               <Field
@@ -137,10 +130,7 @@ export function AccountField({
           {Object.entries(dataFields).map(([key, value]) => (
             <Fragment key={key}>
               <Grid size={{ xs: 4 }}>
-                <LabelizedField
-                  label={t('Account Item')}
-                  value={String(key)}
-                />
+                <LabelizedField label={t('Account Item')} value={String(key)} />
               </Grid>
               <Grid size={{ xs: 4 }}>
                 <LabelizedField
@@ -162,14 +152,18 @@ export function AccountField({
             </Fragment>
           ))}
         </>
-      )
-      }
-      {/* --- Dynamic Fields Section --- */}
+      )}
       <FieldArray name={dynamicFieldsName}>
-        {({ push, remove, form }) => (
-          <>
-            {form.values[baseName][getIndexForId(values[baseName], id)]?.dynamicFields?.map(
-              (field, idx) => (
+        {/* eslint-disable-next-line @typescript-eslint/unbound-method */}
+        {({ push, remove, form }) => {
+          const handleRemove = (idx: number) => remove(idx);
+          const handlePush = (field: { key: string; value: string }) =>
+            push(field);
+          return (
+            <>
+              {form.values[baseName][
+                getIndexForId(values[baseName], id)
+              ]?.dynamicFields?.map((_field, idx) => (
                 <Fragment key={idx}>
                   <Grid size={{ xs: 4 }}>
                     <Field
@@ -192,26 +186,25 @@ export function AccountField({
                     />
                   </Grid>
                   <Grid size={{ xs: 1 }}>
-                    <IconButton onClick={() => remove(idx)}>
-                      <Delete/>
+                    <IconButton onClick={() => handleRemove(idx)}>
+                      <Delete />
                     </IconButton>
                   </Grid>
                 </Fragment>
-              ),
-            )}
-            <Grid size={{ xs: 12 }}>
-              <Button
-                variant="outlined"
-                startIcon={<Add/>}
-                onClick={() => push({ key: '', value: '' })}
-              >
-                {t('Add Field')}
-              </Button>
-            </Grid>
-          </>
-        )}
+              ))}
+              <Grid size={{ xs: 12 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={() => handlePush({ key: '', value: '' })}
+                >
+                  {t('Add Field')}
+                </Button>
+              </Grid>
+            </>
+          );
+        }}
       </FieldArray>
-      {/* --- End Dynamic Fields --- */}
     </>
   );
 }
