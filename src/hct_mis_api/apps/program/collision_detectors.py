@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Optional
 
 from django.db import models
+from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 
 from strategy_field.registry import Registry
@@ -131,10 +132,13 @@ class AbstractCollisionDetector:
             "registration_data_import",
             "registration_data_import_id",
             "rdi_merge_status",
+            "head_of_household",
+            "head_of_household_id",
         }
-        self._update_db_instance(
-            household_source, household_destination, exclude, {"head_of_household": head_of_household}
-        )
+        self._update_db_instance(household_source, household_destination, exclude, extra_fields={})
+        household_source.delete(soft=False)
+        household_destination.head_of_household = head_of_household
+        household_destination.save()
 
     def _update_db_instance(
         self,
@@ -188,6 +192,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         self.initialize()
         return self.unique_identification_keys_dict.get(household.identification_key, None)
 
+    @atomic
     def update_household(self, household_to_merge: Household) -> None:
         """
         Updates an existing household with data from another household based on matching identification keys.
@@ -296,7 +301,6 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         self._update_household(
             Household.objects.get(id=old_household_id), household_to_merge, updated_head_of_household
         )
-        household_to_merge.delete(soft=False)
 
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)
