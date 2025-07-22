@@ -92,6 +92,25 @@ class AbstractCollisionDetector:
 
         return individual_destination
 
+    def _update_accounts(self, individual_destination: Individual, individual_source: Individual) -> Individual:
+        """
+        1. Deletes all accounts in destination individual
+        2. Reassigns accounts from source individual to destination individual
+        """
+        accounts_destination = individual_destination.accounts(manager="all_objects").all()
+        accounts_source = individual_source.accounts(manager="all_objects").all()
+
+        # 1. Deletes all accounts in destination individual
+        accounts_destination.delete()
+
+        # 2. Reassigns accounts from source individual to destination individual
+        for account in accounts_source:
+            account.individual = individual_destination
+            account.rdi_merge_status = Individual.MERGED
+            account.save()
+
+        return individual_destination
+
     def _update_individual(self, individual_destination: Individual, individual_source: Individual) -> None:
         exclude = {
             "id",
@@ -272,6 +291,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             individual_source = individuals_to_merge_by_identification_key[key]
             self._update_documents(individual_original, individual_source)
             self._update_individual_identities(individual_original, individual_source)
+            self._update_accounts(individual_original, individual_source)
             self._update_individual(individual_original, individual_source)
         # 8. Delete the individuals that are in the old household but not in the new household
         Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_remove]).delete()
