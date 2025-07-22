@@ -1,7 +1,7 @@
 from time import sleep
 
-from selenium.common.exceptions import StaleElementReferenceException
 from e2e.page_object.base_components import BaseComponents
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.remote.webelement import WebElement
 
 

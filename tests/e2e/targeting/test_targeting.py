@@ -4,7 +4,6 @@ from typing import Callable
 import factory
 import pytest
 from dateutil.relativedelta import relativedelta
-from selenium.common import NoSuchElementException
 from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
@@ -32,6 +31,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
+from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 

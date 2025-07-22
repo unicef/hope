@@ -1,8 +1,8 @@
 from time import sleep
 from typing import List
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from e2e.page_object.base_components import BaseComponents
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
