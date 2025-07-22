@@ -5,8 +5,9 @@ from django.test import TestCase
 from django.utils import timezone
 
 import pytz
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
@@ -22,7 +23,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,

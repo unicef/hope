@@ -9,37 +9,39 @@ from django.utils import timezone
 
 from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
-from flaky import flaky
-from freezegun import freeze_time
-from graphql import GraphQLError
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
     create_household_with_individual_with_collectors,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
-)
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
     generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from flaky import flaky
+from freezegun import freeze_time
+from graphql import GraphQLError
+from pytz import utc
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.payment.celery_tasks import (
+    prepare_follow_up_payment_plan_task,
+    prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
@@ -50,9 +52,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 
 
 class TestPaymentPlanServices(APITestCase):

@@ -1,11 +1,12 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,

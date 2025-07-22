@@ -1,12 +1,12 @@
 import base64
 
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 def id_to_base64(object_id: str, name: str) -> str:

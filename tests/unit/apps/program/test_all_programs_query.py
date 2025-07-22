@@ -3,24 +3,24 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import AnonymousUser
 
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.core import (
     create_afghanistan,
     generate_data_collecting_types,
 )
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import (
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 

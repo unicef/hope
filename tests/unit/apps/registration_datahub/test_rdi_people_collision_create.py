@@ -6,18 +6,18 @@ from django.core.files import File
 from django.test import TestCase
 
 import pytest
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.household.models import PendingHousehold, PendingIndividual
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 

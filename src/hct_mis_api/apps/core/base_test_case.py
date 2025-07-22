@@ -15,10 +15,10 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory
 
 import factory
+from extras.test_utils.factories.account import PartnerFactory
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
