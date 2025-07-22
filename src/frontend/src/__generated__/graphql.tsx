@@ -163,7 +163,6 @@ export type AddIndividualDataObjectType = {
   preferredLanguage?: InputMaybe<Scalars['String']['input']>;
   pregnant?: InputMaybe<Scalars['Boolean']['input']>;
   relationship: Scalars['String']['input'];
-  role: Scalars['String']['input'];
   seeingDisability?: InputMaybe<Scalars['String']['input']>;
   selfcareDisability?: InputMaybe<Scalars['String']['input']>;
   sex: Scalars['String']['input'];
