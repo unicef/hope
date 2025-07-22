@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-bRKDuR gxVRwT css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
@@ -26,7 +26,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
         >
           <div>
             <span
-              class="sc-fLDLck ivXKQK"
+              class="sc-ggWZvA fdzstu"
               color="textSecondary"
             >
               Cash
@@ -35,7 +35,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
               data-cy="label-Cash"
             >
               <span
-                class="sc-dycHyt kguSQI"
+                class="sc-dTvVRJ CplKv"
                 color="textSecondary"
               >
                 Test FSP 1
@@ -45,17 +45,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
         </div>
       </div>
       <div
-        class="sc-gjcoXW jQCndt"
+        class="sc-hvigdm jECuoS"
       >
         <div
-          class="sc-dVBluf cFSYVV"
+          class="sc-fhHczv eAVTgj"
         />
       </div>
       <div
         class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-gNZgCX lhjjcp"
+          class="sc-hjsuWn hnEAaz"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -65,7 +65,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
            
         </div>
         <div
-          class="sc-kfeOyU bQxXsK"
+          class="sc-jJLAfE jPTkuf"
         >
           <div
             class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
@@ -74,12 +74,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-jbAkgO iOCnQX"
+                class="sc-jwTyAe icXxQd"
                 color="#D8E1EE"
               >
                 <div>
                   <span
-                    class="sc-fLDLck ivXKQK"
+                    class="sc-ggWZvA fdzstu"
                     color="textSecondary"
                   >
                     Cash (Test FSP 1)
@@ -88,7 +88,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
                     data-cy="label-Cash (Test FSP 1)"
                   >
                     <span
-                      class="sc-dycHyt kguSQI"
+                      class="sc-dTvVRJ CplKv"
                       color="textSecondary"
                     >
                       424 USD (424 USD)
@@ -105,7 +105,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FS
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
-                class="sc-hRDKVd bCxRDr"
+                class="sc-hwkwBN jrRHkP"
               >
                 <canvas
                   height="0"
@@ -129,7 +129,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-bRKDuR gxVRwT css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
@@ -149,7 +149,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
         >
           <div>
             <span
-              class="sc-fLDLck ivXKQK"
+              class="sc-ggWZvA fdzstu"
               color="textSecondary"
             >
               -
@@ -158,7 +158,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
               data-cy="label--"
             >
               <span
-                class="sc-dycHyt kguSQI"
+                class="sc-dTvVRJ CplKv"
                 color="textSecondary"
               >
                 Test FSP 1
@@ -168,17 +168,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
         </div>
       </div>
       <div
-        class="sc-gjcoXW jQCndt"
+        class="sc-hvigdm jECuoS"
       >
         <div
-          class="sc-dVBluf cFSYVV"
+          class="sc-fhHczv eAVTgj"
         />
       </div>
       <div
         class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-gNZgCX lhjjcp"
+          class="sc-hjsuWn hnEAaz"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -188,7 +188,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
            
         </div>
         <div
-          class="sc-kfeOyU bQxXsK"
+          class="sc-jJLAfE jPTkuf"
         >
           <div
             class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
@@ -197,12 +197,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-jbAkgO iOCnQX"
+                class="sc-jwTyAe icXxQd"
                 color="#D8E1EE"
               >
                 <div>
                   <span
-                    class="sc-fLDLck ivXKQK"
+                    class="sc-ggWZvA fdzstu"
                     color="textSecondary"
                   >
                     Cash (Test FSP 1)
@@ -211,7 +211,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
                     data-cy="label-Cash (Test FSP 1)"
                   >
                     <span
-                      class="sc-dycHyt kguSQI"
+                      class="sc-dTvVRJ CplKv"
                       color="textSecondary"
                     >
                       424 USD (424 USD)
@@ -228,7 +228,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render no
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
-                class="sc-hRDKVd bCxRDr"
+                class="sc-hwkwBN jrRHkP"
               >
                 <canvas
                   height="0"

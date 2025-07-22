@@ -3,11 +3,11 @@
 exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-gNZgCX fqiGed css-1gtchvp-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-hjsuWn fPrWyn css-1gtchvp-MuiPaper-root"
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-jbAkgO fZSeXo"
+      class="sc-jwTyAe kuChNu"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -16,10 +16,10 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-dycHyt kWOsYm"
+      class="sc-dTvVRJ hPWYbx"
     >
       <div
-        class="sc-kfeOyU brNjjF MuiBox-root css-j7qwjs"
+        class="sc-jJLAfE cQrxrg MuiBox-root css-j7qwjs"
       >
         <div
           class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
@@ -57,7 +57,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                   aria-haspopup="listbox"
                   aria-labelledby="textField-targetingId"
                   aria-required="true"
-                  class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-si86to-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+                  class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
                   data-cy="select-targetingId"
                   id="textField-targetingId"
                   role="combobox"
@@ -81,7 +81,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                 />
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-lohd6h-MuiSvgIcon-root-MuiSelect-icon"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                   data-testid="ArrowDropDownIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -92,10 +92,10 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                 </svg>
                 <fieldset
                   aria-hidden="true"
-                  class="MuiOutlinedInput-notchedOutline css-1ll44ll-MuiOutlinedInput-notchedOutline"
+                  class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
                 >
                   <legend
-                    class="css-81qg8w"
+                    class="css-1n64csd-MuiNotchedOutlined-root"
                   >
                     <span>
                       Target Population

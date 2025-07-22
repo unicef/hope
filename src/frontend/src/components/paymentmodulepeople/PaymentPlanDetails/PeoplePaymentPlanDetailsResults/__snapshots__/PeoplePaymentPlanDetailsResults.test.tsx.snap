@@ -3,11 +3,11 @@
 exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHeader/PaymentPlanDetailsResults should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dVBluf iGTkRx css-1gtchvp-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fhHczv jdckwH css-1gtchvp-MuiPaper-root"
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-dycHyt etyvHV"
+      class="sc-dTvVRJ jvlzpq"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -16,7 +16,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
       </h6>
     </div>
     <div
-      class="sc-jbAkgO hmtbDj"
+      class="sc-jwTyAe cTLZpt"
     >
       <div
         class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
@@ -31,12 +31,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-fLDLck eqCuFP"
+                class="sc-ggWZvA jYGmRn"
                 color="#5F02CF"
               >
                 <div>
                   <span
-                    class="sc-FEMpB ddgbkI"
+                    class="sc-bRKDuR kZvueI"
                     color="textSecondary"
                   >
                     Female Children
@@ -45,7 +45,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                     data-cy="label-Female Children"
                   >
                     <span
-                      class="sc-gjcoXW fZsJNd"
+                      class="sc-hvigdm eRXHYS"
                       color="textSecondary"
                     >
                       0
@@ -58,12 +58,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-fLDLck dBYgWW"
+                class="sc-ggWZvA juQLbO"
                 color="#DFCCF5"
               >
                 <div>
                   <span
-                    class="sc-FEMpB ddgbkI"
+                    class="sc-bRKDuR kZvueI"
                     color="textSecondary"
                   >
                     Female Adults
@@ -72,7 +72,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                     data-cy="label-Female Adults"
                   >
                     <span
-                      class="sc-gjcoXW fZsJNd"
+                      class="sc-hvigdm eRXHYS"
                       color="textSecondary"
                     >
                       2
@@ -85,12 +85,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-fLDLck jWyxsj"
+                class="sc-ggWZvA XVxVH"
                 color="#1D6A64"
               >
                 <div>
                   <span
-                    class="sc-FEMpB ddgbkI"
+                    class="sc-bRKDuR kZvueI"
                     color="textSecondary"
                   >
                     Male Children
@@ -99,7 +99,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                     data-cy="label-Male Children"
                   >
                     <span
-                      class="sc-gjcoXW fZsJNd"
+                      class="sc-hvigdm eRXHYS"
                       color="textSecondary"
                     >
                       0
@@ -112,12 +112,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-fLDLck qEmJv"
+                class="sc-ggWZvA brKRpr"
                 color="#B1E3E0"
               >
                 <div>
                   <span
-                    class="sc-FEMpB ddgbkI"
+                    class="sc-bRKDuR kZvueI"
                     color="textSecondary"
                   >
                     Male Adults
@@ -126,7 +126,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                     data-cy="label-Male Adults"
                   >
                     <span
-                      class="sc-gjcoXW fZsJNd"
+                      class="sc-hvigdm eRXHYS"
                       color="textSecondary"
                     >
                       2
@@ -147,7 +147,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
-                class="sc-hRDKVd bCxRDr"
+                class="sc-hwkwBN jrRHkP"
                 data-cy="chart-container"
               >
                 <canvas
@@ -170,11 +170,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-gNZgCX hGItiC"
+                class="sc-hjsuWn bFxhZg"
               >
                 <div>
                   <span
-                    class="sc-FEMpB ddgbkI"
+                    class="sc-bRKDuR kZvueI"
                     color="textSecondary"
                   >
                     Total Number of People
@@ -183,11 +183,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                     data-cy="label-Total Number of People"
                   >
                     <span
-                      class="sc-gjcoXW fZsJNd"
+                      class="sc-hvigdm eRXHYS"
                       color="textSecondary"
                     >
                       <div
-                        class="sc-kfeOyU esIFmr"
+                        class="sc-jJLAfE ehkxlm"
                       >
                         10
                       </div>

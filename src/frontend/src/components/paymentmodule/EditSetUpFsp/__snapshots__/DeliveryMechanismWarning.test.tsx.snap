@@ -3,12 +3,12 @@
 exports[`components/paymentmodule/DeliveryMechanismWarning should render 1`] = `
 <div>
   <div
-    class="sc-FEMpB fYKdyU MuiBox-root css-19ig97o"
+    class="sc-bRKDuR iECBWg MuiBox-root css-19ig97o"
     data-cy="warning-box"
   >
     <svg
       aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-gjcoXW hGQzKZ css-1umw9bq-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-hvigdm iWzYhC css-1umw9bq-MuiSvgIcon-root"
       data-testid="ErrorOutlineIcon"
       focusable="false"
       viewBox="0 0 24 24"

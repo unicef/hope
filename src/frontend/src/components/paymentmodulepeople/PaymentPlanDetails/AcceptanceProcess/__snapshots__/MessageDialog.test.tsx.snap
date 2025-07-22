@@ -4,12 +4,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/MessageDi
 <div>
   <button
     class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
-    id=":r0:"
     tabindex="0"
     type="button"
   >
     <div
-      class="sc-gNZgCX AcJNB MuiBox-root css-0"
+      class="sc-hjsuWn GxBgH MuiBox-root css-0"
     >
       <svg
         aria-hidden="true"

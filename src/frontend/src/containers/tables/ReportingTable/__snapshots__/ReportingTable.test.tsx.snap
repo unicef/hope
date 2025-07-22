@@ -3,27 +3,27 @@
 exports[`containers/tables/ReportingTable should render loading 1`] = `
 <div>
   <div
-    class="sc-FEMpB kLrWFX"
+    class="sc-bRKDuR jnvOHb"
   >
     <div
-      class="sc-hRDKVd lnQjmV"
+      class="sc-hwkwBN dauhgJ"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kNOymR jZtkxI css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-kcLKEh css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cSaEAk hChnVp MuiBox-root css-0"
+            class="sc-dntSTA ekJsfD MuiBox-root css-0"
           >
             <div
-              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
+              class="sc-dntSTA ekJsfD MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-dYwGCk sc-kvnevz carVMa cGphCt css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -36,7 +36,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -60,7 +60,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -84,7 +84,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -108,7 +108,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -132,7 +132,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -156,7 +156,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -180,7 +180,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -204,11 +204,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -218,11 +218,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -232,11 +232,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -246,11 +246,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -260,11 +260,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -288,7 +288,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
             />
             <p
               class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
-              id=":r8:"
+              id="«ra»"
             >
               Rows per page:
             </p>
@@ -298,9 +298,9 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":r8: :r7:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
-                id=":r7:"
+                aria-labelledby="«ra» «r9»"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-18zjd9i-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input"
+                id="«r9»"
                 role="combobox"
                 tabindex="0"
               >
@@ -315,7 +315,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-ug7h84-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -337,7 +337,6 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 aria-label="previous page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":ra:"
                 tabindex="-1"
                 type="button"
               >
@@ -357,7 +356,6 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 aria-label="next page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":rb:"
                 tabindex="-1"
                 type="button"
               >
@@ -385,27 +383,27 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
 exports[`containers/tables/ReportingTable should render with data 1`] = `
 <div>
   <div
-    class="sc-FEMpB kLrWFX"
+    class="sc-bRKDuR jnvOHb"
   >
     <div
-      class="sc-hRDKVd lnQjmV"
+      class="sc-hwkwBN dauhgJ"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kNOymR jZtkxI css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-kcLKEh css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cSaEAk hChnVp MuiBox-root css-0"
+            class="sc-dntSTA ekJsfD MuiBox-root css-0"
           >
             <div
-              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
+              class="sc-dntSTA ekJsfD MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-dYwGCk sc-kvnevz carVMa cGphCt css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -418,7 +416,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -442,7 +440,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -466,7 +464,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -490,7 +488,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -514,7 +512,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -538,7 +536,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -562,7 +560,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-hjsuWn iyxqhV css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -586,11 +584,11 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -600,11 +598,11 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -614,11 +612,11 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -628,11 +626,11 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -646,10 +644,10 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 role="checkbox"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-dVupuq cQerdX css-19syksp-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-eqNDNG gKevWf css-19syksp-MuiTableCell-root"
                 >
                   <span
-                    class="sc-fuExOL bzBdDs"
+                    class="sc-gGKoUb bXxXBi"
                   >
                     Individuals
                   </span>
@@ -674,10 +672,10 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <div
-                    class="sc-gjXmFk hNDEmk"
+                    class="sc-hwddKA lfHnZQ"
                   >
                     <div
-                      class="sc-hORkcV jqzRTQ status-box-container"
+                      class="sc-jaXbil iKJBpr status-box-container"
                       data-cy="status-container"
                     >
                       Processing
@@ -704,15 +702,15 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                    
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-fAomSb ipSivu css-19syksp-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-fVHBlr gisVyu css-19syksp-MuiTableCell-root"
                 />
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC hpCjza css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 />
               </tr>
@@ -731,7 +729,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
             />
             <p
               class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
-              id=":r1:"
+              id="«r2»"
             >
               Rows per page:
             </p>
@@ -741,9 +739,9 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":r1: :r0:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
-                id=":r0:"
+                aria-labelledby="«r2» «r1»"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-18zjd9i-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input"
+                id="«r1»"
                 role="combobox"
                 tabindex="0"
               >
@@ -758,7 +756,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-ug7h84-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -780,7 +778,6 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 aria-label="previous page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":r5:"
                 tabindex="-1"
                 type="button"
               >
@@ -800,7 +797,6 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 aria-label="next page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":r6:"
                 tabindex="-1"
                 type="button"
               >

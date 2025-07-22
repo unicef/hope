@@ -3,11 +3,11 @@
 exports[`components/rdi/details/individual/RegistrationIndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jZTQcj EfQgM css-1gtchvp-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kvnevz tGxfG css-1gtchvp-MuiPaper-root"
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-fLDLck hGbkJg"
+      class="sc-ggWZvA gfnwgM"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -23,7 +23,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Full Name
@@ -32,7 +32,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Full Name"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Jan Romaniak
@@ -45,7 +45,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Given Name
@@ -54,7 +54,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Given Name"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Jan
@@ -67,7 +67,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Middle Name
@@ -84,7 +84,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Family Name
@@ -93,7 +93,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Family Name"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Romaniak
@@ -106,7 +106,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Gender
@@ -115,7 +115,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Gender"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Male
@@ -128,7 +128,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Age
@@ -137,7 +137,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Age"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               121
@@ -150,7 +150,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Date of Birth
@@ -159,7 +159,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Date of Birth"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               <time
@@ -176,7 +176,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Estimated Date of Birth
@@ -185,7 +185,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Estimated Date of Birth"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               No
@@ -198,7 +198,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Marital Status
@@ -207,7 +207,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Marital Status"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Married
@@ -220,7 +220,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Work Status
@@ -229,7 +229,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Work Status"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Not provided
@@ -242,7 +242,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Pregnant
@@ -251,7 +251,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Pregnant"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               No
@@ -264,7 +264,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Household ID
@@ -273,12 +273,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Household ID"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
                
               <a
-                class="sc-FEMpB bpAlwN"
+                class="sc-bRKDuR kYDjuN"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/household/SG91c2Vob2xkTm9kZTowMTk1YTEzYi0wYThkLTRiYTEtYjM0OS00MDY4YWNmOTViNDE="
               />
             </span>
@@ -290,7 +290,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Role
@@ -299,7 +299,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Role"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -312,7 +312,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Relationship to HOH
@@ -321,7 +321,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Relationship to HOH"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Brother / Sister
@@ -334,7 +334,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Preferred language
@@ -350,7 +350,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dkBYrC dECSus"
+          class="sc-dFVmKS gqYdMc"
         />
       </div>
       <div
@@ -358,7 +358,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Observed disabilities
@@ -375,7 +375,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Seeing disability severity
@@ -384,7 +384,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Seeing disability severity"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -397,7 +397,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Hearing disability severity
@@ -406,7 +406,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Hearing disability severity"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -419,7 +419,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Physical disability severity
@@ -428,7 +428,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Physical disability severity"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -441,7 +441,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Remembering or concentrating disability severity
@@ -450,7 +450,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Remembering or concentrating disability severity"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -463,7 +463,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Self-care disability severity
@@ -472,7 +472,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Self-care disability severity"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -485,7 +485,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Communicating disability severity
@@ -494,7 +494,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Communicating disability severity"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               None
@@ -507,7 +507,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Disability
@@ -516,7 +516,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Disability"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               Not Disabled
@@ -528,7 +528,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dkBYrC dECSus"
+          class="sc-dFVmKS gqYdMc"
         />
       </div>
       <div
@@ -542,7 +542,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             <div>
               <span
-                class="sc-gjcoXW bMjypC"
+                class="sc-hvigdm cFcDGd"
                 color="textSecondary"
               >
                 National ID
@@ -551,7 +551,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
                 data-cy="label-National ID"
               >
                 <span
-                  class="sc-dVBluf fZAisw"
+                  class="sc-fhHczv btIQcS"
                   color="textSecondary"
                 >
                   WSH221365
@@ -561,7 +561,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           </div>
           <div>
             <span
-              class="sc-gjcoXW bMjypC"
+              class="sc-hvigdm cFcDGd"
               color="textSecondary"
             >
               issued
@@ -570,7 +570,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
               data-cy="label-issued"
             >
               <span
-                class="sc-dVBluf fZAisw"
+                class="sc-fhHczv btIQcS"
                 color="textSecondary"
               >
                 Poland
@@ -583,7 +583,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dkBYrC dECSus"
+          class="sc-dFVmKS gqYdMc"
         />
       </div>
       <div
@@ -591,7 +591,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Email
@@ -608,7 +608,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Phone Number
@@ -617,7 +617,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Phone Number"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               +48734123423
@@ -630,7 +630,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-gjcoXW bMjypC"
+            class="sc-hvigdm cFcDGd"
             color="textSecondary"
           >
             Alternate Phone Number
@@ -639,7 +639,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Alternate Phone Number"
           >
             <span
-              class="sc-dVBluf fZAisw"
+              class="sc-fhHczv btIQcS"
               color="textSecondary"
             >
               -

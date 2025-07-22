@@ -3,11 +3,11 @@
 exports[`components/grievances/PaymentGrievanceDetails should render with data 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kfeOyU egllKz css-1gtchvp-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jJLAfE jKqxJe css-1gtchvp-MuiPaper-root"
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-dVBluf fNFrix"
+      class="sc-fhHczv bhgWnP"
     >
       <div
         class="MuiBox-root css-gg4vpm"
@@ -20,7 +20,7 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
       </div>
     </div>
     <table
-      class="MuiTable-root sc-hRDKVd cKdbFj css-14k3lwa-MuiTable-root"
+      class="MuiTable-root sc-hwkwBN ga-dXaX css-14k3lwa-MuiTable-root"
     >
       <thead
         class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"

@@ -9,10 +9,10 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
     >
       <div
-        class="sc-dycHyt kbxpaX"
+        class="sc-dTvVRJ eQvINs"
       >
         <div
-          class="MuiFormControl-root MuiFormControl-fullWidth sc-FEMpB iUuhyW css-ytlejw-MuiFormControl-root"
+          class="MuiFormControl-root MuiFormControl-fullWidth sc-bRKDuR gVTZxS css-ytlejw-MuiFormControl-root"
           data-cy="select-filter"
         >
           <div
@@ -26,13 +26,13 @@ exports[`components/core/DocumentSearchField should render 1`] = `
             </label>
             <div
               borderradius="0px 4px 4px 0px"
-              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jbAkgO knHlqW MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jwTyAe jVqIuI MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
               data-cy="filters-document-type"
             >
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-si86to-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+                class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
                 role="combobox"
                 tabindex="0"
               >
@@ -40,7 +40,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
                   class="MuiBox-root css-70qvj9"
                 >
                   <div
-                    class="sc-gNZgCX jugEEj"
+                    class="sc-hjsuWn fioeUN"
                   >
                     Document 1
                   </div>
@@ -55,7 +55,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-lohd6h-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -66,10 +66,10 @@ exports[`components/core/DocumentSearchField should render 1`] = `
               </svg>
               <fieldset
                 aria-hidden="true"
-                class="MuiOutlinedInput-notchedOutline css-1ll44ll-MuiOutlinedInput-notchedOutline"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
               >
                 <legend
-                  class="css-w1u3ce"
+                  class="css-ex8a5f-MuiNotchedOutlined-root"
                 >
                   <span>
                     Document Type
@@ -85,14 +85,14 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-8 css-1cdctrw-MuiGrid2-root"
     >
       <div
-        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-kfeOyU ghXnkm css-cmpglg-MuiFormControl-root-MuiTextField-root"
+        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-jJLAfE cOURNr css-cmpglg-MuiFormControl-root-MuiTextField-root"
         data-cy="filters-document-number"
       >
         <label
           class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-xbjv7h-MuiFormLabel-root-MuiInputLabel-root"
           data-shrink="true"
-          for=":r1:"
-          id=":r1:-label"
+          for="«r2»"
+          id="«r2»-label"
         >
           Document Number
         </label>
@@ -123,7 +123,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
           <input
             aria-invalid="false"
             class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedStart css-1q55ijt-MuiInputBase-input-MuiOutlinedInput-input"
-            id=":r1:"
+            id="«r2»"
             maxlength="200"
             placeholder="Document Number"
             type="text"
@@ -131,10 +131,10 @@ exports[`components/core/DocumentSearchField should render 1`] = `
           />
           <fieldset
             aria-hidden="true"
-            class="MuiOutlinedInput-notchedOutline css-1ll44ll-MuiOutlinedInput-notchedOutline"
+            class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
           >
             <legend
-              class="css-w1u3ce"
+              class="css-ex8a5f-MuiNotchedOutlined-root"
             >
               <span>
                 Document Number

@@ -30,15 +30,15 @@ exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
       >
         <div>
           <div
-            class="sc-fLDLck eYYPjF"
+            class="sc-ggWZvA fYsnLR"
             data-cy="breadcrumbs-container"
           >
             <span
-              class="sc-dVBluf bNa-dds"
+              class="sc-fhHczv jYJQuK"
               data-cy="breadcrumbs-element-container"
             >
               <a
-                class="sc-FEMpB jOYmrF"
+                class="sc-bRKDuR kogLA-d"
                 data-cy="breadcrumbs-link"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans"
               >
@@ -77,7 +77,6 @@ exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
               <a
                 class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1u75he8-MuiButtonBase-root-MuiButton-root"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/fsp/"
-                id=":r0:"
                 tabindex="0"
               >
                 <span

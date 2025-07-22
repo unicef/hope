@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
     class="MuiBox-root css-j7qwjs"
   >
     <div
-      class="sc-fLDLck fNdpDo"
+      class="sc-ggWZvA bbEdaU"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -16,7 +16,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
        
     </div>
     <div
-      class="sc-dycHyt bmMgQK"
+      class="sc-dTvVRJ bxafV"
     >
       <div
         class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
@@ -25,12 +25,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
-            class="sc-dVBluf hxwbZa"
+            class="sc-fhHczv jqzjc"
             color="#D8E1EE"
           >
             <div>
               <span
-                class="sc-FEMpB ddgbkI"
+                class="sc-bRKDuR kZvueI"
                 color="textSecondary"
               >
                 Cash (Test FSP 1)
@@ -39,7 +39,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Cash (Test FSP 1)"
               >
                 <span
-                  class="sc-gjcoXW fZsJNd"
+                  class="sc-hvigdm eRXHYS"
                   color="textSecondary"
                 >
                   424 USD (424 USD)
@@ -56,7 +56,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
-            class="sc-jbAkgO buaZnu"
+            class="sc-jwTyAe hEmTXw"
           >
             <canvas
               height="0"

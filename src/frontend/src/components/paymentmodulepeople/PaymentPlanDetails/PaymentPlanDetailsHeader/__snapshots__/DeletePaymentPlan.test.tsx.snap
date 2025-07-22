@@ -8,7 +8,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/De
     <button
       class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
       data-cy="button-delete-payment-plan"
-      id=":r0:"
       tabindex="0"
       type="button"
     >

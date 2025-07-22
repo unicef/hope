@@ -7,7 +7,7 @@ exports[`components/paymentmodule/WarningMissingAmount should render 1`] = `
   >
     <svg
       aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-FEMpB kDrgWs css-1umw9bq-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-bRKDuR boLWZE css-1umw9bq-MuiSvgIcon-root"
       data-testid="WarningIcon"
       focusable="false"
       viewBox="0 0 24 24"
