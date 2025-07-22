@@ -26,7 +26,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_househol
                                 'value': 'City Test1 - area1'
                             },
                             'flex_fields': {
-                            },
+                            }
                         }
                     },
                     'individualDataUpdateTicketDetails': None,
@@ -73,7 +73,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             ],
                             'marital_status': 'SINGLE',
                             'relationship': 'UNKNOWN',
-                            'role': 'NO_ROLE',
                             'sex': 'MALE'
                         }
                     },

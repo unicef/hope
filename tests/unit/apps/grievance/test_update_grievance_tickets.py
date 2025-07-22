@@ -188,7 +188,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "estimated_birth_date": False,
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
-                "role": ROLE_PRIMARY,
                 "documents": [
                     {
                         "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
@@ -322,7 +321,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "sex": "MALE",
                             "birthDate": date(year=1981, month=2, day=2).isoformat(),
                             "maritalStatus": SINGLE,
-                            "role": ROLE_PRIMARY,
                             "documents": [
                                 {
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
@@ -354,7 +352,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             expected_result = {
                 "sex": "MALE",
-                "role": "PRIMARY",
                 "documents": [
                     {
                         "key": "national_id",
@@ -384,7 +381,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "sex": "MALE",
                 "birth_date": "1980-02-01",
                 "marital_status": "SINGLE",
-                "role": "PRIMARY",
                 "documents": [{"key": "national_id", "country": "POL", "number": "123-123-UX-321"}],
                 "relationship": "UNKNOWN",
                 "estimated_birth_date": False,
