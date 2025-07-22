@@ -7,16 +7,18 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 
 import pytest
+from extras.test_utils.factories.household import (
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
-)
-from hct_mis_api.apps.household.fixtures import (
-    DocumentTypeFactory,
-    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
     FEMALE,
@@ -27,8 +29,6 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )

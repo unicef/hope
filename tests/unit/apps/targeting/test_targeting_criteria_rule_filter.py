@@ -6,33 +6,33 @@ from django.db.models import QuerySet
 from django.test import TestCase
 from django.utils import timezone
 
-from freezegun import freeze_time
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from freezegun import freeze_time
+from pytz import utc
+
+from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     Household,
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    AccountFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,

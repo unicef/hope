@@ -1,20 +1,20 @@
 from typing import Any, Dict, List
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
     SANCTION_LIST_CONFIRMED_MATCH,
     SANCTION_LIST_POSSIBLE_MATCH,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualFlagQuery(APITestCase):
