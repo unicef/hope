@@ -2,6 +2,11 @@ import os
 from time import sleep
 
 import pytest
+from e2e.page_object.programme_population.individuals import Individuals
+from e2e.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
@@ -9,11 +14,6 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from e2e.page_object.programme_population.individuals import Individuals
-from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData

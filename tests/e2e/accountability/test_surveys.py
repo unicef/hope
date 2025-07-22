@@ -1,14 +1,12 @@
 from django.db import transaction
 
 import pytest
+from e2e.helpers.fixtures import get_program_with_dct_type_and_name
+from e2e.page_object.accountability.surveys import AccountabilitySurveys
+from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from extras.test_utils.factories.accountability import SurveyFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from e2e.helpers.fixtures import get_program_with_dct_type_and_name
-from e2e.page_object.accountability.surveys import AccountabilitySurveys
-from e2e.page_object.accountability.surveys_details import (
-    AccountabilitySurveysDetails,
-)
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.accountability.models import Survey

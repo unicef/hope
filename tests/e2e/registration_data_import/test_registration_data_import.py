@@ -4,6 +4,11 @@ from time import sleep
 from django.conf import settings
 
 import pytest
+from e2e.page_object.programme_population.households_details import HouseholdsDetails
+from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
+from e2e.page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
 from elasticsearch_dsl import connections
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
@@ -11,15 +16,6 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from e2e.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from e2e.page_object.registration_data_import.rdi_details_page import (
-    RDIDetailsPage,
-)
-from e2e.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType

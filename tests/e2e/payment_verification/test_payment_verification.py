@@ -6,6 +6,16 @@ from time import sleep
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
+from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
+from e2e.page_object.payment_verification.payment_record import PaymentRecord
+from e2e.page_object.payment_verification.payment_verification import (
+    PaymentVerification,
+)
+from e2e.page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
+)
+from e2e.payment_module.test_payment_plans import find_file
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import (
@@ -19,16 +29,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-from e2e.page_object.payment_verification.payment_record import PaymentRecord
-from e2e.page_object.payment_verification.payment_verification import (
-    PaymentVerification,
-)
-from e2e.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
-from e2e.payment_module.test_payment_plans import find_file
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User

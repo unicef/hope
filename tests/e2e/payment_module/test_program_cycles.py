@@ -3,13 +3,11 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
+from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
-from e2e.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import DataCollectingType

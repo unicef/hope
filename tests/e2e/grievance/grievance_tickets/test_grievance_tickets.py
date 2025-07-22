@@ -5,6 +5,16 @@ from typing import Optional
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
+from e2e.filters.test_filters import create_grievance
+from e2e.helpers.date_time_format import FormatTime
+from e2e.page_object.admin_panel.admin_panel import AdminPanel
+from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
+from e2e.page_object.grievance.new_ticket import NewTicket
+from e2e.page_object.programme_population.households import Households
+from e2e.page_object.programme_population.households_details import HouseholdsDetails
+from e2e.page_object.programme_population.individuals import Individuals
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -17,18 +27,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
-from e2e.filters.test_filters import create_grievance
-from e2e.helpers.date_time_format import FormatTime
-from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.programme_population.households import Households
-from e2e.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from e2e.page_object.programme_population.individuals import Individuals
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 

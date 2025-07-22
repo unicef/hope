@@ -6,11 +6,11 @@ from django.utils import timezone
 
 import factory
 import pytest
+from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.dashboard.services import DashboardDataCache

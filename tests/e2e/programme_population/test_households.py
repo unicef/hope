@@ -1,6 +1,8 @@
 from datetime import datetime
 
 import pytest
+from e2e.page_object.programme_population.households import Households
+from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -9,10 +11,6 @@ from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from pytz import utc
-from e2e.page_object.programme_population.households import Households
-from e2e.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType

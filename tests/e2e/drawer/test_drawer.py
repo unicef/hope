@@ -2,12 +2,12 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program

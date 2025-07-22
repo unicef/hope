@@ -2,6 +2,11 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from e2e.page_object.filters import Filters
+from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
+from e2e.page_object.grievance.new_ticket import NewTicket
+from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -17,11 +22,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from e2e.page_object.filters import Filters
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType

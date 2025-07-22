@@ -4,6 +4,16 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from e2e.page_object.people.people import People
+from e2e.page_object.people.people_details import PeopleDetails
+from e2e.page_object.programme_population.individuals import Individuals
+from e2e.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from e2e.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -16,18 +26,6 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from e2e.page_object.people.people import People
-from e2e.page_object.people.people_details import PeopleDetails
-from e2e.page_object.programme_population.individuals import Individuals
-from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-)
-from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
-from e2e.programme_population.test_periodic_data_update_upload import (
-    prepare_xlsx_file,
-)
 
 from hct_mis_api.apps.core.models import (
     BusinessArea,

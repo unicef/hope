@@ -4,16 +4,16 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from extras.test_utils.factories.account import RoleFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from selenium.webdriver import Keys, ActionChains
+from extras.test_utils.factories.account import RoleFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import Partner

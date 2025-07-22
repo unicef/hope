@@ -2,6 +2,13 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from e2e.helpers.fixtures import get_program_with_dct_type_and_name
+from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from e2e.page_object.grievance.feedback import Feedback
+from e2e.page_object.grievance.new_feedback import NewFeedback
+from e2e.page_object.grievance.new_ticket import NewTicket
+from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -12,13 +19,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from e2e.helpers.fixtures import get_program_with_dct_type_and_name
-from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from e2e.page_object.grievance.feedback import Feedback
-from e2e.page_object.grievance.new_feedback import NewFeedback
-from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
