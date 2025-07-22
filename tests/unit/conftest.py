@@ -15,7 +15,7 @@ from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 
-from .fixtures import *  # noqa: ABS101, F403, F401
+from tests.extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
 
 
 def pytest_addoption(parser: Parser) -> None:
