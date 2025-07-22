@@ -92,7 +92,6 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
-    datum.language = Yup.string().required('Languages Spoken is required');
   }
   if (currentStep >= FeedbackSteps.Verification) {
     datum.consent = Yup.bool().oneOf([true], 'Consent is required');
@@ -241,7 +240,7 @@ function CreateFeedbackPage(): ReactElement {
     individualLookup: values.selectedIndividual?.id,
     issueType: values.issueType,
     admin2: decodeIdString(values.admin2),
-    language: values.language,
+    language: values.language || '',
     program: values.program,
   });
 
@@ -494,7 +493,6 @@ function CreateFeedbackPage(): ReactElement {
                                 label={t('Languages Spoken')}
                                 component={FormikTextField}
                                 data-cy="input-languages"
-                                required
                               />
                             </Grid>
                             <Grid size={{ xs: 3 }}>
@@ -540,16 +538,6 @@ function CreateFeedbackPage(): ReactElement {
                             variant="contained"
                             onClick={submitForm}
                             data-cy="button-submit"
-                            disabled={
-                              activeStep === steps.length - 1
-                                ? // On final step, check only fields required for this step
-                                  !values.description ||
-                                  !values.language ||
-                                  Object.keys(errors).includes('description') ||
-                                  Object.keys(errors).includes('language')
-                                : // On earlier steps, check if there are any errors for fields on the current step
-                                  Object.keys(errors).length > 0
-                            }
                           >
                             {activeStep === steps.length - 1
                               ? t('Save')
