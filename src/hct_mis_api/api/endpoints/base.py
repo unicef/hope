@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -74,7 +74,7 @@ class HOPEAPIBusinessAreaViewSet(SelectedBusinessAreaMixin, HOPEAPIViewSet):
 
 class ConstanceSettingsAPIView(HOPEAPIView):
     def get(self, request: HttpRequest) -> Response:
-        rest_settings: Dict[str, Any] = {}
+        rest_settings: dict[str, Any] = {}
         for setting_name in dir(config):
             if setting_name.startswith("REST_"):
                 setting_value = getattr(config, setting_name)

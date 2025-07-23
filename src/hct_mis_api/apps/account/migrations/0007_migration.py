@@ -5,19 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0006_migration'),
+        ("account", "0006_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='available_for_export',
+            model_name="user",
+            name="available_for_export",
         ),
         migrations.AlterField(
-            model_name='user',
-            name='partner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='account.partner'),
+            model_name="user",
+            name="partner",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="account.partner"),
         ),
     ]

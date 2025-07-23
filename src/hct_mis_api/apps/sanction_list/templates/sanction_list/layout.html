@@ -1,4 +1,4 @@
-{% load i18n static  %}{% get_current_language_bidi as LANGUAGE_BIDI %}<!DOCTYPE html>
+{% load i18n static %}{% get_current_language_bidi as LANGUAGE_BIDI %}<!DOCTYPE html>
 <html lang="en" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
 <head>
     <title>HOPE Workspace {{ state.tenant }}</title>

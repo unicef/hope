@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Any, List
+from typing import Any
 from uuid import UUID
 
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.models import (
 
 
 class PaymentOrderingFilter(OrderingFilter):
-    def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
+    def filter(self, qs: QuerySet, value: list[str]) -> QuerySet:
         if value and any(v in ("mark", "-mark") for v in value):
             # prevents before random ordering for the same value
             qs = super().filter(qs, value).order_by("mark", "unicef_id")
@@ -101,7 +101,7 @@ class PaymentVerificationPlanFilter(FilterSet):
     program_id = CharFilter(method="filter_by_program_id")
 
     class Meta:
-        fields = tuple()
+        fields = ()
         model = PaymentVerificationPlan
 
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentVerificationPlan]":
@@ -110,7 +110,7 @@ class PaymentVerificationPlanFilter(FilterSet):
 
 class PaymentVerificationSummaryFilter(FilterSet):
     class Meta:
-        fields = tuple()
+        fields = ()
         model = PaymentVerificationSummary
 
 
@@ -216,7 +216,7 @@ class PaymentPlanFilter(FilterSet):
     delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices())
 
     class Meta:
-        fields = tuple()
+        fields = ()
         model = PaymentPlan
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
@@ -288,7 +288,7 @@ class PaymentPlanFilter(FilterSet):
     def filter_total_households_count_with_valid_phone_no_max(
         queryset: "QuerySet", model_field: str, value: Any
     ) -> "QuerySet":
-        queryset = queryset.annotate(
+        return queryset.annotate(
             household_count_with_phone_number=Count(
                 "payment_items",
                 filter=Q(
@@ -299,13 +299,12 @@ class PaymentPlanFilter(FilterSet):
                 & Q(payment_items__excluded=False),
             )
         ).filter(household_count_with_phone_number__lte=value)
-        return queryset
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_min(
         queryset: "QuerySet", model_field: str, value: Any
     ) -> "QuerySet":
-        queryset = queryset.annotate(
+        return queryset.annotate(
             household_count_with_phone_number=Count(
                 "payment_items",
                 filter=Q(
@@ -316,7 +315,6 @@ class PaymentPlanFilter(FilterSet):
                 & Q(payment_items__excluded=False),
             )
         ).filter(household_count_with_phone_number__gte=value)
-        return queryset
 
     @staticmethod
     def filter_status_not(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
@@ -355,7 +353,7 @@ class PaymentFilter(FilterSet):
         return qs.filter(q)
 
     class Meta:
-        fields = tuple()
+        fields = ()
         model = Payment
 
     order_by = PaymentOrderingFilter(

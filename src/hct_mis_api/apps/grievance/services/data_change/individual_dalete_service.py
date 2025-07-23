@@ -1,5 +1,3 @@
-from typing import List
-
 from django.contrib.auth.models import AbstractUser
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -20,7 +18,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 
 
 class IndividualDeleteService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
         individual = individual_data_update_issue_type_extras.get("individual")

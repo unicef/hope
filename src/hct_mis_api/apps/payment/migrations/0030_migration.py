@@ -1,4 +1,4 @@
-from django.db import migrations, models
+from django.db import migrations
 
 
 def migrate_payments_delivery_mechanism(apps, schema_editor):  # pragma: no cover
@@ -11,9 +11,8 @@ def migrate_payments_delivery_mechanism(apps, schema_editor):  # pragma: no cove
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0029_migration'),
+        ("payment", "0029_migration"),
     ]
 
     operations = [

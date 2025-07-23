@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable
 from uuid import UUID
 
 from django.core.paginator import Paginator
@@ -26,7 +26,7 @@ from hct_mis_api.apps.payment.models import (
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 
-encode_typedict: Dict[type, Callable[[Any], Any]] = {
+encode_typedict: dict[type, Callable[[Any], Any]] = {
     UUID: lambda x: str(x),
     PhoneNumber: lambda x: str(x),
     datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
@@ -80,7 +80,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_household_snapshot(household: Household, payment: Optional[Payment] = None) -> dict[Any, Any]:
+def get_household_snapshot(household: Household, payment: Payment | None = None) -> dict[Any, Any]:
     household_data = {}
     all_household_data_dict = household.__dict__
     keys = [key for key in all_household_data_dict.keys() if key not in excluded_household_fields]
@@ -119,7 +119,7 @@ def get_household_snapshot(household: Household, payment: Optional[Payment] = No
     return household_data
 
 
-def get_individual_snapshot(individual: Individual, payment: Optional[Payment] = None) -> dict:
+def get_individual_snapshot(individual: Individual, payment: Payment | None = None) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}

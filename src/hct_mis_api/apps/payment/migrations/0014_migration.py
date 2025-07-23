@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0013_migration'),
+        ("payment", "0013_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paymentverificationplan',
-            name='payment_plan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_verification_plans', to='payment.paymentplan'),
+            model_name="paymentverificationplan",
+            name="payment_plan",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payment_verification_plans",
+                to="payment.paymentplan",
+            ),
         ),
     ]

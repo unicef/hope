@@ -1,5 +1,3 @@
-from typing import Dict
-
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -39,7 +37,7 @@ class AreaChildrenTreeSerializer(serializers.ModelSerializer):
         )
 
     # @extend_schema_field(serializers.ListSerializer(child=AreaChildrenTreeSerializer()))
-    def get_areas(self, obj: Area) -> Dict:
+    def get_areas(self, obj: Area) -> dict:
         return AreaChildrenTreeSerializer(obj.get_children(), many=True).data
 
     @staticmethod
@@ -62,7 +60,7 @@ class AreaTreeSerializer(serializers.ModelSerializer):
         )
 
     @extend_schema_field(AreaChildrenTreeSerializer(many=True))
-    def get_areas(self, obj: Area) -> Dict:
+    def get_areas(self, obj: Area) -> dict:
         return AreaTreeSerializer(obj.get_children(), many=True).data
 
     @staticmethod

@@ -1,4 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
+
 {% block action-content %}
     {% if metadata %}
         <pre>{{ metadata }}</pre>
@@ -14,4 +15,4 @@
         <input type="submit">
         <input type="submit" name="detect" value="Detect">
     </form>
-{% endblock %}
+{% endblock action-content %}

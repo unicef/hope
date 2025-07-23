@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0005_migration'),
+        ("account", "0005_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='doap_hash',
+            model_name="user",
+            name="doap_hash",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='last_doap_sync',
+            model_name="user",
+            name="last_doap_sync",
         ),
     ]

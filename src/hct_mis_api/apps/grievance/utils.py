@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
@@ -30,8 +30,7 @@ logger = logging.getLogger(__name__)
 
 def get_individual(individual_id: str) -> Individual:
     decoded_selected_individual_id = decode_id_string(individual_id)
-    individual = get_object_or_404(Individual.objects.select_related("household"), id=decoded_selected_individual_id)
-    return individual
+    return get_object_or_404(Individual.objects.select_related("household"), id=decoded_selected_individual_id)
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:
@@ -49,9 +48,9 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         .distinct()
     )
 
-    selected_individuals_set = set([str(i.id) for i in selected_individuals])
+    selected_individuals_set = {str(i.id) for i in selected_individuals}
     for ticket_details in ticket_details_queryset:
-        possible_duplicates_set = set([str(i.id) for i in ticket_details.possible_duplicates.all()]).union(
+        possible_duplicates_set = {str(i.id) for i in ticket_details.possible_duplicates.all()}.union(
             {str(ticket_details.golden_records_individual.id)}
         )
         intersection = selected_individuals_set.intersection(possible_duplicates_set)
@@ -60,26 +59,24 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
 
 
 def clear_cache(
-    ticket_details: Union[
-        TicketHouseholdDataUpdateDetails,
-        TicketDeleteHouseholdDetails,
-        TicketAddIndividualDetails,
-        TicketIndividualDataUpdateDetails,
-        TicketDeleteIndividualDetails,
-    ],
+    ticket_details: TicketHouseholdDataUpdateDetails
+    | TicketDeleteHouseholdDetails
+    | TicketAddIndividualDetails
+    | TicketIndividualDataUpdateDetails
+    | TicketDeleteIndividualDetails,
     business_area_slug: str,
 ) -> None:
-    if isinstance(ticket_details, (TicketHouseholdDataUpdateDetails, TicketDeleteHouseholdDetails)):
+    if isinstance(ticket_details, TicketHouseholdDataUpdateDetails | TicketDeleteHouseholdDetails):
         cache.delete_pattern(f"count_{business_area_slug}_HouseholdNodeConnection_*")
 
     if isinstance(
         ticket_details,
-        (TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketDeleteIndividualDetails),
+        TicketAddIndividualDetails | TicketIndividualDataUpdateDetails | TicketDeleteIndividualDetails,
     ):
         cache.delete_pattern(f"count_{business_area_slug}_IndividualNodeConnection_*")
 
 
-def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTicket, documents: List[Dict]) -> None:
+def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTicket, documents: list[dict]) -> None:
     grievance_documents = []
     for document in documents:
         file = document["file"]
@@ -97,7 +94,7 @@ def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTi
     GrievanceDocument.objects.bulk_create(grievance_documents)
 
 
-def update_grievance_documents(documents: List[Dict]) -> None:
+def update_grievance_documents(documents: list[dict]) -> None:
     for document in documents:
         current_document = GrievanceDocument.objects.filter(id=document["id"]).first()
         if current_document:
@@ -113,7 +110,7 @@ def update_grievance_documents(documents: List[Dict]) -> None:
             current_document.save()
 
 
-def delete_grievance_documents(ticket_id: str, documents_to_delete: List[str]) -> None:
+def delete_grievance_documents(ticket_id: str, documents_to_delete: list[str]) -> None:
     documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
 
     for document in documents_to_delete:
@@ -126,8 +123,8 @@ def filter_grievance_tickets_based_on_partner_areas_2(
     queryset: QuerySet["GrievanceTicket"],
     user: User,
     business_area_id: str,
-    program_id: Optional[str],
-    permissions: List[Permissions],
+    program_id: str | None,
+    permissions: list[Permissions],
 ) -> QuerySet["GrievanceTicket"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
@@ -144,8 +141,8 @@ def filter_feedback_based_on_partner_areas_2(
     queryset: QuerySet["Feedback"],
     user: User,
     business_area_id: str,
-    program_id: Optional[str],
-    permissions: List[Permissions],
+    program_id: str | None,
+    permissions: list[Permissions],
 ) -> QuerySet["Feedback"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
@@ -162,10 +159,10 @@ def filter_based_on_partner_areas_2(
     queryset: QuerySet["GrievanceTicket", "Feedback"],
     user: User,
     business_area_id: str,
-    program_id: Optional[str],
+    program_id: str | None,
     lookup_id: str,
-    id_container: Callable[[Any], List[Any]],
-    permissions: List[Permissions],
+    id_container: Callable[[Any], list[Any]],
+    permissions: list[Permissions],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     try:
         programs_for_business_area = []
@@ -193,8 +190,7 @@ def filter_based_on_partner_areas_2(
         if queryset.model is Feedback and not program_id:
             filter_q |= Q(program__isnull=True)
 
-        queryset = queryset.filter(filter_q)
-        return queryset
+        return queryset.filter(filter_q)
     except (Partner.DoesNotExist, AssertionError):
         return queryset.model.objects.none()
 

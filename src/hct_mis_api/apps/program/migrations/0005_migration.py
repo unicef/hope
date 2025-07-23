@@ -4,16 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sanction_list', '0003_migration'),
-        ('program', '0004_migration'),
+        ("sanction_list", "0003_migration"),
+        ("program", "0004_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='program',
-            name='sanction_lists',
-            field=models.ManyToManyField(blank=True, help_text='Program sanction lists', related_name='programs', to='sanction_list.SanctionList'),
+            model_name="program",
+            name="sanction_lists",
+            field=models.ManyToManyField(
+                blank=True, help_text="Program sanction lists", related_name="programs", to="sanction_list.SanctionList"
+            ),
         ),
     ]

@@ -1573,39 +1573,33 @@ class TestGrievanceTicketApprove:
         household.registration_data_import.save()
 
         individual_1 = IndividualFactory(
-            **{
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Benjamin Butler",
+            given_name="Benjamin",
+            family_name="Butler",
+            phone_no="(953)682-4596",
+            birth_date="1943-07-30",
+            household=None,
+            program=self.program,
         )
 
         individual_2 = IndividualFactory(
-            **{
-                "full_name": "Andrew Jackson",
-                "given_name": "Andrew",
-                "family_name": "Jackson",
-                "phone_no": "(853)692-4696",
-                "birth_date": "1963-09-12",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Andrew Jackson",
+            given_name="Andrew",
+            family_name="Jackson",
+            phone_no="(853)692-4696",
+            birth_date="1963-09-12",
+            household=None,
+            program=self.program,
         )
 
         IndividualFactory(
-            **{
-                "full_name": "Ulysses Grant",
-                "given_name": "Ulysses",
-                "family_name": "Grant",
-                "phone_no": "(953)682-1111",
-                "birth_date": "1913-01-31",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Ulysses Grant",
+            given_name="Ulysses",
+            family_name="Grant",
+            phone_no="(953)682-1111",
+            birth_date="1913-01-31",
+            household=None,
+            program=self.program,
         )
 
         household.head_of_household = individual_1

@@ -152,17 +152,17 @@ class TestPaymentSignature(APITestCase):
             }
         ]
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=str(program.cycles.first().id),
-            rules=rules,
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
-            fsp_id=fsp.id,
-            delivery_mechanism_code=dm_cash.code,
-        )
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": str(program.cycles.first().id),
+            "rules": rules,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "excluded_ids": "TEST_INVALID_ID_01, TEST_INVALID_ID_02",
+            "fsp_id": fsp.id,
+            "delivery_mechanism_code": dm_cash.code,
+        }
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(

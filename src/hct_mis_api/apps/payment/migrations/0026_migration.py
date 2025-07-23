@@ -5,42 +5,43 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0018_migration'),
-        ('payment', '0025_migration'),
+        ("household", "0018_migration"),
+        ("payment", "0025_migration"),
     ]
 
     operations = [
         migrations.DeleteModel(  # Django doesn't support Rename for proxy models
-            name='PendingDeliveryMechanismData',
+            name="PendingDeliveryMechanismData",
         ),
         migrations.RenameModel(
-            old_name='DeliveryMechanismData',
-            new_name='Account',
+            old_name="DeliveryMechanismData",
+            new_name="Account",
         ),
         migrations.CreateModel(
-            name='PendingAccount',
+            name="PendingAccount",
             fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
-                'verbose_name': 'Imported Account',
-                'verbose_name_plural': 'Imported Accounts',
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
+                "verbose_name": "Imported Account",
+                "verbose_name_plural": "Imported Accounts",
             },
-            bases=('payment.account',),
+            bases=("payment.account",),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='account_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                    to='payment.accounttype'),
+            model_name="account",
+            name="account_type",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="payment.accounttype"
+            ),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='individual',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='accounts',
-                                    to='household.individual'),
+            model_name="account",
+            name="individual",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="accounts", to="household.individual"
+            ),
         ),
     ]

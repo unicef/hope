@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import date, datetime, timedelta
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -127,7 +127,7 @@ OBSERVED_DISABILITY_CHOICE = (
     (SELF_CARE, _("Difficulty with self care (washing, dressing)")),
     (
         COMMUNICATING,
-        _("Difficulty communicating " "(e.g understanding or being understood)"),
+        _("Difficulty communicating (e.g understanding or being understood)"),
     ),
 )
 NON_BENEFICIARY = "NON_BENEFICIARY"
@@ -331,7 +331,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
         return self.unicef_id or ""
 
     @property
-    def business_area(self) -> Optional[BusinessArea]:
+    def business_area(self) -> BusinessArea | None:
         return self.households.first().business_area if self.households.first() else None
 
 
@@ -737,7 +737,7 @@ class Household(
             ),
         ]
 
-    def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
         household_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
 
@@ -745,7 +745,7 @@ class Household(
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag: Optional[Any] = None) -> None:
+    def withdraw(self, tag: Any | None = None) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.internal_data["withdrawn_tag"] = tag
@@ -758,11 +758,11 @@ class Household(
         self.save()
 
     @property
-    def admin_area(self) -> Optional[Area]:
+    def admin_area(self) -> Area | None:
         """Returns the lowest admin area of the household."""
         return self.admin4 or self.admin3 or self.admin2 or self.admin1
 
-    def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
+    def set_admin_areas(self, new_admin_area: Area | None = None, save: bool = True) -> None:
         """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]
 
@@ -809,13 +809,13 @@ class Household(
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
     @property
-    def geopoint(self) -> Optional[str]:
+    def geopoint(self) -> str | None:
         if self.latitude and self.longitude:
             return f"{self.latitude},{self.longitude}"
         return None
 
     @geopoint.setter
-    def geopoint(self, value: Optional[Tuple[float, float]]) -> None:
+    def geopoint(self, value: tuple[float, float] | None) -> None:
         if value:
             (
                 self.longitude,
@@ -870,12 +870,12 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
     @classmethod
-    def get_all_doc_types_choices(cls) -> List[Tuple[str, str]]:
+    def get_all_doc_types_choices(cls) -> list[tuple[str, str]]:
         """return list of Document Types choices"""
         return [(obj.key, obj.label) for obj in cls.objects.all()]
 
     @classmethod
-    def get_all_doc_types(cls) -> List[str]:
+    def get_all_doc_types(cls) -> list[str]:
         """return list of Document Types keys"""
         return list(cls.objects.all().only("key").values_list("key", flat=True))
 
@@ -1029,7 +1029,7 @@ class IndividualCollection(UnicefIdentifiedModel):
         return self.unicef_id or ""
 
     @property
-    def business_area(self) -> Optional[BusinessArea]:
+    def business_area(self) -> BusinessArea | None:
         return self.individuals.first().business_area if self.individuals.first() else None
 
 
@@ -1298,7 +1298,7 @@ class Individual(
     )
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
-    def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
         individual_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
 
@@ -1353,7 +1353,7 @@ class Individual(
         return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
 
     @property
-    def sanction_list_last_check(self) -> Optional[datetime]:
+    def sanction_list_last_check(self) -> datetime | None:
         # TODO: SANCTION LIST CHECK PER LIST
         if self.program.sanction_lists.exists():
             return cache.get("sanction_list_last_check")
@@ -1424,7 +1424,7 @@ class Individual(
         ]
         permissions = (("update_individual_iban", "Can update individual IBAN"),)
 
-    def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
+    def recalculate_data(self, save: bool = True) -> tuple[Any, list[str]]:
         update_fields = ["disability"]
 
         disability_fields = (
@@ -1453,13 +1453,13 @@ class Individual(
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
     @cached_property
-    def parents(self) -> List["Individual"]:
+    def parents(self) -> list["Individual"]:
         return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
     def is_golden_record_duplicated(self) -> bool:
         return self.deduplication_golden_record_status == DUPLICATE
 
-    def get_deduplication_golden_record(self) -> List:
+    def get_deduplication_golden_record(self) -> list:
         status_key = "duplicates" if self.is_golden_record_duplicated() else "possible_duplicates"
         return self.deduplication_golden_record_results.get(status_key, [])
 

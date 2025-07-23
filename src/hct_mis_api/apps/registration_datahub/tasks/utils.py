@@ -1,7 +1,7 @@
-from typing import Any, List, Union
+from typing import Any
 
 
-def collectors_str_ids_to_list(values: Any) -> Union[None, str, List[str]]:
+def collectors_str_ids_to_list(values: Any) -> None | str | list[str]:
     # TODO: refactor that?
     if values is None:
         return None
@@ -9,5 +9,4 @@ def collectors_str_ids_to_list(values: Any) -> Union[None, str, List[str]]:
     if isinstance(values, float) and values.is_integer():
         temp_value = int(values)
         return [str(temp_value)]
-    else:
-        return str(values).strip(";").replace(" ", "").split(";")
+    return str(values).strip(";").replace(" ", "").split(";")

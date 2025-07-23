@@ -1,5 +1,3 @@
-from typing import Dict, Optional, Type, Union
-
 from django.conf import settings
 from django.db.models import Q, QuerySet
 
@@ -15,7 +13,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
-RelatedInstanceType = Union[Document, Household, IndividualIdentity, IndividualRoleInHousehold]
+RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
 index_settings = {
     "number_of_shards": 1,
@@ -78,14 +76,14 @@ class IndividualDocument(Document):
     def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_admin1(self, instance: Individual) -> Optional[str]:
+    def prepare_admin1(self, instance: Individual) -> str | None:
         household = instance.household
         if household:
             if household.admin1:
                 return household.admin1.name
         return None
 
-    def prepare_admin2(self, instance: Individual) -> Optional[str]:
+    def prepare_admin2(self, instance: Individual) -> str | None:
         household = instance.household
         if household:
             if household.admin2:
@@ -112,8 +110,8 @@ class IndividualDocument(Document):
 
     def get_instances_from_related(
         self, related_instance: RelatedInstanceType
-    ) -> Optional[Union[Individual, QuerySet[Individual]]]:
-        if isinstance(related_instance, (Document, IndividualIdentity)):
+    ) -> Individual | QuerySet[Individual] | None:
+        if isinstance(related_instance, Document | IndividualIdentity):
             return related_instance.individual
         if isinstance(related_instance, Household):
             return related_instance.individuals.all()
@@ -155,8 +153,8 @@ class IndividualDocumentOthers(IndividualDocument):
 
 def get_individual_doc(
     business_area_slug: str,
-) -> Type[IndividualDocument]:
-    documents: Dict[str, Type[IndividualDocument]] = {
+) -> type[IndividualDocument]:
+    documents: dict[str, type[IndividualDocument]] = {
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,
     }
@@ -192,13 +190,13 @@ class HouseholdDocument(Document):
     detail_id = fields.TextField()
     program_registration_id = fields.TextField()
 
-    def prepare_admin1(self, household: Household) -> Optional[str]:
+    def prepare_admin1(self, household: Household) -> str | None:
         if household:
             if household.admin1:
                 return household.admin1.name
         return None
 
-    def prepare_admin2(self, household: Household) -> Optional[str]:
+    def prepare_admin2(self, household: Household) -> str | None:
         if household:
             if household.admin2:
                 return household.admin2.name
@@ -215,6 +213,7 @@ class HouseholdDocument(Document):
     def get_instances_from_related(self, related_instance: Individual) -> Household:
         if isinstance(related_instance, Individual):
             return related_instance.household
+        return None
 
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households"

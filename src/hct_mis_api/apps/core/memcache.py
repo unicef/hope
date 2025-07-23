@@ -1,12 +1,12 @@
 import re
 import time
-from typing import Any, Optional
+from typing import Any
 
 from django.core.cache.backends.locmem import LocMemCache as DjangoLocMemCache
 
 
 class SimpleCacheLock:
-    def __init__(self, cache: Any, key: str, blocking_timeout: float, timeout: Optional[float]) -> None:
+    def __init__(self, cache: Any, key: str, blocking_timeout: float, timeout: float | None) -> None:
         self.cache = cache
         self.key = key
         self.blocking_timeout = blocking_timeout
@@ -21,7 +21,7 @@ class SimpleCacheLock:
                 raise TimeoutError(f"Could not acquire lock {self.key}")  # pragma: no cover
             time.sleep(0.1)  # pragma: no cover
 
-    def __exit__(self, exc_type: Optional[type], exc: Optional[BaseException], tb: Optional[Any]) -> None:
+    def __exit__(self, exc_type: type | None, exc: BaseException | None, tb: Any | None) -> None:
         self.cache.delete(self.key)
 
     def acquire(self, blocking: bool) -> bool:
@@ -39,5 +39,5 @@ class LocMemCache(DjangoLocMemCache):
             if re.match(key_pattern, key):
                 self.delete(key)
 
-    def lock(self, key: str, blocking_timeout: float = 0, timeout: Optional[float] = None) -> SimpleCacheLock:
+    def lock(self, key: str, blocking_timeout: float = 0, timeout: float | None = None) -> SimpleCacheLock:
         return SimpleCacheLock(self, key, blocking_timeout, timeout)

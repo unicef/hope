@@ -117,12 +117,10 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
         self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
         mock_registration_xlsx_import_task_delay.assert_called_with(
-            **{
-                "registration_data_import_id": str(rdi.id),
-                "import_data_id": str(rdi.import_data_id),
-                "business_area_id": str(rdi.business_area_id),
-                "program_id": str(rdi.program_id),
-            }
+            registration_data_import_id=str(rdi.id),
+            import_data_id=str(rdi.import_data_id),
+            business_area_id=str(rdi.business_area_id),
+            program_id=str(rdi.program_id),
         )
 
     @mock.patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
@@ -153,12 +151,10 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
         self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
         mock_registration_xlsx_import_task_delay.assert_called_with(
-            **{
-                "registration_data_import_id": str(rdi.id),
-                "import_data_id": str(rdi.import_data_id),
-                "business_area_id": str(rdi.business_area_id),
-                "program_id": str(rdi.program_id),
-            }
+            registration_data_import_id=str(rdi.id),
+            import_data_id=str(rdi.import_data_id),
+            business_area_id=str(rdi.business_area_id),
+            program_id=str(rdi.program_id),
         )
 
     @mock.patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
@@ -280,10 +276,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
         self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
         mock_registration_xlsx_import_task_delay.assert_called_with(
-            **{
-                "registration_data_import_id": str(rdi.id),
-                "import_data_id": str(rdi.import_data_id),
-                "business_area_id": str(rdi.business_area_id),
-                "program_id": str(rdi.program_id),
-            }
+            registration_data_import_id=str(rdi.id),
+            import_data_id=str(rdi.import_data_id),
+            business_area_id=str(rdi.business_area_id),
+            program_id=str(rdi.program_id),
         )

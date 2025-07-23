@@ -38,8 +38,7 @@ def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
-    return program
+    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
 
 
 @pytest.fixture()
@@ -372,7 +371,6 @@ def test_update_individual_with_fixture_households(
     program.save()
 
     detector = IdentificationKeyCollisionDetector(program)
-    print(destination_individual, source_individual)
     detector._update_individual(destination_individual, source_individual)
 
     destination_individual.refresh_from_db()

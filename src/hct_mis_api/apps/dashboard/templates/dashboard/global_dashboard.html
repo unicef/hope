@@ -2,7 +2,8 @@
 {% load i18n %}
 {% block title %}
     {% translate "Global Dashboard" %}
-{% endblock %}
+{% endblock title %}
+
 {% block content %}
     <div class="bg-white p-4 rounded shadow">
         <h4 class="text-lg font-semibold">{% translate "Payments by Country" %}</h4>
@@ -42,7 +43,8 @@
             <div id="payments-by-region" class="dc-chart w-full h-full"></div>
         </div>
     </div>
-{% endblock %}
+{% endblock content %}
+
 {% block scripts %}
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -68,7 +70,7 @@
                 document.getElementById(chartId).innerHTML = "";
             }
 
-            const url = "{{household_data_url}}";
+            const url = "{{ household_data_url }}";
             const pendingList = ["Sent to Payment Gateway", "Sent to FSP", "Pending"];
             const successfulList = [
                 "Distribution Successful",
@@ -109,11 +111,11 @@
                         "MENAR": "(MENARO) Middle East Northern Africa Regional Office",
                         "SAR": "(ROSA) Regional Office South Asia",
                         "WCAR": "(WCARO) West and Central Africa Regional Office",
-                        "Unknown Region": "Unknown Region" 
+                        "Unknown Region": "Unknown Region"
                     };
 
                     const processedPayments = data.map((item) => ({
-                        delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0, 
+                        delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
                         payments: item.payments || 0,
                         individuals: item.individuals || 0,
                         households: item.households || 0,
@@ -148,11 +150,11 @@
                     const sectorGroup = sectorDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
-                  
+
                     const countryGroup = countryDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
-                    
+
                     const regionGroup = regionDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
@@ -208,7 +210,7 @@
                         .colors(d3.scaleOrdinal().range(d3.schemePaired))
                         .colorAccessor((d) => d.key)
                         .yAxisPadding(90)
-                        .useViewBoxResizing(true) 
+                        .useViewBoxResizing(true)
                         .render();
                     countryChart.yAxis().ticks(4);
                     countryChart.on('renderlet', function(chart) {
@@ -217,7 +219,7 @@
                             .style("text-anchor", "start")
                             .attr("dx", "2");
                             });
-                    
+
                     const regionChart = dc
                         .rowChart("#payments-by-region")
                         .dimension(regionDim)
@@ -288,13 +290,13 @@
                                 }
                                 return p;
                             },
-                            (p, v) => { 
+                            (p, v) => {
                                 if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
                                     p.value -= (v.delivered_quantity_usd || 0);
                                 }
                                 return p;
                             },
-                            () => ({ value: 0 }) 
+                            () => ({ value: 0 })
                         ).value().value;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
@@ -312,8 +314,8 @@
                                 ).value();
                         const finishedPaymentPlans = paymentPlanMetrics.finished;
                         const totalPaymentPlans = paymentPlanMetrics.total;
-                        const verificationPercentage = totalPaymentPlans > 0 
-                            ? (finishedPaymentPlans / totalPaymentPlans) * 100 
+                        const verificationPercentage = totalPaymentPlans > 0
+                            ? (finishedPaymentPlans / totalPaymentPlans) * 100
                             : 0;
                         const successfulPaymentsGroupUSD = ndx
                             .groupAll()
@@ -489,4 +491,4 @@
         });
     });
     </script>
-{% endblock %}
+{% endblock scripts %}
