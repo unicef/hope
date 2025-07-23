@@ -3,17 +3,17 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 
 import pytz
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from parameterized import parameterized
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.payment.fixtures import FinancialInstitutionFactory
 from hct_mis_api.apps.payment.models import FinancialInstitution
 from hct_mis_api.apps.program.models import Program
-from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIProgramStatuesTests(HOPEApiTestCase):

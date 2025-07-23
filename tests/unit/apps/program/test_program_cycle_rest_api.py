@@ -7,27 +7,27 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.dateparse import parse_date
 
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.test import APIClient, APIRequestFactory
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.test import APIClient, APIRequestFactory
+from unit.api.base import HOPEApiTestCase
+
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
     ProgramCycleUpdateSerializer,
 )
 from hct_mis_api.apps.program.api.views import ProgramCycleViewSet
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from tests.unit.api.base import HOPEApiTestCase
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):

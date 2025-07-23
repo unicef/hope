@@ -2,17 +2,18 @@ from unittest.mock import MagicMock, patch
 
 import django
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProFlowResponse
-from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

@@ -8,34 +8,35 @@ from typing import Any, Callable, Dict
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import UserRole
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     EntitlementCardFactory,
     create_household_for_fixtures,
 )
-from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
+
+from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 
