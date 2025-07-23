@@ -1145,4 +1145,5 @@ class TestAccountTypeModel(TestCase):
         generate_delivery_mechanisms()
 
     def test_get_targeting_field_names(self) -> None:
+
         self.assertEqual(AccountType.get_targeting_field_names(), ["bank__number", "mobile__number"])
