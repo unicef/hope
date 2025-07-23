@@ -4,17 +4,17 @@ from typing import Iterator
 from django.core.cache import cache
 from django.urls import reverse
 
-from rest_framework import status
-from rest_framework.test import APITestCase
-
-from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
+from rest_framework import status
+from rest_framework.test import APITestCase
+from unit.api.factories import APITokenFactory
+
+from hct_mis_api.api.models import APIToken, Grant
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.unit.api.factories import APITokenFactory
 
 
 @contextlib.contextmanager

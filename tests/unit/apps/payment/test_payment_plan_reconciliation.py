@@ -5,25 +5,41 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Tuple
 
 import pytz
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+from freezegun import freeze_time
+from openpyxl import load_workbook
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import DataCollectingType, FileTemp
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    decode_id_string_required,
+    encode_id_base64,
+    encode_id_base64_required,
+)
+from extras.test_utils.factories.core import create_afghanistan
+from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx_per_fsp,
+    payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.models import (
     Payment,
@@ -34,9 +50,8 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.steficon.models import Rule
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
