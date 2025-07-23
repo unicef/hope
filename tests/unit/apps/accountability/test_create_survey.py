@@ -176,7 +176,7 @@ class TestCreateSurvey(APITestCase):
             self.assertEqual(task_mock.call_args[0][0], survey.id)
 
         households_ids = self.pp.payment_items.values_list("household_id", flat=True)
-        households = Household.objects.filter(id__in=households_ids)
+        households = Household.objects.filter(id__in=list(households_ids))  # type: ignore
         self.assertEqual(households[0].individuals.count(), 3)
         phone_number_1 = households[0].head_of_household.phone_no
         phone_number_2 = households[1].head_of_household.phone_no

@@ -12,13 +12,13 @@ from extras.test_utils.factories.account import (
     PartnerFactory,
     UserFactory,
 )
+from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.permissions import Permissions
-from extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db

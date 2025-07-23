@@ -5,9 +5,8 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo, RoleAssignment
+from hct_mis_api.apps.program.models import Program
 
 
 class TestPartnerAccessChangeSignal(TestCase):

@@ -15,14 +15,8 @@ from django.utils import timezone
 from django.utils.functional import classproperty
 
 import pytest
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from extras.test_utils.factories.core import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
 from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,

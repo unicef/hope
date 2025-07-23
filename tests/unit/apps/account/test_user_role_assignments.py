@@ -4,14 +4,19 @@ from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
 from django.test import TestCase
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory, RoleFactory
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 
 from hct_mis_api.apps.account.admin.forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import (
+    IncompatibleRoles,
+    Role,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,

@@ -4,8 +4,11 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
-from extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from django_webtest import WebTest
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
 from parameterized import parameterized
 from rest_framework import status
 

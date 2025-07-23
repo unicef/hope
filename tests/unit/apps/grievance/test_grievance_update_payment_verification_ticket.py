@@ -4,8 +4,6 @@ from django.core.management import call_command
 from django.urls import reverse
 
 import pytest
-from rest_framework import status
-
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -21,11 +19,9 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from parameterized import parameterized
+from rest_framework import status
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan

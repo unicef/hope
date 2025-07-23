@@ -16,13 +16,6 @@ from extras.test_utils.factories.household import (
     IndividualFactory,
     create_household,
 )
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-
 from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
@@ -32,7 +25,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from graphql import GraphQLError
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.permissions import Permissions

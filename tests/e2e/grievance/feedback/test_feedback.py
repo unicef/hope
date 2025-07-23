@@ -6,6 +6,7 @@ from e2e.page_object.grievance.feedback import Feedback
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
+from extras.test_utils.factories.accountability import generate_feedback
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -19,7 +20,6 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
-from extras.test_utils.factories.accountability import generate_feedback
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import HOST, Household

@@ -5,7 +5,7 @@ from django.test import override_settings
 from django.utils import timezone
 
 from constance.test import override_config
-from extras.test_utils.factories.account import PartnerFactory, UserFactory, RoleFactory
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
@@ -14,7 +14,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import Role
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea

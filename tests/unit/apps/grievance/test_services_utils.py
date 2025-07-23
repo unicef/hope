@@ -12,10 +12,6 @@ from extras.test_utils.factories.account import (
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
-
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
@@ -33,6 +29,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
 from hct_mis_api.apps.grievance.models import GrievanceTicket

@@ -37,7 +37,6 @@ from pytz import utc
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,

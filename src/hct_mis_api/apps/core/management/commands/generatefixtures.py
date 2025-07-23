@@ -14,7 +14,6 @@ from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
-from hct_mis_api.apps.account.models import RoleAssignment
 from extras.test_utils.factories.household import (
     DocumentFactory,
     EntitlementCardFactory,
@@ -33,6 +32,7 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFilterFactory,
 )
 
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket

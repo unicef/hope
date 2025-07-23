@@ -6,9 +6,9 @@ from django.test import TestCase, override_settings
 
 from constance.test import override_config
 from extras.test_utils.factories.account import (
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    RoleAssignmentFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
