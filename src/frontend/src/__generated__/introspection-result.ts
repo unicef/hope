@@ -7,11 +7,10 @@
       const result: PossibleTypesResultData = {
   "possibleTypes": {
     "Node": [
-      "AccountsNode",
+      "AccountNode",
       "ApprovalProcessNode",
       "AreaNode",
       "AreaTypeNode",
-      "BankAccountInfoNode",
       "BeneficiaryGroupNode",
       "BusinessAreaNode",
       "CommunicationMessageNode",
@@ -55,6 +54,7 @@
       "SanctionListIndividualDocumentNode",
       "SanctionListIndividualNationalitiesNode",
       "SanctionListIndividualNode",
+      "SanctionListNode",
       "SteficonRuleNode",
       "SurveyNode",
       "TicketAddIndividualDetailsNode",

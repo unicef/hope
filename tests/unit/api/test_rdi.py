@@ -17,7 +17,11 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.payment.models import FinancialInstitution, PendingAccount
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
@@ -25,6 +29,7 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase
+from tests.unit.api.factories import UserFactory
 
 
 class CreateRDITests(HOPEApiTestCase):
@@ -38,10 +43,12 @@ class CreateRDITests(HOPEApiTestCase):
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
 
     def test_create_rdi(self) -> None:
+        user = UserFactory()
         data = {
             "name": "aaaa",
             "collect_data_policy": "FULL",
             "program": str(self.program.id),
+            "imported_by_email": user.email,
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
@@ -49,9 +56,20 @@ class CreateRDITests(HOPEApiTestCase):
         self.assertIsNotNone(rdi)
         self.assertEqual(rdi.program, self.program)
         self.assertEqual(rdi.status, RegistrationDataImport.LOADING)
-
+        self.assertEqual(rdi.imported_by, user)
         self.assertEqual(response.json()["id"], str(rdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+
+    def test_create_rdi_permission_denied_for_invalid_email(self) -> None:
+        data = {
+            "name": "aaaa",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": "nonexistentuser@example.com",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
+        self.assertIn("User with this email does not exist.", str(response.json()))
 
 
 class PushToRDITests(HOPEApiTestCase):
@@ -77,6 +95,7 @@ class PushToRDITests(HOPEApiTestCase):
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
+        AccountType.objects.get_or_create(key="bank", defaults=dict(label="Bank", unique_fields=["number"]))
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push(self) -> None:
@@ -93,6 +112,7 @@ class PushToRDITests(HOPEApiTestCase):
                         "full_name": "James Head #1",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
+                        "photo": base64_encoded_data,
                         "role": "",
                         "documents": [
                             {
@@ -138,6 +158,7 @@ class PushToRDITests(HOPEApiTestCase):
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+        self.assertIsNotNone(hh.head_of_household.photo)
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
         self.assertIsNotNone(account)
         self.assertEqual(account.account_type.key, "bank")

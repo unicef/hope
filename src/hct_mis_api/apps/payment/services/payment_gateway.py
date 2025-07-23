@@ -60,22 +60,25 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     external_code = serializers.SerializerMethodField()
     fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
-    extra = serializers.SerializerMethodField()
 
     def get_fsp(self, obj: Any) -> str:
         return obj.financial_service_provider.payment_gateway_id
 
-    def get_extra(self, obj: Any) -> Dict:
-        return {
+    def get_payload(self, obj: Any) -> Dict:
+        payload = {
+            "destination_currency": obj.payment_plan.currency,
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
         }
-
-    def get_payload(self, obj: Any) -> Dict:
-        return {
-            "destination_currency": obj.payment_plan.currency,
-        }
+        if obj.payment_plan.business_area.payment_countries.count() == 1:  # TODO temporary solution
+            payload[
+                "destination_country_iso_code3"
+            ] = obj.payment_plan.business_area.payment_countries.first().iso_code2
+            payload[
+                "destination_country_iso_code2"
+            ] = obj.payment_plan.business_area.payment_countries.first().iso_code3
+        return payload
 
     def get_external_code(self, obj: Any) -> str:
         return f"{obj.payment_plan.unicef_id}-{obj.order}"  # pragma: no cover
@@ -87,7 +90,6 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             "external_code",
             "fsp",
             "payload",
-            "extra",
         ]
 
 
@@ -96,6 +98,7 @@ class PaymentPayloadSerializer(serializers.Serializer):
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
+    middle_name = serializers.CharField(required=False, allow_blank=True)
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
     origination_currency = serializers.CharField(required=False)
@@ -111,14 +114,14 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     extra_data = serializers.SerializerMethodField()
 
     def get_extra_data(self, obj: Payment) -> Dict:
-        return {}
-
-    def get_payload(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
             raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
 
-        snapshot_data = snapshot.snapshot_data
+        return snapshot.snapshot_data
+
+    def get_payload(self, obj: Payment) -> Dict:
+        snapshot_data = self.get_extra_data(obj)
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
         account_data = collector_data.get("account_data", {})
 
@@ -127,6 +130,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "destination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
+            "collector_id": collector_data.get("unicef_id", ""),
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
@@ -240,7 +244,6 @@ class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     fsp: str
     system: int
     payload: dict
-    extra: dict
     id: Optional[int] = None
 
 
@@ -337,7 +340,10 @@ class PaymentGatewayAPI(BaseAPI):
         return PaymentInstructionData.create_from_dict(response_data)
 
     def change_payment_instruction_status(
-        self, status: PaymentInstructionStatus, remote_id: str, validate_response: bool = True
+        self,
+        status: PaymentInstructionStatus,
+        remote_id: str,
+        validate_response: bool = True,
     ) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
             raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
@@ -351,13 +357,17 @@ class PaymentGatewayAPI(BaseAPI):
             PaymentInstructionStatus.FINALIZED: self.Endpoints.FINALIZE_PAYMENT_INSTRUCTION_STATUS,
         }
         response_data, _ = self._post(
-            action_endpoint_map[status].format(remote_id=remote_id), validate_response=validate_response
+            action_endpoint_map[status].format(remote_id=remote_id),
+            validate_response=validate_response,
         )
 
         return response_data.get("status", "")
 
     def add_records_to_payment_instruction(
-        self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
+        self,
+        payment_records: List[Payment],
+        remote_id: str,
+        validate_response: bool = True,
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
         response_data, _ = self._post(
@@ -398,11 +408,15 @@ class PaymentGatewayService:
                 status = response.status
                 if status == PaymentInstructionStatus.DRAFT.value:
                     self.api.change_payment_instruction_status(
-                        status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
+                        status=PaymentInstructionStatus.OPEN,
+                        remote_id=response.remote_id,
                     )
 
     def change_payment_instruction_status(
-        self, new_status: PaymentInstructionStatus, obj: PaymentPlanSplit, validate_response: bool = True
+        self,
+        new_status: PaymentInstructionStatus,
+        obj: PaymentPlanSplit,
+        validate_response: bool = True,
     ) -> Optional[str]:
         if obj.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(
@@ -488,7 +502,10 @@ class PaymentGatewayService:
                     FspNameMapping.objects.get_or_create(
                         external_name=required_field,
                         fsp=fsp,
-                        defaults=dict(hope_name=required_field, source=FspNameMapping.SourceModel.ACCOUNT),
+                        defaults=dict(
+                            hope_name=required_field,
+                            source=FspNameMapping.SourceModel.ACCOUNT,
+                        ),
                     )
 
     def sync_account_types(self) -> None:
@@ -520,19 +537,13 @@ class PaymentGatewayService:
         payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
-        update_fields = ["status", "status_date", "fsp_auth_code"]
-
-        if payment.status in [
-            Payment.STATUS_ERROR,
-            Payment.STATUS_MANUALLY_CANCELLED,
-        ]:
-            if matching_pg_payment.message:
-                payment.reason_for_unsuccessful_payment = matching_pg_payment.message
-            elif matching_pg_payment.payout_amount:
-                payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
-            else:
-                payment.reason_for_unsuccessful_payment = "Unknown error"
-            update_fields.append("reason_for_unsuccessful_payment")
+        payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+        update_fields = [
+            "status",
+            "status_date",
+            "fsp_auth_code",
+            "reason_for_unsuccessful_payment",
+        ]
 
         delivered_quantity = matching_pg_payment.payout_amount
         if payment.status in [
@@ -576,7 +587,13 @@ class PaymentGatewayService:
                     if pending_payments.exists():
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
-                            self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
+                            self.update_payment(
+                                payment,
+                                pg_payment_records,
+                                instruction,
+                                payment_plan,
+                                exchange_rate,
+                            )
                         payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
@@ -592,7 +609,11 @@ class PaymentGatewayService:
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
             self.update_payment(
-                payment, [pg_payment_record], payment.parent_split, payment.parent, payment.parent.get_exchange_rate()
+                payment,
+                [pg_payment_record],
+                payment.parent_split,
+                payment.parent,
+                payment.parent.get_exchange_rate(),
             )
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
@@ -607,14 +628,22 @@ class PaymentGatewayService:
             payments = instruction.split_payment_items.eligible().all().order_by("unicef_id")
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
             for payment in payments:
-                self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
+                self.update_payment(
+                    payment,
+                    pg_payment_records,
+                    instruction,
+                    payment_plan,
+                    exchange_rate,
+                )
 
         if payment_plan.is_reconciled:
             payment_plan.status_finished()
             payment_plan.save()
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(
-                    PaymentInstructionStatus.FINALIZED, instruction, validate_response=False
+                    PaymentInstructionStatus.FINALIZED,
+                    instruction,
+                    validate_response=False,
                 )
 
     def sync_delivery_mechanisms(self) -> None:
@@ -627,8 +656,8 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": AccountType.objects.get(payment_gateway_id=dm.account_type)
-                    if dm.account_type
-                    else None,
+                    "account_type": (
+                        AccountType.objects.get(payment_gateway_id=dm.account_type) if dm.account_type else None
+                    ),
                 },
             )

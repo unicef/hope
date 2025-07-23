@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -127,6 +128,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)
 
 
+@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:

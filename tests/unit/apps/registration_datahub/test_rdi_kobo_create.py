@@ -23,7 +23,6 @@ from hct_mis_api.apps.household.fixtures import IndividualFactory
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -39,6 +38,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestRdiKoboCreateTask(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
@@ -127,12 +127,10 @@ class TestRdiKoboCreateTask(TestCase):
         households = PendingHousehold.objects.all()
         individuals = PendingIndividual.objects.all()
         documents = PendingDocument.objects.all()
-        bank_accounts = PendingBankAccountInfo.objects.all()
 
         self.assertEqual(1, households.count())
         self.assertEqual(2, individuals.count())
         self.assertEqual(3, documents.count())
-        self.assertEqual(1, bank_accounts.count())
 
         individual = individuals.get(full_name="Test Testowski")
 
@@ -554,7 +552,7 @@ class TestRdiKoboCreateTask(TestCase):
             json_file.write(json.dumps(result))
 
     def test_handle_household_dict(self) -> None:
-        bank_accounts_to_create, households_to_create = [], []
+        households_to_create = []
         collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
         household = {
             "_id": 1111,
@@ -588,7 +586,6 @@ class TestRdiKoboCreateTask(TestCase):
 
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.handle_household(
-            bank_accounts_to_create,
             collectors_to_create,
             head_of_households_mapping,
             household,
@@ -615,7 +612,7 @@ class TestRdiKoboCreateTask(TestCase):
             p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type
         )
 
-        bank_accounts_to_create, households_to_create = [], []
+        households_to_create = []
         collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
         household = {
             "_id": 1111,
@@ -650,7 +647,6 @@ class TestRdiKoboCreateTask(TestCase):
 
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.handle_household(
-            bank_accounts_to_create,
             collectors_to_create,
             head_of_households_mapping,
             household,

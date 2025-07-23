@@ -6,6 +6,7 @@ from django.db import transaction
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
@@ -19,7 +20,6 @@ from hct_mis_api.apps.household.models import (
     HouseholdCollection,
     Individual,
     IndividualCollection,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -37,7 +37,7 @@ from hct_mis_api.apps.registration_datahub.services.biometric_deduplication impo
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    CheckAgainstSanctionListPreMergeTask,
+    check_against_sanction_list_pre_merge,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
@@ -50,110 +50,41 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    HOUSEHOLD_FIELDS = (
-        "consent_sign",
-        "consent",
-        "consent_sharing",
-        "residence_status",
-        "country_origin",
-        "zip_code",
-        "size",
-        "address",
-        "country",
-        "female_age_group_0_5_count",
-        "female_age_group_6_11_count",
-        "female_age_group_12_17_count",
-        "female_age_group_18_59_count",
-        "female_age_group_60_count",
-        "pregnant_count",
-        "male_age_group_0_5_count",
-        "male_age_group_6_11_count",
-        "male_age_group_12_17_count",
-        "male_age_group_18_59_count",
-        "male_age_group_60_count",
-        "female_age_group_0_5_disabled_count",
-        "female_age_group_6_11_disabled_count",
-        "female_age_group_12_17_disabled_count",
-        "female_age_group_18_59_disabled_count",
-        "female_age_group_60_disabled_count",
-        "male_age_group_0_5_disabled_count",
-        "male_age_group_6_11_disabled_count",
-        "male_age_group_12_17_disabled_count",
-        "male_age_group_18_59_disabled_count",
-        "male_age_group_60_disabled_count",
-        "other_sex_group_count",
-        "unknown_sex_group_count",
-        "first_registration_date",
-        "last_registration_date",
-        "flex_fields",
-        "start",
-        "deviceid",
-        "name_enumerator",
-        "org_enumerator",
-        "org_name_enumerator",
-        "village",
-        "registration_method",
-        "currency",
-        "unhcr_id",
-        "geopoint",
-        "returnee",
-        "fchild_hoh",
-        "child_hoh",
-        "detail_id",
-        "collect_type",
-    )
-
-    INDIVIDUAL_FIELDS = (
-        "id",
-        "photo",
-        "full_name",
-        "given_name",
-        "middle_name",
-        "family_name",
-        "relationship",
-        "sex",
-        "birth_date",
-        "estimated_birth_date",
-        "marital_status",
-        "phone_no",
-        "phone_no_alternative",
-        "email",
-        "disability",
-        "flex_fields",
-        "first_registration_date",
-        "last_registration_date",
-        "deduplication_batch_status",
-        "deduplication_batch_results",
-        "observed_disability",
-        "seeing_disability",
-        "hearing_disability",
-        "physical_disability",
-        "memory_disability",
-        "selfcare_disability",
-        "comms_disability",
-        "who_answers_phone",
-        "who_answers_alt_phone",
-        "pregnant",
-        "work_status",
-        "detail_id",
-        "disability_certificate_picture",
-        "preferred_language",
-        "age_at_registration",
-        "payment_delivery_phone_no",
-        "wallet_name",
-        "blockchain_name",
-        "wallet_address",
-    )
-
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             households = PendingHousehold.objects.filter(registration_data_import=obj_hct)
+
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
                 "first_registration_date"
             )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
+            if not individual_ids and not household_ids:
+                # empty RDI, nothing to merge, happens when all households have extra_rdi
+                obj_hct.status = RegistrationDataImport.MERGED
+                obj_hct.save()
+                return
+
+            household_ids_to_exclude = []
+            if obj_hct.program.collision_detection_enabled:
+                for ids in chunks(household_ids, 1000):
+                    households = PendingHousehold.objects.filter(id__in=ids)
+                    for household in households:
+                        collided_id = obj_hct.program.collision_detector.detect_collision(household)
+                        if not collided_id:
+                            continue
+                        household_ids_to_exclude.append(household.id)
+                        obj_hct.program.collision_detector.update_household(household)
+                        updated_household = Household.objects.get(id=collided_id)
+                        updated_household.extra_rdis.add(obj_hct)
+            household_ids = list(set(household_ids) - set(household_ids_to_exclude))
+            individual_ids = list(
+                Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
+                .exclude(household__in=household_ids_to_exclude)
+                .values_list("id", flat=True)
+            )
+
             try:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
@@ -163,7 +94,7 @@ class RdiMergeTask:
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                     )
                     kobo_submissions = []
-                    for household in households:
+                    for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
                         kobo_submission_uuid = household.kobo_submission_uuid
                         kobo_asset_id = household.detail_id
                         kobo_submission_time = household.kobo_submission_time
@@ -191,9 +122,6 @@ class RdiMergeTask:
                     PendingIndividualRoleInHousehold.objects.filter(
                         household_id__in=household_ids, individual_id__in=individual_ids
                     ).update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
                     PendingDocument.objects.filter(individual_id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
@@ -218,7 +146,7 @@ class RdiMergeTask:
                         Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
 
-                    if not obj_hct.business_area.postpone_deduplication:
+                    if not obj_hct.business_area.postpone_deduplication and len(individuals):
                         # DEDUPLICATION
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
@@ -261,9 +189,11 @@ class RdiMergeTask:
                         )
 
                     # SANCTION LIST CHECK
-                    if obj_hct.should_check_against_sanction_list() and obj_hct.business_area.screen_beneficiary:
+                    if obj_hct.should_check_against_sanction_list() and obj_hct.program.sanction_lists.exists():
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
-                        CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                        check_against_sanction_list_pre_merge(
+                            program_id=obj_hct.program.id, registration_data_import=obj_hct
+                        )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     # synchronously deduplicate documents
@@ -277,7 +207,6 @@ class RdiMergeTask:
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
                     obj_hct.update_duplicates_against_population_statistics()
-
                     # create household and individual collections - only for Program Population Import
                     if obj_hct.data_source == RegistrationDataImport.PROGRAM_POPULATION:
                         self._update_household_collections(households, obj_hct)

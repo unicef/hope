@@ -223,12 +223,8 @@ def get_has_bank_account_number_query(_: Any, args: Any, is_social_worker_query:
     has_bank_account_number = args[0] in [True, "True"]
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     if has_bank_account_number:  # Individual can have related object bank_account, but empty number
-        return Q(**{f"{lookup_prefix}bank_account_info__isnull": False}) & ~Q(
-            **{f"{lookup_prefix}bank_account_info__bank_account_number": ""}
-        )
-    return Q(**{f"{lookup_prefix}bank_account_info__isnull": True}) | Q(
-        **{f"{lookup_prefix}bank_account_info__bank_account_number": ""}
-    )
+        return Q(**{f"{lookup_prefix}accounts__account_type__key": "bank"})
+    return ~Q(**{f"{lookup_prefix}accounts__account_type__key": "bank"})
 
 
 def get_has_tax_id_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
@@ -266,3 +262,9 @@ def registration_data_import_query(comparison_method: str, args: Any, is_social_
     from django.db.models import Q
 
     return Q(registration_data_import__pk__in=args)
+
+
+def extra_rdis_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
+    from django.db.models import Q
+
+    return Q(extra_rdis__in=args)

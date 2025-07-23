@@ -13,18 +13,21 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
-from hct_mis_api.api.endpoints.rdi.mixin import get_photo_from_stream
-from hct_mis_api.api.endpoints.rdi.upload import BirthDateValidator, DocumentSerializer
+from hct_mis_api.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
+from hct_mis_api.api.endpoints.rdi.upload import (
+    AccountSerializer,
+    BirthDateValidator,
+    DocumentSerializer,
+)
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
+    DATA_SHARING_CHOICES,
     HEAD,
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
@@ -43,7 +46,9 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
+    accounts = AccountSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
+    photo = serializers.CharField(allow_blank=True, required=False)
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
@@ -59,6 +64,8 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin2 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin3 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin4 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+
+    consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -85,14 +92,15 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         ]
 
 
-class PeopleUploadMixin:
+class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     def save_people(self, rdi: RegistrationDataImport, people_data: List[Dict]) -> List[int]:
         people_ids = []
         for person_data in people_data:
             documents = person_data.pop("documents", [])
+            accounts = person_data.pop("accounts", [])
 
             hh = self._create_household(person_data, rdi)
-            ind = self._create_individual(documents, hh, person_data, rdi)
+            ind = self._create_individual(documents, accounts, hh, person_data, rdi)
             people_ids.append(ind.id)
         return people_ids
 
@@ -132,12 +140,14 @@ class PeopleUploadMixin:
     def _create_individual(
         self,
         documents: List[Dict],
+        accounts: List[Dict],
         hh: Optional[PendingHousehold],
         person_data: Dict,
         rdi: RegistrationDataImport,
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
+        photo = self.get_photo(individual_data.pop("photo", None))
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -153,6 +163,7 @@ class PeopleUploadMixin:
             registration_data_import=rdi,
             program_id=rdi.program_id,
             relationship=relationship,
+            photo=photo,
             **individual_data,
         )
         ind.validate_phone_numbers()
@@ -164,18 +175,12 @@ class PeopleUploadMixin:
             hh.save()
 
         for doc in documents:
-            self._create_document(ind, doc)
-        return ind
+            self.save_document(ind, doc)
 
-    def _create_document(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingDocument.objects.create(
-            document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
-            individual=member,
-            country=Country.objects.get(iso_code2=doc["country"]),
-            type=DocumentType.objects.get(key=doc["type"]),
-            program=member.program,
-        )
+        for account in accounts:
+            self.save_account(ind, account)
+
+        return ind
 
 
 class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIView):

@@ -8027,6 +8027,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
+                'hint': 'Filter for targeting by extra RDIs',
+                'isFlexField': False,
+                'labelEn': 'Extra RDIs',
+                'labels': [
+                    {
+                        'label': 'Extra RDIs',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'extra_rdis',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
                 'hint': '',
                 'isFlexField': False,
                 'labelEn': 'Female child headed Household',
@@ -22583,6 +22600,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'fresh_i_f',
                 'required': False,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': 'Field used to identify collisions',
+                'isFlexField': False,
+                'labelEn': 'Identification key',
+                'labels': [
+                    {
+                        'label': 'Identification key',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'hh_identification_key',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': 'Field used to identify collisions',
+                'isFlexField': False,
+                'labelEn': 'Identification key',
+                'labels': [
+                    {
+                        'label': 'Identification key',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'ind_identification_key',
+                'required': False,
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -46641,23 +46692,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'inc_job_h_f',
                 'required': False,
                 'type': 'DECIMAL'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Payment delivery phone number',
-                'labels': [
-                    {
-                        'label': 'Payment delivery phone number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'payment_delivery_phone_no',
-                'required': False,
-                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',

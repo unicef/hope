@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
+    extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_drivers_license_document_number_query,
@@ -71,9 +72,6 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_unhcr_id_issuer,
     get_unhcr_id_no,
 )
-from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
-    PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
-)
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
@@ -98,8 +96,7 @@ logger = logging.getLogger(__name__)
 # about "snapshot_field"
 # if it's the same field that can connect with "associated_with" and "lookup"
 # like individual.full_name or household.size <-- no needed any "snapshot_field" info
-# but for "account_holder_name" it gets from  "bank_account_info__account_holder_name"
-# or for field "debit_card_issuer" used individual.full_name and in "snapshot_field" it's "full_name"
+# but for field "debit_card_issuer" used individual.full_name and in "snapshot_field" it's "full_name"
 
 CORE_FIELDS_ATTRIBUTES = [
     {
@@ -2179,7 +2176,59 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "program_registration_id_h_c",
         "scope": [Scope.KOBO_IMPORT],
     },
-] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
+    {
+        "id": "7003a190-f71f-4ba1-b0f5-fd805097b33c",
+        "type": TYPE_STRING,
+        "name": "hh_identification_key",
+        "lookup": "identification_key",
+        "required": False,
+        "label": {"English(EN)": "Identification key"},
+        "hint": "Field used to identify collisions",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "identification_key_h_c",
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.INDIVIDUAL_UPDATE,
+            Scope.XLSX_PEOPLE,
+            Scope.PEOPLE_UPDATE,
+        ],
+    },
+    {
+        "id": "7003a190-f71f-4ba1-b0f5-fd805097b33c",
+        "type": TYPE_STRING,
+        "name": "ind_identification_key",
+        "lookup": "identification_key",
+        "required": False,
+        "label": {"English(EN)": "Identification key"},
+        "hint": "Field used to identify collisions",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "identification_key_i_c",
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.INDIVIDUAL_UPDATE,
+            Scope.XLSX_PEOPLE,
+            Scope.PEOPLE_UPDATE,
+        ],
+    },
+    {
+        "id": "730295f6-a6a3-48cf-abe3-7b304b40c886",
+        "type": TYPE_SELECT_MANY,
+        "name": "extra_rdis",
+        "lookup": "extra_rdis",
+        "get_query": extra_rdis_query,
+        "required": False,
+        "label": {"English(EN)": "Extra RDIs"},
+        "hint": "Filter for targeting by extra RDIs",
+        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "associated_with": _HOUSEHOLD,
+        "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
+        "xlsx_field": "extra_rdis_",
+    },
+]
 
 
 def get_core_fields_attributes() -> List[Dict[str, Any]]:

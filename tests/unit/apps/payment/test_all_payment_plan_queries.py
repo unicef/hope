@@ -247,11 +247,7 @@ class TestPaymentPlanQueries(APITestCase):
           payment(id: $id) {
             totalPersonsCovered
             fullName
-            snapshotCollectorFullName
-            snapshotCollectorDeliveryPhoneNo
-            snapshotCollectorBankName
-            snapshotCollectorBankAccountNumber
-            snapshotCollectorDebitCardNumber
+            snapshotCollectorAccountData
             additionalCollectorName
             reasonForUnsuccessfulPayment
             verification {
@@ -654,11 +650,6 @@ class TestPaymentPlanQueries(APITestCase):
             "primary_collector": {
                 "full_name": "PrimaryCollectorFullName",
                 "payment_delivery_phone_no": "1111111",
-                "bank_account_info": {
-                    "bank_name": "PrimaryCollBankName",
-                    "bank_account_number": "PrimaryCollBankNumber",
-                    "debit_card_number": "PrimaryCollDebitCardNumber",
-                },
             },
         }
         snapshot_data_hh3 = {
@@ -666,11 +657,6 @@ class TestPaymentPlanQueries(APITestCase):
             "alternate_collector": {
                 "full_name": "AlternateCollectorFullName",
                 "payment_delivery_phone_no": "222222222",
-                "bank_account_info": {
-                    "bank_name": "AlternateCollBankName",
-                    "bank_account_number": "AlternateCollBankNumber",
-                    "debit_card_number": "AlternateCollDebitCardNumber",
-                },
             },
         }
         PaymentHouseholdSnapshot.objects.create(

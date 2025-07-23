@@ -1,4 +1,5 @@
 import datetime as dt
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -10,6 +11,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_range_query,
     country_origin_query,
     country_query,
+    extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_documents_issuer_query,
@@ -157,31 +159,13 @@ class TestAttributesGetQueries(APITestCase):
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
 
     def test_get_has_bank_account_number_query_true(self) -> None:
-        # Test for individuals who have a bank account number
-        expected_query = Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")
+        expected_query = Q(**{"accounts__account_type__key": "bank"})
         result = get_has_bank_account_number_query(None, [True])
         self.assertEqual(result, expected_query)
 
     def test_get_has_bank_account_number_query_false(self) -> None:
-        # Test for individuals who do not have a bank account number
-        expected_query = Q(bank_account_info__isnull=True) | Q(bank_account_info__bank_account_number="")
+        expected_query = ~Q(**{"accounts__account_type__key": "bank"})
         result = get_has_bank_account_number_query(None, [False])
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_social_worker_true(self) -> None:
-        # Test with social worker prefix for individuals who have a bank account number
-        expected_query = Q(individuals__bank_account_info__isnull=False) & ~Q(
-            individuals__bank_account_info__bank_account_number=""
-        )
-        result = get_has_bank_account_number_query(None, [True], is_social_worker_query=True)
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_social_worker_false(self) -> None:
-        # Test with social worker prefix for individuals who do not have a bank account number
-        expected_query = Q(individuals__bank_account_info__isnull=True) | Q(
-            individuals__bank_account_info__bank_account_number=""
-        )
-        result = get_has_bank_account_number_query(None, [False], is_social_worker_query=True)
         self.assertEqual(result, expected_query)
 
     def test_get_has_tax_id_query_true(self) -> None:
@@ -328,4 +312,10 @@ class TestAttributesGetQueries(APITestCase):
         country_code = "AUS"
         result = get_other_issuer_query(None, [country_code])
         expected = Q(documents__type__type="OTHER", documents__type__country__iso_code3=country_code)
+        self.assertEqual(result, expected)
+
+    def test_get_extra_rdis_query(self) -> None:
+        rdis_uuids = [uuid.uuid4(), uuid.uuid4()]
+        result = extra_rdis_query("CONTAINS", rdis_uuids)
+        expected = Q(extra_rdis__in=rdis_uuids)
         self.assertEqual(result, expected)

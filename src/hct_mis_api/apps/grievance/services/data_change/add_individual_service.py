@@ -8,7 +8,7 @@ from django.utils import timezone
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
 from hct_mis_api.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task,
+    deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -20,7 +20,6 @@ from hct_mis_api.apps.grievance.services.data_change.data_change_service import 
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     handle_add_document,
     handle_add_identity,
-    handle_add_payment_channel,
     handle_documents,
     handle_role,
     save_images,
@@ -35,7 +34,6 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
-    BankAccountInfo,
     Document,
     Household,
     Individual,
@@ -107,7 +105,6 @@ class AddIndividualService(DataChangeService):
         individual_data = details.individual_data
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
-        payment_channels = individual_data.pop("payment_channels", [])
         role = individual_data.pop("role", ROLE_NO_ROLE)
         individual_data["flex_fields"] = populate_pdu_with_null_values(
             household.program, individual_data.get("flex_fields", None)
@@ -126,7 +123,6 @@ class AddIndividualService(DataChangeService):
         individual.refresh_from_db()
         documents_to_create = [handle_add_document(document, individual) for document in documents]
         identities_to_create = [handle_add_identity(identity, individual) for identity in identities]
-        payment_channels_to_create = [handle_add_payment_channel(pc, individual) for pc in payment_channels]
         relationship_to_head_of_household = individual_data.get("relationship")
         if household:
             individual.save()
@@ -147,7 +143,6 @@ class AddIndividualService(DataChangeService):
         handle_role(role, household, individual)
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(identities_to_create)
-        BankAccountInfo.objects.bulk_create(payment_channels_to_create)
         if household:
             recalculate_data(household)
         else:
@@ -166,7 +161,7 @@ class AddIndividualService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
                     should_populate_index=True,
                     individuals_ids=[str(individual.id)],
                 )

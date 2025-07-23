@@ -288,6 +288,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     raw_id_fields = (
         "business_area",
+        "financial_service_provider",
+        "delivery_mechanism",
         "targeting_criteria",
         "created_by",
         "program_cycle",
@@ -331,6 +333,13 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 action=self.sync_with_payment_gateway,
                 message="Do you confirm to Sync with Payment Gateway?",
             )
+
+    @button(permission="payment.view_paymentplan")
+    def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        obj = PaymentPlan.objects.get(pk=pk)
+        url = reverse("admin:payment_deliverymechanismconfig_changelist")
+        flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
+        return HttpResponseRedirect(f"{url}?{flt}")
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
@@ -651,22 +660,30 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Account)
-class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
+class AccountAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "number", "get_business_area", "get_program", "account_type", "is_unique")
 
     raw_id_fields = ("account_type", "individual")
     readonly_fields = ("unique_key", "signature_hash")
-    search_fields = ("individual__unicef_id",)
+    search_fields = (
+        "number",
+        "individual__unicef_id",
+    )
     list_filter = (
         ("individual__program__business_area", AutoCompleteFilter),
         ("individual__program", AutoCompleteFilter),
         ("individual", AutoCompleteFilter),
+        ("financial_institution", AutoCompleteFilter),
         ("account_type", AutoCompleteFilter),
         "is_unique",
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("individual__program__business_area")
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("individual__program__business_area", "financial_institution", "account_type")
+        )
 
     def get_business_area(self, obj: Account) -> BusinessArea:
         return obj.individual.program.business_area

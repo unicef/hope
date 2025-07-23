@@ -13,6 +13,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
+    Household,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -39,8 +40,9 @@ class Totals:
     households: int
 
 
-class HouseholdUploadMixin:
-    def save_document(self, member: PendingIndividual, doc: Dict) -> None:
+class DocumentMixin:
+    @staticmethod
+    def save_document(member: PendingIndividual, doc: Dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
             photo=get_photo_from_stream(doc.get("image", None)),
@@ -50,10 +52,39 @@ class HouseholdUploadMixin:
             program=member.program,
         )
 
-    def save_account(self, member: PendingIndividual, doc: Dict) -> None:
+
+class AccountMixin:
+    @staticmethod
+    def save_account(member: PendingIndividual, doc: Dict) -> None:
         PendingAccount.objects.create(individual=member, **doc)
 
+
+class PhotoMixin:
+    @staticmethod
+    def get_photo(photo: Optional[str]) -> Optional[SimpleUploadedFile]:
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            p = get_photo_from_stream(data)
+            return p
+        return None
+
+
+class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
+    def _manage_collision(
+        self, household: Household, registration_data_import: RegistrationDataImport
+    ) -> Optional[str]:
+        """
+        Detects collisions in the provided households data against the existing population.
+        """
+        program = registration_data_import.program
+        if not program.collision_detection_enabled or not program.collision_detector:
+            return None
+        colision_detector = program.collision_detector
+        household_id = colision_detector.detect_collision(household)
+        return household_id
+
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: Dict) -> PendingIndividual:
+        photo = self.get_photo(member_data.pop("photo", None))
         documents = member_data.pop("documents", [])
         accounts = member_data.pop("accounts", [])
         member_of = None
@@ -66,6 +97,7 @@ class HouseholdUploadMixin:
             program=rdi.program,
             registration_data_import=rdi,
             business_area=rdi.business_area,
+            photo=photo,
             **member_data,
         )
         for doc in documents:
@@ -83,6 +115,7 @@ class HouseholdUploadMixin:
 
     def save_households(self, rdi: RegistrationDataImport, households_data: List[Dict]) -> Totals:
         totals = Totals(0, 0)
+        household_ids_to_add_extra_rdis = []
         for household_data in households_data:
             totals.households += 1
             members: list[dict] = household_data.pop("members")
@@ -92,10 +125,18 @@ class HouseholdUploadMixin:
             if country_origin := household_data.get("country_origin"):
                 household_data["country_origin"] = Country.objects.get(iso_code2=country_origin)
 
-            hh = PendingHousehold.objects.create(
+            hh = PendingHousehold(
                 registration_data_import=rdi, program=rdi.program, business_area=rdi.business_area, **household_data
             )
+
+            if collided_household_id := self._manage_collision(hh, rdi):
+                totals.individuals += len(members)
+                household_ids_to_add_extra_rdis.append(collided_household_id)
+                continue
+
+            hh.save()
             for member_data in members:
                 self.save_member(rdi, hh, member_data)
                 totals.individuals += 1
+        rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
         return totals

@@ -1,11 +1,16 @@
+import base64
+from io import BytesIO
 from typing import Any
 
+import pytest
 from parameterized import parameterized
+from PIL import Image
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
@@ -22,6 +27,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase
 
@@ -339,3 +345,45 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(ind.household.admin2.p_code, "AF0101")
         self.assertEqual(ind.household.admin3, None)
         self.assertEqual(ind.household.admin4, None)
+
+
+class TestPeopleUploadMixin:
+    @pytest.fixture
+    def rdi(self) -> RegistrationDataImport:
+        create_afghanistan()
+        rdi: RegistrationDataImport = RegistrationDataImportFactory()
+        return rdi
+
+    @pytest.mark.django_db
+    def test_create_individual_with_photo_remove_prefix(self, rdi: RegistrationDataImport) -> None:
+        prefix = "data:image/png;base64,"
+
+        buffer = BytesIO()
+        image = Image.new("RGB", (1, 1), color="blue")
+        image.save(buffer, format="PNG")
+        photo_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        base64_photo = f"{prefix}{photo_data}"
+
+        person_data = {
+            "type": "NON_BENEFICIARY",
+            "photo": base64_photo,
+            "first_name": "WithPhoto",
+            "birth_date": "2000-01-01",
+            "first_registration_date": "2000-01-01",
+            "last_registration_date": "2000-01-01",
+        }
+        assert base64_photo.startswith(prefix) is True
+
+        individual = PeopleUploadMixin()._create_individual(
+            documents=[],
+            accounts=[],
+            hh=None,
+            person_data=person_data,
+            rdi=rdi,
+        )
+
+        assert individual.photo.name[:5] == "photo"
+        assert individual.photo.name[-4:] == ".png"
+        photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
+        assert photo_saved.startswith(prefix) is False
+        assert photo_saved == photo_data
