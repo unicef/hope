@@ -63,7 +63,6 @@ class TestRdiXlsxCollisions(TestCase):
             program=cls.program,
         )
         generate_delivery_mechanisms()
-
         rebuild_search_index()
 
     def test_execute(self) -> None:
