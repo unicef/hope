@@ -12,10 +12,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -31,7 +31,7 @@ const StyledTable = styled(Table)`
 export interface AccountToEditTableProps {
   values;
   isEdit;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   index;
   account;
@@ -102,24 +102,17 @@ export function AccountToEditTable({
           </TableRow>
         </TableHead>
         <TableBody>
-            {account.data_fields.map(
-              (field, fieldIndex) => (
-                <TableRow key={fieldIndex}>
-                  <TableCell align="left"></TableCell>
-                  <TableCell align="left">{field.name}</TableCell>
-                  <TableCell align="left">
-                    {field.previous_value || '-'}
-                  </TableCell>
-                  <TableCell align="left">
-                    {renderNewOrNotUpdated(
-                      field.previous_value,
-                      field.value,
-                    )}
-                  </TableCell>
-                </TableRow>
-              ),
-            )}
-          </TableBody>
+          {account.data_fields.map((field, fieldIndex) => (
+            <TableRow key={fieldIndex}>
+              <TableCell align="left"></TableCell>
+              <TableCell align="left">{field.name}</TableCell>
+              <TableCell align="left">{field.previous_value || '-'}</TableCell>
+              <TableCell align="left">
+                {renderNewOrNotUpdated(field.previous_value, field.value)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
       </StyledTable>
     </>
   );

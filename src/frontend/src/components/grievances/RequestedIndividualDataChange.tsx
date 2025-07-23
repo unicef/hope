@@ -115,6 +115,8 @@ export function RequestedIndividualDataChange({
       approvedIdentitiesToCreate?: number[];
       approvedIdentitiesToRemove?: number[];
       approvedIdentitiesToEdit?: number[];
+      approvedAccountsToCreate: any;
+      approvedAccountsToEdit: any;
       flexFieldsApproveData?: any;
     }) => {
       const formData: GrievanceIndividualDataChangeApprove = {
@@ -330,6 +332,8 @@ export function RequestedIndividualDataChange({
         const approvedIdentitiesToCreate = values.selectedIdentities;
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
+        const approvedAccountsToCreate = values.selectedAccounts;
+        const approvedAccountsToEdit = values.selectedAccountsToEdit;
         // Removed unused approvedAccountsToCreate and approvedAccountsToEdit
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
@@ -348,8 +352,8 @@ export function RequestedIndividualDataChange({
             approvedIdentitiesToCreate,
             approvedIdentitiesToRemove,
             approvedIdentitiesToEdit,
-            approvedPaymentChannelsToCreate: values.selectedAccounts,
-            approvedPaymentChannelsToEdit: values.selectedAccountsToEdit,
+            approvedAccountsToCreate,
+            approvedAccountsToEdit,
             flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
           });
           const sum = Object.values(values).flat().length;
