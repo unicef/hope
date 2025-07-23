@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from django.db import transaction
 from django.db.models import Count, Q
 
@@ -31,7 +29,7 @@ RECALCULATION_INDIVIDUAL_FIELDS = {
 @transaction.atomic
 def recalculate_data(
     household: Household, save: bool = True, run_from_migration: bool = False
-) -> Tuple[Household, List[str]]:
+) -> tuple[Household, list[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
     if not household.program.data_collecting_type.recalculate_composition:

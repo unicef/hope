@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional, Type, Union
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
@@ -12,7 +11,7 @@ from hct_mis_api.apps.household.models import (
 logger = logging.getLogger(__name__)
 
 
-def create_hh_and_ind_collections(business_area: Optional[BusinessArea] = None) -> None:
+def create_hh_and_ind_collections(business_area: BusinessArea | None = None) -> None:
     # Create representation collection for every household and individual already present in db
     business_area_name = business_area.name if business_area else None
     _create_collections(Household, HouseholdCollection, "household_collection", business_area_name)
@@ -20,10 +19,10 @@ def create_hh_and_ind_collections(business_area: Optional[BusinessArea] = None) 
 
 
 def _create_collections(
-    representation_model: Union[Type[Household], Type[Individual]],
-    collection_model: Union[Type[HouseholdCollection], Type[IndividualCollection]],
+    representation_model: type[Household] | type[Individual],
+    collection_model: type[HouseholdCollection] | type[IndividualCollection],
     related_name: str,
-    business_area_name: Optional[str] = None,
+    business_area_name: str | None = None,
 ) -> None:
     batch_size = 500
     business_areas = (
@@ -57,10 +56,10 @@ def _create_collections(
 
 
 def _batch_create_collections(
-    representation_model: Union[Type[Household], Type[Individual]],
-    collection_model: Union[Type[HouseholdCollection], Type[IndividualCollection]],
+    representation_model: type[Household] | type[Individual],
+    collection_model: type[HouseholdCollection] | type[IndividualCollection],
     related_name: str,
-    representations: List[Union[Household, Individual]],
+    representations: list[Household | Individual],
 ) -> None:
     # Create HouseholdCollection/IndividualCollection objects for every Household/Individual object
     collections = collection_model.objects.bulk_create([collection_model() for _ in representations])

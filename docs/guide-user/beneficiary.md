@@ -30,9 +30,9 @@ KoBo is a digital data collection tool that allows creation of customization of 
 !!! note "Why use KOBO?"
 
     a) Digital Data Collection: Cleaner, more reliable data; all collection lists automatically collated.
-    
+
     b) Wide Adoption: KoBo is already used across the humanitarian sector, including by many of UNICEF’s partners.
-    
+
     c) Pathway to HOPE MIS: Using standardized data collection forms in KoBo will make data usable later for UNICEF HOPE.
 
 
@@ -40,7 +40,7 @@ KoBo is a digital data collection tool that allows creation of customization of 
 
 The following steps will explain how to create a KoBo account:
 
-1. Request for a Kobo Account 
+1. Request for a Kobo Account
       1. Ask your HOPE focal point for external users to be added to the UNICEF active directory
       2. Have your HOPE focal point create the KoBo user accounts in Django.
       3. Activate your account by clicking the link in the e-mail account that you reported.
@@ -80,7 +80,7 @@ b) Your list of forms will appear. Tap on a form’s title to enter the form and
 1. Uploading Finalized Forms
 
       1. To submit finalized forms, tap on “Send Finalized Form” on the home screen.
-      1. A list of the survey submissions which you have made will appear on the screen. 
+      1. A list of the survey submissions which you have made will appear on the screen.
 
       ![Image](_screenshots/reg/5.png)
 
@@ -95,9 +95,9 @@ RDI is the first step that a project team needs to perform in HOPE to ensure ade
 
 #### What do I need to do before importing data?
 
-Ensure the following when selecting file to import: 
+Ensure the following when selecting file to import:
 
-- User has a excel file or Kobo file to upload. 
+- User has a excel file or Kobo file to upload.
 - Download the import template from the RDI module in the event the data is not already in the correct format.
 
 #### How Do I Download a Template?

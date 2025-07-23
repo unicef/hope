@@ -4,26 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration_data', '0007_migration'),
-        ('household', '0018_migration'),
+        ("registration_data", "0007_migration"),
+        ("household", "0018_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='household',
-            name='collision_flag',
-            field=models.BooleanField(default=False, help_text='Flag used to identify if the household is in collision state'),
+            model_name="household",
+            name="collision_flag",
+            field=models.BooleanField(
+                default=False, help_text="Flag used to identify if the household is in collision state"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='extra_rdis',
-            field=models.ManyToManyField(blank=True, help_text='This relation is filed when collision of Household happens.', related_name='extra_hh_rdis', to='registration_data.RegistrationDataImport'),
+            model_name="household",
+            name="extra_rdis",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="This relation is filed when collision of Household happens.",
+                related_name="extra_hh_rdis",
+                to="registration_data.RegistrationDataImport",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='identification_key',
-            field=models.CharField(blank=True, help_text='Key used to identify Collisions in the system', max_length=255, null=True),
+            model_name="household",
+            name="identification_key",
+            field=models.CharField(
+                blank=True, help_text="Key used to identify Collisions in the system", max_length=255, null=True
+            ),
         ),
     ]

@@ -156,9 +156,9 @@ def test_refresh_data(
 
     for item in refreshed_data:
         assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
-        assert (
-            item.keys() & expected_optional_fields == expected_optional_fields
-        ), f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        assert item.keys() & expected_optional_fields == expected_optional_fields, (
+            f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        )
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"
 
@@ -809,9 +809,9 @@ def test_base_queryset_filter_plan_status() -> None:
 
     payment_invalid, _ = _create_test_payment_for_queryset(prog, ba, pp_status=invalid_status)
     qs_invalid = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
-    assert not qs_invalid.filter(
-        pk=payment_invalid.pk
-    ).exists(), f"Payment should be excluded for PP status {invalid_status}"
+    assert not qs_invalid.filter(pk=payment_invalid.pk).exists(), (
+        f"Payment should be excluded for PP status {invalid_status}"
+    )
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
@@ -880,9 +880,9 @@ def test_base_queryset_filter_payment_status() -> None:
     for status_val in excluded_statuses:
         payment_excluded, _ = _create_test_payment_for_queryset(prog, ba, payment_status=status_val)
         qs_excluded = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
-        assert not qs_excluded.filter(
-            pk=payment_excluded.pk
-        ).exists(), f"Payment should be excluded for status {status_val}"
+        assert not qs_excluded.filter(pk=payment_excluded.pk).exists(), (
+            f"Payment should be excluded for status {status_val}"
+        )
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])

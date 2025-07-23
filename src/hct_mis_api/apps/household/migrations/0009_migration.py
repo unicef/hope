@@ -4,30 +4,50 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0008_migration'),
+        ("household", "0008_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='individual',
-            name='biometric_deduplication_batch_results',
+            model_name="individual",
+            name="biometric_deduplication_batch_results",
             field=models.JSONField(blank=True, default=list),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='biometric_deduplication_batch_status',
-            field=models.CharField(choices=[('DUPLICATE_IN_BATCH', 'Duplicate in batch'), ('NOT_PROCESSED', 'Not Processed'), ('SIMILAR_IN_BATCH', 'Similar in batch'), ('UNIQUE_IN_BATCH', 'Unique in batch')], db_index=True, default='NOT_PROCESSED', max_length=50),
+            model_name="individual",
+            name="biometric_deduplication_batch_status",
+            field=models.CharField(
+                choices=[
+                    ("DUPLICATE_IN_BATCH", "Duplicate in batch"),
+                    ("NOT_PROCESSED", "Not Processed"),
+                    ("SIMILAR_IN_BATCH", "Similar in batch"),
+                    ("UNIQUE_IN_BATCH", "Unique in batch"),
+                ],
+                db_index=True,
+                default="NOT_PROCESSED",
+                max_length=50,
+            ),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='biometric_deduplication_golden_record_results',
+            model_name="individual",
+            name="biometric_deduplication_golden_record_results",
             field=models.JSONField(blank=True, default=list),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='biometric_deduplication_golden_record_status',
-            field=models.CharField(choices=[('DUPLICATE', 'Duplicate'), ('NEEDS_ADJUDICATION', 'Needs Adjudication'), ('NOT_PROCESSED', 'Not Processed'), ('POSTPONE', 'Postpone'), ('UNIQUE', 'Unique')], db_index=True, default='NOT_PROCESSED', max_length=50),
+            model_name="individual",
+            name="biometric_deduplication_golden_record_status",
+            field=models.CharField(
+                choices=[
+                    ("DUPLICATE", "Duplicate"),
+                    ("NEEDS_ADJUDICATION", "Needs Adjudication"),
+                    ("NOT_PROCESSED", "Not Processed"),
+                    ("POSTPONE", "Postpone"),
+                    ("UNIQUE", "Unique"),
+                ],
+                db_index=True,
+                default="NOT_PROCESSED",
+                max_length=50,
+            ),
         ),
     ]

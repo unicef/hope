@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Optional, Tuple, Union
+from typing import Any, Iterable, Union
 
 from django.db import models
 from django.db.models import BLANK_CHOICE_DASH
@@ -12,7 +12,7 @@ class GeoCountryDescriptor:
         self.field = field
 
     def __get__(
-        self, instance: Optional[Any] = None, owner: Optional[Any] = None
+        self, instance: Any | None = None, owner: Any | None = None
     ) -> Union["GeoCountryDescriptor", list[Country], Country]:
         if instance is None:
             return self
@@ -49,10 +49,10 @@ class GeoCountryField(models.CharField):
     def get_choices(
         self,
         include_blank: bool = True,
-        blank_choice: Optional[List[Union[Tuple[Any, Any], Tuple[str, Iterable[Tuple[Any, Any]]]]]] = None,
+        blank_choice: list[tuple[Any, Any] | tuple[str, Iterable[tuple[Any, Any]]]] | None = None,
         *args: Any,
         **kwargs: Any,
-    ) -> List:
+    ) -> list:
         if self.choices and self.choices[0] == (None, None):
             self.choices = Country.objects.all().values_list("iso_code2", "name")
         if blank_choice is None:

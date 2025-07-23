@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 from uuid import UUID
 
 from django.conf import settings
@@ -21,8 +21,8 @@ class TokenNotProvided(Exception):
 
 @dataclass
 class RapidProFlowResponse:
-    response: Dict
-    urns: List[str]
+    response: dict
+    urns: list[str]
 
 
 class RapidProAPI:
@@ -55,7 +55,7 @@ class RapidProAPI:
             raise TokenNotProvided(f"Token is not set for {business_area.name}.")
         self._client.headers.update({"Authorization": f"Token {token}"})
 
-    def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> Dict:
+    def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> dict:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
         response = self._client.get(url)
@@ -66,7 +66,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _handle_post_request(self, url: str, data: Dict) -> Dict:
+    def _handle_post_request(self, url: str, data: dict) -> dict:
         response = self._client.post(url=f"{self._get_url()}{url}", json=data)
         try:
             response.raise_for_status()
@@ -76,7 +76,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: Any, phone_numbers: List[str]) -> Union[bool, List]:
+    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> bool | list:
         if e.response and e.response.status_code != 400:
             return False
         try:
@@ -95,20 +95,20 @@ class RapidProAPI:
     def _get_url(self) -> str:
         return f"{self.url}/api/v2"
 
-    def get_flows(self) -> List:
+    def get_flows(self) -> list:
         flows = self._handle_get_request(RapidProAPI.FLOWS_ENDPOINT)
         return flows["results"]
 
     def start_flow(
-        self, flow_uuid: str, phone_numbers: List[str]
-    ) -> Tuple[List[RapidProFlowResponse], Optional[Exception]]:
+        self, flow_uuid: str, phone_numbers: list[str]
+    ) -> tuple[list[RapidProFlowResponse], Exception | None]:
         array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
         all_urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         by_limit = [all_urns[i : i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
 
-        def _start_flow(data: Dict) -> Dict:
+        def _start_flow(data: dict) -> dict:
             try:
                 return self._handle_post_request(
                     RapidProAPI.FLOW_STARTS_ENDPOINT,
@@ -121,7 +121,7 @@ class RapidProAPI:
                     raise ValidationError(message={"phone_numbers": errors}) from e
                 raise
 
-        successful_flows: List = []
+        successful_flows: list = []
         for urns in by_limit:
             try:
                 successful_flows.append(
@@ -140,19 +140,18 @@ class RapidProAPI:
                 return successful_flows, e
         return successful_flows, None
 
-    def get_flow_runs(self) -> List:
+    def get_flow_runs(self) -> list:
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
 
-    def get_mapped_flow_runs(self, start_uuids: List[str]) -> List:
+    def get_mapped_flow_runs(self, start_uuids: list[str]) -> list:
         results = self.get_flow_runs()
-        mapped_results = [
+        return [
             self._map_to_internal_structure(x)
             for x in results
             if x.get("start") is not None and x.get("start").get("uuid") in start_uuids
         ]
-        return mapped_results
 
-    def _get_paginated_results(self, url: str) -> List:
+    def _get_paginated_results(self, url: str) -> list:
         next_url = f"{self._get_url()}{url}"
         results: list = []
         while next_url:
@@ -161,7 +160,7 @@ class RapidProAPI:
             results.extend(data["results"])
         return results
 
-    def _map_to_internal_structure(self, run: Any) -> Dict:
+    def _map_to_internal_structure(self, run: Any) -> dict:
         variable_received_name = "cash_received_text"
         variable_received_positive_string = "YES"
         variable_amount_name = "cash_received_amount"
@@ -190,7 +189,7 @@ class RapidProAPI:
             "received_amount": received_amount,
         }
 
-    def test_connection_start_flow(self, flow_name: str, phone_number: str) -> Tuple[Optional[str], Optional[List]]:
+    def test_connection_start_flow(self, flow_name: str, phone_number: str) -> tuple[str | None, list | None]:
         # find flow by name, get its uuid and start it
         # if no flow with that name is found, return error
         try:
@@ -207,8 +206,8 @@ class RapidProAPI:
             return str(e), None
 
     def test_connection_flow_run(
-        self, flow_uuid: UUID, phone_number: str, timestamp: Optional[Any] = None
-    ) -> Union[Tuple[None, Dict[str, Union[object, Any]]], Tuple[str, None]]:
+        self, flow_uuid: UUID, phone_number: str, timestamp: Any | None = None
+    ) -> tuple[None, dict[str, object | Any]] | tuple[str, None]:
         try:
             # getting start flow that was initiated during test, should be the most recent one with matching flow uuid
             flow_starts = self._handle_get_request(f"{RapidProAPI.FLOW_STARTS_ENDPOINT}")
@@ -241,13 +240,13 @@ class RapidProAPI:
             logger.warning(e)
             return str(e), None
 
-    def broadcast_message(self, phone_numbers: List[str], message: str) -> None:
+    def broadcast_message(self, phone_numbers: list[str], message: str) -> None:
         batch_size = 100
         batched_phone_numbers = [phone_numbers[i : i + batch_size] for i in range(0, len(phone_numbers), batch_size)]
         for batch in batched_phone_numbers:
             self._broadcast_message_batch(batch, message)
 
-    def _broadcast_message_batch(self, phone_numbers: List[str], message: str) -> None:
+    def _broadcast_message_batch(self, phone_numbers: list[str], message: str) -> None:
         data = {
             "urns": [f"{config.RAPID_PRO_PROVIDER}:{phone_number}" for phone_number in phone_numbers],
             "text": message,
@@ -255,7 +254,6 @@ class RapidProAPI:
         try:
             self._handle_post_request(f"{RapidProAPI.BROADCAST_START_ENDPOINT}", data)
         except requests.exceptions.HTTPError as e:
-            print(e.response.json())
             errors = self._parse_json_urns_error(e, phone_numbers)
             if errors:
                 logger.warning("wrong phone numbers " + str(errors))

@@ -1,4 +1,4 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load engine i18n admin_urls static admin_modify jsonfy %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls engine i18n jsonfy static %}
 {% block extrastyle %}{{ block.super }}
     <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
     <script src="{% static "admin/js/jquery.init.js" %}"></script>
@@ -12,14 +12,15 @@
             cursor: pointer;
         }
     </style>
-{% endblock %}
+{% endblock extrastyle %}
+
 {% block breadcrumbs-active %}&rsaquo;<a href="{% url opts|admin_urlname:'test' original.pk %}">Test</a>{% endblock %}
 
 {% block action-content %}
     {% if form %}
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {#      <table>#}
+            {# <table> #}
             {{ form.errors }}
             {{ form.opt }}
             <label><input type="radio" name="opt" class="optFile" checked value="optFile"> File </label>
@@ -55,12 +56,12 @@
                     </table>
                 </div>
             </div>
-            {#      </table>#}
+            {# </table> #}
             <input type="submit" value="Test">
         </form>
     {% endif %}
     {% if results %}
-        {% if target_population%}
+        {% if target_population %}
             <ul>
             <li><b>Target Population</b>: {{ target_population }}</li>
             </ul>
@@ -91,7 +92,7 @@
                         <div id="data{{ forloop.counter }}" style="display: none">
               <pre style="background-color: white;padding: 5px;">
 <h3>Context:{{ row.input }}({{ row.input_type }})</h3>
-<h3>Debug:{{ row.result.debug_info|smart_json}}</h3>
+<h3>Debug:{{ row.result.debug_info|smart_json }}</h3>
 {{ row.input|smart_json }}
               </pre>
                         </div>
@@ -104,7 +105,8 @@
         </table>
         </fieldset>
     {% endif %}
-{% endblock %}
+{% endblock action-content %}
+
 {% block document_ready %}{{ block.super }}
     <script>
         (function ($) {
@@ -124,9 +126,9 @@
                     $x.show();
                 }
             });
-            {% if form.opt.value  %}
+            {% if form.opt.value %}
                 $('input[type=radio].{{ form.opt.value }}').click();
             {% endif %}
         })(django.jQuery);
     </script>
-{% endblock %}
+{% endblock document_ready %}

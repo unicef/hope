@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -88,8 +88,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     }
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
-        individuals: List[PendingIndividual] = []
-        documents: List[PendingDocument] = []
+        individuals: list[PendingIndividual] = []
+        documents: list[PendingDocument] = []
         record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
@@ -145,7 +145,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
     def _create_role(self, role: "Role", individual: PendingIndividual, household: PendingHousehold) -> None:
         if role == "y":
-            defaults = dict(individual=individual, household=household)
+            defaults = {"individual": individual, "household": household}
             if PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
                 PendingIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
             elif PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0:
@@ -154,20 +154,20 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
-    ) -> Dict:
-        household_data = dict(
-            registration_data_import=registration_data_import,
-            program=registration_data_import.program,
-            first_registration_date=record.timestamp,
-            last_registration_date=record.timestamp,
-            country_origin=Country.objects.get(iso_code2="UA"),
-            country=Country.objects.get(iso_code2="UA"),
-            consent=True,
-            size=household_dict.get("size_h_c"),
-            business_area=registration_data_import.business_area,
-            residence_status=household_dict.get("residence_status_h_c", BLANK),
-        )
+        self, household_dict: dict, record: Any, registration_data_import: RegistrationDataImport
+    ) -> dict:
+        household_data = {
+            "registration_data_import": registration_data_import,
+            "program": registration_data_import.program,
+            "first_registration_date": record.timestamp,
+            "last_registration_date": record.timestamp,
+            "country_origin": Country.objects.get(iso_code2="UA"),
+            "country": Country.objects.get(iso_code2="UA"),
+            "consent": True,
+            "size": household_dict.get("size_h_c"),
+            "business_area": registration_data_import.business_area,
+            "residence_status": household_dict.get("residence_status_h_c", BLANK),
+        }
 
         admin1 = household_dict.get("admin1_h_c")
         admin2 = household_dict.get("admin2_h_c")
@@ -186,10 +186,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
     def _prepare_individual_data(
         self,
-        individual_dict: Dict,
+        individual_dict: dict,
         household: PendingHousehold,
         registration_data_import: RegistrationDataImport,
-    ) -> Dict:
+    ) -> dict:
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
             household=str(household.pk),
@@ -234,7 +234,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_documents(self, individual_dict: Dict, individual: PendingIndividual) -> List[PendingDocument]:
+    def _prepare_documents(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingDocument]:
         documents = []
 
         for document_key_string, (
@@ -269,7 +269,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         return documents
 
-    def validate_household(self, individuals_array: List[PendingIndividual]) -> None:
+    def validate_household(self, individuals_array: list[PendingIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -277,7 +277,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def _has_head(self, individuals_array: List[PendingIndividual]) -> bool:
+    def _has_head(self, individuals_array: list[PendingIndividual]) -> bool:
         return any(
             individual_data.get(
                 "relationship_i_c",
@@ -297,14 +297,14 @@ class UkraineRegistrationService(UkraineBaseRegistrationService):
 
 
 class Registration2024(UkraineBaseRegistrationService):
-    INDIVIDUAL_FLEX_FIELDS: List[str] = ["low_income_hh_h_f", "single_headed_hh_h_f"]
+    INDIVIDUAL_FLEX_FIELDS: list[str] = ["low_income_hh_h_f", "single_headed_hh_h_f"]
 
     def _prepare_individual_data(
         self,
-        individual_dict: Dict,
+        individual_dict: dict,
         household: PendingHousehold,
         registration_data_import: RegistrationDataImport,
-    ) -> Dict:
+    ) -> dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
         individual_data["flex_fields"] = build_flex_arg_dict_from_list_if_exists(
             individual_dict, self.INDIVIDUAL_FLEX_FIELDS

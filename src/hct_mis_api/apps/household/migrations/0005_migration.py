@@ -4,18 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0004_migration'),
+        ("household", "0004_migration"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='household',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_removed', False)), fields=('unicef_id', 'program'), name='unique_hh_unicef_id_in_program'),
+            model_name="household",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("is_removed", False)),
+                fields=("unicef_id", "program"),
+                name="unique_hh_unicef_id_in_program",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='individual',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_removed', False), ('duplicate', False)), fields=('unicef_id', 'program'), name='unique_ind_unicef_id_in_program'),
+            model_name="individual",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("is_removed", False), ("duplicate", False)),
+                fields=("unicef_id", "program"),
+                name="unique_ind_unicef_id_in_program",
+            ),
         ),
     ]

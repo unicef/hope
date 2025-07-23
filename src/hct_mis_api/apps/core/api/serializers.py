@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable
 
 from rest_framework import serializers
 
@@ -69,12 +69,12 @@ def attr_resolver(attname: str, default_value: Any, obj: Any) -> Any:
     return getattr(obj, attname, default_value)
 
 
-def dict_resolver(attname: str, default_value: Any, obj: Any) -> Optional[Any]:
+def dict_resolver(attname: str, default_value: Any, obj: Any) -> Any | None:
     return obj.get(attname, default_value)
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) -> Optional[Any]:
-    resolver: Optional[Callable] = attr_resolver
+def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) -> Any | None:
+    resolver: Callable | None = attr_resolver
     if isinstance(obj, dict):
         resolver = dict_resolver
     if not resolver:
@@ -82,7 +82,7 @@ def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) ->
     return resolver(attname, default_value, obj)
 
 
-def resolve_label(obj: Any) -> List[Dict[str, Any]]:
+def resolve_label(obj: Any) -> list[dict[str, Any]]:
     return [{"language": k, "label": v} for k, v in obj.items()]
 
 
@@ -95,12 +95,12 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     def get_labels(self, obj: Any) -> Any:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_value(self, obj: Any) -> Union[str, Optional[Any]]:
+    def get_value(self, obj: Any) -> str | Any | None:
         if isinstance(obj, FlexibleAttributeChoice):
             return obj.name
         return _custom_dict_or_attr_resolver("value", None, obj)
 
-    def get_label_en(self, obj: Any) -> Optional[str]:
+    def get_label_en(self, obj: Any) -> str | None:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
@@ -126,7 +126,7 @@ class FieldAttributeSimpleSerializer(serializers.Serializer):
     is_flex_field = serializers.SerializerMethodField()
     choices = CoreFieldChoiceSerializer(many=True)
 
-    def get_label_en(self, obj: Any) -> Optional[str]:
+    def get_label_en(self, obj: Any) -> str | None:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
@@ -136,14 +136,13 @@ class FieldAttributeSimpleSerializer(serializers.Serializer):
             return True
         return False
 
-    def get_associated_with(self, obj: Any) -> Optional[str]:
+    def get_associated_with(self, obj: Any) -> str | None:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
         if resolved == 0:
             return "Household"
-        elif resolved == 1:
+        if resolved == 1:
             return "Individual"
-        else:
-            return resolved
+        return resolved
 
 
 class FieldAttributeSerializer(serializers.Serializer):
@@ -159,7 +158,7 @@ class FieldAttributeSerializer(serializers.Serializer):
     pdu_data = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_pdu_data(obj: Union[Dict, FlexibleAttribute]) -> Optional[Dict[str, Any]]:
+    def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, Any] | None:
         if isinstance(obj, FlexibleAttribute):
             return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
@@ -167,7 +166,7 @@ class FieldAttributeSerializer(serializers.Serializer):
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_label_en(self, obj: Any) -> Optional[str]:
+    def get_label_en(self, obj: Any) -> str | None:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
@@ -177,11 +176,10 @@ class FieldAttributeSerializer(serializers.Serializer):
             return True
         return False
 
-    def get_associated_with(self, obj: Any) -> Optional[Any]:
+    def get_associated_with(self, obj: Any) -> Any | None:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
         if resolved == 0:
             return "Household"
-        elif resolved == 1:
+        if resolved == 1:
             return "Individual"
-        else:
-            return resolved
+        return resolved
