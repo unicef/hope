@@ -1,12 +1,11 @@
-import { Box, Grid2 as Grid, IconButton, Button } from '@mui/material';
+import { Box, Button, Grid2 as Grid, IconButton } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
 import React, { Fragment, ReactElement, useState } from 'react';
-import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
+import { AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 export interface EditAccountRowProps {
