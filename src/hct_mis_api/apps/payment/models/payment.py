@@ -323,6 +323,14 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export PDF File Summary",
     )
+    reconciliation_import_file = models.ForeignKey(
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Reconciliation Import File",
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
