@@ -58,6 +58,7 @@ interface ResultsProps {
 function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
+
   const handleOpen = () => {
     if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
       setOpenDialog(true);
