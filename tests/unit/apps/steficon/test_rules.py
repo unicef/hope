@@ -1,9 +1,12 @@
+from typing import Tuple
 from unittest.mock import Mock
 
 import pytest
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.config import settings
@@ -30,7 +33,7 @@ s = s.upper()
 
 
 @pytest.fixture
-def basic_rule_setup():
+def basic_rule_setup() -> Tuple[User, Household]:
     BusinessAreaFactory()
     user = UserFactory(is_superuser=True, username="test")
     user.set_password("test")
@@ -52,7 +55,7 @@ def test_rule() -> None:
 
 
 @pytest.mark.django_db
-def test_execution(basic_rule_setup) -> None:
+def test_execution(basic_rule_setup: Tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule = Rule(definition="result.value=101")
     result = rule.execute({"hh": household})
@@ -131,7 +134,7 @@ def test_release() -> None:
 
 
 @pytest.mark.django_db
-def test_nested_rule(basic_rule_setup) -> None:
+def test_nested_rule(basic_rule_setup: Tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
     rule2 = Rule.objects.create(
@@ -158,7 +161,7 @@ def test_modules() -> None:
 
 
 @pytest.mark.django_db
-def test_root_user_can_edit_version_and_rule(basic_rule_setup) -> None:
+def test_root_user_can_edit_version_and_rule(basic_rule_setup: Tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(
         Mock(user=user, headers={"x-root-token": settings.ROOT_TOKEN})
@@ -175,7 +178,7 @@ def test_regular_user_cannot_edit_version_and_rule() -> None:
 
 
 @pytest.mark.django_db
-def test_get_readonly_fields(basic_rule_setup) -> None:
+def test_get_readonly_fields(basic_rule_setup: Tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     # is_root
     assert RuleAdmin(Mock(), Mock()).get_readonly_fields(

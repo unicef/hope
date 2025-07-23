@@ -176,6 +176,7 @@ class TestRuleMixin:
                         "data": "",
                         "error": None,
                         "success": True,
+                        "result": None,
                     }
                     try:
                         if isinstance(rule, Rule):
@@ -190,7 +191,7 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
-            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optData"})
         if "form" in context:
             context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
