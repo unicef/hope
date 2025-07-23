@@ -166,6 +166,7 @@ TEMPLATES: List[Dict[str, Any]] = [
     },
 ]
 PROJECT_APPS = [
+    "hct_mis_api",
     "hct_mis_api.api",
     "hct_mis_api.apps.geo.apps.Config",
     "hct_mis_api.apps.account.apps.AccountConfig",
