@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
-def pp_assign_reconciliation_file_fk(apps, schema_editor):
+def pp_assign_reconciliation_file_fk(apps, schema_editor):  # pragma no cover
     batch_size = 100
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     FileTemp = apps.get_model("core", "FileTemp")
