@@ -28,6 +28,7 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     UNIQUE_IN_BATCH,
     Document,
+    Household,
     Individual,
     PendingIndividual,
 )
@@ -193,6 +194,27 @@ class DeduplicateTask:
             ("deduplication_golden_record_results",),
         )
 
+    def collided_individuals_ids_to_exclude(
+        self, individuals: list[PendingIndividual], registration_data_import: RegistrationDataImport
+    ) -> list[str]:
+        program = registration_data_import.program
+        if not program.collision_detection_enabled or not program.collision_detector:
+            return []
+        households = Household.all_objects.filter(registration_data_import=registration_data_import).iterator(1000)
+        households_to_exclude = []
+        for household in households:
+            if program.collision_detector.detect_collision(household):
+                households_to_exclude.append(household.id)
+
+        individuals_ids_to_exclude = [
+            str(x)
+            for x in PendingIndividual.objects.filter(
+                registration_data_import=registration_data_import,
+                household_id__in=households_to_exclude,
+            ).values_list("id", flat=True)
+        ]
+        return individuals_ids_to_exclude
+
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
         pending_individuals = PendingIndividual.objects.filter(registration_data_import=registration_data_import)
 
@@ -213,7 +235,9 @@ class DeduplicateTask:
         duplicates_in_population = set()
         possible_duplicates_in_population = set()
         checked_individuals_ids = set()
-
+        individual_ids_to_exclude = self.collided_individuals_ids_to_exclude(
+            pending_individuals, registration_data_import
+        )
         for pending_individual in pending_individuals:
             checked_individuals_ids.add(pending_individual.id)
             to_bulk_update_results.append(pending_individual)
@@ -250,7 +274,9 @@ class DeduplicateTask:
                 )
                 self._set_error_message_and_status(registration_data_import, message)
                 break
-
+            # if it is collided household individual, we dont deduplicate against population, because it will be just updating existing household
+            if str(pending_individual.id) in individual_ids_to_exclude:
+                continue
             # Check against the population
             deduplication_result = self._deduplicate_single_individual(pending_individual)
             pending_individual.deduplication_golden_record_results = deduplication_result.results_data
