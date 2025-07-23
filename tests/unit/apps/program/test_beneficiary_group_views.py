@@ -3,12 +3,14 @@ from typing import Any
 from django.core.cache import cache
 from django.urls import reverse
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory
+from rest_framework.test import APIClient
+from unit.api.base import HOPEApiTestCase
 import pytest
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
+from extras.test_utils.factories.core import create_afghanistan
 
 pytestmark = pytest.mark.django_db
 

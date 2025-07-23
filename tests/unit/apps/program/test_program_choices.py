@@ -1,12 +1,15 @@
+from extras.test_utils.factories.account import UserFactory
+
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from typing import Any
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.program.models import Program, ProgramCycle

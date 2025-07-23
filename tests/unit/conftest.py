@@ -15,10 +15,9 @@ from _pytest.config.argparsing import Parser
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
-
 from hct_mis_api.apps.account.models import Partner, Role
 
-from .fixtures import *  # noqa: ABS101, F403, F401
+from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
 
 
 @pytest.fixture(autouse=True)

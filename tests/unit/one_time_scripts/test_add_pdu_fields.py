@@ -1,10 +1,11 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.one_time_scripts.add_pdu_fields import (
     add_specific_fields_and_populate_round,
 )

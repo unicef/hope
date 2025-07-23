@@ -1,8 +1,9 @@
 from django.test.testcases import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import IndividualFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import IndividualFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
 from hct_mis_api.one_time_scripts.calculate_age_at_registration import (
     calculate_age_at_registration_field,
 )

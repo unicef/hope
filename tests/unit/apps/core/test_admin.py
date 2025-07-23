@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
+from extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from django_webtest import WebTest
 from parameterized import parameterized
 from rest_framework import status
@@ -14,7 +15,6 @@ from hct_mis_api.apps.core.admin import (
     AcceptanceProcessThresholdFormset,
     DataCollectingTypeForm,
 )
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 
 

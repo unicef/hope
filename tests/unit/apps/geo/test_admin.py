@@ -4,14 +4,14 @@ from django.test import RequestFactory, override_settings
 from django.urls import reverse
 
 from django_webtest import WebTest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from factory import fuzzy
 from flaky import flaky
 from webtest import Upload
 
-from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.geo.admin import AreaAdmin
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area, AreaType
 
 

@@ -6,9 +6,10 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory
@@ -23,7 +24,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
