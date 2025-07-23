@@ -86,6 +86,10 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
     )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
+    office_country = models.ForeignKey(
+        "geo.Country", related_name="business_area", null=True, blank=True, on_delete=models.SET_NULL
+    )
+    payment_countries = models.ManyToManyField("geo.Country", related_name="payment_business_areas")
 
     is_split = models.BooleanField(default=False)
     region_code = models.CharField(max_length=8)
@@ -94,7 +98,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
-
+    # TODO: deprecated to remove in the next release
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     kobo_url = models.URLField(max_length=255, null=True, blank=True)
@@ -132,7 +136,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         default=5,
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
-    screen_beneficiary = models.BooleanField(default=False, help_text="Enable screen beneficiary against sanction list")
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     biometric_deduplication_threshold = models.FloatField(
         default=0.0,
@@ -175,9 +178,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
             for business_area in cls.objects.all()
         ]
-
-    def should_check_against_sanction_list(self) -> bool:
-        return self.screen_beneficiary
 
     def get_sys_option(self, key: str, default: None = None) -> Any:
         if "hope" in self.custom_fields:

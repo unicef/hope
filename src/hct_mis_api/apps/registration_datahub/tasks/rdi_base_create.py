@@ -78,12 +78,14 @@ class RdiBaseCreateTask:
         imported_delivery_mechanism_data = []
         for _, data in self.accounts.items():
             individual = data.pop("individual")
+            if individual._state.adding:  # if an individual is not created because it is a collided one
+                continue
             for account_type, values in data.items():
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
                         individual=individual,
                         account_type=account_types_dict[account_type],
-                        number=values.get("number", None),
+                        number=values.pop("number", None),
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )

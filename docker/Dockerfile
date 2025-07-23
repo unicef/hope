@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.12.7-slim-bookworm as base
+FROM python:3.13-slim-bookworm as base
 ENV APP_PATH=/app
 ARG UID=82
 
@@ -21,6 +21,7 @@ RUN apt-get update \
     libpangocairo-1.0-0 \
     shared-mime-info \
     wkhtmltopdf \
+    screen \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && addgroup --system --gid "${UID}" hope \
@@ -65,7 +66,7 @@ RUN --mount=type=cache,target=/root/.uv-cache \
     uv sync --cache-dir=/root/.uv-cache \
         --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-editable --frozen --extra distribution --no-install-package hope
+        --no-editable --frozen --no-install-package hope
 COPY ./tests ./tests
 COPY ./src/data $APP_PATH/data
 COPY ./manage.py ./manage.py
@@ -91,7 +92,7 @@ COPY ./src/ ./src/
 COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hct_mis_api/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-dev --no-editable --frozen --extra distribution
+        --no-dev --no-editable --frozen
 
 
 ## Dist (backend only) image

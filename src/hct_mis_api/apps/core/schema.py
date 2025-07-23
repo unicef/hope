@@ -14,7 +14,7 @@ from typing import (
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 
 import graphene
 from constance import config
@@ -32,7 +32,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
-from hct_mis_api.apps.core.kobo.api import KoboAPI
+from hct_mis_api.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
@@ -313,11 +313,11 @@ def get_fields_attr_generators(
 
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
-        assets = KoboAPI(business_area_slug).get_single_project_data(uid)
+        assets = KoboAPI().get_single_project_data(uid)
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
-    except AttributeError as error:
+    except AttributeError as error:  # pragma: no cover
         logger.warning(error)
         raise GraphQLError(str(error)) from error
 
@@ -326,13 +326,18 @@ def resolve_asset(business_area_slug: str, uid: str) -> Dict:
 
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
     try:
-        assets = KoboAPI(business_area_slug).get_all_projects_data()
+        business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
+            slug=business_area_slug
+        )
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
-    except AttributeError as error:
+    except AttributeError as error:  # pragma: no cover
         logger.warning(error)
         raise GraphQLError(str(error)) from error
+    except CountryCodeNotProvided:
+        raise GraphQLError(f"Business area {business_area_slug} does not have a country code.")
 
     return reduce_assets_list(assets, only_deployed=only_deployed)
 

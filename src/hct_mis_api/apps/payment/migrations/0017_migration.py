@@ -4,7 +4,7 @@ from django.db import migrations, models
 from django.db.models import Subquery, OuterRef
 
 
-def delete_models_if_exists(apps, schema_editor):
+def delete_models_if_exists(apps, schema_editor):   # pragma: no cover
     try:
         FinancialInstitutionMapping = apps.get_model('payment', 'FinancialInstitutionMapping')
         FinancialInstitution = apps.get_model('payment', 'FinancialInstitution')

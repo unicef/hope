@@ -17,10 +17,10 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
-import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
-import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
+import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -98,41 +98,43 @@ function EditIndividualDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <FieldArray
-            name="individualDataUpdateFields"
-            render={(arrayHelpers) => (
-              <>
-                {values.individualDataUpdateFields.map((item, index) => (
-                  <EditIndividualDataChangeFieldRow
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${index}-${item?.fieldName}`}
-                    itemValue={item}
-                    index={index}
-                    individual={fullIndividual.individual}
-                    fields={
-                      addIndividualFieldsData.allAddIndividualsFieldsAttributes
-                    }
-                    notAvailableFields={notAvailableItems}
-                    onDelete={() => arrayHelpers.remove(index)}
-                    values={values}
-                  />
-                ))}
-                <Grid size={{ xs: 4 }}>
-                  <Button
-                    color="primary"
-                    onClick={() => {
-                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                    }}
-                    startIcon={<AddCircleOutline />}
-                    data-cy="button-add-new-field"
-                    disabled={isEditTicket}
-                  >
-                    {t('Add new field')}
-                  </Button>
-                </Grid>
-              </>
-            )}
-          />
+          <Grid container spacing={3}>
+            <FieldArray
+              name="individualDataUpdateFields"
+              render={(arrayHelpers) => (
+                <>
+                  {values.individualDataUpdateFields.map((item, index) => (
+                    <Grid size={{ xs: 12 }} key={`${index}-${item?.fieldName}`}>
+                      <EditIndividualDataChangeFieldRow
+                        itemValue={item}
+                        index={index}
+                        individual={fullIndividual.individual}
+                        fields={
+                          addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                        }
+                        notAvailableFields={notAvailableItems}
+                        onDelete={() => arrayHelpers.remove(index)}
+                        values={values}
+                      />
+                    </Grid>
+                  ))}
+                  <Grid size={{ xs: 4 }}>
+                    <Button
+                      color="primary"
+                      onClick={() => {
+                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                      }}
+                      startIcon={<AddCircleOutline />}
+                      data-cy="button-add-new-field"
+                      disabled={isEditTicket}
+                    >
+                      {t('Add new field')}
+                    </Button>
+                  </Grid>
+                </>
+              )}
+            />
+          </Grid>
         </BoxWithBorders>
       )}
       <BoxWithBorders>
@@ -178,17 +180,18 @@ function EditIndividualDataChange({
           )}
         </Box>
       </BoxWithBorders>
-      <BoxWithBorders>
+       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant="h6">{t('Payment Channels')}</Typography>
+            <Typography variant="h6">{t('Accounts')}</Typography>
           </Title>
-          <ExistingPaymentChannelFieldArray
+          <ExistingAccountsFieldArray
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual.individual}
+            addIndividualFieldsData={addIndividualFieldsData}
           />
-          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
+           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={addIndividualFieldsData}/>}
         </Box>
       </BoxWithBorders>
     </>

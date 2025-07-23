@@ -21,7 +21,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SEX_CHOICE,
     UNICEF,
-    BankAccountInfo,
     Document,
     DocumentType,
     EntitlementCard,
@@ -31,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -224,7 +222,7 @@ class IndividualFactory(DjangoModelFactory):
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
-    email = factory.Sequence(lambda n: f'factory.Faker("email"){n}')
+    email = factory.Sequence(lambda n: f"user{n}@example.com")
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -244,25 +242,6 @@ class PendingIndividualFactory(IndividualFactory):
 
     class Meta:
         model = PendingIndividual
-
-
-class BankAccountInfoFactory(DjangoModelFactory):
-    class Meta:
-        model = BankAccountInfo
-
-    individual = factory.SubFactory(IndividualFactory)
-    bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = factory.LazyAttribute(lambda x: random.randint(10**26, 10**27 - 1))
-    bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
-    account_holder_name = factory.Faker("last_name")
-    rdi_merge_status = MergeStatusModel.MERGED
-
-
-class PendingBankAccountInfoFactory(BankAccountInfoFactory):
-    rdi_merge_status = PendingIndividual.PENDING
-
-    class Meta:
-        model = PendingBankAccountInfo
 
 
 class DocumentTypeFactory(DjangoModelFactory):

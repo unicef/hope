@@ -9,7 +9,6 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     IndividualIdentityFactory,
@@ -20,7 +19,6 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     MALE,
     ROLE_PRIMARY,
-    BankAccountInfo,
     Document,
     Household,
     Individual,
@@ -38,6 +36,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestRegistrationProgramPopulationImportTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -103,10 +102,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             partner=PartnerFactory(),
         )
 
-        cls.bank_account_info = BankAccountInfoFactory(
-            individual=cls.individuals[0],
-        )
-
         rebuild_search_index()
 
     def _run_task(self, rdi_id: Optional[str] = None) -> None:
@@ -135,10 +130,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             0,
         )
         self.assertEqual(
-            BankAccountInfo.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
             IndividualRoleInHousehold.pending_objects.count(),
             0,
         )
@@ -158,10 +149,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         )
         self.assertEqual(
             Document.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            BankAccountInfo.pending_objects.count(),
             1 * multiplier,
         )
         self.assertEqual(

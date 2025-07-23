@@ -74,6 +74,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         collectors_to_create = []
         for index_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
+                if index_id not in self.households:
+                    continue
                 collector.household_id = self.households.get(int(index_id)).pk
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
@@ -93,9 +95,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     continue
 
                 header = header_cell.value
+                if header.startswith("pp_identification_key"):
+                    obj_to_create.identification_key = cell.value
+                    continue
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
-
                 if not current_field and header not in complex_fields[sheet_title]:
                     continue
                 is_not_image = current_field.get("type") != "IMAGE"
@@ -204,11 +208,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 "pp_pregnant_i_c": self._handle_bool_field,
                 "pp_fchild_hoh_i_c": self._handle_bool_field,
                 "pp_child_hoh_i_c": self._handle_bool_field,
-                "pp_bank_name_i_c": self._handle_bank_account_fields,
-                "pp_bank_account_number_i_c": self._handle_bank_account_fields,
-                "pp_debit_card_number_i_c": self._handle_bank_account_fields,
-                "pp_account_holder_name_i_c": self._handle_bank_account_fields,
-                "pp_bank_branch_name_i_c": self._handle_bank_account_fields,
                 "pp_first_registration_date_i_c": self._handle_datetime,
                 "pp_unhcr_id_no_i_c": self._handle_identity_fields,
                 "pp_unhcr_id_photo_i_c": self._handle_identity_photo,
@@ -280,7 +279,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_documents()
         self._create_identities()
         self._create_collectors()
-        self._create_bank_accounts_infos()
         self._create_accounts()
 
     @transaction.atomic()

@@ -293,6 +293,10 @@ class PaymentPlan(
     program_cycle = models.ForeignKey(
         "program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE, help_text="Program Cycle"
     )
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
+    )
     imported_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL, help_text="Imported File"
     )
@@ -510,19 +514,15 @@ class PaymentPlan(
     )
     status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
     is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
-    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
-    )
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [
-            UniqueConstraint(
-                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-            ),
-        ]
+        # constraints = [
+        #     UniqueConstraint(
+        #         fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+        #     ),
+        # ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -714,7 +714,7 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -1219,7 +1219,12 @@ class PaymentPlan(
         target=Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self) -> None:
+        from hct_mis_api.apps.payment.models import PaymentVerificationSummary
+
         self.status_date = timezone.now()
+
+        if not hasattr(self, "payment_verification_summary"):
+            PaymentVerificationSummary.objects.create(payment_plan=self)
 
     @transition(
         field=status,
@@ -1227,12 +1232,7 @@ class PaymentPlan(
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
-        from hct_mis_api.apps.payment.models import PaymentVerificationSummary
-
         self.status_date = timezone.now()
-
-        if not hasattr(self, "payment_verification_summary"):
-            PaymentVerificationSummary.objects.create(payment_plan=self)
 
     @transition(
         field=status,
@@ -1375,10 +1375,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
             if main_key in {"primary_collector", "alternate_collector"}:
                 return household_data.get(main_key, {}).get("id")
-
-            if main_key == "bank_account_info":
-                bank_account_info_lookup = snapshot_field_path_split[1]
-                return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
 
             if main_key == "documents":
                 doc_type, doc_lookup = snapshot_field_path_split[1], snapshot_field_path_split[2]
@@ -1930,8 +1926,6 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,
-        null=True,  # TODO MB make not nullable after migrations
-        blank=True,
     )
     financial_institution = models.ForeignKey(
         "payment.FinancialInstitution",
@@ -1939,11 +1933,11 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         null=True,
         blank=True,
     )
-    number = models.CharField(max_length=256, blank=True, null=True)
+    number = models.CharField(max_length=256, blank=True, null=True, db_index=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)  # type: ignore
-    is_unique = models.BooleanField(default=True)
-    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
+    is_unique = models.BooleanField(default=True, db_index=True)
+    active = models.BooleanField(default=True, db_index=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
@@ -1964,6 +1958,25 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
+
+    @property
+    def account_data(self) -> dict:
+        data = self.data.copy()
+        if self.number:
+            data["number"] = self.number
+        if self.financial_institution:
+            data["financial_institution"] = str(self.financial_institution.id)
+        return data
+
+    @account_data.setter
+    def account_data(self, account_values: dict) -> None:
+        for field_name, value in account_values.items():
+            if field_name == "number":
+                self.number = value
+            elif field_name == "financial_institution":
+                self.financial_institution = FinancialInstitution.objects.filter(id=value).first()
+            else:
+                self.data[field_name] = value
 
     @cached_property
     def unique_delivery_data_for_account_type(self) -> Dict:
@@ -2009,7 +2022,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
                     self.save(update_fields=["unique_key", "is_unique"])
 
     @classmethod
-    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
+    def validate_uniqueness(cls, qs: Union[QuerySet["Account"], List["Account"]]) -> None:
         for dmd in qs:
             dmd.update_unique_field()
 
@@ -2025,7 +2038,7 @@ class PaymentDataCollector(Account):
         associated_objects = {
             FspNameMapping.SourceModel.INDIVIDUAL.value: collector,
             FspNameMapping.SourceModel.HOUSEHOLD.value: collector.household,
-            FspNameMapping.SourceModel.ACCOUNT.value: account.data if account else {},
+            FspNameMapping.SourceModel.ACCOUNT.value: account.account_data if account else {},
         }
         return associated_objects.get(associated_with)
 
@@ -2046,7 +2059,7 @@ class PaymentDataCollector(Account):
         else:
             dm_config = dm_configs.first()
         if not dm_config:
-            return account.data if account else {}
+            return account.account_data if account else {}
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
 
@@ -2056,7 +2069,7 @@ class PaymentDataCollector(Account):
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
             else:
                 internal_field = field
-                associated_object = account.data if account else {}
+                associated_object = account.account_data if account else {}
             if isinstance(associated_object, dict):
                 value = associated_object.get(internal_field, None)
                 delivery_data[field] = value and str(value)
@@ -2096,7 +2109,7 @@ class PaymentDataCollector(Account):
                 field = fsp_name_mapping.hope_name
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
             else:
-                associated_object = account.data if account else {}
+                associated_object = account.account_data if account else {}
             if isinstance(associated_object, dict):
                 value = associated_object.get(field, None)
             else:

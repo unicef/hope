@@ -22,7 +22,6 @@ from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
@@ -49,6 +48,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
+@pytest.mark.elasticsearch
 class TestIndividualQuery(APITestCase):
     databases = "__all__"
 
@@ -217,12 +217,6 @@ class TestIndividualQuery(APITestCase):
         )
         cls.household_2.head_of_household = cls.individual_2
         cls.household_2.save()
-
-        cls.bank_account_info = BankAccountInfoFactory(
-            individual=cls.individuals[5],
-            bank_name="ING",
-            bank_account_number=11110000222255558888999925,
-        )
 
         cls.individual_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").unicef_id
         cls.household_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").household.unicef_id
@@ -536,30 +530,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_bank_account_number_filter(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
-
-        # Should be James Bond
-        self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={"search": self.bank_account_info.bank_account_number},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
-            ("without_permission", []),
-        ]
-    )
     def test_query_individuals_by_search_birth_certificate_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
@@ -686,6 +656,7 @@ class TestIndividualQuery(APITestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestIndividualWithFlexFieldsQuery(APITestCase):
     databases = "__all__"
 
@@ -804,6 +775,7 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
     databases = "__all__"
 
@@ -816,8 +788,12 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         phoneNo
         birthDate
         accounts {
-            name
-            individualTabData
+        edges {
+            node {
+              name
+              dataFields
+            }
+          }
         }
       }
     }

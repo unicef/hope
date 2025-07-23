@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 from unittest import mock
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 import requests_mock
@@ -60,6 +60,48 @@ EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     }
 }
 
+EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA = {
+    "ROWSET": {
+        "ROW": [
+            {
+                "CURRENCY_CODE": "XEU",
+                "CURRENCY_NAME": "European Currency Unit",
+                "X_RATE": ".867",
+                "VALID_FROM": "01-DEC-98",
+                "VALID_TO": "31-DEC-99",
+                "RATIO": "1",
+                "NO_OF_DECIMAL": "2",
+                "PAST_XRATE": {
+                    "PAST_XRATE_ROW": [
+                        {
+                            "VALID_FROM": "01-JAN-98",
+                            "VALID_TO": "31-JAN-98",
+                            "PAST_XRATE": ".906",
+                            "PAST_RATIO": "1",
+                        },
+                        {
+                            "VALID_FROM": "01-FEB-98",
+                            "VALID_TO": "28-FEB-98",
+                            "PAST_XRATE": ".926",
+                            "PAST_RATIO": "1",
+                        },
+                    ]
+                },
+            },
+            {
+                "CURRENCY_CODE": "CUP1",
+                "CURRENCY_NAME": "Cuban Peso (non convertible)",
+                "X_RATE": "24",
+                "VALID_FROM": "15-AUG-06",
+                "VALID_TO": "31-DEC-99",
+                "RATIO": "1",
+                "NO_OF_DECIMAL": "2",
+                "PAST_XRATE": None,
+            },
+        ]
+    }
+}
+
 EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
     "ROWSET": {
         "ROW": [
@@ -89,10 +131,6 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 
 
 class TestExchangeRatesAPI(TestCase):
-    @mock.patch.dict(os.environ, clear=True)
-    def test_test_api_class_initialization_key_not_in_env(self) -> None:
-        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateClientAPI)
-
     @parameterized.expand(
         [
             ("default_initialization", None, None),
@@ -100,48 +138,38 @@ class TestExchangeRatesAPI(TestCase):
             ("api_url_provided_as_arg", None, "https://uni-apis.org"),
         ]
     )
+    @override_settings(EXCHANGE_RATES_API_KEY="TEST_API_KEY")
     def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
-        with mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True):
-            api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
+        api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
-            if api_key is not None:
-                self.assertEqual(api_key, api_client.api_key)
+        if api_key is not None:
+            self.assertEqual(api_key, api_client.api_key)
 
-            if api_url is not None:
-                self.assertEqual(api_url, api_client.api_url)
+        if api_url is not None:
+            self.assertEqual(api_url, api_client.api_url)
 
-            if api_url is None and api_key is None:
-                self.assertEqual("TEST_API_KEY", api_client.api_key)
-                self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
+        if api_url is None and api_key is None:
+            self.assertEqual("TEST_API_KEY", api_client.api_key)
+            self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
 
     @parameterized.expand(
         [
-            ("with_history", True),
-            ("without_history", False),
+            ("yes", EXCHANGE_RATES_WITH_HISTORICAL_DATA),
+            ("short", EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA),
+            (None, EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA),
         ]
     )
-    def test_fetch_exchange_rates(self, test_name: str, with_history: bool) -> None:
+    def test_fetch_exchange_rates(self, mode: str, json_data: dict) -> None:
+        url = "https://uniapis.unicef.org/biapi/v1/exchangerates"
         with requests_mock.Mocker() as adapter:
-            if with_history is True:
-                adapter.register_uri(
-                    "GET",
-                    "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
-                    json=EXCHANGE_RATES_WITH_HISTORICAL_DATA,
-                )
-            else:
-                adapter.register_uri(
-                    "GET",
-                    "https://uniapis.unicef.org/biapi/v1/exchangerates",
-                    json=EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA,
-                )
+            if mode in ["yes", "short"]:
+                url += f"?history={mode}"
+            adapter.register_uri("GET", url=url, json=json_data)
 
             api_client = ExchangeRateClientAPI(api_key="TEST_API_KEY")
-            response_dict = api_client.fetch_exchange_rates(with_history=with_history)
+            response_dict = api_client.fetch_exchange_rates(mode=mode)
 
-            if test_name == "with_history":
-                self.assertEqual(EXCHANGE_RATES_WITH_HISTORICAL_DATA, response_dict)
-            elif test_name == "without_history":
-                self.assertEqual(EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA, response_dict)
+            self.assertEqual(json_data, response_dict)
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
