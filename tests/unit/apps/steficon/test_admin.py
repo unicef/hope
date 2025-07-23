@@ -171,10 +171,8 @@ def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient,
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)
     hh1 = HouseholdFactory(head_of_household=hoh1)
-    hh1.representation = "HH1"
     hh1.save()
     hh2 = HouseholdFactory(head_of_household=hoh2)
-    hh2.representation = "HH2"
     hh2.save()
     hoh1.household = hh1
     hoh1.save()
@@ -200,7 +198,7 @@ def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient,
     assert len(results) == 2
     result_values = {str(r["result"].value) for r in results}
     assert {r["success"] for r in results} == {True}
-    assert result_values == {"HH-0", "HH-1"}
+    assert result_values == {str(hh1), str(hh2)}
 
 
 @pytest.mark.django_db
