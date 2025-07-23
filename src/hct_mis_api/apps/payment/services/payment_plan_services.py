@@ -677,20 +677,20 @@ class PaymentPlanService:
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
         with transaction.atomic():
-            self.payment_plan.background_action_status_xlsx_importing_reconciliation()
-            self.payment_plan.save()
-
             file_temp = FileTemp.objects.create(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
                 file=file,
             )
+            self.payment_plan.background_action_status_xlsx_importing_reconciliation()
+            self.payment_plan.reconciliation_import_file = file_temp
+            self.payment_plan.save()
+
             transaction.on_commit(
                 partial(
                     import_payment_plan_payment_list_per_fsp_from_xlsx.delay,
                     self.payment_plan.pk,
-                    file_temp.pk,
                 )
             )
         self.payment_plan.refresh_from_db()
