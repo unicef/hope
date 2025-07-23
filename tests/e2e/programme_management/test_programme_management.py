@@ -9,24 +9,19 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories.account import RoleFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
-from extras.test_utils.factories.program import ProgramFactory
-
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
 )
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
+
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()

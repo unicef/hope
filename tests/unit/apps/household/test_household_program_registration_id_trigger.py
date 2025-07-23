@@ -6,7 +6,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from parameterized import parameterized
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.base_test_case import APITestCase

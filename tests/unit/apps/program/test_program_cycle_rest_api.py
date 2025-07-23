@@ -19,7 +19,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.apps.account.models import Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.serializers import (

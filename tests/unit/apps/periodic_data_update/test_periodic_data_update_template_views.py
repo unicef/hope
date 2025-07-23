@@ -11,10 +11,6 @@ from django.utils import timezone
 
 import freezegun
 import pytest
-from flaky import flaky
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -24,6 +20,7 @@ from extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
+from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
 

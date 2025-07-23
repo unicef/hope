@@ -59,18 +59,10 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 import elasticsearch
-from flags.models import FlagState
-
-from extras.test_utils.factories.payment import (
-    generate_delivery_mechanisms,
-    generate_payment_plan,
-    generate_reconciled_payment_plan,
-    update_fsps,
+from extras.test_utils.factories.account import (
+    create_superuser,
+    generate_unicef_partners,
 )
-
-
-from extras.test_utils.factories.account import create_superuser, generate_unicef_partners
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from extras.test_utils.factories.accountability import (
     generate_feedback,
     generate_messages,
@@ -81,7 +73,6 @@ from extras.test_utils.factories.core import (
     generate_data_collecting_types,
     generate_pdu_data,
 )
-from hct_mis_api.apps.core.models import BusinessArea
 from extras.test_utils.factories.geo import generate_area_types, generate_areas
 from extras.test_utils.factories.grievance import generate_fake_grievances
 from extras.test_utils.factories.household import generate_additional_doc_types
@@ -97,10 +88,11 @@ from extras.test_utils.factories.program import (
 )
 from extras.test_utils.factories.registration_data import generate_rdi
 from extras.test_utils.factories.steficon import generate_rule_formulas
-from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data
+from flags.models import FlagState
 
-from hct_mis_api.apps.account.models import Partner, Role, User
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data
 
 logger = logging.getLogger(__name__)
 

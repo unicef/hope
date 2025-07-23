@@ -10,22 +10,15 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-from django.urls import reverse
 from django.utils import timezone
 
 import pytest
-from openpyxl import Workbook
-from rest_framework import status
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
 from extras.test_utils.factories.core import create_afghanistan
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
-
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -37,6 +30,15 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
 )
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory
+from openpyxl import Workbook
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.models import (
     Approval,
     FinancialServiceProvider,
@@ -44,17 +46,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hct_mis_api.apps.payment.models import Approval, PaymentPlan
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from extras.test_utils.factories.steficon import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 

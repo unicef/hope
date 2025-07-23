@@ -14,7 +14,6 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,

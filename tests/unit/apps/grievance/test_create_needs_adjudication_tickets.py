@@ -5,11 +5,11 @@ from django.core.management import call_command
 from django.urls import reverse
 
 import pytest
-from rest_framework import status
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -23,7 +23,6 @@ from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services impo
     create_needs_adjudication_tickets_for_biometrics,
 )
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 

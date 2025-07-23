@@ -11,11 +11,6 @@ from extras.test_utils.factories.account import (
     PartnerFactory,
     UserFactory,
 )
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.permissions import Permissions
 from extras.test_utils.factories.core import create_ukraine
 from extras.test_utils.factories.geo import (
     AreaFactory,
@@ -23,6 +18,10 @@ from extras.test_utils.factories.geo import (
     CountryFactory,
     generate_area_types,
 )
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db()

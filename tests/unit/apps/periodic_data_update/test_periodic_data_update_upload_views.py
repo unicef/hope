@@ -9,10 +9,6 @@ from django.test.utils import CaptureQueriesContext
 
 import freezegun
 import pytest
-from flaky import flaky
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -28,6 +24,7 @@ from extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
+from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.apps.periodic_data_update.test_periodic_data_update_import_service import (

@@ -3,14 +3,19 @@ from typing import Any, Callable, Iterable, List, Optional
 from django.conf import settings
 
 import pytest
-from factory.django import DjangoModelFactory
-
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner, Role, User, RoleAssignment
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
-from hct_mis_api.apps.geo.models import Area
-from extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.program.models import Program
 
 
 @pytest.fixture()

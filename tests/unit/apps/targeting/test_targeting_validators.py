@@ -2,9 +2,8 @@ from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-import pytest
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 
+import pytest
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -12,7 +11,8 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType,  FlexibleAttribute
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification

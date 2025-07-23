@@ -1,15 +1,11 @@
 from django.test import TestCase
 
+import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import Role, User
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
-import pytest
-
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import (
     AdminAreaLimitedTo,
     Role,
@@ -20,7 +16,6 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class UserPartnerTest(TestCase):

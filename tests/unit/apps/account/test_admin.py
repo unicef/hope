@@ -17,16 +17,14 @@ from extras.test_utils.factories.account import (
     RoleFactory,
     UserFactory,
 )
+from extras.test_utils.factories.core import create_afghanistan
 
-from hct_mis_api.apps.account.models import Partner, Role, User
 from hct_mis_api.apps.account.admin import PartnerAdmin
 from hct_mis_api.apps.account.admin.user_role import (
     RoleAssignmentAdmin,
     RoleAssignmentInline,
 )
-
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
-from extras.test_utils.factories.core import create_afghanistan
 
 pytestmark = pytest.mark.django_db()
 
