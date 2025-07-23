@@ -203,7 +203,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
             </Grid>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid size={{ xs: 6 }}>
+                <Grid size={{ xs: 12 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
