@@ -3,7 +3,7 @@ from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
-from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
+from extras.test_utils.factories.geo import generate_area_types, generate_areas
 
 logger = logging.getLogger(__name__)
 

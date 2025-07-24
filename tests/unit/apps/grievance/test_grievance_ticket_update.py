@@ -5,27 +5,14 @@ from django.core.files.base import ContentFile
 from django.core.management import call_command
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_LOW,
-    PRIORITY_MEDIUM,
-    URGENCY_NOT_URGENT,
-)
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
@@ -35,15 +22,36 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketNeedsAdjudicationDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
 )
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_LOW,
+    PRIORITY_MEDIUM,
+    URGENCY_NOT_URGENT,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketNote,
-)
-from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
 )
 from hct_mis_api.apps.household.models import (
     FEMALE,
@@ -57,15 +65,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-)
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

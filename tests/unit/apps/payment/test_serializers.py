@@ -3,14 +3,23 @@ from unittest.mock import Mock
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
+
 from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
@@ -18,14 +27,6 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     TPHouseholdListSerializer,
     VolumeByDeliveryMechanismSerializer,
-)
-from hct_mis_api.apps.payment.fixtures import (
-    ApprovalFactory,
-    ApprovalProcessFactory,
-    DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,

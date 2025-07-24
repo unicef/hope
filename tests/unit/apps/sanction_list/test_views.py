@@ -7,14 +7,14 @@ from django.conf import settings
 from django.urls import reverse
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_datahub.validators import XlsxException
 from hct_mis_api.apps.sanction_list.api.views import SanctionListIndividualViewSet
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 
 pytestmark = pytest.mark.django_db
 

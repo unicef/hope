@@ -19,6 +19,7 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import (
     IndividualFactory,
     PendingIndividualFactory,
@@ -37,7 +38,6 @@ from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
 )
-from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,

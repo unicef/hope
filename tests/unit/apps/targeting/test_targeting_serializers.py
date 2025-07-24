@@ -1,7 +1,8 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import PaymentPlanFactory
+
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
