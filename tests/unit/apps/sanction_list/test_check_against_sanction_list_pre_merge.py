@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 import pytest
@@ -17,7 +18,6 @@ from strategy_field.utils import fqn
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -67,66 +67,7 @@ class TestSanctionListPreMerge(TestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
-        Country.objects.create(
-            **{
-                "created_at": "2021-10-28 09:39:13.189-00:00",
-                "updated_at": "2021-10-28 09:39:13.189-00:00",
-                "original_id": None,
-                "name": "Poland",
-                "short_name": "Poland",
-                "iso_code2": "PL",
-                "iso_code3": "POL",
-                "iso_num": "0616",
-                "parent": None,
-                "valid_from": "2021-10-28 09:39:13.189-00:00",
-                "valid_until": None,
-                "extras": {},
-                "lft": 1,
-                "rght": 2,
-                "tree_id": 177,
-                "level": 0,
-            }
-        )
-        Country.objects.create(
-            **{
-                "created_at": "2021-10-28 09:39:12.804-00:00",
-                "updated_at": "2021-10-28 09:39:12.804-00:00",
-                "original_id": None,
-                "name": "Iraq",
-                "short_name": "Iraq",
-                "iso_code2": "IQ",
-                "iso_code3": "IRQ",
-                "iso_num": "0368",
-                "parent": None,
-                "valid_from": "2021-10-28 09:39:12.804-00:00",
-                "valid_until": None,
-                "extras": {},
-                "lft": 1,
-                "rght": 2,
-                "tree_id": 107,
-                "level": 0,
-            }
-        )
-        Country.objects.create(
-            **{
-                "created_at": "2021-10-28 09:39:12.210-00:00",
-                "updated_at": "2021-10-28 09:39:12.210-00:00",
-                "original_id": None,
-                "name": "Afghanistan",
-                "short_name": "Afghanistan",
-                "iso_code2": "AF",
-                "iso_code3": "AFG",
-                "iso_num": "0004",
-                "parent": None,
-                "valid_from": "2021-10-28 09:39:12.210-00:00",
-                "valid_until": None,
-                "extras": {},
-                "lft": 1,
-                "rght": 2,
-                "tree_id": 1,
-                "level": 0,
-            }
-        )
+        call_command("loadcountries")
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.sanction_lists.add(sanction_list)
         cls.registration_data_import = RegistrationDataImportFactory(
