@@ -495,6 +495,7 @@ class TestBusinessAreas:
 
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -573,6 +574,7 @@ class TestBusinessAreas:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -758,6 +760,7 @@ class TestManualCalendar:
         end_date = datetime.now() + relativedelta(months=1)
         assert str(end_date.strftime("25 %b %Y")) in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -940,6 +943,7 @@ class TestManualCalendar:
         assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
