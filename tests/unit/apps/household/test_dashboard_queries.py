@@ -1,5 +1,6 @@
 from django.utils import timezone
 
+import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household
@@ -11,6 +12,8 @@ from pytz import utc
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+
+pytestmark = pytest.mark.django_db()
 
 
 class TestDashboardQueries(APITestCase):
