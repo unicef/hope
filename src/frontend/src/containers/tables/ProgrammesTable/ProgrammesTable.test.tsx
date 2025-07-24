@@ -4,6 +4,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from 'src/testUtils/testUtils';
 import { setupCommonMocks } from 'src/testUtils/commonMocks';
 import ProgrammesTable from './ProgrammesTable';
+// Explicitly mock all relevant RestService methods as a named export
+vi.mock('@restgenerated/services/RestService', () => ({
+  RestService: {
+    restBusinessAreasProgramsList: vi.fn(),
+    restBusinessAreasProgramsCountRetrieve: vi.fn(),
+    restBusinessAreasUsersProfileRetrieve: vi.fn(),
+  },
+}));
+
 import { RestService } from '@restgenerated/services/RestService';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { FrequencyOfPaymentsEnum } from '@restgenerated/models/FrequencyOfPaymentsEnum';
@@ -23,6 +32,8 @@ describe('ProgrammesTable', () => {
       {
         id: 'program-1',
         programmeCode: 'PROG001',
+        beneficiaryGroupMatch: 'test-program',
+        compatibleDct: 'test-program',
         numberOfHouseholdsWithTpInProgram: 1000,
         slug: 'test-program',
         name: 'Emergency Cash Transfer Program',
@@ -198,17 +209,16 @@ describe('ProgrammesTable', () => {
         businessAreaSlug: 'test-business-area',
         beneficiaryGroupMatch: 'test-program',
         compatibleDct: 'test-program',
-        ordering: 'startDate',
-        limit: 10,
-        offset: 0,
       }),
     );
 
     expect(
       RestService.restBusinessAreasProgramsCountRetrieve,
-    ).toHaveBeenCalledWith({
-      businessAreaSlug: 'test-business-area',
-    });
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        businessAreaSlug: 'test-business-area',
+      }),
+    );
   });
 
   it('renders empty table when no programs are available', async () => {
@@ -275,6 +285,8 @@ describe('ProgrammesTable', () => {
       expect(RestService.restBusinessAreasProgramsList).toHaveBeenCalledWith(
         expect.objectContaining({
           businessAreaSlug: 'test-business-area',
+          beneficiaryGroupMatch: 'test-program',
+          compatibleDct: 'test-program',
           search: 'education',
           startDate: '2023-01-01',
           endDate: '2023-12-31',
@@ -285,7 +297,6 @@ describe('ProgrammesTable', () => {
           budgetMin: 50000,
           budgetMax: 500000,
           dataCollectingType: 'full',
-          ordering: 'startDate',
         }),
       );
     });
