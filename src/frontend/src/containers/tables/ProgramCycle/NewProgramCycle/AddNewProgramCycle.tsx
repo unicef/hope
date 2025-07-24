@@ -1,18 +1,18 @@
-import { Button, Dialog } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ProgramQuery } from '@generated/graphql';
-import AddIcon from '@mui/icons-material/Add';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
 import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
-import { ProgramCycle } from '@api/programCycleApi';
-import { useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import AddIcon from '@mui/icons-material/Add';
+import { Button, Dialog } from '@mui/material';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { useQueryClient } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AddNewProgramCycleProps {
-  program: ProgramQuery['program'];
-  lastProgramCycle?: ProgramCycle;
+  program: ProgramDetail;
+  lastProgramCycle?: ProgramCycleList;
 }
 
 const AddNewProgramCycle = ({
@@ -27,7 +27,7 @@ const AddNewProgramCycle = ({
 
   const handleClose = async () => {
     await queryClient.invalidateQueries({
-      queryKey: ['programCycles', businessArea, program.id],
+      queryKey: ['programCycles', businessArea, program.slug],
     });
     setOpen(false);
     setStep(0);
@@ -43,7 +43,7 @@ const AddNewProgramCycle = ({
   };
 
   const stepsToRender = [];
-  if (lastProgramCycle.end_date) {
+  if (lastProgramCycle.endDate) {
     stepsToRender.push(
       <CreateProgramCycle
         program={program}

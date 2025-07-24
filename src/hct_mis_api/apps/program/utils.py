@@ -2,16 +2,21 @@ import re
 from random import randint
 from typing import Dict, List, Optional
 
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    RoleAssignment,
+    User,
+)
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
     Document,
     EntitlementCard,
     Household,
@@ -23,8 +28,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
-from hct_mis_api.apps.program.validators import validate_data_collecting_type
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -36,18 +40,16 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
     program.pk = None
     program.status = Program.DRAFT
 
-    data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
-    if data_collecting_type_code:
-        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
-    else:
-        data_collecting_type = program.data_collecting_type
-
-    validate_data_collecting_type(program.business_area, program.data_collecting_type, data_collecting_type)
+    data_collecting_type = program_data.pop("data_collecting_type", None) or program.data_collecting_type
 
     program_data["data_collecting_type_id"] = data_collecting_type.id
 
     for field_name, value in program_data.items():
         setattr(program, field_name, value)
+
+    if not program.programme_code:
+        program.programme_code = program.generate_programme_code()
+    program.slug = program.generate_slug()
 
     program.full_clean()
     program.save()
@@ -143,7 +145,7 @@ class CopyProgramPopulation:
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
-        household.head_of_household = Individual.original_and_repr_objects.filter(
+        household.head_of_household = Individual.all_merge_status_objects.filter(
             program=self.program,
             unicef_id=household.head_of_household.unicef_id,
         ).first()
@@ -184,11 +186,17 @@ class CopyProgramPopulation:
         copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from).exclude(
             Q(individual__withdrawn=True) | Q(individual__duplicate=True)
         )
+        if (
+            self.rdi.exclude_external_collectors
+        ):  # exclude roles held by external alternate collectors - external alternate collectors are not copied
+            copied_from_roles = copied_from_roles.filter(
+                Q(individual__household=new_household.copied_from) | Q(role=ROLE_PRIMARY)
+            )
         for role in copied_from_roles:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = Individual.original_and_repr_objects.filter(
+            role.individual = Individual.all_merge_status_objects.filter(
                 program=self.program,
                 unicef_id=role.individual.unicef_id,
             ).first()
@@ -243,7 +251,7 @@ class CopyProgramPopulation:
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
         if new_individual.household:
-            new_individual.household = Household.original_and_repr_objects.filter(
+            new_individual.household = Household.all_merge_status_objects.filter(
                 program=self.program,
                 unicef_id=new_individual.household.unicef_id,
             ).first()
@@ -444,7 +452,6 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 household.copied_from_id = original_household_id
                 household.pk = None
                 household.program = program
-                household.is_original = False
                 household.registration_data_import = rdi
                 household.total_cash_received = None
                 household.total_cash_received_usd = None
@@ -512,34 +519,55 @@ def create_program_partner_access(
     partners_data: List, program: Program, partner_access: Optional[str] = None
 ) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(business_areas=program.business_area).exclude(
-            name=settings.DEFAULT_EMPTY_PARTNER
-        )
+        # create full-area-access for all allowed partners; UNICEF subpartners already have access to all programs in BA
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(parent__name="UNICEF")
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     for partner_data in partners_data:
-        program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
-            program=program,
-            partner_id=partner_data["partner"],
+        #  TODO: temporary solution to avoid getting role from user's input
+        #   which is planned to be applied later outside this ticket.
+        existing_roles_for_partner_in_this_ba = (
+            RoleAssignment.objects.filter(
+                partner_id=partner_data["partner"],
+                business_area=program.business_area,
+                program=None,
+            )
+            .values_list("role_id", flat=True)
+            .distinct()
         )
-        if areas := partner_data.get("areas"):
-            program_partner.areas.set(Area.objects.filter(id__in=areas))
-            program_partner.full_area_access = False
-            program_partner.save(update_fields=["full_area_access"])
+        for role_id in existing_roles_for_partner_in_this_ba:
+            RoleAssignment.objects.get_or_create(
+                partner_id=partner_data["partner"],
+                business_area=program.business_area,
+                program=program,
+                role_id=role_id,
+            )
+        # TODO: end of temporary solution - to remove after role assignment is implemented in UI
+        if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
+            area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
+                partner_id=partner_data["partner"],
+                program=program,
+            )
+            area_limits.areas.set(Area.objects.filter(id__in=areas))
         else:
-            # full area access
-            program_partner.full_area_access = True
-            program_partner.save(update_fields=["full_area_access"])
+            # remove area limits if it is updated to full-area-access
+            if area_limits := AdminAreaLimitedTo.objects.filter(
+                partner_id=partner_data["partner"],
+                program=program,
+            ).first():
+                area_limits.delete()
+
     return partners_data
 
 
 def remove_program_partner_access(partners_data: List, program: Program) -> None:
     partner_ids = [partner_data["partner"] for partner_data in partners_data]
-    existing_program_partner_access = ProgramPartnerThrough.objects.filter(
+    existing_partner_role_assignments = RoleAssignment.objects.filter(
+        business_area=program.business_area,
         program=program,
     )
-    removed_partner_access = existing_program_partner_access.exclude(
-        Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
+    removed_partner_access = existing_partner_role_assignments.exclude(
+        Q(partner_id__in=partner_ids) | Q(partner__parent__name="UNICEF")
     )
     removed_partner_access.delete()
 

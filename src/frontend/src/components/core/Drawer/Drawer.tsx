@@ -1,21 +1,21 @@
+import { useBackendVersion } from '@hooks/useBackendVersion';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useFrontendVersion } from '@hooks/useFrontendVersion';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import MUIDrawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
+import MUIDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBackendVersion } from '@hooks/useBackendVersion';
-import { useFrontendVersion } from '@hooks/useFrontendVersion';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
-import styled from 'styled-components';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramStatus } from '@generated/graphql';
-import { useProgramContext } from 'src/programContext';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -110,8 +110,10 @@ const Text = styled(ListItemText)`
 `;
 const ProgramNotActiveBar = styled.div`
   background-color: #ff80ff;
+  color: #721c24;
+  border-radius: 5px;
   text-align: center;
-  color: #444;
+  font-weight: 600;
 `;
 
 const Icon = styled(ListItemIcon)`
@@ -154,12 +156,12 @@ export const Drawer = ({
 
   let notActiveBar = null;
   const programStatus = selectedProgram?.status;
-  const isActive = programStatus === ProgramStatus.Active;
+  const isActive = programStatus === Status791Enum.ACTIVE;
   const isDefined = programStatus !== undefined && programStatus !== null;
   if (!isAllPrograms && !isActive && isDefined) {
     notActiveBar = (
       <ProgramNotActiveBar data-cy="program-inactive-subheader">
-        programme inactive
+        Programme Inactive
       </ProgramNotActiveBar>
     );
   }

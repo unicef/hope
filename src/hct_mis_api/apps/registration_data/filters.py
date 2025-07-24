@@ -10,21 +10,23 @@ from hct_mis_api.apps.core.filters import (
     IntegerFilter,
     IntegerRangeFilter,
 )
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class RegistrationDataImportFilter(FilterSet):
     import_date = DateFilter(field_name="import_date__date")
-    business_area = CharFilter(field_name="business_area__slug")
     import_date_range = DateTimeRangeFilter(field_name="import_date")
     size = IntegerRangeFilter(field_name="number_of_households")
-    program = CharFilter(method="filter_by_program")
     total_households_count_with_valid_phone_no_max = IntegerFilter(
         method="filter_total_households_count_with_valid_phone_no_max"
     )
     total_households_count_with_valid_phone_no_min = IntegerFilter(
         method="filter_total_households_count_with_valid_phone_no_min"
+    )
+    search = CharFilter(
+        field_name="name",
+        lookup_expr="startswith",
     )
 
     class Meta:
@@ -34,7 +36,6 @@ class RegistrationDataImportFilter(FilterSet):
             "import_date": ["exact"],
             "status": ["exact"],
             "name": ["exact", "startswith"],
-            "business_area": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -52,9 +53,6 @@ class RegistrationDataImportFilter(FilterSet):
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         qs = super().filter_queryset(queryset)
         return qs.exclude(excluded=True)
-
-    def filter_by_program(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        return queryset.filter(program_id=decode_id_string_required(value))
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(

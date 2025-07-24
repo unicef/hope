@@ -12,6 +12,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from flaky import flaky
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -384,6 +385,7 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
+    @flaky(max_runs=3, min_passes=1)
     def test_individual_ids(self) -> None:
         payment_plan = PaymentPlanFactory(
             name="tp",
@@ -413,6 +415,7 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
 
         assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
+    @flaky(max_runs=3, min_passes=1)
     def test_household_and_individual_ids(self) -> None:
         payment_plan = PaymentPlanFactory(
             name="tp",

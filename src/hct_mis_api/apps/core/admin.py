@@ -5,6 +5,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter, TabularInline
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
@@ -35,6 +36,7 @@ from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
+from hct_mis_api.apps.account.models import Partner, RoleAssignment
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
@@ -268,12 +270,67 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
+    @button(label="Partners", permission="account.can_change_allowed_partners")
+    def allowed_partners(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
+        business_area = get_object_or_404(BusinessArea, pk=pk)
+
+        class AllowedPartnersForm(forms.Form):
+            partners = forms.ModelMultipleChoiceField(
+                queryset=Partner.objects.exclude(
+                    id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True)
+                ),
+                required=False,
+                widget=FilteredSelectMultiple("Partners", is_stacked=False),
+            )
+
+        if request.method == "POST":
+            form = AllowedPartnersForm(request.POST)
+            if form.is_valid():
+                selected_partners = form.cleaned_data["partners"]
+                # Get the current allowed partners for the business area
+                previous_allowed_partners = set(Partner.objects.filter(allowed_business_areas=business_area))
+
+                # Identify which partners were removed
+                removed_partners = previous_allowed_partners - set(selected_partners)
+                # Check if there are any removed partners with existing role assignments in this business area
+                for partner in removed_partners:
+                    if RoleAssignment.objects.filter(partner=partner, business_area=business_area).exists():
+                        self.message_user(
+                            request,
+                            f"You cannot remove {partner.name} because it has existing role assignments in this business area.",
+                            messages.ERROR,
+                        )
+                        return HttpResponseRedirect(request.get_full_path())
+
+                for partner in Partner.objects.all():
+                    if partner in selected_partners:
+                        partner.allowed_business_areas.add(business_area)
+                    else:
+                        partner.allowed_business_areas.remove(business_area)
+                messages.success(request, "Allowed partners successfully updated.")
+                return HttpResponseRedirect(request.get_full_path())
+
+        else:
+            form = AllowedPartnersForm(
+                initial={"partners": Partner.objects.filter(allowed_business_areas=business_area)}
+            )
+
+        context = self.get_common_context(request, pk)
+        context.update(
+            {
+                "business_area": business_area,
+                "form": form,
+            }
+        )
+
+        return TemplateResponse(request, "core/admin/allowed_partners.html", context)
+
     @button(permission="account.view_user")
     def members(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
-            .user_roles.values(
+            .role_assignments.values(
                 "user__id",
                 "user__email",
                 "user__username",

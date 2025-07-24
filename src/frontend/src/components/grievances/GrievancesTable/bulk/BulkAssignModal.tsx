@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  AllGrievanceTicketQuery,
-  AllUsersForFiltersQuery,
-  useAllUsersForFiltersQuery,
-  useBulkUpdateGrievanceAssigneeMutation,
-} from '@generated/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { User } from '@restgenerated/models/User';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -21,52 +21,73 @@ export const StyledLink = styled.div`
 `;
 
 interface BulkAssignModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
-  businessArea: string;
+  selectedTickets: GrievanceTicketList[];
   setSelected;
 }
 
 export function BulkAssignModal({
   selectedTickets,
-  businessArea,
   setSelected,
 }: BulkAssignModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] =
-    useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
+  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const [value, setValue] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
-  const { data: usersData } = useAllUsersForFiltersQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: inputValue,
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
+        {
+          businessAreaSlug,
+          formData: params,
+        },
+      );
+    },
+    onSuccess: () => {
+      if (isAllPrograms) {
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasGrievanceTickets'],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasProgramsGrievanceTickets',
+            { program: programId },
+          ],
+        });
+      }
+      setSelected([]);
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
     },
   });
-  const optionsData = usersData?.allUsers?.edges || [];
-  const onFilterChange = (data): void => {
-    if (data) {
-      setValue(data);
-    }
+
+  const { data: usersData } = useQuery({
+    queryKey: ['users', businessAreaSlug, inputValue],
+    queryFn: () =>
+      RestService.restBusinessAreasUsersList({
+        businessAreaSlug: businessAreaSlug,
+        limit: 20,
+        orderBy: ['first_name', 'last_name', 'email'],
+        search: inputValue,
+      }),
+  });
+
+  const optionsData: User[] = usersData?.results || [];
+
+  const onFilterChange = (data: User | null): void => {
+    setValue(data);
   };
   const onSave = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          assignedTo: value.node.id,
-          businessAreaSlug: businessArea,
-          grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
-        },
-        refetchQueries: ['AllGrievanceTicket'],
-        awaitRefetchQueries: true,
-      });
-      setSelected([]);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      throw e;
-    }
+    await mutateAsync({
+      assignedTo: value?.id || '',
+      grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
+    });
   };
 
   return (

@@ -1,19 +1,19 @@
-import { Box, TableCell } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box, TableCell } from '@mui/material';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentPlanTableRowProps {
-  plan;
+  plan: PaymentPlanList;
   canViewDetails: boolean;
 }
 
@@ -29,21 +29,17 @@ export const PaymentPlanTableRow = ({
   const handleClick = (): void => {
     navigate(paymentPlanPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
-
-  if (!statusChoicesData) return null;
 
   const followUpLinks = (): ReactElement => {
-    if (!plan.followUps?.edges?.length) return <>-</>;
+    if (!plan.followUps?.length) return <>-</>;
     return (
       <Box display="flex" flexDirection="column">
-        {plan.followUps?.edges?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
+        {plan.followUps?.map((followUp) => {
+          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`;
           return (
-            <Box key={followUp?.node?.id} mb={1}>
-              <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
-                {followUp?.node?.unicefId}
+            <Box key={followUp?.id} mb={1}>
+              <BlackLink key={followUp?.id} to={followUpPaymentPlanPath}>
+                {followUp?.unicefId}
               </BlackLink>
             </Box>
           );
@@ -75,22 +71,22 @@ export const PaymentPlanTableRow = ({
       </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
       <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
-      <TableCell align="left">{plan.currencyName}</TableCell>
+      <TableCell align="left">{plan.currency}</TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          plan.totalEntitledQuantity,
+          Number(plan.totalEntitledQuantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          plan.totalDeliveredQuantity,
+          Number(plan.totalDeliveredQuantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          plan.totalUndeliveredQuantity,
+          Number(plan.totalUndeliveredQuantity),
           plan.currency,
         )}`}
       </TableCell>

@@ -22,20 +22,6 @@ from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
 from hct_mis_api.apps.payment.models import PaymentPlan
 
-EXCLUDE_HOUSEHOLD_MUTATION = """
-mutation excludeHouseholds($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!, $exclusionReason: String) {
-  excludeHouseholds(
-    paymentPlanId: $paymentPlanId,
-    excludedHouseholdsIds: $excludedHouseholdsIds,
-    exclusionReason: $exclusionReason
-  ) {
-      paymentPlan {
-        id
-      }
-    }
-}
-"""
-
 
 class TestExcludeHouseholds(APITestCase):
     @classmethod
@@ -45,7 +31,10 @@ class TestExcludeHouseholds(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], cls.business_area
+            cls.user,
+            [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+            cls.business_area,
+            whole_business_area_access=True,
         )
         cls.program = RealProgramFactory()
         cls.program_cycle = cls.program.cycles.first()
@@ -95,63 +84,6 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_4 = PaymentFactory(
             parent=cls.another_payment_plan, household=cls.household_4, excluded=False, currency="PLN"
         )
-
-    def test_payment_plan_within_not_status_open_or_lock(self) -> None:
-        payment_plan_id = encode_id_base64(self.source_payment_plan.id, "PaymentPlan")
-
-        exclude_mutation_response = self.graphql_request(
-            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": payment_plan_id,
-                "excludedHouseholdsIds": [Household.objects.get(id=self.household_1.id).unicef_id],
-            },
-        )
-
-        assert "errors" in exclude_mutation_response
-        self.assertEqual(
-            exclude_mutation_response["errors"][0]["message"],
-            "Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan",
-        )
-
-    def test_exclude_hh_without_permissions(self) -> None:
-        payment_plan_id = encode_id_base64(self.source_payment_plan.id, "PaymentPlan")
-        user_with_out_perms = UserFactory.create()
-
-        exclude_mutation_response = self.graphql_request(
-            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
-            context={"user": user_with_out_perms},
-            variables={
-                "paymentPlanId": payment_plan_id,
-                "excludedHouseholdsIds": [Household.objects.first().unicef_id],
-            },
-        )
-
-        assert "errors" in exclude_mutation_response
-        self.assertEqual(
-            exclude_mutation_response["errors"][0]["message"],
-            "Permission Denied: User does not have correct permission.",
-        )
-
-    def test_exclude_households_mutation(self) -> None:
-        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
-
-        self.graphql_request(
-            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": self.payment_plan_id,
-                "excludedHouseholdsIds": [household_unicef_id_1],
-                "exclusionReason": "I do not like those households",
-            },
-        )
-
-        self.payment_plan.refresh_from_db()
-
-        self.assertEqual(
-            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
-        )
-        self.assertEqual(self.payment_plan.exclude_household_error, "")
 
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_payment_with_wrong_hh_ids(self, get_exchange_rate_mock: Any) -> None:

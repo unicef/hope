@@ -35,10 +35,10 @@ class BusinessAreaFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> List:
-        return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
+        return BusinessArea.objects.filter(role_assignments__user__isnull=False).values_list("id", "name").distinct()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
-        return queryset.filter(user_roles__business_area=self.value()).distinct() if self.value() else queryset
+        return queryset.filter(role_assignments__business_area=self.value()).distinct() if self.value() else queryset
 
 
 class PermissionFilter(SimpleListFilter):

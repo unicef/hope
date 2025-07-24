@@ -12,9 +12,10 @@ export const ProfilePage = (): ReactElement | null => {
 
   useEffect(() => {
     if (error) {
-      window.location.replace(
-        `${LOGIN_URL}?next=${location.pathname}${location.search}`,
+      const encodedNext = encodeURIComponent(
+        `${location.pathname}${location.search}`,
       );
+      window.location.replace(`${LOGIN_URL}?next=${encodedNext}`);
     }
     if (next?.startsWith('/api/')) {
       window.location.replace(next);

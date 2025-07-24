@@ -1,25 +1,22 @@
-import React, { ReactElement } from 'react';
-import { Box, Button } from '@mui/material';
-import { PageHeader } from '@core/PageHeader';
-import {
-  finishProgramCycle,
-  ProgramCycle,
-  reactivateProgramCycle,
-} from '@api/programCycleApi';
-import { useTranslation } from 'react-i18next';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
-import { Link } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { decodeIdString } from '@utils/utils';
-import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
 import { AdminButton } from '@core/AdminButton';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import AddIcon from '@mui/icons-material/Add';
+import { Box, Button } from '@mui/material';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { RestService } from '@restgenerated/index';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ProgramCycleDetailsHeaderProps {
-  programCycle: ProgramCycle;
+  programCycle: ProgramCycleList;
 }
 
 export const ProgramCycleDetailsHeader = ({
@@ -31,45 +28,62 @@ export const ProgramCycleDetailsHeader = ({
   const queryClient = useQueryClient();
   const { businessArea, programId } = useBaseUrl();
 
-  const decodedProgramCycleId = decodeIdString(programCycle.id);
-
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
-      mutationFn: async () => {
-        return finishProgramCycle(
-          businessArea,
-          programId,
-          decodedProgramCycleId,
-        );
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesFinishCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [
             'programCyclesDetails',
             businessArea,
+            programCycle.id,
             programId,
-            decodedProgramCycleId,
           ],
         });
+        showMessage(t('Programme Cycle Finished'));
+      },
+      onError: (error) => {
+        showMessage(t('Failed to finish the programme cycle.'));
+        console.error(error);
       },
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
     useMutation({
-      mutationFn: async () => {
-        return reactivateProgramCycle(
-          businessArea,
-          programId,
-          decodedProgramCycleId,
-        );
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesReactivateCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [
             'programCyclesDetails',
             businessArea,
+            programCycle.id,
             programId,
-            decodedProgramCycleId,
           ],
         });
       },
@@ -88,23 +102,27 @@ export const ProgramCycleDetailsHeader = ({
 
   const finishAction = async () => {
     try {
-      await finishMutation();
+      await finishMutation({
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 
   const reactivateAction = async () => {
     try {
-      await reactivateMutation();
+      await reactivateMutation({
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -166,7 +184,7 @@ export const ProgramCycleDetailsHeader = ({
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={programCycle.admin_url} />}
+      flags={<AdminButton adminUrl={programCycle.adminUrl} />}
     >
       {buttons}
     </PageHeader>

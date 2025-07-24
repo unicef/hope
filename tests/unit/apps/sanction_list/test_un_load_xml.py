@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from django.core.management import call_command
 from django.utils import timezone
 
 import pytest
@@ -27,6 +28,7 @@ def sanction_list(db: Any) -> "SanctionList":
 def program(db: Any, sanction_list: "SanctionList") -> "Program":
     from extras.test_utils.factories.program import ProgramFactory
 
+    call_command("loadcountries")
     create_afghanistan()
     program = ProgramFactory()
     program.sanction_lists.add(sanction_list)

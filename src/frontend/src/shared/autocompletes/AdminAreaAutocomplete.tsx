@@ -1,8 +1,8 @@
-import { get } from 'lodash';
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAllAdminAreasLazyQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import {
@@ -45,33 +45,34 @@ export function AdminAreaAutocomplete({
   const location = useLocation();
   const { businessArea } = useBaseUrl();
 
-  const [loadData, { data, loading }] = useAllAdminAreasLazyQuery({
-    variables: {
-      first: 20,
-      name: debouncedInputText,
-      businessArea,
-      level,
-    },
-    fetchPolicy: 'cache-and-network',
+  const {
+    data: areasData,
+    isLoading: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ['adminAreas', debouncedInputText, businessArea, level, open],
+    queryFn: () =>
+      RestService.restAreasList({
+        search: debouncedInputText,
+        areaTypeAreaLevel: level,
+        limit: 20,
+      }),
+    enabled: open && !!businessArea,
   });
 
   const isMounted = useRef(true);
 
-  const loadDataCallback = useCallback(() => {
-    const asyncLoadData = async () => {
-      if (isMounted.current && businessArea) {
-        try {
-          await loadData({
-            variables: { businessArea, name: debouncedInputText },
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    };
+  const loadData = useCallback(() => {
+    if (isMounted.current && businessArea && open) {
+      refetch();
+    }
+  }, [refetch, businessArea, open]);
 
-    void asyncLoadData();
-  }, [loadData, businessArea, debouncedInputText]);
+  const loadDataCallback = useCallback(() => {
+    if (isMounted.current && businessArea && open) {
+      loadData();
+    }
+  }, [loadData, businessArea, open]);
 
   useEffect(() => {
     if (open) {
@@ -80,7 +81,7 @@ export function AdminAreaAutocomplete({
     return () => {
       isMounted.current = false;
     };
-  }, [open, debouncedInputText, loadDataCallback]);
+  }, [open, loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -92,7 +93,7 @@ export function AdminAreaAutocomplete({
     setAppliedFilter,
   );
 
-  const allEdges = get(data, 'allAdminAreas.edges', []);
+  const allEdges = areasData?.results || [];
 
   return (
     <BaseAutocomplete
@@ -107,11 +108,7 @@ export function AdminAreaAutocomplete({
         if (!selectedValue) {
           onInputTextChange('');
         }
-        handleAutocompleteChange(
-          name,
-          selectedValue?.node?.id,
-          handleFilterChange,
-        );
+        handleAutocompleteChange(name, selectedValue?.id, handleFilterChange);
       }}
       handleOpen={() => setOpen(true)}
       open={open}
@@ -119,12 +116,12 @@ export function AdminAreaAutocomplete({
         handleAutocompleteClose(setOpen, onInputTextChange, reason)
       }
       handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
+        handleOptionSelected(option?.id, value1)
       }
       handleOptionLabel={(option) =>
         getAutocompleteOptionLabel(option, allEdges, inputValue)
       }
-      data={data}
+      data={areasData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

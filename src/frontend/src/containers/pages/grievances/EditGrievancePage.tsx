@@ -1,26 +1,3 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
-import { Field, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
-  useAllProgramsForChoicesQuery,
-  useGrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-  useGrievancesChoiceDataQuery,
-  useMeQuery,
-  useUpdateGrievanceMutation,
-} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -32,6 +9,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { Title } from '@components/core/Title';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingDocumentationFieldArray } from '@components/grievances/Documentation/ExistingDocumentationFieldArray';
 import { NewDocumentationFieldArray } from '@components/grievances/Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '@components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
@@ -45,41 +23,57 @@ import {
   EmptyComponent,
   dataChangeComponentDict,
   prepareInitialValues,
-  prepareVariables,
+  prepareRestUpdateVariables,
 } from '@components/grievances/utils/editGrievanceUtils';
 import { validate } from '@components/grievances/utils/validateGrievance';
 import { validationSchema } from '@components/grievances/utils/validationSchema';
-import {
-  PERMISSIONS,
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-} from '../../../config/permissions';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid2 as Grid,
+  Typography,
+} from '@mui/material';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
-  getGrievanceCategoryDescriptions,
-  getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_TICKET_STATES,
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
 } from '@utils/constants';
 import {
   choicesToDict,
   isInvalid,
   isPermissionDeniedError,
+  showApiErrorMessages,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { useProgramContext } from 'src/programContext';
+import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import {
+  PERMISSIONS,
+  hasCreatorOrOwnerPermissions,
+  hasPermissions,
+} from '../../../config/permissions';
+import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -96,62 +90,147 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } =
+    useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const queryClient = useQueryClient();
 
   const {
     data: ticketData,
-    loading: ticketLoading,
+    isLoading: ticketLoading,
     error,
-  } = useGrievanceTicketQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
+  } = useQuery<GrievanceTicketDetail>({
+    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
   });
 
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryFn: () => {
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
+        });
+      },
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    },
+  );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
 
-  const [mutate, { loading }] = useUpdateGrievanceMutation();
-  const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
+  const { mutateAsync: updateGrievanceTicket, isPending: loading } =
+    useMutation({
+      mutationFn: (data: { id: string; formData: any }) =>
+        RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
+          businessAreaSlug,
+          id: data.id,
+          formData: data.formData,
+        }),
+    });
+
+  const { mutateAsync: changeTicketStatus } = useMutation({
+    mutationFn: (data: { id: string; formData: any }) =>
+      RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
+        businessAreaSlug,
+        id: data.id,
+        formData: data.formData,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          id,
+        ],
+      });
+    },
+  });
+
   const {
     data: allAddIndividualFieldsData,
-    loading: allAddIndividualFieldsDataLoading,
-  } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
+    isLoading: allAddIndividualFieldsDataLoading,
+  } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFieldsAttributes', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug,
+          },
+        ),
+    });
+  const {
+    data: allEditPeopleFieldsData,
+    isLoading: allEditPeopleFieldsLoading,
+  } = useQuery({
+    queryKey: ['editPeopleFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
   const individualFieldsDict = useArrayToDict(
-    allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
+    allAddIndividualFieldsData?.results,
     'name',
     '*',
   );
   const householdFieldsDict = useArrayToDict(
-    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    householdFieldsData?.results,
     'name',
     '*',
   );
 
   const peopleFieldsDict = useArrayToDict(
-    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    allEditPeopleFieldsData?.results,
     'name',
+    '*',
+  );
+
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
     '*',
   );
 
@@ -166,25 +245,12 @@ const EditGrievancePage = (): ReactElement => {
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (
-    !choicesData ||
-    !ticketData ||
-    !currentUserData ||
-    permissions === null ||
-    !householdFieldsData ||
-    !householdFieldsDict ||
-    !individualFieldsDict ||
-    !peopleFieldsDict ||
-    !programsData
-  )
-    return null;
-
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const currentUserId = currentUserData.me.id;
-  const ticket = ticketData.grievanceTicket;
+  const currentUserId = currentUserData.id;
+  const ticket = ticketData;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
@@ -204,13 +270,22 @@ const EditGrievancePage = (): ReactElement => {
   )
     return <PermissionDenied />;
 
-  const changeState = (status): void => {
-    mutateStatus({
-      variables: {
-        grievanceTicketId: ticket.id,
-        status,
-      },
-    });
+  const changeState = async (status): Promise<void> => {
+    try {
+      await changeTicketStatus({
+        id: ticket.id,
+        formData: {
+          status,
+        },
+      });
+      showMessage(t('Ticket status updated successfully.'));
+    } catch (e) {
+      showApiErrorMessages(
+        e,
+        showMessage,
+        'An error occurred while updating the grievance ticket',
+      );
+    }
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValues: any = prepareInitialValues(ticket);
@@ -257,9 +332,10 @@ const EditGrievancePage = (): ReactElement => {
     baseUrl,
   );
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict
@@ -270,20 +346,15 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const { variables } = prepareVariables(businessArea, values, ticket);
-          await mutate({
-            variables,
-            refetchQueries: () => [
-              {
-                query: GrievanceTicketDocument,
-                variables: { id: ticket.id },
-              },
-            ],
+          const formData = prepareRestUpdateVariables(values, ticket);
+          await updateGrievanceTicket({
+            id: ticket.id,
+            formData,
           });
           showMessage(t('Grievance Ticket edited.'));
           navigate(grievanceDetailsPath);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          showApiErrorMessages(error, showMessage);
         }
         if (
           ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
@@ -295,7 +366,7 @@ const EditGrievancePage = (): ReactElement => {
       validate={(values) =>
         validate(
           values,
-          allAddIndividualFieldsData,
+          allAddIndividualFieldsData?.results || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           beneficiaryGroup,
@@ -359,10 +430,7 @@ const EditGrievancePage = (): ReactElement => {
                       {showIssueType(values) ? (
                         <Grid size={{ xs: 6 }}>
                           <LabelizedField label={t('Issue Type')}>
-                            {selectedIssueType(
-                              values,
-                              choicesData.grievanceTicketIssueTypeChoices,
-                            )}
+                            {selectedIssueType(values, issueTypeDict)}
                           </LabelizedField>
                         </Grid>
                       ) : null}

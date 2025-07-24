@@ -20,39 +20,6 @@ from hct_mis_api.apps.household.models import DISABLED, HEAD, MALE, NOT_DISABLED
 class TestFixingGrievanceTickets(APITestCase):
     databases = "__all__"
 
-    CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
-    mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){
-      createGrievanceTicket(input:$input){
-        grievanceTickets{
-          description
-          category
-          issueType
-          individualDataUpdateTicketDetails{
-            individual{
-              fullName
-            }
-            individualData
-          }
-          sensitiveTicketDetails{
-            id
-          }
-          householdDataUpdateTicketDetails{
-            household{
-              id
-            }
-            householdData
-          }
-          addIndividualTicketDetails{
-            household{
-              id
-            }
-            individualData
-          }
-        }
-      }
-    }
-    """
-
     @parameterized.expand(
         [
             (True, DISABLED),

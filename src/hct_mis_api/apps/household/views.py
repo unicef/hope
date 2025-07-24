@@ -40,7 +40,7 @@ def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingInd
     raise NotFound(f"Document with given tax_id: {tax_id} not found")
 
 
-def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household]:
+def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household, None]:
     kobo_asset_value = _prepare_kobo_asset_id_value(detail_id)
 
     households = Household.objects.filter(detail_id__endswith=kobo_asset_value)
@@ -49,7 +49,7 @@ def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[Pe
     if households.count() > 1:
         raise ValidationError(f"Multiple households ({households.count()}) with given detail_id found")
     if households.count() == 1:
-        return households.first()  # type: ignore
+        return households.first()
 
     imported_households = PendingHousehold.objects.filter(detail_id__endswith=kobo_asset_value)
     if business_area_code:

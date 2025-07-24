@@ -1,7 +1,6 @@
 import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
@@ -15,10 +14,11 @@ import {
 } from '@utils/constants';
 import { ChangeEvent, ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 export interface SelectionProps {
   handleChange: (e: ChangeEvent) => void;
-  choicesData: GrievancesChoiceDataQuery;
+  choicesData: GrievanceChoices;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   showIssueType: (values) => boolean;
   values;
@@ -51,6 +51,7 @@ function Selection({
 
   function replaceLabels(choices, _beneficiaryGroup) {
     if (!choices) return [];
+
     return choices.map((choice) => {
       let newName = choice.name;
       if (_beneficiaryGroup?.memberLabel) {
@@ -62,10 +63,17 @@ function Selection({
       return { ...choice, name: newName };
     });
   }
-  const updatedChoices = replaceLabels(
-    issueTypeDict[values.category]?.subCategories,
-    beneficiaryGroup,
+
+  const subCategoriesObj = issueTypeDict[values.category]?.subCategories || [];
+
+  // Transform to array of { name, value }
+  const subcategories = Object.entries(subCategoriesObj).map(
+    ([value, name]) => ({
+      name,
+      value,
+    }),
   );
+  const updatedChoices = replaceLabels(subcategories, beneficiaryGroup);
 
   const categoryDescriptions =
     getGrievanceCategoryDescriptions(beneficiaryGroup);

@@ -2,10 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  useApproveHouseholdDataChangeMutation,
-} from '@generated/graphql';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -13,18 +10,26 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { camelCase } from 'lodash';
+import { customSnakeCase } from '@components/grievances/utils/createGrievanceUtils';
 
 export function RequestedHouseholdDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
 
   const getConfirmationText = (values): string => {
     const allSelected =
@@ -33,20 +38,59 @@ export function RequestedHouseholdDataChange({
       allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
-  const [mutate] = useApproveHouseholdDataChangeMutation();
+
+  const { mutateAsync: mutate } = useMutation({
+    mutationFn: ({
+      householdApproveData,
+      flexFieldsApproveData,
+    }: {
+      householdApproveData: any;
+      flexFieldsApproveData?: any;
+    }) => {
+      const formData: GrievanceHouseholdDataChangeApprove = {
+        householdApproveData,
+        flexFieldsApproveData,
+      };
+
+      return RestService.restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: ticket.id,
+          formData,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage('Changes Approved');
+      queryClient.invalidateQueries({
+        queryKey: ['GrievanceTicketDetail', ticket.id],
+      });
+    },
+    onError: (error: any) => {
+      if (error?.body?.errors) {
+        Object.values(error.body.errors)
+          .flat()
+          .forEach((msg: string) => {
+            showMessage(msg);
+          });
+      } else {
+        showMessage(error?.message || 'An error occurred');
+      }
+    },
+  });
   const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
+    ...ticket.ticketDetails.householdData,
   };
   let allApprovedCount = 0;
-  const flexFields = householdData?.flex_fields || {};
-  delete householdData.flex_fields;
+  const flexFields = householdData?.flexFields || {};
+  delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
   allApprovedCount += flexFieldsEntries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -109,44 +153,39 @@ export function RequestedHouseholdDataChange({
       initialValues={{
         selected: entries
           .filter(
-            (row: [string, { approve_status: boolean }]) =>
-              row[1].approve_status,
+            (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
           )
-          .map((row) => row[0]),
+          .map((row) => camelCase(row[0])),
         selectedFlexFields: flexFieldsEntries
           .filter(
-            (row: [string, { approve_status: boolean }]) =>
-              row[1].approve_status,
+            (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
           )
           .map((row) => row[0]),
       }}
       onSubmit={async (values) => {
         const householdApproveData = values.selected.reduce((prev, curr) => {
           // eslint-disable-next-line no-param-reassign
-          prev[curr] = true;
+          prev[customSnakeCase(curr)] = true;
           return prev;
         }, {});
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
-            prev[curr] = true;
+            prev[customSnakeCase(curr)] = true;
             return prev;
           },
           {},
         );
+
         try {
           await mutate({
-            variables: {
-              grievanceTicketId: ticket.id,
-              householdApproveData: JSON.stringify(householdApproveData),
-              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
-            },
+            householdApproveData,
+            flexFieldsApproveData,
           });
-          showMessage('Changes Approved');
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
-        } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+        } catch (error) {
+          // Error handling is done in the mutation's onError callback
         }
       }}
     >

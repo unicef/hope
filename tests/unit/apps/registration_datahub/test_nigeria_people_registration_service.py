@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -34,10 +34,9 @@ from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service imp
 
 
 class TestNigeriaPeopleRegistrationService(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUp(cls) -> None:
+        call_command("init-geo-fixtures")
         generate_delivery_mechanisms()
         country = geo_models.Country.objects.create(name="Nigeria")
         area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)

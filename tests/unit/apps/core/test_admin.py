@@ -2,10 +2,18 @@ from typing import List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 
-from extras.test_utils.factories.core import DataCollectingTypeFactory
+from django_webtest import WebTest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
 from parameterized import parameterized
+from rest_framework import status
 
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.admin import (
     AcceptanceProcessThresholdFormset,
     DataCollectingTypeForm,
@@ -107,3 +115,69 @@ class TestDataCollectingTypeForm(TestCase):
             form.errors["compatible_types"][0],
             f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: ['{str(standard_dct.label)}']",
         )
+
+
+class BusinessAreaAdminTest(WebTest):
+    csrf_checks = False
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.user = UserFactory(username="adminuser", is_staff=True, is_superuser=True)
+        cls.business_area = create_afghanistan()
+        cls.url = reverse("admin:core_businessarea_allowed_partners", args=[cls.business_area.pk])
+
+        cls.partner1 = PartnerFactory(name="Partner 1")
+        cls.partner2 = PartnerFactory(name="Partner 2")
+        cls.partner3 = PartnerFactory(name="Partner 3")
+
+        RoleAssignment.objects.all().delete()
+
+        cls.partner1.allowed_business_areas.add(cls.business_area)
+        cls.partner2.allowed_business_areas.add(cls.business_area)
+
+    def check_initial_state(self) -> None:
+        self.assertIn(self.business_area, self.partner1.allowed_business_areas.all())
+        self.assertIn(self.business_area, self.partner2.allowed_business_areas.all())
+        self.assertNotIn(self.business_area, self.partner3.allowed_business_areas.all())
+
+    def refresh_partners(self) -> None:
+        self.partner1.refresh_from_db()
+        self.partner2.refresh_from_db()
+        self.partner3.refresh_from_db()
+
+    def test_allowed_partners_get_request(self) -> None:
+        """Ensure GET request returns a valid response with the correct form"""
+        response = self.app.get(self.url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("form", response.context)
+
+    def test_allowed_partners_post_request_success(self) -> None:
+        self.check_initial_state()
+        response = self.app.post(
+            self.url,
+            user=self.user,
+            params={"partners": [self.partner1.id, self.partner3.id]},
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.refresh_partners()
+        self.assertIn(self.business_area, self.partner1.allowed_business_areas.all())
+        self.assertNotIn(self.business_area, self.partner2.allowed_business_areas.all())  # Removed
+        self.assertIn(self.business_area, self.partner3.allowed_business_areas.all())  # Added
+
+    def test_allowed_partners_post_request_prevent_removal_due_to_role_assignment(self) -> None:
+        """Ensure a partner with an existing role assignment cannot be removed"""
+        self.check_initial_state()
+
+        RoleAssignment.objects.create(partner=self.partner1, business_area=self.business_area)
+        response = self.app.post(
+            self.url,
+            user=self.user,
+            params={"partners": [self.partner3.id]},
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        # Nothing should change
+        self.refresh_partners()
+        self.check_initial_state()

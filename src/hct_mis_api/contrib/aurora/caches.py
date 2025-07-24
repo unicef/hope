@@ -40,6 +40,6 @@ class RegistrationListVersionsKeyBit(KeyBitBase):
 
 
 class AuroraKeyConstructor(KeyConstructorMixin):
-    organization_list_versions = OrganizationListVersionsKeyBit()
-    project_list_versions = ProjectListVersionsKeyBit()
-    registration_list_versions = RegistrationListVersionsKeyBit()
+    organization_list_version = OrganizationListVersionsKeyBit()
+    project_list_version = ProjectListVersionsKeyBit()
+    registration_list_version = RegistrationListVersionsKeyBit()

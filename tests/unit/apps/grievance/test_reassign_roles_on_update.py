@@ -73,13 +73,13 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             "HEAD": {
                 "role": "HEAD",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(individual.id, "IndividualNode"),
+                "household": str(self.household.id),
+                "individual": str(individual.id),
             },
             self.primary_role.id: {
                 "role": "PRIMARY",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(individual.id, "IndividualNode"),
+                "household": str(self.household.id),
+                "individual": str(individual.id),
             },
         }
 
@@ -99,8 +99,8 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             self.alternate_role.id: {
                 "role": "ALTERNATE",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.primary_collector_individual.id, "IndividualNode"),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
 
@@ -117,8 +117,8 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             self.alternate_role.id: {
                 "role": "ALTERNATE",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(individual.id, "IndividualNode"),
+                "household": str(self.household.id),
+                "individual": str(individual.id),
             },
         }
 
@@ -132,8 +132,8 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             self.primary_role.id: {
                 "role": "PRIMARY",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.alternate_collector_individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": self.alternate_collector_individual.id,
             },
         }
 
@@ -168,8 +168,8 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             self.alternate_role.id: {
                 "role": "ALTERNATE",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.no_role_individual.id, "IndividualNode"),
+                "household": str(self.household.id),
+                "individual": str(self.no_role_individual.id),
             },
         }
 

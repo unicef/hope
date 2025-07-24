@@ -1,52 +1,40 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from django.core.management import call_command
+from django.urls import reverse
 
+import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.grievance import ReferralTicketWithoutExtrasFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
-from parameterized import parameterized
+from rest_framework import status
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.models import Program
 
+pytestmark = pytest.mark.django_db()
 
-class TestGrievanceUpdateReferralTicketQuery(APITestCase):
-    QUERY = """
-        mutation UpdateGrievanceTicket(
-          $input: UpdateGrievanceTicketInput!
-        ) {
-          updateGrievanceTicket(input: $input) {
-            grievanceTicket {
-              referralTicketDetails {
-                household {
-                  size
-                }
-                individual {
-                  fullName
-                }
-              }
-            }
-          }
-        }
-    """
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
+class TestGrievanceUpdateReferralTicket:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
         call_command("loadcountries")
-        partner = PartnerFactory(name="Partner")
-        cls.user = UserFactory.create(partner=partner)
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner, first_name="TestUser")
+        self.user2 = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        self.program = ProgramFactory(
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            name="program afghanistan 1",
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -54,122 +42,84 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        cls.household, cls.individuals = create_household(
-            {"size": 1, "business_area": cls.business_area},
+        self.household, self.individuals = create_household(
+            {"size": 1, "business_area": self.afghanistan},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
-        cls.ticket = ReferralTicketWithoutExtrasFactory()
-        cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
-        cls.ticket.ticket.save()
-        cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
-        cls.update_partner_access_to_program(partner, cls.program)
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_update_referral_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._prepare_input()
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
+        self.ticket = ReferralTicketWithoutExtrasFactory(
+            ticket__business_area=self.afghanistan,
+            ticket__status=GrievanceTicket.STATUS_NEW,
+            ticket__description="OLD description",
+            ticket__language="",
         )
+        self.ticket.ticket.programs.set([self.program])
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_update_referral_ticket_with_household_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_update_referral_ticket_with_individual_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_update_referral_ticket_with_household_and_individual_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras: Dict = {
-            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
+        self.list_details = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.ticket.ticket.pk),
+            },
         )
 
     def _prepare_input(self, extras: Optional[Dict] = None) -> Dict:
         input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "admin": encode_id_base64(str(self.admin_area.id), "Area"),
-                "language": "Polish, English",
-                "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
-            }
+            "description": "Test Feedback NEW",
+            "assigned_to": str(self.user.id),
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English, ESP",
         }
 
         if extras:
-            input_data["input"]["extras"] = {"category": {"referralTicketExtras": extras}}  # type: ignore
+            input_data["extras"] = {"category": {"referral_ticket_extras": extras}}  # type: ignore
 
         return input_data
+
+    def test_update_referral_ticket_without_extras(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        input_data = self._prepare_input()
+
+        response = self.api_client.patch(self.list_details, input_data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["description"] == "OLD description"
+        assert response.json()["language"] == "Polish, English, ESP"
+        assert response.json()["assigned_to"]["first_name"] == "TestUser"
+
+    def test_update_referral_ticket_with_household_extras(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        extras = {
+            "household": str(self.household.id),
+        }
+        input_data = self._prepare_input(extras)
+
+        response = self.api_client.patch(self.list_details, input_data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["household"]["id"] == str(self.household.id)
+
+    def test_update_referral_ticket_with_individual_extras(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        extras = {
+            "individual": str(self.individuals[0].id),
+        }
+        input_data = self._prepare_input(extras)
+
+        response = self.api_client.patch(self.list_details, input_data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["individual"]["id"] == str(self.individuals[0].id)
+
+    def test_update_referral_ticket_with_household_and_individual_extras(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        extras = {
+            "individual": str(self.individuals[0].id),
+            "household": str(self.household.id),
+        }
+        input_data = self._prepare_input(extras)
+
+        response = self.api_client.patch(self.list_details, input_data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["individual"]["id"] == str(self.individuals[0].id)
+        assert response.json()["household"]["id"] == str(self.household.id)

@@ -7,6 +7,7 @@ from unittest import mock
 
 from django.conf import settings
 from django.core.files import File
+from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -39,8 +40,6 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.mark.elasticsearch
 class TestRdiKoboCreateTask(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
         return BytesIO(Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes())
@@ -48,6 +47,7 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -574,11 +574,11 @@ class TestRdiKoboCreateTask(TestCase):
             "hohh_is_caregiver_h_f": "0",
             "alternate_collector": "1",
             "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
-            "_uuid": "123123-411d-85f1-123123",
+            "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "_submission_time": "2022-02-22T12:22:22",
         }
         submission_meta_data = {
-            "kobo_submission_uuid": "123123-411d-85f1-123123",
+            "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
             "kobo_submission_time": "2022-02-22T12:22:22",
         }
@@ -598,7 +598,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(len(households_to_create), 1)
         self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
         self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
-        self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")
+        self.assertEqual(hh.kobo_submission_uuid, "5b6f30ee-010b-4bd5-a510-e78f062af155")
 
     def test_handle_household_drc_hotfix_dict(self) -> None:
         program = ProgramFactory(id="f5a67047-714f-459a-8ead-911d21f7925c", status="ACTIVE")

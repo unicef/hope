@@ -1,12 +1,14 @@
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Grid2 as Grid,
+  MenuItem,
+} from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanStatus,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -14,17 +16,12 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
+import { Choice } from '@restgenerated/models/Choice';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
+export type FilterProps = Partial<PaymentPlan>;
 
 interface PaymentPlansFiltersProps {
   filter;
@@ -35,21 +32,21 @@ interface PaymentPlansFiltersProps {
 }
 
 export const allowedStatusChoices = [
-  PaymentPlanStatus.Accepted,
-  PaymentPlanStatus.Draft,
-  PaymentPlanStatus.Finished,
-  PaymentPlanStatus.InApproval,
-  PaymentPlanStatus.InAuthorization,
-  PaymentPlanStatus.InReview,
-  PaymentPlanStatus.Locked,
-  PaymentPlanStatus.LockedFsp,
-  PaymentPlanStatus.Open,
-  PaymentPlanStatus.Preparing,
-  PaymentPlanStatus.Processing,
-  PaymentPlanStatus.SteficonCompleted,
-  PaymentPlanStatus.SteficonError,
-  PaymentPlanStatus.SteficonRun,
-  PaymentPlanStatus.SteficonWait,
+  PaymentPlanStatusEnum.ACCEPTED,
+  PaymentPlanStatusEnum.DRAFT,
+  PaymentPlanStatusEnum.FINISHED,
+  PaymentPlanStatusEnum.IN_APPROVAL,
+  PaymentPlanStatusEnum.IN_AUTHORIZATION,
+  PaymentPlanStatusEnum.IN_REVIEW,
+  PaymentPlanStatusEnum.LOCKED,
+  PaymentPlanStatusEnum.LOCKED_FSP,
+  PaymentPlanStatusEnum.OPEN,
+  PaymentPlanStatusEnum.PREPARING,
+  PaymentPlanStatusEnum.PROCESSING,
+  PaymentPlanStatusEnum.STEFICON_COMPLETED,
+  PaymentPlanStatusEnum.STEFICON_ERROR,
+  PaymentPlanStatusEnum.STEFICON_RUN,
+  PaymentPlanStatusEnum.STEFICON_WAIT,
 ];
 
 export function PaymentPlansFilters({
@@ -80,16 +77,14 @@ export function PaymentPlansFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
-
-  if (!statusChoicesData) {
-    return null;
-  }
+  const { data: statusChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentVerificationPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   const preparedStatusChoices =
-    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    [...(statusChoicesData || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as any),
     ) || [];
 
   return (

@@ -7,7 +7,6 @@ from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
@@ -70,15 +69,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
         reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
@@ -107,15 +106,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
         with self.assertRaises(ValidationError) as error:
@@ -132,15 +131,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
 
@@ -162,15 +161,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
 
@@ -190,15 +189,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.alternate_collector_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.alternate_collector_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
 
@@ -223,15 +222,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_ALTERNATE: {
                 "role": ROLE_ALTERNATE,
-                "new_individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.alternate_collector_individual.id), "Individual"),
+                "new_individual": str(self.primary_collector_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.alternate_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
 
@@ -251,15 +250,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": "WRONG_ROLE",
-                "new_individual": encode_id_base64(str(self.alternate_collector_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.alternate_collector_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
         with self.assertRaises(ValidationError) as error:
@@ -278,15 +277,15 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.alternate_collector_individual.id), "Individual"),
+                "new_individual": str(self.primary_collector_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.alternate_collector_individual.id),
             },
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
         with self.assertRaises(ValidationError) as error:
@@ -305,9 +304,9 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             ROLE_PRIMARY: {
                 "role": ROLE_PRIMARY,
-                "new_individual": encode_id_base64(str(self.alternate_collector_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.alternate_collector_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
         with self.assertRaises(ValidationError) as error:
@@ -327,9 +326,9 @@ class TestReassignRolesOnUpdate(APITestCase):
         role_reassign_data = {
             str(self.primary_collector_individual.id): {
                 "role": "HEAD",
-                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
-                "household": encode_id_base64(str(self.household.id), "Household"),
-                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
             },
         }
         with self.assertRaises(ValidationError) as error:

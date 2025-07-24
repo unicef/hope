@@ -14,15 +14,16 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useApprovePaymentDetailsMutation,
-} from '@generated/graphql';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { VerifyPaymentGrievance } from '../VerifyPaymentGrievance/VerifyPaymentGrievance';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceUpdateApproveStatus } from '@restgenerated/models/GrievanceUpdateApproveStatus';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -41,22 +42,54 @@ export function PaymentGrievanceDetails({
   ticket,
   canApprovePaymentVerification,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprovePaymentVerification: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [mutate] = useApprovePaymentDetailsMutation();
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
   const confirm = useConfirmation();
 
-  const approveStatus = ticket.paymentVerificationTicketDetails?.approveStatus;
-  const oldReceivedAmount =
-    ticket.paymentVerificationTicketDetails?.oldReceivedAmount;
-  const newReceivedAmount =
-    ticket.paymentVerificationTicketDetails?.newReceivedAmount;
+  const { mutateAsync: mutate } = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) => {
+      const requestBody: GrievanceUpdateApproveStatus = {
+        approveStatus,
+      };
+
+      return RestService.restBusinessAreasGrievanceTicketsApprovePaymentDetailsCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: grievanceTicketId,
+          formData: requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
+  const approveStatus = ticket.ticketDetails?.approveStatus;
+  const oldReceivedAmount = ticket.ticketDetails?.oldReceivedAmount;
+  const newReceivedAmount = ticket.ticketDetails?.newReceivedAmount;
   const receivedAmount =
-    ticket.paymentVerificationTicketDetails?.paymentVerification
-      ?.receivedAmount;
+    ticket.ticketDetails?.paymentVerification?.receivedAmount;
   const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
   const entitlementQuantity = ticket.paymentRecord?.entitlementQuantity;
 
@@ -84,16 +117,8 @@ export function PaymentGrievanceDetails({
                 }).then(async () => {
                   try {
                     await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
+                      grievanceTicketId: ticket.id,
+                      approveStatus: !approveStatus,
                     });
                     if (approveStatus) {
                       showMessage(t('Changes Disapproved'));
@@ -102,7 +127,7 @@ export function PaymentGrievanceDetails({
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                    // Error is handled in the mutation's onError callback
                   }
                 })
               }

@@ -1,12 +1,13 @@
 import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import camelCase from 'lodash/camelCase';
+import { camelCase, snakeCase } from 'lodash';
 import mapKeys from 'lodash/mapKeys';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 import { ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -24,9 +25,11 @@ export const householdDataRow = (
   ticket,
   isEdit,
   handleSelectBioData,
+  household: HouseholdDetail | undefined,
 ): ReactElement => {
-  const fieldName = row[0];
-  const field = fieldsDict[row[0]];
+  const fieldName = snakeCase(row[0]);
+  const field = fieldsDict[fieldName];
+
   const isItemSelected = isSelected(fieldName);
   const labelId = `enhanced-table-checkbox-${index}`;
   const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
@@ -42,9 +45,9 @@ export const householdDataRow = (
       ? countriesDict[valueDetails.previousValue]
       : valueDetails.previousValue;
 
-  const householdValue = field.isFlexField
-    ? ticket.householdDataUpdateTicketDetails.household.flexFields[fieldName]
-    : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
+  const householdValue = field?.isFlexField
+    ? household.flexFields[fieldName]
+    : household[camelCase(fieldName)];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue
@@ -73,7 +76,7 @@ export const householdDataRow = (
       </TableCell>
       <TableCell id={labelId} scope="row" align="left">
         <Capitalize>
-          {row[0].replaceAll('_h_f', '').replaceAll('_', ' ')}
+          {snakeCase(row[0]).replaceAll('_h_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align="left">

@@ -14,17 +14,12 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
-from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.models import (
-    BeneficiaryGroup,
-    Program,
-    ProgramCycle,
-    ProgramPartnerThrough,
-)
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
@@ -70,10 +65,10 @@ class ProgramCycleAdminInline(admin.TabularInline):
     raw_id_fields = ("created_by",)
 
 
-class PartnerAreaForm(forms.Form):
+class PartnerAreaLimitForm(forms.Form):
     partner = forms.ModelChoiceField(queryset=Partner.objects.all(), required=True)
     areas = TreeNodeMultipleChoiceField(
-        queryset=Area.objects.filter(area_type__area_level__lte=3), widget=CheckboxSelectMultiple(), required=False
+        queryset=Area.objects.filter(area_type__area_level__lte=3), widget=CheckboxSelectMultiple(), required=True
     )
 
 
@@ -166,63 +161,58 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         context["form"] = form
         return TemplateResponse(request, "admin/program/program/create_target_population_from_text.html", context)
 
-    @button(permission="account.view_partner")
-    def partners(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
-        context = self.get_common_context(request, pk, title="Partner access")
+    @button(permission="account.can_change_area_limits")
+    def area_limits(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
+        context = self.get_common_context(request, pk, title="Admin Area Limits")
         program: Program = context["original"]
-        PartnerAreaFormSet = formset_factory(PartnerAreaForm, extra=0, can_delete=True)
+        PartnerAreaLimitFormSet = formset_factory(PartnerAreaLimitForm, extra=0, can_delete=True)
 
         is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
 
         if request.method == "GET" or not is_editable:
             partner_area_data = []
-            for partner_program_through in program.program_partner_through.all():
+            for area_limits in program.admin_area_limits.all():
                 partner_area_data.append(
                     {
-                        "partner": partner_program_through.partner,
-                        "areas": [
-                            str(area_id) for area_id in partner_program_through.areas.values_list("id", flat=True)
-                        ],
+                        "partner": area_limits.partner,
+                        "areas": [str(area_id) for area_id in area_limits.areas.values_list("id", flat=True)],
                     }
                 )
-            partner_area_form_set = PartnerAreaFormSet(initial=partner_area_data, prefix="program_areas")
+            partner_area_form_set = PartnerAreaLimitFormSet(initial=partner_area_data, prefix="program_areas")
         elif request.method == "POST":
-            partner_area_form_set = PartnerAreaFormSet(request.POST or None, prefix="program_areas")
+            partner_area_form_set = PartnerAreaLimitFormSet(request.POST or None, prefix="program_areas")
             if partner_area_form_set.is_valid():
                 for partner_area_form in partner_area_form_set:
                     form = partner_area_form.cleaned_data
                     if form and not form["DELETE"]:
                         areas_ids = list(map(lambda area: str(area.id), form["areas"]))
-                        program_partner, _ = ProgramPartnerThrough.objects.update_or_create(
+                        program_partner, _ = AdminAreaLimitedTo.objects.update_or_create(
                             partner=form["partner"],
                             program=program,
                         )
-                        if not areas_ids:
-                            program_partner.full_area_access = True
-                            program_partner.save(update_fields=["full_area_access"])
-                        else:
-                            program_partner.full_area_access = False
-                            program_partner.save(update_fields=["full_area_access"])
-                            program_partner.areas.set(areas_ids)
+                        program_partner.areas.set(areas_ids)
                     elif form and form["DELETE"]:
-                        ProgramPartnerThrough.objects.filter(partner=form["partner"], program=program).delete()
-                return HttpResponseRedirect(reverse("admin:program_program_partners", args=[pk]))
+                        AdminAreaLimitedTo.objects.filter(partner=form["partner"], program=program).delete()
+                return HttpResponseRedirect(reverse("admin:program_program_area_limits", args=[pk]))
 
         context["program_area_formset"] = partner_area_form_set
         context["business_area"] = program.business_area
         context["areas"] = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
+        # it's only possible to create area limits for partners that have a role in this program
         context["partners"] = (
-            Partner.objects.filter(Q(allowed_business_areas=program.business_area))
-            .exclude(name="UNICEF")
+            Partner.objects.filter(
+                Q(role_assignments__program=program)
+                | (Q(role_assignments__business_area=program.business_area) & Q(role_assignments__program__isnull=True))
+            )
+            .exclude(parent__name="UNICEF")
             .order_by("name")
         )
         context["program"] = program
-        context["unicef_partner_id"] = Partner.objects.get(name="UNICEF").id
 
         if is_editable:
-            return TemplateResponse(request, "admin/program/program/program_partner_access.html", context)
+            return TemplateResponse(request, "admin/program/program/program_area_limits.html", context)
         else:
-            return TemplateResponse(request, "admin/program/program/program_partner_access_readonly.html", context)
+            return TemplateResponse(request, "admin/program/program/program_area_limits_readonly.html", context)
 
     @button(permission="account.can_reindex_programs")
     def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:

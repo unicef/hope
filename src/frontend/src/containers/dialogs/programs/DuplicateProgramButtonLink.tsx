@@ -2,11 +2,11 @@ import { IconButton } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
 import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { ProgramQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface DuplicateProgramButtonLinkProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
 export function DuplicateProgramButtonLink({
@@ -17,7 +17,7 @@ export function DuplicateProgramButtonLink({
   return (
     <IconButton
       component={Link}
-      to={`/${baseUrl}/duplicate/${program.id}`}
+      to={`/${baseUrl}/duplicate/${program.slug}`}
       data-cy="button-copy-program"
     >
       <FileCopy />

@@ -5,32 +5,76 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import AllValuesComboFilter
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.forms import (
-    UserRoleAdminForm,
-    UserRoleInlineFormSet,
+    RoleAssignmentAdminForm,
+    RoleAssignmentInlineFormSet,
 )
-from hct_mis_api.apps.account.models import Role
+from hct_mis_api.apps.account.models import Partner, Role
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
 
 
-class UserRoleInline(admin.TabularInline):
-    model = account_models.UserRole
+class RoleAssignmentInline(admin.TabularInline):
+    model = account_models.RoleAssignment
+    fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
-    formset = UserRoleInlineFormSet
-    raw_id_fields = ("business_area", "role")
+    formset = RoleAssignmentInlineFormSet
+
+    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+        partner_id = request.resolver_match.kwargs.get("object_id")
+
+        if db_field.name == "business_area":
+            if partner_id and partner_id.isdigit():
+                partner = Partner.objects.get(id=partner_id)
+                kwargs["queryset"] = BusinessArea.objects.filter(
+                    id__in=partner.allowed_business_areas.all().values("id"),
+                    is_split=False,
+                )
+            else:
+                kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
+
+        elif db_field.name == "role":
+            if partner_id and partner_id.isdigit():
+                kwargs["queryset"] = Role.objects.filter(
+                    is_available_for_partner=True,
+                )
+            else:
+                kwargs["queryset"] = Role.objects.all()
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def has_add_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        if isinstance(obj, Partner):
+            if obj.is_parent or obj.is_unicef_subpartner:
+                return False  # Disable adding if Partner is a parent or is a UNICEF subpartner
+            return request.user.can_add_business_area_to_partner()
+        return True
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        if isinstance(obj, Partner):
+            if obj.is_unicef_subpartner:
+                return False  # Disable editing if Partner is a UNICEF subpartner
+            return request.user.can_add_business_area_to_partner()
+        return True
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        if isinstance(obj, Partner):
+            if obj.is_unicef_subpartner:
+                return False  # Disable deleting if Partner is a UNICEF subpartner
+            return request.user.can_add_business_area_to_partner()
+        return True
 
 
-@admin.register(account_models.UserRole)
-class UserRoleAdmin(HOPEModelAdminBase):
-    list_display = ("user", "role", "business_area", "expiry_date")
-    form = UserRoleAdminForm
+@admin.register(account_models.RoleAssignment)
+class RoleAssignmentAdmin(HOPEModelAdminBase):
+    list_display = ("user", "partner", "role", "business_area", "program")
+    form = RoleAssignmentAdminForm
     autocomplete_fields = ("role",)
     raw_id_fields = ("user", "business_area", "role")
     search_fields = (
@@ -40,6 +84,7 @@ class UserRoleAdmin(HOPEModelAdminBase):
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
         ("role__subsystem", AllValuesComboFilter),
     )
@@ -50,7 +95,9 @@ class UserRoleAdmin(HOPEModelAdminBase):
             .get_queryset(request)
             .select_related(
                 "business_area",
+                "program",
                 "user",
+                "partner",
                 "role",
             )
         )
@@ -63,16 +110,3 @@ class UserRoleAdmin(HOPEModelAdminBase):
 
     def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
-
-    def _get_data(self, record: Any) -> str:
-        roles = Role.objects.all()
-        collector = ForeignKeysCollector(None)
-        objs = []
-        for qs in [roles]:
-            objs.extend(qs)
-        objs.extend(account_models.UserRole.objects.filter(pk=record.pk))
-        collector.collect(objs)
-        serializer = self.get_serializer("json")
-        return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
-        )

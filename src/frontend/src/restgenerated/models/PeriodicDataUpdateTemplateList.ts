@@ -4,11 +4,11 @@
 /* eslint-disable */
 export type PeriodicDataUpdateTemplateList = {
     readonly id: number;
-    number_of_records?: number | null;
-    readonly created_at: string;
-    created_by?: string;
+    numberOfRecords?: number | null;
+    readonly createdAt: string;
+    createdBy?: string;
     status: string;
-    status_display: string;
-    can_export: boolean;
+    statusDisplay: string;
+    canExport: boolean;
 };
 

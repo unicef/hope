@@ -1,13 +1,16 @@
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useMarkPayAsFailedMutation } from '@generated/graphql';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 export interface ForceFailedButtonProps {
   paymentId: string;
@@ -20,20 +23,45 @@ export function ForceFailedButton({
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useMarkPayAsFailedMutation();
+  const { paymentPlanId } = useParams();
+  const { businessArea, programId } = useBaseUrl();
+  const { mutateAsync: markAsFailed, isPending: loadingMarkAsFailed } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        paymentPlanId: ppId,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        paymentPlanId: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve(
+          {
+            businessAreaSlug,
+            paymentId: id,
+            paymentPlanId: ppId,
+            programSlug,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Payment has been marked as failed successfully.'));
+      },
+      onError: (error) => {
+        showMessage(t('Failed to mark the payment as failed.'));
+        console.error(error);
+      },
+    });
 
-  const submit = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          paymentId,
-        },
-      });
-      setOpenModal(false);
-      showMessage(t('Payment has been marked as failed.'));
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    }
+  const submit = (): void => {
+    markAsFailed({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      paymentPlanId,
+      id: paymentId,
+    });
   };
 
   return (
@@ -75,7 +103,7 @@ export function ForceFailedButton({
               variant="contained"
               onClick={() => submit()}
               data-cy="button-submit"
-              disabled={loading}
+              disabled={loadingMarkAsFailed}
             >
               {t('Mark as failed')}
             </Button>

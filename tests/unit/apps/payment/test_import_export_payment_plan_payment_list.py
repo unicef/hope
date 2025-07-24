@@ -25,9 +25,9 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -446,20 +446,20 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             0,
         )
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             export_service.get_template(self.fsp_1, self.dm_atm_card)
-        self.assertEqual(
-            e.exception.message,
+        self.assertIn(
             f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
             f"Plan {self.payment_plan.unicef_id} for FSP {self.fsp_1.name} and delivery "
             f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}.",
+            str(e.exception),
         )
 
     def test_flex_fields_admin_visibility(self) -> None:
         user = User.objects.create_superuser(username="admin", password="password", email="admin@example.com")
         permission_list = [Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name]
         role, created = Role.objects.update_or_create(name="LOL", defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=self.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=self.business_area)
         decimal_flexible_attribute = FlexibleAttribute(
             type=FlexibleAttribute.DECIMAL,
             name="flex_decimal_i_f",

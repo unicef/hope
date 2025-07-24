@@ -100,7 +100,7 @@ class ProgramFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     cash_plus = fuzzy.FuzzyChoice((True, False))
-    population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
+    population_goal = factory.fuzzy.FuzzyInteger(50000, 600000)
     administrative_areas_of_implementation = factory.Faker(
         "sentence",
         nb_words=3,
@@ -108,9 +108,7 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
-    programme_code = factory.LazyAttribute(
-        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-    )
+    programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
             master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
@@ -119,6 +117,13 @@ class ProgramFactory(DjangoModelFactory):
             ),
         )
     )
+
+    @staticmethod
+    def generate_programme_code(obj: Any) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=obj.business_area.id, programme_code=programme_code).exists():
+            return ProgramFactory.generate_programme_code(obj)
+        return programme_code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -140,3 +145,75 @@ def get_program_with_dct_type_and_name(
         **kwargs,
     )
     return program
+
+
+def generate_beneficiary_groups() -> None:
+    BeneficiaryGroupFactory(
+        **{
+            "name": "Household",
+            "group_label": "Household",
+            "group_label_plural": "Households",
+            "member_label": "Individual",
+            "member_label_plural": "Individuals",
+            "master_detail": True,
+        }
+    )
+    BeneficiaryGroupFactory(
+        **{
+            "name": "Social Workers",
+            "group_label": "Household",
+            "group_label_plural": "Households",
+            "member_label": "Individual",
+            "member_label_plural": "Individuals",
+            "master_detail": False,
+        }
+    )
+
+
+def generate_people_program() -> None:
+    from extras.test_utils.factories.household import (
+        create_household,
+        create_individual_document,
+    )
+
+    from hct_mis_api.apps.household.models import HOST, SEEING
+
+    ba = BusinessArea.objects.get(name="Afghanistan")
+    people_program = ProgramFactory(
+        **{
+            "name": "Initial_Program_People (sw)",
+            "status": "ACTIVE",
+            "start_date": "2023-06-19",
+            "end_date": "2029-12-24",
+            "description": "qwerty",
+            "business_area": ba,
+            "budget": "100000.00",
+            "frequency_of_payments": "REGULAR",
+            "sector": "EDUCATION",
+            "scope": "UNICEF",
+            "cash_plus": False,
+            "data_collecting_type": DataCollectingType.objects.get(code="partial_individuals"),
+            "programme_code": "ABC1",
+            "beneficiary_group": BeneficiaryGroup.objects.get(name="Social Workers"),
+            # cycle data
+            "cycle__unicef_id": "PC-23-0060-000001",
+            "cycle__title": "Default Program Cycle 1",
+            "cycle__status": "DRAFT",
+            "cycle__start_date": "2023-06-19",
+            "cycle__end_date": "2023-12-24",
+        }
+    )
+    # add one individual
+    household, individuals = create_household(
+        household_args={"business_area": ba, "program": people_program, "residence_status": HOST},
+        individual_args={
+            "full_name": "Stacey Freeman",
+            "given_name": "Stacey",
+            "middle_name": "",
+            "family_name": "Freeman",
+            "business_area": ba,
+            "observed_disability": [SEEING],
+        },
+    )
+    individual = individuals[0]
+    create_individual_document(individual)

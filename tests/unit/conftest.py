@@ -7,6 +7,7 @@ from time import sleep
 from typing import Any
 
 from django.conf import settings
+from django.core.cache import cache
 
 import pytest
 from _pytest.config import Config
@@ -15,6 +16,32 @@ from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
+
+from hct_mis_api.apps.account.models import Partner, Role
+
+
+@pytest.fixture(autouse=True)
+def create_unicef_partner(db: Any) -> None:
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(scope="class", autouse=True)
+def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(autouse=True)
+def create_role_with_all_permissions(db: Any) -> None:
+    yield Role.objects.get_or_create(name="Role with all permissions")
+
+
+@pytest.fixture(scope="class", autouse=True)
+def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        Role.objects.get_or_create(name="Role with all permissions")
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -226,3 +253,8 @@ def register_custom_sql_signal() -> None:
 
     pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
     post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)
+
+
+@pytest.fixture(autouse=True)
+def clear_cache_before_each_test() -> None:
+    cache.clear()

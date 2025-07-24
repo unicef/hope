@@ -2,4 +2,4 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Admin4Enum = boolean;
+export type Admin4Enum = string;

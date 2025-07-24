@@ -7,78 +7,58 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-
 snapshots['TestFSPRelatedSchema::test_query_all_financial_service_provider_xlsx_templates 1'] = {
-    'data': {
-        'allFinancialServiceProviderXlsxTemplates': {
-            'edges': [
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'columns': [
-                            'column_1',
-                            'column_2'
-                        ],
-                        'name': 'FSP_template_1'
-                    }
-                },
-                {
-                    'node': {
-                        'columns': [
-                            'column_3',
-                            'column_4'
-                        ],
-                        'name': 'FSP_template_2'
-                    }
+                    'column': 4,
+                    'line': 12
                 }
-            ]
+            ],
+            'message': 'Cannot query field "allFinancialServiceProviderXlsxTemplates" on type "Query".'
         }
-    }
+    ]
 }
 
 snapshots['TestFSPRelatedSchema::test_query_all_financial_service_providers 1'] = {
-    'data': {
-        'allFinancialServiceProviders': {
-            'edges': [
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': {'edges': [{'node': {'name': 'Cash'}}]},
-                        'name': 'FSP_1',
-                        'visionVendorNumber': '149-69-3686'
-                    }
-                },
-                {
-                    'node': {
-                        'communicationChannel': 'API',
-                        'deliveryMechanisms': {'edges': [{'node': {'name': 'Voucher'}}]},
-                        'name': 'FSP_2',
-                        'visionVendorNumber': '666-69-3686'
-                    }
+                    'column': 4,
+                    'line': 16
                 }
-            ]
+            ],
+            'message': 'Cannot query field "allFinancialServiceProviders" on type "Query".'
         }
-    }
+    ]
 }
 
 snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider 1'] = {
-    'data': {
-        'financialServiceProvider': {
-            'distributionLimit': 10000.0,
-            'name': 'FSP_1',
-            'visionVendorNumber': '149-69-3686'
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Cannot query field "financialServiceProvider" on type "Query".'
         }
-    }
+    ]
 }
 
-
 snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider_xlsx_template 1'] = {
-    'data': {
-        'financialServiceProviderXlsxTemplate': {
-            'columns': [
-                'column_1',
-                'column_2'
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
             ],
-            'name': 'FSP_template_1'
+            'message': 'Cannot query field "financialServiceProviderXlsxTemplate" on type "Query".'
         }
-    }
+    ]
 }

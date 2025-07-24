@@ -1,20 +1,18 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import CloseIcon from '@mui/icons-material/CloseRounded';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  AllProgramsForChoicesDocument,
-  ProgramQuery,
-  useDeleteProgramMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import CloseIcon from '@mui/icons-material/CloseRounded';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useNavigate } from 'react-router-dom';
 
 const RemoveButton = styled(Button)`
   && {
@@ -37,37 +35,43 @@ const MidDialog = styled(Dialog)`
 `;
 
 interface DeleteProgramProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
-export function DeleteProgram({ program }: DeleteProgramProps): ReactElement {
+export const DeleteProgram = ({
+  program,
+}: DeleteProgramProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea } = useBaseUrl();
-  const [mutate] = useDeleteProgramMutation();
+  const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
-  const deleteProgram = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          programId: program.id,
-        },
-
-        refetchQueries: () => [
-          {
-            query: AllProgramsForChoicesDocument,
-            variables: { businessArea, first: 100 },
-          },
-        ],
-      });
-      showMessage(t('Programme removed'));
-      navigate(`/${businessArea}/programs/all/list`);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    }
-  };
+  const { mutateAsync: deleteProgram, isPending: isPendingDelete } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsDestroy({
+          businessAreaSlug: businessArea,
+          slug: program.slug,
+        }),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsList', businessArea, programId],
+        });
+        showMessage(t('Programme removed'));
+        navigate(`/${businessArea}/programs/all/list`);
+      },
+      onError: (e) => {
+        // Handle empty response error as success
+        if (e.message && e.message.includes('Unexpected end of JSON input')) {
+          showMessage(t('Programme removed'));
+          navigate(`/${businessArea}/programs/all/list`);
+        } else {
+          showMessage(e.message);
+        }
+      },
+    });
 
   return (
     <span>
@@ -101,7 +105,8 @@ export function DeleteProgram({ program }: DeleteProgramProps): ReactElement {
               type="submit"
               color="primary"
               variant="contained"
-              onClick={deleteProgram}
+              disabled={isPendingDelete}
+              onClick={() => deleteProgram()}
               data-cy="button-remove-program"
             >
               {t('REMOVE')}
@@ -111,4 +116,4 @@ export function DeleteProgram({ program }: DeleteProgramProps): ReactElement {
       </MidDialog>
     </span>
   );
-}
+};

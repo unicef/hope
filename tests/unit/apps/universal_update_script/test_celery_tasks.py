@@ -14,7 +14,7 @@ from hct_mis_api.apps.universal_update_script.celery_tasks import (
 )
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture()

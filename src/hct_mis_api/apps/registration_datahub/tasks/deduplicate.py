@@ -2,7 +2,7 @@ import itertools
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, fields
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
@@ -195,7 +195,7 @@ class DeduplicateTask:
         )
 
     def collided_individuals_ids_to_exclude(
-        self, individuals: list[PendingIndividual], registration_data_import: RegistrationDataImport
+        self, individuals: Iterable[PendingIndividual], registration_data_import: RegistrationDataImport
     ) -> list[str]:
         program = registration_data_import.program
         if not program.collision_detection_enabled or not program.collision_detector:

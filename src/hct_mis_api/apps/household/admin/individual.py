@@ -34,7 +34,6 @@ from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
-    IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
@@ -69,7 +68,6 @@ class IndividualAdmin(
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
-    IsOriginalAdminMixin,
     RdiMergeStatusAdminMixin,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
@@ -306,18 +304,16 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
 class IndividualRepresentationInline(admin.TabularInline):
     model = Individual
     extra = 0
-    fields = ("unicef_id", "program", "is_original")
-    readonly_fields = ("unicef_id", "program", "is_original")
+    fields = ("unicef_id", "program")
+    readonly_fields = ("unicef_id", "program")
     show_change_link = True
     can_delete = False
     verbose_name_plural = "Individual representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
-            Individual.all_objects.select_related("program")
-            .all()
-            .only("unicef_id", "is_original", "copied_from", "program__name")
-        )
+            Individual.all_objects.select_related("program").all().only("unicef_id", "copied_from", "program__name")
+        )  # pragma: no cover
 
     def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
         return False  # Disable adding new individual representations inline

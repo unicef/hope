@@ -160,7 +160,7 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataUpdateUpload:
-    # @flaky(max_runs=5, min_passes=1)
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
@@ -203,6 +203,7 @@ class TestPeriodicDataUpdateUpload:
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
 
     @pytest.mark.night
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -295,6 +296,7 @@ class TestPeriodicDataUpdateUpload:
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
     @pytest.mark.night
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,

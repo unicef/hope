@@ -1,22 +1,22 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`containers/tables/population/HouseholdTable should render loading 1`] = `
+exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
 <div>
   <div
-    class="sc-FEMpB kLrWFX"
+    class="sc-hjsuWn hQErrm"
   >
     <div
-      class="sc-hRDKVd lnQjmV"
+      class="sc-kvnevz bIBVRY"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dFVmKS hPqdCJ css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-gGKoUb css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cSaEAk hChnVp MuiBox-root css-0"
+            class="sc-hwddKA kxvGLi MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -29,11 +29,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               </h6>
             </div>
             <div
-              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
+              class="sc-hwddKA kxvGLi MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-kCuUfV sc-jaXbil bA-dfzX bQMtkL css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -47,9 +47,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
-                  />
+                    role="button"
+                    tabindex="0"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
@@ -57,10 +71,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Household ID
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -69,10 +96,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Status
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -81,10 +121,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Head of Household
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -93,10 +146,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Household Size
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -105,10 +171,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Administrative Level 2
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -117,10 +196,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Residence Status
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -129,10 +221,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Total Cash Received
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
                 <th
@@ -141,10 +246,23 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   scope="col"
                 >
                   <span
-                    class="sc-kfeOyU geVRDn"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
+                    role="button"
+                    tabindex="0"
                   >
                     Registration Date
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      data-testid="ArrowDownwardIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
                   </span>
                 </th>
               </tr>
@@ -153,11 +271,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq idiDBe css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -167,11 +285,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq idiDBe css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -181,11 +299,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq idiDBe css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -195,11 +313,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq idiDBe css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -209,81 +327,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
-                  colspan="9"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
-                  colspan="9"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
-                  colspan="9"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
-                  colspan="9"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
-                  colspan="9"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom lkJTAp css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq idiDBe css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -307,7 +355,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
             />
             <p
               class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
-              id=":r6:"
+              id="«r2»"
             >
               Rows per page:
             </p>
@@ -317,24 +365,24 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":r6: :r5:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
-                id=":r5:"
+                aria-labelledby="«r2» «r1»"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-18zjd9i-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input"
+                id="«r1»"
                 role="combobox"
                 tabindex="0"
               >
-                10
+                5
               </div>
               <input
                 aria-hidden="true"
                 aria-invalid="false"
                 class="MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput"
                 tabindex="-1"
-                value="10"
+                value="5"
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-ug7h84-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -350,14 +398,14 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               0–0 of 0
             </p>
             <div
-              class="MuiBox-root css-nkn1dz"
+              class="MuiTablePagination-actions"
             >
               <button
-                aria-label="previous page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
+                aria-label="Go to previous page"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":r8:"
                 tabindex="-1"
+                title="Go to previous page"
                 type="button"
               >
                 <svg
@@ -368,16 +416,16 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   viewBox="0 0 24 24"
                 >
                   <path
-                    d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
+                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
                   />
                 </svg>
               </button>
               <button
-                aria-label="next page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
+                aria-label="Go to next page"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":r9:"
                 tabindex="-1"
+                title="Go to next page"
                 type="button"
               >
                 <svg
@@ -388,7 +436,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                   viewBox="0 0 24 24"
                 >
                   <path
-                    d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
+                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
                   />
                 </svg>
               </button>
@@ -396,18 +444,6 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`containers/tables/population/HouseholdTable should render with data 1`] = `
-<div>
-  <div
-    class="sc-FEMpB kLrWFX"
-  >
-    <div>
-      Unexpected error
     </div>
   </div>
 </div>

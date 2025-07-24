@@ -2,8 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 export type FollowUpPaymentPlan = {
     readonly id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
+    status: PaymentPlanStatusEnum;
+    /**
+     * Dispersion Start Date
+     */
+    dispersionStartDate?: string | null;
+    /**
+     * Dispersion End Date
+     */
+    dispersionEndDate?: string | null;
+    /**
+     * Follow Up Payment Plan flag [sys]
+     */
+    isFollowUp?: boolean;
+    /**
+     * Name
+     */
+    name?: string | null;
 };
 

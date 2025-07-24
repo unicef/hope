@@ -11,7 +11,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -58,12 +58,12 @@ class TestAdminSite(WebTest):
     @staticmethod
     def create_user_role_with_permissions(
         user: "User", permissions: Iterable, business_area: "BusinessArea"
-    ) -> UserRole:
+    ) -> RoleAssignment:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
         return user_role
 
     @parameterized.expand(model_admins)

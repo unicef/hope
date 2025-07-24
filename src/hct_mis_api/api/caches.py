@@ -1,15 +1,15 @@
 import functools
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
+from django.conf import settings
 from django.core.cache import cache
+from django.db.models import Count, Max, QuerySet
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
-
-from hct_mis_api.apps.core.utils import decode_id_string
 
 
 def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool = True) -> Callable:
@@ -37,7 +37,7 @@ def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool 
 
             # If etag from header and calculated are the same,
             # return 304 status code as request consists of the same data already (cached on client side)
-            if compare_etags and request.headers.get("If-None-Match") == etag:
+            if compare_etags and request.headers.get("If-None-Match") == etag and not settings.DEBUG:
                 return Response(status=status.HTTP_304_NOT_MODIFIED, headers={"ETAG": etag})
             res = function(*args, **kwargs)
             res.headers["ETAG"] = etag
@@ -63,7 +63,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        business_area_slug = kwargs.get("business_area")
+        business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         return str(business_area_version)
 
@@ -76,13 +76,13 @@ class KeyConstructorMixin(KeyConstructor):
     pagination = bits.PaginationKeyBit()
 
 
-class BusinessAreaKeyBit(KeyBitBase):
+class BusinessAreaKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        business_area_slug = kwargs.get("business_area")
+        business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
         version_key = f"{business_area_slug}:{business_area_version}:{self.specific_view_cache_key}"
@@ -90,26 +90,68 @@ class BusinessAreaKeyBit(KeyBitBase):
         return str(version)
 
 
-class BusinessAreaAndProgramKeyBit(KeyBitBase):
+class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        business_area_slug = kwargs.get("business_area")
+        business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
-        program_id = decode_id_string(kwargs.get("program_id"))
+        program_slug = kwargs.get("program_slug")
 
-        version_key = f"{business_area_slug}:{business_area_version}:{program_id}:{self.specific_view_cache_key}"
+        version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
 
 
-class ProgramKeyBit(KeyBitBase):
+class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
+    """
+    KeyBit that validates the cache based on the latest `updated_at` and the number of objects in the queryset.
+    It eliminates the need to create and maintain cache versions at the cost of an additional query to fetch
+    the latest `updated_at` value and object count.
+    The cache is based also on the business area, program and their version.
+    """
+
+    specific_view_cache_key = ""
+
+    def _get_queryset(
+        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+    ) -> QuerySet:
+        return view_instance.get_queryset()
+
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        program_id = decode_id_string(kwargs.get("program_id"))
-        version = get_or_create_cache_key(f"{program_id}:version", 1)
-        return str(version)
+        business_area_slug = kwargs.get("business_area_slug")
+        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+        program_slug = kwargs.get("program_slug")
+
+        queryset = self._get_queryset(business_area_slug, program_slug, view_instance).aggregate(
+            latest_updated_at=Max("updated_at"), obj_count=Count("id")
+        )
+        latest_updated_at = queryset["latest_updated_at"]
+        obj_count = queryset["obj_count"]
+
+        key = (
+            f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
+            f":{latest_updated_at}:{obj_count}"
+        )
+
+        return key
+
+
+class AreaLimitKeyBit(KeyBitBase):
+    def get_data(
+        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+    ) -> str:
+        area_limits = ",".join(
+            map(
+                str,
+                request.user.partner.get_area_limits_for_program(view_instance.program.id)
+                .order_by("created_at")
+                .values_list("id", flat=True),
+            )
+        )
+        return area_limits

@@ -1,7 +1,6 @@
 import { BusinessAreaSelect } from '@containers/BusinessAreaSelect';
 import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
 import { UserProfileMenu } from '@containers/UserProfileMenu';
-import { useCachedMe } from '@hooks/useCachedMe';
 import MenuIcon from '@mui/icons-material/Menu';
 import TextsmsIcon from '@mui/icons-material/Textsms';
 import { Box, Button } from '@mui/material';
@@ -10,7 +9,10 @@ import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import { styled } from '@mui/system';
 import { ReactElement } from 'react';
-import {  theme as muiTheme } from 'src/theme';
+import { theme as muiTheme } from 'src/theme';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
@@ -26,35 +28,32 @@ interface AppBarProps {
   open: boolean;
 }
 
-
-const StyledAppBar = styled(MuiAppBar)<AppBarProps>(
-  ({  open }) => ({
-    position: 'fixed',
-    top: 0,
-    zIndex: muiTheme.zIndex.drawer + 1,
-    backgroundColor: muiTheme.palette.secondary.main,
+const StyledAppBar = styled(MuiAppBar)<AppBarProps>(({ open }) => ({
+  position: 'fixed',
+  top: 0,
+  zIndex: muiTheme.zIndex.drawer + 1,
+  backgroundColor: muiTheme.palette.secondary.main,
+  transition: muiTheme.transitions.create(['width', 'margin'], {
+    easing: muiTheme.transitions.easing.sharp,
+    duration: muiTheme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: '270px',
+    width: 'calc(100% - 270px)',
+    transition: muiTheme.transitions.create(['width', 'margin'], {
+      easing: muiTheme.transitions.easing.sharp,
+      duration: muiTheme.transitions.duration.enteringScreen,
+    }),
+  }),
+  ...(!open && {
+    marginLeft: '0',
+    width: '100%',
     transition: muiTheme.transitions.create(['width', 'margin'], {
       easing: muiTheme.transitions.easing.sharp,
       duration: muiTheme.transitions.duration.leavingScreen,
     }),
-    ...(open && {
-      marginLeft: '270px',
-      width: 'calc(100% - 270px)',
-      transition: muiTheme.transitions.create(['width', 'margin'], {
-        easing: muiTheme.transitions.easing.sharp,
-        duration: muiTheme.transitions.duration.enteringScreen,
-      }),
-    }),
-    ...(!open && {
-      marginLeft: '0',
-      width: '100%',
-      transition: muiTheme.transitions.create(['width', 'margin'], {
-        easing: muiTheme.transitions.easing.sharp,
-        duration: muiTheme.transitions.duration.leavingScreen,
-      }),
-    }),
   }),
-);
+}));
 
 const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
   marginRight: 36,
@@ -64,18 +63,29 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 }));
 
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
-  const { data: meData, loading: meLoading } = useCachedMe();
+  const { businessArea, programSlug } = useBaseUrl();
+
+  const { data: meData } = useQuery({
+    queryKey: ['profile', businessArea, programSlug],
+    queryFn: () => {
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        program: programSlug === 'all' ? undefined : programSlug,
+      });
+    },
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+  });
+
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
     window.location.pathname.split('/')[2]
   }&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${
     window.location.href
   }`;
 
-  if (meLoading) {
-    return null;
-  }
   return (
-    <StyledAppBar  open={open}>
+    <StyledAppBar open={open}>
       <StyledToolbar>
         <Box display="flex" alignItems="center" justifyContent="center">
           <Box ml={1}>

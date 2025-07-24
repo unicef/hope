@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { MergedHouseholdMinimalFragment } from '@generated/graphql';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
-export const headCells: HeadCell<MergedHouseholdMinimalFragment>[] = [
+export const headCells: HeadCell<HouseholdList>[] = [
   {
     disablePadding: false,
     label: '',

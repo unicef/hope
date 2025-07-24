@@ -1,14 +1,15 @@
-import { api } from './api';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { api, handleApiResponse } from './api';
 
 export const fetchTargetPopulations = async (
   businessAreaSlug: string,
   programId: string,
   params = {},
-): Promise<TargetPopulationList> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/targeting/target-populations/`,
-    params,
+): Promise<PaginatedPaymentPlanListList> => {
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/targeting/target-populations/`,
+      params,
+    ),
   );
-  return response;
 };

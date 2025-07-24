@@ -3,7 +3,7 @@ import { handleOptionSelected } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
-import { fetchBeneficiaryGroups } from '@api/programsApi';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const BeneficiaryGroupAutocompleteRest = ({
   value,
@@ -38,7 +38,7 @@ export const BeneficiaryGroupAutocompleteRest = ({
       value={value}
       label={t('Beneficiary Group')}
       dataCy="filters-beneficiary-group-autocomplete"
-      fetchFunction={fetchBeneficiaryGroups}
+      fetchFunction={() => RestService.restBeneficiaryGroupsList({})}
       businessArea={businessArea}
       handleChange={(_, selectedValue) => {
         onChange(selectedValue);

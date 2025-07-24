@@ -1,7 +1,3 @@
-import {
-  createPeriodicDataUpdateTemplate,
-  fetchPeriodicFields,
-} from '@api/periodicDataUpdateApi';
 import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -9,11 +5,13 @@ import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
 import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
+import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
@@ -52,27 +50,7 @@ export const NewTemplatePage = (): ReactElement => {
     {},
   );
 
-  const createTemplate = useMutation({
-    mutationFn: (params: {
-      businessAreaSlug: string;
-      programId: string;
-      //TODO MS: Add types
-      roundsData: any;
-      filters: any;
-    }) =>
-      createPeriodicDataUpdateTemplate(
-        params.businessAreaSlug,
-        params.programId,
-        params.roundsData,
-        params.filters,
-      ),
-    onSuccess: () => {
-      showMessage(t('Template created successfully.'));
-      navigate(`/${baseUrl}/population/individuals`, {
-        state: { isNewTemplateJustCreated: true },
-      });
-    },
-  });
+  const uploadTemplate = useUploadPeriodicDataUpdateTemplate();
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = [
@@ -82,8 +60,12 @@ export const NewTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        }),
     });
 
   if (periodicFieldsLoading) {
@@ -99,18 +81,18 @@ export const NewTemplatePage = (): ReactElement => {
       return [];
     }
     return data.results.map((item) => {
-      const { name, pdu_data, label } = item;
-      const { rounds_names } = pdu_data;
+      const { name, pduData, label } = item;
+      const { roundsNames } = pduData;
       return {
         field: name,
         label,
-        rounds: rounds_names.map((_, roundIndex) => ({
+        rounds: roundsNames.map((_, roundIndex) => ({
           round: roundIndex + 1,
-          round_name: rounds_names[roundIndex],
+          roundName: roundsNames[roundIndex],
         })),
-        numberOfRounds: rounds_names.length,
+        numberOfRounds: roundsNames.length,
         roundNumber: 1,
-        roundName: rounds_names[0],
+        roundName: roundsNames[0],
       };
     });
   };
@@ -206,12 +188,24 @@ export const NewTemplatePage = (): ReactElement => {
       filters: filtersToSend,
     };
 
-    createTemplate.mutate({
-      businessAreaSlug: businessArea,
-      programId: programId,
-      roundsData: payload.rounds_data,
-      filters: payload.filters,
-    });
+    uploadTemplate.mutate(
+      {
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody: {
+          rounds_data: payload.rounds_data,
+          filters: payload.filters,
+        },
+      },
+      {
+        onSuccess: () => {
+          showMessage(t('Template created successfully.'));
+          navigate(`/${baseUrl}/population/individuals`, {
+            state: { isNewTemplateJustCreated: true },
+          });
+        },
+      },
+    );
   };
 
   return (

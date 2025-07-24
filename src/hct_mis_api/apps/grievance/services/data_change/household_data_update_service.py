@@ -2,13 +2,12 @@ from datetime import date, datetime
 from typing import List
 
 from django.contrib.auth.models import AbstractUser
-from django.shortcuts import get_object_or_404
 
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.core.utils import to_snake_case
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
@@ -34,9 +33,7 @@ class HouseholdDataUpdateService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
-        household_encoded_id = household_data_update_issue_type_extras.get("household")
-        household_id = decode_id_string(household_encoded_id)
-        household = get_object_or_404(Household, id=household_id)
+        household = household_data_update_issue_type_extras.get("household")
         household_data = household_data_update_issue_type_extras.get("household_data", {})
         to_date_string(household_data, "start")
         to_date_string(household_data, "end")
@@ -147,9 +144,6 @@ class HouseholdDataUpdateService(DataChangeService):
             household_data["country"]["value"] = geo_models.Country.objects.filter(
                 iso_code3=country.get("value")
             ).first()
-        if admin_area_title.get("value") is not None:
-            household_data["admin_area"] = admin_area_title.copy()
-            household_data["admin_area"]["value"] = Area.objects.filter(p_code=admin_area_title.get("value")).first()
         only_approved_data = {
             field: value_and_approve_status.get("value")
             for field, value_and_approve_status in household_data.items()
@@ -163,7 +157,10 @@ class HouseholdDataUpdateService(DataChangeService):
 
         Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
         updated_household = Household.objects.get(id=household.id)
-        updated_household.set_admin_areas()
+
+        if admin_area_title.get("value") is not None and is_approved(admin_area_title):
+            area = Area.objects.filter(p_code=admin_area_title.get("value")).first()
+            updated_household.set_admin_areas(area)
 
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)

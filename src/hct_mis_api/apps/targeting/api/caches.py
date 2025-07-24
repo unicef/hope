@@ -1,9 +1,12 @@
-from hct_mis_api.api.caches import BusinessAreaAndProgramKeyBit, KeyConstructorMixin
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramKeyBitMixin,
+    KeyConstructorMixin,
+)
 
 
-class TPListVersionsKeyBit(BusinessAreaAndProgramKeyBit):
+class TPListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "target_population_list"
 
 
 class TPKeyConstructor(KeyConstructorMixin):
-    target_population_list_versions = TPListVersionsKeyBit()
+    target_population_list_version = TPListVersionsKeyBit()

@@ -3,6 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+ * * `TP_LOCK` - Population Lock
+ * * `TP_UNLOCK` - Population Unlock
+ * * `TP_REBUILD` - Population Rebuild
+ * * `DRAFT` - Draft
  * * `LOCK` - Lock
  * * `LOCK_FSP` - Lock FSP
  * * `UNLOCK` - Unlock
@@ -14,8 +18,13 @@
  * * `REJECT` - Reject
  * * `FINISH` - Finish
  * * `SEND_TO_PAYMENT_GATEWAY` - Send to Payment Gateway
+ * * `SEND_XLSX_PASSWORD` - Send XLSX Password
  */
 export enum ActionEnum {
+    TP_LOCK = 'TP_LOCK',
+    TP_UNLOCK = 'TP_UNLOCK',
+    TP_REBUILD = 'TP_REBUILD',
+    DRAFT = 'DRAFT',
     LOCK = 'LOCK',
     LOCK_FSP = 'LOCK_FSP',
     UNLOCK = 'UNLOCK',
@@ -27,4 +36,5 @@ export enum ActionEnum {
     REJECT = 'REJECT',
     FINISH = 'FINISH',
     SEND_TO_PAYMENT_GATEWAY = 'SEND_TO_PAYMENT_GATEWAY',
+    SEND_XLSX_PASSWORD = 'SEND_XLSX_PASSWORD',
 }

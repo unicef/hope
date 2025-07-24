@@ -2,6 +2,7 @@ import uuid
 from typing import Dict
 from unittest.mock import MagicMock, patch
 
+from django.core.cache import cache
 from django.test import TestCase
 
 import requests
@@ -51,6 +52,9 @@ class TestPhoneNumberVerification(TestCase):
             payment_plan=payment_plan,
         )
         cls.individuals = []
+        # set cache key
+        version_key = f":1:afghanistan:1:{program.slug}:registration_data_import_list"
+        cache.set(version_key, 1)
         for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=cls.afghanistan, program=program
@@ -58,7 +62,7 @@ class TestPhoneNumberVerification(TestCase):
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin2": Area.objects.order_by("?").first(),
                     "program": program,
                 },
                 {
@@ -109,7 +113,7 @@ class TestPhoneNumberVerification(TestCase):
             other_household, other_individuals = create_household(
                 {
                     "registration_data_import": other_registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin2": Area.objects.order_by("?").first(),
                     "program": other_program,
                 },
                 {"registration_data_import": other_registration_data_import},

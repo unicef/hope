@@ -8,7 +8,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
-import { useUploadPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -37,40 +37,43 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
-  const { mutate, error } = useUploadPeriodicDataUpdateTemplate();
+  const [error, setError] = useState<any>(null);
   const canPDUUpload = hasPermissions(PERMISSIONS.PDU_UPLOAD, permissions);
 
-  const handleFileUpload = (): void => {
+  const handleFileUpload = async (): Promise<void> => {
     if (fileToImport) {
       setIsLoading(true);
-      const uploadData = {
-        businessAreaSlug: businessArea,
-        programId: programId,
-        file: fileToImport,
-        additionalParams: {},
-      };
+      setError(null);
+      try {
+        const formData = new FormData();
+        formData.append('file', fileToImport);
+        // Add any additional params to formData here if needed
 
-      mutate(uploadData, {
-        onSuccess: () => {
-          showMessage(t('File uploaded successfully'));
-          setOpenImport(false);
-          setFileToImport(null);
-          setIsLoading(false);
-        },
-        onError: (uploadError) => {
-          showMessage(
-            uploadError ? uploadError.toString() : t('Error uploading file'),
-          );
-          setIsLoading(false);
-        },
-      });
+        await RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            requestBody: formData as any,
+          },
+        );
+        showMessage(t('File uploaded successfully'));
+        setOpenImport(false);
+        setFileToImport(null);
+      } catch (uploadError: any) {
+        setError(uploadError);
+        showMessage(
+          uploadError ? uploadError.toString() : t('Error uploading file'),
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
   let errorMessage = null;
   if (error) {
     errorMessage = (
       <Error data-cy="pdu-upload-error">
-        {t('Error uploading file:')} {error.message}
+        {t('Error uploading file:')} {error.message || error.toString()}
       </Error>
     );
   }
@@ -100,7 +103,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
               {t('Select Files to Upload')}
               <GreyText>
                 {t(
-                  'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be \\u2264 10MB.',
+                  'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.',
                 )}
               </GreyText>
             </Box>

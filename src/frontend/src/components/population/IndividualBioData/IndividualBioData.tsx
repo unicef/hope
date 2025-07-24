@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -8,12 +8,6 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  GrievancesChoiceDataQuery,
-  HouseholdChoiceDataQuery,
-  IndividualDisability,
-  IndividualNode,
-} from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -22,8 +16,12 @@ import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
 `;
@@ -33,11 +31,11 @@ const BorderBox = styled.div`
 `;
 
 interface IndividualBioDataProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  choicesData: IndividualChoices;
+  grievancesChoices: GrievanceChoices;
 }
 export const IndividualBioData = ({
   individual,
@@ -58,45 +56,45 @@ export const IndividualBioData = ({
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
 
-  const mappedIndividualDocuments = individual?.documents?.edges?.map(
-    (edge) => (
-      <Grid size={{ xs:3 }} key={edge.node.id}>
-        <Box flexDirection="column">
-          <Box mb={1}>
-            <LabelizedField label={edge.node.type.label}>
-              {edge.node.photo ? (
-                <DocumentPopulationPhotoModal
-                  documentNumber={edge.node.documentNumber}
-                  documentId={edge.node.id}
-                  individual={individual}
-                />
-              ) : (
-                edge.node.documentNumber
-              )}
-            </LabelizedField>
-          </Box>
-          <LabelizedField label="issued">{edge.node.country}</LabelizedField>
-        </Box>
-      </Grid>
-    ),
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
   );
 
-  const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs:3 }} key={item.node.id}>
+  const mappedIndividualDocuments = individual?.documents?.map((doc) => (
+    <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.number}
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
+              <DocumentPopulationPhotoModal
+                documentNumber={doc.documentNumber}
+                documentId={doc.id}
+                individual={individual}
+              />
+            ) : (
+              doc.documentNumber
+            )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.node.country}</LabelizedField>
+        <LabelizedField label="issued">{doc.country}</LabelizedField>
+      </Box>
+    </Grid>
+  ));
+
+  const mappedIdentities = individual?.identities?.map((item) => (
+    <Grid size={{ xs: 3 }} key={item.id}>
+      <Box flexDirection="column">
+        <Box mb={1}>
+          <LabelizedField label={`${item.partner} ID`}>
+            {item.number}
+          </LabelizedField>
+        </Box>
+        <LabelizedField label="issued">{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -104,8 +102,8 @@ export const IndividualBioData = ({
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
       <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
-        {individual?.householdsAndRoles?.length
-          ? individual?.householdsAndRoles?.map((item) => (
+        {individual?.rolesInHouseholds?.length
+          ? individual?.rolesInHouseholds?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
@@ -237,9 +235,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual?.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {observedDisabilityChoicesDict[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -276,7 +272,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
-            {individual?.disability === IndividualDisability.Disabled
+            {individual?.disability === DisabilityEnum.DISABLED
               ? 'Disabled'
               : 'Not Disabled'}
           </LabelizedField>
@@ -322,7 +318,7 @@ export const IndividualBioData = ({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}

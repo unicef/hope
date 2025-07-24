@@ -1,32 +1,35 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
-import {
-  RecipientNode,
-  RecipientsQueryVariables,
-  useRecipientsQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { RestService } from '@restgenerated/services/RestService';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RecipientsTableProps {
   id: string;
   canViewDetails: boolean;
 }
 
-export function RecipientsTable({
+function RecipientsTable({
   id,
   canViewDetails,
 }: RecipientsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const initialVariables: RecipientsQueryVariables = {
-    survey: id,
-  };
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const initialVariables = useMemo(
+    () => ({
+      survey: id,
+    }),
+    [id],
+  );
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
@@ -43,13 +46,15 @@ export function RecipientsTable({
 
   return (
     <TableWrapper>
-      <UniversalTable<RecipientNode, RecipientsQueryVariables>
+      <UniversalRestQueryTable
         title={t('Recipients')}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useRecipientsQuery}
-        queriedObjectName="recipients"
-        initialVariables={initialVariables}
+        query={
+          RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList
+        }
+        queryVariables={{ businessAreaSlug, programSlug, ...initialVariables }}
+        setQueryVariables={() => {}}
         renderRow={(row) => (
           <RecipientsTableRow
             key={row.id}
@@ -62,3 +67,5 @@ export function RecipientsTable({
     </TableWrapper>
   );
 }
+
+export default withErrorBoundary(RecipientsTable, 'RecipientsTable');

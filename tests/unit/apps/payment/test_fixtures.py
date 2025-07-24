@@ -24,7 +24,7 @@ class TestFixtures(TestCase):
         UserFactory(username="root")
         DataCollectingTypeFactory(
             label="Full",
-            code="full",
+            code="full_collection",
             weight=1,
             business_areas=[afg],
             type=DataCollectingType.Type.STANDARD.value,

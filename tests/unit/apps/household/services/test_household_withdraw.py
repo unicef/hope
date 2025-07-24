@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
@@ -13,11 +13,10 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 
 
 class TestHouseholdWithdraw(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
 
     def test_withdraw(self) -> None:

@@ -67,11 +67,6 @@ api_patterns = [
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
     path(
-        "dashboard-report/<uuid:report_id>",
-        hct_mis_api.apps.core.views.download_dashboard_report,
-        name="dashboard_report",
-    ),
-    path(
         f"{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
         hct_mis_api.apps.targeting.views.download_xlsx_households,
         name="admin-download-target-population",

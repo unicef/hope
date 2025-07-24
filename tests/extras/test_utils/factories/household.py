@@ -1,6 +1,8 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
+from django.conf import settings
+
 import factory
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.program import ProgramFactory
@@ -150,7 +152,7 @@ class HouseholdFactory(DjangoModelFactory):
         if "registration_data_import" not in kwargs:
             kwargs["registration_data_import"] = RegistrationDataImportFactory(program=kwargs["program"])
         if "registration_data_import__imported_by__partner" not in kwargs:
-            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
+            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name=settings.UNICEF_HQ_PARTNER)
 
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
@@ -310,7 +312,8 @@ def create_household(
         individual_args = {}
 
     partner = PartnerFactory(name="UNICEF")
-    household_args["registration_data_import__imported_by__partner"] = partner
+    unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
+    household_args["registration_data_import__imported_by__partner"] = unicef_hq
 
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(
@@ -367,7 +370,8 @@ def create_household_with_individual_with_collectors(
         household_args["size"] = 2
 
     partner = PartnerFactory(name="UNICEF")
-    household_args["registration_data_import__imported_by__partner"] = partner
+    unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
+    household_args["registration_data_import__imported_by__partner"] = unicef_hq
 
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(
@@ -532,3 +536,51 @@ def create_individual_document(individual: Individual, document_type: Optional[s
         additional_fields["type"] = document_type
     document = DocumentFactory(individual=individual, **additional_fields)
     return document
+
+
+def generate_additional_doc_types() -> None:
+    for doc_type_data in [
+        {
+            "label": "Disability Card",
+            "key": "disability_card",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Medical Certificate",
+            "key": "medical_certificate",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Proof of Legal Guardianship",
+            "key": "proof_legal_guardianship",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Temporary Protection Visa",
+            "key": "temporary_protection_visa",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Registration Token",
+            "key": "registration_token",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Receiver POI",
+            "key": "receiver_poi",
+            "is_identity_document": False,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+    ]:
+        DocumentTypeFactory(**doc_type_data)

@@ -1,7 +1,7 @@
 import { HeadCell } from '../Table/EnhancedTableHead';
-import { LogEntryNode } from '@generated/graphql';
+import { ActivityLogEntry } from './types';
 
-export const headCells: HeadCell<LogEntryNode>[] = [
+export const headCells: HeadCell<ActivityLogEntry>[] = [
   {
     disablePadding: false,
     label: 'Date',

@@ -10,14 +10,14 @@ import { CreateVerificationPlan } from '@components/payments/CreateVerificationP
 import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
-import {
-  PaymentVerificationPlanStatus,
-  useCashPlanVerificationSamplingChoicesQuery,
-  usePaymentPlanQuery,
-} from '@generated/graphql';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Button } from '@mui/material';
+import { Choice } from '@restgenerated/models/Choice';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import {
   decodeIdString,
   getFilterFromQueryParams,
@@ -64,7 +64,8 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const permissions = usePermissions();
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { paymentPlanId } = useParams();
+  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const location = useLocation();
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -72,21 +73,34 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { paymentPlanId } = useParams();
-  const { data, loading, error } = usePaymentPlanQuery({
-    variables: { id: paymentPlanId },
-    fetchPolicy: 'cache-and-network',
+
+  const {
+    data: paymentPlan,
+    isLoading,
+    error,
+  } = useQuery<PaymentVerificationPlanDetails>({
+    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+      }),
   });
-  const { data: choicesData, loading: choicesLoading } =
-    useCashPlanVerificationSamplingChoicesQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } = useQuery<
+    Array<Choice>
+  >({
+    queryKey: ['samplingChoices', businessArea],
+    queryFn: () => RestService.restChoicesPaymentVerificationPlanSamplingList(),
+  });
+
   const { isSocialDctType } = useProgramContext();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (isLoading || choicesLoading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) return null;
-
-  const { paymentPlan } = data;
+  if (!paymentPlan || !choicesData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -100,14 +114,14 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     permissions,
   );
 
-  const statesArray = paymentPlan.verificationPlans?.edges?.map(
-    (v) => v.node.status,
+  const statesArray = paymentPlan.paymentVerificationPlans?.map(
+    (v) => v.status,
   );
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
-      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
-      statesArray.includes(PaymentVerificationPlanStatus.Active);
+      statesArray.includes(PaymentVerificationPlanStatusEnum.FINISHED) ||
+      statesArray.includes(PaymentVerificationPlanStatusEnum.ACTIVE);
 
     return showTable && statesArray.length > 0;
   };
@@ -149,7 +163,6 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
             canCreatePaymentVerificationPlan={
               paymentPlan.canCreatePaymentVerificationPlan
             }
-            version={paymentPlan.version}
             isPaymentPlan={true}
           />
         )}
@@ -207,13 +220,12 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       <Container>
         <VerificationPlansSummary planNode={paymentPlan} />
       </Container>
-      {paymentPlan.verificationPlans?.edges?.length
-        ? paymentPlan.verificationPlans.edges.map((edge) => (
+      {paymentPlan.paymentVerificationPlans?.length
+        ? paymentPlan.paymentVerificationPlans.map((plan) => (
             <VerificationPlanDetails
-              key={edge.node.id}
-              samplingChoicesData={choicesData}
-              verificationPlan={edge.node}
-              planNode={paymentPlan}
+              key={plan.id}
+              verificationPlan={plan}
+              planNode={plan}
             />
           ))
         : null}
@@ -225,7 +237,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            verifications={paymentPlan.verificationPlans}
+            verifications={paymentPlan.paymentVerificationPlans}
           />
           <TableWrapper>{renderVerificationsTable()}</TableWrapper>
         </>
@@ -240,7 +252,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {paymentPlan.verificationPlans?.edges[0]?.node?.id &&
+      {paymentPlan.paymentVerificationPlans?.[0]?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}

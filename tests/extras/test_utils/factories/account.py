@@ -1,22 +1,37 @@
+import os
 import random
 import time
-from typing import Any
+from typing import Any, List
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 import factory
+from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 
 
 class PartnerFactory(DjangoModelFactory):
-    name = "UNICEF"
+    name = settings.UNICEF_HQ_PARTNER
 
     class Meta:
         model = Partner
         django_get_or_create = ("name",)
+
+    @factory.lazy_attribute
+    def parent(self) -> Any:
+        if self.name == settings.UNICEF_HQ_PARTNER:
+            return PartnerFactory(name="UNICEF")
+        return None
 
 
 class BusinessAreaFactory(DjangoModelFactory):
@@ -64,11 +79,63 @@ class RoleFactory(DjangoModelFactory):
         django_get_or_create = ("name", "subsystem")
 
 
-class UserRoleFactory(DjangoModelFactory):
-    user = factory.SubFactory(UserFactory)
+class RoleAssignmentFactory(DjangoModelFactory):
     role = factory.SubFactory(RoleFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
+    user = None
+    partner = None
 
     class Meta:
-        model = UserRole
-        django_get_or_create = ("user", "role")
+        model = RoleAssignment
+        django_get_or_create = ("user", "partner", "role", "business_area")
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> RoleAssignment:
+        partner = kwargs.get("partner")
+        user = kwargs.get("user")
+        if not user and not partner:
+            user = UserFactory()
+            kwargs["user"] = user
+        if partner:
+            partner.allowed_business_areas.add(kwargs["business_area"])
+        return super()._create(model_class, *args, **kwargs)
+
+
+class AdminAreaLimitedToFactory(DjangoModelFactory):
+    partner = factory.SubFactory(PartnerFactory)
+    program = factory.SubFactory(ProgramFactory)
+
+    class Meta:
+        model = AdminAreaLimitedTo
+
+    @factory.post_generation
+    def areas(self, create: bool, extracted: List[Any], **kwargs: Any) -> None:
+        if not create:
+            return
+
+        if extracted:
+            for area in extracted:
+                self.areas.add(area)
+
+
+def create_superuser(**kwargs: Any) -> User:
+    password = os.environ.get("LOCAL_ROOT_PASSWORD", "root1234")
+    user_data = {
+        "username": kwargs.get("username") or "root",
+        "email": kwargs.get("email") or "root@root.com",
+        "first_name": kwargs.get("first_name") or "Root",
+        "last_name": kwargs.get("last_name") or "Rootkowski",
+        "partner": kwargs.get("partner") or PartnerFactory(name="UNICEF HQ"),
+        "is_active": True,
+        "password": password,
+    }
+    user = User.objects.create_superuser(**user_data)
+    print("*** Super User Created with password: ", password)
+    return user
+
+
+def generate_unicef_partners() -> None:
+    unicef_main_partner = PartnerFactory(name="UNICEF")
+    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
+    PartnerFactory(name="UNHCR")
+    PartnerFactory(name="WFP")

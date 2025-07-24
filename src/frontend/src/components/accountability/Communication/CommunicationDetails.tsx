@@ -1,6 +1,5 @@
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
@@ -11,9 +10,10 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { MessageDetail } from '@restgenerated/models/MessageDetail';
 
 interface CommunicationDetailsProps {
-  message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
+  message: MessageDetail;
 }
 
 function CommunicationDetails({

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "types": ["jest", "node", "graphql"],
+    "types": ["node", "graphql"],
     "useDefineForClassFields": true,
     "lib": ["es2021", "DOM", "DOM.Iterable"],
     "allowJs": true,
@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
@@ -37,12 +37,16 @@
   "include": [
     "src",
     "__tests__",
-    "jest",
-    "vite.config.ts",
     "tsconfig.json",
     ".eslintrc.cjs",
-    "jest.config"
+    "babel.config.cjs",
+    "vitest"
   ],
-  "exclude": ["node_modules", "frontend/jest", "src/restgenerated"],
+  "exclude": [
+    "node_modules",
+    "frontend/jest",
+    "src/restgenerated",
+    "vite.config.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

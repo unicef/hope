@@ -6,7 +6,7 @@ from uuid import UUID
 from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -23,13 +23,11 @@ from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
-from hct_mis_api.apps.account.permissions import (
-    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
-    Permissions,
-)
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.utils import test_conditional
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.visibility_backends import VisibilityBackend
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -62,22 +60,26 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         verbose_name=_("Parent"),
     )
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
-    """
-        permissions structure
-        {
-            "business_area_id": {
-                "roles": ["role_id_1", "role_id_2"],
-                "programs": {"program_id":["admin_id"]}
-            }
-        }
-    """
 
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
 
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        # Partner cannot be a parent if it has RoleAssignments
+        if self.parent:
+            if RoleAssignment.objects.filter(partner=self.parent).exists():
+                raise ValidationError(f"{self.parent} cannot become a parent as it has RoleAssignments.")
+            if self.parent.user_set.exists():
+                raise ValidationError(f"{self.parent} cannot become a parent as it has users.")
+        super().save(*args, **kwargs)
+
     @property
     def is_child(self) -> bool:
         return self.parent is None
+
+    @property
+    def is_unicef_subpartner(self) -> bool:
+        return self.parent and self.parent.is_unicef
 
     @property
     def is_parent(self) -> bool:
@@ -89,19 +91,12 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
     @classmethod
     def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: Optional[str] = None) -> List:
-        partners = cls.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
+        role_assignments = RoleAssignment.objects.filter(business_area_id=business_area_id)
         if program_id:
-            return [
-                (partner.id, partner.name)
-                for partner in partners
-                if program_id in partner.get_program_ids_for_business_area(business_area_id)
-            ]
-        else:
-            return [
-                (partner.id, partner.name)
-                for partner in partners
-                if partner.get_program_ids_for_business_area(business_area_id)
-            ]
+            role_assignments = role_assignments.filter(Q(program_id=program_id) | Q(program=None))
+        partners = cls.objects.filter(role_assignments__in=role_assignments).order_by("name").distinct()
+
+        return [(partner.id, partner.name) for partner in partners]
 
     @property
     def is_unicef(self) -> bool:
@@ -115,49 +110,59 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def is_editable(self) -> bool:
         return not self.is_unicef and not self.is_default
 
-    def has_full_area_access_in_program(self, program_id: Union[str, UUID]) -> bool:
-        return self.is_unicef or (
-            self.program_partner_through.filter(program_id=program_id).first()
-            and self.program_partner_through.filter(program_id=program_id).first().full_area_access
-        )
-
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
-        return [
-            str(program_id)
-            for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)
-        ]
+        from hct_mis_api.apps.program.models import Program
 
-    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
-        return self.is_unicef or self.programs.filter(id=program_id).exists()
+        if not hasattr(self, "_program_ids_for_business_area_cache"):
+            self._program_ids_for_business_area_cache = {}
+        if business_area_id in self._program_ids_for_business_area_cache:
+            return self._program_ids_for_business_area_cache[business_area_id]
+
+        if self.role_assignments.filter(business_area_id=business_area_id, program=None).exists():
+            programs_ids = (
+                Program.objects.filter(business_area_id=business_area_id).order_by("id").values_list("id", flat=True)
+            )
+        else:
+            programs_ids = (
+                self.role_assignments.filter(business_area_id=business_area_id)
+                .order_by("program_id")
+                .values_list("program_id", flat=True)
+            )
+        program_ids_list = [str(program_id) for program_id in programs_ids]
+
+        self._program_ids_for_business_area_cache[business_area_id] = program_ids_list
+
+        return program_ids_list
+
+    def get_program_ids_for_permissions_in_business_area(
+        self, business_area_id: str, permissions: List[Permissions]
+    ) -> List[str]:
+        """
+        Return list of program ids that the partner has permissions for in the given business area
+        """
+        from hct_mis_api.apps.program.models import Program
+
+        permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
+
+        if self.role_assignments.filter(permission_filter, business_area_id=business_area_id, program=None).exists():
+            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+        else:
+            programs_ids = self.role_assignments.filter(
+                permission_filter, business_area_id=business_area_id
+            ).values_list("program_id", flat=True)
+        return [str(program_id) for program_id in programs_ids]
 
     def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
-        return self.is_unicef or self.get_program_areas(program_id).filter(id=area_id).exists()
+        return VisibilityBackend.has_area_access(self, area_id, program_id)
 
-    def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
-        return Area.objects.filter(
-            program_partner_through__partner=self, program_partner_through__program_id=program_id
-        )
+    def get_area_limits_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+        return VisibilityBackend.get_area_limits_for_program(self, program_id)
 
-    def get_roles_for_business_area(
-        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
-    ) -> QuerySet["Role"]:
-        if not business_area_slug and not business_area_id:
-            return Role.objects.none()
+    def has_area_limits_in_program(self, program_id: Union[str, UUID]) -> bool:
+        return VisibilityBackend.has_area_limits_in_program(self, program_id)
 
-        if not business_area_id and business_area_slug:
-            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-
-        return Role.objects.filter(
-            business_area_partner_through__partner=self,
-            business_area_partner_through__business_area_id=business_area_id,
-        )
-
-    def add_roles_in_business_area(self, business_area_id: str, roles: List["Role"]) -> None:
-        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            partner=self,
-            business_area_id=business_area_id,
-        )
-        business_area_partner_through.roles.add(*roles)
+    def get_areas_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+        return VisibilityBackend.get_areas_for_program(self, program_id)
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -181,74 +186,127 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()
+        if self.partner and self.partner.is_parent:
+            raise ValidationError(f"{self.partner} is a parent partner and cannot have users.")
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> List:
+    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         """
-        return list of permissions based on User Role BA and User Partner
-        if program_id is in arguments need to check if partner has access to this program
+        Return list of program ids that the user (or user's partner) has access to in the given business area.
         """
-        user_roles_query = UserRole.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
-            expiry_date__lt=timezone.now()
-        )
-        all_user_roles_permissions_list = list(
-            Role.objects.filter(user_roles__in=user_roles_query).values_list("permissions", flat=True)
-        )
+        from hct_mis_api.apps.program.models import Program
 
-        # Regular user, need to check access to the program
-        if not self.partner.is_unicef:
-            # Check program access
-            if program_id and not self.partner.has_program_access(program_id):
-                return []
+        if not hasattr(self, "_program_ids_for_business_area_cache"):
+            self._program_ids_for_business_area_cache = {}
+        if business_area_id in self._program_ids_for_business_area_cache:
+            return self._program_ids_for_business_area_cache[business_area_id]
 
-            # Prepare partner permissions
-            partner_roles_in_ba = self.partner.get_roles_for_business_area(business_area_slug=business_area_slug)
-            all_partner_roles_permissions_list = [
-                perm for perm in partner_roles_in_ba.values_list("permissions", flat=True) if perm
-            ]
-        elif all_user_roles_permissions_list:
-            # Default partner permissions for UNICEF partner with access to business area
-            all_partner_roles_permissions_list = [DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER]
-        else:
-            all_partner_roles_permissions_list = []
-        return list(
-            set(
-                [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                + [perm for perms in all_user_roles_permissions_list if perms for perm in perms]
+        if RoleAssignment.objects.filter(
+            Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
+        ).exists():
+            programs_ids = (
+                Program.objects.filter(business_area_id=business_area_id).order_by("id").values_list("id", flat=True)
             )
+        else:
+            programs_ids = (
+                RoleAssignment.objects.filter(
+                    Q(user=self) | Q(partner__user=self),
+                    business_area_id=business_area_id,
+                )
+                .order_by("program_id")
+                .values_list("program_id", flat=True)
+            )
+
+        program_ids_list = [str(program_id) for program_id in programs_ids]
+        self._program_ids_for_business_area_cache[business_area_id] = program_ids_list
+        return program_ids_list
+
+    def get_program_ids_for_permissions_in_business_area(
+        self, business_area_id: str, permissions: List[Permissions]
+    ) -> List[str]:
+        """
+        Return list of program ids that the user (or user's partner) has permissions for in the given business area.
+        """
+        from hct_mis_api.apps.program.models import Program
+
+        permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
+
+        if RoleAssignment.objects.filter(
+            permission_filter,
+            Q(user=self) | Q(partner__user=self),
+            business_area_id=business_area_id,
+            program=None,
+        ).exists():
+            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+        else:
+            programs_ids = RoleAssignment.objects.filter(
+                permission_filter,
+                Q(user=self) | Q(partner__user=self),
+                business_area_id=business_area_id,
+            ).values_list("program_id", flat=True)
+        return [str(program_id) for program_id in programs_ids]
+
+    def permissions_in_business_area(self, business_area_slug: str, program_id: Union[UUID, str, None] = None) -> set:
+        """
+        return list of permissions for the given business area and program,
+        retrieved from RoleAssignments of the user and their partner
+        """
+        if program_id:
+            role_assignments = RoleAssignment.objects.filter(
+                Q(partner__user=self, business_area__slug=business_area_slug, program_id=program_id)
+                | Q(partner__user=self, business_area__slug=business_area_slug, program=None)
+                | Q(user=self, business_area__slug=business_area_slug, program_id=program_id)
+                | Q(user=self, business_area__slug=business_area_slug, program=None)
+            ).exclude(expiry_date__lt=timezone.now())
+        else:
+            role_assignments = RoleAssignment.objects.filter(
+                Q(partner__user=self, business_area__slug=business_area_slug)
+                | Q(user=self, business_area__slug=business_area_slug)
+            ).exclude(expiry_date__lt=timezone.now())
+
+        permissions_set = set()
+        # permissions from group field in RoleAssignment
+        role_assignment_group_permissions = Permission.objects.filter(
+            group__role_assignments__in=role_assignments
+        ).values_list("content_type__app_label", "codename")
+        permissions_set.update(f"{app}.{codename}" for app, codename in role_assignment_group_permissions)
+
+        # permissions from role field in RoleAssignment
+        role_assignment_role_permissions = Role.objects.filter(
+            role_assignments__in=role_assignments, permissions__isnull=False
+        ).values_list("permissions", flat=True)
+        permissions_set.update(
+            permission for permission_list in role_assignment_role_permissions for permission in permission_list
         )
+        return permissions_set
 
     @property
     def business_areas(self) -> QuerySet[BusinessArea]:
-        return BusinessArea.objects.filter(
-            Q(Q(user_roles__user=self) & ~Q(user_roles__expiry_date__lt=timezone.now())) | Q(partners=self.partner)
-        ).distinct()
-
-    def has_permission(
-        self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
-    ) -> bool:
-        return permission in self.permissions_in_business_area(business_area.slug, program_id)
+        role_assignments = RoleAssignment.objects.filter(Q(user=self) | Q(partner__user=self)).exclude(
+            expiry_date__lt=timezone.now()
+        )
+        return BusinessArea.objects.filter(role_assignments__in=role_assignments).exclude(active=False).distinct()
 
     @test_conditional(lru_cache())
-    def cached_user_roles(self) -> QuerySet["UserRole"]:
-        return self.user_roles.all().select_related("business_area")
+    def cached_role_assignments(self) -> QuerySet["RoleAssignment"]:
+        return self.role_assignments.all().select_related("business_area")
 
     def can_download_storage_files(self) -> bool:
         return any(
-            self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
-            for role in self.cached_user_roles()
+            self.has_perm(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
+            for role in self.cached_role_assignments()
         )
 
     def can_change_fsp(self) -> bool:
         return any(
-            self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
-            for role in self.cached_user_roles()
+            self.has_perm(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            for role in self.cached_role_assignments()
         )
 
     def can_add_business_area_to_partner(self) -> bool:
         return any(
-            self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
-            for role in self.cached_user_roles()
+            self.has_perm(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
+            for role in self.cached_role_assignments()
         )
 
     def email_user(  # type: ignore
@@ -291,6 +349,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("restrict_help_desk", "Limit fields to be editable for help desk"),
             ("can_reindex_programs", "Can reindex programs"),
             ("can_add_business_area_to_partner", "Can add business area to partner"),
+            ("can_change_allowed_partners", "Can change allowed partners"),
+            ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
         )
 
@@ -307,19 +367,118 @@ class HorizontalChoiceArrayField(ArrayField):
         return super(ArrayField, self).formfield(**defaults)
 
 
-class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
-    user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
-    role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
-    expiry_date = models.DateField(
-        blank=True, null=True, help_text="After expiry date this User Role will be inactive."
+class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
+    """
+    Model to represent the assignment of a role to a user or partner within a specific business area or program.
+    When program is NULL, the role is assigned to the user or partner in all programs within the business area.
+    This model also associates the role with an expiry date and a group, if applicable.
+    """
+
+    business_area = models.ForeignKey("core.BusinessArea", related_name="role_assignments", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        "account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
     )
+    partner = models.ForeignKey(
+        "account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
+    role = models.ForeignKey(
+        "account.Role", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
+    program = models.ForeignKey(
+        "program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
+    expiry_date = models.DateField(
+        blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
+    )
+    group = models.ForeignKey(Group, related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
-        unique_together = ("business_area", "user", "role")
+        constraints = [
+            # Either user or partner should be assigned; not both
+            models.CheckConstraint(
+                check=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
+                name="user_or_partner_not_both",
+            ),
+            # Unique constraint for user + role + business_area + program when program is NOT NULL
+            models.UniqueConstraint(
+                fields=["user", "role", "business_area", "program"],
+                name="unique_user_role_business_area_program",
+                condition=Q(user__isnull=False),
+            ),
+            # Unique constraint for user + role + business_area when program is NULL
+            models.UniqueConstraint(
+                fields=["user", "role", "business_area"],
+                name="unique_user_role_business_area_no_program",
+                condition=Q(user__isnull=False, program__isnull=True),
+            ),
+            # Unique constraint for partner + role + business_area + program when program is NOT NULL
+            models.UniqueConstraint(
+                fields=["partner", "role", "business_area", "program"],
+                name="unique_partner_role_business_area_program",
+                condition=Q(partner__isnull=False),
+            ),
+            # Unique constraint for partner + role + business_area when program is NULL
+            models.UniqueConstraint(
+                fields=["partner", "role", "business_area"],
+                name="unique_partner_role_business_area_no_program",
+                condition=Q(partner__isnull=False, program__isnull=True),
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        errors = []
+        # Ensure either user or partner is set, but not both
+        if bool(self.user) == bool(self.partner):
+            errors.append("Either user or partner must be set, but not both.")
+        # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
+        if (
+            self.partner
+            and not self.partner.is_unicef_subpartner
+            and self.role
+            and not self.role.is_available_for_partner
+        ):
+            errors.append("Partner can only be assigned roles that are available for partners.")
+        if self.partner:
+            # Validate that business_area is within the partner's allowed_business_areas
+            if not self.partner.allowed_business_areas.filter(id=self.business_area.id).exists():
+                errors.append(f"{self.business_area} is not within the allowed business areas for {self.partner}.")
+            # Only partners that are not parents can have role assignments
+            if self.partner.is_parent:
+                errors.append(f"{self.partner} is a parent partner and cannot have role assignments.")
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"{self.user} {self.role} in {self.business_area}"
+        role_holder = self.user or self.partner
+        return f"{role_holder} {self.role} in {self.business_area}"
+
+
+class AdminAreaLimitedTo(TimeStampedUUIDModel):
+    """
+    Model to limit the admin area access for a partner.
+    Partners with full area access for a certain program will not have any area limits - no record in this model.
+    """
+
+    partner = models.ForeignKey("account.Partner", related_name="admin_area_limits", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", related_name="admin_area_limits", on_delete=models.CASCADE)
+    areas = models.ManyToManyField("geo.Area", related_name="admin_area_limits", blank=True)
+
+    class Meta:
+        unique_together = ("partner", "program")
+
+    def clean(self) -> None:
+        if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:
+            raise ValidationError(f"Area limits cannot be set for programs with {self.program.partner_access} access.")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class UserGroup(NaturalKeyModel, models.Model):
@@ -362,6 +521,8 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
+    is_visible_on_ui = models.BooleanField(default=True)
+    is_available_for_partner = models.BooleanField(default=True)
 
     def natural_key(self) -> Tuple:
         return self.name, self.subsystem
@@ -383,11 +544,11 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user: User, business_area: "BusinessArea", role: UserRole) -> None:
+    def validate_user_role(self, user: User, business_area: "BusinessArea", role: RoleAssignment) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        incompatible_userroles = UserRole.objects.filter(
+        incompatible_userroles = RoleAssignment.objects.filter(
             business_area=business_area,
             role__id__in=incompatible_roles,
             user=user,
@@ -431,8 +592,8 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         failing_users = set()
 
         for role_pair in ((self.role_one, self.role_two), (self.role_two, self.role_one)):
-            for userrole in UserRole.objects.filter(role=role_pair[0]):
-                if UserRole.objects.filter(
+            for userrole in RoleAssignment.objects.filter(role=role_pair[0]):
+                if RoleAssignment.objects.filter(
                     user=userrole.user,
                     business_area=userrole.business_area,
                     role=role_pair[1],

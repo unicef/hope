@@ -8,11 +8,13 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeletePaymentVerificationPlanMutation } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
-import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
 import { useProgramContext } from '../../programContext';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -23,24 +25,33 @@ export function DeleteVerificationPlan({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
 }: DeleteVerificationPlanProps): ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate] = useDeletePaymentVerificationPlanMutation();
+  const { businessArea, programId: programSlug } = useBaseUrl();
+
+  const deleteVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsDeleteVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: paymentVerificationPlanId,
+        },
+      ),
+  });
 
   const handleDeleteVerificationPlan = async (): Promise<void> => {
-    const { errors } = await mutate({
-      variables: { paymentVerificationPlanId },
-      refetchQueries,
-    });
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
+    try {
+      await deleteVerificationPlanMutation.mutateAsync();
+
+      setDeleteDialogOpen(false);
+      showMessage(t('Verification plan has been deleted.'));
+    } catch (error) {
+      showApiErrorMessages(error, showMessage);
     }
-    setDeleteDialogOpen(false);
-    showMessage(t('Verification plan has been deleted.'));
   };
   return (
     <>

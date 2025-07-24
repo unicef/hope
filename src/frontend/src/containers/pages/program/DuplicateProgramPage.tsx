@@ -1,59 +1,103 @@
+import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { editProgramDetailsValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import {
-  AllProgramsForChoicesDocument,
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  useCopyProgramMutation,
-  usePduSubtypeChoicesDataQuery,
-  useProgramQuery,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
-import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
 import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Fade } from '@mui/material';
+import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
+import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { ProgramCopy } from '@restgenerated/models/ProgramCopy';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { UserChoices } from '@restgenerated/models/UserChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  decodeIdString,
+  isPartnerVisible,
+  mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
+} from '@utils/utils';
+import { Formik } from 'formik';
 import { omit } from 'lodash';
-import { editProgramDetailsValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import { hasPermissionInModule } from '../../../config/permissions';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const [mutate, { loading: loadingCopy }] = useCopyProgramMutation();
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
 
-  const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
-    variables: { businessArea },
-  });
-  const { data, loading: loadingProgram } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
+  const queryClient = useQueryClient();
 
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
+  const { mutateAsync: copyProgram, isPending: loadingCopy } = useMutation({
+    mutationFn: (programData: ProgramCopy) => {
+      return RestService.restBusinessAreasProgramsCopyCreate({
+        businessAreaSlug: businessArea,
+        slug: id,
+        requestBody: programData,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaPrograms', businessArea],
+      });
+    },
+  });
+
+  const { data: treeData, isLoading: treeLoading } =
+    useQuery<PaginatedAreaTreeList>({
+      queryKey: ['allAreasTree', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+          businessAreaSlug: businessArea,
+        }),
+    });
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
+  });
+
+  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
+    useQuery<UserChoices>({
+      queryKey: ['userChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasUsersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
+    });
 
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
@@ -61,7 +105,7 @@ const DuplicateProgramPage = (): ReactElement => {
       ? budgetValue.toFixed(2)
       : 0;
     const partnersToSet =
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
@@ -129,34 +173,47 @@ const DuplicateProgramPage = (): ReactElement => {
     const pduFieldsWithReplacedNulls = values.pduFields.map(transformPduField);
 
     const pduFieldsToSend = pduFieldsWithReplacedNulls.every(arePduFieldsEqual)
-      ? null
+      ? []
       : pduFieldsWithReplacedNulls.length > 0
         ? pduFieldsWithReplacedNulls
-        : null;
+        : [];
 
     try {
-      const response = await mutate({
-        variables: {
-          programData: {
-            id,
-            ...requestValues,
-            budget: budgetToFixed,
-            businessAreaSlug: businessArea,
-            partners: partnersToSet,
-            pduFields: pduFieldsToSend,
-          },
-        },
-        refetchQueries: () => [
-          {
-            query: AllProgramsForChoicesDocument,
-            variables: { businessArea, first: 100 },
-          },
-        ],
-      });
+      const programData = {
+        programmeCode: requestValues.programmeCode,
+        name: requestValues.name,
+        sector: requestValues.sector,
+        description: requestValues.description,
+        budget: budgetToFixed.toString(),
+        administrativeAreasOfImplementation:
+          requestValues.administrativeAreasOfImplementation,
+        populationGoal: parseInt(requestValues.populationGoal, 10) || 0,
+        cashPlus: requestValues.cashPlus,
+        frequencyOfPayments: requestValues.frequencyOfPayments,
+        dataCollectingType: requestValues.dataCollectingTypeCode,
+        beneficiaryGroup: requestValues.beneficiaryGroup,
+        startDate: requestValues.startDate,
+        endDate:
+          requestValues.endDate === '' || requestValues.endDate === undefined
+            ? null
+            : requestValues.endDate,
+        pduFields: pduFieldsToSend,
+        partners: partnersToSet.map(({ partner, areas }) => ({
+          partner,
+          areas,
+        })),
+        partnerAccess: values.partnerAccess as PartnerAccessEnum,
+      };
+
+      await copyProgram(programData);
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/details/${response.data.copyProgram.program.id}`);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      navigate(`/${baseUrl}/list`);
+    } catch (e: any) {
+      showApiErrorMessages(
+        e,
+        showMessage,
+        t('Programme create action failed.'),
+      );
     }
   };
 
@@ -164,10 +221,10 @@ const DuplicateProgramPage = (): ReactElement => {
     loadingProgram ||
     treeLoading ||
     userPartnerChoicesLoading ||
-    pdusubtypeChoicesLoading
+    choicesLoading
   )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
@@ -184,36 +241,35 @@ const DuplicateProgramPage = (): ReactElement => {
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     partners,
-    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
-  } = data.program;
+    partnerAccess = 'ALL_PARTNERS_ACCESS',
+  } = program;
 
   const initialValues = {
     editMode: true,
     name: `Copy of Programme: (${name})`,
-    programmeCode: '',
+    programmeCode: null,
     startDate,
     endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    beneficiaryGroup: beneficiaryGroup?.id,
     description,
     budget,
-    administrativeAreasOfImplementation,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
     populationGoal,
     cashPlus,
     frequencyOfPayments,
     partners: partners
-      .filter((partner) => partner.name !== 'UNICEF')
+      .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
         areas: partner.areas.map((area) => decodeIdString(area.id)),
         areaAccess: partner.areaAccess,
       })),
-    partnerAccess,
+    partnerAccess: partnerAccess,
     pduFields: [],
   };
-  initialValues.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
+  initialValues.budget = program.budget === '0.00' ? '' : program.budget;
 
   const stepFields = [
     [
@@ -234,8 +290,8 @@ const DuplicateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const { allAreasTree } = treeData;
-  const { userPartnerChoices } = userPartnerChoicesData;
+  const allAreasTree = treeData?.results || [];
+  const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -289,14 +345,10 @@ const DuplicateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = userPartnerChoices
-          .filter((partner) => partner.name !== 'UNICEF')
-          .map((partner) => ({
-            value: partner.value,
-            label: partner.name,
-            disabled: values.partners.some((p) => p.id === partner.value),
-          }));
-
+        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+          userPartnerChoices,
+          values.partners,
+        );
         const handleNextStep = async () => {
           await handleNext({
             validateForm,
@@ -354,7 +406,7 @@ const DuplicateProgramPage = (): ReactElement => {
                         handleNext={handleNextStep}
                         step={step}
                         setStep={setStep}
-                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        pdusubtypeChoicesData={choicesData.pduSubtypeChoices}
                         errors={errors}
                         programId={id}
                         setFieldValue={setFieldValue}

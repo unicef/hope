@@ -7,13 +7,9 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  GrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
   grievanceTicketBadgeColors,
@@ -23,12 +19,18 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { replaceLabels } from '../utils/createGrievanceUtils';
+import {
+  getIssueTypeToDisplay,
+  isShowIssueType,
+  replaceLabels,
+} from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 interface GrievancesDetailsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
-  choicesData: GrievancesChoiceDataQuery;
+  ticket: GrievanceTicketDetail;
+  choicesData: GrievanceChoices;
   baseUrl: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
@@ -45,7 +47,6 @@ function GrievancesDetails({
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -57,23 +58,9 @@ function GrievancesDetails({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const issueType = ticket.issueType
-    ? choicesData.grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
-          (el) => el.value === ticket.issueType.toString(),
-        )[0].name
-    : '-';
+  const showIssueType = isShowIssueType(ticket.category);
+  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
-  const showIssueType =
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString() ||
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION.toString();
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
@@ -220,7 +207,9 @@ function GrievancesDetails({
               showIssueType && {
                 label: t('Issue Type'),
                 value: (
-                  <span>{replaceLabels(issueType, beneficiaryGroup)}</span>
+                  <span>
+                    {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
+                  </span>
                 ),
                 size: 3,
               },

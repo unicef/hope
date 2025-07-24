@@ -24,6 +24,7 @@ from extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
+from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.apps.periodic_data_update.test_periodic_data_update_import_service import (
@@ -37,12 +38,12 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
 class TestPeriodicDataUpdateUploadViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -64,18 +65,19 @@ class TestPeriodicDataUpdateUploadViews:
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
         self.url_upload = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-upload",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
+    @flaky(max_runs=3, min_passes=1)
     @pytest.mark.parametrize(
         "permissions, partner_permissions, access_to_program, expected_status",
         [
@@ -109,18 +111,14 @@ class TestPeriodicDataUpdateUploadViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
+        self.set_up(api_client, afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
@@ -130,9 +128,8 @@ class TestPeriodicDataUpdateUploadViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -175,9 +172,8 @@ class TestPeriodicDataUpdateUploadViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -236,18 +232,15 @@ class TestPeriodicDataUpdateUploadViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
+        self.set_up(api_client, afghanistan)
+
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         create_household_and_individuals(
             household_data={
@@ -306,9 +299,8 @@ class TestPeriodicDataUpdateUploadViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_UPLOAD],

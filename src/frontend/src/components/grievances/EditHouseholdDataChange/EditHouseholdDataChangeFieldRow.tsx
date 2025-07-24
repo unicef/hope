@@ -6,19 +6,13 @@ import camelCase from 'lodash/camelCase';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-  HouseholdQuery,
-} from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes']
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'];
-  household: HouseholdQuery['household'];
+  fields;
+  household: HouseholdDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
@@ -37,7 +31,8 @@ export const EditHouseholdDataChangeFieldRow = ({
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const field = fields.find((item) => item.name === itemValue.fieldName);
+
+  const field = fields?.find((item) => item.name === itemValue.fieldName);
   const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
   );
@@ -48,6 +43,7 @@ export const EditHouseholdDataChangeFieldRow = ({
     helpers.setValue(field?.isFlexField);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
+
   return (
     <>
       <Grid size={{ xs: 4 }}>
@@ -59,12 +55,12 @@ export const EditHouseholdDataChangeFieldRow = ({
           required
           component={FormikSelectField}
           choices={fields
-            .filter(
+            ?.filter(
               (item) =>
                 !notAvailableFields.includes(item.name) ||
                 item.name === itemValue?.fieldName,
             )
-            .map((item) => ({
+            ?.map((item) => ({
               value: item.name,
               name: item.labelEn,
             }))}
@@ -85,10 +81,10 @@ export const EditHouseholdDataChangeFieldRow = ({
           field={field}
         />
       ) : (
-        <Grid size={{ xs:4 }} />
+        <Grid size={{ xs: 4 }} />
       )}
       {itemValue.fieldName && (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

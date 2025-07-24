@@ -1,11 +1,5 @@
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
@@ -25,15 +19,11 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
-
-const Overview = styled(Paper)`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import { Overview } from '@components/payments/Overview';
 
 interface PaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
   canViewHouseholdDetails: boolean;
 }
@@ -48,19 +38,15 @@ export function PaymentDetails({
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
-  let paymentVerification: PaymentQuery['payment']['verification'] = null;
-  if (
-    payment.verification &&
-    payment.verification.status !== PaymentVerificationStatus.Pending
-  ) {
+  let paymentVerification: PaymentDetail['verification'] = null;
+  if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
   }
 
   const showFailureReason = [
-    PaymentStatus.NotDistributed,
-    PaymentStatus.ForceFailed,
-    PaymentStatus.TransactionErroneous,
+    'NOT_DISTRIBUTED',
+    'FORCE_FAILED',
+    'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
   const collectorAccountData = payment?.snapshotCollectorAccountData
@@ -116,7 +102,7 @@ export function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.distributionModality}
+              value={payment.parent?.unicefId}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -220,14 +206,11 @@ export function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
-              value={payment.deliveryType.name}
+              value={payment.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('FSP')}
-              value={payment.serviceProvider?.fullName}
-            />
+            <LabelizedField label={t('FSP')} value={payment.fspName} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField

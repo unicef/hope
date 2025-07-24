@@ -145,7 +145,7 @@ def check_against_sanction_list_pre_merge(
             id__in=sanction_list_individuals,
         )
     if not individuals_ids:
-        individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)
+        individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
     documents: Tuple = (get_individual_doc(program.business_area.slug),)

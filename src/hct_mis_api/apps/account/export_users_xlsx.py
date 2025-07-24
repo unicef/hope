@@ -25,9 +25,9 @@ class PartnerField(GenericField):
         return user.partner.name
 
 
-class UserRoleField(GenericField):
+class RoleAssignmentField(GenericField):
     def value(self, user: User, business_area: str) -> str:
-        all_roles = user.user_roles.filter(business_area__slug=business_area)
+        all_roles = user.role_assignments.filter(business_area__slug=business_area)
         return ", ".join([f"{role.business_area.name}-{role.role.name}" for role in all_roles])
 
 
@@ -39,7 +39,7 @@ class ExportUsersXlsx:
             "email": GenericField("email", "E-MAIL"),
             "status": GenericField("status", "ACCOUNT STATUS"),
             "partner": PartnerField("partner", "PARTNER"),
-            "user_roles": UserRoleField("user_roles", "USER ROLES"),
+            "user_roles": RoleAssignmentField("user_roles", "USER ROLES"),
         }
     )
 
@@ -61,7 +61,7 @@ class ExportUsersXlsx:
         users = (
             User.objects.prefetch_related("user_roles")
             .select_related("partner")
-            .filter(is_superuser=False, user_roles__business_area__slug=self.business_area_slug)
+            .filter(is_superuser=False, role_assignments__business_area__slug=self.business_area_slug)
         )
         if users.exists() is False:
             return None

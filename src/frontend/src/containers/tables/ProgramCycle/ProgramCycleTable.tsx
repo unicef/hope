@@ -1,4 +1,3 @@
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
@@ -12,39 +11,69 @@ import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCyc
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 
 interface ProgramCyclesTableProgramDetailsProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
 export const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   });
-  const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
-    program.status === ProgramStatus.Active &&
+    program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
-  const { data, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessArea, program.id, queryVariables],
-    queryFn: async () => {
-      return fetchProgramCycles(businessArea, program.id, queryVariables);
+  const { data, error, isLoading } = useQuery<PaginatedProgramCycleListList>({
+    queryKey: ['programCycles', businessArea, program.slug, queryVariables],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsCyclesList({
+        businessAreaSlug: businessArea,
+        programSlug: queryVariables.programSlug,
+        limit: queryVariables.limit,
+        offset: queryVariables.offset,
+        ordering: queryVariables.ordering,
+      });
     },
+  });
+
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
   });
 
   const canViewDetails = programId !== 'all';
 
-  const renderRow = (row: ProgramCycle): ReactElement => {
+  const renderRow = (row: ProgramCycleList): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
     const canEditProgramCycle =
       (row.status === 'Draft' || row.status === 'Active') &&
@@ -72,25 +101,25 @@ export const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-entitled-quantity"
         >
-          {row.total_entitled_quantity_usd || '-'}
+          {row.totalEntitledQuantityUsd || '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-undelivered-quantity"
         >
-          {row.total_undelivered_quantity_usd || '-'}
+          {row.totalUndeliveredQuantityUsd || '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-delivered-quantity"
         >
-          {row.total_delivered_quantity_usd || '-'}
+          {row.totalDeliveredQuantityUsd || '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">
-          <UniversalMoment>{row.start_date}</UniversalMoment>
+          <UniversalMoment>{row.startDate}</UniversalMoment>
         </TableCell>
         <TableCell data-cy="program-cycle-end-date">
-          <UniversalMoment>{row.end_date}</UniversalMoment>
+          <UniversalMoment>{row.endDate}</UniversalMoment>
         </TableCell>
 
         <TableCell data-cy="program-cycle-details-btn">
@@ -121,7 +150,7 @@ export const ProgramCyclesTableProgramDetails = ({
       <AddNewProgramCycle
         key="add-new"
         program={program}
-        lastProgramCycle={data.results[data.results.length - 1]}
+        lastProgramCycle={data?.results[data?.results?.length - 1]}
       />,
     );
   }
@@ -131,6 +160,7 @@ export const ProgramCyclesTableProgramDetails = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
+      itemsCount={dataProgramCyclesCount?.count}
       data={data}
       error={error}
       isLoading={isLoading}

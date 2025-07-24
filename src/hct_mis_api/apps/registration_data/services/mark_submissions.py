@@ -36,11 +36,13 @@ class MarkSubmissions:
     def _get_submissions(self, submission_ids: List[UUID]) -> QuerySet[KoboImportedSubmission]:
         return KoboImportedSubmission.objects.exclude(kobo_submission_uuid__in=list(submission_ids))
 
-    def _get_submissions_ids(self, datahub_ids: QuerySet) -> List:
-        return Household.objects.filter(
-            kobo_submission_uuid__isnull=False,
-            registration_data_import__id__in=list(datahub_ids),
-        ).values_list("kobo_submission_uuid", flat=True)
+    def _get_submissions_ids(self, datahub_ids: QuerySet) -> list[UUID]:
+        return list(
+            Household.objects.filter(
+                kobo_submission_uuid__isnull=False,
+                registration_data_import__id__in=list(datahub_ids),
+            ).values_list("kobo_submission_uuid", flat=True)
+        )
 
     def _get_datahub_ids(self) -> QuerySet[RegistrationDataImport]:
         return (

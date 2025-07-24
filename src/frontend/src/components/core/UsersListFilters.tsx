@@ -1,7 +1,9 @@
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useUserChoiceDataQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
@@ -26,6 +28,7 @@ export function UsersListFilters({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { businessArea } = useBaseUrl();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -45,10 +48,23 @@ export function UsersListFilters({
     clearFilter();
   };
 
-  const { data: choices } = useUserChoiceDataQuery();
-  if (!choices) {
+  const { data: choicesData, isLoading } = useQuery({
+    queryKey: ['userChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasUsersChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
+
+  if (isLoading || !choicesData) {
     return null;
   }
+
+  const choices = {
+    userPartnerChoices: choicesData.partnerChoicesTemp,
+    userRolesChoices: choicesData.roleChoices,
+    userStatusChoices: choicesData.statusChoices,
+  };
 
   return (
     <FiltersSection

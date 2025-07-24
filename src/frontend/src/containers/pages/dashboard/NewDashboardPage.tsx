@@ -3,7 +3,9 @@ import { FC } from 'react';
 
 export const NewDashboardPage: FC = () => {
   const { businessArea } = useBaseUrl();
-  const dashboardUrl = `${window.location.origin}/api/rest/dashboard/${businessArea}/`;
+  const encodedBusinessArea = encodeURIComponent(businessArea);
+  const dashboardUrl = `${window.location.origin}/api/rest/dashboard/${encodedBusinessArea}/`;
+
   return (
     <div style={{ height: '100vh', width: '100%' }}>
       <iframe

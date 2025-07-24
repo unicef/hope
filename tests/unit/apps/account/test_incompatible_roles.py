@@ -4,7 +4,7 @@ from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -39,8 +39,8 @@ class IncompatibleRolesTest(TestCase):
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
         user = UserFactory()
-        UserRole.objects.create(role=self.role_1, business_area=business_area, user=user)
-        UserRole.objects.create(role=self.role_2, business_area=business_area, user=user)
+        RoleAssignment.objects.create(role=self.role_1, business_area=business_area, user=user)
+        RoleAssignment.objects.create(role=self.role_2, business_area=business_area, user=user)
 
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
 

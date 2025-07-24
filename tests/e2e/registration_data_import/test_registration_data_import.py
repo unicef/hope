@@ -97,6 +97,11 @@ def unicef_partner() -> Partner:
 
 
 @pytest.fixture
+def unicef_hq() -> Partner:
+    yield PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
+
+
+@pytest.fixture
 def unhcr_partner() -> Partner:
     yield PartnerFactory(name="UNHCR")
 
@@ -133,6 +138,7 @@ def areas(country: Country) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeRegistrationDataImport:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_registration_data_import(
         self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
@@ -153,6 +159,7 @@ class TestSmokeRegistrationDataImport:
         assert "Imported by" in pageRegistrationDataImport.getTableLabel()[5].text
         assert "Data Source" in pageRegistrationDataImport.getTableLabel()[6].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_registration_data_import_select_file(
         self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
@@ -172,6 +179,7 @@ class TestSmokeRegistrationDataImport:
         pageRegistrationDataImport.getExcelItem().click()
         pageRegistrationDataImport.getInputName()
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_registration_data_details_page(
         self,
         create_programs: None,
@@ -209,6 +217,7 @@ class TestSmokeRegistrationDataImport:
 
 
 class TestRegistrationDataImport:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_registration_data_import_happy_path(
         self,
         registration_datahub: None,

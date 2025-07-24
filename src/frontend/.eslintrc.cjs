@@ -5,7 +5,6 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
-    'jest/globals': true,
     node: true,
   },
   extends: [
@@ -16,7 +15,6 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
-    'plugin:jest/recommended',
     'plugin:@tanstack/eslint-plugin-query/recommended',
   ],
   parserOptions: {
@@ -33,7 +31,6 @@ module.exports = {
     'react',
     'import',
     'react-hooks',
-    'jest',
     '@tanstack/query',
   ],
   ignorePatterns: [
@@ -91,6 +88,7 @@ module.exports = {
     'import/extensions': 'off',
     'import/no-named-as-default': 'off',
     'import/no-named-as-default-member': 'off',
+    '@typescript-eslint/unbound-method': ["error", { ignoreStatic: true }],
     "padding-line-between-statements": [
       "error",
       { "blankLine": "never", "prev": "import", "next": "import" }

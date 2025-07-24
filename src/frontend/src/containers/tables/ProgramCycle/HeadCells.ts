@@ -1,7 +1,7 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { ProgramCycle } from '@api/programCycleApi';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
-const headCells: HeadCell<ProgramCycle>[] = [
+const headCells: HeadCell<ProgramCycleList>[] = [
   {
     id: 'title',
     numeric: false,
@@ -41,7 +41,7 @@ const headCells: HeadCell<ProgramCycle>[] = [
     dataCy: 'head-cell-total-delivered-quantity_usd',
   },
   {
-    id: 'start_date',
+    id: 'startDate',
     numeric: false,
     disablePadding: false,
     label: 'Start Date',

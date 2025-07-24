@@ -4,7 +4,6 @@ from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import BusinessArea
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):
@@ -14,17 +13,17 @@ class APIBusinessAreaTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.list_url = reverse("api:business-area-list")
+        cls.list_url = reverse("api:core:business-areas-list")
 
     def test_list_business_area(self) -> None:
-        business_area1: BusinessArea = BusinessAreaFactory(
+        business_area1 = BusinessAreaFactory(
             slug="ukraine11",
             code="1234",
             name="Ukraine",
             long_name="the long name of Ukraine",
             active=True,
         )
-        business_area2: BusinessArea = BusinessAreaFactory(
+        business_area2 = BusinessAreaFactory(
             slug="BA 2",
             code="5678",
             name="Bus Area 2",
@@ -38,6 +37,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         response = self.client.get(self.list_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            self.client.force_authenticate(self.user)
             response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 3)
@@ -51,6 +51,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": None,
                 "is_split": self.business_area.is_split,
                 "active": self.business_area.active,
+                "is_accountability_applicable": self.business_area.is_accountability_applicable,
             },
             response.json()["results"],
         )
@@ -64,6 +65,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": None,
                 "is_split": business_area1.is_split,
                 "active": business_area1.active,
+                "is_accountability_applicable": business_area1.is_accountability_applicable,
             },
             response.json()["results"],
         )
@@ -77,6 +79,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": str(business_area2.parent.id),
                 "is_split": business_area2.is_split,
                 "active": business_area2.active,
+                "is_accountability_applicable": business_area2.is_accountability_applicable,
             },
             response.json()["results"],
         )

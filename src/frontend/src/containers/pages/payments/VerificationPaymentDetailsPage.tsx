@@ -1,45 +1,52 @@
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import {
-  PaymentVerificationPlanStatus,
-  usePaymentQuery,
-  usePaymentVerificationChoicesQuery,
-} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { VerificationPaymentDetails } from '@components/payments/VerificationPaymentDetails';
 import { VerifyManual } from '@components/payments/VerifyManual';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { AdminButton } from '@core/AdminButton';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { businessArea, programId } = useBaseUrl();
+  const { paymentPlanId, paymentId } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error } = usePaymentQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+  const {
+    data: payment,
+    isLoading: loading,
+    error,
+  } = useQuery<PaymentDetail>({
+    queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          paymentVerificationPk: paymentPlanId,
+          id: paymentId,
+          programSlug: programId,
+        },
+      ),
   });
-  const { data: choicesData, loading: choicesLoading } =
-    usePaymentVerificationChoicesQuery();
   const { baseUrl } = useBaseUrl();
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) return null;
+  if (!payment || permissions === null) return null;
 
-  const { payment } = data;
-
-  const { verificationPlans } = payment?.parent || {};
-  const verificationPlansAmount = verificationPlans?.edges.length;
-  const verification =
-    verificationPlans.edges[verificationPlansAmount - 1].node;
+  const { paymentVerificationPlans } = payment?.parent || {};
+  const verificationPlansAmount = paymentVerificationPlans?.length;
+  const verification = paymentVerificationPlans[verificationPlansAmount - 1];
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
@@ -71,12 +78,14 @@ function VerificationPaymentDetailsPage(): ReactElement {
     >
       {verification?.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
-      verification?.status !== PaymentVerificationPlanStatus.Finished ? (
+      verification?.status !== PaymentVerificationPlanStatusEnum.FINISHED ? (
         <VerifyManual
           paymentVerificationId={payment.verification?.id}
           status={payment.verification?.status}
           enabled={payment.verification.isManuallyEditable}
           receivedAmount={payment.verification.receivedAmount}
+          cashOrPaymentPlanId={paymentId}
+          verificationPlanId={paymentPlanId}
         />
       ) : null}
     </PageHeader>

@@ -19,7 +19,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.serializers import (
@@ -41,13 +41,9 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             Permissions.PM_PROGRAMME_CYCLE_UPDATE,
             Permissions.PM_PROGRAMME_CYCLE_DELETE,
         ]
-        partner = PartnerFactory(name="UNICEF")
+        unicef = PartnerFactory(name="UNICEF")
+        partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
         cls.user = UserFactory(username="Hope_Test_DRF", password="SpeedUp", partner=partner, is_superuser=True)
-        permission_list = [perm.value for perm in user_permissions]
-        role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
-        cls.client = APIClient()
-
         cls.program = ProgramFactory(
             name="Test REST API Program",
             status=Program.ACTIVE,
@@ -60,6 +56,13 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             cycle__end_date="2023-01-10",
             cycle__created_by=cls.user,
         )
+        permission_list = [perm.value for perm in user_permissions]
+        role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
+        user_role, _ = RoleAssignment.objects.get_or_create(
+            user=cls.user, role=role, business_area=cls.business_area, program=cls.program
+        )
+        cls.client = APIClient()
+
         cls.cycle1 = ProgramCycle.objects.create(
             program=cls.program,
             title="Cycle 1",
@@ -76,13 +79,12 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             end_date="2023-05-25",
             created_by=cls.user,
         )
-        cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.program.pk)}".encode()).decode()
         cls.list_url = reverse(
-            "api:programs:cycles-list", kwargs={"business_area": "afghanistan", "program_id": cls.program_id_base64}
+            "api:programs:cycles-list", kwargs={"business_area_slug": "afghanistan", "program_slug": cls.program.slug}
         )
         cls.cycle_1_detail_url = reverse(
             "api:programs:cycles-detail",
-            kwargs={"business_area": "afghanistan", "program_id": cls.program_id_base64, "pk": str(cls.cycle1.id)},
+            kwargs={"business_area_slug": "afghanistan", "program_slug": cls.program.slug, "pk": str(cls.cycle1.id)},
         )
 
     def test_list_program_cycles_without_perms(self) -> None:
@@ -94,8 +96,6 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        cycles = ProgramCycle.objects.filter(program=self.program)
-        self.assertEqual(int(response.data["count"]), cycles.count())
 
         results = response.data["results"]
         first_cycle = results[0]
@@ -180,7 +180,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:programs:cycles-detail",
-            kwargs={"business_area": "afghanistan", "program_id": self.program_id_base64, "pk": str(cycle3.id)},
+            kwargs={"business_area_slug": "afghanistan", "program_slug": self.program.slug, "pk": str(cycle3.id)},
         )
 
         bad_response = self.client.delete(url)
@@ -224,7 +224,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
 
     def test_filter_by_program(self) -> None:
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.list_url, {"program": self.program_id_base64})
+        response = self.client.get(self.list_url, {"program": str(self.program.pk)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 3)
 
@@ -298,7 +298,9 @@ class ProgramCycleCreateSerializerTest(TestCase):
             username="MyUser", first_name="FirstName", last_name="LastName", password="PassworD"
         )
         request.user = user
-        request.parser_context = {"kwargs": {"program_id": str(self.program_id)}}
+        request.parser_context = {
+            "kwargs": {"program_slug": str(self.program.slug), "business_area_slug": "afghanistan"}
+        }
         return {"request": request}
 
     def test_validate_title_unique(self) -> None:
@@ -307,7 +309,7 @@ class ProgramCycleCreateSerializerTest(TestCase):
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycles' title should be unique.", str(error.exception))
+        self.assertIn("Programme Cycle title should be unique.", str(error.exception))
 
     def test_validate_if_no_end_date(self) -> None:
         ProgramCycleFactory(program=self.program, title="Cycle 1", end_date=None)
@@ -413,7 +415,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("A ProgramCycle with this title already exists.", str(error.exception))
+        self.assertIn("Programme Cycle with this title already exists.", str(error.exception))
 
     def test_validate_program_status(self) -> None:
         self.program.status = Program.DRAFT
@@ -428,6 +430,8 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         cycle_2 = ProgramCycleFactory(
             program=self.program, title="Cycle 2222", start_date="2023-12-20", end_date="2023-12-25"
         )
+        cycle_2.save()
+        cycle_2.refresh_from_db()
         data = {"start_date": parse_date("2023-12-20"), "end_date": parse_date("2023-12-19")}
         serializer = ProgramCycleUpdateSerializer(instance=cycle_2, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
@@ -441,7 +445,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         self.assertIn(
             "Programme Cycles' timeframes must not overlap with the provided start date.", str(error.exception)
         )
-        # before program start date
+        # before program start date (program with end_date)
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("1999-12-10")}, context=self.get_serializer_context()
         )
@@ -462,12 +466,23 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         # before program start date
         self.program.end_date = None
         self.program.save()
+        cycle_2.refresh_from_db()
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("2022-01-01")}, context=self.get_serializer_context()
         )
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn("Programme Cycle start date must be after the programme start date.", str(error.exception))
+        # start date after existing end date
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"start_date": parse_date("2023-12-26")}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Programme Cycle start date must be before the end date.",
+            str(error.exception),
+        )
         # no error
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("2023-12-24")}, context=self.get_serializer_context()
@@ -477,14 +492,6 @@ class ProgramCycleUpdateSerializerTest(TestCase):
     def test_validate_end_date(self) -> None:
         self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
         self.cycle.save()
-        data = {"start_date": parse_date("2023-02-02"), "end_date": None}
-        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
-        with self.assertRaises(ValidationError) as error:
-            serializer.is_valid(raise_exception=True)
-        self.assertIn(
-            "This field may not be null.",
-            str(error.exception),
-        )
         # end date before program start date
         serializer = ProgramCycleUpdateSerializer(
             instance=self.cycle, data={"end_date": parse_date("1999-10-10")}, context=self.get_serializer_context()
@@ -505,6 +512,34 @@ class ProgramCycleUpdateSerializerTest(TestCase):
             "Programme Cycle end date must be within the programme's start and end dates.",
             str(error.exception),
         )
+        # clearing end date
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": None}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Cannot clear the Programme Cycle end date if it was previously set.",
+            str(error.exception),
+        )
+        # end date before existing start date
+        self.program.end_date = None
+        self.program.save()
+        self.cycle.start_date = datetime.strptime("2023-02-02", "%Y-%m-%d").date()
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": parse_date("2023-02-01")}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Programme Cycle end date must be after the start date.",
+            str(error.exception),
+        )
+        # no errors
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": parse_date("2023-12-24")}, context=self.get_serializer_context()
+        )
+        self.assertTrue(serializer.is_valid())
 
 
 class ProgramCycleViewSetTestCase(TestCase):

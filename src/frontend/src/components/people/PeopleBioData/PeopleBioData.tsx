@@ -1,6 +1,9 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
   formatAge,
@@ -8,35 +11,26 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  GrievancesChoiceDataQuery,
-  HouseholdChoiceDataQuery,
-  IndividualDisability,
-  IndividualNode,
-} from '@generated/graphql';
-import { LabelizedField } from '@core/LabelizedField';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
-import { useProgramContext } from '../../../programContext';
-import { ReactElement, ReactNode } from 'react';
-
-const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+import { Overview } from '@components/payments/Overview';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
 `;
 
 interface PeopleBioDataProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  choicesData: IndividualChoices;
+  grievancesChoices: GrievanceChoices;
 }
 export const PeopleBioData = ({
   individual,
@@ -52,49 +46,45 @@ export const PeopleBioData = ({
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
 
-  const residenceChoicesDict = choicesToDict(
-    choicesData.residenceStatusChoices,
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
   );
 
-  const mappedIndividualDocuments = individual?.documents?.edges?.map(
-    (edge) => (
-      <Grid size={{ xs: 3 }} key={edge.node.id}>
-        <Box flexDirection="column">
-          <Box mb={1}>
-            <LabelizedField label={edge.node.type.label}>
-              {edge.node.photo ? (
-                <DocumentPopulationPhotoModal
-                  documentNumber={edge.node.documentNumber}
-                  documentId={edge.node.id}
-                  individual={individual}
-                />
-              ) : (
-                edge.node.documentNumber
-              )}
-            </LabelizedField>
-          </Box>
-          <LabelizedField label="issued">{edge.node.country}</LabelizedField>
-        </Box>
-      </Grid>
-    ),
-  );
-
-  const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs: 3 }} key={item.node.id}>
+  const mappedIndividualDocuments = individual?.documents?.map((doc) => (
+    <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.number}
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
+              <DocumentPopulationPhotoModal
+                documentNumber={doc.documentNumber}
+                documentId={doc.id}
+                individual={individual}
+              />
+            ) : (
+              doc.documentNumber
+            )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.node.country}</LabelizedField>
+        <LabelizedField label="issued">{doc.country}</LabelizedField>
+      </Box>
+    </Grid>
+  ));
+
+  const mappedIdentities = individual?.identities?.map((item) => (
+    <Grid size={{ xs: 3 }} key={item.id}>
+      <Box flexDirection="column">
+        <Box mb={1}>
+          <LabelizedField label={`${item.partner} ID`}>
+            {item.number}
+          </LabelizedField>
+        </Box>
+        <LabelizedField label="issued">{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -131,7 +121,7 @@ export const PeopleBioData = ({
       <>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Residence Status')}>
-            {residenceChoicesDict[household?.residenceStatus]}
+            {household?.residenceStatus}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -181,7 +171,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 6 }}>
           <LabelizedField label={t('Geolocation')}>
-            {household?.geopoint || '-'}
+            {household?.geopoint}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -270,9 +260,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual?.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {observedDisabilityChoicesDict[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -309,7 +297,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
-            {individual?.disability === IndividualDisability.Disabled
+            {individual?.disability === DisabilityEnum.DISABLED
               ? 'Disabled'
               : 'Not Disabled'}
           </LabelizedField>

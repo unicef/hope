@@ -12,6 +12,8 @@ from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
     from hct_mis_api.apps.account.models import AbstractUser, User
     from hct_mis_api.apps.program.models import Program
 
@@ -69,7 +71,7 @@ class LogEntry(models.Model):
 def log_create(
     mapping: Dict,
     business_area_field: Any,
-    user: Optional[Union["AbstractUser", "User"]] = None,
+    user: Optional[Union["AbstractUser", "User", "AnonymousUser"]] = None,
     programs: Union[UUID, QuerySet["Program"], str, None] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,

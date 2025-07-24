@@ -10,7 +10,7 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
-from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
 from parameterized import parameterized
@@ -23,13 +23,13 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 
 class TestXLSXValidatorsMethods(APITestCase):
     databases = {"default"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     FILES_DIR_PATH = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file"
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         call_command("loadflexfieldsattributes")
         generate_delivery_mechanisms()
 
@@ -38,6 +38,15 @@ class TestXLSXValidatorsMethods(APITestCase):
         cls.social_worker_program = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
         cls.country = CountryFactory()
         cls.business_area.countries.add(cls.country)
+        AreaFactory(p_code="AF29")
+        AreaFactory(p_code="AF2401")
+        AreaFactory(p_code="AF02")
+        AreaFactory(p_code="AF1524")
+        AreaFactory(p_code="AF31")
+        AreaFactory(p_code="AF0619")
+        AreaFactory(p_code="AF0201")
+        AreaFactory(p_code="AF11")
+        AreaFactory(p_code="AF1115")
 
     def test_string_validator(self) -> None:
         validator = UploadXLSXInstanceValidator(self.program)

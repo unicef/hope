@@ -44,7 +44,7 @@ function TargetPopulationDetails({
             <LabelizedField
               dataCy="created-by"
               label={t('created by')}
-              value={`${createdBy.firstName} ${createdBy.lastName}`}
+              value={createdBy}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>

@@ -52,4 +52,6 @@ def copy_model_object(model_object: Any) -> Dict:
         del model_dict["_state"]
     if "_django_version" in model_dict:
         del model_dict["_django_version"]
+    if "_prefetched_objects_cache" in model_dict:
+        del model_dict["_prefetched_objects_cache"]
     return model_object.__class__(**model_dict)

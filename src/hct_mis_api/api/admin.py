@@ -80,14 +80,16 @@ class APITokenForm(forms.ModelForm):
     def __init__(self, *args: Any, instance: Optional[Any] = None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
-            self.fields["valid_for"].queryset = BusinessArea.objects.filter(user_roles__user=instance.user).distinct()
+            self.fields["valid_for"].queryset = BusinessArea.objects.filter(
+                role_assignments__user=instance.user
+            ).distinct()
 
     def clean(self) -> None:
         if self.instance and hasattr(self.instance, "user"):
             user = self.instance.user
         else:
             user = self.cleaned_data["user"]
-        if not BusinessArea.objects.filter(user_roles__user=user).exists():
+        if not BusinessArea.objects.filter(role_assignments__user=user).exists():
             raise ValidationError("This user does not have any Business Areas assigned to him")
 
 
@@ -166,7 +168,7 @@ class APITokenAdmin(SmartModelAdmin):
     @atomic()
     def save_model(self, request: HttpRequest, obj: Any, form: Form, change: bool) -> None:
         obj.save()
-        obj.valid_for.set(BusinessArea.objects.filter(user_roles__user=obj.user))
+        obj.valid_for.set(BusinessArea.objects.filter(role_assignments__user=obj.user))
         obj.save()
         if change:
             self._send_token_email(request, obj, TOKEN_UPDATED_EMAIL)

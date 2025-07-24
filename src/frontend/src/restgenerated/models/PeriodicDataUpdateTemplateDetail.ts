@@ -4,6 +4,6 @@
 /* eslint-disable */
 export type PeriodicDataUpdateTemplateDetail = {
     readonly id: number;
-    rounds_data: any;
+    roundsData: any;
 };
 

@@ -12,11 +12,10 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
-import { useProgramQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/TargetPopulationForPeopleTable';
 import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const initialFilter = {
   name: '',
@@ -31,11 +30,8 @@ const TargetPopulationsPage = (): ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const { programId } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
-  const { data: programData } = useProgramQuery({
-    variables: { id: programId },
-  });
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -46,12 +42,12 @@ const TargetPopulationsPage = (): ReactElement => {
 
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
-  if (!programData || !permissions) return null;
+  if (!permissions) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied />;
   let Table = TargetPopulationTable;
   let Filters = TargetPopulationTableFilters;
-  if (programData.program.isSocialWorkerProgram) {
+  if (isSocialDctType) {
     Table = TargetPopulationForPeopleTable;
     Filters = TargetPopulationForPeopleFilters;
   }

@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 import pytest
@@ -44,7 +45,6 @@ def sanction_list(db: Any) -> "SanctionList":
 @pytest.mark.elasticsearch
 class TestSanctionListPreMerge(TestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
 
@@ -67,6 +67,7 @@ class TestSanctionListPreMerge(TestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
+        call_command("loadcountries")
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.sanction_lists.add(sanction_list)
         cls.registration_data_import = RegistrationDataImportFactory(

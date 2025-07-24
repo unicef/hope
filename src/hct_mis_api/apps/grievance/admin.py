@@ -23,7 +23,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, IsOriginalAdminMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class GrievanceTicketCopiedToInline(admin.TabularInline):
@@ -36,11 +36,11 @@ class GrievanceTicketCopiedToInline(admin.TabularInline):
     verbose_name_plural = "Grievance Ticket representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
-        return GrievanceTicket.default_for_migrations_fix.all()
+        return GrievanceTicket.objects.all()
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdminMixin):
+class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "created_at",
@@ -87,7 +87,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdm
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
         qs = (
-            self.model.default_for_migrations_fix.get_queryset()
+            self.model.objects.get_queryset()
             .select_related(
                 "registration_data_import", "business_area", "assigned_to", "created_by", "admin2", "partner"
             )

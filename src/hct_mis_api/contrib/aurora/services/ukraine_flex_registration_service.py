@@ -109,7 +109,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
+        household.save(update_fields=("detail_id", "admin1", "admin2", "admin3", "admin4"))
 
         for index, individual_dict in enumerate(individuals_array):
             try:

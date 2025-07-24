@@ -1,6 +1,5 @@
 import { Box, Grid2 as Grid } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import AddIndividualGrievanceDetails from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
@@ -12,9 +11,10 @@ import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface GrievancesApproveSectionProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   baseUrl: string;
   canApproveFlagAndAdjudication: boolean;
   canApproveDataChange: boolean;
@@ -39,7 +39,7 @@ function GrievancesApproveSection({
     if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION
     ) {
-      if (ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion) {
+      if (ticket.ticketDetails.isMultipleDuplicatesVersion) {
         return (
           <NeedsAdjudicationDetailsNew
             ticket={ticket}
@@ -107,10 +107,7 @@ function GrievancesApproveSection({
     if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {
-      if (
-        ticket.paymentVerificationTicketDetails
-          .hasMultiplePaymentVerifications === false
-      ) {
+      if (ticket.ticketDetails.hasMultiplePaymentVerifications === false) {
         return (
           <PaymentGrievanceDetails
             ticket={ticket}
@@ -123,8 +120,10 @@ function GrievancesApproveSection({
   };
 
   return (
-    <Grid size={{ xs: 12 }}>
-      <Box p={3}>{matchDetailsComponent()}</Box>
+    <Grid container size={{ xs: 12 }}>
+      <Box sx={{ width: '100%' }} p={3}>
+        {matchDetailsComponent()}
+      </Box>
     </Grid>
   );
 }

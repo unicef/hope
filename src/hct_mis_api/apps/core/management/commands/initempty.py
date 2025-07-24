@@ -2,6 +2,8 @@ from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
+from extras.test_utils.factories.account import create_superuser
+
 
 class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
@@ -11,6 +13,6 @@ class Command(BaseCommand):
         call_command("generatedocumenttypes")
         call_command("search_index", "--rebuild", "-f")
         call_command("generateroles")
-        call_command("loaddata", "hct_mis_api/apps/account/fixtures/superuser.json")
+        create_superuser()
         call_command("loadcountries")
         call_command("loadcountrycodes")
