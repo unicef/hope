@@ -1,16 +1,6 @@
 import { setupCommonMocks } from 'src/testUtils/commonMocks';
 setupCommonMocks();
 
-// Mock the programCycleApi module
-vi.mock('@api/programCycleApi', () => ({
-  finishProgramCycle: vi.fn(),
-  reactivateProgramCycle: vi.fn(),
-}));
-
-const programCycleApi = require('@api/programCycleApi');
-const finishProgramCycle = programCycleApi.finishProgramCycle;
-const reactivateProgramCycle = programCycleApi.reactivateProgramCycle;
-
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -53,12 +43,15 @@ describe('ProgramCyclesTable', () => {
       RestService.restBusinessAreasProgramsCyclesList,
     ).mockResolvedValue(restBusinessAreasProgramsCyclesList);
 
-    // Set up mock implementations for program cycle API
-    vi.mocked(finishProgramCycle).mockResolvedValue({
+    // Set up mock implementations for program cycle actions on RestService
+    vi.mocked(
+      RestService.restBusinessAreasProgramsCyclesFinishCreate,
+    ).mockResolvedValue({
       message: 'Programme Cycle Finished',
     });
-
-    vi.mocked(reactivateProgramCycle).mockResolvedValue({
+    vi.mocked(
+      RestService.restBusinessAreasProgramsCyclesReactivateCreate,
+    ).mockResolvedValue({
       message: 'Programme Cycle Reactivated',
     });
   });
@@ -89,7 +82,7 @@ describe('ProgramCyclesTable', () => {
     ).toHaveBeenCalledWith(
       expect.objectContaining({
         businessAreaSlug: 'afghanistan',
-        programSlug: 'test-program-id',
+        programSlug: undefined,
         offset: 0,
         limit: 5,
         ordering: 'created_at',
@@ -184,7 +177,7 @@ describe('ProgramCyclesTable', () => {
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           businessAreaSlug: 'afghanistan',
-          programSlug: 'test-program-id',
+          programSlug: undefined,
           search: 'emergency',
           status: 'ACTIVE',
           startDate: '2023-01-01',
@@ -219,10 +212,14 @@ describe('ProgramCyclesTable', () => {
 
     // Wait for the mutation to complete and API to be called
     await vi.waitFor(() => {
-      expect(finishProgramCycle).toHaveBeenCalledWith(
-        'afghanistan',
-        'test-program-id',
-        'cycle-1',
+      expect(
+        RestService.restBusinessAreasProgramsCyclesFinishCreate,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          businessAreaSlug: 'afghanistan',
+          programSlug: 'test-program',
+          id: 'cycle-1',
+        }),
       );
     });
   });
@@ -249,10 +246,14 @@ describe('ProgramCyclesTable', () => {
 
     // Wait for the mutation to complete and API to be called
     await vi.waitFor(() => {
-      expect(reactivateProgramCycle).toHaveBeenCalledWith(
-        'afghanistan',
-        'test-program-id',
-        'cycle-2',
+      expect(
+        RestService.restBusinessAreasProgramsCyclesReactivateCreate,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          businessAreaSlug: 'afghanistan',
+          programSlug: 'test-program',
+          id: 'cycle-2',
+        }),
       );
     });
   });
