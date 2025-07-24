@@ -1430,7 +1430,7 @@ class TestHouseholdFilter:
             ({"search": "456"}, {"program_registration_id": "456"}, {"program_registration_id": "123"}, {}, {}),
         ],
     )
-    def test_asearch(
+    def test_1_search(
         self, filters: Dict, household1_data: Dict, household2_data: Dict, hoh_1_data: Dict, hoh_2_data: Dict
     ) -> None:
         household1, household2 = self._create_test_households(
