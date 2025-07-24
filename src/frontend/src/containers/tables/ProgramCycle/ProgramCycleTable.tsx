@@ -47,7 +47,7 @@ export const ProgramCyclesTableProgramDetails = ({
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug: businessArea,
-        programSlug: program.slug,
+        programSlug: queryVariables.programSlug,
         limit: queryVariables.limit,
         offset: queryVariables.offset,
         ordering: queryVariables.ordering,
