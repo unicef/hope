@@ -25,12 +25,12 @@ class Migration(migrations.Migration):
                 ),
             ],
             state_operations=[
-                migrations.DeleteModel(
-                    name='TargetingCriteria',
-                ),
                 migrations.RemoveField(
                     model_name='targetingcriteriarule',
                     name='targeting_criteria',
+                ),
+                migrations.DeleteModel(
+                    name='TargetingCriteria',
                 ),
                 migrations.AlterField(
                     model_name='targetingcriteriarule',
