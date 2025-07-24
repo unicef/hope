@@ -4,7 +4,9 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from extras.test_utils.factories.account import generate_unicef_partners
+
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
@@ -27,22 +29,16 @@ class Command(BaseCommand):
 
         reset_business_area_sequences()
         call_command("flush", "--noinput")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/payment/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
+        generate_unicef_partners()
+        call_command("generateroles")
+        call_command("init-geo-fixtures")
+        call_command("init-core-fixtures")
+        # add more fixtures if needed
 
         partner = Partner.objects.get(name="UNICEF")
+        unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
 
-        UserRole.objects.create(
+        RoleAssignment.objects.create(
             user=User.objects.create_superuser(
                 "cypress-username",
                 "cypress@cypress.com",
@@ -50,7 +46,7 @@ class Command(BaseCommand):
                 first_name="Cypress",
                 last_name="User",
                 status="ACTIVE",
-                partner=partner,
+                partner=unicef_hq,
             ),
             role=Role.objects.get(name="Role with all permissions"),
             business_area=BusinessArea.objects.get(name="Afghanistan"),

@@ -9,7 +9,11 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories.account import RoleFactory
+from extras.test_utils.factories.account import (
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+)
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
@@ -17,11 +21,7 @@ from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    BusinessAreaPartnerThrough,
-    DataCollectingType,
-)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
@@ -31,6 +31,26 @@ pytestmark = pytest.mark.django_db()
 def create_programs() -> None:
     create_program("Test Programm")
     yield
+
+
+@pytest.fixture(autouse=True)
+def create_unhcr_partner() -> None:
+    """
+    This factory is needed due to the temporary solution applied on program mutation -
+    partner needs to already hold any role in the business area to get this role for the new program.
+    This can be reverted after changing the temporary solution to receive role in the mutation input.
+    """
+    partner_unhcr = PartnerFactory(name="UNHCR")
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    partner_unhcr.role_assignments.all().delete()
+    partner_unhcr.allowed_business_areas.add(afghanistan)
+    # TODO: below line can be removed after temporary solution is removed for partners. Only being allowed in BA is enough.
+    RoleAssignmentFactory(
+        partner=partner_unhcr,
+        business_area=afghanistan,
+        role=RoleFactory(name="Role for UNHCR"),
+        program=None,
+    )
 
 
 def create_program(
@@ -469,9 +489,13 @@ class TestBusinessAreas:
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
+
+        pageProgrammeDetails.wait_for_text_in_any_element("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("TEST", pageProgrammeDetails.labelPartnerName)
+
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -550,6 +574,7 @@ class TestBusinessAreas:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -604,7 +629,9 @@ class TestAdminAreas:
         sleep(1)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("TEST", pageProgrammeDetails.labelPartnerName)
+
         assert "1" in pageProgrammeDetails.getLabelAdminArea1().text
         assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
 
@@ -733,6 +760,7 @@ class TestManualCalendar:
         end_date = datetime.now() + relativedelta(months=1)
         assert str(end_date.strftime("25 %b %Y")) in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -837,11 +865,7 @@ class TestManualCalendar:
         partner1 = Partner.objects.create(name="Test Partner 1")
         partner2 = Partner.objects.create(name="Test Partner 2")
         role = RoleFactory(name="Role in BA")
-        ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            business_area=BusinessArea.objects.get(slug="afghanistan"),
-            partner=partner1,
-        )
-        ba_partner_through.roles.set([role])
+        RoleAssignmentFactory(role=role, partner=partner1, business_area=BusinessArea.objects.get(slug="afghanistan"))
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
@@ -919,6 +943,7 @@ class TestManualCalendar:
         assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [

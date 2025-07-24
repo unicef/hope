@@ -1,9 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useUpdatePpMutation,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
@@ -18,7 +14,7 @@ import {
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import Exclusions from '../CreateTargetPopulation/Exclusions';
@@ -26,32 +22,16 @@ import { PaperContainer } from '../PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { useMutation } from '@tanstack/react-query';
+import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
+import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface EditTargetPopulationProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: TargetPopulationDetail;
   screenBeneficiary: boolean;
 }
-
-type TargetingCriteriaRuleNodeExtended = {
-  __typename: 'TargetingCriteriaRuleNode';
-  id: any;
-  householdIds: string;
-  individualIds: string;
-  individualsFiltersBlocks?: {
-    __typename: 'TargetingIndividualRuleFilterBlockNode';
-    individualBlockFilters?: {
-      // Define the properties of individualBlockFilters here
-    }[];
-  }[];
-  collectorsFiltersBlocks: {
-    // Define the properties of collectorsFiltersBlocks here
-  }[];
-  householdsFiltersBlocks?: {
-    // Define the properties of householdsFiltersBlocks here
-  }[];
-  deliveryMechanism?: string;
-  fsp?: string;
-};
 
 const EditTargetPopulation = ({
   paymentPlan,
@@ -59,8 +39,19 @@ const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
-    paymentPlan.rules.map((rule) => ({ ...rule })) || [];
+  const { showMessage } = useSnackbar();
+  const { id } = useParams();
+  const { baseUrl, programSlug, businessArea } = useBaseUrl();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const targetingCriteriaCopy =
+    paymentPlan.rules.map((rule) => ({
+      ...rule,
+      fsp: undefined,
+      deliveryMechanism: undefined,
+    })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
@@ -86,12 +77,26 @@ const EditTargetPopulation = ({
     },
   };
 
-  const [mutate, { loading }] = useUpdatePpMutation();
-  const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
-  const { selectedProgram, isSocialDctType, isStandardDctType } =
-    useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        tpId,
+        slug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        tpId: string;
+        slug: string;
+        requestBody?: PatchedTargetPopulationCreate;
+      }) =>
+        RestService.restBusinessAreasProgramsTargetPopulationsPartialUpdate({
+          businessAreaSlug,
+          id: tpId,
+          programSlug: slug,
+          requestBody,
+        }),
+    });
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
@@ -119,29 +124,35 @@ const EditTargetPopulation = ({
 
   const handleSubmit = async (values): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          paymentPlanId: values.id,
-          fspId: values.targetingCriteria[0]?.fsp,
-          deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
-          excludedIds: values.excludedIds,
-          exclusionReason: values.exclusionReason,
-          programCycleId: values.programCycleId.value,
-          ...(paymentPlan.status === PaymentPlanStatus.TpOpen && {
-            name: values.name,
-          }),
-          ...getTargetingCriteriaVariables({
-            flagExcludeIfActiveAdjudicationTicket:
-              values.flagExcludeIfActiveAdjudicationTicket,
-            flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-            criterias: values.targetingCriteria,
-          }),
+      await updateTargetPopulation(
+        {
+          businessAreaSlug: businessArea,
+          tpId: id,
+          slug: programSlug,
+          requestBody: {
+            excludedIds: values.excludedIds,
+            exclusionReason: values.exclusionReason,
+            programCycleId: values.programCycleId.value,
+            ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
+              name: values.name,
+            }),
+            ...getTargetingCriteriaVariables({
+              flagExcludeIfActiveAdjudicationTicket:
+                values.flagExcludeIfActiveAdjudicationTicket,
+              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+              criterias: values.targetingCriteria,
+            }),
+          },
         },
-      });
-      showMessage(t('Target Population Updated'));
-      navigate(`/${baseUrl}/target-population/${values.id}`);
+        {
+          onSuccess: () => {
+            showMessage(t('Target Population Updated'));
+            navigate(`/${baseUrl}/target-population/${values.id}`);
+          },
+        },
+      );
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -158,7 +169,7 @@ const EditTargetPopulation = ({
           <EditTargetPopulationHeader
             handleSubmit={submitForm}
             values={values}
-            loading={loading}
+            loading={loadingUpdate}
             baseUrl={baseUrl}
             targetPopulation={paymentPlan}
             data-cy="edit-target-population-header"

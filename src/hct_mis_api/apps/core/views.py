@@ -1,28 +1,20 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import View
 
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.forms import StorageFileForm
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.permissions_views_mixins import UploadFilePermissionMixin
-from hct_mis_api.apps.reporting.models import DashboardReport
-
-if TYPE_CHECKING:
-    from uuid import UUID
-
 
 logger = logging.getLogger(__name__)
 
@@ -50,15 +42,6 @@ class CommandForm(forms.Form):
 def trigger_error(request: HttpRequest) -> HttpResponse:
     division_by_zero = 1 / 0  # noqa: F841
     return HttpResponse(division_by_zero)
-
-
-@login_required
-def download_dashboard_report(request: HttpRequest, report_id: "UUID") -> Any:
-    report = get_object_or_404(DashboardReport, id=report_id)
-    if not request.user.has_permission(Permissions.DASHBOARD_EXPORT.name, report.business_area):
-        logger.warning("Permission Denied: You need dashboard export permission to access this file")
-        raise PermissionDenied("Permission Denied: You need dashboard export permission to access this file")
-    return redirect(report.file.url)
 
 
 class UploadFile(UploadFilePermissionMixin, View):

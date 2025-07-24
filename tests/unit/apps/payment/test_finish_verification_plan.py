@@ -1,14 +1,14 @@
 from typing import Any
 from unittest import mock
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from constance.test import override_config
 from extras.test_utils.factories.account import (
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    UserRoleFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -35,16 +35,15 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
 
 
 class TestFinishVerificationPlan(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()
         role = RoleFactory(name="Releaser")
-        UserRoleFactory(user=user, role=role, business_area=business_area)
+        RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
         afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 
@@ -69,7 +68,7 @@ class TestFinishVerificationPlan(TestCase):
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": afghanistan_areas_qs.order_by("?").first(),
+                    "admin2": afghanistan_areas_qs.order_by("?").first(),
                     "program": cls.program,
                 },
                 {

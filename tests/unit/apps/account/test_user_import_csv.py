@@ -8,9 +8,9 @@ from constance.test import override_config
 from django_webtest import WebTest
 from extras.test_utils.factories.account import (
     PartnerFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    UserRoleFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
 
@@ -67,7 +67,7 @@ class UserImportCSVTest(WebTest):
     @responses.activate
     def test_import_csv_detect_incompatible_roles(self) -> None:
         u: User = UserFactory(email="test@example.com", partner=self.partner)
-        UserRoleFactory(user=u, role=self.role_2, business_area=self.business_area)
+        RoleAssignmentFactory(user=u, role=self.role_2, business_area=self.business_area)
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
         res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
@@ -78,7 +78,7 @@ class UserImportCSVTest(WebTest):
         res = res.form.submit()
         assert res.status_code == 200
 
-        assert not u.user_roles.filter(role=self.role, business_area=self.business_area).exists()
+        assert not u.role_assignments.filter(role=self.role, business_area=self.business_area).exists()
 
     @responses.activate
     def test_import_csv_do_not_change_partner(self) -> None:

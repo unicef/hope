@@ -1,33 +1,37 @@
 from typing import Any, Callable, Iterable, List, Optional
 
-import pytest
-from factory.django import DjangoModelFactory
+from django.conf import settings
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+import pytest
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 
 
 @pytest.fixture()
-def update_partner_access_to_program() -> Callable:
-    def _update_partner_access_to_program(
+def set_admin_area_limits_in_program() -> Callable:
+    def _set_admin_area_limits_in_program(
         partner: Partner,
         program: Program,
-        areas: Optional[List[Area]] = None,
-        full_area_access: Optional[bool] = False,
+        areas: List[Area],
     ) -> None:
-        program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
+        admin_area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
             program=program,
             partner=partner,
         )
-        if areas:
-            program_partner_through.areas.set(areas)
-        if full_area_access:
-            program_partner_through.full_area_access = True
-            program_partner_through.save(update_fields=["full_area_access"])
+        admin_area_limits.areas.set(areas)
 
-    return _update_partner_access_to_program
+    return _set_admin_area_limits_in_program
 
 
 @pytest.fixture()
@@ -36,49 +40,56 @@ def create_partner_role_with_permissions() -> Callable:
         partner: Partner,
         permissions: Iterable,
         business_area: BusinessArea,
-        name: Optional[str] = "Partner Role with Permissions",
+        program: Optional[Program] = None,
+        name: Optional[str] = None,
+        whole_business_area_access: Optional[bool] = False,
     ) -> None:
-        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            business_area=business_area,
-            partner=partner,
-        )
         permission_list = [perm.value for perm in permissions]
+        name = name or f"Partner Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        business_area_partner_through.roles.add(role)
+        # whole_business_area is used to create a role for all programs in a business area (program=None)
+        if not program and not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
+        partner.allowed_business_areas.add(business_area)
+        RoleAssignment.objects.get_or_create(partner=partner, role=role, business_area=business_area, program=program)
 
     return _create_partner_role_with_permissions
 
 
 @pytest.fixture()
-def create_user_role_with_permissions(update_partner_access_to_program: Any) -> Callable:
+def create_user_role_with_permissions(set_admin_area_limits_in_program: Any) -> Callable:
     def _create_user_role_with_permissions(
         user: User,
         permissions: Iterable,
         business_area: BusinessArea,
         program: Optional[Program] = None,
         areas: Optional[List[Area]] = None,
-        name: Optional[str] = "Role with Permissions",
-    ) -> UserRole:
+        name: Optional[str] = None,
+        whole_business_area_access: Optional[bool] = False,
+    ) -> RoleAssignment:
         permission_list = [perm.value for perm in permissions]
+        name = name or f"User Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        # whole_business_area is used to create a role for all programs in a business area (program=None)
+        if not program and not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for User Role")
+        user_role, _ = RoleAssignment.objects.get_or_create(
+            user=user, role=role, business_area=business_area, program=program
+        )
 
-        # update Partner permissions for the program
-        if program:
-            update_partner_access_to_program(user.partner, program, areas)
+        # set admin area limits
+        if program and areas:
+            set_admin_area_limits_in_program(user.partner, program, areas)
         return user_role
 
     return _create_user_role_with_permissions
 
 
-class PartnerFactory(DjangoModelFactory):
-    name = "UNICEF"
-
-    class Meta:
-        model = Partner
-        django_get_or_create = ("name",)
-
-
 @pytest.fixture()
 def partner_unicef(db: Any) -> PartnerFactory:
     return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture()
+def partner_unicef_hq(db: Any) -> PartnerFactory:
+    return PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=PartnerFactory(name="UNICEF"))

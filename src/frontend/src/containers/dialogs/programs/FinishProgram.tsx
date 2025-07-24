@@ -1,55 +1,64 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ProgramQuery,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface FinishProgramProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
 export function FinishProgram({ program }: FinishProgramProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
-  const [mutate, { loading }] = useUpdateProgramMutation();
-  const finishProgram = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.Finished,
-        },
-        version: program.version,
+  const { mutateAsync: finishProgramMutation, isPending: loading } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsFinishCreate({
+          businessAreaSlug: businessArea,
+          slug: program.slug,
+        }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['program', businessArea, program.slug],
+        });
       },
     });
-    if (!response.errors && response.data.updateProgram) {
+
+  const finishProgram = async (): Promise<void> => {
+    try {
+      await finishProgramMutation();
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Finished,
+        status: ProgramStatus.FINISHED,
       });
-
       showMessage(t('Programme finished.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
+      navigate(`/${baseUrl}/details/${program.slug}`);
       setOpen(false);
-    } else {
-      showMessage(t('Programme finish action failed.'));
+    } catch (error: any) {
+      showApiErrorMessages(
+        error,
+        showMessage,
+        t('Failed to finish programme.'),
+      );
     }
   };
   return (

@@ -1,6 +1,9 @@
+from typing import Any
+
 from django.core.management import call_command
 
-from extras.test_utils.factories.account import UserFactory
+import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.grievance import (
@@ -9,63 +12,61 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.program.models import Program
+
+pytestmark = pytest.mark.django_db()
 
 
-class TestWithdrawHousehold(APITestCase):
-    STATUS_CHANGE_MUTATION = """
-        mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
-          grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
-            grievanceTicket {
-              id
-              addIndividualTicketDetails {
-                individualData
-              }
-            }
-          }
-        }
-        """
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
+class TestWithdrawHousehold:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
         call_command("loadcountries")
+        self.business_area = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
 
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.first()
-
+        self.program = ProgramFactory(
+            business_area=self.business_area,
+            status=Program.ACTIVE,
+            name="program afghanistan 1",
+        )
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             country=country,
             area_level=2,
         )
-        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
+        self.area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
 
-        cls.program_one = ProgramFactory(
-            name="Test program ONE",
-            business_area=cls.business_area,
+        self.program = ProgramFactory(
+            status=Program.ACTIVE,
+            business_area=BusinessArea.objects.first(),
         )
 
-    def test_withdraw_household_when_withdraw_last_individual_empty(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+    def test_withdraw_household_when_withdraw_last_individual_empty(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
+            self.program,
         )
-
-        household = HouseholdFactory.build(program=self.program_one)
+        household = HouseholdFactory.build(program=self.program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = self.program_one
+        household.registration_data_import.program = self.program
         household.registration_data_import.save()
-        household.program = self.program_one
-
+        household.program = self.program
         individual_data = {
             "full_name": "Test Example",
             "given_name": "Test",
@@ -73,22 +74,21 @@ class TestWithdrawHousehold(APITestCase):
             "phone_no": "+18773523904",
             "birth_date": "1965-03-15",
             "household": household,
-            "program": self.program_one,
+            "program": self.program,
         }
 
         individual = IndividualFactory(**individual_data)
-
         household.head_of_household = individual
         household.save()
 
         ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin2=self.admin_area_1,
+            admin2=self.area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-
+        ticket.programs.set([self.program])
         TicketDeleteIndividualDetailsFactory(
             ticket=ticket,
             individual=individual,
@@ -96,17 +96,15 @@ class TestWithdrawHousehold(APITestCase):
             approve_status=True,
         )
 
-        self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.business_area.slug, "pk": str(ticket.id)},
         )
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
 
         ind = Individual.objects.filter(id=individual.id).first()
         hh = Household.objects.filter(id=household.id).first()
 
-        self.assertTrue(ind.withdrawn)
-        self.assertTrue(hh.withdrawn)
+        assert ind.withdrawn is True
+        assert hh.withdrawn is True

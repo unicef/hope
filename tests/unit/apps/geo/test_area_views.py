@@ -1,5 +1,5 @@
 import json
-from typing import Callable
+from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -11,13 +11,20 @@ from extras.test_utils.factories.account import (
     PartnerFactory,
     UserFactory,
 )
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.core import create_ukraine
+from extras.test_utils.factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+    generate_area_types,
+)
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestAreaViews:
@@ -77,7 +84,7 @@ class TestAreaViews:
         self.url_list = reverse(
             "api:geo:areas-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
+                "business_area_slug": self.afghanistan.slug,
             },
         )
 
@@ -116,7 +123,6 @@ class TestAreaViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -130,35 +136,35 @@ class TestAreaViews:
         response_json = response.json()["results"]
         assert len(response_json) == 6
         assert {
-            "id": id_to_base64(self.area_1_area_type_1.id, "Area"),
+            "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
             "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
         } in response_json
         assert {
-            "id": id_to_base64(self.area_2_area_type_1.id, "Area"),
+            "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
             "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
         } in response_json
         assert {
-            "id": id_to_base64(self.area_1_area_type_2.id, "Area"),
+            "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
             "updated_at": self.area_1_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
         } in response_json
         assert {
-            "id": id_to_base64(self.area_2_area_type_2.id, "Area"),
+            "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
             "updated_at": self.area_2_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
         } in response_json
         assert {
-            "id": id_to_base64(self.area_1_area_type_afg_2.id, "Area"),
+            "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
@@ -167,7 +173,7 @@ class TestAreaViews:
             ),
         } in response_json
         assert {
-            "id": id_to_base64(self.area_2_area_type_afg_2.id, "Area"),
+            "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
@@ -176,7 +182,7 @@ class TestAreaViews:
             ),
         } in response_json
         assert {
-            "id": id_to_base64(self.area_other.id, "Area"),
+            "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
             "area_type": str(self.area_type_other.id),
@@ -188,7 +194,6 @@ class TestAreaViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -203,21 +208,21 @@ class TestAreaViews:
         response_json_1 = response_level_1.json()["results"]
         assert len(response_json_1) == 4
         assert {
-            "id": id_to_base64(self.area_1_area_type_1.id, "Area"),
+            "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
             "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
         } in response_json_1
         assert {
-            "id": id_to_base64(self.area_2_area_type_1.id, "Area"),
+            "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
             "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
         } in response_json_1
         assert {
-            "id": id_to_base64(self.area_1_area_type_afg_2.id, "Area"),
+            "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
@@ -226,7 +231,7 @@ class TestAreaViews:
             ),
         } in response_json_1
         assert {
-            "id": id_to_base64(self.area_2_area_type_afg_2.id, "Area"),
+            "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
@@ -245,7 +250,6 @@ class TestAreaViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -287,7 +291,7 @@ class TestAreaViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 2
 
             assert etag_second_call == etag
 
@@ -300,7 +304,7 @@ class TestAreaViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update != etag
 
@@ -312,7 +316,7 @@ class TestAreaViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update_2 != etag_call_after_update
 
@@ -324,7 +328,7 @@ class TestAreaViews:
 
             etag_call_after_update_3 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update_3 != etag_call_after_update_2
 
@@ -335,7 +339,7 @@ class TestAreaViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 2
 
             assert etag_call_after_update_second_call == etag_call_after_update_3
 
@@ -347,3 +351,52 @@ class TestAreaViews:
             etag_call_with_filter = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_call_with_filter != etag_call_after_update_second_call
+
+    def test_areas_tree(
+        self, api_client: Callable, afghanistan: BusinessAreaFactory, create_user_role_with_permissions: Any
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        # call_command("init-geo-fixtures")
+        business_area = create_ukraine()
+        country, _ = Country.objects.get_or_create(name="Ukraine")
+        business_area.countries.add(country)
+        generate_area_types()
+
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GEO_VIEW_LIST],
+            business_area,
+        )
+
+        p_code_prefix = country.iso_code2
+        area_type_level_1 = AreaType.objects.get(country=country, area_level=1)
+        area_type_level_2 = area_type_level_1.get_children().first()
+        area_type_level_3 = area_type_level_2.get_children().first()
+        area_type_level_4 = area_type_level_3.get_children().first()
+        area_type_level_5 = area_type_level_4.get_children().first()
+        # 1 level
+        area_l_1 = AreaFactory(area_type=area_type_level_1, p_code=f"{p_code_prefix}11", name="City1")
+        area_l_2 = AreaFactory(
+            area_type=area_type_level_2, p_code=f"{p_code_prefix}1122", parent=area_l_1, name="City2"
+        )
+        area_l_3 = AreaFactory(
+            area_type=area_type_level_3, p_code=f"{p_code_prefix}112233", parent=area_l_2, name="City3"
+        )
+        area_l_4 = AreaFactory(
+            area_type=area_type_level_4, p_code=f"{p_code_prefix}11223344", parent=area_l_3, name="City4"
+        )
+        AreaFactory(area_type=area_type_level_5, p_code=f"{p_code_prefix}1122334455", parent=area_l_4, name="City5")
+
+        Area.objects.rebuild()
+        AreaType.objects.rebuild()
+        Country.objects.rebuild()
+
+        # check api
+        response = self.client.get(reverse("api:geo:areas-all-areas-tree", kwargs={"business_area_slug": "ukraine"}))
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.json()
+        assert len(response_results) == 1
+        assert response_results[0]["name"] == "City1"
+        assert response_results[0]["areas"][0]["name"] == "City2"
+        assert response_results[0]["areas"][0]["areas"][0]["name"] == "City3"
+        assert len(response_results[0]["areas"][0]["areas"][0]["areas"]) == 0

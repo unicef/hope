@@ -1,25 +1,24 @@
-import { MouseEvent, ReactElement, useState } from 'react';
-import styled from 'styled-components';
-import {
-  AllHouseholdsForPopulationTableQueryVariables,
-  AllHouseholdsQuery,
-  AllHouseholdsQueryVariables,
-  HouseholdChoiceDataQuery,
-  useAllHouseholdsForPopulationTableQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells } from '@utils/utils';
+import { createApiParams } from '@utils/apiUtils';
+import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
-import { adjustHeadCells } from '@utils/utils';
-import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
   filter;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   setFieldValue;
   selectedHousehold?;
   setSelectedIndividual?;
@@ -54,31 +53,68 @@ function LookUpHouseholdTableCommunication({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const matchWithdrawnValue = (): boolean | undefined => {
-    if (filter.withdrawn === 'true') {
-      return true;
-    }
-    if (filter.withdrawn === 'false') {
-      return false;
-    }
-    return undefined;
-  };
-  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
+  const initialQueryVariables = useMemo(() => {
+    const matchWithdrawnValue = (): boolean | undefined => {
+      if (filter.withdrawn === 'true') {
+        return true;
+      }
+      if (filter.withdrawn === 'false') {
+        return false;
+      }
+      return undefined;
+    };
+
+    return {
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      familySize: JSON.stringify({
+        before: filter.householdSizeMin,
+        after: filter.householdSizeMax,
+      }),
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      admin2: filter.admin2,
+      residenceStatus: filter.residenceStatus,
+      withdrawn: matchWithdrawnValue(),
+      orderBy: filter.orderBy,
+      headOfHouseholdPhoneNoValid: true,
+    };
+  }, [
     businessArea,
-    familySize: JSON.stringify({
-      min: filter.householdSizeMin,
-      max: filter.householdSizeMax,
-    }),
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    admin2: filter.admin2,
-    residenceStatus: filter.residenceStatus,
-    withdrawn: matchWithdrawnValue(),
-    orderBy: filter.orderBy,
-    headOfHouseholdPhoneNoValid: true,
-    program: programId,
-  };
+    programId,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+    filter.orderBy,
+  ]);
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+  });
 
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
@@ -117,9 +153,7 @@ function LookUpHouseholdTableCommunication({
     }
   };
 
-  const handleRadioChange = (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-  ): void => {
+  const handleRadioChange = (household): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
@@ -143,23 +177,10 @@ function LookUpHouseholdTableCommunication({
   );
 
   const renderTable = (): ReactElement => (
-    <UniversalTable<
-      AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-      AllHouseholdsQueryVariables
-    >
-      headCells={
-        householdMultiSelect ? adjustedHeadCells.slice(1) : adjustedHeadCells
-      }
-      rowsPerPageOptions={[5, 10, 15, 20]}
-      query={useAllHouseholdsForPopulationTableQuery}
-      queriedObjectName="allHouseholds"
-      initialVariables={initialVariables}
-      filterOrderBy={filter.orderBy}
-      onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
-      numSelected={householdMultiSelect && selected.length}
-      renderRow={(row) => (
+    <UniversalRestTable
+      renderRow={(row: HouseholdList) => (
         <LookUpHouseholdTableRowCommunication
-          key={row.id}
+          key={(row as any).id}
           household={row}
           radioChangeHandler={handleRadioChange}
           selectedHousehold={selectedHousehold}
@@ -171,6 +192,17 @@ function LookUpHouseholdTableCommunication({
           isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
         />
       )}
+      headCells={
+        householdMultiSelect ? adjustedHeadCells.slice(1) : adjustedHeadCells
+      }
+      allowSort={false}
+      onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
+      numSelected={householdMultiSelect && selected.length}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      data={data}
+      isLoading={isLoading}
+      error={error}
     />
   );
   return noTableStyling ? (

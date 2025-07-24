@@ -1,6 +1,6 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.account import UserFactory
@@ -34,11 +34,10 @@ def _time(some_time: datetime.date) -> str:
 
 
 class TestDetails(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.user = UserFactory()
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)

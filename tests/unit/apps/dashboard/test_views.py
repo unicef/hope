@@ -14,7 +14,7 @@ from extras.test_utils.factories.account import (
 )
 from rest_framework import status
 
-from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.services import DashboardGlobalDataCache
@@ -72,8 +72,8 @@ def test_dashboard_data_view_access_granted(
     business_area = setup_client["business_area"]
     list_url = setup_client["list_url"]
 
-    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    UserRole.objects.create(user=user, role=role, business_area=business_area)
+    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
+    RoleAssignment.objects.create(user=user, role=role, business_area=business_area)
 
     response = client.get(list_url)
     assert response.status_code == status.HTTP_200_OK
@@ -158,8 +158,8 @@ def test_dashboard_report_view_context_with_permission(afghanistan: BusinessArea
     Test that the DashboardReportView includes the correct context data when the user has permission.
     """
     user = UserFactory()
-    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    UserRole.objects.create(user=user, role=role, business_area=afghanistan)
+    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
+    RoleAssignment.objects.create(user=user, role=role, business_area=afghanistan)
     request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": afghanistan.slug}))
     request.user = user
     view = DashboardReportView()
@@ -207,9 +207,9 @@ def test_dashboard_data_view_permissions(
     url = setup_client[expected_url_key]
 
     if permission_granted:
-        role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+        role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
         assigned_area = "global" if business_area_slug == "global" else business_area
-        UserRole.objects.create(user=user, role=role, business_area=assigned_area)
+        RoleAssignment.objects.create(user=user, role=role, business_area=assigned_area)
 
     _ = populate_dashboard_cache(business_area)
 

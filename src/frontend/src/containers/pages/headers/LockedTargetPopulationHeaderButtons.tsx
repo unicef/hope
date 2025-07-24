@@ -1,14 +1,13 @@
 import { LoadingButton } from '@components/core/LoadingButton';
-import {
-  Action,
-  BusinessAreaDataQuery,
-  PaymentPlanQuery,
-  ProgramStatus,
-} from '@generated/graphql';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FileCopy } from '@mui/icons-material';
 import { Box, Button, Tooltip } from '@mui/material';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -28,11 +27,11 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: TargetPopulationDetail;
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;
-  businessAreaData: BusinessAreaDataQuery;
+  businessAreaData: BusinessArea;
 }
 
 export function LockedTargetPopulationHeaderButtons({
@@ -46,11 +45,25 @@ export function LockedTargetPopulationHeaderButtons({
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
 
-  const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
-    usePaymentPlanAction(Action.TpUnlock, targetPopulation.id, () => {
+  const { mutateAsync: unlockAction, isPending: loadingUnlock } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsUnlockRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: targetPopulation.id,
+      }),
+    onSuccess: () => {
       showMessage(t('Target Population Unlocked'));
-    });
+    },
+    onError: (error) => {
+      showMessage(
+        error.message ||
+          t('An error occurred while unlocking the target population.'),
+      );
+    },
+  });
 
   return (
     <Box display="flex" alignItems="center">
@@ -82,7 +95,7 @@ export function LockedTargetPopulationHeaderButtons({
         <Box m={2}>
           <Tooltip
             title={
-              targetPopulation.program.status !== ProgramStatus.Active
+              targetPopulation.program.status !== Status791Enum.ACTIVE
                 ? t('Assigned programme is not ACTIVE')
                 : ''
             }

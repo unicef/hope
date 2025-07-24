@@ -1,11 +1,9 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import {
-  AllGrievanceTicketDocument,
-  AllGrievanceTicketQuery,
-  useBulkUpdateGrievanceAssigneeMutation,
-} from '@generated/graphql';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -20,25 +18,26 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import LinkedTicketsModal from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
-import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  getIssueTypeToDisplay,
+} from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 interface GrievancesTableRowProps {
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
+  ticket: GrievanceTicketList;
   statusChoices: { [id: number]: string };
   categoryChoices: { [id: number]: string };
   canViewDetails: boolean;
   issueTypeChoicesData;
   priorityChoicesData;
   urgencyChoicesData;
-  checkboxClickHandler: (
-    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ) => void;
+  checkboxClickHandler: (ticket: GrievanceTicketList) => void;
   isSelected: boolean;
   optionsData;
   setInputValue;
-  initialVariables;
 }
 
 export function GrievancesTableRow({
@@ -53,9 +52,8 @@ export function GrievancesTableRow({
   isSelected,
   optionsData,
   setInputValue,
-  initialVariables,
 }: GrievancesTableRowProps): ReactElement {
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
@@ -64,34 +62,43 @@ export function GrievancesTableRow({
     ticket.category,
     baseUrl,
   );
-  const issueType = ticket.issueType
-    ? issueTypeChoicesData
-        .find((el) => el.category === ticket.category.toString())
-        .subCategories.find((el) => el.value === ticket.issueType.toString())
-        .name
-    : '-';
+  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
+        {
+          businessAreaSlug: businessArea,
+          formData: params,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsGrievanceTickets'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasProgramsGrievanceTickets',
+          { program: programId },
+        ],
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
 
   const onFilterChange = async (assignee, ids): Promise<void> => {
     if (assignee) {
-      try {
-        await mutate({
-          variables: {
-            assignedTo: assignee.node.id,
-            businessAreaSlug: businessArea,
-            grievanceTicketIds: ids,
-          },
-          refetchQueries: () => [
-            {
-              query: AllGrievanceTicketDocument,
-              variables: { ...initialVariables },
-            },
-          ],
-        });
-      } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
-      }
+      await mutateAsync({
+        assignedTo: assignee.id,
+        grievanceTicketIds: ids,
+      });
     }
   };
 
@@ -122,7 +129,6 @@ export function GrievancesTableRow({
 
   const mappedPrograms = getMappedPrograms();
 
-  //TODO: add target to the query
   const getTargetUnicefId = (_ticket) => {
     return isSocialDctType || isAllPrograms
       ? _ticket?.targetId
@@ -177,7 +183,7 @@ export function GrievancesTableRow({
         )}
       </TableCell>
       <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
-      <TableCell align="left">{issueType}</TableCell>
+      <TableCell align="left">{issueTypeToDisplay}</TableCell>
       <TableCell align="left">{targetId || '-'}</TableCell>
       <TableCell align="left">
         <StatusBox

@@ -23,7 +23,7 @@ class HOPEPermissionTest(TestCase):
         user = UserFactory()
         self.business_area = BusinessAreaFactory(name="Afghanistan")
         self.role = RoleFactory(subsystem="API", name="c")
-        user.user_roles.create(role=self.role, business_area=self.business_area)
+        user.role_assignments.create(role=self.role, business_area=self.business_area)
 
         self.token: APIToken = APITokenFactory(
             user=user,

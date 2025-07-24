@@ -29,6 +29,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -247,6 +248,13 @@ class TestGrievanceUtils(TestCase):
         ticket_details.ticket = grievance
         ticket_details.save()
         partner = PartnerFactory(name="other")
+
+        area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
+        area_limits = AdminAreaLimitedTo.objects.create(
+            partner=partner,
+            program=program,
+        )
+        area_limits.areas.add(area_other)
         partner_unicef = PartnerFactory()
 
         with pytest.raises(PermissionDenied) as e:
@@ -595,7 +603,7 @@ class TestGrievanceUtils(TestCase):
             str(deduplication_set_id),
         )
 
-    def test_create_grievance_ticket_with_details__no_possible_duplicates(self) -> None:
+    def test_create_grievance_ticket_with_details_no_possible_duplicates(self) -> None:
         ba = BusinessAreaFactory(slug="afghanistan")
         deduplication_set_id = uuid.uuid4()
         program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)

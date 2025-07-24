@@ -227,7 +227,7 @@ class PeriodicDataUpdateImportService:
             individuals.append(individual)
         Individual.objects.bulk_update(individuals, ["flex_fields"])
 
-    def _import_cleaned_data(self, cleaned_data: dict) -> Individual:
+    def _import_cleaned_data(self, cleaned_data: dict) -> Optional[Individual]:
         individual_uuid = cleaned_data["individual__uuid"]
         individual_unicef_id = cleaned_data["individual_unicef_id"]
         individual = Individual.objects.filter(id=individual_uuid).first()

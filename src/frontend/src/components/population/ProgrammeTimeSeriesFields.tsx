@@ -14,18 +14,18 @@ import styled from 'styled-components';
 import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { IndividualNode } from '@generated/graphql';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
 `;
 
-//TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
-  individual: IndividualNode;
-  periodicFieldsData: any;
+  individual: IndividualDetail;
+  periodicFieldsData: PaginatedPeriodicFieldList;
 }
 
 export const ProgrammeTimeSeriesFields = ({

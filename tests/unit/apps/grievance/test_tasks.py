@@ -74,7 +74,6 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         deduplicate_mock.reset_mock()
 
         self.business_area.postpone_deduplication = False
-        self.business_area.screen_beneficiary = False
         self.business_area.save()
 
         deduplicate_and_check_against_sanctions_list_task_single_individual(

@@ -73,6 +73,17 @@ class Common:
             f" {self.driver.find_element(element_type, locator).text}"
         )
 
+    def wait_for_text_in_any_element(
+        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+    ) -> bool:
+        try:
+            return self._wait(timeout).until(
+                lambda driver: any(text in el.text for el in driver.find_elements(element_type, locator))
+            )
+        except TimeoutException:
+            pass
+        raise NoSuchElementException(f"Text '{text}' not found in any element matching {locator}.")
+
     def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
         for _ in range(retry):
             sleep(1)

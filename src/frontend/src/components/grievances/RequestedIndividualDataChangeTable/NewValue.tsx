@@ -1,9 +1,15 @@
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 
 export interface NewValueProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
 }
 

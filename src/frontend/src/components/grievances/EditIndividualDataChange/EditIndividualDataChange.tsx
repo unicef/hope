@@ -5,11 +5,9 @@ import { FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllIndividualsQuery,
-  useAllAddIndividualFieldsQuery,
-  useIndividualLazyQuery,
-} from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
@@ -20,6 +18,7 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 
 const BoxWithBorders = styled.div`
@@ -41,25 +40,62 @@ function EditIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
-    values.selectedIndividual;
-  const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
-    useAllAddIndividualFieldsQuery({ fetchPolicy: 'network-only' });
+  const individual: IndividualList = values.selectedIndividual;
+  const {
+    data: addIndividualFieldsData,
+    isLoading: addIndividualFieldsLoading,
+  } = useQuery({
+    queryKey: ['allAddIndividualsFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
 
-  const [
-    getIndividual,
-    { data: fullIndividual, loading: fullIndividualLoading },
-  ] = useIndividualLazyQuery({ variables: { id: individual?.id } });
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['grievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
 
-  useEffect(() => {
-    if (individual) {
-      getIndividual();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.selectedIndividual]);
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery({
+      queryKey: ['individualsChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
+
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countriesList'],
+    queryFn: () => RestService.restChoicesCountriesList(),
+  });
+
+  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
+    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
+    queryFn: () => {
+      if (!individual?.id) return null;
+      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        programSlug,
+        id: individual.id,
+      });
+    },
+    enabled:
+      !!individual?.id &&
+      !!businessAreaSlug &&
+      !!programSlug &&
+      programSlug !== 'all',
+  });
 
   useEffect(() => {
     if (
@@ -82,11 +118,21 @@ function EditIndividualDataChange({
   if (
     addIndividualFieldsLoading ||
     fullIndividualLoading ||
-    addIndividualFieldsLoading ||
-    !fullIndividual
+    choicesLoading ||
+    individualChoicesLoading ||
+    countriesLoading ||
+    !fullIndividual ||
+    !addIndividualFieldsData
   ) {
     return <LoadingComponent />;
   }
+
+  const combinedData = {
+    allAddIndividualsFieldsAttributes: addIndividualFieldsData || [],
+    countriesChoices: countriesData || [],
+    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
+  };
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
@@ -108,10 +154,8 @@ function EditIndividualDataChange({
                       <EditIndividualDataChangeFieldRow
                         itemValue={item}
                         index={index}
-                        individual={fullIndividual.individual}
-                        fields={
-                          addIndividualFieldsData.allAddIndividualsFieldsAttributes
-                        }
+                        individual={fullIndividual}
+                        fields={combinedData.allAddIndividualsFieldsAttributes}
                         notAvailableFields={notAvailableItems}
                         onDelete={() => arrayHelpers.remove(index)}
                         values={values}
@@ -149,13 +193,13 @@ function EditIndividualDataChange({
           <ExistingDocumentFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
-            addIndividualFieldsData={addIndividualFieldsData}
+            individual={fullIndividual}
+            addIndividualFieldsData={combinedData}
           />
           {!isEditTicket && (
             <NewDocumentFieldArray
               values={values}
-              addIndividualFieldsData={addIndividualFieldsData}
+              addIndividualFieldsData={combinedData}
               setFieldValue={setFieldValue}
             />
           )}
@@ -169,18 +213,18 @@ function EditIndividualDataChange({
           <ExistingIdentityFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
-            addIndividualFieldsData={addIndividualFieldsData}
+            individual={fullIndividual}
+            addIndividualFieldsData={combinedData}
           />
           {!isEditTicket && (
             <NewIdentityFieldArray
               values={values}
-              addIndividualFieldsData={addIndividualFieldsData}
+              addIndividualFieldsData={combinedData}
             />
           )}
         </Box>
       </BoxWithBorders>
-       <BoxWithBorders>
+      <BoxWithBorders>
         <Box mt={3}>
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
@@ -188,10 +232,15 @@ function EditIndividualDataChange({
           <ExistingAccountsFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
-            addIndividualFieldsData={addIndividualFieldsData}
+            individual={fullIndividual}
+            individualChoicesData={individualChoicesData}
           />
-           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={addIndividualFieldsData}/>}
+          {!isEditTicket && (
+            <NewAccountFieldArray
+              values={values}
+              individualChoicesData={individualChoicesData}
+            />
+          )}
         </Box>
       </BoxWithBorders>
     </>

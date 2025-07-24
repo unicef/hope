@@ -2,11 +2,12 @@ import datetime
 import json
 from typing import Dict
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -31,8 +32,6 @@ from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service impor
 
 
 class BaseTestUkrainianRegistrationService(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
@@ -50,6 +49,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -63,6 +63,9 @@ class BaseTestUkrainianRegistrationService(TestCase):
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0702001", name="Name3", parent=admin2)
 
         cls.household = [
             {

@@ -1,22 +1,21 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import {
-  AllHouseholdsForPopulationTableQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MouseEvent, ReactElement } from 'react';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpHouseholdTableRowProps {
-  household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
-  radioChangeHandler: (
-    household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
-  ) => void;
-  selectedHousehold: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
-  choicesData: HouseholdChoiceDataQuery;
+  household: HouseholdList;
+  radioChangeHandler: (household) => void;
+  selectedHousehold: HouseholdDetail;
+  choicesData: HouseholdChoices;
   checkboxClickHandler?: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
@@ -40,6 +39,11 @@ export function LookUpHouseholdTableRow({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
+  const permissions = usePermissions();
+  const canViewDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
 
   const handleClick = (event): void => {
     event.preventDefault();
@@ -89,7 +93,7 @@ export function LookUpHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align="left">
-        {!isAllPrograms ? (
+        {!isAllPrograms && canViewDetails ? (
           <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
             {household.unicefId}
           </BlackLink>
@@ -97,7 +101,7 @@ export function LookUpHouseholdTableRow({
           <span>{household.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
+      <TableCell align="left">{household.headOfHousehold}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
       <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
       <TableCell align="left">

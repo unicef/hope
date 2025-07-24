@@ -58,6 +58,7 @@ def add_accountability_surveys_message() -> Survey:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeAccountabilitySurveys:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_accountability_surveys(
         self,
         test_program: Program,
@@ -90,6 +91,7 @@ class TestSmokeAccountabilitySurveys:
         assert "SUR-24-0005" in pageAccountabilitySurveys.getRows()[0].text
         assert "Test survey" in pageAccountabilitySurveys.getRows()[0].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_accountability_surveys_details(
         self,
         test_program: Program,

@@ -1,8 +1,11 @@
 import contextlib
 import logging
+from typing import Iterable
 
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import QuerySet
+from django.utils import timezone
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -129,10 +132,10 @@ class RdiMergeTask:
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
                     PendingHousehold.objects.filter(id__in=household_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
+                        rdi_merge_status=MergeStatusModel.MERGED, updated_at=timezone.now()
                     )
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
+                        rdi_merge_status=MergeStatusModel.MERGED, updated_at=timezone.now()
                     )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
@@ -252,7 +255,7 @@ class RdiMergeTask:
             logger.warning(e)
             raise
 
-    def _update_household_collections(self, households: list, rdi: RegistrationDataImport) -> None:
+    def _update_household_collections(self, households: QuerySet[Household], rdi: RegistrationDataImport) -> None:
         households_to_update = []
         # if there are at least 2 households with the same unicef_id, they already have a collection - and new representation will be added to it
         # if this is the 2nd representation - the collection is created now for the new representation and the existing one
@@ -276,7 +279,7 @@ class RdiMergeTask:
 
         Household.all_objects.bulk_update(households_to_update, ["household_collection"])
 
-    def _update_individual_collections(self, individuals: list, rdi: RegistrationDataImport) -> None:
+    def _update_individual_collections(self, individuals: Iterable, rdi: RegistrationDataImport) -> None:
         individuals_to_update = []
         for individual in individuals:
             # find other individual with the same unicef_id and group them in the same collection

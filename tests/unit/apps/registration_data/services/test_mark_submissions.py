@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -18,11 +19,11 @@ from hct_mis_api.apps.registration_data.services.mark_submissions import MarkSub
 
 class TestMarkSubmissions(TestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
 
         cls.business_area = BusinessArea.objects.first()

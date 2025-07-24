@@ -1,6 +1,6 @@
 from typing import List
 
-from django.conf import settings
+from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test import TestCase
@@ -41,11 +41,11 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
 class TestGoldenRecordDeduplication(TestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

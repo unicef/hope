@@ -1,20 +1,18 @@
-import { Radio } from '@mui/material';
-import TableCell from '@mui/material/TableCell';
-import { AllIndividualsForPopulationTableQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { sexToCapitalize } from '@utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { useProgramContext } from 'src/programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
 
 interface LookUpIndividualTableRowProps {
-  individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
-  radioChangeHandler: (
-    individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-  ) => void;
-  selectedIndividual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
+  individual: IndividualList;
+  radioChangeHandler: (individual: IndividualList) => void;
+  selectedIndividual: IndividualList;
 }
 
 export function LookUpIndividualTableRow({
@@ -65,7 +63,7 @@ export function LookUpIndividualTableRow({
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">
-        {individual?.household?.admin2?.name || '-'}
+        {individual.household?.admin2?.id || '-'}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>

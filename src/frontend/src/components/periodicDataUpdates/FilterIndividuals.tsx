@@ -3,9 +3,9 @@ import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
-import { AdminAreaAutocompleteMultipleRest } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRest';
-import { RdiAutocompleteRest } from '@shared/autocompletes/rest/RdiAutocompleteRest';
-import { TargetPopulationAutocompleteRest } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRest';
+import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
+import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
+import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { t } from 'i18next';
 import React, { FC } from 'react';
 
@@ -32,7 +32,7 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
     <FiltersSection isOnPaper={isOnPaper} withApplyClearButtons={false}>
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid size={{ xs: 3 }}>
-          <RdiAutocompleteRest
+          <RdiAutocompleteRestFilter
             value={filter.registrationDataImportId}
             onChange={(selectedItem) =>
               handleStateFilterChange('registrationDataImportId', selectedItem)
@@ -40,7 +40,7 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <TargetPopulationAutocompleteRest
+          <TargetPopulationAutocompleteRestFilter
             value={filter.targetPopulationId}
             onChange={(selectedItem) =>
               handleStateFilterChange('targetPopulationId', selectedItem)
@@ -128,29 +128,27 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid p={3} container alignItems="flex-start" spacing={3}>
-          <Grid size={{ xs:6 }}>
-            <AdminAreaAutocompleteMultipleRest
-              value={filter.admin1}
-              onChange={(_, option) => {
-                handleStateFilterChange('admin1', option);
-              }}
-              level={1}
-              dataCy="filter-admin1"
-              disabled={filter.admin2.length > 0}
-            />
-          </Grid>
-          <Grid size={{ xs:6 }}>
-            <AdminAreaAutocompleteMultipleRest
-              value={filter.admin2}
-              onChange={(_, option) => {
-                handleStateFilterChange('admin2', option);
-              }}
-              level={2}
-              dataCy="filter-admin2"
-              disabled={filter.admin1.length > 0}
-            />
-          </Grid>
+        <Grid size={{ xs: 3 }}>
+          <AdminAreaAutocompleteMultipleRestFilter
+            value={filter.admin1 || []}
+            onChange={(_, option) => {
+              handleStateFilterChange('admin1', option);
+            }}
+            level={1}
+            dataCy="filter-admin1"
+            disabled={filter.admin2?.length > 0}
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <AdminAreaAutocompleteMultipleRestFilter
+            value={filter.admin2 || []}
+            onChange={(_, option) => {
+              handleStateFilterChange('admin2', option);
+            }}
+            level={1}
+            dataCy="filter-admin2"
+            disabled={filter.admin1?.length > 0}
+          />
         </Grid>
         <Grid size={{ xs: 3 }}>
           <SelectFilter

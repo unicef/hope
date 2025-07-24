@@ -57,7 +57,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             household_data={
                 "registration_data_import": cls.rdi_other,
                 "program": cls.program_from,
-                "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),

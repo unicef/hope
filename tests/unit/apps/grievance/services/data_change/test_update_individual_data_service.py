@@ -1,9 +1,11 @@
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
     TicketIndividualDataUpdateDetailsFactory,
 )
@@ -13,14 +15,19 @@ from extras.test_utils.factories.household import (
     IndividualFactory,
     create_household,
 )
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
 from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
@@ -32,6 +39,7 @@ class TestUpdateIndividualDataService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = BusinessAreaFactory()
+        generate_delivery_mechanisms()
         cls.program = ProgramFactory()
         cls.country_afg = CountryFactory(iso_code3="AFG")
         cls.user = UserFactory()
@@ -205,13 +213,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_not_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -247,13 +255,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "22222",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -297,13 +305,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "123456",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_not_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -324,10 +332,84 @@ class TestUpdateIndividualDataService(TestCase):
         # document was not updated
         self.assertEqual(document_to_edit.document_number, "111111")
 
+    def test_edit_account(self) -> None:
+        fi1 = FinancialInstitutionFactory(id="6")
+        fi2 = FinancialInstitutionFactory(id="7")
+        account = AccountFactory(
+            id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
+            individual=self.individual,
+            number="123",
+            data={"field": "value"},
+            financial_institution=fi1,
+            account_type=AccountType.objects.get(key="mobile"),
+        )
+
+        self.ticket.individual_data_update_ticket_details.individual_data["accounts"] = [
+            {
+                "approve_status": True,
+                "value": {
+                    "data_fields": {
+                        "financial_institution": str(fi1.id),
+                        "new_field": "new_value",
+                        "number": "2222",
+                    },
+                    "name": "mobile",
+                },
+            }
+        ]
+        self.ticket.individual_data_update_ticket_details.individual_data["accounts_to_edit"] = [
+            {
+                "approve_status": True,
+                "data_fields": [
+                    {"name": "field", "previous_value": "value", "value": "updated_value"},
+                    {"name": "new_field", "previous_value": None, "value": "new_value"},
+                    {"name": "number", "previous_value": "123", "value": "123123"},
+                    {
+                        "name": "financial_institution",
+                        "previous_value": str(fi1.id),
+                        "value": str(fi2.id),
+                    },
+                ],
+                "id": "e0a7605f-62f4-4280-99f6-b7a2c4001680",
+                "name": "mobile",
+            }
+        ]
+        self.ticket.individual_data_update_ticket_details.save()
+
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        try:
+            service.close(self.user)
+        except ValidationError:
+            self.fail("ValidationError should not be raised")
+
+        account.refresh_from_db()
+        self.assertEqual(account.number, "123123")
+        self.assertEqual(account.financial_institution, fi2)
+        self.assertEqual(
+            account.data,
+            {
+                "field": "updated_value",
+                "new_field": "new_value",
+            },
+        )
+
+        new_account = self.individual.accounts.exclude(id=account.id).first()
+        self.assertEqual(new_account.number, "2222")
+        self.assertEqual(new_account.financial_institution, fi1)
+        self.assertEqual(
+            new_account.data,
+            {
+                "new_field": "new_value",
+            },
+        )
+
     def test_update_people_individual_hh_fields(self) -> None:
         pl = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
         CountryFactory(name="Other Country", short_name="Oth", iso_code2="O", iso_code3="OTH", iso_num="111")
-        AreaFactory(area_type__country=pl, p_code="PL22M33", name="Test Area M")
+        area_type_1 = AreaTypeFactory(area_level=1, country=pl)
+        area_type_2 = AreaTypeFactory(area_level=2, country=pl)
+        area1 = AreaFactory(area_type=area_type_1, p_code="PL22", name="Test Area Parent")
+        AreaFactory(area_type=area_type_2, p_code="PL22M33", name="Test Area M", parent=area1)
         hh_fields = [
             "consent",
             "residence_status",
@@ -385,3 +467,8 @@ class TestUpdateIndividualDataService(TestCase):
 
         self.assertEqual(hh.admin_area.p_code, "PL22M33")
         self.assertEqual(hh.admin_area.name, "Test Area M")
+        self.assertEqual(hh.admin2.p_code, "PL22M33")
+        self.assertEqual(hh.admin2.name, "Test Area M")
+        self.assertIsNone(hh.admin3)
+        self.assertIsNotNone(hh.admin1)
+        self.assertEqual(hh.admin2.parent, hh.admin1)

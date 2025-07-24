@@ -1,4 +1,3 @@
-# Create your models here.
 import base64
 import hashlib
 import json
@@ -45,35 +44,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class RepresentationManager(models.Manager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-class SoftDeletableRepresentationManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-# remove after data migration
-class IsOriginalManager(models.Manager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=True)
-
-
 class SoftDeletableIsVisibleManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_visible=True)
-
-
-class SoftDeletableRepresentationMergedManager(SoftDeletableRepresentationManager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(rdi_merge_status="MERGED")
-
-
-class SoftDeletableRepresentationPendingManager(SoftDeletableRepresentationManager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
 class MergedManager(models.Manager):
@@ -86,7 +59,17 @@ class PendingManager(models.Manager):
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
-class SoftDeletableIsOriginalManagerMixin:
+class SoftDeletableMergedManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="MERGED")
+
+
+class SoftDeletablePendingManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="PENDING")
+
+
+class SoftDeletableManagerMixin:
     """
     Manager that limits the queryset by default to show only not removed
     instances of model.
@@ -117,11 +100,7 @@ class SoftDeletableIsOriginalManagerMixin:
         if hasattr(self, "_hints"):
             kwargs["hints"] = self._hints
 
-        return self._queryset_class(**kwargs).filter(is_removed=False, is_original=True)
-
-
-class SoftDeletableIsOriginalManager(SoftDeletableIsOriginalManagerMixin, models.Manager):
-    pass
+        return self._queryset_class(**kwargs).filter(is_removed=False)
 
 
 class MergeStatusModel(models.Model):
@@ -138,7 +117,7 @@ class MergeStatusModel(models.Model):
         abstract = True
 
 
-class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
+class SoftDeletableMergeStatusModel(MergeStatusModel):
     """
     An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
@@ -146,29 +125,32 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     Default manager returns only not-removed entries.
     """
 
-    is_removed = models.BooleanField(default=False)
-    is_original = models.BooleanField(db_index=True, default=False)
+    is_removed = models.BooleanField(default=False, db_index=True)
+    removed_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
 
-    objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
-    all_merge_status_objects = SoftDeletableRepresentationManager()
-    available_objects = SoftDeletableRepresentationMergedManager()
-    all_objects = models.Manager()
-    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
-    pending_objects = SoftDeletableRepresentationPendingManager()
+    objects: models.Manager = SoftDeletableMergedManager(_emit_deprecation_warnings=True)  # MERGED - is_removed
+    pending_objects: models.Manager = SoftDeletablePendingManager()  # PENDING - is_removed
+    available_objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
+    all_merge_status_objects: models.Manager = SoftDeletableManager()  # MERGED + PENDING - is_removed
+    all_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
 
-    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+    def delete(
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
             self.is_removed = True
-            self.save(using=using)  # type: ignore
-        else:
-            return super().delete(using=using, *args, **kwargs)
+            self.removed_date = timezone.now()
+            self.save(using=using)
+            return 1, {self._meta.label: 1}
+
+        return models.Model.delete(self, using=using, *args, **kwargs)
 
 
 class AdminUrlMixin:
@@ -191,36 +173,6 @@ class TimeStampedUUIDModel(UUIDModel):
 
     class Meta:
         abstract = True
-
-
-class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresentationMergeStatusModel):
-    """
-    An abstract base class model with a ``is_removed`` field that
-    marks entries that are not going to be used anymore, but are
-    kept in db for any reason.
-    Default manager returns only not-removed entries.
-    """
-
-    is_removed = models.BooleanField(default=False, db_index=True)
-    removed_date = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
-    def delete(  # type: ignore
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Tuple[int, Dict[str, int]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
-        Actually delete object if setting ``soft`` to False.
-        """
-        if soft:
-            self.is_removed = True
-            self.removed_date = timezone.now()
-            self.save(using=using)
-            return 1, {self._meta.label: 1}
-
-        return models.Model.delete(self, using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):

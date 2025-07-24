@@ -3,6 +3,7 @@ import { gql } from '@apollo/client';
 export const programDetails = gql`
   fragment programDetails on ProgramNode {
     id
+    slug
     name
     programmeCode
     startDate

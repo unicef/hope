@@ -1,48 +1,34 @@
-import { ProgramQuery } from '@generated/graphql';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  FormHelperText,
-} from '@mui/material';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogActions } from '@containers/dialogs/DialogActions';
-import { LoadingButton } from '@core/LoadingButton';
-import { useTranslation } from 'react-i18next';
-import { Field, Form, Formik, FormikValues } from 'formik';
-import { decodeIdString, today } from '@utils/utils';
-import moment from 'moment';
-import * as Yup from 'yup';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { GreyText } from '@core/GreyText';
-import Grid from '@mui/material/Grid2';
 import { LabelizedField } from '@core/LabelizedField';
-import { FormikDateField } from '@shared/Formik/FormikDateField';
-import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import {
-  ProgramCycle,
-  ProgramCycleUpdate,
-  ProgramCycleUpdateResponse,
-  updateProgramCycle,
-} from '@api/programCycleApi';
-import { useMutation } from '@tanstack/react-query';
-import type { DefaultError } from '@tanstack/query-core';
+import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { RestService } from '@restgenerated/index';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { ProgramCycleUpdate } from '@restgenerated/models/ProgramCycleUpdate';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages, today } from '@utils/utils';
+import { Field, Form, Formik, FormikValues } from 'formik';
+import moment from 'moment';
+import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 
 interface UpdateProgramCycleProps {
-  program: ProgramQuery['program'];
-  programCycle?: ProgramCycle;
+  program: ProgramDetail;
+  programCycle?: ProgramCycleList;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
-}
-
-interface MutationError extends DefaultError {
-  data: any;
 }
 
 const UpdateProgramCycle = ({
@@ -59,12 +45,12 @@ const UpdateProgramCycle = ({
   let endDate = Yup.date()
     .required(t('End Date is required'))
     .min(today, t('End Date cannot be in the past'))
-    .when('start_date', ([start_date], schema) =>
-      start_date
+    .when('startDate', ([startDate], schema) =>
+      startDate
         ? schema.min(
-            new Date(start_date),
+            new Date(startDate),
             `${t('End date have to be greater than')} ${moment(
-              start_date,
+              startDate,
             ).format('YYYY-MM-DD')}`,
           )
         : schema,
@@ -77,7 +63,7 @@ const UpdateProgramCycle = ({
     );
   }
   const validationSchema = Yup.object().shape({
-    end_date: endDate,
+    endDate: endDate,
   });
 
   const initialValues: {
@@ -85,23 +71,28 @@ const UpdateProgramCycle = ({
   } = {
     id: programCycle.id,
     title: programCycle.title,
-    start_date: programCycle.start_date,
-    end_date: undefined,
+    startDate: programCycle.startDate,
+    endDate: programCycle.endDate,
   };
 
-  const { mutateAsync, isPending, error } = useMutation<
-    ProgramCycleUpdateResponse,
-    MutationError,
-    ProgramCycleUpdate
-  >({
-    mutationFn: async (body) => {
-      return updateProgramCycle(
-        businessArea,
-        program.id,
-        decodeIdString(programCycle.id),
-        body,
-      );
-    },
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: ProgramCycleUpdate;
+    }) =>
+      RestService.restBusinessAreasProgramsCyclesUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
     onSuccess: () => {
       onSubmit();
     },
@@ -110,13 +101,18 @@ const UpdateProgramCycle = ({
   const handleSubmit = async (values: FormikValues) => {
     try {
       await mutateAsync({
-        title: programCycle.title,
-        start_date: programCycle.start_date,
-        end_date: values.end_date,
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: program.slug ?? program.id,
+        requestBody: {
+          title: values.title,
+          startDate: values.startDate,
+          endDate: values.endDate,
+        } as any, // type assertion to allow camelCase, REST client will transform
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
-      /* empty */
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -158,12 +154,12 @@ const UpdateProgramCycle = ({
                   data-cy="previous-program-cycle-start-date"
                   label={t('Start Date')}
                 >
-                  {values.start_date}
+                  {values.startDate}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <Field
-                  name="end_date"
+                  name="endDate"
                   label={t('End Date')}
                   component={FormikDateField}
                   required
@@ -171,9 +167,6 @@ const UpdateProgramCycle = ({
                   decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   data-cy="input-previous-program-cycle-end-date"
                 />
-                {error?.data?.end_date && (
-                  <FormHelperText error>{error.data.end_date}</FormHelperText>
-                )}
               </Grid>
             </Grid>
           </DialogContent>

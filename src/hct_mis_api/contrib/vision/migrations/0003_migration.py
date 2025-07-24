@@ -1,4 +1,4 @@
-from django.db import migrations, connection
+from django.db import connection, migrations
 
 TRIGGER_FUNCTION = """
 CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()

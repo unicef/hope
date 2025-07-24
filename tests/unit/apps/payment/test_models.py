@@ -69,7 +69,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestBasePaymentPlanModel:
@@ -401,7 +401,7 @@ class TestPaymentModel(TestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-        cls.pp = PaymentPlanFactory(created_by=cls.user)
+        cls.pp = PaymentPlanFactory(created_by=cls.user, business_area=cls.business_area)
 
     def test_create(self) -> None:
         p1 = PaymentFactory()
@@ -414,6 +414,15 @@ class TestPaymentModel(TestCase):
         PaymentFactory(parent=pp, household=hh1, currency="PLN")
         with self.assertRaises(IntegrityError):
             PaymentFactory(parent=pp, household=hh1, currency="PLN")
+
+    def test_household_admin2_property(self) -> None:
+        hh1 = HouseholdFactory(admin2=None, head_of_household=IndividualFactory(household=None))
+        admin2 = AreaFactory(name="New admin2")
+        payment = PaymentFactory(parent=self.pp, household=hh1)
+        self.assertEqual(payment.household_admin2, "")
+        hh1.admin2 = admin2
+        hh1.save()
+        self.assertEqual(payment.household_admin2, "New admin2")
 
     def test_payment_status_property(self) -> None:
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_PENDING)
@@ -703,6 +712,7 @@ class TestPaymentPlanSplitModel(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
 
+@pytest.mark.django_db(transaction=True)
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

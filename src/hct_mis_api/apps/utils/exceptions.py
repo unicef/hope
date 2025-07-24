@@ -1,13 +1,12 @@
 import logging
 from typing import Callable, Optional
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
 
-def log_and_raise(txt: str, error: Optional[Exception] = None, error_type: Callable = GraphQLError) -> None:
-    # TODO: need to be refactor to just raise exception
+def log_and_raise(txt: str, error: Optional[Exception] = None, error_type: Callable = ValidationError) -> None:
     logger.warning(txt)
     if error is not None:
         raise error_type(txt) from error

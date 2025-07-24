@@ -16,6 +16,7 @@ from django.utils.functional import classproperty
 
 import pytest
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -533,16 +534,18 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
     "hct_mis_api.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         organization = OrganizationFactory.create(slug="ukraine")
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0702001", name="Name3", parent=admin2)
 
     def test_successful_run_without_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
         result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)

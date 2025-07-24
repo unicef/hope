@@ -7,17 +7,17 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { choicesToDict, householdStatusToColor } from '@utils/utils';
-import {
-  HouseholdNode,
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface RecipientsTableRowProps {
-  household: HouseholdNode;
-  headOfHousehold: IndividualNode;
+  household: HouseholdDetail;
+  headOfHousehold: IndividualDetail;
   canViewDetails: boolean;
 }
 
@@ -27,10 +27,15 @@ export const RecipientsTableRow = ({
   canViewDetails,
 }: RecipientsTableRowProps): ReactElement => {
   const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      fetchPolicy: 'cache-first',
+  const { baseUrl, businessArea } = useBaseUrl();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
     });
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;

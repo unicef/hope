@@ -179,6 +179,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         blank=True,
     )
     import_from_ids = models.TextField(blank=True, null=True)
+    exclude_external_collectors = models.BooleanField(
+        default=False,
+        help_text="Exclude external alternate collectors from the RDI. "
+        "This is used for the RDI created from the program population.",
+    )
     pull_pictures = models.BooleanField(default=True)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
@@ -240,6 +245,27 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     @property
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
+
+    @property
+    def biometric_deduplicated(self) -> str:
+        if self.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED:
+            return "YES"
+        return "NO"
+
+    @property
+    def can_merge(self) -> bool:
+        if not self.program.is_active():
+            return False
+
+        is_still_processing = RegistrationDataImport.objects.filter(
+            program=self.program,
+            deduplication_engine_status__in=[
+                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            ],
+        ).exists()
+        if is_still_processing:
+            return False
+        return True
 
     def update_duplicates_against_population_statistics(self) -> None:
         self.golden_record_duplicates = Individual.objects.filter(

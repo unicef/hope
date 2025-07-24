@@ -1,56 +1,120 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AllSurveysQueryVariables,
-  SurveyNode,
-  SurveysChoiceDataQuery,
-  useAllSurveysQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { choicesToDict, dateToIsoString } from '@utils/utils';
+import { dateToIsoString, restChoicesToDict } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
+import { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
+import { Survey } from '@restgenerated/models/Survey';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { Choice } from '@restgenerated/models/Choice';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface SurveysTableProps {
   filter;
   canViewDetails: boolean;
-  choicesData: SurveysChoiceDataQuery;
+  choicesData: Array<Choice> | null;
 }
 
-export function SurveysTable({
+function SurveysTable({
   filter,
   canViewDetails,
   choicesData,
 }: SurveysTableProps): ReactElement {
-  const { programId } = useBaseUrl();
+  const { programId, baseUrl } = useBaseUrl();
   const { t } = useTranslation();
+  const businessAreaSlug = baseUrl.split('/')[0];
 
-  const initialVariables: AllSurveysQueryVariables = {
-    search: filter.search,
-    paymentPlan: filter.targetPopulation || '',
-    createdBy: filter.createdBy || '',
-    program: programId,
-    createdAtRange: JSON.stringify({
-      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug,
+      programSlug: programId,
+      search: filter.search,
+      paymentPlan: filter.targetPopulation || '',
+      createdBy: filter.createdBy || '',
+      createdAtRange: JSON.stringify({
+        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+      }),
+      ordering: '-created_at',
     }),
-  };
-  const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
+    [
+      businessAreaSlug,
+      programId,
+      filter.search,
+      filter.targetPopulation,
+      filter.createdBy,
+      filter.createdAtRangeMin,
+      filter.createdAtRangeMax,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: dataSurveys,
+    isLoading: isLoadingSurveys,
+    error: errorSurveys,
+  } = useQuery<PaginatedSurveyList>({
+    queryKey: ['businessAreasProgramsSurveysList', queryVariables],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysList(
+        createApiParams(
+          {
+            businessAreaSlug: queryVariables.businessAreaSlug,
+            programSlug: queryVariables.programSlug,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
+  });
+
+  const { data: dataSurveysCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsSurveysCount',
+      businessAreaSlug,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: queryVariables.businessAreaSlug,
+            programSlug: queryVariables.programSlug,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: !!businessAreaSlug && !!programId,
+  });
+
+  const categoryDict = restChoicesToDict(choicesData);
 
   return (
     <TableWrapper>
-      <UniversalTable<SurveyNode, AllSurveysQueryVariables>
+      <UniversalRestTable
         headCells={headCells}
         title={t('Surveys List')}
-        rowsPerPageOptions={[10, 15, 20]}
-        query={useAllSurveysQuery}
-        queriedObjectName="allSurveys"
-        defaultOrderBy="createdAt"
+        data={dataSurveys}
+        isLoading={isLoadingSurveys}
+        error={errorSurveys}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        defaultOrderBy="created_at"
         defaultOrderDirection="desc"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        itemsCount={dataSurveysCount?.count}
+        renderRow={(row: Survey) => (
           <SurveysTableRow
             key={row.id}
             survey={row}
@@ -62,3 +126,5 @@ export function SurveysTable({
     </TableWrapper>
   );
 }
+
+export default withErrorBoundary(SurveysTable, 'SurveysTable');

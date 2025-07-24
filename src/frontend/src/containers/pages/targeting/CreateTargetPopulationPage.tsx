@@ -1,41 +1,41 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import {
-  useBusinessAreaDataQuery,
-  useCreateTpMutation,
-  useProgramQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
 } from '@utils/targetingUtils';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
+  const { programSlug, businessAreaSlug, baseUrl } = useBaseUrl();
   const { isSocialDctType, isStandardDctType } = useProgramContext();
   const initialValues = {
     name: '',
     criterias: [],
-    program: programId,
+    program: programSlug,
     programCycleId: {
       value: '',
       name: '',
@@ -49,27 +49,52 @@ const CreateTargetPopulationPage = (): ReactElement => {
     deliveryMechanism: '',
     fsp: '',
   };
-  const [mutate, { loading }] = useCreateTpMutation();
+  const queryClient = useQueryClient();
+  const { mutateAsync: createTargetPopulation, isPending: loadingCreate } =
+    useMutation({
+      mutationFn: ({ requestBody }: { requestBody: any }) =>
+        RestService.restBusinessAreasProgramsTargetPopulationsCreate({
+          businessAreaSlug,
+          programSlug,
+          requestBody,
+        }),
+      onSuccess: () => {
+        // Invalidate the list and detail queries for target populations and program
+        queryClient.invalidateQueries({
+          queryKey: ['targetPopulations', businessAreaSlug, programSlug],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['program', businessAreaSlug, programSlug],
+        });
+      },
+    });
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const navigate = useNavigate();
 
-  const { data: programData } = useProgramQuery({
-    variables: { id: programId },
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessAreaSlug,
+      }),
   });
-
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
+  const { data: program } = useQuery<ProgramDetail>({
+    queryKey: ['program', businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug,
+        slug: programSlug,
+      }),
   });
 
   if (permissions === null) return null;
   if (!businessAreaData) return null;
-  if (!programData) return null;
+  if (!program) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
 
-  const screenBeneficiary = programData?.program?.screenBeneficiary;
+  const screenBeneficiary = program?.screenBeneficiary;
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Targeting Name is required'))
@@ -82,29 +107,27 @@ const CreateTargetPopulationPage = (): ReactElement => {
     }),
   });
 
-  const handleSubmit = async (values): Promise<void> => {
+  const handleSubmit = async (values: any): Promise<void> => {
     const fsp = values.criterias[0]?.fsp || null;
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
+    const requestBody = {
+      programCycleId: values.programCycleId.value,
+      name: values.name,
+      excludedIds: values.excludedIds,
+      exclusionReason: values.exclusionReason,
+      fspId: fsp,
+      deliveryMechanismCode: deliveryMechanism,
+      ...getTargetingCriteriaVariables(values),
+    };
+
     try {
-      const res = await mutate({
-        variables: {
-          input: {
-            programCycleId: values.programCycleId.value,
-            name: values.name,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            fspId: fsp,
-            deliveryMechanismCode: deliveryMechanism,
-            ...getTargetingCriteriaVariables(values),
-          },
-        },
+      const res = await createTargetPopulation({
+        requestBody,
       });
       showMessage(t('Target Population Created'));
-      navigate(
-        `/${baseUrl}/target-population/${res.data.createPaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/target-population/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -120,7 +143,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
             <AutoSubmitFormOnEnter />
             <CreateTargetPopulationHeader
               handleSubmit={submitForm}
-              loading={loading}
+              loading={loadingCreate}
               values={values}
               baseUrl={baseUrl}
               permissions={permissions}

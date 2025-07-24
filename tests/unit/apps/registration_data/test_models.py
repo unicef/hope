@@ -1,6 +1,6 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.account import PartnerFactory
@@ -24,11 +24,10 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
         partner = PartnerFactory()
@@ -90,7 +89,8 @@ class TestRegistrationDataModels(TestCase):
 
     def test_imported_individual_identity_str(self) -> None:
         self.assertEqual(
-            str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
+            str(self.imported_individual_identity),
+            f"UNICEF HQ [Sub-Partner of UNICEF] {self.imported_individual_3.unicef_id} 123456789",
         )
 
     def test_bulk_update_household_size(self) -> None:

@@ -1,7 +1,10 @@
+from typing import Any
+
 from django.core.management import call_command
+from django.urls import reverse
 
 import pytest
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.grievance import (
@@ -9,10 +12,10 @@ from extras.test_utils.factories.grievance import (
     TicketIndividualDataUpdateDetailsFactory,
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -21,117 +24,130 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     Individual,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.mark.elasticsearch
-class TestChangeHeadOfHousehold(APITestCase):
-    STATUS_CHANGE_MUTATION = """
-    mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
-      grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
-        grievanceTicket {
-          id
-        }
-      }
-    }
-    """
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
+class TestChangeHeadOfHousehold:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
         call_command("loadcountries")
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner, first_name="TestUser")
+        self.user2 = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
 
+        self.program = ProgramFactory(
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            name="program afghanistan 1",
+        )
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             country=country,
             area_level=2,
         )
-        admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
+        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdeeed")
 
-        cls.household = HouseholdFactory.build()
-        cls.household.program.save()
-        cls.household.household_collection.save()
-        cls.household.registration_data_import.imported_by.save()
-        cls.household.registration_data_import.program = cls.household.program
-        cls.household.registration_data_import.save()
+        self.household = HouseholdFactory.build()
+        self.household.program.save()
+        self.household.household_collection.save()
+        self.household.registration_data_import.imported_by.save()
+        self.household.registration_data_import.program = self.household.program
+        self.household.registration_data_import.save()
 
-        cls.individual1: Individual = IndividualFactory(household=cls.household, program=cls.household.program)
-        cls.individual2: Individual = IndividualFactory(household=cls.household, program=cls.household.program)
-        cls.individual1.relationship = HEAD
-        cls.individual2.relationship = BROTHER_SISTER
-        cls.individual1.save()
-        cls.individual2.save()
+        self.individual1: Individual = IndividualFactory(household=self.household, program=self.household.program)
+        self.individual2: Individual = IndividualFactory(household=self.household, program=self.household.program)
+        self.individual1.relationship = HEAD
+        self.individual2.relationship = BROTHER_SISTER
+        self.individual1.save()
+        self.individual2.save()
 
-        cls.household.head_of_household = cls.individual1
-        cls.household.save()
+        self.household.head_of_household = self.individual1
+        self.household.save()
 
-        cls.grievance_ticket = GrievanceTicketFactory(
+        self.grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=admin_area_1,
-            business_area=cls.business_area,
+            admin2=self.admin_area,
+            business_area=self.afghanistan,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
+        self.grievance_ticket.programs.set([self.program])
         TicketIndividualDataUpdateDetailsFactory(
-            ticket=cls.grievance_ticket,
-            individual=cls.individual2,
+            ticket=self.grievance_ticket,
+            individual=self.individual2,
             individual_data={
                 "relationship": {"value": "HEAD", "approve_status": True, "previous_value": "BROTHER_SISTER"}
             },
         )
-
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
-        )
         rebuild_search_index()
 
-    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self) -> None:
+    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grievance_ticket.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_UPDATE],
+            self.afghanistan,
+            self.program,
+        )
         self.individual1.relationship = HEAD
         self.individual1.save()
 
         self.household.head_of_household = self.individual1
         self.household.save()
 
-        response = self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
+        assert self.individual1.relationship == "HEAD"
+        assert self.individual2.relationship == "BROTHER_SISTER"
 
-        self.assertTrue("There is one head of household" in response["errors"][0]["message"])
-        self.assertEqual(self.individual1.relationship, "HEAD")
-        self.assertEqual(self.individual2.relationship, "BROTHER_SISTER")
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(self) -> None:
+        self.individual1.refresh_from_db()
+        self.individual2.save()
+        self.individual2.refresh_from_db()
+
+        assert "There is one head of household. First, you need to change its role." in response.json()
+        assert self.individual1.relationship == "HEAD"
+        assert self.individual2.relationship == "BROTHER_SISTER"
+
+    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grievance_ticket.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_UPDATE],
+            self.afghanistan,
+            self.program,
+        )
         self.individual1.relationship = AUNT_UNCLE
         self.individual1.save()
 
         self.household.head_of_household = self.individual1
         self.household.save()
 
-        response = self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        self.assertFalse("errors" in response)
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 
-        self.assertEqual(self.individual1.relationship, "AUNT_UNCLE")
-        self.assertEqual(self.individual2.relationship, "HEAD")
+        assert self.individual1.relationship == "AUNT_UNCLE"
+        assert self.individual2.relationship == "HEAD"

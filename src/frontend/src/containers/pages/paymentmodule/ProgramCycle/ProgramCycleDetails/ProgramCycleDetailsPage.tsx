@@ -1,17 +1,18 @@
-import { ReactElement, useState } from 'react';
-import { decodeIdString, getFilterFromQueryParams } from '@utils/utils';
-import { useQuery } from '@tanstack/react-query';
-import { fetchProgramCycle } from '@api/programCycleApi';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useLocation, useParams } from 'react-router-dom';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
+import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { ProgramCycleDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsHeader';
 import { ProgramCycleDetailsSection } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsSection';
 import { TableWrapper } from '@core/TableWrapper';
-import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
-import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 
 const initialFilter = {
   search: '',
@@ -29,19 +30,17 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
   const location = useLocation();
   const permissions = usePermissions();
 
-  const decodedProgramCycleId = decodeIdString(programCycleId);
-
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      'programCyclesDetails',
-      businessArea,
-      programId,
-      decodedProgramCycleId,
-    ],
-    queryFn: async () => {
-      return fetchProgramCycle(businessArea, programId, decodedProgramCycleId);
+  const { data, isLoading } = useQuery<ProgramCycleList>({
+    queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsCyclesRetrieve({
+        businessAreaSlug: businessArea,
+        id: programCycleId,
+        programSlug: programId,
+      });
     },
   });
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );

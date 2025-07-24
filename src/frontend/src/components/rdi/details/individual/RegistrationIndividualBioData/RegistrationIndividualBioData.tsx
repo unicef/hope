@@ -1,6 +1,11 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { ContentLink } from '@components/core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
   formatAge,
@@ -8,20 +13,13 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  IndividualDetailedFragment,
-} from '@generated/graphql';
-import { ContentLink } from '@core/ContentLink';
-import { LabelizedField } from '@core/LabelizedField';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
 `;
@@ -31,17 +29,17 @@ const BorderBox = styled.div`
 `;
 
 interface RegistrationIndividualBioDataProps {
-  individual: IndividualDetailedFragment;
-  choicesData: HouseholdChoiceDataQuery;
+  individual: IndividualDetail;
+  choicesData: IndividualChoices;
 }
 
 export function RegistrationIndividualBioData({
   individual,
   choicesData,
 }: RegistrationIndividualBioDataProps): ReactElement {
-  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
+  const { baseUrl } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const relationshipChoicesDict = choicesToDict(
@@ -51,43 +49,46 @@ export function RegistrationIndividualBioData({
     choicesData.maritalStatusChoices,
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
+
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
+  );
+
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid key={edge.node.id} size={{ xs: 3 }}>
+  const mappedIndividualDocuments = individual.documents?.map((doc) => (
+    <Grid key={doc.id} size={{ xs: 3 }}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={edge.node.type.label}>
-            {edge.node.photo ? (
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
               <DocumentRegistrationPhotoModal
-                documentNumber={edge.node.documentNumber}
-                documentId={edge.node.id}
+                documentNumber={doc.documentNumber}
+                documentId={doc.id}
                 individual={individual}
               />
             ) : (
-              edge.node.documentNumber
+              doc.documentNumber
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{edge.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{doc.country}</LabelizedField>
       </Box>
     </Grid>
   ));
 
-  const mappedIdentities = individual.identities?.edges?.map((item) => (
-    <Grid key={item.node.id} size={{ xs: 3 }}>
+  const mappedIdentities = individual.identities?.map((item) => (
+    <Grid key={item.id} size={{ xs: 3 }}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.number}
+          <LabelizedField label={`${item.partner} ID`}>
+            {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{item.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -155,7 +156,6 @@ export function RegistrationIndividualBioData({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
-            {' '}
             {individual?.household?.id ? (
               <ContentLink
                 href={`/${baseUrl}/registration-data-import/household/${individual?.household?.id}`}
@@ -187,9 +187,7 @@ export function RegistrationIndividualBioData({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {observedDisabilityChoicesDict[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -224,11 +222,11 @@ export function RegistrationIndividualBioData({
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        {/* <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
             {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
           </LabelizedField>
-        </Grid>
+        </Grid> */}
         {!mappedIndividualDocuments?.length &&
         !mappedIdentities.length ? null : (
           <Grid size={{ xs: 12 }}>

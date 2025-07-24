@@ -154,7 +154,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 "first_registration_date": "2021-01-01",
                 "last_registration_date": "2021-01-01",
                 "program": cls.program_from,
-                "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),
@@ -166,7 +165,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             },
             individuals_data=[
                 {
-                    "registration_data_import": cls.rdi_other,
                     "first_registration_date": "2021-01-01",
                     "last_registration_date": "2021-01-01",
                     "given_name": "Test",
@@ -569,7 +567,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         individual_already_in_program_from.save()
 
         self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individuals[0].unicef_id).exists(),
+            Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists(),
         )
         import_program_population(
             import_from_program_id=str(self.program_from.id),
@@ -607,9 +605,9 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 individual=individual_already_in_program_from,
             ).first(),
         )
-        # role in new program
+        # role in new program - New Role is within PENDING rdi_merge_status
         self.assertIsNotNone(
-            IndividualRoleInHousehold.original_and_repr_objects.filter(
+            IndividualRoleInHousehold.pending_objects.filter(
                 household=new_hh_repr,
                 individual=individual_already_in_program_to,
             ).first(),
@@ -694,4 +692,409 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             IndividualRoleInHousehold.pending_objects.filter(
                 role=ROLE_ALTERNATE,
             ).exists(),
+        )
+
+    def test_import_program_population_import_from_ids(self) -> None:
+        program_to_import_from_ids = ProgramFactory(business_area=self.afghanistan)
+        program_to_without_import_from_ids = ProgramFactory(business_area=self.afghanistan)
+        household_1, individuals_1 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.rdi_other,
+                "first_registration_date": "2021-02-01",
+                "last_registration_date": "2021-02-01",
+                "program": self.program_from,
+            },
+            individuals_data=[
+                {
+                    "first_registration_date": "2021-02-01",
+                    "last_registration_date": "2021-02-01",
+                    "given_name": "Test_1",
+                    "full_name": "Test_1 Testowski_1",
+                    "family_name": "Testowski_1",
+                    "relationship": HEAD,
+                },
+                {
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
+                },
+            ],
+        )
+        IndividualRoleInHouseholdFactory(
+            household=household_1,
+            individual=individuals_1[0],
+            role=ROLE_PRIMARY,
+        )
+
+        # BankAccountInfoFactory(
+        #     individual=individuals_1[0],
+        # )
+        household_2, individuals_2 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.rdi_other,
+                "first_registration_date": "2021-03-01",
+                "last_registration_date": "2021-03-01",
+                "program": self.program_from,
+            },
+            individuals_data=[
+                {
+                    "first_registration_date": "2021-03-01",
+                    "last_registration_date": "2021-03-01",
+                    "given_name": "Test_2",
+                    "full_name": "Test_2 Testowski_2",
+                    "family_name": "Testowski_2",
+                    "relationship": HEAD,
+                },
+                {
+                    "first_registration_date": "2024-03-21",
+                    "last_registration_date": "2024-03-24",
+                },
+            ],
+        )
+        IndividualRoleInHouseholdFactory(
+            household=household_2,
+            individual=individuals_2[0],
+            role=ROLE_PRIMARY,
+        )
+        IndividualIdentityFactory(
+            individual=individuals_2[0],
+            partner=PartnerFactory(),
+        )
+
+        # assert no pending objects before import
+        self.assertEqual(
+            Household.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(
+            Individual.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(
+            IndividualIdentity.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(
+            Document.pending_objects.count(),
+            0,
+        )
+        # self.assertEqual(
+        #     BankAccountInfo.pending_objects.count(),
+        #     0,
+        # )
+        self.assertEqual(
+            IndividualRoleInHousehold.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 0)
+
+        # import to program without import_from_ids
+        import_program_population(
+            import_from_program_id=str(self.program_from.id),
+            import_to_program_id=str(program_to_without_import_from_ids.id),
+            rdi=self.registration_data_import,
+        )
+
+        self.assertEqual(
+            Household.pending_objects.filter(program=program_to_without_import_from_ids).count(),
+            3,
+        )
+        self.assertEqual(
+            Individual.pending_objects.filter(program=program_to_without_import_from_ids).count(),
+            6,
+        )
+        self.assertEqual(
+            IndividualIdentity.pending_objects.filter(individual__program=program_to_without_import_from_ids).count(),
+            2,
+        )
+        self.assertEqual(
+            Document.pending_objects.filter(program=program_to_without_import_from_ids).count(),
+            1,
+        )
+        # self.assertEqual(
+        #     BankAccountInfo.pending_objects.filter(individual__program=program_to_without_import_from_ids).count(),
+        #     2,
+        # )
+        self.assertEqual(
+            IndividualRoleInHousehold.pending_objects.filter(
+                household__program=program_to_without_import_from_ids
+            ).count(),
+            3,
+        )
+        self.assertEqual(
+            Account.all_objects.filter(
+                rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_without_import_from_ids
+            ).count(),
+            1,
+        )
+
+        # import to program with import_from_ids - import only self.household and household_2
+        registration_data_import = RegistrationDataImportFactory(
+            business_area=self.afghanistan,
+            program=self.program_from,
+            import_from_ids=f"{self.household.unicef_id},{household_2.unicef_id}",
+        )
+        import_program_population(
+            import_from_program_id=str(self.program_from.id),
+            import_to_program_id=str(program_to_import_from_ids.id),
+            rdi=registration_data_import,
+        )
+        self.assertEqual(
+            Household.pending_objects.filter(program=program_to_import_from_ids).count(),
+            2,
+        )
+        self.assertEqual(
+            Individual.pending_objects.filter(program=program_to_import_from_ids).count(),
+            4,
+        )
+        self.assertEqual(
+            IndividualIdentity.pending_objects.filter(individual__program=program_to_import_from_ids).count(),
+            2,
+        )
+        self.assertEqual(
+            Document.pending_objects.filter(program=program_to_import_from_ids).count(),
+            1,
+        )
+        # self.assertEqual(
+        #     BankAccountInfo.pending_objects.filter(individual__program=program_to_import_from_ids).count(),
+        #     1,
+        # )
+        self.assertEqual(
+            IndividualRoleInHousehold.pending_objects.filter(household__program=program_to_import_from_ids).count(),
+            2,
+        )
+        self.assertEqual(
+            Account.all_objects.filter(
+                rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_import_from_ids
+            ).count(),
+            1,
+        )
+
+    def test_import_program_population_exclude_external_collectors(self) -> None:
+        program_to_exclude_external_collectors = ProgramFactory(business_area=self.afghanistan)
+        program_to_without_exclude_external_collectors = ProgramFactory(business_area=self.afghanistan)
+        household_1, individuals_1 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.rdi_other,
+                "first_registration_date": "2021-02-01",
+                "last_registration_date": "2021-02-01",
+                "program": self.program_from,
+            },
+            individuals_data=[
+                {
+                    "first_registration_date": "2021-02-01",
+                    "last_registration_date": "2021-02-01",
+                    "given_name": "Test_1",
+                    "full_name": "Test_1 Testowski_1",
+                    "family_name": "Testowski_1",
+                    "relationship": HEAD,
+                },
+                {
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
+                },
+            ],
+        )
+        external_collector_primary = IndividualFactory(
+            program=self.program_from
+        )  # primary external collector will be imported anyway
+        IndividualRoleInHouseholdFactory(
+            household=household_1,
+            individual=external_collector_primary,
+            role=ROLE_PRIMARY,
+        )
+        IndividualRoleInHouseholdFactory(
+            household=household_1,
+            individual=individuals_1[0],
+            role=ROLE_ALTERNATE,
+        )
+        # BankAccountInfoFactory(
+        #     individual=individuals_1[0],
+        # )
+        household_2, individuals_2 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.rdi_other,
+                "first_registration_date": "2021-03-01",
+                "last_registration_date": "2021-03-01",
+                "program": self.program_from,
+            },
+            individuals_data=[
+                {
+                    "first_registration_date": "2021-03-01",
+                    "last_registration_date": "2021-03-01",
+                    "given_name": "Test_2",
+                    "full_name": "Test_2 Testowski_2",
+                    "family_name": "Testowski_2",
+                    "relationship": HEAD,
+                },
+                {
+                    "first_registration_date": "2024-03-21",
+                    "last_registration_date": "2024-03-24",
+                },
+            ],
+        )
+        IndividualRoleInHouseholdFactory(
+            household=household_2,
+            individual=individuals_2[0],
+            role=ROLE_PRIMARY,
+        )
+        external_collector_alternate = IndividualFactory(program=self.program_from)
+        IndividualRoleInHouseholdFactory(
+            household=household_2,
+            individual=external_collector_alternate,
+            role=ROLE_ALTERNATE,
+        )
+        IndividualIdentityFactory(
+            individual=external_collector_alternate,
+            partner=PartnerFactory(),
+        )
+
+        # assert no pending objects before import
+        self.assertEqual(
+            Household.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(
+            Individual.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(
+            IndividualIdentity.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(
+            Document.pending_objects.count(),
+            0,
+        )
+        # self.assertEqual(
+        #     BankAccountInfo.pending_objects.count(),
+        #     0,
+        # )
+        self.assertEqual(
+            IndividualRoleInHousehold.pending_objects.count(),
+            0,
+        )
+        self.assertEqual(Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 0)
+
+        # import to program without exclude_external_collectors
+        import_program_population(
+            import_from_program_id=str(self.program_from.id),
+            import_to_program_id=str(program_to_without_exclude_external_collectors.id),
+            rdi=self.registration_data_import,
+        )
+
+        self.assertEqual(
+            Household.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
+            3,
+        )
+        self.assertEqual(
+            Individual.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
+            8,  # 6 individuals from households + 2 external collectors
+        )
+        self.assertEqual(
+            IndividualIdentity.pending_objects.filter(
+                individual__program=program_to_without_exclude_external_collectors
+            ).count(),
+            2,  # 1 identity from self.household + 1 from external alternatecollector
+        )
+        self.assertEqual(
+            Document.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
+            1,
+        )
+        # self.assertEqual(
+        #     BankAccountInfo.pending_objects.filter(
+        #         individual__program=program_to_without_exclude_external_collectors
+        #     ).count(),
+        #     2,
+        # )
+        self.assertEqual(
+            IndividualRoleInHousehold.pending_objects.filter(
+                household__program=program_to_without_exclude_external_collectors
+            ).count(),
+            5,  # 3 primary roles from households + 1 alternate role from household_1 + 1 alternate external collector from household_2
+        )
+        self.assertEqual(
+            Account.all_objects.filter(
+                rdi_merge_status=MergeStatusModel.PENDING,
+                individual__program=program_to_without_exclude_external_collectors,
+            ).count(),
+            1,
+        )
+
+        # import to program with exclude_external_collectors - import only self.household and household_2
+        registration_data_import = RegistrationDataImportFactory(
+            business_area=self.afghanistan,
+            program=self.program_from,
+            exclude_external_collectors=True,
+        )
+        import_program_population(
+            import_from_program_id=str(self.program_from.id),
+            import_to_program_id=str(program_to_exclude_external_collectors.id),
+            rdi=registration_data_import,
+        )
+        self.assertEqual(
+            Household.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
+            3,
+        )
+        self.assertEqual(
+            Individual.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
+            7,  # 6 individuals from households + 1 external primary collector from household_1 (alternate from household_2 is excluded)
+        )
+        self.assertEqual(
+            IndividualIdentity.pending_objects.filter(
+                individual__program=program_to_exclude_external_collectors
+            ).count(),
+            1,  # 1 identity from self.household (1 from external alternate collector is excluded)
+        )
+        self.assertEqual(
+            Document.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
+            1,
+        )
+        # self.assertEqual(
+        #     BankAccountInfo.pending_objects.filter(individual__program=program_to_exclude_external_collectors).count(),
+        #     2,
+        # )
+        self.assertEqual(
+            IndividualRoleInHousehold.pending_objects.filter(
+                household__program=program_to_exclude_external_collectors
+            ).count(),
+            4,  # 3 primary roles from households + 1 alternate role from household_1 (alternate from household_2 is excluded)
+        )
+        self.assertEqual(
+            Account.all_objects.filter(
+                rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_exclude_external_collectors
+            ).count(),
+            1,
+        )
+
+        self.assertEqual(
+            external_collector_primary.copied_to(manager="pending_objects")
+            .filter(program=program_to_exclude_external_collectors)
+            .count(),
+            1,
+        )
+        self.assertEqual(
+            external_collector_alternate.copied_to(manager="pending_objects")
+            .filter(program=program_to_exclude_external_collectors)
+            .count(),
+            0,
+        )
+        household_1_copy = Household.pending_objects.filter(
+            unicef_id=household_1.unicef_id,
+            program=program_to_exclude_external_collectors,
+        ).first()
+        household_2_copy = Household.pending_objects.filter(
+            unicef_id=household_2.unicef_id,
+            program=program_to_exclude_external_collectors,
+        ).first()
+        self.assertEqual(
+            household_1_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_PRIMARY).count(), 1
+        )
+        self.assertEqual(
+            household_1_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_ALTERNATE).count(), 1
+        )
+        self.assertEqual(
+            household_2_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_PRIMARY).count(), 1
+        )
+        self.assertEqual(
+            household_2_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_ALTERNATE).count(), 0
         )

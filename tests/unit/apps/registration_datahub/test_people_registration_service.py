@@ -2,11 +2,12 @@ import datetime
 import json
 from typing import Union
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
@@ -32,10 +33,13 @@ from hct_mis_api.contrib.aurora.services.people_registration_service import (
 
 class TestPeopleRegistrationService(TestCase):
     databases = {"default"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
+        call_command("init-geo-fixtures")
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")

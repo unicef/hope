@@ -4,12 +4,10 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  DeduplicationEngineSimilarityPairIndividualNode,
-  IndividualDetailedFragment,
-  useIndividualLazyQuery,
-} from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Box,
@@ -25,8 +23,8 @@ import { useProgramContext } from 'src/programContext';
 
 export interface BiometricsResultsProps {
   similarityScore: number;
-  individual1?: IndividualDetailedFragment;
-  individual2?: DeduplicationEngineSimilarityPairIndividualNode;
+  individual1?: any;
+  individual2?: any;
   openLinkText?: string;
   modalTitle?: string;
 }
@@ -55,12 +53,8 @@ const BiometricsResultsRdi = ({
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const permissions = usePermissions();
-  const [individual1Data, setIndividual1Data] = useState<
-    IndividualDetailedFragment | undefined
-  >(individual1);
-  const [individual2Data, setIndividual2Data] = useState<
-    DeduplicationEngineSimilarityPairIndividualNode | IndividualDetailedFragment
-  >(individual2);
+  const [individual1Data, setIndividual1Data] = useState<any>(individual1);
+  const [individual2Data, setIndividual2Data] = useState<any>(individual2);
 
   const canViewBiometricsResults = hasPermissions(
     PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
@@ -70,32 +64,41 @@ const BiometricsResultsRdi = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const [loadIndividual1Data] = useIndividualLazyQuery({
-    variables: {
-      id: individual1?.id,
-    },
-    fetchPolicy: 'cache-and-network',
-    onCompleted: (data) => {
-      setIndividual1Data(data.individual);
-    },
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const individual1Query = useQuery({
+    queryKey: ['individual', individual1?.id, businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        id: individual1?.id,
+        programSlug,
+      }),
+    enabled: dialogOpen && !!individual1?.id,
   });
 
-  const [loadIndividual2Data] = useIndividualLazyQuery({
-    variables: {
-      id: individual2?.id,
-    },
-    fetchPolicy: 'cache-and-network',
-    onCompleted: (data) => {
-      setIndividual2Data(data.individual);
-    },
+  const individual2Query = useQuery({
+    queryKey: ['individual', individual2?.id, businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        id: individual2?.id,
+        programSlug,
+      }),
+    enabled: dialogOpen && !!individual2?.id,
   });
 
   useEffect(() => {
-    if (dialogOpen) {
-      loadIndividual1Data();
-      loadIndividual2Data();
+    if (individual1Query.data) {
+      setIndividual1Data(individual1Query.data);
     }
-  }, [dialogOpen, loadIndividual1Data, loadIndividual2Data]);
+  }, [individual1Query.data]);
+
+  useEffect(() => {
+    if (individual2Query.data) {
+      setIndividual2Data(individual2Query.data);
+    }
+  }, [individual2Query.data]);
 
   return (
     <>

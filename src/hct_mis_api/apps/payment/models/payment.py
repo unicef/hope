@@ -1387,7 +1387,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 country = Country.objects.filter(pk=household_data.get(main_key)).first()
                 return country.iso_code3 if country else None
 
-            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id"}:
                 area = Area.objects.filter(pk=household_data.get(main_key)).first()
                 return f"{area.p_code} - {area.name}" if area else "" if area else None
 
@@ -1870,6 +1870,10 @@ class Payment(
         self.delivery_date = delivery_date
 
     @property
+    def household_admin2(self) -> str:
+        return self.household.admin2.name if self.household.admin2 else ""
+
+    @property
     def payment_status(self) -> str:  # pragma: no cover
         status = "-"
         if self.status == Payment.STATUS_PENDING:
@@ -1895,6 +1899,11 @@ class Payment(
     @property
     def full_name(self) -> str:
         return self.collector.full_name
+
+    @property
+    def people_individual(self) -> Optional[Individual]:
+        """for DCT social worker return first Individual from Household"""
+        return self.household.individuals.first() if self.parent.is_social_worker_program else None
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:

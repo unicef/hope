@@ -121,7 +121,7 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
 
 
 class PaymentVerificationPlanFactory(DjangoModelFactory):
-    payment_plan = factory.SubFactory("hct_mis_api.apps.payment.fixtures.PaymentPlanFactory")
+    payment_plan = factory.SubFactory("extras.test_utils.factories.payment.PaymentPlanFactory")
     status = factory.fuzzy.FuzzyChoice(
         ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
@@ -146,7 +146,7 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
 
 
 class PaymentVerificationFactory(DjangoModelFactory):
-    payment = factory.SubFactory("hct_mis_api.apps.payment.fixtures.PaymentFactory")
+    payment = factory.SubFactory("extras.test_utils.factories.payment.PaymentFactory")
     payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
@@ -207,9 +207,7 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    programme_code = factory.LazyAttribute(
-        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-    )
+    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
@@ -219,6 +217,13 @@ class RealProgramFactory(DjangoModelFactory):
             ),
         )
     )
+
+    @staticmethod
+    def generate_programme_code(obj: Any) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=obj.business_area.id, programme_code=programme_code).exists():
+            return RealProgramFactory.generate_programme_code(obj)
+        return programme_code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -393,7 +398,7 @@ def create_payment_verification_plan_with_status(
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
+                "admin2": Area.objects.order_by("?").first(),
                 "program": program,
             },
             {"registration_data_import": registration_data_import},
@@ -487,7 +492,7 @@ def generate_payment_plan() -> None:
     address = "Ohio"
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
-    data_collecting_type = DataCollectingType.objects.get(code="full")
+    data_collecting_type = DataCollectingType.objects.get(code="full_collection")
     if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     else:

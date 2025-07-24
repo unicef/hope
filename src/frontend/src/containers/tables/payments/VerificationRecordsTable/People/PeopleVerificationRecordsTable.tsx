@@ -1,13 +1,14 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentVerificationsQueryVariables,
-  PaymentVerificationNode,
-  useAllPaymentVerificationsQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../../UniversalTable';
-import { headCells } from './PeopleVerificationRecordsHeadCells';
+import { createApiParams } from '@utils/apiUtils';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { headCells } from './PeopleVerificationRecordsHeadCells';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 interface PeopleVerificationRecordsTableProps {
   paymentPlanId?: string;
@@ -23,27 +24,63 @@ export function PeopleVerificationRecordsTable({
   businessArea,
 }: PeopleVerificationRecordsTableProps): ReactElement {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
 
-  const initialVariables: AllPaymentVerificationsQueryVariables = {
-    ...filter,
-    businessArea,
-    paymentPlanId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ...filter,
+      paymentPlanId,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+    }),
+    [filter, paymentPlanId, businessArea, programId],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentVerificationPlanListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsList',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentVerificationsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
 
   return (
-    <UniversalTable<
-      PaymentVerificationNode,
-      AllPaymentVerificationsQueryVariables
-    >
+    <UniversalRestTable
       title={t('Verification Records')}
       headCells={headCells}
-      query={useAllPaymentVerificationsQuery}
-      queriedObjectName="allPaymentVerifications"
-      initialVariables={initialVariables}
-      renderRow={(paymentVerification) => (
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      data={paymentsData}
+      renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
-          key={paymentVerification.id}
-          paymentVerification={paymentVerification}
+          key={payment.id}
+          payment={payment}
           canViewRecordDetails={canViewRecordDetails}
         />
       )}

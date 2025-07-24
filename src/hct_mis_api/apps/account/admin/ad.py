@@ -168,7 +168,7 @@ class ADUSerMixin:
                                 basic_role = account_models.Role.objects.filter(name="Basic User").first()
                                 if global_business_area and basic_role:
                                     users_role_to_bulk_create.append(
-                                        account_models.UserRole(
+                                        account_models.RoleAssignment(
                                             business_area=global_business_area,
                                             user=user,
                                             role=basic_role,
@@ -177,7 +177,7 @@ class ADUSerMixin:
                                 results.created.append(user)
 
                             users_role_to_bulk_create.append(
-                                account_models.UserRole(role=role, business_area=business_area, user=user)
+                                account_models.RoleAssignment(role=role, business_area=business_area, user=user)
                             )
                         except HTTPError as e:
                             if e.response.status_code != 404:
@@ -186,7 +186,7 @@ class ADUSerMixin:
                         except Http404:
                             results.missing.append(email)
                     account_models.User.objects.bulk_create(users_to_bulk_create)
-                    account_models.UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                    account_models.RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
                     ctx["results"] = results
                     return TemplateResponse(request, "admin/load_users.html", ctx)
                 except Exception as e:

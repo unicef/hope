@@ -27,8 +27,8 @@ function FeedbackPage(): ReactElement {
     feedbackId: '',
     issueType: '',
     createdBy: '',
-    createdAtRangeMin: '',
-    createdAtRangeMax: '',
+    createdAtBefore: '',
+    createdAtAfter: '',
     program: '',
     programState: isAllPrograms ? 'all' : '',
   };

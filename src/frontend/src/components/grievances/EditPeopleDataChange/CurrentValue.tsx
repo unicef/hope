@@ -1,14 +1,20 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
   values;
 }

@@ -1,58 +1,40 @@
 from typing import Any, Dict, List, Optional
 
 from django.core.management import call_command
+from django.urls import reverse
 
+import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from parameterized import parameterized
+from rest_framework import status
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.models import Program
 
+pytestmark = pytest.mark.django_db()
 
-class TestGrievanceCreateComplaintTicketQuery(APITestCase):
-    CREATE_GRIEVANCE_MUTATION = """
-    mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
-      createGrievanceTicket(input: $input) {
-        grievanceTickets{
-          category
-          admin
-          language
-          description
-          consent
-          complaintTicketDetails {
-            household {
-              size
-            }
-            individual {
-              fullName
-            }
-            paymentRecord {
-              fullName
-            }
-          }
-        }
-      }
-    }
-    """
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
+class TestGrievanceCreateComplaintTicket:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
         call_command("loadcountries")
-        partner = PartnerFactory(name="Partner")
-        cls.user = UserFactory.create(partner=partner)
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner, first_name="TestUser")
+        self.user2 = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        self.program = ProgramFactory(
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            name="program afghanistan 1",
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -60,220 +42,123 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        cls.household, cls.individuals = create_household(
-            {"size": 1, "business_area": cls.business_area},
+        self.household, self.individuals = create_household(
+            {"size": 1, "business_area": self.afghanistan},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
-        cls.household2, cls.individuals2 = create_household(
-            {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe second Individual"},
+        self.household2, self.individuals2 = create_household(
+            {"size": 1, "business_area": self.afghanistan},
+            {"given_name": "John222", "family_name": "Doe222", "middle_name": "", "full_name": "John Doe222"},
         )
-        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_partner_access_to_program(partner, cls.program)
 
-        payment_plan = PaymentPlanFactory(program_cycle=cls.program.cycles.first(), business_area=cls.business_area)
-        cls.payment = PaymentFactory(
-            household=cls.household,
-            collector=cls.individuals[0],
-            business_area=cls.business_area,
+        payment_plan = PaymentPlanFactory(program_cycle=self.program.cycles.first(), business_area=self.afghanistan)
+        self.payment = PaymentFactory(
+            household=self.household,
+            collector=self.individuals[0],
+            business_area=self.afghanistan,
             parent=payment_plan,
             currency="PLN",
         )
-        cls.second_payment = PaymentFactory(
-            household=cls.household2,
-            collector=cls.individuals2[0],
-            business_area=cls.business_area,
+        self.second_payment = PaymentFactory(
+            household=self.household2,
+            collector=self.individuals2[0],
+            business_area=self.afghanistan,
             parent=payment_plan,
             currency="PLN",
         )
-        super().setUpTestData()
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_complaint_ticket(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._create_variables(
-            household=self.id_to_base64(self.household.id, "HouseholdNode"),
-            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[self.id_to_base64(self.payment.id, "PaymentNode")],
+        self.list_url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-list",
+            kwargs={"business_area_slug": self.afghanistan.slug},
         )
 
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    def test_create_a_ticket_per_payment(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
-
-        input_data = self._create_variables(
-            household=self.id_to_base64(self.household.id, "HouseholdNode"),
-            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[
-                self.id_to_base64(self.payment.id, "PaymentNode"),
-                self.id_to_base64(self.second_payment.id, "PaymentNode"),
-            ],
-        )
-
-        self.graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-        self.assertEqual(GrievanceTicket.objects.count(), 2)
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_complaint_ticket_without_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._create_variables(
-            household=self.id_to_base64(self.household.id, "HouseholdNode"),
-            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[],
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_complaint_ticket_with_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._create_variables(
-            household=self.id_to_base64(self.household.id, "HouseholdNode"),
-            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[
-                self.id_to_base64(self.payment.id, "PaymentNode"),
-                self.id_to_base64(self.second_payment.id, "PaymentNode"),
-            ],
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_complaint_ticket_without_household(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._create_variables(
-            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[self.id_to_base64(self.payment.id, "PaymentNode")],
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_complaint_ticket_without_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._create_variables(
-            household=self.id_to_base64(self.household.id, "HouseholdNode"),
-            payment_records=[self.id_to_base64(self.payment.id, "PaymentNode")],
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_complaint_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._create_variables(payment_records=[])
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=input_data,
-        )
-
-    def _create_variables(
+    def _prepare_input(
         self,
         household: Optional[str] = None,
         individual: Optional[str] = None,
         payment_records: Optional[List[Optional[str]]] = None,
     ) -> Dict:
         return {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                "issueType": GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
-                "admin": encode_id_base64(str(self.admin_area.id), "Area"),
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-                "extras": {
-                    "category": {
-                        "grievanceComplaintTicketExtras": {
-                            "household": household,
-                            "individual": individual,
-                            "paymentRecord": payment_records,
-                        }
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "grievance_complaint_ticket_extras": {
+                        "household": household,
+                        "individual": individual,
+                        "payment_record": payment_records,
                     }
-                },
-            }
+                }
+            },
         }
+
+    def test_create_complaint_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        input_data = self._prepare_input(
+            household=str(self.household.id),
+            individual=str(self.individuals[0].id),
+            payment_records=[str(self.payment.id)],
+        )
+
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.json()[0]
+
+    def test_create_complaint_ticket_without_payment_record(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        input_data = self._prepare_input(
+            household=str(self.household.id),
+            individual=str(self.individuals[0].id),
+            payment_records=[],
+        )
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.json()[0]
+
+    def test_create_complaint_ticket_with_two_payment_records(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        input_data = self._prepare_input(
+            household=str(self.household.id),
+            individual=str(self.individuals[0].id),
+            payment_records=[
+                str(self.payment.id),
+                str(self.second_payment.id),
+            ],
+        )
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.json()[0]
+
+    def test_create_complaint_ticket_without_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        input_data = self._prepare_input(
+            individual=str(self.individuals[0].id),
+            payment_records=[str(self.payment.id)],
+        )
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.json()[0]
+
+    def test_create_complaint_ticket_without_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        input_data = self._prepare_input(
+            household=str(self.household.id),
+            payment_records=[str(self.payment.id)],
+        )
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.json()[0]
+
+    def test_create_complaint_ticket_without_extras(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        input_data = self._prepare_input(payment_records=[])
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.json()[0]

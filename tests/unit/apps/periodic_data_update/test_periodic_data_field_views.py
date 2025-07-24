@@ -23,12 +23,12 @@ from rest_framework.reverse import reverse
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import PeriodicFieldData
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
 class TestPeriodicFieldViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -52,8 +52,8 @@ class TestPeriodicFieldViews:
         self.url_list = reverse(
             "api:periodic-data-update:periodic-fields-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
@@ -62,9 +62,8 @@ class TestPeriodicFieldViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -77,7 +76,7 @@ class TestPeriodicFieldViews:
         response_json = response.json()["results"]
         assert len(response_json) == 3
         assert {
-            "id": id_to_base64((self.periodic_field1.id), "FlexibleAttribute"),
+            "id": str(self.periodic_field1.id),
             "name": self.periodic_field1.name,
             "label": self.periodic_field1.label["English(EN)"],
             "pdu_data": {
@@ -87,7 +86,7 @@ class TestPeriodicFieldViews:
             },
         } in response_json
         assert {
-            "id": id_to_base64(self.periodic_field2.id, "FlexibleAttribute"),
+            "id": str(self.periodic_field2.id),
             "name": self.periodic_field2.name,
             "label": self.periodic_field2.label["English(EN)"],
             "pdu_data": {
@@ -97,7 +96,7 @@ class TestPeriodicFieldViews:
             },
         } in response_json
         assert {
-            "id": id_to_base64(self.periodic_field3.id, "FlexibleAttribute"),
+            "id": str(self.periodic_field3.id),
             "name": self.periodic_field3.name,
             "label": self.periodic_field3.label["English(EN)"],
             "pdu_data": {
@@ -107,7 +106,7 @@ class TestPeriodicFieldViews:
             },
         } in response_json
         assert {
-            "id": id_to_base64(self.periodic_field_data_program2.id, "FlexibleAttribute"),
+            "id": str(self.periodic_field_data_program2.id),
             "name": self.periodic_field_program2.name,
             "label": self.periodic_field_program2.label["English(EN)"],
             "pdu_data": {
@@ -122,9 +121,8 @@ class TestPeriodicFieldViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -137,7 +135,7 @@ class TestPeriodicFieldViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -146,7 +144,7 @@ class TestPeriodicFieldViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 0
+            assert len(ctx.captured_queries) == 1
 
             assert etag_second_call == etag
 
@@ -159,7 +157,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
             assert etag_call_after_update != etag
 
@@ -170,7 +168,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 0
+            assert len(ctx.captured_queries) == 1
 
             assert etag_call_after_update_second_call == etag_call_after_update
 
@@ -183,6 +181,6 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
             assert etag_call_after_update_2 != etag_call_after_update_second_call

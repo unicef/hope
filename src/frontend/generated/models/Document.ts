@@ -23,7 +23,6 @@ export type Document = {
     cleared_date?: string;
     issuance_date?: string | null;
     expiry_date?: string | null;
-    is_migration_handled?: boolean;
     cleared_by?: string | null;
     /**
      * If this object was copied from another, this field will contain the object it was copied from.

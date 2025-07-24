@@ -1,16 +1,15 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  useAllPaymentPlansForTableQuery,
-  PaymentPlanNode,
-} from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
+import { useQuery } from '@tanstack/react-query';
 import { dateToIsoString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentVerificationTableProps {
   filter?;
@@ -24,23 +23,65 @@ function PaymentVerificationTable({
 }: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialVariables: AllPaymentPlansForTableQueryVariables = {
-    businessArea,
-    search: filter.search,
-    verificationStatus: filter.verificationStatus,
-    serviceProvider: filter.serviceProvider,
-    deliveryTypes: filter.deliveryTypes,
-    startDate: dateToIsoString(filter.startDate, 'startOfDay'),
-    endDate: dateToIsoString(filter.endDate, 'endOfDay'),
-    program: programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      programSlug: programId,
+      businessAreaSlug: businessArea,
+      search: filter.search,
+      verificationStatus: filter.verificationStatus,
+      serviceProvider: filter.serviceProvider,
+      deliveryTypes: filter.deliveryTypes,
+      startDate: dateToIsoString(filter.startDate, 'startOfDay'),
+      endDate: dateToIsoString(filter.endDate, 'endOfDay'),
+    }),
+    [
+      programId,
+      businessArea,
+      filter.search,
+      filter.verificationStatus,
+      filter.serviceProvider,
+      filter.deliveryTypes,
+      filter.startDate,
+      filter.endDate,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: paymentPlansData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentVerificationPlanListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentVerificationsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
+
   return (
-    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+    <UniversalRestTable
       title={t('List of Payment Plans')}
       headCells={headCells}
-      query={useAllPaymentPlansForTableQuery}
-      queriedObjectName="allPaymentPlans"
-      initialVariables={initialVariables}
+      data={paymentPlansData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
       renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow
           key={paymentPlan.id}

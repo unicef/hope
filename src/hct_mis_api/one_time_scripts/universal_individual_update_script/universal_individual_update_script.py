@@ -138,7 +138,7 @@ class UniversalIndividualUpdateScript:
             if individuals_queryset.count() > 1:  # pragma: no cover
                 errors.append(f"Row: {row_index} - Multiple individuals with unicef_id {unicef_id} found")
                 continue
-            individual = individuals_queryset.first()
+            individual: Individual = individuals_queryset.first()  # type: ignore
             household = individual.household
             if household is None:  # pragma: no cover
                 errors.append(f"Row: {row_index} - Household not found for individual with unicef_id {unicef_id}")

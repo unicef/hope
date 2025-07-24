@@ -1,0 +1,215 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% load i18n admin_urls static admin_modify mptt_tags engine %}
+
+{% block extrahead %}{{ block.super }}
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/base.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+    {{ media }}
+    {{ program_area_formset.media }}
+    <style>
+        .field-areas {
+            height: 250px;
+            overflow: hidden;
+
+            .field-areas-container {
+                height: 100%;
+                overflow-y: auto;
+            }
+        }
+    </style>
+{% endblock %}
+{% block action-content %}
+    <form method="POST" id="save_permissions" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="refresh-areas" value="false"/>
+        <div class="js-inline-admin-formset inline-group">
+            <div class="tabular inline-related last-related">
+                {{ program_area_formset.management_form }}
+                <fieldset class="module">
+                    <h2>Admin Area Limits</h2>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th class="column-partner required">Partner</th>
+                            <th class="column-areas required">Areas</th>
+                            <th>Delete?</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if program_area_formset.non_field_errors %}
+                            <tr class="row-form-errors">
+                                <td colspan="3">{{ program_area_formset.non_field_errors }}</td>
+                            </tr>
+                        {% endif %}
+                        {% for form in program_area_formset %}
+                            {{ form.management_form }}
+                            <tr class="form-row dynamic-program_areas"
+                                id="program-areas-{{ forloop.counter0 }}">
+                                <td class="field-partner">
+                                    {{ form.partner.errors.as_ul }}
+                                    <select
+                                            name="program_areas-{{  forloop.counter0 }}-partner" id="id_program_areas-{{ forloop.counter0 }}-partner"
+                                    >
+                                    {% if form.partner.value == unicef_partner_id %}
+                                        <option value={{ unicef_partner_id }} selected> UNICEF </option>
+                                    {% else %}
+                                        <option value > --------- </option>
+                                        {%  for partner in partners %}
+                                            <option value={{ partner.id }} {% if partner.id == form.partner.value %} selected{% endif %}> {{ partner.name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                    </select>
+                                </td>
+                                <td class="field-areas">
+                                    {{ form.areas.errors.as_ul }}
+                                    <div class="field-areas-container">
+                                        <ul class="root">
+                                            {% recursetree areas %}
+                                                <li>
+                                                    <label for="id_program_areas-{{ forloop.counter0 }}-areas_{{ node.id }}">
+                                                        <input type="checkbox"
+                                                               name="program_areas-{{ forloop.counter0 }}-areas"
+                                                               value="{{ node.id }}"
+                                                               id="id_program_areas-{{ forloop.counter0 }}-areas_{{ node.id }}"
+                                                               {% if node.id|stringformat:"s" in form.areas.value %}
+                                                               checked {% endif %}
+                                                               {% if form.partner.value == unicef_partner_id %}
+                                                                 disabled
+                                                               {% endif %}
+                                                        >
+                                                        {{ node }}
+                                                    </label>
+                                                    {% if not node.is_leaf_node %}
+                                                        <ul class="children">
+                                                            {{ children }}
+                                                        </ul>
+                                                    {% endif %}
+                                                </li>
+                                            {% endrecursetree %}
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="delete">
+                                    {% if form.partner.value != unicef_partner_id %}
+                                      {{ form.DELETE }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="form-row empty-form" id="program_areas-empty"></tr>
+                        </tbody>
+                        <tfoot>
+                        <tr class="add-row add-program_areas-row">
+                            <td colspan="4">
+                                <a href="#">Add another Area Limit</a>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </fieldset>
+            </div>
+        </div>
+        <input type="submit" value="Save">
+    </form>
+{% endblock %}
+{% block admin_change_form_document_ready %}{{ block.super }}
+    <script>
+        $(".add-program_areas-row a").click(function (event) {
+            event.preventDefault();
+            const numberOfForms = $(".dynamic-program_areas").length;
+            const programAreas = $("#program_areas-empty");
+            const newRow = `<tr class="form-row dynamic-program_areas" id="program_areas-${numberOfForms}">
+                            <td class="field-partner">
+                                {{ program_area_formset.empty_form.partner.errors.as_ul }}
+                                <select name="program_areas-${numberOfForms}-partner" id="id_program_areas-${numberOfForms}-partner">
+                                    <option value > --------- {{ form.partner.value }} </option>
+                                    {%  for partner in partners %}
+                                       <option value={{ partner.id }}> {{ partner.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td class="field-areas">
+                            {{ program_area_formset.empty_form.areas.errors.as_ul }}
+                                <div class="field-areas-container">
+                                    <ul class="root">
+                                        {% recursetree areas %}
+                                            <li>
+                                                <label for="id_program_areas-${numberOfForms}-areas_{{ node.id }}">
+                                                    <input type="checkbox"
+                                                           name="program_areas-${numberOfForms}-areas"
+                                                           value="{{ node.id }}"
+                                                           id="id_program_areas-${numberOfForms}-areas_{{ node.id }}"
+                                                    >
+                                                    {{ node }}
+                                                </label>
+                                                {% if not node.is_leaf_node %}
+                                                    <ul class="children">
+                                                        {{ children }}
+                                                    </ul>
+                                                {% endif %}
+                                            </li>
+                                        {% endrecursetree %}
+                                    </ul>
+                                </div>
+                                </td>
+                            <td>
+                                {{ program_area_formset.empty_form.DELETE }}
+                            </td>
+                        </tr>`;
+            const newRwoFixed = newRow.replace(/__prefix__/g, numberOfForms);
+            programAreas.before(newRwoFixed);
+            $(document).on('change', '#' + "program_areas-" + numberOfForms, function(e) {
+                markChildren(e.target);
+                traverseUpTree(e.target);
+            });
+            $("#id_program_areas-TOTAL_FORMS").attr("value", numberOfForms + 1);
+        });
+
+        function traverseUpTree(node) {
+            const parent = node.closest("ul").parentNode.querySelector("input");
+            const siblings = Array.from(
+                parent
+                    .closest("li")
+                    .querySelector("ul")
+                    .querySelectorAll("input")
+            );
+
+            const checkStatus = siblings.map(check => check.checked);
+            const every = checkStatus.every(Boolean);
+            const some = checkStatus.some(Boolean);
+
+            parent.checked = every;
+            parent.indeterminate = !every && every !== some;
+
+            if (node !== parent) {
+                traverseUpTree(parent);
+            }
+        }
+
+        function markChildren(node) {
+            node
+                .closest("li")
+                .querySelectorAll("input")
+                .forEach(child => (child.checked = node.checked));
+        }
+
+        $(document).ready(function () {
+            $('.dynamic-program_areas .field-areas input[type="checkbox"]').each(function (
+                _,
+                node
+            ) {
+                traverseUpTree(node);
+            });
+        });
+
+        $('.dynamic-program_areas .field-areas input[type="checkbox"]').change(function (
+            e
+        ) {
+            markChildren(e.target);
+            traverseUpTree(e.target);
+        });
+
+    </script>
+
+{% endblock %}

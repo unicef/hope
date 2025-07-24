@@ -10,15 +10,14 @@ import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import {
-  PaymentPlanDocument,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useExcludeHouseholdsPpMutation,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanExcludeBeneficiaries } from '@restgenerated/models/PaymentPlanExcludeBeneficiaries';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { StyledTextField } from '@shared/StyledTextField';
 import { ButtonTooltip } from '@core/ButtonTooltip';
@@ -26,10 +25,12 @@ import { GreyText } from '@core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function ExcludeSection({
@@ -61,7 +62,8 @@ export function ExcludeSection({
     permissions,
   );
   const hasOpenOrLockedStatus =
-    status === PaymentPlanStatus.Locked || status === PaymentPlanStatus.Open;
+    status === PaymentPlanStatusEnum.LOCKED ||
+    status === PaymentPlanStatusEnum.OPEN;
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
@@ -79,7 +81,25 @@ export function ExcludeSection({
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
 
-  const [mutate, { error }] = useExcludeHouseholdsPpMutation();
+  const queryClient = useQueryClient();
+  const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: mutate, error } = useMutation({
+    mutationFn: (data: PaymentPlanExcludeBeneficiaries) =>
+      RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody: data,
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+  });
 
   const handleIdsChange = (event): void => {
     if (event.target.value === '') {
@@ -98,27 +118,15 @@ export function ExcludeSection({
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
     try {
       await mutate({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-          excludedHouseholdsIds: idsToSave,
-          exclusionReason: values.exclusionReason || null,
-        },
-        refetchQueries: () => [
-          {
-            query: PaymentPlanDocument,
-            variables: { id: paymentPlan.id },
-            fetchPolicy: 'network-only',
-          },
-          'AllPaymentsForTable',
-        ],
-        awaitRefetchQueries: true,
+        excludedHouseholdsIds: idsToSave,
+        exclusionReason: values.exclusionReason || undefined,
       });
       if (!error) {
         showMessage(t('Beneficiaries exclusion started'));
         setExclusionsOpen(false);
       }
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -307,7 +315,7 @@ export function ExcludeSection({
                 component={FormikTextField}
               />
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
                   label={t('Beneficiaries Ids')}
@@ -377,7 +385,7 @@ export function ExcludeSection({
               <Box display="flex" flexDirection="column">
                 {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
-                    <Grid size={{ xs:8 }}>
+                    <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
@@ -412,7 +420,7 @@ export function ExcludeSection({
                 {renderInputAndApply()}
                 <Grid container size={{ xs: 6 }}>
                   {errors?.map((formError) => (
-                    <Grid key={formError}  size={{ xs: 12 }}>
+                    <Grid key={formError} size={{ xs: 12 }}>
                       <FormHelperText key={formError} error>
                         {formError}
                       </FormHelperText>
@@ -421,7 +429,7 @@ export function ExcludeSection({
                 </Grid>
                 <Grid container direction="column" size={{ xs: 3 }}>
                   {excludedIds.map((id) => (
-                    <Grid key={id}  size={{ xs: 12 }}>
+                    <Grid key={id} size={{ xs: 12 }}>
                       <ExcludedItem
                         key={id}
                         id={id}

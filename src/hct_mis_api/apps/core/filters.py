@@ -14,10 +14,9 @@ from django.forms import (
 from django.utils import timezone
 
 from dateutil.parser import parse
-from django_filters import Filter, FilterSet
+from django_filters import Filter
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
@@ -88,10 +87,6 @@ class DateTimeRangeFilter(BaseRangeFilter):
     field_class = DateTimeRangeField
 
 
-class DateRangeFilter(BaseRangeFilter):
-    field_class = DateRangeField
-
-
 class DecimalRangeFilter(BaseRangeFilter):
     field_class = DecimalRangeField
 
@@ -118,50 +113,6 @@ def filter_age(field_name: str, qs: QuerySet, min_age: Optional[int], max_age: O
     return qs.filter(**{f"{field_name}__{lookup_expr}": values})
 
 
-class AgeRangeFilter(Filter):
-    field_class = IntegerRangeField
-
-    def filter(self, qs: QuerySet, values: Union[date, Tuple[date, date]]) -> QuerySet:
-        if values:
-            min_value = values.get("min")  # 20
-            max_value = values.get("max")  # 21
-            current = timezone.now().date()
-            if min_value is not None and max_value is not None:
-                self.lookup_expr = "range"
-                # min year +1 , day-1
-                max_date = date(
-                    current.year - min_value,
-                    current.month,
-                    current.day,
-                )
-                min_date = date(
-                    current.year - max_value - 1,
-                    current.month,
-                    current.day,
-                )
-                min_date = min_date + timedelta(days=1)
-                values = (min_date, max_date)
-            elif min_value is not None and max_value is None:
-                self.lookup_expr = "lte"
-                max_date = date(
-                    current.year - min_value,
-                    current.month,
-                    current.day,
-                )
-                values = max_date
-            elif min_value is None and max_value is not None:
-                self.lookup_expr = "gte"
-                # min year -1 , day+1
-                min_date = date(
-                    current.year - max_value - 1,
-                    current.month,
-                    current.day,
-                )
-                min_date = min_date + timedelta(days=1)
-                values = min_date
-        return super().filter(qs, values)
-
-
 class IntegerFilter(Filter):
     """Custom Integer filter to parse Decimal values."""
 
@@ -178,10 +129,3 @@ class BusinessAreaSlugFilter(Filter):
         if business_area_slug:
             return qs.filter(business_area_id=ba.id)
         return qs
-
-
-class GlobalProgramFilterMixin(FilterSet):
-    @property
-    def qs(self) -> QuerySet:
-        program_id = self.request.headers.get("Program")
-        return super().qs.filter(program_id=decode_id_string(program_id))
