@@ -18,7 +18,6 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
-import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
@@ -60,6 +59,10 @@ export const IndividualBioData = ({
 
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
+  );
+
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
   );
 
   const mappedIndividualDocuments = individual?.documents?.map((doc) => (
@@ -232,7 +235,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {ObservedDisabilityEnum[individual?.observedDisability]}
+            {observedDisabilityChoicesDict[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

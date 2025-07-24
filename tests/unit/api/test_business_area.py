@@ -1,12 +1,9 @@
-import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hct_mis_api.api.models import Grant
-
-pytestmark = pytest.mark.django_db()
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):

@@ -49,8 +49,8 @@ export const ProgramCycleDetailsHeader = ({
           queryKey: [
             'programCyclesDetails',
             businessArea,
-            programId,
             programCycle.id,
+            programId,
           ],
         });
         showMessage(t('Programme Cycle Finished'));
