@@ -3,17 +3,17 @@
 from django.db import migrations, models
 
 
-def transfer_targeting_criteria_data(apps, schema_editor):  # pragma: no-cover
-    PaymentPlan = apps.get_model('payment', 'PaymentPlan')  # pragma: no-cover
-    for plan in PaymentPlan.objects.filter(targeting_criteria__isnull=False):  # pragma: no-cover
+def transfer_targeting_criteria_data(apps, schema_editor):  # pragma no cover
+    PaymentPlan = apps.get_model('payment', 'PaymentPlan')
+    for plan in PaymentPlan.objects.filter(targeting_criteria__isnull=False):
         criteria = plan.targeting_criteria
         plan.flag_exclude_if_active_adjudication_ticket = criteria.flag_exclude_if_active_adjudication_ticket
         plan.flag_exclude_if_on_sanction_list = criteria.flag_exclude_if_on_sanction_list
         plan.save()
 
     # Update ForeignKey relationships from rules to payment plans
-    TargetingCriteriaRule = apps.get_model('targeting', 'TargetingCriteriaRule')  # pragma: no-cover
-    for rule in TargetingCriteriaRule.objects.all():  # pragma: no-cover
+    TargetingCriteriaRule = apps.get_model('targeting', 'TargetingCriteriaRule')
+    for rule in TargetingCriteriaRule.objects.all():
         if hasattr(rule.targeting_criteria, 'targeting_criteria'):
             rule.payment_plan = rule.targeting_criteria.payment_plan
             rule.save()
