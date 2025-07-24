@@ -1,10 +1,12 @@
+import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import BusinessArea
+
+pytestmark = pytest.mark.django_db()
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):
@@ -17,14 +19,14 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         cls.list_url = reverse("api:core:business-areas-list")
 
     def test_list_business_area(self) -> None:
-        business_area1: BusinessArea = BusinessAreaFactory(
+        business_area1 = BusinessAreaFactory(
             slug="ukraine11",
             code="1234",
             name="Ukraine",
             long_name="the long name of Ukraine",
             active=True,
         )
-        business_area2: BusinessArea = BusinessAreaFactory(
+        business_area2 = BusinessAreaFactory(
             slug="BA 2",
             code="5678",
             name="Bus Area 2",
