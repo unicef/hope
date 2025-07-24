@@ -34,14 +34,14 @@ export const headCells: HeadCell<IndividualList>[] = [
   {
     disablePadding: false,
     label: 'Type',
-    id: '-birthDate',
+    id: 'type',
     numeric: false,
     dataCy: 'individual-age',
   },
   {
     disablePadding: false,
     label: 'Age',
-    id: '-birthDate',
+    id: 'birthDate',
     numeric: true,
     dataCy: 'individual-age',
   },

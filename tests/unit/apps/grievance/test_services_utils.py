@@ -603,7 +603,7 @@ class TestGrievanceUtils(TestCase):
             str(deduplication_set_id),
         )
 
-    def test_create_grievance_ticket_with_details__no_possible_duplicates(self) -> None:
+    def test_create_grievance_ticket_with_details_no_possible_duplicates(self) -> None:
         ba = BusinessAreaFactory(slug="afghanistan")
         deduplication_set_id = uuid.uuid4()
         program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)
