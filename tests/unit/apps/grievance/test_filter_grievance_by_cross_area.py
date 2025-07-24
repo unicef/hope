@@ -10,7 +10,6 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -42,8 +41,8 @@ class TestCrossAreaFilter(APITestCase):
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory(partner=partner_unicef)
 
-        role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
-        UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
+        RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
+        # UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
 
         cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2, p_code="AREA1")
         cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2, p_code="AREA2")
