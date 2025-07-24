@@ -18,11 +18,11 @@ from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
-    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
@@ -167,6 +167,32 @@ class HouseholdSerializer(serializers.ModelSerializer):
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
+    village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+
+    admin1 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=1),
+    )
+    admin2 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=2),
+    )
+    admin3 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=3),
+    )
+    admin4 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=4),
+    )
 
     class Meta:
         model = PendingHousehold
@@ -192,19 +218,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
         return ret
 
     def validate(self, attrs: Dict) -> Dict:
-        def get_related() -> int:
-            return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
-
-        # TODO  - 221086 how to check this? Data collecting type in the program does not store information if individual data is collected
-        # ctype = attrs.get("collect_individual_data", "")
-        # if ctype == COLLECT_TYPE_NONE:
-        #     if not attrs.get("size", 0) > 0:
-        #         raise ValidationError({"size": ["This field is required 2"]})
-        # elif ctype == COLLECT_TYPE_PARTIAL:
-        #     if not attrs.get("size", 0) > get_related():
-        #         raise ValidationError({"size": ["Households size must be greater than provided details"]})
-        # else:
-        #     attrs["size"] = get_related()
         return attrs
 
 

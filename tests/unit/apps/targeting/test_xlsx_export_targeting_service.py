@@ -1,22 +1,20 @@
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     PaymentFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.payment.models import AccountType, PaymentPlan
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
 from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
@@ -72,12 +70,11 @@ class TestXlsxExportTargetingService(APITestCase):
             vulnerability_score=99,
             household=hh2,
         )
-        targeting_criteria = TargetingCriteriaFactory()
         TargetingCriteriaRuleFactory(
-            targeting_criteria=targeting_criteria, household_ids=f"{p1.household.unicef_id}, {p2.household.unicef_id}"
+            household_ids=f"{p1.household.unicef_id}, {p2.household.unicef_id}",
+            payment_plan=self.payment_plan,
         )
-        self.payment_plan.targeting_criteria = targeting_criteria
-        self.payment_plan.save()
+
         service = XlsxExportTargetingService(self.payment_plan)
         self.assertEqual(len(service.households), 2)
 

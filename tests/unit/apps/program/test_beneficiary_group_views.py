@@ -1,10 +1,9 @@
 from django.urls import reverse
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from rest_framework.test import APIClient
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
-from tests.unit.api.base import HOPEApiTestCase
+from unit.api.base import HOPEApiTestCase
 
 
 class BeneficiaryGroupAPITestCase(HOPEApiTestCase):

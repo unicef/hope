@@ -1,8 +1,8 @@
 from unittest import skip
 
+from extras.test_utils.factories.account import UserFactory
 from rest_framework.test import APIClient
 
-from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 
 

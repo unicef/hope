@@ -7,20 +7,30 @@ from django.core.files.base import ContentFile
 from django.test import TestCase
 
 import pytest
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -38,22 +48,12 @@ from hct_mis_api.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
-from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

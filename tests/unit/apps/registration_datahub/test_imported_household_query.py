@@ -3,21 +3,21 @@ from typing import Any, List
 from django.conf import settings
 from django.core.management import call_command
 
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.fixtures import CountryFactory
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     PendingDocumentFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -132,20 +132,14 @@ class TestImportedHouseholdQuery(APITestCase):
 
     @parameterized.expand(
         [
-            (
-                "detail_id",
-                "test123",
-            ),
-            (
-                "enumerator_rec_id",
-                123,
-            ),
+            ("detail_id", "test123", "HH-12344"),
+            ("enumerator_rec_id", 123, "HH-12355"),
         ]
     )
-    def test_imported_household_query(self, field_name: str, value: Any) -> None:
+    def test_imported_household_query(self, field_name: str, value: Any, hh_unicef_id: str) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_VIEW_DETAILS], self.business_area)
         country = CountryFactory()
-        hh = PendingHouseholdFactory(country=country, unicef_id="HH-123", program=self.program)
+        hh = PendingHouseholdFactory(country=country, unicef_id=hh_unicef_id, program=self.program)
         setattr(hh, field_name, value)
         hh.save()
         ind = PendingIndividualFactory(

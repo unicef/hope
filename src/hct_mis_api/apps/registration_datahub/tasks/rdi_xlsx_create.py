@@ -5,9 +5,8 @@ from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
-from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -214,15 +213,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 return True
         return value
 
-    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> Union[str, Point]:
+    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> Optional[Tuple[float, float]]:
         if not value:
-            return ""
+            return None
 
         values_as_list = value.split(",")
-        longitude = values_as_list[0].strip()
-        latitude = values_as_list[1].strip()
+        x = values_as_list[0].strip()
+        y = values_as_list[1].strip()
 
-        return Point(x=float(longitude), y=float(latitude), srid=4326)
+        return float(x), float(y)
 
     def _handle_string_field(
         self,

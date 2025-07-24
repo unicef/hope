@@ -1,8 +1,8 @@
 export SECRET_KEY=SOME_KEY_HERE
 export DEBUG=true
 export ENV=dev
-export DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
-export REP_DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
+export DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+export REP_DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
 export EMAIL_HOST=TBD
 export EMAIL_HOST_USER=TBD
 export EMAIL_HOST_PASSWORD=TBD

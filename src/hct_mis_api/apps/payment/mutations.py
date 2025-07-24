@@ -490,6 +490,8 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             log_and_raise("If 'Amount Received' equals to 0, please set status as 'Not Received'")
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
+        elif received and received_amount.is_nan():
+            log_and_raise("NaN is not allowed")
 
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()
@@ -1256,10 +1258,7 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
             steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
             program_cycle=program_cycle,
         )
-        if payment_plan.targeting_criteria:
-            payment_plan_copy.targeting_criteria = PaymentPlanService.copy_target_criteria(
-                payment_plan.targeting_criteria
-            )
+        PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
 
         payment_plan_copy.save()
         payment_plan_copy.refresh_from_db()

@@ -60,7 +60,7 @@ const EditTargetPopulation = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
-    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+    paymentPlan.rules.map((rule) => ({ ...rule })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
@@ -76,10 +76,10 @@ const EditTargetPopulation = ({
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      paymentPlan.flagExcludeIfActiveAdjudicationTicket ||
       false,
     flagExcludeIfOnSanctionList:
-      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.flagExcludeIfOnSanctionList || false,
     programCycleId: {
       value: paymentPlan.programCycle.id,
       name: paymentPlan.programCycle.title,

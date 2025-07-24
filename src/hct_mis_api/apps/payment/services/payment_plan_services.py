@@ -50,7 +50,6 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
 )
@@ -447,13 +446,19 @@ class PaymentPlanService:
             payment.update_signature_hash()
         Payment.objects.bulk_update(payments, ["signature_hash"])
 
-    @staticmethod
-    def create_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
+    def create_targeting_criteria(self, targeting_criteria_input: Dict, program: Program) -> None:
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
 
-        targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
+        # Update the payment plan with targeting criteria fields
+        self.payment_plan.flag_exclude_if_active_adjudication_ticket = targeting_criteria_input.get(
+            "flag_exclude_if_active_adjudication_ticket", False
+        )
+        self.payment_plan.flag_exclude_if_on_sanction_list = targeting_criteria_input.get(
+            "flag_exclude_if_on_sanction_list", False
+        )
+        self.payment_plan.save()
 
-        return targeting_criteria
+        from_input_to_targeting_criteria(targeting_criteria_input, program, self.payment_plan)
 
     @staticmethod
     def create(input_data: Dict, user: "User", business_area_slug: str) -> PaymentPlan:
@@ -472,13 +477,10 @@ class PaymentPlanService:
             raise GraphQLError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
 
         with transaction.atomic():
-            targeting_criteria = PaymentPlanService.create_targeting_criteria(input_data["targeting_criteria"], program)
-
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
                 program_cycle=program_cycle,
-                targeting_criteria=targeting_criteria,
                 name=input_data["name"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
@@ -500,6 +502,8 @@ class PaymentPlanService:
                 payment_plan.delivery_mechanism = delivery_mechanism
                 payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism"])
 
+            PaymentPlanService(payment_plan).create_targeting_criteria(input_data["targeting_criteria"], program)
+
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 
         return payment_plan
@@ -509,7 +513,6 @@ class PaymentPlanService:
         should_update_money_stats = False
         should_rebuild_list = False
         vulnerability_filter = False
-        old_targeting_criteria = None
 
         name = input_data.get("name")
         vulnerability_score_min = input_data.get("vulnerability_score_min")
@@ -569,14 +572,11 @@ class PaymentPlanService:
             vulnerability_filter = True
             self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
-        if targeting_criteria_input:
+        if targeting_criteria_input and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
             should_rebuild_list = True
             TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
-            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
-            if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
-                if self.payment_plan.targeting_criteria:
-                    old_targeting_criteria = self.payment_plan.targeting_criteria
-                self.payment_plan.targeting_criteria = targeting_criteria
+            self.payment_plan.rules.all().delete()
+            from_input_to_targeting_criteria(targeting_criteria_input, program, self.payment_plan)
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids
@@ -609,26 +609,24 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if not (fsp_id and delivery_mechanism_code) and hasattr(self.payment_plan, "delivery_mechanism"):
-            self.payment_plan.delivery_mechanism = None
-            self.payment_plan.financial_service_provider = None
-            should_rebuild_list = True
-
-        if fsp_id and delivery_mechanism_code:
-            fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
-            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-            if (
-                self.payment_plan.financial_service_provider != fsp
-                or self.payment_plan.delivery_mechanism != delivery_mechanism
-            ):
+        if self.payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+            if not (fsp_id and delivery_mechanism_code):
+                self.payment_plan.delivery_mechanism = None
+                self.payment_plan.financial_service_provider = None
                 should_rebuild_list = True
-                self.payment_plan.financial_service_provider = fsp
-                self.payment_plan.delivery_mechanism = delivery_mechanism
+
+            if fsp_id and delivery_mechanism_code:
+                fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
+                delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+                if (
+                    self.payment_plan.financial_service_provider != fsp
+                    or self.payment_plan.delivery_mechanism != delivery_mechanism
+                ):
+                    should_rebuild_list = True
+                    self.payment_plan.financial_service_provider = fsp
+                    self.payment_plan.delivery_mechanism = delivery_mechanism
 
         self.payment_plan.save()
-        # remove old targeting_criteria
-        if old_targeting_criteria:
-            old_targeting_criteria.delete()
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(
@@ -679,20 +677,20 @@ class PaymentPlanService:
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
         with transaction.atomic():
-            self.payment_plan.background_action_status_xlsx_importing_reconciliation()
-            self.payment_plan.save()
-
             file_temp = FileTemp.objects.create(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
                 file=file,
             )
+            self.payment_plan.background_action_status_xlsx_importing_reconciliation()
+            self.payment_plan.reconciliation_import_file = file_temp
+            self.payment_plan.save()
+
             transaction.on_commit(
                 partial(
                     import_payment_plan_payment_list_per_fsp_from_xlsx.delay,
                     self.payment_plan.pk,
-                    file_temp.pk,
                 )
             )
         self.payment_plan.refresh_from_db()
@@ -749,7 +747,6 @@ class PaymentPlanService:
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
             status_date=timezone.now(),
-            targeting_criteria=self.copy_target_criteria(source_pp.targeting_criteria),
             is_follow_up=True,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
@@ -763,6 +760,7 @@ class PaymentPlanService:
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
         )
+        self.copy_target_criteria(source_pp, follow_up_pp),
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
 
@@ -882,12 +880,10 @@ class PaymentPlanService:
             payment_plan_rebuild_stats.delay(str(payment_plan.id))
 
     @staticmethod
-    def copy_target_criteria(targeting_criteria: TargetingCriteria) -> TargetingCriteria:
-        targeting_criteria_copy = TargetingCriteria()
-        targeting_criteria_copy.save()
-        for rule in targeting_criteria.rules.all():
+    def copy_target_criteria(source_pp: PaymentPlan, target_pp: PaymentPlan) -> None:
+        for rule in source_pp.get_rules():
             rule_copy = TargetingCriteriaRule(
-                targeting_criteria=targeting_criteria_copy,
+                payment_plan=target_pp,
                 household_ids=rule.household_ids,
                 individual_ids=rule.individual_ids,
             )
@@ -913,8 +909,6 @@ class PaymentPlanService:
                     col_filter.pk = None
                     col_filter.collector_block_filters = col_filter_block_copy
                     col_filter.save()
-
-        return targeting_criteria_copy
 
     def send_xlsx_password(self) -> PaymentPlan:
         send_payment_plan_payment_list_xlsx_per_fsp_password.delay(str(self.payment_plan.pk), str(self.user.pk))
