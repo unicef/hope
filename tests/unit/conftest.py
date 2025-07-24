@@ -21,7 +21,7 @@ from hct_mis_api.apps.account.models import Partner, Role
 
 
 @pytest.fixture(autouse=True)
-def create_unicef_partner() -> None:
+def create_unicef_partner(db: Any) -> None:
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
