@@ -17,21 +17,27 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(
-            remove_targeting_criteria_rules_without_payment_plan,
-            reverse_code=migrations.RunPython.noop
-        ),
-        migrations.DeleteModel(
-            name='TargetingCriteria',
-        ),
-        migrations.RemoveField(
-            model_name='targetingcriteriarule',
-            name='targeting_criteria',
-        ),
-        migrations.AlterField(
-            model_name='targetingcriteriarule',
-            name='payment_plan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rules',
-                                    to='payment.paymentplan'),
-        ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(
+                    remove_targeting_criteria_rules_without_payment_plan,
+                    reverse_code=migrations.RunPython.noop
+                ),
+            ],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='targetingcriteriarule',
+                    name='targeting_criteria',
+                ),
+                migrations.DeleteModel(
+                    name='TargetingCriteria',
+                ),
+                migrations.AlterField(
+                    model_name='targetingcriteriarule',
+                    name='payment_plan',
+                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rules',
+                                            to='payment.paymentplan'),
+                ),
+            ]
+        )
     ]
