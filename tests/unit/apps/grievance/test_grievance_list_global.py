@@ -663,7 +663,7 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 42
+        assert len(response.json()) == 43
 
     def test_all_add_individuals_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -679,4 +679,4 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 29
+        assert len(response.json()) == 30
