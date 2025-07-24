@@ -161,7 +161,7 @@ export const FlagDetails = ({
                 .map((item) => item.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
-            <TableCell align="left">{t('Sanction List')}</TableCell>
+            <TableCell align="left">{details.sanctionListIndividual.sanctionList.name}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>
