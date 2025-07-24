@@ -25,7 +25,6 @@ class TestGrievanceCreateReferralTicket:
     def setup(self, api_client: Any) -> None:
         call_command("loadcountries")
         self.business_area = create_afghanistan()
-        call_command("loadcountries")
         partner = PartnerFactory(name="Partner")
         self.user = UserFactory.create(partner=partner)
         self.api_client = api_client(self.user)
