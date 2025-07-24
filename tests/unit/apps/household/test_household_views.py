@@ -47,7 +47,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 class TestHouseholdList:
@@ -1411,20 +1411,6 @@ class TestHouseholdFilter:
             household2_data={"residence_status": HOST},
         )
 
-    def test_filter_by_last_registration_date(self) -> None:
-        self._test_filter_households_in_list(
-            filters={"last_registration_date_after": "2022-12-31"},
-            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
-            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
-        )
-
-    def test_filter_by_first_registration_date(self) -> None:
-        self._test_filter_households_in_list(
-            filters={"first_registration_date": "2022-12-31 00:00:00"},
-            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
-            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
-        )
-
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
     @pytest.mark.parametrize(
         "filters,household1_data,household2_data,hoh_1_data,hoh_2_data",
@@ -1444,7 +1430,7 @@ class TestHouseholdFilter:
             ({"search": "456"}, {"program_registration_id": "456"}, {"program_registration_id": "123"}, {}, {}),
         ],
     )
-    def test_search(
+    def test_asearch(
         self, filters: Dict, household1_data: Dict, household2_data: Dict, hoh_1_data: Dict, hoh_2_data: Dict
     ) -> None:
         household1, household2 = self._create_test_households(
@@ -1460,3 +1446,17 @@ class TestHouseholdFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(household1.id)
         return response_data
+
+    def test_filter_by_last_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"last_registration_date_after": "2022-12-31"},
+            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
+            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
+        )
+
+    def test_filter_by_first_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"first_registration_date": "2022-12-31 00:00:00"},
+            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
+            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
+        )
