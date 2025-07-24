@@ -1,13 +1,15 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -15,7 +17,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.apps.targeting.services.utils import (
     from_input_to_targeting_criteria,
-    get_unicef_ids,
+    get_existing_unicef_ids,
 )
 
 
@@ -35,21 +37,22 @@ class TestPaymentPlanModel(TestCase):
         cls.ind1 = IndividualFactory(household=cls.hh1, program=cls.program)
         cls.ind2 = IndividualFactory(household=cls.hh2, program=cls.program)
 
+        cls.pp = PaymentPlanFactory()
+
     def test_get_unicef_ids(self) -> None:
-        ids_1 = get_unicef_ids(f"{self.hh1},HH-invalid", "household", self.program)
+        ids_1 = get_existing_unicef_ids(f"{self.hh1},HH-invalid", Household, self.program)
         self.assertEqual(ids_1, f"{self.hh1}")
 
-        ids_2 = get_unicef_ids(f" {self.hh1}, {self.hh2} ", "household", self.program)
+        ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", Household, self.program)
         self.assertEqual(ids_2, f"{self.hh1}, {self.hh2}")
 
-        ids_3 = get_unicef_ids(f"{self.ind1}, IND-000", "individual", self.program)
+        ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", Individual, self.program)
         self.assertEqual(ids_3, f"{self.ind1}")
 
-        ids_4 = get_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", "individual", self.program)
+        ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", Individual, self.program)
         self.assertEqual(ids_4, f"{self.ind1}, {self.ind2}")
 
     def test_from_input_to_targeting_criteria(self) -> None:
-        self.assertEqual(TargetingCriteria.objects.count(), 0)
         self.assertEqual(TargetingCriteriaRule.objects.count(), 0)
         self.assertEqual(TargetingCriteriaRuleFilter.objects.count(), 0)
         self.assertEqual(TargetingIndividualRuleFilterBlock.objects.count(), 0)
@@ -99,9 +102,8 @@ class TestPaymentPlanModel(TestCase):
                 }
             ],
         }
-        from_input_to_targeting_criteria(targeting_criteria_input, self.program)
+        from_input_to_targeting_criteria(targeting_criteria_input, self.program, self.pp)
 
-        self.assertEqual(TargetingCriteria.objects.count(), 1)
         self.assertEqual(TargetingCriteriaRule.objects.count(), 1)
         self.assertEqual(TargetingCriteriaRuleFilter.objects.count(), 1)
         self.assertEqual(TargetingIndividualRuleFilterBlock.objects.count(), 1)

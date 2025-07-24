@@ -11,21 +11,21 @@ from django.utils import timezone
 
 import freezegun
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.periodic_data_update.fixtures import (
+from extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
 )
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 

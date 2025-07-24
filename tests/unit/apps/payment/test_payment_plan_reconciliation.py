@@ -18,32 +18,13 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 import pytz
-from freezegun import freeze_time
-from openpyxl import load_workbook
-from parameterized import parameterized
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType, FileTemp
-from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-    decode_id_string_required,
-    encode_id_base64,
-    encode_id_base64_required,
-)
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.celery_tasks import (
-    create_payment_plan_payment_list_xlsx_per_fsp,
-    payment_plan_apply_engine_rule,
-)
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -54,6 +35,28 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+from freezegun import freeze_time
+from openpyxl import load_workbook
+from parameterized import parameterized
+from pytz import utc
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import DataCollectingType, FileTemp
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    decode_id_string_required,
+    encode_id_base64,
+    encode_id_base64_required,
+)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx_per_fsp,
+    payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
@@ -71,10 +74,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 
 if TYPE_CHECKING:

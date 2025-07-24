@@ -11,27 +11,10 @@ from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
 
-from graphql import GraphQLError
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FileTemp,
-    FlexibleAttribute,
-)
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
-from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    Document,
-    Household,
-)
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import DocumentFactory, create_household
+from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -41,6 +24,24 @@ from hct_mis_api.apps.payment.fixtures import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.program import ProgramFactory
+from graphql import GraphQLError
+
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FileTemp,
+    FlexibleAttribute,
+)
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    Document,
+    Household,
+)
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -65,7 +66,6 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 def valid_file() -> File:

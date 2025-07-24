@@ -5,7 +5,7 @@ volumes:
 
 services:
   db:
-    image: kartoza/postgis:14-3
+    image: postgres:14.3
     command: -c 'max_connections=200'
     volumes:
       - db:/var/lib/postgresql/data

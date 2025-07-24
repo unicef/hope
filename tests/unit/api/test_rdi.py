@@ -4,8 +4,14 @@ from typing import Dict
 
 from django.core.management import call_command
 
+from extras.test_utils.factories.program import (
+    ProgramFactory,
+    get_program_with_dct_type_and_name,
+)
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase
+from unit.api.factories import UserFactory
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -22,14 +28,8 @@ from hct_mis_api.apps.payment.models import (
     FinancialInstitution,
     PendingAccount,
 )
-from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
-    get_program_with_dct_type_and_name,
-)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.unit.api.base import HOPEApiTestCase
-from tests.unit.api.factories import UserFactory
 
 
 class CreateRDITests(HOPEApiTestCase):

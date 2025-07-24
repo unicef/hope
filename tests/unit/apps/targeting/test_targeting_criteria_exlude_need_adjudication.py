@@ -1,16 +1,15 @@
-from parameterized import parameterized
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
+from extras.test_utils.factories.household import (
     IndividualFactory,
     create_household_and_individuals,
 )
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from parameterized import parameterized
+
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaQueryingBase,
 )
@@ -50,13 +49,10 @@ class TestTargetingCriteriaFlags(APITestCase):
                 },
             ],
         )
-        targeting_criteria = TargetingCriteriaFactory(
+        pp = PaymentPlanFactory(
+            business_area=cls.business_area,
             flag_exclude_if_active_adjudication_ticket=True,
             flag_exclude_if_on_sanction_list=True,
-        )
-        pp = PaymentPlanFactory(
-            targeting_criteria=targeting_criteria,
-            business_area=cls.business_area,
         )
         for hh in [cls.household1, cls.household2]:
             PaymentFactory(

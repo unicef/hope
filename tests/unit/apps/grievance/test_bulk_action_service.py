@@ -3,11 +3,11 @@ from unittest.mock import patch
 from django.test import TestCase, override_settings
 
 import pytest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
 from faker.generator import random
 from flaky import flaky
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.constants import (
     PRIORITY_HIGH,

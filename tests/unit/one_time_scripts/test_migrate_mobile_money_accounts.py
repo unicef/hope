@@ -1,17 +1,18 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     PaymentFactory,
     generate_delivery_mechanisms,
 )
+
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     bulk_create_payment_snapshot_data,
