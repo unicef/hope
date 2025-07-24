@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Any
 
+from django.core.management import call_command
+
 import pytest
 
 from hct_mis_api.apps.sanction_list.models import (
@@ -21,9 +23,9 @@ def strategy(sanction_list: "SanctionList") -> "EUSanctionList":
 
 
 @pytest.mark.elasticsearch
-def test_load_file(strategy: "EUSanctionList", always_eager: Any, countries: Any) -> None:
+def test_load_file(strategy: "EUSanctionList", always_eager: Any) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
-
+    call_command("loadcountries")
     strategy.load_from_file(main_test_files_path / "eu.xml")
     assert SanctionListIndividual.objects.count() == 2
     assert SanctionListIndividualAliasName.objects.count() == 3  # we have 4 aliases, but one is double
