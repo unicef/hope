@@ -14,7 +14,7 @@ def transfer_targeting_criteria_data(apps, schema_editor):  # pragma no cover
     # Update ForeignKey relationships from rules to payment plans
     TargetingCriteriaRule = apps.get_model('targeting', 'TargetingCriteriaRule')
     for rule in TargetingCriteriaRule.objects.all():
-        if hasattr(rule.targeting_criteria, 'targeting_criteria'):
+        if hasattr(rule.targeting_criteria, 'payment_plan'):
             rule.payment_plan = rule.targeting_criteria.payment_plan
             rule.save()
 
