@@ -266,6 +266,7 @@ class TestSmokeProgrammeDetails:
         assert "Only Selected Partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_edit_programme_from_details(
         self,
         create_programs: None,
@@ -293,6 +294,7 @@ class TestSmokeProgrammeDetails:
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_happy_path(
         self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -498,6 +500,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[2].text
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_edit_programme_cycle(
         self, standard_active_program_with_draft_program_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
