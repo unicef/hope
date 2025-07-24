@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from django_webtest import WebTest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -12,7 +13,6 @@ from extras.test_utils.factories.core import (
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.admin import (
     AcceptanceProcessThresholdFormset,

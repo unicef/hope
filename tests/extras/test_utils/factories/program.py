@@ -171,10 +171,11 @@ def generate_beneficiary_groups() -> None:
 
 
 def generate_people_program() -> None:
-    from hct_mis_api.apps.household.fixtures import (
+    from extras.test_utils.factories.household import (
         create_household,
         create_individual_document,
     )
+
     from hct_mis_api.apps.household.models import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")

@@ -121,7 +121,7 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
 
 
 class PaymentVerificationPlanFactory(DjangoModelFactory):
-    payment_plan = factory.SubFactory("hct_mis_api.apps.payment.fixtures.PaymentPlanFactory")
+    payment_plan = factory.SubFactory("extras.test_utils.factories.payment.PaymentPlanFactory")
     status = factory.fuzzy.FuzzyChoice(
         ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
@@ -146,7 +146,7 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
 
 
 class PaymentVerificationFactory(DjangoModelFactory):
-    payment = factory.SubFactory("hct_mis_api.apps.payment.fixtures.PaymentFactory")
+    payment = factory.SubFactory("extras.test_utils.factories.payment.PaymentFactory")
     payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,

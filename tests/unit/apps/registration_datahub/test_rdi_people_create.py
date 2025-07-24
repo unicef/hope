@@ -15,12 +15,12 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
-from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,

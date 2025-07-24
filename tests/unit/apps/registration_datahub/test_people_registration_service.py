@@ -7,11 +7,11 @@ from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     DocumentType,

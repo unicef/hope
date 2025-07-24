@@ -7,28 +7,28 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
     create_ukraine,
 )
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import (
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db

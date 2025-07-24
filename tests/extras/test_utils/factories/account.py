@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 
 import factory
+from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.account.models import (
@@ -17,7 +18,6 @@ from hct_mis_api.apps.account.models import (
     User,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class PartnerFactory(DjangoModelFactory):

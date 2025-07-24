@@ -8,28 +8,28 @@ from django.urls import reverse
 from django.utils import timezone
 
 import pytest
-from rest_framework import status
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
     FeedbackFactory,
     SurveyFactory,
 )
-from hct_mis_api.apps.accountability.models import Survey
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 pytestmark = pytest.mark.django_db
 

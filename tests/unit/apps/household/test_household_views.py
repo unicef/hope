@@ -9,26 +9,29 @@ from django.utils import timezone
 
 import pytest
 from constance.test import override_config
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
     SurveyFactory,
 )
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     HOST,
@@ -39,11 +42,8 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
