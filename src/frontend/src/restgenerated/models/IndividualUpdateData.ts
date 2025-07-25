@@ -7,7 +7,7 @@ import type { EditAccount } from './EditAccount';
 import type { EditIndividualDocument } from './EditIndividualDocument';
 import type { EditIndividualIdentity } from './EditIndividualIdentity';
 import type { IndividualDocument } from './IndividualDocument';
-import type { IndividualIdentity } from './IndividualIdentity';
+import type { IndividualIdentityGT } from './IndividualIdentityGT';
 export type IndividualUpdateData = {
     status?: string;
     fullName?: string;
@@ -38,7 +38,7 @@ export type IndividualUpdateData = {
     documents?: Array<IndividualDocument>;
     documentsToRemove?: Array<string>;
     documentsToEdit?: Array<EditIndividualDocument>;
-    identities?: Array<IndividualIdentity>;
+    identities?: Array<IndividualIdentityGT>;
     identitiesToRemove?: Array<number>;
     identitiesToEdit?: Array<EditIndividualIdentity>;
     accounts?: Array<CreateAccount>;

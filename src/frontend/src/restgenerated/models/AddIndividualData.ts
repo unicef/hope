@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { CreateAccount } from './CreateAccount';
 import type { IndividualDocument } from './IndividualDocument';
-import type { IndividualIdentity } from './IndividualIdentity';
+import type { IndividualIdentityGT } from './IndividualIdentityGT';
 export type AddIndividualData = {
     fullName: string;
     givenName?: string;
@@ -33,7 +33,7 @@ export type AddIndividualData = {
     whoAnswersAltPhone?: string;
     businessArea?: string;
     documents?: Array<IndividualDocument>;
-    identities?: Array<IndividualIdentity>;
+    identities?: Array<IndividualIdentityGT>;
     accounts?: Array<CreateAccount>;
     preferredLanguage?: string;
     flexFields?: any;
