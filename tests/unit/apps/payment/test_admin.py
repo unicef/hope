@@ -16,7 +16,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from admin.payment_admin import ArrayFieldWidget, CommaSeparatedArrayField
+from hct_mis_api.admin.payment_admin import ArrayFieldWidget, CommaSeparatedArrayField
 from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 

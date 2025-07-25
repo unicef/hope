@@ -14,7 +14,7 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 
-from admin.account_admin.mixins import get_valid_kobo_username
+from hct_mis_api.admin.account_admin.mixins import get_valid_kobo_username
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
 from hct_mis_api.apps.core.models import BusinessArea
 
