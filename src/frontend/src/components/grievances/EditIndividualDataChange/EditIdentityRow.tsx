@@ -19,14 +19,6 @@ const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
 
-interface Identity {
-  id: string;
-  number: string;
-  partner: string;
-  country: string;
-  countryIso3: string;
-}
-
 interface AddIndividualFieldsData {
   countriesChoices: Array<{ value: any; labelEn?: string }>;
   identityTypeChoices: Array<{ value: any; labelEn?: string }>;
