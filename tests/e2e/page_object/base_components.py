@@ -182,10 +182,13 @@ class BaseComponents(Common):
         # self.getMenuItemClearCache().click()
 
         self.getGlobalProgramFilter().click()
-        self.clear_and_send_keys(self.getGlobalProgramFilterSearchInput(), "")
+        self.getGlobalProgramFilterSearchInput().clear()
+        self.clear_input(self.getGlobalProgramFilterSearchInput())
+        for _ in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):
+            self.getGlobalProgramFilterSearchInput().send_keys(Keys.BACKSPACE)
         self.getGlobalProgramFilterSearchButton().click()
         if name != "All Programmes":
-            self.clear_and_send_keys(self.getGlobalProgramFilterSearchInput(), name)
+            self.getGlobalProgramFilterSearchInput().send_keys(name)
             self.getGlobalProgramFilterSearchButton().click()
             self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
 
