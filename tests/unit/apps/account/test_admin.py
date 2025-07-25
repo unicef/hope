@@ -19,8 +19,8 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 
-from hct_mis_api.apps.account.admin import PartnerAdmin
-from hct_mis_api.apps.account.admin.user_role import (
+from apps.account.admin import PartnerAdmin
+from admin.account_admin.user_role import (
     RoleAssignmentAdmin,
     RoleAssignmentInline,
 )
