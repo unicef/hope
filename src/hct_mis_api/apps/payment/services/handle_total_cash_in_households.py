@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from django.db.models import F, OuterRef, Subquery, Sum
@@ -8,7 +7,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment
 
 
-def handle_total_cash_in_specific_households(id_list: List[UUID]) -> None:
+def handle_total_cash_in_specific_households(id_list: list[UUID]) -> None:
     total_cash_received_payment_subquery = Subquery(
         Payment.objects.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, household__pk=OuterRef("pk"))
         .values("household__pk")

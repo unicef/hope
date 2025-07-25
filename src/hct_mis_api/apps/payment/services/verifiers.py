@@ -1,5 +1,3 @@
-from typing import Dict
-
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
@@ -33,7 +31,7 @@ class PaymentVerificationArgumentVerifier:
         },
     }
 
-    def __init__(self, input_data: Dict) -> None:
+    def __init__(self, input_data: dict) -> None:
         self.input_data = input_data
 
     def verify(self, field_name: str) -> None:

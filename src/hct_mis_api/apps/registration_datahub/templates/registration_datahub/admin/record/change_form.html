@@ -1,8 +1,10 @@
 {% extends "admin_extra_buttons/change_form.html" %}{% load smart_register %}
 {% block after_field_sets %}
     {% dump original.data "" original %}
-{% endblock %}
+{% endblock after_field_sets %}
+
 {% block inline_field_sets %}{% endblock %}
+
 {% block admin_change_form_document_ready %}
     {{ block.super }}
     <script>
@@ -16,4 +18,4 @@
             });
         })(django.jQuery);
     </script>
-{% endblock %}
+{% endblock admin_change_form_document_ready %}

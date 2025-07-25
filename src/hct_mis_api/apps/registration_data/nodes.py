@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Optional
+from typing import Any
 
 import graphene
 from dateutil.parser import parse
@@ -25,7 +25,7 @@ class DeduplicationResultNode(graphene.ObjectType):
     duplicate = graphene.Boolean()
     distinct = graphene.Boolean()
 
-    def resolve_age(self, info: Any) -> Optional[int]:
+    def resolve_age(self, info: Any) -> int | None:
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()
@@ -41,7 +41,7 @@ class DeduplicationResultNode(graphene.ObjectType):
     def resolve_distinct(self, info: Any) -> bool:
         return self.get("distinct", False)
 
-    def resolve_unicef_id(self, info: Any) -> Optional[str]:
+    def resolve_unicef_id(self, info: Any) -> str | None:
         try:
             individual = Individual.all_objects.get(id=decode_id_string(self.get("hit_id")))
             return str(individual.unicef_id)
@@ -60,13 +60,13 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     location = graphene.String()
 
     @staticmethod
-    def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
+    def resolve_photo(parent: Any, info: Any) -> graphene.String | None:
         # photo url serialization storage timeout
         individual = Individual.all_objects.filter(id=parent.get("id") or None).first()
         return individual.photo.url if individual and individual.photo else None
 
     @staticmethod
-    def resolve_id(parent: Any, info: Any) -> Optional[str]:
+    def resolve_id(parent: Any, info: Any) -> str | None:
         return encode_id_base64(parent.get("id"), "Individual")
 
 

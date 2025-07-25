@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class DataChangeValidator:
     @classmethod
-    def verify_approve_data(cls, approve_data: Dict) -> None:
+    def verify_approve_data(cls, approve_data: dict) -> None:
         if not isinstance(approve_data, dict):
             log_and_raise("Fields must be a dictionary with field name as key and boolean as a value")
         # valid roles
@@ -31,7 +31,7 @@ class DataChangeValidator:
             log_and_raise("Values must be booleans")
 
     @classmethod
-    def verify_approve_data_against_object_data(cls, object_data: Dict, approve_data: Dict) -> None:
+    def verify_approve_data_against_object_data(cls, object_data: dict, approve_data: dict) -> None:
         error = "Provided fields are not the same as provided in the object approve data"
         if approve_data and not isinstance(object_data, dict):
             log_and_raise(error)
@@ -51,20 +51,18 @@ def validate_file(file: Any) -> None:
         raise ValidationError(_("File type not supported"))
 
 
-def validate_files_size(files: List[Any]) -> None:
+def validate_files_size(files: list[Any]) -> None:
     if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
         raise ValidationError("Total size of files can not be larger than 25mb.")
 
 
-def validate_grievance_documents_size(ticket_id: str, new_documents: List[Dict], is_updated: bool = False) -> None:
+def validate_grievance_documents_size(ticket_id: str, new_documents: list[dict], is_updated: bool = False) -> None:
     grievance_documents = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id)
 
     if is_updated:
         current_documents_size = sum(
-            (
-                grievance_documents.exclude(id__in=[document["id"] for document in new_documents]).values_list(
-                    "file_size", flat=True
-                )
+            grievance_documents.exclude(id__in=[document["id"] for document in new_documents]).values_list(
+                "file_size", flat=True
             )
         )
     else:

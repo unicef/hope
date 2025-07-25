@@ -2,7 +2,8 @@
 {% load i18n %}
 {% block title %}
     {{ business_area_slug }} {% translate "Dashboard" %}
-{% endblock %}
+{% endblock title %}
+
 {% block content %}
     <div id="dashboard-loading-status" class="text-center p-4 mb-4 text-gray-700 bg-yellow-100 border border-yellow-300 rounded" style="display: none;"></div>
     <!-- Top Row: Disbursed and Planned Amounts -->
@@ -72,7 +73,8 @@
             <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
         </div>
     </div>
-{% endblock %}
+{% endblock content %}
+
 {% block scripts %}
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -105,7 +107,7 @@
                 }
             }
 
-            const url = "{{household_data_url}}";
+            const url = "{{ household_data_url }}";
             const pendingList = ["Sent to Payment Gateway", "Sent to FSP", "Pending"];
             const successfulList = [
                 "Distribution Successful",
@@ -113,10 +115,10 @@
                 "Transaction Successful",
             ];
 
-            const maxRetries = 12; 
+            const maxRetries = 12;
             const retryDelay = 5000;
 
-            function initializeChartsAndMetrics(data) { 
+            function initializeChartsAndMetrics(data) {
                 [
                     "payments-by-fsp",
                     "payments-by-delivery",
@@ -163,7 +165,7 @@
                     const currencyDim = ndx.dimension((d) => d.currency || "UNK");
 
                     const disbursedPaymentsByCurrencyGroup = currencyDim.group().reduce(
-                        (p, v) => { 
+                        (p, v) => {
                             if (pendingList.includes(v.payment_status) || successfulList.includes(v.payment_status)) {
                                 p.sum += v.delivered_quantity || 0;
                             }
@@ -196,7 +198,7 @@
                         .order((d) => -d);
 
                     const successfulPaymentsByCurrencyGroup = currencyDim.group().reduce(
-                        (p, v) => { 
+                        (p, v) => {
                             if (successfulList.includes(v.payment_status)) {
                                 p.sum += v.delivered_quantity || 0;
                             }
@@ -273,7 +275,7 @@
                         .group(topProgramGroup)
                         .elasticX(true)
                         .height(400)
-                        .margins({ top: 10, right: 20, bottom: 30, left: 5 }) 
+                        .margins({ top: 10, right: 20, bottom: 30, left: 5 })
                         .label((d) => {
                             const totalProgramSum = programGroup.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalProgramSum > 0 ? ((d.value / totalProgramSum) * 100).toFixed(0) : '0';
@@ -306,7 +308,7 @@
                         .group(monthGroup)
                         .elasticX(true)
                         .height(400)
-                        .margins({ top: 0, right: 0, bottom: 30, left: 5 }) 
+                        .margins({ top: 0, right: 0, bottom: 30, left: 5 })
                         .useViewBoxResizing(true)
                         .label((d) => {
                             const totalMonthSum = monthGroup.all().reduce((sum, g) => sum + g.value, 0);
@@ -324,7 +326,7 @@
                         .group(topAdmin1Group)
                         .elasticX(true)
                         .height(400)
-                        .margins({ top: 0, right: 20, bottom: 30, left: 5 }) 
+                        .margins({ top: 0, right: 20, bottom: 30, left: 5 })
                         .label((d) => {
                             const totalAdmin1Sum = admin1Group.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalAdmin1Sum > 0 ? ((d.value / totalAdmin1Sum) * 100).toFixed(0) : '0';
@@ -380,21 +382,21 @@
                         const reconciliationPercentage = totalPaymentsCount > 0 ?
                             (nonPendingPaymentSum / totalPaymentsCount) * 100 :
                             0;
-                        
+
                         const reconciledPaymentsValueUSD = ndx.groupAll().reduce(
-                            (p, v) => { 
+                            (p, v) => {
                                 if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
                                     p.value += (v.delivered_quantity_usd || 0);
                                 }
                                 return p;
                             },
-                            (p, v) => { 
+                            (p, v) => {
                                 if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
                                     p.value -= (v.delivered_quantity_usd || 0);
                                 }
                                 return p;
                             },
-                            () => ({ value: 0 }) 
+                            () => ({ value: 0 })
                         ).value().value;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
@@ -412,8 +414,8 @@
                                 ).value();
                         const finishedPaymentPlans = paymentPlanMetrics.finished;
                         const totalPaymentPlans = paymentPlanMetrics.total;
-                        const verificationPercentage = totalPaymentPlans > 0 
-                            ? (finishedPaymentPlans / totalPaymentPlans) * 100 
+                        const verificationPercentage = totalPaymentPlans > 0
+                            ? (finishedPaymentPlans / totalPaymentPlans) * 100
                             : 0;
                         const successfulPaymentsGroupUSD = ndx
                             .groupAll()
@@ -483,7 +485,7 @@
                                 () => 0,
                             )
                             .value();
-                        
+
                         const plannedPaymentsAmount = ndx.groupAll()
                             .reduceSum(d => d.total_planned_usd || 0)
                             .value();
@@ -496,7 +498,7 @@
                             `${decimalNumberFormatter(totalSuccessfulUSD)} USD`;
                         document.getElementById("planned-payments-amount").innerHTML =
                             `${decimalNumberFormatter(plannedPaymentsAmount)} USD`;
-                        
+
                         let disbursedPaymentsHtml = '';
                         const disbursedCurrencyTotals = disbursedPaymentsByCurrencyGroup.all();
                         disbursedCurrencyTotals.forEach(item => {
@@ -517,7 +519,7 @@
                             `${simplenumberFormatter(pwdReached)}`;
                         document.getElementById("children-reached").innerHTML =
                             `${simplenumberFormatter(childrenReached)}`;
-                        
+
                         document.querySelector(".reconciliation-percentage-value").innerHTML =
                             `${decimalNumberFormatter(reconciliationPercentage)}`;
                         document.querySelector(".reconciliation-amount-value").innerHTML =
@@ -591,7 +593,7 @@
                     hideSpinner("payments-by-month");
                     dc.renderAll();
                     isChartsInitialized = true;
-            } 
+            }
 
             function attemptFetch(retryCount = 0) {
                 d3.json(url).then((fetchedData) => {
@@ -613,7 +615,7 @@
                         }
                     } else {
                         if (loadingStatusDiv) {
-                            loadingStatusDiv.style.display = 'none'; 
+                            loadingStatusDiv.style.display = 'none';
                         }
                         initializeChartsAndMetrics(fetchedData);
                     }
@@ -623,7 +625,7 @@
                         loadingStatusDiv.textContent = errorMessage;
                         loadingStatusDiv.style.display = 'block';
                     }
-                    initializeChartsAndMetrics([]); 
+                    initializeChartsAndMetrics([]);
                 });
             }
 
@@ -667,4 +669,4 @@
         });
     });
     </script>
-{% endblock %}
+{% endblock scripts %}

@@ -3,10 +3,10 @@ class Result:
         self.value = 0
 
     def __repr__(self) -> str:
-        return "<steficon.result.Result object at {}>".format(id(self))
+        return f"<steficon.result.Result object at {id(self)}>"
 
     def __str__(self) -> str:
-        return "Result: {}".format(self.value)
+        return f"Result: {self.value}"
 
 
 class Score(Result):
@@ -15,7 +15,7 @@ class Score(Result):
         self.extra: dict = {}
 
     def __repr__(self) -> str:
-        return "<steficon.result.Score object at {}>".format(id(self))
+        return f"<steficon.result.Score object at {id(self)}>"
 
     def __str__(self) -> str:
-        return "Score: {}".format(self.value)
+        return f"Score: {self.value}"

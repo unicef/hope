@@ -4,66 +4,65 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0009_migration'),
+        ("payment", "0009_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='business_area',
+            model_name="paymentrecord",
+            name="business_area",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='delivery_type',
+            model_name="paymentrecord",
+            name="delivery_type",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='head_of_household',
+            model_name="paymentrecord",
+            name="head_of_household",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='household',
+            model_name="paymentrecord",
+            name="household",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='parent',
+            model_name="paymentrecord",
+            name="parent",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='service_provider',
+            model_name="paymentrecord",
+            name="service_provider",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='target_population',
+            model_name="paymentrecord",
+            name="target_population",
         ),
         migrations.RemoveField(
-            model_name='serviceprovider',
-            name='business_area',
+            model_name="serviceprovider",
+            name="business_area",
         ),
         migrations.AlterField(
-            model_name='financialserviceprovider',
-            name='internal_data',
+            model_name="financialserviceprovider",
+            name="internal_data",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='internal_data',
+            model_name="payment",
+            name="internal_data",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AlterField(
-            model_name='paymentplan',
-            name='internal_data',
+            model_name="paymentplan",
+            name="internal_data",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.DeleteModel(
-            name='CashPlan',
+            name="CashPlan",
         ),
         migrations.DeleteModel(
-            name='PaymentRecord',
+            name="PaymentRecord",
         ),
         migrations.DeleteModel(
-            name='ServiceProvider',
+            name="ServiceProvider",
         ),
     ]

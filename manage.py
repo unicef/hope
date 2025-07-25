@@ -34,7 +34,6 @@ def run_dev() -> None:
         sys.exit(f"❌  {exc.cmd} exited with {exc.returncode}")
 
     def shutdown(*_):
-        print("\n⇢  Stopping all services…")
         for p in processes:
             p.terminate()
         for p in processes:
@@ -50,7 +49,6 @@ def run_dev() -> None:
         while True:
             for p in processes:
                 if p.poll() is not None:
-                    print(f"⚠️  {p.args} exited with {p.returncode}")
                     shutdown()
             signal.pause()
     except KeyboardInterrupt:

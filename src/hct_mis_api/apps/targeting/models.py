@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
 from django.db.models import JSONField, Q
@@ -124,7 +124,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         ):
             return False
 
-    def get_core_fields(self) -> List:
+    def get_core_fields(self) -> list:
         if self.is_social_worker_program:
             return FieldFactory.from_only_scopes([Scope.TARGETING, Scope.XLSX_PEOPLE])
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
@@ -164,7 +164,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     def is_social_worker_program(self) -> bool:
         return False
 
-    def get_core_fields(self) -> List:
+    def get_core_fields(self) -> list:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     def get_lookup_prefix(self, associated_with: Any) -> str:

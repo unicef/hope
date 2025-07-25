@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from django.core.management import call_command
 
@@ -12,7 +12,9 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualNationalities,
 )
-from hct_mis_api.apps.sanction_list.strategies.eu import EUSanctionList
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.sanction_list.strategies.eu import EUSanctionList
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from django import template
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @register.simple_tag()
-def get_related(user: "User", field: Any) -> Dict[str, Any]:
+def get_related(user: "User", field: Any) -> dict[str, Any]:
     related = []
     info = {
         "to": field.model._meta.model_name,

@@ -1,7 +1,7 @@
 import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from django.db.models import QuerySet
 
@@ -26,7 +26,7 @@ class DjangoFastConnectionField(DjangoConnectionField):
     use_cached_count = True
 
     @classmethod
-    def cache_count(cls, connection: Connection, args: Dict, iterable: QuerySet) -> int:
+    def cache_count(cls, connection: Connection, args: dict, iterable: QuerySet) -> int:
         try:
             excluded_args = ["first", "last", "before", "after"]
             business_area = args.get("business_area")
@@ -40,7 +40,7 @@ class DjangoFastConnectionField(DjangoConnectionField):
 
     @classmethod
     def resolve_connection(
-        cls, connection: Connection, args: Dict, iterable: Union[QuerySet, List], max_limit: Optional[int] = None
+        cls, connection: Connection, args: dict, iterable: QuerySet | list, max_limit: int | None = None
     ) -> Connection:
         # Remove the offset parameter and convert it to an after cursor.
         offset = args.pop("offset", None)

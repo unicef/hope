@@ -1,10 +1,8 @@
-from typing import Dict
-
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 
 
 class ProcessVerification:
-    def __init__(self, input_data: Dict, payment_verification_plan: PaymentVerificationPlan) -> None:
+    def __init__(self, input_data: dict, payment_verification_plan: PaymentVerificationPlan) -> None:
         self.input_data = input_data
         self.payment_verification_plan = payment_verification_plan
 

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from django.core.exceptions import ValidationError
 
@@ -36,9 +36,9 @@ ACCOUNT_FIELD = "account_details"
 EXTRA_FIELD = "extra"
 
 
-def mergedicts(a: Dict, b: Dict, path: Optional[List]) -> Dict:
+def mergedicts(a: dict, b: dict, path: list | None) -> dict:
     if not path:
-        path = list()
+        path = []
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
@@ -103,7 +103,7 @@ class GenericRegistrationService(BaseRegistrationService):
     def get_boolean(value: Any) -> bool:
         if value in ["yes", "YES", "Y", "y", "1", 1, True]:
             return True
-        elif value in ["no", "NO", "N", "n", "0", 0, False]:
+        if value in ["no", "NO", "N", "n", "0", 0, False]:
             return False
         return value
 
@@ -124,7 +124,7 @@ class GenericRegistrationService(BaseRegistrationService):
         return DISABLED if GenericRegistrationService.get_boolean(value) else NOT_DISABLED
 
     @classmethod
-    def get(cls, data: Dict, key: str) -> Any:
+    def get(cls, data: dict, key: str) -> Any:
         """
         utility method to get the value given a list of one dict or a dict
         {"key": "value"}
@@ -136,9 +136,10 @@ class GenericRegistrationService(BaseRegistrationService):
             data = data[0]
         if key in data:
             return data[key][0] if isinstance(data[key], list) and len(data[key]) == 1 else data[key]
+        return None
 
     @classmethod
-    def _create_household_dict(cls, data_dict: Dict, mapping_dict: Dict) -> Dict:
+    def _create_household_dict(cls, data_dict: dict, mapping_dict: dict) -> dict:
         """create household dictionary ready to be build"""
         my_dict = {}
         for key, value in mapping_dict.items():
@@ -149,7 +150,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     if retrieved_value:
                         if field == "flex_fields":
                             if "flex_fields" not in my_dict:
-                                my_dict["flex_fields"] = dict()
+                                my_dict["flex_fields"] = {}
                             flex_dict = my_dict["flex_fields"]
                             flex_dict[key] = retrieved_value
                         else:
@@ -165,7 +166,7 @@ class GenericRegistrationService(BaseRegistrationService):
         return my_dict
 
     @staticmethod
-    def get_extra_ff(extra_flex_fields: list, data: Dict) -> Dict:
+    def get_extra_ff(extra_flex_fields: list, data: dict) -> dict:
         extra_ffs = {}
         for ff in extra_flex_fields:
             values = data.copy()
@@ -181,16 +182,16 @@ class GenericRegistrationService(BaseRegistrationService):
         return extra_ffs
 
     @classmethod
-    def create_individuals_dicts(cls, data_dict: List, mapping_dict: Dict, mapping: Dict) -> List:
+    def create_individuals_dicts(cls, data_dict: list, mapping_dict: dict, mapping: dict) -> list:
         """create individuals dicts, including documents"""
         individuals_dicts = []
         constances = mapping.get("individual_constances", {})
 
         for item in data_dict:
-            my_dict = dict(extra=dict())
-            my_dict["documents"] = dict()
-            my_dict[ACCOUNT_FIELD] = dict()
-            flex_fields = dict()
+            my_dict = {"extra": {}}
+            my_dict["documents"] = {}
+            my_dict[ACCOUNT_FIELD] = {}
+            flex_fields = {}
             for key, value in mapping_dict.items():
                 model, field = value.split(".")
                 retrieved_value = cls.get(item, key)
@@ -203,7 +204,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     if model == DOCUMENT_FIELD:
                         doc_num, doc_field = field.split("-")
                         if doc_num not in my_dict["documents"]:
-                            my_dict["documents"][doc_num] = dict()
+                            my_dict["documents"][doc_num] = {}
                         my_dict["documents"][doc_num].update({doc_field: retrieved_value})
                     if model == ACCOUNT_FIELD:
                         my_dict[ACCOUNT_FIELD][field] = retrieved_value
@@ -223,13 +224,13 @@ class GenericRegistrationService(BaseRegistrationService):
         self,
         record: Any,
         registration_data_import: RegistrationDataImport,
-        mapping: Dict,
+        mapping: dict,
     ) -> PendingHousehold:
         record_data_dict = record.get_data()
         household_payload = self._create_household_dict(record_data_dict, mapping)
-        flex_fields = household_payload.pop("flex_fields", dict())
+        flex_fields = household_payload.pop("flex_fields", {})
 
-        flex_fields.update(**self.get_extra_ff(mapping.get("flex_fields", list()), record_data_dict))
+        flex_fields.update(**self.get_extra_ff(mapping.get("flex_fields", []), record_data_dict))
         household_data = {
             **household_payload,
             # "flex_registrations_record": record,
@@ -251,17 +252,17 @@ class GenericRegistrationService(BaseRegistrationService):
         self,
         record: Any,
         household: PendingHousehold,
-        mapping: Dict,
-    ) -> Tuple:
-        base_individual_data_dict = dict(
-            household=household,
-            registration_data_import=household.registration_data_import,
-            business_area=household.business_area,
-            program=household.program,
-            first_registration_date=record.timestamp,
-            last_registration_date=record.timestamp,
-            detail_id=record.source_id,
-        )
+        mapping: dict,
+    ) -> tuple:
+        base_individual_data_dict = {
+            "household": household,
+            "registration_data_import": household.registration_data_import,
+            "business_area": household.business_area,
+            "program": household.program,
+            "first_registration_date": record.timestamp,
+            "last_registration_date": record.timestamp,
+            "detail_id": record.source_id,
+        }
 
         record_data_dict = record.get_data()
         individuals_key = mapping["defaults"].get("individuals_key", "individuals")
@@ -277,7 +278,7 @@ class GenericRegistrationService(BaseRegistrationService):
         for individual_data in individuals_data:
             documents_data = individual_data.pop("documents")
             account_data = individual_data.pop("account_details")
-            extra_data = individual_data.pop("extra", dict())
+            extra_data = individual_data.pop("extra", {})
 
             individual_dict = dict(
                 **base_individual_data_dict,

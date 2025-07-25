@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0006_migration'),
+        ("accountability", "0006_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='feedback',
-            name='is_original',
+            model_name="feedback",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='message',
-            name='is_original',
+            model_name="message",
+            name="is_original",
         ),
     ]

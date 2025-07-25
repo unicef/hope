@@ -236,9 +236,10 @@ def test_dashboard_data_view_global_slug_cache_miss(
     client.force_authenticate(user=user)
 
     cache.delete(DashboardGlobalDataCache.get_cache_key("global"))
-    with patch.object(DashboardGlobalDataCache, "get_data", return_value=None) as mock_get_data, patch(
-        "hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay"
-    ) as mock_task_delay:
+    with (
+        patch.object(DashboardGlobalDataCache, "get_data", return_value=None) as mock_get_data,
+        patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay") as mock_task_delay,
+    ):
         response = client.get(global_url)
 
         mock_get_data.assert_called_once_with("global")
@@ -266,9 +267,9 @@ def test_dashboard_report_view_global_slug(
     context = view.get_context_data(business_area_slug="global")
 
     assert view.template_name == "dashboard/global_dashboard.html"
-    assert (
-        context.get("has_permission") is True
-    ), f"Permission denied for global report. User superuser: {request.user.is_superuser}, User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
+    assert context.get("has_permission") is True, (
+        f"Permission denied for global report. User superuser: {request.user.is_superuser}, User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
+    )
     assert context["business_area_slug"] == "global"
     assert context["household_data_url"] == reverse("api:household-data", args=["global"])
 

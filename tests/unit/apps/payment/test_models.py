@@ -1065,7 +1065,7 @@ class TestAccountModel(TestCase):
         Account.update_unique_field.assert_called_once()
 
     def test_unique_active_wallet_constraint(self) -> None:
-        AccountFactory(**{"individual": self.ind, "unique_key": "wallet-1", "active": True, "is_unique": True})
+        AccountFactory(individual=self.ind, unique_key="wallet-1", active=True, is_unique=True)
 
         test_cases = [
             # (desc, active, is_unique, unique_key, should_raise)
@@ -1110,14 +1110,14 @@ class TestAccountModelUniqueField(TransactionTestCase):
         account_type_bank, _ = AccountType.objects.update_or_create(
             key="bank",
             label="Bank",
-            defaults=dict(
-                unique_fields=[
+            defaults={
+                "unique_fields": [
                     "number",
                     "seeing_disability",
                     "name_of_cardholder__atm_card",
                 ],
-                payment_gateway_id="123",
-            ),
+                "payment_gateway_id": "123",
+            },
         )
 
         dmd_1 = AccountFactory(

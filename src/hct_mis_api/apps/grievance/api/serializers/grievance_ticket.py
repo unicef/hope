@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from rest_framework import serializers
 
@@ -140,13 +140,13 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "related_tickets",
         )
 
-    def get_programs(self, obj: GrievanceTicket) -> Dict:
+    def get_programs(self, obj: GrievanceTicket) -> dict:
         return ProgramSmallSerializer(obj.programs, many=True).data
 
-    def get_related_tickets(self, obj: GrievanceTicket) -> Dict:
+    def get_related_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
 
-    def get_total_days(self, obj: GrievanceTicket) -> Optional[int]:
+    def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
 
 
@@ -181,7 +181,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "ticket_details",
         )
 
-    def get_payment_record(self, obj: GrievanceTicket) -> Optional[Dict]:
+    def get_payment_record(self, obj: GrievanceTicket) -> dict | None:
         payment_verification = getattr(obj.ticket_details, "payment_verification", None)
         if payment_verification:
             payment_record = getattr(payment_verification, "payment", None)
@@ -189,16 +189,16 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             payment_record = getattr(obj.ticket_details, "payment", None)
         return PaymentSmallSerializer(payment_record).data if payment_record else None
 
-    def get_linked_tickets(self, obj: GrievanceTicket) -> Dict:
+    def get_linked_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("created_at"), many=True).data
 
-    def get_existing_tickets(self, obj: GrievanceTicket) -> Dict:
+    def get_existing_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._existing_tickets.order_by("created_at"), many=True).data
 
-    def get_documentation(self, obj: GrievanceTicket) -> Dict:
+    def get_documentation(self, obj: GrievanceTicket) -> dict:
         return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at"), many=True).data
 
-    def get_ticket_details(self, obj: GrievanceTicket) -> Optional[Dict]:
+    def get_ticket_details(self, obj: GrievanceTicket) -> dict | None:
         ticket_details = obj.ticket_details
         serializer = TICKET_DETAILS_SERIALIZER_MAPPING.get(type(ticket_details))
         return serializer(ticket_details, context=self.context).data if serializer else None
@@ -214,28 +214,28 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_issue_type_choices = serializers.SerializerMethodField()
     document_type_choices = serializers.SerializerMethodField()
 
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
-    def get_grievance_ticket_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_grievance_ticket_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
 
-    def get_grievance_ticket_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_grievance_ticket_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
-    def get_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
 
-    def get_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
 
-    def get_grievance_ticket_priority_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_grievance_ticket_priority_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PRIORITY_CHOICES)
 
-    def get_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
 
-    def get_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict]:
+    def get_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> list[dict]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
             {"category": key, "label": categories[key], "sub_categories": value}

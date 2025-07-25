@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
@@ -31,7 +31,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 
 
-def _prepare_roles_with_approve_status(roles_data: List[Dict[Any, Any]]) -> List[Dict[str, Any]]:
+def _prepare_roles_with_approve_status(roles_data: list[dict[Any, Any]]) -> list[dict[str, Any]]:
     roles_with_approve_status = []
     for role in roles_data:
         individual = role["individual"]
@@ -49,7 +49,7 @@ def _prepare_roles_with_approve_status(roles_data: List[Dict[Any, Any]]) -> List
 
 
 class HouseholdDataUpdateService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
         household = household_data_update_issue_type_extras.get("household")
@@ -64,7 +64,7 @@ class HouseholdDataUpdateService(DataChangeService):
         }
         for field in household_data_with_approve_status.keys():
             current_value = getattr(household, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             if isinstance(current_value, Country):
                 current_value = current_value.alpha3
@@ -116,7 +116,7 @@ class HouseholdDataUpdateService(DataChangeService):
         }
         for field in household_data_with_approve_status.keys():
             current_value = getattr(household, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             if isinstance(current_value, Country):
                 current_value = current_value.alpha3

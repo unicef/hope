@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from django.db.models import F, Func, OuterRef, Q, QuerySet, Subquery, Sum
 from django.db.models.functions import Coalesce
@@ -123,7 +123,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     geopoint = graphene.String()
 
     @staticmethod
-    def resolve_delivered_quantities(parent: Household, info: Any) -> List[Dict[str, Any]]:
+    def resolve_delivered_quantities(parent: Household, info: Any) -> list[dict[str, Any]]:
         return delivered_quantity_service(parent)
 
     @staticmethod
@@ -285,7 +285,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.STANDARD.value)
@@ -295,7 +295,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.STANDARD.value)
@@ -306,7 +306,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_people_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.SINGLE.value)
@@ -317,7 +317,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_child_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         households_child_params = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -337,7 +337,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -365,7 +365,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_people_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -393,7 +393,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_individuals_with_disability_reached_by_age(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params_with_disability = [
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_disabled_count",
@@ -455,7 +455,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_people_with_disability_reached_by_age(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params_with_disability = [
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_disabled_count",
