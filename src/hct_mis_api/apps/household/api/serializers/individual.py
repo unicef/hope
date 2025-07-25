@@ -94,11 +94,7 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndividualIdentity
-        fields = (
-            "id",
-            "country",
-            "number",
-        )
+        fields = ("id", "country", "number", "partner")
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -379,12 +375,15 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             return role.role
         return ROLE_NO_ROLE
 
+    @extend_schema_field(DocumentSerializer(many=True))
     def get_documents(self, obj: Individual) -> dict:
         return DocumentSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data
 
+    @extend_schema_field(IndividualIdentitySerializer(many=True))
     def get_identities(self, obj: Individual) -> dict:
         return IndividualIdentitySerializer(obj.identities(manager="all_merge_status_objects").all(), many=True).data
 
+    @extend_schema_field(AccountSerializer(many=True))
     def get_accounts(self, obj: Individual) -> dict:
         if self.context["request"].user.has_perm(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value, obj.program
