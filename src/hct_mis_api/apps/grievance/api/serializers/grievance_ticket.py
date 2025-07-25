@@ -24,7 +24,6 @@ from hct_mis_api.apps.household.api.serializers.household import (
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
-    IndividualIdentitySerializer,
 )
 from hct_mis_api.apps.household.models import (
     Document,
@@ -255,6 +254,12 @@ class EditIndividualDocumentSerializer(serializers.Serializer):
     photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
 
 
+class IndividualIdentityGTSerializer(serializers.Serializer):
+    country = serializers.CharField()
+    partner = serializers.CharField()
+    number = serializers.CharField()
+
+
 class EditIndividualIdentitySerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=IndividualIdentity.objects.all())
     country = serializers.CharField()
@@ -336,7 +341,7 @@ class AddIndividualDataSerializer(serializers.Serializer):
     role = serializers.CharField()
     business_area = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
-    identities = IndividualIdentitySerializer(many=True, required=False)
+    identities = IndividualIdentityGTSerializer(many=True, required=False)
     accounts = CreateAccountSerializer(many=True, required=False)
     preferred_language = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
@@ -379,7 +384,7 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
         child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()), required=False
     )
     documents_to_edit = EditIndividualDocumentSerializer(many=True, required=False)
-    identities = IndividualIdentitySerializer(many=True, required=False)
+    identities = IndividualIdentityGTSerializer(many=True, required=False)
     identities_to_remove = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=IndividualIdentity.objects.all()),
         required=False,

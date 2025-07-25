@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF32` - Debraland
- * * `HR55` - Kevinside
- * * `UA24` - Martinmouth
- * * `UA59` - Sonyaport
- * * `HR84` - South Alanton
- * * `AF46` - South Dianehaven
- * * `AF52` - South Jason
- * * `UA62` - South Vincent
- * * `HR37` - West Jeffreyville
+ * * `HR70` - Castroberg
+ * * `UA65` - East Brianview
+ * * `UA91` - East Tanya
+ * * `AF10` - Freemanton
+ * * `UA56` - Hallchester
+ * * `AF75` - New Cindyland
+ * * `AF13` - North Arthurmouth
+ * * `HR15` - Sarahport
+ * * `HR60` - West Jenniferhaven
  */
 export enum Admin1Enum {
-    AF32 = 'AF32',
-    HR55 = 'HR55',
-    UA24 = 'UA24',
-    UA59 = 'UA59',
-    HR84 = 'HR84',
-    AF46 = 'AF46',
-    AF52 = 'AF52',
-    UA62 = 'UA62',
-    HR37 = 'HR37',
+    HR70 = 'HR70',
+    UA65 = 'UA65',
+    UA91 = 'UA91',
+    AF10 = 'AF10',
+    UA56 = 'UA56',
+    AF75 = 'AF75',
+    AF13 = 'AF13',
+    HR15 = 'HR15',
+    HR60 = 'HR60',
 }
