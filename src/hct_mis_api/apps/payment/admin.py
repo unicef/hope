@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib import admin, messages
@@ -68,7 +68,7 @@ class ArrayFieldWidget(forms.Textarea):
             return "\n".join(str(v) for v in value)
         return value
 
-    def value_from_datadict(self, data: Any, files: Any, name: Any) -> List[str]:
+    def value_from_datadict(self, data: Any, files: Any, name: Any) -> list[str]:
         value = data.get(name, "")
         if not value:
             return []
@@ -91,7 +91,7 @@ class CommaSeparatedArrayField(forms.Field):
             return "\n".join(str(self.base_field.prepare_value(v)) for v in value)
         return value
 
-    def to_python(self, value: Any) -> List[str]:
+    def to_python(self, value: Any) -> list[str]:
         if not value:
             return []
         if isinstance(value, list):
@@ -143,7 +143,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return HttpResponseRedirect(url)
 
     @button(permission="core.execute_sync_rapid_pro")
-    def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> HttpResponseRedirect | None:
         if request.method == "POST":
             from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
                 CheckRapidProVerificationTask,
@@ -306,7 +306,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     date_hierarchy = "updated_at"
     inlines = [FundsCommitmentItemInline]
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
 
     @button(
@@ -325,13 +325,12 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             PaymentGatewayService().sync_payment_plan(payment_plan)
 
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.sync_with_payment_gateway,
-                message="Do you confirm to Sync with Payment Gateway?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.sync_with_payment_gateway,
+            message="Do you confirm to Sync with Payment Gateway?",
+        )
 
     @button(permission="payment.view_paymentplan")
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
@@ -419,7 +418,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             )
         )
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
     @button(
@@ -436,13 +435,12 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             PaymentGatewayService().sync_record(payment)
 
             return redirect(reverse("admin:payment_payment_change", args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.sync_with_payment_gateway,
-                message="Do you confirm to Sync with Payment Gateway?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.sync_with_payment_gateway,
+            message="Do you confirm to Sync with Payment Gateway?",
+        )
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
@@ -480,10 +478,10 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_change_fsp()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -495,7 +493,7 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         model = FspXlsxTemplatePerDeliveryMechanism
         fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
 
-    def clean(self) -> Optional[Dict[str, Any]]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         delivery_mechanism = cleaned_data.get("delivery_mechanism")
         financial_service_provider = cleaned_data.get("financial_service_provider")
@@ -542,10 +540,10 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_change_fsp()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -565,7 +563,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             financial_service_provider=obj,
         ).distinct()
 
-    def clean(self) -> Optional[Dict[str, Any]]:
+    def clean(self) -> dict[str, Any] | None:
         if self.instance:
             protected_fields = [
                 "name",
@@ -648,10 +646,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_change_fsp()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:

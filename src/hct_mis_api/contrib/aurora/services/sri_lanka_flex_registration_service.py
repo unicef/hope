@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
@@ -47,8 +47,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ]
 
     def _prepare_household_data(
-        self, localization_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
-    ) -> Dict:
+        self, localization_dict: dict, record: Any, registration_data_import: RegistrationDataImport
+    ) -> dict:
         household_data = {
             "registration_data_import": registration_data_import,
             "program": registration_data_import.program,
@@ -77,10 +77,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
     def _prepare_individual_data(
         self,
-        head_of_household_info: Dict,
-        registration_data_import: Optional[RegistrationDataImport] = None,
+        head_of_household_info: dict,
+        registration_data_import: RegistrationDataImport | None = None,
         **kwargs: Any,
-    ) -> Dict:
+    ) -> dict:
         flex_fields_dict = build_flex_arg_dict_from_list_if_exists(
             head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
         )
@@ -106,8 +106,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return individual_data
 
     def _prepare_national_id(
-        self, individual_dict: Dict, imported_individual: PendingIndividual
-    ) -> Optional[PendingDocument]:
+        self, individual_dict: dict, imported_individual: PendingIndividual
+    ) -> PendingDocument | None:
         national_id = individual_dict.get("national_id_no_i_c")
         if not national_id:
             return None
@@ -120,8 +120,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
 
     def _prepare_birth_certificate(
-        self, individual_dict: Dict, imported_individual: PendingIndividual
-    ) -> Optional[PendingDocument]:
+        self, individual_dict: dict, imported_individual: PendingIndividual
+    ) -> PendingDocument | None:
         national_id = individual_dict.get("chidlren_birth_certificate")
         if not national_id:
             return None
@@ -135,7 +135,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def _prepare_bank_statement_document(self, individual_dict: Dict, imported_individual: PendingIndividual) -> None:
+    def _prepare_bank_statement_document(self, individual_dict: dict, imported_individual: PendingIndividual) -> None:
         bank_account = individual_dict.get("confirm_bank_account_number")
         if not bank_account:
             return None
@@ -168,14 +168,14 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if id_enumerator:
             household.flex_fields["id_enumerator"] = id_enumerator
 
-        base_individual_data_dict = dict(
-            household=household,
-            registration_data_import=registration_data_import,
-            first_registration_date=record.timestamp,
-            last_registration_date=record.timestamp,
-            preferred_language=preferred_language_of_contact,
-            business_area=registration_data_import.business_area,
-        )
+        base_individual_data_dict = {
+            "household": household,
+            "registration_data_import": registration_data_import,
+            "first_registration_date": record.timestamp,
+            "last_registration_date": record.timestamp,
+            "preferred_language": preferred_language_of_contact,
+            "business_area": registration_data_import.business_area,
+        }
 
         head_of_household = PendingIndividual.objects.create(
             **base_individual_data_dict,

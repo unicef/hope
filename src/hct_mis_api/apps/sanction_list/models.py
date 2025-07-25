@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, TYPE_CHECKING
 
 from django.db import models
 
@@ -7,14 +7,16 @@ from strategy_field.fields import StrategyField
 from hct_mis_api.apps.utils.models import TimeStampedModel, TimeStampedUUIDModel
 
 from .strategies import registry
-from .strategies._base import BaseSanctionList
+
+if TYPE_CHECKING:
+    from .strategies._base import BaseSanctionList
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
-    def delete(self) -> Tuple[int, Dict[str, int]]:
+    def delete(self) -> tuple[int, dict[str, int]]:
         return (super().update(active=False), {})
 
-    def hard_delete(self) -> Tuple[int, Dict[str, int]]:
+    def hard_delete(self) -> tuple[int, dict[str, int]]:
         return super().delete()
 
     def active(self) -> models.QuerySet:
@@ -34,7 +36,7 @@ class ActiveIndividualsManager(models.Manager):
             return SanctionListIndividualQuerySet(self.model).active()
         return SanctionListIndividualQuerySet(self.model)
 
-    def hard_delete(self) -> Tuple[int, Dict[str, int]]:
+    def hard_delete(self) -> tuple[int, dict[str, int]]:
         return self.get_queryset().hard_delete()
 
 

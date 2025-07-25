@@ -1,14 +1,14 @@
 {% load steficon %}
   <style>
-    {#html * { padding:0; margin:0; }#}
-    {#body * { padding:10px 20px; }#}
-    {#body * * { padding:0; }#}
-    {#body { font:small sans-serif; background-color:#fff; color:#000; }#}
-    {#body>div { border-bottom:1px solid #ddd; }#}
-    {#h1 { font-weight:normal; }#}
-    {#h2 { margin-bottom:.8em; }#}
-    {#h3 { margin:1em 0 .5em 0; }#}
-    {#h4 { margin:0 0 .5em 0; font-weight: normal; }#}
+    {# html * { padding:0; margin:0; } #}
+    {# body * { padding:10px 20px; } #}
+    {# body * * { padding:0; } #}
+    {# body { font:small sans-serif; background-color:#fff; color:#000; } #}
+    {# body>div { border-bottom:1px solid #ddd; } #}
+    {# h1 { font-weight:normal; } #}
+    {# h2 { margin-bottom:.8em; } #}
+    {# h3 { margin:1em 0 .5em 0; } #}
+    {# h4 { margin:0 0 .5em 0; font-weight: normal; } #}
     code, pre { font-size: 100%; white-space: pre-wrap; }
     table { border:1px solid #ccc; border-collapse: collapse; width:100%; background:white; }
     tbody td, tbody th { vertical-align:top; padding:2px 3px; }
@@ -56,7 +56,7 @@
     pre.exception_value { font-family: sans-serif; color: #575757; font-size: 1.5em; margin: 10px 0 10px 0; }
   </style>
 <div id="summary">
-{#<h1>{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}</h1>#}
+{# <h1>{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}</h1> #}
 <pre class="exception_value">
 {% if exception_value %}{{ exception_value|force_escape }}{% else %}No exception message supplied{% endif %}
 </pre>
@@ -85,9 +85,9 @@
     <p>The string that could not be encoded/decoded was: <strong>{{ unicode_hint }}</strong></p>
 </div>
 {% endif %}
-{#<pre style="margin: 10px;padding: 10px;" class="code">#}
-{#    {% for line in rule.definition|split %}<span class="lineno">{{ forloop.counter }}</span><span  class="line">{{ line|safe }}</span>{% endfor %}#}
-{#</pre>#}
+{# <pre style="margin: 10px;padding: 10px;" class="code"> #}
+{# {% for line in rule.definition|split %}<span class="lineno">{{ forloop.counter }}</span><span  class="line">{{ line|safe }}</span>{% endfor %} #}
+{# </pre> #}
 <div class="context" style="padding: 10px;">
     {% for line in rule.definition|split %}
     <ol start="{{ forloop.counter }}" class="context-line"><li>{{ line|safe }}</li></ol>
@@ -126,7 +126,7 @@
               <ol start="{{ frame.lineno }}" class="context-line">
                 <li onclick="toggle('pre{{ frame.id }}', 'post{{ frame.id }}')"><pre>{{ frame.context_line }}</pre>{% if not is_email %} <span>…</span>{% endif %}</li>
               </ol>
-              {% if frame.post_context and not is_email  %}
+              {% if frame.post_context and not is_email %}
                 <ol start='{{ frame.lineno|add:"1" }}' class="post-context" id="post{{ frame.id }}">
                   {% for line in frame.post_context %}
                   <li onclick="toggle('pre{{ frame.id }}', 'post{{ frame.id }}')"><pre>{{ line }}</pre></li>
@@ -220,4 +220,3 @@ Exception Value: {{ exception_value|force_escape }}
 </div>
 {% endif %}
 {% endif %}
-

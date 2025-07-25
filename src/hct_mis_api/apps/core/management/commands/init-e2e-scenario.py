@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 from datetime import timedelta
-from typing import Any, Tuple
+from typing import Any
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
@@ -35,7 +35,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 faker = Faker()
 
 
-def create_household_with_individual(address: str) -> Tuple[Household, Individual]:
+def create_household_with_individual(address: str) -> tuple[Household, Individual]:
     now = timezone.now()
     delta_20_years = timedelta(days=365 * 20)
     afghanistan = BusinessArea.objects.get(name="Afghanistan")
@@ -167,7 +167,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
-        print("Initializing scenario with options:", {k: v for k, v in options.items() if k in ["scenario", "seed"]})
         {"targeting": init_targeting, "payment_plan": init_payment_plan, "init_clear": init_clear}[options["scenario"]](
             options["seed"]
         )

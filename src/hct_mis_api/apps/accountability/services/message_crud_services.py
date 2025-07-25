@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
@@ -20,9 +19,7 @@ logger = logging.getLogger(__name__)
 
 class MessageCrudServices:
     @classmethod
-    def create(
-        cls, user: Union[AbstractBaseUser, AnonymousUser], business_area: BusinessArea, input_data: dict
-    ) -> Message:
+    def create(cls, user: AbstractBaseUser | AnonymousUser, business_area: BusinessArea, input_data: dict) -> Message:
         verifier = MessageArgumentVerifier(input_data)
         verifier.verify()
 
@@ -67,14 +64,14 @@ class MessageCrudServices:
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif payment_plan := input_data.get("payment_plan"):
+        if payment_plan := input_data.get("payment_plan"):
             if payment_plan.status == PaymentPlan.Status.TP_OPEN:
                 return Household.objects.none()
             return Household.objects.filter(payment__parent=payment_plan).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif registration_data_import := input_data.get("registration_data_import"):
+        if registration_data_import := input_data.get("registration_data_import"):
             return Household.objects.filter(
                 registration_data_import__status=RegistrationDataImport.MERGED,
                 registration_data_import=registration_data_import,

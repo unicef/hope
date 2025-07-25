@@ -1,6 +1,6 @@
 import logging
 from datetime import date, timedelta
-from typing import Any, Dict, List
+from typing import Any
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
@@ -147,7 +147,7 @@ class HouseholdFilter(UpdatedAtFilter):
             return qs.exclude(
                 head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
             )
-        elif value is False:
+        if value is False:
             return qs.filter(
                 head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
             )
@@ -172,14 +172,14 @@ class HouseholdFilter(UpdatedAtFilter):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
-    def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
+    def _get_elasticsearch_query_for_households(self, search: str) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         program_slug = self.request.parser_context["kwargs"].get("program_slug")
         filters = [{"term": {"business_area": business_area}}]
         if program_slug:
             program = Program.objects.get(slug=program_slug, business_area__slug=business_area)
             filters.append({"term": {"program_id": str(program.pk)}})
-        query: Dict[str, Any] = {
+        query: dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
@@ -347,16 +347,14 @@ class IndividualFilter(UpdatedAtFilter):
             )
             min_date = min_date + timedelta(days=1)
             query &= Q(birth_date__gte=min_date)
-        queryset = queryset.filter(query)
-        return queryset
+        return queryset.filter(query)
 
     def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value == MergeStatusModel.PENDING:
             return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
-        else:
-            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+        return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
-    def flags_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
+    def flags_filter(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         q_obj = Q()
         if NEEDS_ADJUDICATION in value:
             q_obj |= Q(deduplication_golden_record_status=NEEDS_ADJUDICATION)
@@ -384,7 +382,7 @@ class IndividualFilter(UpdatedAtFilter):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
-    def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
+    def _get_elasticsearch_query_for_individuals(self, search: str) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         filters = [{"term": {"business_area": business_area}}]
         if program_slug := self.request.parser_context["kwargs"].get("program_slug"):
@@ -448,7 +446,7 @@ class IndividualFilter(UpdatedAtFilter):
         document_type = self.data.get("document_type")
         return qs.filter(documents__type__key=document_type, documents__document_number__icontains=document_number)
 
-    def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
+    def status_filter(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         q_obj = Q()
         if STATUS_DUPLICATE in value:
             q_obj |= Q(duplicate=True)
@@ -465,10 +463,9 @@ class IndividualFilter(UpdatedAtFilter):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
         if value is True:
             return qs.filter(program__status=Program.ACTIVE)
-        elif value is False:
+        if value is False:
             return qs.filter(program__status=Program.FINISHED)
-        else:
-            return qs
+        return qs
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
         extra_households = Household.extra_rdis.through.objects.filter(registrationdataimport=value).values_list(

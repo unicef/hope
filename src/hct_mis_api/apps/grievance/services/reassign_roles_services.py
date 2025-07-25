@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Union
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
@@ -39,7 +39,7 @@ Reassing data structure:
 
 
 def reassign_roles_on_marking_as_duplicate_individual_service(
-    role_reassign_data: Dict,
+    role_reassign_data: dict,
     user: "AbstractUser",
     duplicated_individuals: QuerySet[Individual],
 ) -> None:
@@ -179,11 +179,11 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
 
 def reassign_roles_on_disable_individual_service(
     individual_to_remove: Individual,
-    role_reassign_data: Dict,
+    role_reassign_data: dict,
     user: "AbstractUser",
     program_or_qs: Union["Program", QuerySet["Program"]],
     individual_key: str = "individual",
-) -> Optional[Household]:
+) -> Household | None:
     roles_to_bulk_update = []
     roles_to_delete = []
     for role_data in role_reassign_data.values():
@@ -215,7 +215,7 @@ def reassign_roles_on_disable_individual_service(
         ).first():
             if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
                 raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-            elif (
+            if (
                 role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
             ):  # remove alternate role if the new individual is being assigned as primary
                 roles_to_delete.append(new_individual_current_role)
@@ -254,7 +254,7 @@ def reassign_roles_on_disable_individual_service(
 
 def reassign_roles_on_update_service(
     individual: Individual,
-    role_reassign_data: Dict,
+    role_reassign_data: dict,
     user: "AbstractUser",
     program_or_qs: Union["Program", QuerySet["Program"]],
 ) -> None:
@@ -285,7 +285,7 @@ def reassign_roles_on_update_service(
         ).first():
             if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
                 raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-            elif (
+            if (
                 role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
             ):  # remove alternate role if the new individual is being assigned as primary
                 roles_to_delete.append(new_individual_current_role)

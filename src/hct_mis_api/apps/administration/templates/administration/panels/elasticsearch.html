@@ -1,4 +1,4 @@
-{% extends "smart_admin/console.html" %}{% load static i18n %}
+{% extends "smart_admin/console.html" %}{% load i18n static %}
 {% block left %}
     <div class="console module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
         <div class="changelist-form-container">
@@ -28,6 +28,7 @@
         </div>
     </div>
 {% endblock left %}
+
 {% block buttons %}
     {{ block.super }}
-{% endblock %}
+{% endblock buttons %}

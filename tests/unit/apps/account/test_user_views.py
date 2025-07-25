@@ -999,16 +999,17 @@ class TestUserChoices:
         assert response.status_code == status.HTTP_200_OK
         assert response.data == {
             "role_choices": [
-                dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.order_by("name")
+                {"name": role.name, "value": role.id, "subsystem": role.subsystem}
+                for role in Role.objects.order_by("name")
             ],
             "status_choices": to_choice_object(USER_STATUS_CHOICES),
             "partner_choices": [
-                dict(name=partner.name, value=partner.id)
+                {"name": partner.name, "value": partner.id}
                 for partner in [self.partner, self.unicef_hq, self.unicef_partner_in_afghanistan]
             ],
             # TODO: below assert can be removed after temporary solution is removed for partners
             "partner_choices_temp": [
-                dict(name=partner.name, value=partner.id)
+                {"name": partner.name, "value": partner.id}
                 for partner in [self.unicef_hq, self.unicef_partner_in_afghanistan]
             ],
         }

@@ -1,6 +1,5 @@
 import csv
 import logging
-from typing import Dict, Optional
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -54,7 +53,7 @@ class RoleAssignmentAdminForm(forms.ModelForm):
 class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
     model = account_models.RoleAssignment
 
-    def add_fields(self, form: "forms.Form", index: Optional[int]) -> None:
+    def add_fields(self, form: "forms.Form", index: int | None) -> None:
         super().add_fields(form, index)
         form.fields["role"].required = True
 
@@ -111,7 +110,7 @@ class KoboLoginForm(forms.Form):
 class KoboImportUsersForm(forms.Form):
     emails = forms.CharField(required=False, widget=forms.Textarea)
 
-    def clean_emails(self) -> Dict:
+    def clean_emails(self) -> dict:
         errors = []
         for e in self.cleaned_data["emails"].split():
             try:

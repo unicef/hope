@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
+from typing import Any, Callable, Optional, Sequence
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -32,7 +32,7 @@ class Rule(LimitBusinessAreaModelMixin):
         (TYPE_TARGETING, "Targeting"),
     )
 
-    LANGUAGES: Sequence[Tuple] = [(a.label.lower(), a.label) for a in interpreters]
+    LANGUAGES: Sequence[tuple] = [(a.label.lower(), a.label) for a in interpreters]
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,
@@ -80,10 +80,10 @@ class Rule(LimitBusinessAreaModelMixin):
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
-    def get_flag(self, name: str, default: Optional[str] = None) -> str:
+    def get_flag(self, name: str, default: str | None = None) -> str:
         return self.flags.get(name, default)
 
-    def as_dict(self) -> Dict:
+    def as_dict(self) -> dict:
         return model_to_dict(self, MONITORED_FIELDS)
 
     def clean(self) -> None:
@@ -93,12 +93,12 @@ class Rule(LimitBusinessAreaModelMixin):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> Tuple[int, Dict[str, int]]:
+    def delete(self, using: Any | None = None, keep_parents: bool | None = False) -> tuple[int, dict[str, int]]:
         self.enabled = False
         self.save()
         return 1, {self._meta.label: 1}
 
-    def get_changes(self) -> Tuple[Dict, List]:
+    def get_changes(self) -> tuple[dict, list]:
         prev = self.latest_commit
         if prev:
             data1 = prev.after
@@ -114,8 +114,8 @@ class Rule(LimitBusinessAreaModelMixin):
         self,
         force_insert: bool = False,
         force_update: bool = False,
-        using: Optional[Any] = None,
-        update_fields: Optional[Any] = None,
+        using: Any | None = None,
+        update_fields: Any | None = None,
     ) -> None:
         with atomic():
             super().save(force_insert, force_update, using, update_fields)
@@ -168,7 +168,7 @@ class Rule(LimitBusinessAreaModelMixin):
             return None
 
     @property
-    def last_changes(self) -> Optional[Dict]:
+    def last_changes(self) -> dict | None:
         try:
             return {
                 "fields": self.latest_commit.affected_fields,
@@ -180,10 +180,10 @@ class Rule(LimitBusinessAreaModelMixin):
 
     @cached_property
     def interpreter(self) -> Any:
-        func: Type[Interpreter] = mapping[self.language]
+        func: type[Interpreter] = mapping[self.language]
         return func(self.definition)
 
-    def execute(self, context: Optional[Dict] = None, only_release: bool = True, only_enabled: bool = True) -> Result:
+    def execute(self, context: dict | None = None, only_release: bool = True, only_enabled: bool = True) -> Result:
         if self.pk:
             qs = self.history
             if only_release:
@@ -197,8 +197,7 @@ class Rule(LimitBusinessAreaModelMixin):
         with atomic():
             if latest:
                 return latest.interpreter.execute(context)
-            else:
-                raise ValueError("No Released Rules found")
+            raise ValueError("No Released Rules found")
 
 
 class RuleCommit(models.Model):
@@ -238,15 +237,15 @@ class RuleCommit(models.Model):
         return value
 
     @cached_property
-    def prev(self) -> Optional[QuerySet]:
+    def prev(self) -> QuerySet | None:
         return self.rule.history.order_by("-version").filter(id__lt=self.id).first()
 
     @cached_property
-    def next(self) -> Optional[QuerySet]:
+    def next(self) -> QuerySet | None:
         return self.rule.history.order_by("version").filter(id__gt=self.id).first()
 
     @atomic
-    def revert(self, fields: Tuple[str, str, str, str, str] = MONITORED_FIELDS) -> None:
+    def revert(self, fields: tuple[str, str, str, str, str] = MONITORED_FIELDS) -> None:
         for field in fields:
             setattr(self.rule, field, self.after[field])
         self.rule.save()
@@ -256,7 +255,7 @@ class RuleCommit(models.Model):
         func: Callable = mapping[self.language]
         return func(self.definition)
 
-    def execute(self, context: Dict) -> Any:
+    def execute(self, context: dict) -> Any:
         return self.interpreter.execute(context)
 
     def release(self) -> Optional["RuleCommit"]:

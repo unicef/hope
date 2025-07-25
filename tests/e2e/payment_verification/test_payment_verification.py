@@ -52,7 +52,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -61,7 +61,6 @@ def get_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 def create_program(
@@ -101,7 +100,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
     program = Program.objects.filter(name="Active Program").first()
-    households = list()
+    households = []
     for _ in range(number_verification_plans):
         household, _ = create_household(
             {
@@ -118,7 +117,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         status=PaymentPlan.Status.FINISHED,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
-    payments = list()
+    payments = []
     for hh in households:
         payments.append(
             PaymentFactory(
@@ -241,13 +240,11 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         payment_plan=payment_plan,
         verification_channel=channel,
     )
-    pv = PaymentVerificationFactory(
+    return PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-
-    return pv
 
 
 @pytest.fixture

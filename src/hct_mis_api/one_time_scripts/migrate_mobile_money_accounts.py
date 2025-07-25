@@ -10,7 +10,7 @@ from hct_mis_api.apps.payment.models import (
 
 def migrate_mobile_money_accounts() -> None:
     mobile_account_type, _ = AccountType.objects.get_or_create(
-        key="mobile", defaults=dict(label="Mobile", unique_fields=[])
+        key="mobile", defaults={"label": "Mobile", "unique_fields": []}
     )
     mobile_money_dm = DeliveryMechanism.objects.get(code="mobile_money")
     # Chunk size
@@ -65,9 +65,9 @@ def migrate_mobile_money_accounts() -> None:
                     account, created = Account.all_objects.get_or_create(
                         individual_id=payment.collector_id,
                         account_type=mobile_account_type,
-                        defaults=dict(
-                            number=snapshot_phone_number,
-                        ),
+                        defaults={
+                            "number": snapshot_phone_number,
+                        },
                     )
 
                     if created:
@@ -75,9 +75,9 @@ def migrate_mobile_money_accounts() -> None:
                             account.active = False
                         account.rdi_merge_status = "MERGED"
                         account.data.update(
-                            dict(
-                                number=snapshot_phone_number or "",
-                            )
+                            {
+                                "number": snapshot_phone_number or "",
+                            }
                         )
                         account.save()
                         account_ids.append(account.id)

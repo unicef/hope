@@ -100,7 +100,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         results = response.data["results"]
         self.assertEqual(len(results), 2)
-        self.assertEqual(set([r["name"] for r in results]), {rdi1.name, rdi2.name})
+        self.assertEqual({r["name"] for r in results}, {rdi1.name, rdi2.name})
 
         for result in results:
             if result["name"] == "Test RDI 1":

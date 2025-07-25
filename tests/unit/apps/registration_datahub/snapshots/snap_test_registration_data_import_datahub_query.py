@@ -7,16 +7,11 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestRegistrationDataImportDatahubQuery::test_registration_data_import_datahub_query_single 1'] = {
-    'errors': [
+snapshots["TestRegistrationDataImportDatahubQuery::test_registration_data_import_datahub_query_single 1"] = {
+    "errors": [
         {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Cannot query field "registrationDataImportDatahub" on type "Query".'
+            "locations": [{"column": 7, "line": 3}],
+            "message": 'Cannot query field "registrationDataImportDatahub" on type "Query".',
         }
     ]
 }

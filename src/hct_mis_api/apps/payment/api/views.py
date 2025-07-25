@@ -2,7 +2,7 @@ import logging
 import mimetypes
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any
 from zipfile import BadZipFile
 
 from django.db import transaction
@@ -530,9 +530,9 @@ class PaymentVerificationRecordViewSet(
             raise ValidationError("You can't set received_amount {received_amount} and not set received to NO")
         if received is None and received_amount is not None:
             raise ValidationError("You can't set received_amount {received_amount} and not set received to YES")
-        elif received_amount == 0 and received:
+        if received_amount == 0 and received:
             raise ValidationError("If 'Amount Received' equals to 0, please set status as 'Not Received'")
-        elif received_amount is not None and received_amount != 0 and not received:
+        if received_amount is not None and received_amount != 0 and not received:
             raise ValidationError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
@@ -821,8 +821,7 @@ class PaymentPlanViewSet(
                 data=response_serializer.data,
                 status=status.HTTP_200_OK,
             )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_VIEW_LIST], url_path="entitlement-export-xlsx")
     def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1412,8 +1411,7 @@ class TargetPopulationViewSet(
                 data=response_serializer.data,
                 status=status.HTTP_201_CREATED,
             )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["post"], url_path="apply-engine-formula")
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1542,7 +1540,7 @@ class PaymentPlanManagerialViewSet(
             new_object=payment_plan,
         )
 
-    def _get_action_permission(self, action_name: str) -> Optional[str]:
+    def _get_action_permission(self, action_name: str) -> str | None:
         action_to_permissions_map = {
             PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
             PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
@@ -1680,7 +1678,7 @@ def available_fsps_for_delivery_mechanisms(
 ) -> Response:
     delivery_mechanisms = DeliveryMechanism.get_choices()
 
-    def get_fsps(mechanism_name: str) -> List[Dict[str, Any]]:
+    def get_fsps(mechanism_name: str) -> list[dict[str, Any]]:
         fsps_qs = FinancialServiceProvider.objects.filter(
             Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
             | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
@@ -1688,8 +1686,7 @@ def available_fsps_for_delivery_mechanisms(
             allowed_business_areas__slug=business_area_slug,
         ).distinct()
 
-        fsps = list(fsps_qs.values("id", "name"))
-        return fsps
+        return list(fsps_qs.values("id", "name"))
 
     list_resp = [
         {

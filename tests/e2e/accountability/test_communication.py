@@ -92,8 +92,9 @@ class TestSmokeAccountabilityCommunication:
             in pageAccountabilityCommunicationDetails.getLabelCreatedBy().text
         )
 
-        assert "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC" in pageAccountabilityCommunicationDetails.getCommunicationMessageDetails().text.replace(
-            "\n", " "
+        assert (
+            "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC"
+            in pageAccountabilityCommunicationDetails.getCommunicationMessageDetails().text.replace("\n", " ")
         )
 
         assert (

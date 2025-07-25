@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -9,10 +9,12 @@ import pytest
 from extras.test_utils.factories.core import create_afghanistan
 from strategy_field.utils import fqn
 
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

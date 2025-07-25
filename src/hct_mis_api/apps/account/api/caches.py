@@ -22,9 +22,7 @@ class UserListVersionsKeyBit(KeyBitBase):
         latest_updated_at = queryset["latest_updated_at"]
         obj_count = queryset["obj_count"]
 
-        key = f"{business_area_slug}:{business_area_version}:user-list:{latest_updated_at}:{obj_count}"
-
-        return key
+        return f"{business_area_slug}:{business_area_version}:user-list:{latest_updated_at}:{obj_count}"
 
 
 class UserListKeyConstructor(KeyConstructor):

@@ -1,6 +1,6 @@
 import logging
 from io import BytesIO
-from typing import Any, List, Tuple
+from typing import Any
 
 from django.db import transaction
 
@@ -95,8 +95,8 @@ class UniversalIndividualUpdateService:
         logger.info(text)
 
     def validate_household_fields(
-        self, row: Tuple[Any, ...], headers: List[str], household: Any, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], household: Any, row_index: int
+    ) -> list[str]:
         if self.household_fields is None:
             return []  # pragma: no cover
         errors = []
@@ -107,7 +107,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_individual_fields(self, row: Tuple[Any, ...], headers: List[str], row_index: int) -> List[str]:
+    def validate_individual_fields(self, row: tuple[Any, ...], headers: list[str], row_index: int) -> list[str]:
         errors = []
         for field, (name, validator, _handler) in self.individual_fields.items():
             value = row[headers.index(field)]
@@ -116,7 +116,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_individual_flex_fields(self, row: Tuple[Any, ...], headers: List[str], row_index: int) -> List[str]:
+    def validate_individual_flex_fields(self, row: tuple[Any, ...], headers: list[str], row_index: int) -> list[str]:
         errors = []
         for field, (name, validator, _handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
@@ -125,7 +125,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_household_flex_fields(self, row: Tuple[Any, ...], headers: List[str], row_index: int) -> List[str]:
+    def validate_household_flex_fields(self, row: tuple[Any, ...], headers: list[str], row_index: int) -> list[str]:
         errors = []
         for field, (name, validator, _handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
@@ -135,8 +135,8 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_documents(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+    ) -> list[str]:
         errors = []
         for number_column_name, country_column_name in self.document_fields:
             document_type = self.document_types.get(number_column_name)
@@ -158,8 +158,8 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_accounts(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+    ) -> list[str]:
         errors = []
         for account_type, account_columns_mapping in self.account_data_fields.items():
             columns_from_header = self.get_all_account_columns(
@@ -188,7 +188,7 @@ class UniversalIndividualUpdateService:
                 )
         return errors
 
-    def validate(self, sheet: Worksheet, headers: List[str]) -> List[str]:
+    def validate(self, sheet: Worksheet, headers: list[str]) -> list[str]:
         errors = []
         row_index = 1
         for row in sheet.iter_rows(min_row=2, values_only=True):
@@ -220,7 +220,7 @@ class UniversalIndividualUpdateService:
             errors.extend(self.validate_accounts(row, headers, individual, row_index))
         return errors
 
-    def handle_household_update(self, row: Tuple[Any, ...], headers: List[str], household: Any) -> None:
+    def handle_household_update(self, row: tuple[Any, ...], headers: list[str], household: Any) -> None:
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, household, self.business_area, self.program)
@@ -228,7 +228,7 @@ class UniversalIndividualUpdateService:
                 continue
             setattr(household, _name, handled_value)
 
-    def handle_individual_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
+    def handle_individual_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
         for field, (_name, _validator, handler) in self.individual_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, individual, self.business_area, self.program)
@@ -236,7 +236,7 @@ class UniversalIndividualUpdateService:
                 continue
             setattr(individual, _name, handled_value)
 
-    def handle_individual_flex_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
+    def handle_individual_flex_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
         for field, (name, _validator, handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, individual, self.business_area, self.program)
@@ -244,7 +244,7 @@ class UniversalIndividualUpdateService:
                 continue
             individual.flex_fields[name] = handled_value
 
-    def handle_household_flex_update(self, row: Tuple[Any, ...], headers: List[str], household: Household) -> None:
+    def handle_household_flex_update(self, row: tuple[Any, ...], headers: list[str], household: Household) -> None:
         for field, (name, _validator, handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, household, self.business_area, self.program)
@@ -253,8 +253,8 @@ class UniversalIndividualUpdateService:
             household.flex_fields[name] = handled_value
 
     def handle_documents_update(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
-    ) -> Tuple[list, list]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual
+    ) -> tuple[list, list]:
         documents_to_update = []
         documents_to_create = []
         if self.document_fields is None:
@@ -289,13 +289,13 @@ class UniversalIndividualUpdateService:
         return documents_to_update, documents_to_create
 
     def get_all_account_columns(
-        self, account_type: str, headers: List[str], columns_to_ignore: List[str]
-    ) -> List[Tuple[str, str]]:
+        self, account_type: str, headers: list[str], columns_to_ignore: list[str]
+    ) -> list[tuple[str, str]]:
         prefix = f"account__{account_type}__"
         prefix_len = len(prefix)
         return [(x, x[prefix_len:]) for x in headers if x.startswith(prefix) and x not in columns_to_ignore]
 
-    def handle_account_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
+    def handle_account_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
         individual_accounts = individual.accounts.all()
         for account_type, account_columns_mapping in self.account_data_fields.items():
             account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
@@ -333,7 +333,7 @@ class UniversalIndividualUpdateService:
                 single_data_object.save()
                 single_data_object.update_unique_field()
 
-    def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:
+    def handle_update(self, sheet: Worksheet, headers: list[str]) -> list[str]:
         row_index = 1
         individual_ids = []
         household_fields_to_update = ["flex_fields"]

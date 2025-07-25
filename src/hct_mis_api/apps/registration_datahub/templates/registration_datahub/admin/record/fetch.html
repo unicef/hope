@@ -1,4 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
+
 {% block action-content %}
     <form method="post">
         {% csrf_token %}
@@ -7,4 +8,4 @@
         </table>
         <input type="submit">
     </form>
-{% endblock %}
+{% endblock action-content %}

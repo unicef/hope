@@ -1,5 +1,3 @@
-from typing import Dict, List, Union
-
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -159,7 +157,7 @@ class GrievancePermissionsMixin:
 
 
 class GrievanceMutationMixin:
-    def verify_required_arguments(self, input_data: Dict, field_name: str, options: Dict) -> None:
+    def verify_required_arguments(self, input_data: dict, field_name: str, options: dict) -> None:
         for key, value in options.items():
             if key != input_data.get(field_name):
                 continue
@@ -347,7 +345,7 @@ class GrievanceMutationMixin:
         GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
     }
 
-    MOVE_TO_STATUS_PERMISSION_MAPPING: Dict[int, Dict[Union[str, int], List[Permissions]]] = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING: dict[int, dict[str | int, list[Permissions]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,
@@ -393,7 +391,7 @@ class GrievanceMutationMixin:
         },
     }
 
-    def update_basic_data(self, approver: User, input_data: Dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
+    def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
         messages = []
 
         if ids_to_delete := input_data.pop("documentation_to_delete", None):
@@ -473,7 +471,7 @@ class GrievanceMutationMixin:
 
     def get_permissions_for_status_change(
         self, status: int, current_status: int, is_feedback: bool
-    ) -> List[Permissions]:
+    ) -> list[Permissions]:
         permissions = self.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status, {})
         feedback_permissions = permissions.get("feedback", [])
         any_permissions = permissions.get("any", [])

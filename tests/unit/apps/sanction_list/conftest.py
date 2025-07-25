@@ -33,11 +33,10 @@ def always_eager() -> Generator[Any, None, None]:
 def sanction_list(db: Any) -> "SanctionList":
     from test_utils.factories.sanction_list import SanctionListFactory
 
-    sl = SanctionListFactory(
+    return SanctionListFactory(
         name="EU",
         strategy="hct_mis_api.apps.sanction_list.strategies.eu.EUSanctionList",
         config={
             "url": "http://example.com/sl.xml",
         },
     )
-    return sl

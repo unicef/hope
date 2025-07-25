@@ -5,20 +5,21 @@ import strategy_field.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('program', '0003_migration'),
+        ("program", "0003_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='program',
-            name='collision_detection_enabled',
+            model_name="program",
+            name="collision_detection_enabled",
             field=models.BooleanField(default=False, help_text="don't create duplicated"),
         ),
         migrations.AddField(
-            model_name='program',
-            name='collision_detector',
-            field=strategy_field.fields.StrategyField(blank=True, help_text='Object which detects collisions', null=True),
+            model_name="program",
+            name="collision_detector",
+            field=strategy_field.fields.StrategyField(
+                blank=True, help_text="Object which detects collisions", null=True
+            ),
         ),
     ]
