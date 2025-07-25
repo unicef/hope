@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, Union
+from typing import Iterable
 from uuid import UUID
 
 from django.contrib import messages
@@ -26,9 +26,9 @@ class HouseholdWithDrawnMixin:
         self,
         request: HttpRequest,
         hh: Household,
-        tickets: Optional[Iterable] = None,
-        comment: Optional[str] = None,
-        tag: Optional[str] = None,
+        tickets: Iterable | None = None,
+        comment: str | None = None,
+        tag: str | None = None,
     ) -> HouseholdWithdraw:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -72,7 +72,7 @@ class HouseholdWithDrawnMixin:
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
-    def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
+    def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
@@ -93,22 +93,20 @@ class HouseholdWithDrawnMixin:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
                 return None
-            else:
-                context["form"] = form
-                return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
-        else:
-            context["form"] = MassWithdrawForm(
-                initial={
-                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
-                    "reason": "",
-                    "tag": "",
-                }
-            )
+            context["form"] = form
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
+        context["form"] = MassWithdrawForm(
+            initial={
+                "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                "reason": "",
+                "tag": "",
+            }
+        )
+        return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
 
-    def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
+    def mass_unwithdraw(self, request: HttpRequest, qs: QuerySet) -> TemplateResponse | None:
         context = self.get_common_context(request, title="Restore")
         context["action"] = "mass_unwithdraw"
         context["op"] = "restore"
@@ -134,22 +132,20 @@ class HouseholdWithDrawnMixin:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
                 return None
-            else:
-                context["form"] = form
-                return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
-        else:
-            context["form"] = MassRestoreForm(
-                initial={
-                    "reopen_tickets": True,
-                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
-                }
-            )
+            context["form"] = form
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
+        context["form"] = MassRestoreForm(
+            initial={
+                "reopen_tickets": True,
+                "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            }
+        )
+        return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.can_withdrawn")
-    def withdraw(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
+    def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         context = self.get_common_context(request, pk)
@@ -166,7 +162,7 @@ class HouseholdWithDrawnMixin:
             context["title"] = "Withdrawn"
             msg = "Household successfully withdrawn"
             tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
-        form: Union[Form, WithdrawForm]
+        form: Form | WithdrawForm
         if request.method == "POST":
             form = WithdrawForm(request.POST)
             if form.is_valid():

@@ -116,22 +116,20 @@ def generate_grievance(
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
     GrievanceTicket.objects.create(
-        **{
-            "business_area": business_area,
-            "unicef_id": unicef_id,
-            "language": "Polish",
-            "consent": True,
-            "description": "grievance_ticket_1",
-            "category": category,
-            "status": status,
-            "created_by": created_by,
-            "assigned_to": assigned_to,
-            "created_at": created_at,
-            "updated_at": updated_at,
-            "household_unicef_id": household_unicef_id,
-            "priority": priority,
-            "urgency": urgency,
-        }
+        business_area=business_area,
+        unicef_id=unicef_id,
+        language="Polish",
+        consent=True,
+        description="grievance_ticket_1",
+        category=category,
+        status=status,
+        created_by=created_by,
+        assigned_to=assigned_to,
+        created_at=created_at,
+        updated_at=updated_at,
+        household_unicef_id=household_unicef_id,
+        priority=priority,
+        urgency=urgency,
     )
 
 
@@ -197,12 +195,11 @@ def payment_verification_creator(
         payment_plan=payment_plan,
         verification_channel=channel,
     )
-    pv = PaymentVerificationFactory(
+    return PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-    return pv
 
 
 @pytest.fixture
@@ -427,7 +424,6 @@ class TestSmokeFilters:
 
             for locator in programs[nav_menu]:
                 try:
-                    print(nav_menu, locator)
                     filters.wait_for(locator, timeout=20)
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")

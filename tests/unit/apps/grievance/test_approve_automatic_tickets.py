@@ -262,7 +262,7 @@ class TestGrievanceApproveAutomaticTickets:
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert len(resp_data["ticket_details"]["possible_duplicates"]) == 2
         selected_individuals = resp_data["ticket_details"]["possible_duplicates"]
-        selected_individuals_ids = list(map(lambda d: d["id"], selected_individuals))
+        selected_individuals_ids = [d["id"] for d in selected_individuals]
         assert str(self.individuals[0].id) in selected_individuals_ids
         assert str(self.individuals[1].id) in selected_individuals_ids
 

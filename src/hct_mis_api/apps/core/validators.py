@@ -1,7 +1,7 @@
 import logging
 import typing
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Iterable
 
 from django.core.exceptions import ValidationError
 
@@ -52,7 +52,7 @@ class BaseValidator:
     """
 
     @classmethod
-    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> None:
+    def validate(cls, excluded_validators: Any | None = None, *args: Any, **kwargs: Any) -> None:
         if not excluded_validators:
             excluded_validators = []
 
@@ -87,7 +87,7 @@ class CommonValidator(BaseValidator):
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
-def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List[str]]:
+def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list[str]]:
     choices_mapping = defaultdict(list)
     first_row = choices_sheet.row(0)
     choices_headers_map = [col.value for col in first_row]
@@ -102,7 +102,7 @@ def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List
     for row_number in range(1, choices_sheet.nrows):
         row = choices_sheet.row(row_number)
 
-        if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+        if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
             continue
 
         last_list_name = None
@@ -143,14 +143,7 @@ class KoboTemplateValidator:
         "deviceid": TYPE_STRING,
     }
     EXPECTED_REQUIRED_FIELDS = (
-        "country_h_c"
-        "size_h_c"
-        "relationship_i_c"
-        "role_i_c"
-        "full_name_i_c"
-        "gender_i_c"
-        "birth_date_i_c"
-        "estimated_birth_date_i_c"
+        "country_h_csize_h_crelationship_i_crole_i_cfull_name_i_cgender_i_cbirth_date_i_cestimated_birth_date_i_c"
     )
     FIELDS_EXCLUDED_FROM_CHOICE_CHECK = (
         # temporarily disabled from checking
@@ -166,8 +159,8 @@ class KoboTemplateValidator:
     )
 
     @classmethod
-    def _map_columns_numbers(cls, first_row: Iterable) -> Dict[str, int]:
-        columns_names_and_numbers_mapping: Dict[str, Any] = {
+    def _map_columns_numbers(cls, first_row: Iterable) -> dict[str, int]:
+        columns_names_and_numbers_mapping: dict[str, Any] = {
             "type": None,
             "name": None,
             "required": None,
@@ -186,8 +179,8 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_file(
-        cls, survey_sheet: "Worksheet", choices_mapping: Dict, columns_names_and_numbers_mapping: Dict
-    ) -> Dict:
+        cls, survey_sheet: "Worksheet", choices_mapping: dict, columns_names_and_numbers_mapping: dict
+    ) -> dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):
             field_name = row[columns_names_and_numbers_mapping["name"]].value
@@ -220,7 +213,7 @@ class KoboTemplateValidator:
         return core_fields_in_file
 
     @classmethod
-    def _get_core_fields_from_db(cls) -> Dict:
+    def _get_core_fields_from_db(cls) -> dict:
         all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area()
         return {
             core_field_data["xlsx_field"]: {
@@ -233,7 +226,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_field_type(cls, core_field: Any, core_field_from_file: Dict, field_type: str) -> Optional[Dict]:
+    def _check_field_type(cls, core_field: Any, core_field_from_file: dict, field_type: str) -> dict | None:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -242,7 +235,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_is_field_required(cls, core_field: Any, core_field_from_file: Dict) -> Optional[Dict]:
+    def _check_is_field_required(cls, core_field: Any, core_field_from_file: dict) -> dict | None:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":
@@ -253,7 +246,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: List) -> Optional[List]:
+    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: list) -> list | None:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 
@@ -284,7 +277,7 @@ class KoboTemplateValidator:
         return errors
 
     @classmethod
-    def validate_kobo_template(cls, survey_sheet: "Worksheet", choices_sheet: "Worksheet") -> List[Dict[str, str]]:
+    def validate_kobo_template(cls, survey_sheet: "Worksheet", choices_sheet: "Worksheet") -> list[dict[str, str]]:
         choices_mapping = prepare_choices_for_validation(choices_sheet)
 
         first_row = survey_sheet.row(0)
@@ -324,7 +317,7 @@ class KoboTemplateValidator:
 
 class DataCollectingTypeValidator(BaseValidator):
     @classmethod
-    def validate_data_collecting_type(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+    def validate_data_collecting_type(cls, *args: Any, **kwargs: Any) -> None:
         data_collecting_type = kwargs.get("data_collecting_type")
         program = kwargs.get("program")
         business_area = kwargs.get("business_area") or getattr(program, "business_area", None)
@@ -344,22 +337,22 @@ class DataCollectingTypeValidator(BaseValidator):
             ):
                 raise ValidationError("The Data Collection Type for this programme cannot be edited.")
             # can update for draft program and without population
-            elif (
+            if (
                 program
                 and program.data_collecting_type.code != data_collecting_type.code
                 and program.status == Program.DRAFT
                 and Household.objects.filter(program=program).exists()
             ):
                 raise ValidationError("DataCollectingType can be updated only for Program without any households")
-            elif not data_collecting_type.active:
+            if not data_collecting_type.active:
                 raise ValidationError("Only active DataCollectingType can be used in Program")
-            elif data_collecting_type.deprecated:
+            if data_collecting_type.deprecated:
                 raise ValidationError("Avoid using the deprecated DataCollectingType in Program")
 
 
 class PartnersDataValidator(BaseValidator):
     @classmethod
-    def validate_partners_data(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+    def validate_partners_data(cls, *args: Any, **kwargs: Any) -> None:
         partners_data = kwargs.get("partners_data")
         partner_access = kwargs.get("partner_access")
         partner = kwargs.get("partner")

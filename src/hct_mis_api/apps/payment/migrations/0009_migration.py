@@ -6,83 +6,81 @@ from django.db import migrations, models
 
 def migrate_onetoone_to_foreignkey(apps, schema_editor):
     PaymentVerification = apps.get_model("payment", "PaymentVerification")
-    PaymentVerification.objects.filter(
-        payment_id__isnull=False
-    ).update(payment_fk=models.F("payment_id"))
+    PaymentVerification.objects.filter(payment_id__isnull=False).update(payment_fk=models.F("payment_id"))
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('grievance', '0006_migration'),
-        ('payment', '0008_migration'),
-        ('grievance', '0006_migration'),
+        ("grievance", "0006_migration"),
+        ("payment", "0008_migration"),
+        ("grievance", "0006_migration"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='paymentverification',
-            name='payment_content_type_and_payment_id',
+            model_name="paymentverification",
+            name="payment_content_type_and_payment_id",
         ),
         migrations.RemoveConstraint(
-            model_name='paymentverificationsummary',
-            name='payment_plan_content_type_and_payment_plan_id',
+            model_name="paymentverificationsummary",
+            name="payment_plan_content_type_and_payment_plan_id",
         ),
         migrations.RemoveIndex(
-            model_name='paymentverification',
-            name='payment_pay_payment_ec4a29_idx',
+            model_name="paymentverification",
+            name="payment_pay_payment_ec4a29_idx",
         ),
         migrations.RemoveIndex(
-            model_name='paymentverificationplan',
-            name='payment_pay_payment_3ba67e_idx',
+            model_name="paymentverificationplan",
+            name="payment_pay_payment_3ba67e_idx",
         ),
         migrations.RemoveIndex(
-            model_name='paymentverificationsummary',
-            name='payment_pay_payment_8b7d61_idx',
+            model_name="paymentverificationsummary",
+            name="payment_pay_payment_8b7d61_idx",
         ),
         migrations.RemoveField(
-            model_name='paymentverification',
-            name='payment_content_type',
+            model_name="paymentverification",
+            name="payment_content_type",
         ),
         migrations.RemoveField(
-            model_name='paymentverification',
-            name='payment_object_id',
+            model_name="paymentverification",
+            name="payment_object_id",
         ),
         migrations.RemoveField(
-            model_name='paymentverificationplan',
-            name='payment_plan_content_type',
+            model_name="paymentverificationplan",
+            name="payment_plan_content_type",
         ),
         migrations.RemoveField(
-            model_name='paymentverificationplan',
-            name='payment_plan_object_id',
+            model_name="paymentverificationplan",
+            name="payment_plan_object_id",
         ),
         migrations.RemoveField(
-            model_name='paymentverificationsummary',
-            name='payment_plan_content_type',
+            model_name="paymentverificationsummary",
+            name="payment_plan_content_type",
         ),
         migrations.RemoveField(
-            model_name='paymentverificationsummary',
-            name='payment_plan_object_id',
+            model_name="paymentverificationsummary",
+            name="payment_plan_object_id",
         ),
         migrations.AddField(
-            model_name='paymentverification',
-            name='payment_fk',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='payment.payment'),
+            model_name="paymentverification",
+            name="payment_fk",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.payment"),
         ),
         migrations.RunPython(migrate_onetoone_to_foreignkey, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
-            model_name='paymentverification',
-            name='payment',
+            model_name="paymentverification",
+            name="payment",
         ),
         migrations.RenameField(
-            model_name='paymentverification',
-            old_name='payment_fk',
-            new_name='payment',
+            model_name="paymentverification",
+            old_name="payment_fk",
+            new_name="payment",
         ),
         migrations.AlterField(
-            model_name='paymentverification',
-            name='payment',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='payment_verifications', to='payment.payment'),
+            model_name="paymentverification",
+            name="payment",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="payment_verifications", to="payment.payment"
+            ),
         ),
     ]

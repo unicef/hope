@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -76,7 +76,7 @@ class FlexibleAttributeImporter:
         "deviceid",
     )
 
-    def _get_model_fields(self, object_type_to_add: Any) -> Optional[List[str]]:
+    def _get_model_fields(self, object_type_to_add: Any) -> list[str] | None:
         return {
             "attribute": self.ATTRIBUTE_MODEL_FIELDS,
             "group": self.GROUP_MODEL_FIELDS,
@@ -162,7 +162,7 @@ class FlexibleAttributeImporter:
                 )
                 logger.warning(validation_error_message)
                 raise ValidationError(validation_error_message)
-            elif choice_key not in self.CALCULATE_TYPE_CHOICE_MAP.keys():
+            if choice_key not in self.CALCULATE_TYPE_CHOICE_MAP.keys():
                 validation_error_message = (
                     f"Survey Sheet: Row {row_number + 1}: "
                     f"Invalid type: {choice_key} for calculate field, valid choices are "
@@ -170,8 +170,7 @@ class FlexibleAttributeImporter:
                 )
                 logger.warning(validation_error_message)
                 raise ValidationError(validation_error_message)
-            else:
-                self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
+            self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
     def _can_add_row(self, row: Row) -> bool:
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
@@ -196,7 +195,7 @@ class FlexibleAttributeImporter:
 
         return True
 
-    def _get_list_of_field_choices(self, sheet: Worksheet) -> Set:
+    def _get_list_of_field_choices(self, sheet: Worksheet) -> set:
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
@@ -205,7 +204,7 @@ class FlexibleAttributeImporter:
 
         return {row[0].value.split(" ")[1] for row in fields_with_choices}
 
-    def _get_field_choice_name(self, row: Row) -> Optional[str]:
+    def _get_field_choice_name(self, row: Row) -> str | None:
         has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
@@ -215,7 +214,7 @@ class FlexibleAttributeImporter:
         self.json_fields_to_create = defaultdict(dict)
         self.object_fields_to_create = {}
 
-    def _handle_choices(self, sheets: Union[Dict, Worksheet]) -> None:
+    def _handle_choices(self, sheets: dict | Worksheet) -> None:
         choices_assigned_to_fields = self._get_list_of_field_choices(sheets["survey"])
         choices_from_db = FlexibleAttributeChoice.objects.all()
         choices_first_row = sheets["choices"].row(0)
@@ -226,7 +225,7 @@ class FlexibleAttributeImporter:
             row = sheets["choices"].row(row_number)
             self._reset_model_fields_variables()
 
-            if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+            if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
                 continue
 
             if row[0].value not in choices_assigned_to_fields:
@@ -285,7 +284,7 @@ class FlexibleAttributeImporter:
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
 
-            if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+            if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
                 continue
 
             object_type_to_add = "group" if row[0].value in ("begin_group", "begin_repeat") else "attribute"
@@ -353,9 +352,7 @@ class FlexibleAttributeImporter:
 
                 if obj:
                     if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
-                        logger.warning(
-                            f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
-                        )
+                        logger.warning(f"Survey Sheet: Row {row_number + 1}: Type of the attribute cannot be changed!")
                         raise ValidationError(
                             f"Survey Sheet: Row {row_number + 1}: Type of the attribute cannot be changed!"
                         )
@@ -402,7 +399,7 @@ class FlexibleAttributeImporter:
     can_add_flag = True
 
     @transaction.atomic
-    def import_xls(self, xls_file: Union[File, str]) -> None:
+    def import_xls(self, xls_file: File | str) -> None:
         self.current_group_tree = [None]
         if isinstance(xls_file, str) and isfile(xls_file):
             wb = xlrd.open_workbook(filename=xls_file)

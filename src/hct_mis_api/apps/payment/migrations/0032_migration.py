@@ -5,28 +5,30 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0031_migration'),
+        ("payment", "0031_migration"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PaymentDataCollector',
-            fields=[
-            ],
+            name="PaymentDataCollector",
+            fields=[],
             options={
-                'verbose_name': 'Payment Data Collector',
-                'verbose_name_plural': 'Payment Data Collectors',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Payment Data Collector",
+                "verbose_name_plural": "Payment Data Collectors",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('payment.account',),
+            bases=("payment.account",),
         ),
         migrations.AlterField(
-            model_name='deliverymechanismperpaymentplan',
-            name='payment_plan',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='delivery_mechanism_per_payment_plan', to='payment.paymentplan'),
+            model_name="deliverymechanismperpaymentplan",
+            name="payment_plan",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="delivery_mechanism_per_payment_plan",
+                to="payment.paymentplan",
+            ),
         ),
     ]

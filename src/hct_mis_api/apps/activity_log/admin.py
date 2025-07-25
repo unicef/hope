@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.contrib import admin
 from django.db.models.query import QuerySet
@@ -39,7 +39,7 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, admin.ModelAdm
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

@@ -1,6 +1,6 @@
 import os
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q, QuerySet
 
@@ -57,9 +57,7 @@ class BaseAPI:
 
         return response
 
-    def _post(
-        self, endpoint: str, data: Optional[Union[Dict, List]] = None, validate_response: bool = True
-    ) -> Tuple[Dict, int]:
+    def _post(self, endpoint: str, data: dict | list | None = None, validate_response: bool = True) -> tuple[dict, int]:
         response = self._client.post(f"{self.api_url}{endpoint}", json=data)
         if validate_response:
             response = self.validate_response(response)
@@ -68,12 +66,12 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
-    def _get(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
+    def _get(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
         response = self._client.get(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
 
-    def _delete(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
+    def _delete(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
         response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
         try:
@@ -86,7 +84,7 @@ class BusinessAreaMixin:
     business_area_model_field = "business_area"
 
     @property
-    def business_area_slug(self) -> Optional[str]:
+    def business_area_slug(self) -> str | None:
         return self.kwargs.get("business_area_slug")
 
     @cached_property
@@ -105,11 +103,11 @@ class ProgramMixin:
         return self.program.business_area
 
     @property
-    def business_area_slug(self) -> Optional[str]:
+    def business_area_slug(self) -> str | None:
         return self.kwargs.get("business_area_slug")
 
     @property
-    def program_slug(self) -> Optional[str]:
+    def program_slug(self) -> str | None:
         return self.kwargs.get("program_slug")
 
     @cached_property
@@ -208,8 +206,7 @@ class PermissionActionMixin:
     def get_permissions(self) -> Any:
         if self.action in self.permission_classes_by_action:
             return [permission() for permission in self.permission_classes_by_action[self.action]]
-        else:
-            return super().get_permissions()  # pragma: no cover
+        return super().get_permissions()  # pragma: no cover
 
 
 class SerializerActionMixin:
@@ -218,8 +215,7 @@ class SerializerActionMixin:
     def get_serializer_class(self) -> Any:
         if self.action in self.serializer_classes_by_action:
             return self.serializer_classes_by_action[self.action]
-        else:
-            return super().get_serializer_class()  # pragma: no cover
+        return super().get_serializer_class()  # pragma: no cover
 
 
 class ActionMixin(PermissionActionMixin, SerializerActionMixin):
@@ -245,7 +241,7 @@ class BaseViewSet(GenericViewSet):
         if hasattr(self, "permissions_by_action"):
             if self.action in self.permissions_by_action:
                 return self.permissions_by_action[self.action]
-            elif self.action == "count":
+            if self.action == "count":
                 return self.permissions_by_action["list"]
         return self.PERMISSIONS
 
@@ -253,7 +249,7 @@ class BaseViewSet(GenericViewSet):
 class AdminUrlSerializerMixin:
     admin_url = serializers.SerializerMethodField()
 
-    def resolve_admin_url(self, obj: Any) -> Optional[str]:
+    def resolve_admin_url(self, obj: Any) -> str | None:
         if self.context.request.user.is_superuser:
             return obj.admin_url
         return None
@@ -291,11 +287,11 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        if auth_header and auth_header[0].lower() == "token".encode():
+        if auth_header and auth_header[0].lower() == b"token":
             return True
         return False
 
-    def get_authenticators(self) -> List[Any]:
+    def get_authenticators(self) -> list[Any]:
         if self.is_external_request():
             self.authentication_classes = [HOPEAuthentication]
         return super().get_authenticators()  # pragma: no cover

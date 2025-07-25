@@ -4,14 +4,18 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('aurora', '0003_migration'),
+        ("aurora", "0003_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='record',
-            options={'permissions': (('can_fetch_data', 'Can fetch data from aurora'), ('can_add_records', 'Can add records'))},
+            name="record",
+            options={
+                "permissions": (
+                    ("can_fetch_data", "Can fetch data from aurora"),
+                    ("can_add_records", "Can add records"),
+                )
+            },
         ),
     ]

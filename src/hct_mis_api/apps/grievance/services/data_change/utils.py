@@ -4,7 +4,7 @@ import string
 import urllib.parse
 from collections import Counter
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -50,25 +50,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def to_date_string(data: Dict, field_name: str) -> None:
+def to_date_string(data: dict, field_name: str) -> None:
     if raw_date := data.get(field_name):
         data[field_name] = raw_date.isoformat()
 
 
-def to_phone_number_str(data: Dict, field_name: str) -> None:
+def to_phone_number_str(data: dict, field_name: str) -> None:
     if phone_number := data.get(field_name):
         data[field_name] = str(phone_number)
 
 
-def is_approved(item: Dict) -> bool:
+def is_approved(item: dict) -> bool:
     return item.get("approve_status") is True
 
 
-def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
+def convert_to_empty_string_if_null(value: Any) -> Any | str:
     return "" if value is None else value
 
 
-def cast_flex_fields(flex_fields: Dict) -> None:
+def cast_flex_fields(flex_fields: dict) -> None:
     decimals_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
     integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
     for key, value in flex_fields.items():
@@ -78,7 +78,7 @@ def cast_flex_fields(flex_fields: Dict) -> None:
             flex_fields[key] = int(value)
 
 
-def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
+def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
@@ -114,8 +114,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
     ).first():
         if already_with_another_role.role == ROLE_PRIMARY:
             raise ValidationError("Ticket cannot be closed, primary collector role has to be reassigned")
-        else:
-            already_with_another_role.delete(soft=False)
+        already_with_another_role.delete(soft=False)
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         IndividualRoleInHousehold.objects.update_or_create(
@@ -126,7 +125,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
         )
 
 
-def handle_add_document(document_data: Dict, individual: Individual) -> Document:
+def handle_add_document(document_data: dict, individual: Individual) -> Document:
     document_key = document_data.get("key")
     country_code = document_data.get("country")
     number = document_data.get("number")
@@ -171,7 +170,7 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
     )
 
 
-def handle_edit_document(document_data: Dict) -> Document:
+def handle_edit_document(document_data: dict) -> Document:
     document_key = document_data.get("key")
     country_code = document_data.get("country")
     number = document_data.get("number")
@@ -218,7 +217,7 @@ def handle_edit_document(document_data: Dict) -> Document:
     return document
 
 
-def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
+def handle_add_identity(identity: dict, individual: Individual) -> IndividualIdentity:
     partner_name = identity.get("partner")
     country_code = identity.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
@@ -234,7 +233,7 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
     )
 
 
-def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
+def handle_edit_identity(identity_data: dict) -> IndividualIdentity:
     updated_identity = identity_data.get("value", {})
     partner_name = updated_identity.get("partner")
     number = updated_identity.get("number")
@@ -257,7 +256,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_edit_accounts_save(accounts: List[Dict]) -> List[Dict]:
+def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
     items = []
     for account in accounts:
         _id = account.pop("id")
@@ -279,14 +278,14 @@ def prepare_edit_accounts_save(accounts: List[Dict]) -> List[Dict]:
     return items
 
 
-def handle_update_account(account: Dict) -> Optional[Account]:
+def handle_update_account(account: dict) -> Account | None:
     account_instance = get_object_or_404(Account, id=account.get("id"))
     data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}
     account_instance.account_data = data_fields_dict
     return account_instance
 
 
-def handle_add_account(account: Dict, individual: Individual) -> Account:
+def handle_add_account(account: dict, individual: Individual) -> Account:
     account_instance = Account(
         individual=individual,
         account_type=AccountType.objects.get(key=account["name"]),
@@ -296,8 +295,8 @@ def handle_add_account(account: Dict, individual: Individual) -> Account:
     return account_instance
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
-    previous_documents: Dict[str, Any] = {}
+def prepare_previous_documents(documents_to_remove_with_approve_status: list[dict]) -> dict[str, dict]:
+    previous_documents: dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = document_data.get("value")
         document: Document = get_object_or_404(Document, id=document_id)
@@ -312,7 +311,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dic
     return previous_documents
 
 
-def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
+def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
     edited_documents = []
 
     for document_to_edit in documents_to_edit:
@@ -352,8 +351,8 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
-    previous_identities: Dict[str, Any] = {}
+def prepare_previous_identities(identities_to_remove_with_approve_status: list[dict]) -> dict[str, Any]:
+    previous_identities: dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=identity_id)
@@ -369,7 +368,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[D
     return previous_identities
 
 
-def prepare_edit_identities(identities: List[Dict]) -> List[Dict]:
+def prepare_edit_identities(identities: list[dict]) -> list[dict]:
     edited_identities = []
     for identity_data in identities:
         identity = identity_data.get("id")
@@ -406,15 +405,15 @@ def generate_filename() -> str:
     return f"{file_name}-{timezone.now()}"
 
 
-def handle_photo(photo: Optional[Union[InMemoryUploadedFile, str]], photoraw: Optional[str]) -> Optional[str]:
+def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None) -> str | None:
     if isinstance(photo, InMemoryUploadedFile):
         return default_storage.save(f"{generate_filename()}.jpg", photo)
-    elif isinstance(photo, str):
+    if isinstance(photo, str):
         return photoraw
     return None
 
 
-def handle_document(document: Dict) -> Dict:
+def handle_document(document: dict) -> dict:
     photo = document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
@@ -422,11 +421,11 @@ def handle_document(document: Dict) -> Dict:
     return document
 
 
-def handle_documents(documents: List[Dict]) -> List[Dict]:
+def handle_documents(documents: list[dict]) -> list[dict]:
     return [handle_document(document) for document in documents]
 
 
-def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) -> None:
+def verify_required_arguments(input_data: dict, field_name: str, options: dict) -> None:
     from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
@@ -440,7 +439,7 @@ def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) 
                 raise ValidationError(f"You can't provide {not_allowed} in {key}")
 
 
-def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> None:
+def remove_parsed_data_fields(data_dict: dict, fields_list: Iterable[str]) -> None:
     for field in fields_list:
         data_dict.pop(field, None)
 
@@ -456,7 +455,7 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
     withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all())
 
 
-def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
+def get_data_from_role_data(role_data: dict) -> tuple[Any | None, Individual, Individual, Household]:
     role_name = role_data.get("role")
 
     individual_id = role_data.get("individual")
@@ -469,7 +468,7 @@ def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual,
     return role_name, old_individual, new_individual, household
 
 
-def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
+def get_data_from_role_data_new_ticket(role_data: dict) -> tuple[Any | None, Individual, Individual, Household]:
     role_name, old_individual, _, household = get_data_from_role_data(role_data)
     new_individual_id = role_data.get("new_individual")
     new_individual = get_object_or_404(Individual, id=new_individual_id)
@@ -479,11 +478,11 @@ def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], 
 
 def reassign_roles_on_disable_individual(
     individual_to_remove: Individual,
-    role_reassign_data: Dict,
+    role_reassign_data: dict,
     program_id: Optional["UUID"],
-    info: Optional[Any] = None,
+    info: Any | None = None,
     is_new_ticket: bool = False,
-) -> Optional[Household]:
+) -> Household | None:
     roles_to_bulk_update = []
     roles_to_delete = []
     for role_data in role_reassign_data.values():
@@ -526,7 +525,7 @@ def reassign_roles_on_disable_individual(
         ).first():
             if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
                 raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-            elif (
+            if (
                 role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
             ):  # remove alternate role if the new individual is being assigned as primary
                 roles_to_delete.append(new_individual_current_role)
@@ -565,7 +564,7 @@ def reassign_roles_on_disable_individual(
 
 
 def reassign_roles_on_update(
-    individual: Individual, role_reassign_data: Dict, program_id: "UUID", info: Optional[Any] = None
+    individual: Individual, role_reassign_data: dict, program_id: "UUID", info: Any | None = None
 ) -> None:
     roles_to_bulk_update = []
     roles_to_delete = []
@@ -597,7 +596,7 @@ def reassign_roles_on_update(
         ).first():
             if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
                 raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-            elif (
+            if (
                 role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
             ):  # remove alternate role if the new individual is being assigned as primary
                 roles_to_delete.append(new_individual_current_role)
@@ -622,7 +621,7 @@ def withdraw_individual(
     individual_to_remove: Individual,
     info: Any,
     old_individual_to_remove: Individual,
-    removed_individual_household: Optional[Household],
+    removed_individual_household: Household | None,
     program_id: Optional["UUID"],
 ) -> None:
     individual_to_remove.withdraw()
@@ -643,7 +642,7 @@ def mark_as_duplicate_individual(
     individual_to_remove: Individual,
     info: Any,
     old_individual_to_remove: Individual,
-    removed_individual_household: Optional[Household],
+    removed_individual_household: Household | None,
     unique_individual: Individual,
     program_id: Optional["UUID"],
 ) -> None:
@@ -657,7 +656,7 @@ def log_and_withdraw_household_if_needed(
     individual_to_remove: Individual,
     info: Any,
     old_individual_to_remove: Individual,
-    removed_individual_household: Optional[Household],
+    removed_individual_household: Household | None,
     program_id: Optional["UUID"],
 ) -> None:
     log_create(
@@ -674,7 +673,7 @@ def log_and_withdraw_household_if_needed(
             removed_individual_household.withdraw()
 
 
-def save_images(flex_fields: Dict, associated_with: str) -> None:
+def save_images(flex_fields: dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
         logger.warning("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")

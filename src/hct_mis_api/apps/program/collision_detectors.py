@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
 from django.db.transaction import atomic
@@ -23,7 +23,7 @@ class AbstractCollisionDetector:
         if not self.program.collision_detection_enabled:
             raise ValueError("Collision detection is not enabled for this program")  # pragma: no cover
 
-    def detect_collision(self, household: Household) -> Optional[str]:
+    def detect_collision(self, household: Household) -> str | None:
         raise NotImplementedError("Subclasses should implement this method")  # pragma: no cover
 
     def _update_roles_in_household(self, household_id_destination: str, roles_by_id: dict[int, str]) -> None:
@@ -163,7 +163,7 @@ class AbstractCollisionDetector:
         source: models.Model,
         destination: models.Model,
         exclude: set[str],
-        extra_fields: Optional[dict[str, Any]] = None,
+        extra_fields: dict[str, Any] | None = None,
     ) -> None:
         """
         Update a database instance by copying data from a source model to a destination model.
@@ -192,12 +192,12 @@ class AbstractCollisionDetector:
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
     def __init__(self, context: "Program"):
         super().__init__(context)
-        self.unique_identification_keys_dict: Optional[dict[str, str]] = None
+        self.unique_identification_keys_dict: dict[str, str] | None = None
 
     def initialize(self) -> None:
         if self.unique_identification_keys_dict is not None:
             return
-        self.unique_identification_keys_dict = dict()
+        self.unique_identification_keys_dict = {}
         ids_with_uniquekey_list = list(
             Household.objects.filter(program=self.program, identification_key__isnull=False)
             .values_list("id", "identification_key")
@@ -206,7 +206,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         for hh_id, key in ids_with_uniquekey_list:
             self.unique_identification_keys_dict[key] = str(hh_id)
 
-    def detect_collision(self, household: Household) -> Optional[str]:
+    def detect_collision(self, household: Household) -> str | None:
         self.initialize()
         return self.unique_identification_keys_dict.get(household.identification_key, None)
 
@@ -247,11 +247,11 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         old_individuals = Household.objects.get(id=old_household_id).individuals.all()
         individuals_to_merge = household_to_merge.individuals(manager="all_objects").all()
         # 3. Sanity check - All individuals in both households must have an identification key
-        if any([x for x in old_individuals if x.identification_key is None]):
+        if any(x for x in old_individuals if x.identification_key is None):
             raise ValueError(
                 f"Cannot merge households with individuals with no identification key household {old_household_id}"
             )
-        if any([x for x in individuals_to_merge if x.identification_key is None]):
+        if any(x for x in individuals_to_merge if x.identification_key is None):
             raise ValueError(
                 f"Cannot merge households with individuals with no identification key {household_to_merge.id}"
             )

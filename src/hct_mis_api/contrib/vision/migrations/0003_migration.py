@@ -1,4 +1,4 @@
-from django.db import connection, migrations
+from django.db import migrations
 
 TRIGGER_FUNCTION = """
 CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
@@ -9,7 +9,7 @@ DECLARE
 
 BEGIN
     -- Check if FundsCommitmentGroup exists, if not create it
-    SELECT id INTO fc_group_id FROM vision_fundscommitmentgroup 
+    SELECT id INTO fc_group_id FROM vision_fundscommitmentgroup
     WHERE funds_commitment_number = NEW.funds_commitment_number;
 
     IF fc_group_id IS NULL THEN
@@ -104,8 +104,8 @@ DROP TRIGGER IF EXISTS funds_commitment_insert_trigger ON vision_fundscommitment
 DROP FUNCTION IF EXISTS funds_commitment_trigger_function;
 """
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ("vision", "0002_migration"),
     ]

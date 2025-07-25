@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 
@@ -34,7 +34,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
-    def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
+    def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> dict:
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = dict(Program.SECTOR_CHOICE)
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
@@ -70,7 +70,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_total_transferred_by_month(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )

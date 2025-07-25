@@ -109,7 +109,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
-            filters=dict(),
+            filters={},
             rounds_data=rounds_data,
         )
         service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
@@ -402,7 +402,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": self.string_attribute.name,

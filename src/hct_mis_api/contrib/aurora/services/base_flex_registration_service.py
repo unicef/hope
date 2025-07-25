@@ -3,7 +3,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterable
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -33,7 +33,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
     @atomic("default")
     def create_rdi(
-        self, imported_by: Optional[Any], rdi_name: str = "rdi_name", is_open: bool = False
+        self, imported_by: Any | None, rdi_name: str = "rdi_name", is_open: bool = False
     ) -> RegistrationDataImport:
         project = self.registration.project
         programme = project.programme
@@ -54,7 +54,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             number_of_households=number_of_households,
             created_by_id=imported_by.id if imported_by else None,
         )
-        rdi = RegistrationDataImport.objects.create(
+        return RegistrationDataImport.objects.create(
             name=rdi_name,
             data_source=RegistrationDataImport.FLEX_REGISTRATION,
             imported_by=imported_by,
@@ -68,7 +68,6 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                 RegistrationDataImport.DEDUP_ENGINE_PENDING if programme.biometric_deduplication_enabled else None
             ),
         )
-        return rdi
 
     @abc.abstractmethod
     def create_household_for_rdi_household(self, record: Any, rdi_datahub: RegistrationDataImport) -> None:
@@ -116,7 +115,6 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                         self.create_household_for_rdi_household(record, rdi)
                         imported_records_ids.append(record_id)
                     except ValidationError as e:
-                        print(e)
                         logger.exception(e)
                         records_with_error.append((record, str(e)))
 
@@ -180,10 +178,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             )
             raise
 
-    def _create_object_and_validate(self, data: Dict, model_class: Any, model_form: Optional[Any] = None) -> Any:
+    def _create_object_and_validate(self, data: dict, model_class: Any, model_form: Any | None = None) -> Any:
         files = {}
         if photo := data.get("photo"):
-            if isinstance(photo, (str, bytes)):
+            if isinstance(photo, str | bytes):
                 photo = self._prepare_picture_from_base64(photo, str(uuid.uuid4()))
             files["photo"] = photo
             del data["photo"]  # Remove the base64 from data since we're handling it as a file
@@ -200,7 +198,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             raise ValidationError(form.errors)
         return form.save()
 
-    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> Union[ContentFile, Any]:
+    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> ContentFile | Any:
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.md5(document_number.encode()).hexdigest()

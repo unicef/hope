@@ -1,7 +1,7 @@
 import logging
 import re
 from functools import cached_property
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any, Generator
 from uuid import UUID
 
 from django.conf import settings
@@ -53,20 +53,18 @@ class DjAdminManager:
         self.login_url = f"{self.admin_url}login/"
 
         self._logged = False
-        self._last_error: Optional[Response] = None
-        self._last_response: Optional[Response] = None
+        self._last_error: Response | None = None
+        self._last_response: Response | None = None
         self._username = None
         self._password = None
         self.form_errors = []
 
-    def extract_errors(self, res: Response) -> List:
-        self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
+    def extract_errors(self, res: Response) -> list:
+        self.form_errors = list(self.regex.findall(res.content.decode()))
         return self.form_errors
 
-    def assert_response(
-        self, status: Union[int, List[int]], location: Optional[str] = None, custom_error: str = ""
-    ) -> None:
-        if not isinstance(status, (list, tuple)):
+    def assert_response(self, status: int | list[int], location: str | None = None, custom_error: str = "") -> None:
+        if not isinstance(status, list | tuple):
             status = [status]
         if self._last_response.status_code not in status:
             msg = f"Unexpected code:{self._last_response.status_code} not in {status}: {custom_error}"
@@ -93,7 +91,7 @@ class DjAdminManager:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
-    def login(self, request: Optional[HttpRequest] = None, twin: Optional[Any] = None) -> None:
+    def login(self, request: HttpRequest | None = None, twin: Any | None = None) -> None:
         try:
             username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         except ValueError:
@@ -128,7 +126,7 @@ class DjAdminManager:
         self.client.headers["Referer"] = url
         return self._last_response
 
-    def _post(self, url: str, data: Dict) -> Any:
+    def _post(self, url: str, data: dict) -> Any:
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
@@ -237,7 +235,7 @@ class KoboAccessMixin:
             logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
-    def delete_view(self, request: HttpRequest, object_id: str, extra_context: Optional[Dict] = None) -> HttpResponse:
+    def delete_view(self, request: HttpRequest, object_id: str, extra_context: dict | None = None) -> HttpResponse:
         if request.POST:  # The user has confirmed the deletion.
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)

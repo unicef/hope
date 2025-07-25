@@ -6,7 +6,10 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
 
 
 class BaseTest(WebTest):

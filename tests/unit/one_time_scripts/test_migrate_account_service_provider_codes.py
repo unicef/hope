@@ -42,21 +42,24 @@ class TestMigrateAccountServiceProviderCodes(TestCase):
         generate_delivery_mechanisms()
         cls.uba_fsp, _ = FinancialServiceProvider.objects.get_or_create(
             name="United Bank for Africa - Nigeria",
-            defaults=dict(
-                vision_vendor_number=12345, communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            ),
+            defaults={
+                "vision_vendor_number": 12345,
+                "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            },
         )
         cls.moneygram_fsp, _ = FinancialServiceProvider.objects.get_or_create(
             name="Moneygram",
-            defaults=dict(
-                vision_vendor_number=123456, communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            ),
+            defaults={
+                "vision_vendor_number": 123456,
+                "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            },
         )
         cls.ecobank_fsp, _ = FinancialServiceProvider.objects.get_or_create(
             name="Nigeria - Eco Bank",
-            defaults=dict(
-                vision_vendor_number=1234567, communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            ),
+            defaults={
+                "vision_vendor_number": 1234567,
+                "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            },
         )
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
         cls.nigeria_uba_rdi = RegistrationDataImportFactory(business_area=cls.ba_ng, data_source="Flex Registration")
