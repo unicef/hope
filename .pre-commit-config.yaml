@@ -35,3 +35,8 @@ repos:
         hooks:
             -   id: check-hooks-apply
             -   id: check-useless-excludes
+    -   repo: https://github.com/pre-commit/mirrors-mypy
+        rev: v1.17.0
+        hooks:
+          - id: mypy
+            args: ["--strict"]  # Optional: add any mypy args here
