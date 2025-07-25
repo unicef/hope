@@ -972,6 +972,7 @@ class TestIndividualDetail:
                     "name": self.country.name,
                     "iso_code3": self.country.iso_code3,
                 },
+                "partner": None,
                 "number": self.identity.number,
             }
         ]
