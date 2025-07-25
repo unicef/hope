@@ -2,7 +2,6 @@ import logging
 import time
 import typing
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -30,9 +29,7 @@ class KoboRequestsSession(requests.Session):
         new_parsed = urlparse(new_url)
         if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:  # pragma: no cover
             return False
-        return super().should_strip_auth(
-            old_url, new_url
-        )  # type: ignore # FIXME: Call to untyped function "should_strip_auth" in typed context
+        return super().should_strip_auth(old_url, new_url)  # type: ignore # FIXME: Call to untyped function "should_strip_auth" in typed context
 
 
 class KoboAPI:
@@ -40,7 +37,7 @@ class KoboAPI:
     FORMAT = "json"
 
     def __init__(
-        self, kpi_url: Optional[str] = None, token: Optional[str] = None, project_views_id: Optional[str] = None
+        self, kpi_url: str | None = None, token: str | None = None, project_views_id: str | None = None
     ) -> None:
         self._kpi_url = kpi_url or settings.KOBO_URL
         self._token = token or settings.KOBO_MASTER_API_TOKEN
@@ -54,9 +51,9 @@ class KoboAPI:
         self._client.mount(self._kpi_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"token {self._token}"})
 
-    def _get_paginated_request(self, url: str) -> List[Dict]:
+    def _get_paginated_request(self, url: str) -> list[dict]:
         next_url = url
-        results: List = []
+        results: list = []
 
         while next_url:
             response = self._get_request(next_url)
@@ -75,13 +72,13 @@ class KoboAPI:
         return response
 
     def _post_request(
-        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
+        self, url: str, data: dict | None = None, files: typing.IO | None = None
     ) -> Response:  # pragma: no cover
         return self._client.post(url=url, data=data, files=files)
 
     def create_template_from_file(
         self, bytes_io_file: typing.IO, xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
-    ) -> Optional[Tuple[Dict, str]]:  # pragma: no cover
+    ) -> tuple[dict, str] | None:  # pragma: no cover
         # TODO: not sure if this actually works
         if not template_id:
             data = {
@@ -134,7 +131,7 @@ class KoboAPI:
         log_and_raise("Fetching import data took too long", error_type=RetryError)
         return None
 
-    def get_all_projects_data(self, country_code: str) -> List:
+    def get_all_projects_data(self, country_code: str) -> list:
         if not country_code:
             raise CountryCodeNotProvided("No country code provided")
         endpoint = f"api/v2/project-views/{self._project_views_id}/assets/"
@@ -143,14 +140,14 @@ class KoboAPI:
         url = f"{self._kpi_url}/{endpoint}?{query_params}"
         return self._get_paginated_request(url)
 
-    def get_single_project_data(self, uid: str) -> Dict:
+    def get_single_project_data(self, uid: str) -> dict:
         endpoint = f"api/v2/assets/{uid}/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         url = f"{self._kpi_url}/{endpoint}?{query_params}"
         response = self._get_request(url)
         return response.json()
 
-    def get_project_submissions(self, uid: str, only_active_submissions: bool) -> List[Dict]:
+    def get_project_submissions(self, uid: str, only_active_submissions: bool) -> list[dict]:
         endpoint = f"api/v2/assets/{uid}/data/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         if only_active_submissions:

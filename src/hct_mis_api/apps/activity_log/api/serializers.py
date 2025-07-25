@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
@@ -32,7 +30,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
             "user",
         )
 
-    def get_is_user_generated(self, obj: LogEntry) -> Optional[bool]:
+    def get_is_user_generated(self, obj: LogEntry) -> bool | None:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         if isinstance(obj.content_object, GrievanceTicket):

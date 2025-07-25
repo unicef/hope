@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from django.conf import settings
 from django.core.management import call_command
@@ -23,13 +23,15 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
 )
-from hct_mis_api.apps.sanction_list.models import SanctionList
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.sanction_list.models import SanctionList
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

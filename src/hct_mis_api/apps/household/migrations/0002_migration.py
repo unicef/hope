@@ -8,318 +8,473 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('program', '0001_migration'),
-        ('account', '0002_migration'),
-        ('geo', '0001_migration'),
-        ('household', '0001_migration'),
-        ('core', '0002_migration'),
-        ('registration_data', '0001_migration'),
+        ("program", "0001_migration"),
+        ("account", "0002_migration"),
+        ("geo", "0001_migration"),
+        ("household", "0001_migration"),
+        ("core", "0002_migration"),
+        ("registration_data", "0001_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='xlsxupdatefile',
-            name='rdi',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='registration_data.registrationdataimport'),
+            model_name="xlsxupdatefile",
+            name="rdi",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, to="registration_data.registrationdataimport"
+            ),
         ),
         migrations.AddField(
-            model_name='xlsxupdatefile',
-            name='uploaded_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL),
+            model_name="xlsxupdatefile",
+            name="uploaded_by",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='individualroleinhousehold',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, help_text='If this object was copied from another, this field will contain the object it was copied from.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='copied_to', to='household.individualroleinhousehold'),
+            model_name="individualroleinhousehold",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="If this object was copied from another, this field will contain the object it was copied from.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="copied_to",
+                to="household.individualroleinhousehold",
+            ),
         ),
         migrations.AddField(
-            model_name='individualroleinhousehold',
-            name='household',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='individuals_and_roles', to='household.household'),
+            model_name="individualroleinhousehold",
+            name="household",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="individuals_and_roles",
+                to="household.household",
+            ),
         ),
         migrations.AddField(
-            model_name='individualroleinhousehold',
-            name='individual',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='households_and_roles', to='household.individual'),
+            model_name="individualroleinhousehold",
+            name="individual",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="households_and_roles",
+                to="household.individual",
+            ),
         ),
         migrations.AddField(
-            model_name='individualidentity',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, help_text='If this object was copied from another, this field will contain the object it was copied from.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='copied_to', to='household.individualidentity'),
+            model_name="individualidentity",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="If this object was copied from another, this field will contain the object it was copied from.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="copied_to",
+                to="household.individualidentity",
+            ),
         ),
         migrations.AddField(
-            model_name='individualidentity',
-            name='country',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='geo.country'),
+            model_name="individualidentity",
+            name="country",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"),
         ),
         migrations.AddField(
-            model_name='individualidentity',
-            name='individual',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='identities', to='household.individual'),
+            model_name="individualidentity",
+            name="individual",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="identities", to="household.individual"
+            ),
         ),
         migrations.AddField(
-            model_name='individualidentity',
-            name='partner',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='individual_identities', to='account.partner'),
+            model_name="individualidentity",
+            name="partner",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="individual_identities",
+                to="account.partner",
+            ),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='business_area',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.businessarea'),
+            model_name="individual",
+            name="business_area",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, help_text='If this individual was copied from another individual, this field will contain the individual it was copied from.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='copied_to', to='household.individual'),
+            model_name="individual",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="If this individual was copied from another individual, this field will contain the individual it was copied from.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="copied_to",
+                to="household.individual",
+            ),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='household',
-            field=models.ForeignKey(blank=True, help_text='This represents the household this person is a MEMBER,\n            and if null then relationship is NON_BENEFICIARY and that\n            simply means they are a representative of one or more households\n            and not a member of one.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='individuals', to='household.household'),
+            model_name="individual",
+            name="household",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="This represents the household this person is a MEMBER,\n            and if null then relationship is NON_BENEFICIARY and that\n            simply means they are a representative of one or more households\n            and not a member of one.",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="individuals",
+                to="household.household",
+            ),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='individual_collection',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='individuals', to='household.individualcollection'),
+            model_name="individual",
+            name="individual_collection",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="individuals",
+                to="household.individualcollection",
+            ),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='individuals', to='program.program'),
+            model_name="individual",
+            name="program",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="individuals",
+                to="program.program",
+            ),
         ),
         migrations.AddField(
-            model_name='individual',
-            name='registration_data_import',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='individuals', to='registration_data.registrationdataimport'),
+            model_name="individual",
+            name="registration_data_import",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="individuals",
+                to="registration_data.registrationdataimport",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='admin1',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='geo.area'),
+            model_name="household",
+            name="admin1",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='admin2',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='geo.area'),
+            model_name="household",
+            name="admin2",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='admin3',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='geo.area'),
+            model_name="household",
+            name="admin3",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='admin4',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='geo.area'),
+            model_name="household",
+            name="admin4",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='admin_area',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='geo.area'),
+            model_name="household",
+            name="admin_area",
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="geo.area"),
         ),
         migrations.AddField(
-            model_name='household',
-            name='business_area',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.businessarea'),
+            model_name="household",
+            name="business_area",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
         ),
         migrations.AddField(
-            model_name='household',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, help_text='If this household was copied from another household, this field will contain the household it was copied from.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='copied_to', to='household.household'),
+            model_name="household",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="If this household was copied from another household, this field will contain the household it was copied from.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="copied_to",
+                to="household.household",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='country',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='geo.country'),
+            model_name="household",
+            name="country",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name="+", to="geo.country"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='country_origin',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='geo.country'),
+            model_name="household",
+            name="country_origin",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name="+", to="geo.country"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='head_of_household',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='heading_household', to='household.individual'),
+            model_name="household",
+            name="head_of_household",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="heading_household",
+                to="household.individual",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='household_collection',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='households', to='household.householdcollection'),
+            model_name="household",
+            name="household_collection",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="households",
+                to="household.householdcollection",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='program.program'),
+            model_name="household",
+            name="program",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="program.program"
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='programs',
-            field=models.ManyToManyField(blank=True, related_name='households', to='program.Program'),
+            model_name="household",
+            name="programs",
+            field=models.ManyToManyField(blank=True, related_name="households", to="program.Program"),
         ),
         migrations.AddField(
-            model_name='household',
-            name='registration_data_import',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='households', to='registration_data.registrationdataimport'),
+            model_name="household",
+            name="registration_data_import",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="households",
+                to="registration_data.registrationdataimport",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='representatives',
-            field=models.ManyToManyField(help_text='This is only used to track collector (primary or secondary) of a household.\n            They may still be a HOH of this household or any other household.\n            Through model will contain the role (ROLE_CHOICE) they are connected with on.', related_name='represented_households', through='household.IndividualRoleInHousehold', to='household.Individual'),
+            model_name="household",
+            name="representatives",
+            field=models.ManyToManyField(
+                help_text="This is only used to track collector (primary or secondary) of a household.\n            They may still be a HOH of this household or any other household.\n            Through model will contain the role (ROLE_CHOICE) they are connected with on.",
+                related_name="represented_households",
+                through="household.IndividualRoleInHousehold",
+                to="household.Individual",
+            ),
         ),
         migrations.AddField(
-            model_name='household',
-            name='storage_obj',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.storagefile'),
+            model_name="household",
+            name="storage_obj",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="core.storagefile"
+            ),
         ),
         migrations.AddField(
-            model_name='entitlementcard',
-            name='household',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='entitlement_cards', to='household.household'),
+            model_name="entitlementcard",
+            name="household",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="entitlement_cards",
+                to="household.household",
+            ),
         ),
         migrations.AddField(
-            model_name='documentvalidator',
-            name='type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='validators', to='household.documenttype'),
+            model_name="documentvalidator",
+            name="type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="validators", to="household.documenttype"
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='cleared_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="document",
+            name="cleared_by",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, help_text='If this object was copied from another, this field will contain the object it was copied from.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='copied_to', to='household.document'),
+            model_name="document",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="If this object was copied from another, this field will contain the object it was copied from.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="copied_to",
+                to="household.document",
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='country',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='geo.country'),
+            model_name="document",
+            name="country",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='individual',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='household.individual'),
+            model_name="document",
+            name="individual",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="documents", to="household.individual"
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='program',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='program.program'),
+            model_name="document",
+            name="program",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, related_name="+", to="program.program"
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='household.documenttype'),
+            model_name="document",
+            name="type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="documents", to="household.documenttype"
+            ),
         ),
         migrations.AddField(
-            model_name='bankaccountinfo',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, help_text='If this object was copied from another, this field will contain the object it was copied from.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='copied_to', to='household.bankaccountinfo'),
+            model_name="bankaccountinfo",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="If this object was copied from another, this field will contain the object it was copied from.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="copied_to",
+                to="household.bankaccountinfo",
+            ),
         ),
         migrations.AddField(
-            model_name='bankaccountinfo',
-            name='individual',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bank_account_info', to='household.individual'),
+            model_name="bankaccountinfo",
+            name="individual",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="bank_account_info", to="household.individual"
+            ),
         ),
         migrations.CreateModel(
-            name='PendingBankAccountInfo',
-            fields=[
-            ],
+            name="PendingBankAccountInfo",
+            fields=[],
             options={
-                'verbose_name': 'Imported Bank Account Info',
-                'verbose_name_plural': 'Imported Bank Account Infos',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Imported Bank Account Info",
+                "verbose_name_plural": "Imported Bank Account Infos",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('household.bankaccountinfo',),
+            bases=("household.bankaccountinfo",),
         ),
         migrations.CreateModel(
-            name='PendingDocument',
-            fields=[
-            ],
+            name="PendingDocument",
+            fields=[],
             options={
-                'verbose_name': 'Imported Document',
-                'verbose_name_plural': 'Imported Documents',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Imported Document",
+                "verbose_name_plural": "Imported Documents",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('household.document',),
+            bases=("household.document",),
         ),
         migrations.CreateModel(
-            name='PendingHousehold',
-            fields=[
-            ],
+            name="PendingHousehold",
+            fields=[],
             options={
-                'verbose_name': 'Imported Household',
-                'verbose_name_plural': 'Imported Households',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Imported Household",
+                "verbose_name_plural": "Imported Households",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('household.household',),
+            bases=("household.household",),
         ),
         migrations.CreateModel(
-            name='PendingIndividual',
-            fields=[
-            ],
+            name="PendingIndividual",
+            fields=[],
             options={
-                'verbose_name': 'Imported Individual',
-                'verbose_name_plural': 'Imported Individuals',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Imported Individual",
+                "verbose_name_plural": "Imported Individuals",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('household.individual',),
+            bases=("household.individual",),
         ),
         migrations.CreateModel(
-            name='PendingIndividualIdentity',
-            fields=[
-            ],
+            name="PendingIndividualIdentity",
+            fields=[],
             options={
-                'verbose_name': 'Imported Individual Identity',
-                'verbose_name_plural': 'Imported Individual Identities',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Imported Individual Identity",
+                "verbose_name_plural": "Imported Individual Identities",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('household.individualidentity',),
+            bases=("household.individualidentity",),
         ),
         migrations.CreateModel(
-            name='PendingIndividualRoleInHousehold',
-            fields=[
-            ],
+            name="PendingIndividualRoleInHousehold",
+            fields=[],
             options={
-                'verbose_name': 'Imported Individual Role In Household',
-                'verbose_name_plural': 'Imported Individual Roles In Household',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Imported Individual Role In Household",
+                "verbose_name_plural": "Imported Individual Roles In Household",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('household.individualroleinhousehold',),
+            bases=("household.individualroleinhousehold",),
         ),
         migrations.AlterUniqueTogether(
-            name='individualroleinhousehold',
-            unique_together={('household', 'individual'), ('role', 'household')},
+            name="individualroleinhousehold",
+            unique_together={("household", "individual"), ("role", "household")},
         ),
         migrations.AddIndex(
-            model_name='individual',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['vector_column'], name='household_i_vector__4c5828_gin'),
+            model_name="individual",
+            index=django.contrib.postgres.indexes.GinIndex(
+                fields=["vector_column"], name="household_i_vector__4c5828_gin"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'), django.db.models.expressions.Func(django.db.models.expressions.F('type_id'), django.db.models.expressions.Value(True), function='check_unique_document_for_individual', output_field=models.BooleanField()))), fields=('individual', 'type', 'country', 'program'), name='unique_for_individual_if_not_removed_and_valid'),
+            model_name="document",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    models.Q(
+                        ("is_removed", False),
+                        ("status", "VALID"),
+                        django.db.models.expressions.Func(
+                            django.db.models.expressions.F("type_id"),
+                            django.db.models.expressions.Value(True),
+                            function="check_unique_document_for_individual",
+                            output_field=models.BooleanField(),
+                        ),
+                    )
+                ),
+                fields=("individual", "type", "country", "program"),
+                name="unique_for_individual_if_not_removed_and_valid",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'), ('rdi_merge_status', 'MERGED'))), fields=('document_number', 'type', 'country', 'program', 'is_original'), name='unique_if_not_removed_and_valid_for_representations'),
+            model_name="document",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    models.Q(("is_removed", False), ("status", "VALID"), ("rdi_merge_status", "MERGED"))
+                ),
+                fields=("document_number", "type", "country", "program", "is_original"),
+                name="unique_if_not_removed_and_valid_for_representations",
+            ),
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS household_household_default_page_index ON public.household_household USING btree (created_at, business_area_id, is_removed) WHERE NOT is_removed;",

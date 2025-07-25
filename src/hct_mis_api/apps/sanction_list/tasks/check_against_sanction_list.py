@@ -35,7 +35,7 @@ class CheckAgainstSanctionListTask:
         results_dict = {}
 
         for row in sheet.iter_rows(min_row=2):
-            if not any([cell.value for cell in row]):
+            if not any(cell.value for cell in row):
                 continue
 
             filter_values = {
@@ -52,7 +52,7 @@ class CheckAgainstSanctionListTask:
                 row_number = cell.row
                 header_as_key = header.replace(" ", "_").lower().strip()
                 if header_as_key == "date_of_birth":
-                    if not isinstance(value, (datetime, date)):
+                    if not isinstance(value, datetime | date):
                         try:
                             value = dateutil.parser.parse(value)
                         except Exception:
@@ -78,7 +78,7 @@ class CheckAgainstSanctionListTask:
 
             if len(names) == 0:
                 continue
-            elif len(names) == 1:
+            if len(names) == 1:
                 name_query = Q(full_name__in=full_name_permutations) | Q(first_name__iexact=names[0])
             else:
                 name_query = Q(full_name__in=full_name_permutations) | (
@@ -104,7 +104,7 @@ class CheckAgainstSanctionListTask:
         }
         text_body = render_to_string("sanction_list/check_results.txt", context)
         html_body = render_to_string("sanction_list/check_results.html", context)
-        subject = f"Sanction List Check - file: {original_file_name}, " f"date: {today.strftime('%Y-%m-%d %I:%M %p')}"
+        subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
         attachment_wb = Workbook()
         attachment_ws = attachment_wb.active

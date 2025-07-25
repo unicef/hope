@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from django.db import transaction
 
@@ -17,13 +17,13 @@ from hct_mis_api.one_time_scripts.universal_individual_update_script.validator_a
     validate_string,
 )
 
-household_fields: Dict[str, Tuple[str, Any, Any]] = {
+household_fields: dict[str, tuple[str, Any, Any]] = {
     "admin1_h_c": ("admin1", validate_admin, handle_admin_field),
     "admin2_h_c": ("admin2", validate_admin, handle_admin_field),
     "admin3_h_c": ("admin3", validate_admin, handle_admin_field),
 }
 
-individual_fields: Dict[str, Tuple[str, Any, Any]] = {
+individual_fields: dict[str, tuple[str, Any, Any]] = {
     "given_name_i_c": ("given_name", validate_string, handle_simple_field),
     "middle_name_i_c": ("middle_name", validate_string, handle_simple_field),
     "family_name_i_c": ("family_name", validate_string, handle_simple_field),
@@ -33,7 +33,7 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "pp_phone_no_i_c": ("phone_no", validate_phone_number, handle_simple_field),
 }
 
-individual_flex_fields: Dict[str, Tuple[str, Any, Any]] = {
+individual_flex_fields: dict[str, tuple[str, Any, Any]] = {
     "ss_hw_lot_num_i_f": ("ss_hw_lot_num_i_f", validate_flex_field_string, handle_simple_field),
     "ss_health_facility_name_i_f": ("ss_health_facility_name_i_f", validate_flex_field_string, handle_simple_field),
     "ss_hw_title_i_f": ("ss_hw_title_i_f", validate_flex_field_string, handle_simple_field),
@@ -43,7 +43,7 @@ individual_flex_fields: Dict[str, Tuple[str, Any, Any]] = {
     "ss_hw_cadre_i_f": ("ss_hw_cadre_i_f", validate_flex_field_string, handle_simple_field),
 }
 
-document_fields: List[Tuple[str, str]] = [
+document_fields: list[tuple[str, str]] = [
     ("national_id_no_i_c", "national_id_country_i_c"),
     ("birth_certificate_no_i_c", "birth_certificate_country_i_c"),
 ]

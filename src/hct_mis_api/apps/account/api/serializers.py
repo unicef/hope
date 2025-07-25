@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -159,8 +159,7 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
     def get_area_access(self, obj: Partner) -> str:
         if obj.has_area_limits_in_program(obj.partner_program):
             return "ADMIN_AREA"
-        else:
-            return "BUSINESS_AREA"
+        return "BUSINESS_AREA"
 
     def get_areas(self, obj: Partner) -> ReturnDict:
         areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")
@@ -173,13 +172,15 @@ class UserChoicesSerializer(serializers.Serializer):
     partner_choices = serializers.SerializerMethodField()
     partner_choices_temp = serializers.SerializerMethodField()
 
-    def get_role_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return [dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.order_by("name")]
+    def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        return [
+            {"name": role.name, "value": role.id, "subsystem": role.subsystem} for role in Role.objects.order_by("name")
+        ]
 
-    def get_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
-    def get_partner_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_partner_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(
@@ -190,7 +191,7 @@ class UserChoicesSerializer(serializers.Serializer):
             )
         )
 
-    def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         # TODO: can be removed after proper solution is applied; this is the temp solution to skip the user input in
         #  program mutations and retrieve partners already with a role in BA
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]

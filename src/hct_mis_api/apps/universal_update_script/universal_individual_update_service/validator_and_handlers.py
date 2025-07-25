@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable
 
 from django.db.models import Model
 
@@ -14,7 +14,7 @@ from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 def handle_date_field(
     value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
-) -> Optional[date]:
+) -> date | None:
     if value is None or value == "":
         return None
     return timezone_datetime(value).date()
@@ -34,7 +34,7 @@ def handle_boolean_field(value: Any, name: str, household: Any, business_area: B
 
 def handle_integer_field(
     value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
-) -> Optional[int]:
+) -> int | None:
     if value is None or value == "":
         return None
     return int(value)
@@ -42,7 +42,7 @@ def handle_integer_field(
 
 def handle_admin_field(
     value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
-) -> Optional[Area]:
+) -> Area | None:
     if value is None or value == "":
         return None
     return Area.objects.get(p_code=value)
@@ -50,7 +50,7 @@ def handle_admin_field(
 
 def validate_admin(
     value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     countries = business_area.countries.all()
@@ -61,13 +61,11 @@ def validate_admin(
 
 def validate_string(
     value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     return None
 
 
-def validate_date(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+def validate_date(value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program) -> str | None:
     if value is None or value == "":
         return None
     try:
@@ -79,7 +77,7 @@ def validate_date(
 
 def validate_integer(
     value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     try:
@@ -91,7 +89,7 @@ def validate_integer(
 
 def validate_phone_number(
     value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     is_valid = is_valid_phone_number(value)
@@ -100,7 +98,7 @@ def validate_phone_number(
     return None
 
 
-def _get_field_choices_values(model_class: Type[Model], field_name: str) -> list[tuple[str, str]]:
+def _get_field_choices_values(model_class: type[Model], field_name: str) -> list[tuple[str, str]]:
     field = model_class._meta.get_field(field_name)
     if field.choices:
         return [key for key, display in field.choices]
@@ -109,7 +107,7 @@ def _get_field_choices_values(model_class: Type[Model], field_name: str) -> list
 
 def validate_choices(
     value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     choices = _get_field_choices_values(model_class, name)
@@ -120,7 +118,7 @@ def validate_choices(
 
 def validate_boolean(
     value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     if isinstance(value, bool):
@@ -132,7 +130,7 @@ def validate_boolean(
 
 def validate_flex_field_string(
     value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     return None
 
 

@@ -24,5 +24,5 @@ def initialize_core_fixtures() -> None:
     generate_data_collecting_types()
 
     FlagState.objects.get_or_create(
-        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+        name="ALLOW_ACCOUNTABILITY_MODULE", condition="boolean", value="True", required=False
     )

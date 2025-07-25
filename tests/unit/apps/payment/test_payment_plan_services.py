@@ -163,12 +163,12 @@ class TestPaymentPlanServices(APITestCase):
             },
             individuals_data=[{}],
         )
-        create_input_data = dict(
-            program_cycle_id=str(program_cycle.id),
-            name="TEST_123",
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        create_input_data = {
+            "program_cycle_id": str(program_cycle.id),
+            "name": "TEST_123",
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
@@ -177,7 +177,7 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-        )
+        }
 
         with self.assertRaisesMessage(
             ValidationError, f"Target Population with name: TEST_123 and program: {program.name} already exists."
@@ -216,11 +216,11 @@ class TestPaymentPlanServices(APITestCase):
         pp.save()
 
         # check validation for Open PP
-        open_input_data = dict(
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
+        open_input_data = {
+            "dispersion_start_date": parse_date("2020-09-10"),
+            "dispersion_end_date": parse_date("2020-09-11"),
+            "currency": "USD",
+        }
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         self.assertEqual(
@@ -271,13 +271,13 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=program_cycle.id,
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": program_cycle.id,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
@@ -286,9 +286,9 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-            fsp_id=self.fsp.id,
-            delivery_mechanism_code=self.dm_transfer_to_account.code,
-        )
+            "fsp_id": self.fsp.id,
+            "delivery_mechanism_code": self.dm_transfer_to_account.code,
+        }
 
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
@@ -325,11 +325,11 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
+        input_data = {
+            "dispersion_start_date": parse_date("2020-09-10"),
+            "dispersion_end_date": parse_date("2020-09-11"),
+            "currency": "USD",
+        }
 
         with self.assertRaisesMessage(ValidationError, "Not Allow edit Payment Plan within status LOCKED"):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
@@ -649,16 +649,16 @@ class TestPaymentPlanServices(APITestCase):
             cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
         cycle = program.cycles.first()
-        input_data = dict(
-            business_area_slug="afghanistan",
-            dispersion_start_date=parse_date("2020-11-11"),
-            dispersion_end_date=parse_date("2020-11-20"),
-            currency="USD",
-            name="TestName123",
-            program_cycle_id=str(cycle.id),
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "dispersion_start_date": parse_date("2020-11-11"),
+            "dispersion_end_date": parse_date("2020-11-20"),
+            "currency": "USD",
+            "name": "TestName123",
+            "program_cycle_id": str(cycle.id),
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [
                         {
@@ -674,7 +674,7 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-        )
+        }
 
         with self.assertRaisesMessage(
             ValidationError,
@@ -710,13 +710,13 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=program_cycle.id,
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": program_cycle.id,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
@@ -725,7 +725,7 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-        )
+        }
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:

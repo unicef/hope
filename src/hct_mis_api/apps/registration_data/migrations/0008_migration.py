@@ -4,15 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration_data', '0007_migration'),
+        ("registration_data", "0007_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='registrationdataimport',
-            name='exclude_external_collectors',
-            field=models.BooleanField(default=False, help_text='Exclude external alternate collectors from the RDI. This is used for the RDI created from the program population.'),
+            model_name="registrationdataimport",
+            name="exclude_external_collectors",
+            field=models.BooleanField(
+                default=False,
+                help_text="Exclude external alternate collectors from the RDI. This is used for the RDI created from the program population.",
+            ),
         ),
     ]

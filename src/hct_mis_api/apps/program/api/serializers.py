@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.db.models import Count, F, Q, Value
 from django.shortcuts import get_object_or_404
@@ -31,9 +31,9 @@ from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCy
 
 def validate_cycle_timeframes_overlapping(
     program: Program,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    current_cycle_id: Optional[str] = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    current_cycle_id: str | None = None,
 ) -> None:
     cycle_qs = program.cycles.exclude(id=current_cycle_id)
     if start_date:
@@ -59,8 +59,7 @@ def validate_programme_code(programme_code: str) -> str:
     programme_code = programme_code.upper()
     if not re.match(r"^[A-Z0-9\-]{4}$", programme_code):
         raise serializers.ValidationError(
-            "Programme code should be exactly 4 characters long and may only contain letters, digits "
-            "and character: -"
+            "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
         )
     return programme_code
 
@@ -76,7 +75,7 @@ def validate_data_collecting_type(data_collecting_type: DataCollectingType, busi
     # validate DCT
     if not data_collecting_type.active:
         raise serializers.ValidationError("Only active Data Collecting Type can be used in Program.")
-    elif data_collecting_type.deprecated:
+    if data_collecting_type.deprecated:
         raise serializers.ValidationError("Deprecated Data Collecting Type cannot be used in Program.")
 
 
@@ -91,7 +90,7 @@ def validate_data_collecting_type_and_beneficiary_group_combination(
         )
 
 
-def validate_partners_data(partners: list[Dict[str, Any]], partner_access: str, user_partner: Partner) -> None:
+def validate_partners_data(partners: list[dict[str, Any]], partner_access: str, user_partner: Partner) -> None:
     partners_ids = [int(partner["partner"]) for partner in partners]
     if (
         partner_access == Program.SELECTED_PARTNERS_ACCESS
@@ -145,7 +144,7 @@ class ProgramCycleListSerializer(serializers.ModelSerializer):
             return "-"
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
-    def get_admin_url(self, obj: ProgramCycle) -> Optional[str]:
+    def get_admin_url(self, obj: ProgramCycle) -> str | None:
         user = self.context["request"].user
         return obj.admin_url if user.is_superuser else None
 
@@ -166,8 +165,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         program_slug = request.parser_context["kwargs"]["program_slug"]
-        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
-        return program
+        return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
     def validate_title(self, value: str) -> str:
         program = self.get_program()
@@ -176,7 +174,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Programme Cycle title should be unique.")
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         request = self.context["request"]
         program = self.get_program()
         start_date = data["start_date"]
@@ -240,7 +238,7 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
 
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         program = self.instance.program
         start_date = data.get("start_date")
         end_date = data.get("end_date")
@@ -285,7 +283,7 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
                     )
             if start_date and end_date < start_date:
                 raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
-            elif end_date < self.instance.start_date:
+            if end_date < self.instance.start_date:
                 raise serializers.ValidationError(
                     {"start_date": "Programme Cycle end date must be after the start date."}
                 )
@@ -453,7 +451,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "status",
         )
 
-    def validate_programme_code(self, value: Optional[str]) -> Optional[str]:
+    def validate_programme_code(self, value: str | None) -> str | None:
         if value:
             value = validate_programme_code(value)
             business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
@@ -467,7 +465,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         validate_data_collecting_type(data_collecting_type, business_area_slug)
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         # validate start_date and end_date
         end_date = data.get("end_date")
         if end_date:
@@ -485,7 +483,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
         return data
 
-    def to_representation(self, obj: Program) -> Dict:
+    def to_representation(self, obj: Program) -> dict:
         """
         Override to_representation to include the partners and pdu_fields in the correct format.
         """
@@ -540,7 +538,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "partner_access",
         )
 
-    def validate_programme_code(self, value: Optional[str]) -> Optional[str]:
+    def validate_programme_code(self, value: str | None) -> str | None:
         if value:
             value = validate_programme_code(value)
             if (
@@ -560,11 +558,10 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             # can update for draft program without population
             if self.instance.status != Program.DRAFT:
                 raise serializers.ValidationError("Data Collecting Type can be updated only for Draft Programs.")
-            else:
-                if Household.objects.filter(program=self.instance).exists():
-                    raise serializers.ValidationError(
-                        "Data Collecting Type can be updated only for Program without any households."
-                    )
+            if Household.objects.filter(program=self.instance).exists():
+                raise serializers.ValidationError(
+                    "Data Collecting Type can be updated only for Program without any households."
+                )
         return value
 
     def validate_beneficiary_group(self, value: BeneficiaryGroup) -> BeneficiaryGroup:
@@ -573,11 +570,11 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Beneficiary Group cannot be updated if Program has population.")
         return value
 
-    def validate_version(self, value: Optional[int]) -> Optional[int]:
+    def validate_version(self, value: int | None) -> int | None:
         check_concurrency_version_in_mutation(value, self.instance)
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         end_date = data.get("end_date")
         start_date = data["start_date"]
         if end_date:
@@ -599,7 +596,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
         return data
 
-    def to_representation(self, obj: Program) -> Dict:
+    def to_representation(self, obj: Program) -> dict:
         """
         Override to_representation to include the partners and pdu_fields in the correct format.
         """
@@ -632,11 +629,11 @@ class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
             "version",
         )
 
-    def validate_version(self, value: Optional[int]) -> Optional[int]:
+    def validate_version(self, value: int | None) -> int | None:
         check_concurrency_version_in_mutation(value, self.instance)
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         # validate partners and partner_access
         partners = data.get("partners", [])
         partner_access = data["partner_access"]
@@ -673,7 +670,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "partner_access",
         )
 
-    def validate_programme_code(self, value: Optional[str]) -> Optional[str]:
+    def validate_programme_code(self, value: str | None) -> str | None:
         if value:
             value = validate_programme_code(value)
             if Program.objects.filter(business_area=self.instance.business_area, programme_code=value).exists():
@@ -685,7 +682,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         validate_data_collecting_type(data_collecting_type, self.instance.business_area.slug)
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         original_program = self.instance
 
         # validate DCT against original program
@@ -695,7 +692,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"data_collecting_type": "The original Program must have a Data Collecting Type."}
             )
-        elif data_collecting_type not in original_program.data_collecting_type.compatible_types.all():
+        if data_collecting_type not in original_program.data_collecting_type.compatible_types.all():
             raise serializers.ValidationError(
                 {"data_collecting_type": "Data Collecting Type must be compatible with the original Program."}
             )
@@ -726,19 +723,19 @@ class ProgramChoicesSerializer(serializers.Serializer):
     pdu_subtype_choices = serializers.SerializerMethodField()
     program_cycle_status_choices = serializers.SerializerMethodField()
 
-    def get_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
 
-    def get_frequency_of_payments_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_frequency_of_payments_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
 
-    def get_sector_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_sector_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SECTOR_CHOICE)
 
-    def get_scope_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_scope_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SCOPE_CHOICE)
 
-    def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         request = self.context.get("request", {})
         return list(
             DataCollectingType.objects.filter(
@@ -758,13 +755,13 @@ class ProgramChoicesSerializer(serializers.Serializer):
             .order_by("name")
         )
 
-    def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.PARTNER_ACCESS_CHOICE)
 
-    def get_pdu_subtype_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_pdu_subtype_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PeriodicFieldData.TYPE_CHOICES)
 
-    def get_program_cycle_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_program_cycle_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
 

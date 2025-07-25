@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -94,14 +94,13 @@ class PaymentNotification:
 
     def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()
-        email = MailjetClient(
+        return MailjetClient(
             mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
             subject=self.email_subject,
             recipients=[user_recipient.email for user_recipient in self.user_recipients],
             ccs=[self.action_user.email],
             variables=body_variables,
         )
-        return email
 
     def send_email_notification(self) -> None:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
@@ -110,16 +109,16 @@ class PaymentNotification:
             except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
-    def _prepare_body_variables(self) -> Dict[str, Any]:
+    def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        variables = {
+        return {
             "first_name": "Payment Plan",
             "last_name": self.recipient_title,
             "action_name": self.action_name,
             "payment_plan_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
-                f'{encode_id_base64(self.payment_plan.program.id, "Program")}/payment-module/payment-plans/'
-                f'{encode_id_base64(self.payment_plan.id, "PaymentPlan")}'
+                f"{encode_id_base64(self.payment_plan.program.id, 'Program')}/payment-module/payment-plans/"
+                f"{encode_id_base64(self.payment_plan.id, 'PaymentPlan')}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,
             "payment_plan_creator": self.payment_plan_creator.get_full_name(),
@@ -128,4 +127,3 @@ class PaymentNotification:
             "action_date": self.action_date,
             "program_name": self.payment_plan.program.name,
         }
-        return variables

@@ -90,8 +90,7 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 def get_redis_host() -> str:
     regex = "\\/\\/(.*):"
-    redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
-    return redis_host
+    return re.search(regex, env("CACHE_LOCATION")).group(1)
 
 
 @pytest.fixture(autouse=True)
@@ -510,22 +509,20 @@ def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDas
 @pytest.fixture
 def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
-        **{
-            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
-            "code": "0060",
-            "name": "Afghanistan",
-            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            "region_code": "64",
-            "region_name": "SAR",
-            "slug": "afghanistan",
-            "has_data_sharing_agreement": True,
-            "is_accountability_applicable": True,
-            "kobo_token": "XXX",
-            "active": True,
-        },
+        pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+        code="0060",
+        name="Afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        slug="afghanistan",
+        has_data_sharing_agreement=True,
+        is_accountability_applicable=True,
+        kobo_token="XXX",
+        active=True,
     )
     FlagState.objects.get_or_create(
-        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+        name="ALLOW_ACCOUNTABILITY_MODULE", condition="boolean", value="True", required=False
     )
     yield business_area
 
@@ -695,18 +692,17 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
 def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
     yield
     if request.node.rep_setup.failed:
-        print("setting up a test failed!", request.node.nodeid)
+        pass
     elif request.node.rep_setup.passed:
         if request.node.rep_call.failed:
             screenshot(browser, request.node.nodeid)
-            print("\nExecuting test failed", request.node.nodeid)
 
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)

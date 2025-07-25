@@ -191,7 +191,6 @@ class Common:
             file_path = settings.SCREENSHOT_DIRECTORY
         sleep(delay_sec)
         full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
-        print("Saving screenshot to:", full_filename)
         self.driver.get_screenshot_as_file(full_filename)
 
     def scroll(self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1) -> None:
@@ -209,9 +208,9 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")
+                pass
             except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")
+                pass
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)
@@ -225,6 +224,6 @@ class Common:
         while True:
             if os.path.exists(filepath):
                 return True
-            elif time.time() - start_time > timeout:
+            if time.time() - start_time > timeout:
                 raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
             sleep(0.02)

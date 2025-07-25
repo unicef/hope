@@ -18,17 +18,17 @@ jobs:
             echo "❌ ERROR: $AZURE_PIPELINE_ID must be set" >&2
             exit 1
           fi
-          
+
           IFS=',' read -ra pipelines <<< "$AZURE_PIPELINE_ID"
           for pipeline in "${pipelines[@]}"; do
             jsonBody='{"variables": {"sha": {"isSecret": false, "value": "${{ github.sha }}"}, "tag": {"isSecret": false, "value": "core-${{ github.sha }}"}}}'
             contentLength=$(echo -n $jsonBody | wc -c)
             project=ICTD-HCT-MIS
             organization=unicef
-          
+
             echo Triggering deploy for pipeline $pipeline
             echo JSON body: $jsonBody
-          
+
             curl -v -L \
               -u ":${{ secrets.AZURE_PAT }}" \
               -H "Content-Type: application/json" \

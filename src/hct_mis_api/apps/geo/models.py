@@ -1,7 +1,7 @@
 # - Country
 # - AreaType
 # - Area
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.contrib.postgres.fields import CICharField
 from django.db import models
@@ -62,7 +62,7 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         return self.name
 
     @classmethod
-    def get_choices(cls) -> List[Dict[str, Any]]:
+    def get_choices(cls) -> list[dict[str, Any]]:
         queryset = cls.objects.all().order_by("name")
         return [
             {
@@ -139,9 +139,9 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     @classmethod
     def get_admin_areas_as_choices(
-        cls, admin_level: Optional[int] = None, business_area_slug: Optional[str] = None, *args: Any, **kwargs: Any
-    ) -> List[Dict[str, Any]]:
-        params: Dict[str, Any] = {}
+        cls, admin_level: int | None = None, business_area_slug: str | None = None, *args: Any, **kwargs: Any
+    ) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {}
         if admin_level:
             params["area_type__area_level"] = admin_level
 

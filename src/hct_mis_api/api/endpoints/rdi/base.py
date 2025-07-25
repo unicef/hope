@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
@@ -38,7 +38,7 @@ class RDISerializer(serializers.ModelSerializer):
         model = RegistrationDataImport
         fields = ("name", "program", "imported_by_email")
 
-    def create(self, validated_data: Dict) -> None:
+    def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
         return super().create(validated_data)
 

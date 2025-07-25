@@ -43,9 +43,10 @@ class TestCreateFinancialInstitutions(TestCase):
         account_type_bank = AccountType.objects.get(key="bank")
         cls.uba_fsp, _ = FinancialServiceProvider.objects.get_or_create(
             name="United Bank for Africa - Nigeria",
-            defaults=dict(
-                vision_vendor_number=12345, communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            ),
+            defaults={
+                "vision_vendor_number": 12345,
+                "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            },
         )
         cls.nigeria = geo_models.Country.objects.create(name="Nigeria", iso_code2="NG", iso_code3="NG", iso_num="NG")
         cls.afg = geo_models.Country.objects.create(name="Afghanistan", iso_code2="AF", iso_code3="AF", iso_num="0004")

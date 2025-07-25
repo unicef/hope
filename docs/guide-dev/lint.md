@@ -1,6 +1,6 @@
 # Code quality
 
-To enhance readability of code and increase code standards we use the following  
+To enhance readability of code and increase code standards we use the following
 
 - pep8 - <https://peps.python.org/pep-0008/>
 - flake8 - <https://flake8.pycqa.org/en/latest/>

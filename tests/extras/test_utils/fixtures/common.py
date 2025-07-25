@@ -8,17 +8,15 @@ from extras.test_utils.factories.account import BusinessAreaFactory
 @pytest.fixture()
 def afghanistan() -> BusinessAreaFactory:
     return BusinessAreaFactory(
-        **{
-            "code": "0060",
-            "name": "Afghanistan",
-            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            "region_code": "64",
-            "region_name": "SAR",
-            "slug": "afghanistan",
-            "has_data_sharing_agreement": True,
-            "kobo_token": "XXX",
-            "active": True,
-        },
+        code="0060",
+        name="Afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        slug="afghanistan",
+        has_data_sharing_agreement=True,
+        kobo_token="XXX",
+        active=True,
     )
 
 
