@@ -4,33 +4,33 @@ exclude = ["src/frontend"]
 
 [lint]
 select = [
-#    "A", # prevent using keywords that clobber python builtins
-#    "B", # bugbear: security warnings
-#    "BLE", # blind exceptions
+    "A", # prevent using keywords that clobber python builtins
+    "B", # bugbear: security warnings
+    "BLE", # blind exceptions
     "C4", # flake8-comprehensions
-#    "C90", # McCabe complexity
+    "C90", # McCabe complexity
     "COM", # flake8-commas
-#    "D", # pydocstyle
-#    "DJ", # flake8-django
-#    "E", # pycodestylex
+    "D", # pydocstyle
+    "DJ", # flake8-django
+    "E", # pycodestylex
     "E4", "E7", "E9",
-#    "ERA", # eradicate
+    "ERA", # eradicate
     "F", # pyflakes
     "FLY", # flynt
     "FURB", # refurb
     "I", # isort
     "ICN", # flake8-import-conventions
     "ISC", # implicit string concatenation
-#    "N", # Pep* naming
-#    "PERF", # perflint
+    "N", # Pep* naming
+    "PERF", # perflint
     "PIE", # flake8-pie
-#    "PL", # PyLint
-#    "PT", # flake8-pytest-style
+    "PL", # PyLint
+    "PT", # flake8-pytest-style
     "Q", # flake8-quotes
     "R", # PyLint Refactor
     "RET", # flake8-return
-#    "S", # bandit,
-#    "SIM", # flake8-simplify
+    "S", # bandit,
+    "SIM", # flake8-simplify
     "T10", # flake8-debugger
     "T20", # flake8-print
     "TC", # flake8-type-checking
