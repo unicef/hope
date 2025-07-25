@@ -323,6 +323,14 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export PDF File Summary",
     )
+    reconciliation_import_file = models.ForeignKey(
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Reconciliation Import File",
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -1420,7 +1428,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
         core_field = core_fields_attributes.get(core_field_name)
         if not core_field:
-            # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
+            # Some fields can be added to the template, such as 'size'
             # which are not applicable to "People" export.
             return None
 

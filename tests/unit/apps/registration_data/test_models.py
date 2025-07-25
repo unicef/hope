@@ -3,23 +3,23 @@ import datetime
 from django.core.management import call_command
 from django.test import TestCase
 
-from freezegun import freeze_time
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
 )
-from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
+from freezegun import freeze_time
+
+from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 

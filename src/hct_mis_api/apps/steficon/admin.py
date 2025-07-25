@@ -154,7 +154,7 @@ class TestRuleMixin:
                 elif selection == "optTargetPopulation":
                     tp = form.cleaned_data.get("target_population")
                     context["target_population"] = tp
-                    data = [{"household": e.household} for e in tp.selections.all()]
+                    data = [{"household": e.household} for e in tp.payment_items.all()]
                     title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
                 elif selection == "optContentType":
                     ct: ContentType = form.cleaned_data["content_type"]
@@ -176,12 +176,13 @@ class TestRuleMixin:
                         "data": "",
                         "error": None,
                         "success": True,
+                        "result": None,
                     }
                     try:
                         if isinstance(rule, Rule):
-                            row["result"] = rule.interpreter.execute(values)
+                            row["result"] = rule.interpreter.execute({"data": values})
                         else:
-                            row["result"] = rule.execute(values)
+                            row["result"] = rule.execute({"data": values})
                     except Exception as e:
                         row["error"] = f"{e.__class__.__name__}: {str(e)}"
                         row["success"] = False
@@ -190,7 +191,7 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
-            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optData"})
         if "form" in context:
             context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)

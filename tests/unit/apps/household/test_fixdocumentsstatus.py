@@ -1,11 +1,12 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_for_fixtures,
 )
+
 from hct_mis_api.apps.household.management.commands.fixdocumentsstatus import (
     fix_documents_statuses,
 )

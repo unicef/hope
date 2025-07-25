@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { AccountField } from '../AccountField';
 import { removeItemById } from '../utils/helpers';
 import { ReactElement } from 'react';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 export interface NewAccountFieldArrayProps {

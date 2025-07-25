@@ -58,5 +58,5 @@ This will require some more steps to be taken before running the tests.
 7. Run the tests:
     ```bash
       source ./development_tools/local_selenium_init.sh`
-      python -m pytest -svvv tests/selenium --html-report=./report/report.html`
+      python -m pytest -svvv tests/e2e --html-report=./report/report.html`
     ```

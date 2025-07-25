@@ -14,7 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='targetingcriteriarule',
             name='payment_plan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+',
-                                    to='payment.paymentplan'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='payment.paymentplan', null=True),
         ),
     ]

@@ -5,12 +5,14 @@ from django.test import TestCase
 from django.utils import timezone
 
 import pytest
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import ProgramFactory
+
 from hct_mis_api.apps.account.models import (
     AdminAreaLimitedTo,
     Partner,
@@ -18,8 +20,6 @@ from hct_mis_api.apps.account.models import (
     RoleAssignment,
 )
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
 data_migration = import_module("hct_mis_api.apps.account.migrations.0011_migration")

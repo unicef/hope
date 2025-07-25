@@ -10,9 +10,6 @@ import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { AccountToEditTable } from './AccountToEditTable';
 import { AccountTable } from './AccountTable';
-import { PaymentChannelsTable } from './PaymentChannelsTable';
-import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
-import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
@@ -180,17 +177,19 @@ export function RequestedIndividualDataChangeTable({
             />
           ))
         : null}
-      {accounts?.length ? accounts.map((account, index) => (
-        <AccountTable
-          key={account.id}
-          values={values}
-          isEdit={isEdit}
-          ticket={ticket}
-          setFieldValue={setFieldValue}
-          index={index}
-          account={account}
-        />
-      )) : null}
+      {accounts?.length
+        ? accounts.map((account, index) => (
+            <AccountTable
+              key={account.id}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              index={index}
+              account={account}
+            />
+          ))
+        : null}
       {accountsToEdit?.length
         ? accountsToEdit.map((account, index) => (
             <AccountToEditTable
