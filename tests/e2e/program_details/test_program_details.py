@@ -275,15 +275,13 @@ class TestSmokeProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("Test Programm")
         pageProgrammeDetails.getButtonEditProgram().click()
         pageProgrammeDetails.getSelectEditProgramDetails().click()
-        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeName())
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
-        pageProgrammeManagement.getInputProgrammeCode().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeCode())
         pageProgrammeManagement.getInputProgrammeCode().send_keys("NEW1")
-        pageProgrammeManagement.getInputStartDate().click()
-        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputStartDate())
         pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
-        pageProgrammeManagement.getInputEndDate().click()
-        pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputEndDate())
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -622,7 +620,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
-        pageProgrammeDetails.getInputTitle().send_keys(Keys.CONTROL + "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getInputTitle())
         pageProgrammeDetails.getInputTitle().send_keys("New cycle with wrong date")
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
@@ -635,8 +633,7 @@ class TestProgrammeDetails:
             sleep(0.1)
         assert "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text
 
-        pageProgrammeDetails.getStartDateCycle().click()
-        pageProgrammeDetails.getStartDateCycle().send_keys(Keys.CONTROL + "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getStartDateCycle())
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() - relativedelta(days=1)).strftime("%Y-%m-%d")
         )
@@ -650,8 +647,7 @@ class TestProgrammeDetails:
                 break
             sleep(0.1)
         assert "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text
-        pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(Keys.CONTROL + "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getEndDateCycle())
 
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
@@ -694,7 +690,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
         pageProgrammeDetails.getButtonEditProgramCycle()[1].click()
-        pageProgrammeDetails.getInputTitle().send_keys(Keys.CONTROL + "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getInputTitle())
         pageProgrammeDetails.getInputTitle().send_keys("New cycle with wrong date")
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
@@ -727,8 +723,7 @@ class TestProgrammeDetails:
                 break
             sleep(0.1)
         assert "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text
-        pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(Keys.CONTROL + "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getEndDateCycle())
 
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonSave().click()
@@ -776,11 +771,9 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getButtonEditProgram().click()
         pageProgrammeDetails.getSelectEditProgramDetails().click()
         pageProgrammeManagement.getInputProgrammeName()
-        pageProgrammeManagement.getInputStartDate().click()
-        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputStartDate())
         pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
-        pageProgrammeManagement.getInputEndDate().click()
-        pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputEndDate())
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()

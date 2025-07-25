@@ -378,14 +378,13 @@ def generate_data_collecting_types() -> None:
     ]
 
     for data_dict in data_collecting_types:
-        dct = DataCollectingTypeFactory(
+        DataCollectingTypeFactory(
             label=data_dict["label"],
             code=data_dict["code"],
             business_areas=all_ba_id_list,
             type=data_dict["type"],
             household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
         )
-        dct.compatible_types.add(dct)
 
 
 def generate_pdu_data() -> None:
