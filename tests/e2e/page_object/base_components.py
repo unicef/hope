@@ -1,4 +1,5 @@
 from time import sleep
+import sys
 
 from e2e.helpers.helper import Common
 from selenium.webdriver import Keys
@@ -182,8 +183,7 @@ class BaseComponents(Common):
 
         self.getGlobalProgramFilter().click()
         self.getGlobalProgramFilterSearchInput().clear()
-        self.getGlobalProgramFilterSearchInput().send_keys(Keys.CONTROL + "a")  # Select all (use COMMAND on Mac)
-        self.getGlobalProgramFilterSearchInput().send_keys(Keys.DELETE)
+        self.clear_input(self.getGlobalProgramFilterSearchInput())
         for _ in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):
             self.getGlobalProgramFilterSearchInput().send_keys(Keys.BACKSPACE)
         self.getGlobalProgramFilterSearchButton().click()
@@ -252,3 +252,12 @@ class BaseComponents(Common):
                 return True
             sleep(1)
         return False
+
+    def clear_input(self, element: WebElement) -> None:
+        """
+        Clear an input element, cross-platform.
+        """
+        key = Keys.COMMAND if sys.platform == "darwin" else Keys.CONTROL
+        element.click()
+        element.send_keys(key, "a")
+        element.send_keys(Keys.DELETE)

@@ -1128,7 +1128,7 @@ class TestTargeting:
         pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
         pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         # pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingDetails.getInputName().send_keys(Keys.CONTROL + "a")
+        pageTargetingDetails.clear_input(pageTargetingDetails.getInputName())
         pageTargetingDetails.getInputName().send_keys("New Test Data")
         pageTargetingDetails.getInputName().send_keys(Keys.ENTER)
         # pageTargetingCreate.getButtonSave().click()
