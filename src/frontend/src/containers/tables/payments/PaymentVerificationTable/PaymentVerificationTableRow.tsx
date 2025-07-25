@@ -56,7 +56,7 @@ export function PaymentVerificationTableRow({
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left" data-cy="cycle-title">
-        {plan.programCycle.title}
+        {plan?.programCycle?.title || '-'}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>

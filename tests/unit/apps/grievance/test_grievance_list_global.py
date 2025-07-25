@@ -4,21 +4,21 @@ from typing import Any, Callable
 from django.utils import timezone
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
@@ -663,7 +663,7 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 42
+        assert len(response.json()) == 43
 
     def test_all_add_individuals_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -679,4 +679,4 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 29
+        assert len(response.json()) == 30

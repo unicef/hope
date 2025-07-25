@@ -4,7 +4,8 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
-from hct_mis_api.apps.account.fixtures import generate_unicef_partners
+from extras.test_utils.factories.account import generate_unicef_partners
+
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,

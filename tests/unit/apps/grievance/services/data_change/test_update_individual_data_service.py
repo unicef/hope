@@ -4,28 +4,30 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 import pytest
-
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
-from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
-    IndividualDataUpdateService,
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
+    TicketIndividualDataUpdateDetailsFactory,
 )
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialInstitutionFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
+    IndividualDataUpdateService,
+)
+from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

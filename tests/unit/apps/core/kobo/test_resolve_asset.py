@@ -4,7 +4,7 @@
 # import pytest
 # from dateutil.tz import tzlocal
 #
-# from hct_mis_api.apps.core.fixtures import create_afghanistan
+# from extras.test_utils.factories.core import create_afghanistan
 # # from hct_mis_api.apps.core.schema import resolve_asset
 #
 # pytestmark = pytest.mark.django_db(transaction=True)

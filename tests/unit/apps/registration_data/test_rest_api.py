@@ -5,22 +5,22 @@ from unittest.mock import Mock, patch
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.sanction_list import SanctionListFactory
 from rest_framework import status
 from rest_framework.test import APIClient
+from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListFactory
 from hct_mis_api.apps.sanction_list.models import SanctionList
-from tests.unit.api.base import HOPEApiTestCase
 
 
 class RegistrationDataImportViewSetTest(HOPEApiTestCase):

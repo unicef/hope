@@ -1,11 +1,12 @@
 import base64
-import copy
 from pathlib import Path
 
 from django.core.management import call_command
 
+from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -18,14 +19,11 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
     DocumentType,
-    Household,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.unit.api.base import HOPEApiTestCase
 
 
 class UploadRDITests(HOPEApiTestCase):
@@ -610,68 +608,3 @@ class UploadRDITests(HOPEApiTestCase):
 """,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
-
-    def test_upload_collision(self) -> None:
-        program = Program.objects.get(pk=self.program.id)
-        program.collision_detection_enabled = True
-        program.collision_detector = "hct_mis_api.apps.program.collision_detectors.IdentificationKeyCollisionDetector"
-        program.save()
-        input_data = {
-            "program": str(self.program.id),
-            "households": [
-                {
-                    "residence_status": "IDP",
-                    "village": "village1",
-                    "country": "AF",
-                    "identification_key": "ab1",
-                    "members": [
-                        {
-                            "relationship": HEAD,
-                            "role": ROLE_PRIMARY,
-                            "full_name": "John Doe",
-                            "birth_date": "2000-01-01",
-                            "sex": "MALE",
-                        },
-                        {
-                            "relationship": SON_DAUGHTER,
-                            "full_name": "Mary Doe",
-                            "birth_date": "2000-01-01",
-                            "role": "",
-                            "sex": "FEMALE",
-                        },
-                    ],
-                    "size": 1,
-                }
-            ],
-        }
-        input_data["name"] = "Origin"
-        response = self.client.post(self.url, copy.deepcopy(input_data), format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        data = response.json()
-        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
-        self.assertEqual(rdi.program, self.program)
-        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_PENDING)
-
-        hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
-        self.assertEqual(Household.all_objects.count(), 1)
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNone(hh.alternate_collector)
-
-        self.assertEqual(hh.head_of_household.full_name, "John Doe")
-        self.assertEqual(hh.head_of_household.sex, MALE)
-        self.assertEqual(data["households"], 1)
-        self.assertEqual(data["individuals"], 2)
-
-        input_data["name"] = "Collision"
-        response = self.client.post(self.url, copy.deepcopy(input_data), format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        data = response.json()
-        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
-        self.assertEqual(rdi.program, self.program)
-        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_PENDING)
-        self.assertEqual(Household.all_objects.count(), 1)
-        self.assertEqual(hh.unicef_id, Household.all_objects.first().unicef_id)

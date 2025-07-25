@@ -3,14 +3,14 @@ from typing import Any, List
 from django.urls import reverse
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db

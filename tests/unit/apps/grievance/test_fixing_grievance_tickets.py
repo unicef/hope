@@ -1,20 +1,20 @@
 from typing import Any
 
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from parameterized import parameterized
+
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.grievance.management.commands.fix_grievance_tickets import (
     fix_disability_fields,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import DISABLED, HEAD, MALE, NOT_DISABLED
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestFixingGrievanceTickets(APITestCase):

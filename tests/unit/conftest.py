@@ -15,14 +15,13 @@ from _pytest.config.argparsing import Parser
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
+from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
 
 from hct_mis_api.apps.account.models import Partner, Role
 
-from .fixtures import *  # noqa: ABS101, F403, F401
-
 
 @pytest.fixture(autouse=True)
-def create_unicef_partner() -> None:
+def create_unicef_partner(db: Any) -> None:
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 

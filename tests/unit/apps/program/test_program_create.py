@@ -1,29 +1,29 @@
 from typing import Any
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
     create_ukraine,
 )
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db

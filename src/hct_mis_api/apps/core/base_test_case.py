@@ -15,14 +15,14 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory
 
 import factory
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.program import ProgramFactory
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 if TYPE_CHECKING:  # pragma: no_cover
     from hct_mis_api.apps.account.models import Partner, User
