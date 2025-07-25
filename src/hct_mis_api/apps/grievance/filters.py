@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any
 
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 
@@ -36,7 +36,7 @@ class GrievanceOrderingFilter(OrderingFilter):
             ("-linked_tickets", "Linked tickets (descending)"),
         ]
 
-    def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
+    def filter(self, qs: QuerySet, value: list[str]) -> QuerySet:
         if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
             qs = super().filter(qs, value)
             qs = (
@@ -223,7 +223,7 @@ class GrievanceTicketFilter(FilterSet):
 
         if val == "system":
             return qs.filter(~Q(category__in=user_generated))
-        elif val == "user":
+        if val == "user":
             return qs.filter(category__in=user_generated)
         return qs
 
@@ -235,10 +235,9 @@ class GrievanceTicketFilter(FilterSet):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
             return qs.filter(programs__status=Program.ACTIVE)
-        elif value is False:
+        if value is False:
             return qs.filter(programs__status=Program.FINISHED)
-        else:
-            return qs
+        return qs
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
@@ -253,8 +252,7 @@ class GrievanceTicketFilter(FilterSet):
             and (not program or not user.partner.has_area_limits_in_program(program.id))
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
-        else:
-            return qs
+        return qs
 
     def _get_ticket_filters(self, lookup: str, value: str) -> Q:
         query = Q()
@@ -271,7 +269,7 @@ class GrievanceTicketFilter(FilterSet):
         household_q = self._get_ticket_filters("household", value)
         return qs.filter(household_q)
 
-    def filter_by_payment_record(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
+    def filter_by_payment_record(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         return qs.filter(
             Q(complaint_ticket_details__payment_id__in=value) | Q(sensitive_ticket_details__payment_id__in=value)
         )

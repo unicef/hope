@@ -17,30 +17,24 @@ from ._base import BaseSanctionList
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Generator, TypedDict
 
-    Alias = TypedDict(
-        "Alias",
-        {
-            "first_name": str,
-            "second_name": str,
-            "third_name": str,
-            "full_name": str,
-            "reference_number": str,
-            "data_id": str,
-            "listed_on": str,
-            "version_num": str,
-            "country_of_birth": None,
-        },
-    )
-    Entry = TypedDict(
-        "Entry",
-        {
-            "id": int,
-            "aliases": list[Alias],
-            "birthdays": list[dict[str, str | None]],
-            "citizenships": list[dict[str, str | None]],
-            "identifications": list[dict[str, str | None]],
-        },
-    )
+    class Alias(TypedDict):
+        first_name: str
+        second_name: str
+        third_name: str
+        full_name: str
+        reference_number: str
+        data_id: str
+        listed_on: str
+        version_num: str
+        country_of_birth: None
+
+    class Entry(TypedDict):
+        id: int
+        aliases: list[Alias]
+        birthdays: list[dict[str, str | None]]
+        citizenships: list[dict[str, str | None]]
+        identifications: list[dict[str, str | None]]
+
 
 logger = logging.getLogger(__name__)
 

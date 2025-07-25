@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 @dataclass
@@ -8,7 +8,7 @@ class Language:
     code: str
 
 
-LANGUAGES: List[Language] = [
+LANGUAGES: list[Language] = [
     Language(english="English | English", code="en-us"),
     Language(english=" | عربي" + "Arabic", code="ar-ae"),
     Language(english="čeština | Czech", code="cs-cz"),
@@ -30,7 +30,7 @@ LANGUAGES: List[Language] = [
 
 class Languages:
     @classmethod
-    def get_choices(cls) -> List[Dict[str, Any]]:
+    def get_choices(cls) -> list[dict[str, Any]]:
         return [
             {
                 "label": {"English(EN)": language.english},
@@ -40,9 +40,9 @@ class Languages:
         ]
 
     @classmethod
-    def get_tuple(cls) -> Tuple[Tuple[str, str], ...]:
+    def get_tuple(cls) -> tuple[tuple[str, str], ...]:
         return tuple((lang.code, lang.english) for lang in LANGUAGES)
 
     @classmethod
-    def filter_by_code(cls, name: str) -> List[Language]:
+    def filter_by_code(cls, name: str) -> list[Language]:
         return [language for language in LANGUAGES if name.lower() in language.english.lower()]

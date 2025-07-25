@@ -2,26 +2,25 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import model_utils.fields
-import uuid
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('geo', '0004_migration'),
-        ('payment', '0026_migration'),
+        ("geo", "0004_migration"),
+        ("payment", "0026_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='account',
-            name='number',
+            model_name="account",
+            name="number",
             field=models.CharField(blank=True, max_length=256, null=True),
         ),
         migrations.AddField(
-            model_name='account',
-            name='financial_institution',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='payment.financialinstitution'),
+            model_name="account",
+            name="financial_institution",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="payment.financialinstitution"
+            ),
         ),
     ]

@@ -1,4 +1,4 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load i18n admin_urls static admin_modify %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls i18n static %}
 {% block extrahead %}
     {{ block.super }}
     {{ media }}
@@ -25,24 +25,27 @@
             padding-left: 20px;
         }
     </style>
-{% endblock %}
+{% endblock extrahead %}
+
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
         &rsaquo; <a
             href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
         &rsaquo; <a
             href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
         &rsaquo; <a
-            href="{% url opts|admin_urlname:'change'  object_id=original.pk %}">{{ original }}</a>
+            href="{% url opts|admin_urlname:'change' object_id=original.pk %}">{{ original }}</a>
         &rsaquo; Inspect
     </div>
-{% endblock %}
+{% endblock breadcrumbs %}
+
 {% block object-tools-items %}
     {% if sentry_url %}
         <li><a target='_sentry' href="{{ sentry_url }}" class="btn extra-link">Check errors in Sentry</a></li>
     {% endif %}
-{% endblock %}
+{% endblock object-tools-items %}
+
 {% block action-content %}
     {% if warnings %}
         <h3>Warnings</h3>
@@ -60,7 +63,7 @@
         <tr>
             <th style="width: 10%;white-space:nowrap; ">Component</th>
             <th style="width: 5%" colspan="2">#&nbsp;Records</th>
-            {#            <td style="width: 10px">-</td>#}
+            {# <td style="width: 10px">-</td> #}
             <th style="width: 90%"><a href="javascript:django.jQuery('table.errors').toggle();"># Warnings/Errors</a>
             </th>
         </tr>
@@ -91,6 +94,6 @@
             </tr>
         {% endfor %}
     </table>
-{% endblock %}
+{% endblock action-content %}
 
 {% block submit_buttons_bottom %}{% endblock %}

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -217,9 +217,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.screen_beneficiary
 
     @classmethod
-    def get_choices(
-        cls, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    def get_choices(cls, business_area_slug: str | None = None, program_id: str | None = None) -> list[dict[str, Any]]:
         query = Q(status=cls.MERGED)
         if business_area_slug:
             query &= Q(business_area__slug=business_area_slug)
@@ -424,7 +422,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         cls.objects.filter(program=program).delete()
 
     @classmethod
-    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
+    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: list[SimilarityPair]) -> None:
         from hct_mis_api.apps.program.models import Program
 
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
@@ -455,7 +453,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
             with transaction.atomic():
                 cls.objects.bulk_create(duplicates, ignore_conflicts=True)
 
-    def serialize_for_ticket(self) -> Dict[str, Any]:
+    def serialize_for_ticket(self) -> dict[str, Any]:
         results = {"similarity_score": float(self.similarity_score), "status_code": self.get_status_code_display()}
         for i, ind in enumerate([self.individual1, self.individual2]):
             results[f"individual{i + 1}"] = {
@@ -472,20 +470,20 @@ class DeduplicationEngineSimilarityPair(models.Model):
         cls,
         individual: Individual,
         similarity_pairs: QuerySet["DeduplicationEngineSimilarityPair"],
-    ) -> List:
+    ) -> list:
         duplicates = []
         for pair in similarity_pairs:
             duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
             household = duplicate.household
             duplicates.append(
-                dict(
-                    id=str(duplicate.id),
-                    unicef_id=str(duplicate.unicef_id),
-                    full_name=duplicate.full_name,
-                    similarity_score=float(pair.similarity_score),
-                    age=duplicate.age,
-                    location=household.admin2.name if duplicate.household and duplicate.household.admin2 else None,
-                )
+                {
+                    "id": str(duplicate.id),
+                    "unicef_id": str(duplicate.unicef_id),
+                    "full_name": duplicate.full_name,
+                    "similarity_score": float(pair.similarity_score),
+                    "age": duplicate.age,
+                    "location": household.admin2.name if duplicate.household and duplicate.household.admin2 else None,
+                }
             )
 
         return duplicates

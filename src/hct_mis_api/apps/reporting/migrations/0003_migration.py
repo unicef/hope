@@ -4,32 +4,31 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reporting', '0002_migration'),
+        ("reporting", "0002_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='report',
-            name='admin_area',
+            model_name="report",
+            name="admin_area",
         ),
         migrations.RemoveField(
-            model_name='report',
-            name='business_area',
+            model_name="report",
+            name="business_area",
         ),
         migrations.RemoveField(
-            model_name='report',
-            name='created_by',
+            model_name="report",
+            name="created_by",
         ),
         migrations.RemoveField(
-            model_name='report',
-            name='program',
+            model_name="report",
+            name="program",
         ),
         migrations.DeleteModel(
-            name='DashboardReport',
+            name="DashboardReport",
         ),
         migrations.DeleteModel(
-            name='Report',
+            name="Report",
         ),
     ]

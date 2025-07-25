@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from django.db import transaction
 
 from hct_mis_api.apps.geo.models import Country
@@ -11,7 +9,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
-mapping: List[Dict[str, Optional[str]]] = [
+mapping: list[dict[str, str | None]] = [
     {
         "uba_institution_name": "3line Card Management Limited",
         "uba_code": "110005",

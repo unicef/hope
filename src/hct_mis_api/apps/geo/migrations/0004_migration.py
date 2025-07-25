@@ -8,5 +8,4 @@ class Migration(migrations.Migration):
         ("geo", "0003_migration"),
     ]
 
-    operations = [
-    ]
+    operations = []

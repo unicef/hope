@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from uuid import uuid4
 
 from django.http import HttpRequest
@@ -22,7 +22,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
+WWW_ROOT = f"http://{DOMAIN_NAME}/"
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 FRONTEND_HOST = env("DOMAIN")
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
@@ -112,31 +112,34 @@ DATABASES = {
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
 # If app is not specified here it will use default db
-DATABASE_APPS_MAPPING: Dict[str, str] = {}
+DATABASE_APPS_MAPPING: dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 
-MIDDLEWARE = [
-    # "hct_mis_api.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
-] + [
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "hijack.middleware.HijackUserMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-    "hct_mis_api.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
-    "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
-    "hct_mis_api.middlewares.version.VersionMiddleware",
-]
+MIDDLEWARE = (
+    [
+        # "hct_mis_api.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
+    ]
+    + [
+        "corsheaders.middleware.CorsMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "hijack.middleware.HijackUserMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+        "hct_mis_api.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+        "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
+        "hct_mis_api.middlewares.version.VersionMiddleware",
+    ]
+)
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
-TEMPLATES: List[Dict[str, Any]] = [
+TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
@@ -270,7 +273,7 @@ NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
 # helper function to extend all the common lists
-def extend_list_avoid_repeats(list_to_extend: List, extend_with: List) -> None:
+def extend_list_avoid_repeats(list_to_extend: list, extend_with: list) -> None:
     """Extends the first list with the elements in the second one, making sure its elements are not already there in the
     original list."""
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
@@ -281,7 +284,7 @@ HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 
 CACHE_ENABLED = env("CACHE_ENABLED")
 
-CACHES: Dict[str, Any]
+CACHES: dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
         "default": {
@@ -363,11 +366,11 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 AA_PERMISSION_HANDLER = 3
 
 
-def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
+def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
     return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
 
 
-def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
+def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
     from ..apps.utils.security import is_root  # noqa: ABS101
@@ -443,7 +446,7 @@ FLAGS = {
 
 MARKDOWNIFY = {
     "default": {
-        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
+        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ulbr"]
     }
 }
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
@@ -96,9 +96,9 @@ class TargetingCriteriaRuleQueryingBase:
 
     def __init__(
         self,
-        filters: Optional[Any] = None,
-        individuals_filters_blocks: Optional[Any] = None,
-        collectors_filters_blocks: Optional[Any] = None,
+        filters: Any | None = None,
+        individuals_filters_blocks: Any | None = None,
+        collectors_filters_blocks: Any | None = None,
     ) -> None:
         if filters is not None:
             self.filters = filters
@@ -152,7 +152,7 @@ class TargetingCriteriaRuleQueryingBase:
 
 class TargetingIndividualRuleFilterBlockBase:
     def __init__(
-        self, individual_block_filters: Optional[Any] = None, target_only_hoh: Optional[List[Household]] = None
+        self, individual_block_filters: Any | None = None, target_only_hoh: list[Household] | None = None
     ) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
@@ -202,7 +202,7 @@ class TargetingIndividualRuleFilterBlockBase:
 class TargetingCollectorRuleFilterBlockBase:
     def __init__(
         self,
-        collector_block_filters: Optional[Any] = None,
+        collector_block_filters: Any | None = None,
     ) -> None:
         if collector_block_filters is not None:
             self.collector_block_filters = collector_block_filters
@@ -306,7 +306,7 @@ class TargetingCriteriaFilterBase:
     def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments: List, field_attr: str) -> List:
+    def prepare_arguments(self, arguments: list, field_attr: str) -> list:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -330,9 +330,9 @@ class TargetingCriteriaFilterBase:
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
-            logger.warning(f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments")
+            logger.warning(f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments")
             raise ValidationError(
-                f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments"
+                f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:

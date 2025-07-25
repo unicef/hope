@@ -1,13 +1,11 @@
-from typing import Dict, List, Optional, Type
-
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 def create_tickets_based_on_payment_records_service(
-    grievance_ticket: GrievanceTicket, details: Dict, model: Type
-) -> List[GrievanceTicket]:
+    grievance_ticket: GrievanceTicket, details: dict, model: type
+) -> list[GrievanceTicket]:
     individual = details.get("individual")
     household = details.get("household")
     # Payment ids
@@ -25,7 +23,7 @@ def create_tickets_based_on_payment_records_service(
         grievance_tickets_to_return = [grievance_ticket]
 
     # for the first ticket_details use already create grievance_ticket
-    ticket: Optional[GrievanceTicket] = grievance_ticket
+    ticket: GrievanceTicket | None = grievance_ticket
     # create linked tickets for all payment ids
     for payment in payment_records:
         # copy GrievanceTicket object and assign linked tickets
@@ -52,7 +50,7 @@ def create_tickets_based_on_payment_records_service(
 
 
 def update_ticket_based_on_payment_record_service(
-    grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict
+    grievance_ticket: GrievanceTicket, extras: dict, input_data: dict
 ) -> GrievanceTicket:
     ticket_details = grievance_ticket.ticket_details
 

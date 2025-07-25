@@ -4,14 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('geo', '0001_migration'),
+        ("geo", "0001_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='area',
-            options={'ordering': ('name',), 'permissions': (('import_areas', 'Can import areas'),), 'verbose_name_plural': 'Areas'},
+            name="area",
+            options={
+                "ordering": ("name",),
+                "permissions": (("import_areas", "Can import areas"),),
+                "verbose_name_plural": "Areas",
+            },
         ),
     ]

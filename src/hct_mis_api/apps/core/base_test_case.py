@@ -5,7 +5,7 @@ import shutil
 import time
 from functools import reduce
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -56,7 +56,7 @@ class APITestCase(SnapshotTestTestCase):
         super().tearDown()
 
     def snapshot_graphql_request(
-        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
+        self, request_string: str, context: dict | None = None, variables: dict | None = None
     ) -> None:
         if context is None:
             context = {}
@@ -69,9 +69,7 @@ class APITestCase(SnapshotTestTestCase):
             )
         )
 
-    def graphql_request(
-        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
-    ) -> Dict:
+    def graphql_request(self, request_string: str, context: dict | None = None, variables: dict | None = None) -> dict:
         if context is None:
             context = {}
 
@@ -82,10 +80,10 @@ class APITestCase(SnapshotTestTestCase):
         )
 
     def generate_context(
-        self, user: Optional["User"] = None, files: Optional[Dict] = None, headers: Optional[Dict[str, str]] = None
+        self, user: Optional["User"] = None, files: dict | None = None, headers: dict[str, str] | None = None
     ) -> WSGIRequest:
         request = RequestFactory()
-        prepared_headers: Dict = reduce(
+        prepared_headers: dict = reduce(
             lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
             (headers or {}).items(),
             {},
@@ -109,7 +107,7 @@ class APITestCase(SnapshotTestTestCase):
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
     @staticmethod
-    def __set_context_files(context: Any, files: Dict) -> None:
+    def __set_context_files(context: Any, files: dict) -> None:
         if isinstance(files, dict):
             for name, file in files.items():
                 context.FILES[name] = file
@@ -118,7 +116,7 @@ class APITestCase(SnapshotTestTestCase):
     def set_admin_area_limits_in_program(
         partner: "Partner",
         program: "Program",
-        areas: List["Area"],
+        areas: list["Area"],
     ) -> None:
         admin_area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
             program=program,
@@ -133,9 +131,9 @@ class APITestCase(SnapshotTestTestCase):
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
-        areas: Optional[List["Area"]] = None,
-        name: Optional[str] = None,
-        whole_business_area_access: Optional[bool] = False,
+        areas: list["Area"] | None = None,
+        name: str | None = None,
+        whole_business_area_access: bool | None = False,
     ) -> RoleAssignment:
         """
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
@@ -162,9 +160,9 @@ class APITestCase(SnapshotTestTestCase):
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
-        areas: Optional[List["Area"]] = None,
-        name: Optional[str] = None,
-        whole_business_area_access: Optional[bool] = False,
+        areas: list["Area"] | None = None,
+        name: str | None = None,
+        whole_business_area_access: bool | None = False,
     ) -> RoleAssignment:
         """
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).

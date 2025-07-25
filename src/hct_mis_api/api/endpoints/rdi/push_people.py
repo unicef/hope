@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, TYPE_CHECKING
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -9,7 +9,6 @@ from django.utils.functional import cached_property
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
@@ -33,6 +32,9 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
@@ -93,7 +95,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
 
 class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
-    def save_people(self, rdi: RegistrationDataImport, people_data: List[Dict]) -> List[int]:
+    def save_people(self, rdi: RegistrationDataImport, people_data: list[dict]) -> list[int]:
         people_ids = []
         for person_data in people_data:
             documents = person_data.pop("documents", [])
@@ -104,7 +106,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             people_ids.append(ind.id)
         return people_ids
 
-    def _create_household(self, person_data: Dict, rdi: RegistrationDataImport) -> Optional[PendingHousehold]:
+    def _create_household(self, person_data: dict, rdi: RegistrationDataImport) -> PendingHousehold | None:
         if person_data.get("type") == NON_BENEFICIARY:
             return None
         household_fields = [field.name for field in PendingHousehold._meta.get_fields()]
@@ -139,10 +141,10 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
 
     def _create_individual(
         self,
-        documents: List[Dict],
-        accounts: List[Dict],
-        hh: Optional[PendingHousehold],
-        person_data: Dict,
+        documents: list[dict],
+        accounts: list[dict],
+        hh: PendingHousehold | None,
+        person_data: dict,
         rdi: RegistrationDataImport,
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]

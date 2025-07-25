@@ -1,5 +1,4 @@
 import json
-from typing import Dict
 
 from django.db import models
 
@@ -109,7 +108,7 @@ class Record(models.Model):
         self.status = self.STATUS_IMPORTED
         self.save()
 
-    def get_data(self) -> Dict:
+    def get_data(self) -> dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
         if not self.files:

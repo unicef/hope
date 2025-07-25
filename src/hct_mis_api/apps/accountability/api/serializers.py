@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.conf import settings
 
 from rest_framework import serializers
@@ -264,7 +262,7 @@ class SurveySerializer(serializers.ModelSerializer):
             "created_by",
         )
 
-    def get_sample_file_path(self, obj: Survey) -> Optional[str]:
+    def get_sample_file_path(self, obj: Survey) -> str | None:
         try:
             return obj.sample_file_path()
         except SampleFileExpiredException:
@@ -273,7 +271,7 @@ class SurveySerializer(serializers.ModelSerializer):
     def get_has_valid_sample_file(self, obj: Survey) -> bool:
         return obj.has_valid_sample_file()
 
-    def get_rapid_pro_url(self, obj: Survey) -> Optional[str]:
+    def get_rapid_pro_url(self, obj: Survey) -> str | None:
         if not obj.flow_id:
             return None
         return f"{settings.RAPID_PRO_URL}/flow/results/{obj.flow_id}/"

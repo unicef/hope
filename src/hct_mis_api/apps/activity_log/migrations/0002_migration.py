@@ -6,36 +6,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('program', '0001_migration'),
-        ('activity_log', '0001_migration'),
-        ('core', '0001_migration'),
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("program", "0001_migration"),
+        ("activity_log", "0001_migration"),
+        ("core", "0001_migration"),
+        ("contenttypes", "0002_remove_content_type_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='logentry',
-            name='business_area',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.businessarea'),
+            model_name="logentry",
+            name="business_area",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to="core.businessarea"),
         ),
         migrations.AddField(
-            model_name='logentry',
-            name='content_type',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='log_entries', to='contenttypes.contenttype'),
+            model_name="logentry",
+            name="content_type",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="log_entries",
+                to="contenttypes.contenttype",
+            ),
         ),
         migrations.AddField(
-            model_name='logentry',
-            name='programs',
-            field=models.ManyToManyField(blank=True, related_name='activity_logs', to='program.Program'),
+            model_name="logentry",
+            name="programs",
+            field=models.ManyToManyField(blank=True, related_name="activity_logs", to="program.Program"),
         ),
         migrations.AddField(
-            model_name='logentry',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='logs', to=settings.AUTH_USER_MODEL, verbose_name='actor'),
+            model_name="logentry",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="logs",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="actor",
+            ),
         ),
     ]

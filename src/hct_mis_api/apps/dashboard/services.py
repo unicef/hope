@@ -3,14 +3,8 @@ import json
 from collections import defaultdict
 from typing import (
     Any,
-    Dict,
-    List,
-    Optional,
     Protocol,
-    Set,
-    Tuple,
     TypedDict,
-    Union,
     cast,
 )
 from uuid import UUID
@@ -42,7 +36,7 @@ class CountrySummaryDict(TypedDict):
     finished_payment_plans: int
     total_payment_plans: int
     planned_sum_for_group: float
-    _seen_households: Set[UUID]
+    _seen_households: set[UUID]
 
 
 class GlobalSummaryDict(TypedDict):
@@ -55,7 +49,7 @@ class GlobalSummaryDict(TypedDict):
     finished_payment_plans: int
     total_payment_plans: int
     planned_sum_for_group: float
-    _seen_households: Set[UUID]
+    _seen_households: set[UUID]
 
 
 def get_pwd_count_expression() -> models.Expression:
@@ -85,18 +79,18 @@ class DashboardCacheBase(Protocol):
         return f"{cls.CACHE_KEY_PREFIX}{identifier}"
 
     @classmethod
-    def get_data(cls, identifier: str) -> Optional[List[Dict[str, Any]]]:
+    def get_data(cls, identifier: str) -> list[dict[str, Any]] | None:
         cache_key = cls.get_cache_key(identifier)
         data = cache.get(cache_key)
         return json.loads(data) if data else None
 
     @classmethod
-    def store_data(cls, identifier: str, data: List[Dict[str, Any]]) -> None:
+    def store_data(cls, identifier: str, data: list[dict[str, Any]]) -> None:
         cache_key = cls.get_cache_key(identifier)
         cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
 
     @classmethod
-    def _get_base_payment_queryset(cls, business_area: Optional[BusinessArea] = None) -> models.QuerySet:
+    def _get_base_payment_queryset(cls, business_area: BusinessArea | None = None) -> models.QuerySet:
         qs = (
             Payment.objects.using("read_only")
             .select_related(
@@ -189,11 +183,11 @@ class DashboardCacheBase(Protocol):
         )
 
     @classmethod
-    def _get_household_data(cls, household_ids: Set[UUID]) -> Dict[UUID, Dict[str, Any]]:
+    def _get_household_data(cls, household_ids: set[UUID]) -> dict[UUID, dict[str, Any]]:
         if not household_ids:
             return {}
 
-        household_map: Dict[UUID, Dict[str, Any]] = {}
+        household_map: dict[UUID, dict[str, Any]] = {}
         household_id_list = list(household_ids)
 
         for i in range(0, len(household_id_list), HOUSEHOLD_BATCH_SIZE):
@@ -233,9 +227,9 @@ class DashboardCacheBase(Protocol):
 
     @classmethod
     def _get_payment_plan_counts(
-        cls, base_queryset: models.QuerySet, group_by_annotated_names: List[str]
-    ) -> Dict[str, Dict[Tuple, int]]:
-        date_field: Union[F, Coalesce] = Coalesce("delivery_date", "entitlement_date", "status_date")
+        cls, base_queryset: models.QuerySet, group_by_annotated_names: list[str]
+    ) -> dict[str, dict[tuple, int]]:
+        date_field: F | Coalesce = Coalesce("delivery_date", "entitlement_date", "status_date")
         potential_annotations = {
             "year": ExtractYear(date_field),
             "month": ExtractMonth(date_field),
@@ -275,16 +269,14 @@ class DashboardCacheBase(Protocol):
         return {"total": dict(total_counts), "finished": dict(finished_counts)}
 
     @classmethod
-    def refresh_data(cls, identifier: str, years_to_refresh: Optional[List[int]] = None) -> List[Dict[str, Any]]:
+    def refresh_data(cls, identifier: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
         raise NotImplementedError
 
 
 class DashboardDataCache(DashboardCacheBase):
     @classmethod
-    def refresh_data(
-        cls, business_area_slug: str, years_to_refresh: Optional[List[int]] = None
-    ) -> List[Dict[str, Any]]:
-        existing_data_for_other_years: List[Dict[str, Any]] = []
+    def refresh_data(cls, business_area_slug: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
+        existing_data_for_other_years: list[dict[str, Any]] = []
         is_partial_refresh_attempt = bool(years_to_refresh)
 
         if is_partial_refresh_attempt and years_to_refresh:
@@ -308,19 +300,19 @@ class DashboardDataCache(DashboardCacheBase):
         base_payments_qs = cls._get_base_payment_queryset(business_area=business_area)
 
         if is_partial_refresh_attempt and years_to_refresh:
-            date_field_expr: Union[F, Coalesce] = Coalesce("delivery_date", "entitlement_date", "status_date")
+            date_field_expr: F | Coalesce = Coalesce("delivery_date", "entitlement_date", "status_date")
             if base_payments_qs.exists():
                 base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
                     _temp_refresh_year__in=years_to_refresh
                 )
 
-        household_ids: Set[UUID] = set(
+        household_ids: set[UUID] = {
             hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
-        )
+        }
 
         if not household_ids:
             final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
-            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+            serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_result_list, many=True).data)
             cls.store_data(business_area_slug, serialized_data)
             return serialized_data
 
@@ -328,7 +320,7 @@ class DashboardDataCache(DashboardCacheBase):
 
         if not base_payments_qs.exists() and is_partial_refresh_attempt:
             final_result_list = existing_data_for_other_years
-            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+            serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_result_list, many=True).data)
             cls.store_data(business_area_slug, serialized_data)
             return serialized_data
 
@@ -450,7 +442,7 @@ class DashboardDataCache(DashboardCacheBase):
         if is_partial_refresh_attempt:
             final_result_list.extend(existing_data_for_other_years)
 
-        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+        serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_result_list, many=True).data)
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
 
@@ -458,15 +450,15 @@ class DashboardDataCache(DashboardCacheBase):
 class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
     def refresh_data(
-        cls, identifier: str = GLOBAL_SLUG, years_to_refresh: Optional[List[int]] = None
-    ) -> List[Dict[str, Any]]:
-        all_newly_processed_data: List[Dict[str, Any]] = []
+        cls, identifier: str = GLOBAL_SLUG, years_to_refresh: list[int] | None = None
+    ) -> list[dict[str, Any]]:
+        all_newly_processed_data: list[dict[str, Any]] = []
         is_explicit_partial_refresh = years_to_refresh is not None
 
-        actual_years_to_process: List[int]
-        data_from_cache_for_other_years: List[Dict[str, Any]] = []
+        actual_years_to_process: list[int]
+        data_from_cache_for_other_years: list[dict[str, Any]] = []
 
-        def get_all_db_years() -> List[int]:
+        def get_all_db_years() -> list[int]:
             """Helper to fetch all distinct, valid years from payment data that meets base criteria."""
             date_field_expr_for_years = Coalesce("delivery_date", "entitlement_date", "status_date")
             base_qs_for_years = cls._get_base_payment_queryset()
@@ -508,11 +500,11 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             if not current_year_payments_qs.exists():
                 continue
 
-            household_ids: Set[UUID] = set(
+            household_ids: set[UUID] = {
                 hh_id
                 for hh_id in current_year_payments_qs.values_list("household_id", flat=True).distinct()
                 if hh_id is not None
-            )
+            }
             household_map = cls._get_household_data(household_ids)
 
             plan_group_fields = [
@@ -622,6 +614,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         else:
             final_data_to_cache = all_newly_processed_data
 
-        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_data_to_cache, many=True).data)
+        serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_data_to_cache, many=True).data)
         cls.store_data(identifier, serialized_data)
         return serialized_data

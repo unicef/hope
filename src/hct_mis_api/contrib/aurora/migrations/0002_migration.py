@@ -5,35 +5,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('steficon', '0001_migration'),
-        ('core', '0001_migration'),
-        ('aurora', '0001_migration'),
-        ('program', '0001_migration'),
+        ("steficon", "0001_migration"),
+        ("core", "0001_migration"),
+        ("aurora", "0001_migration"),
+        ("program", "0001_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='registration',
-            name='steficon_rule',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='steficon.rulecommit'),
+            model_name="registration",
+            name="steficon_rule",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="steficon.rulecommit"
+            ),
         ),
         migrations.AddField(
-            model_name='project',
-            name='organization',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='aurora.organization'),
+            model_name="project",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="aurora.organization"),
         ),
         migrations.AddField(
-            model_name='project',
-            name='programme',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='program.program'),
+            model_name="project",
+            name="programme",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="program.program"
+            ),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='business_area',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.businessarea'),
+            model_name="organization",
+            name="business_area",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+            ),
         ),
     ]

@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0033_migration'),
+        ("payment", "0033_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='account',
-            name='active',
+            model_name="account",
+            name="active",
             field=models.BooleanField(db_index=True, default=True),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='is_unique',
+            model_name="account",
+            name="is_unique",
             field=models.BooleanField(db_index=True, default=True),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='number',
+            model_name="account",
+            name="number",
             field=models.CharField(blank=True, db_index=True, max_length=256, null=True),
         ),
     ]
