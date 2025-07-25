@@ -207,7 +207,15 @@ const DuplicateProgramPage = (): ReactElement => {
 
       const response = await copyProgram(programData);
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/details/${response.slug}`);
+      // Extract program slug from response.message
+      //@ts-ignore
+      const slugMatch = (response.message as string).match(
+        /New Program slug: ([^\s]+)/,
+      );
+      const newSlug = slugMatch ? slugMatch[1] : null;
+      if (newSlug) {
+        navigate(`/${baseUrl}/details/${newSlug}`);
+      }
     } catch (e: any) {
       showApiErrorMessages(
         e,
