@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
+import { IndividualIdentity } from '@restgenerated/models/IndividualIdentity';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -34,10 +35,10 @@ interface AddIndividualFieldsData {
 export interface EditIdentityRowProps {
   setFieldValue: (field: string, value: any) => void;
   values: any;
-  identity: Identity;
+  identity: IndividualIdentity;
   arrayHelpers: any;
   addIndividualFieldsData: AddIndividualFieldsData;
-  id: string;
+  id: number;
 }
 
 export function EditIdentityRow({
@@ -58,12 +59,12 @@ export function EditIdentityRow({
   return isEdited ? (
     <Grid container alignItems="center" spacing={3}>
       <AgencyField
-        id={id}
+        id={id.toString()}
         key={`${id}-${identity.number}-${identity.partner}`}
         onDelete={() =>
           removeItemById(
             values.individualDataUpdateDocumentsToEdit,
-            identity.id,
+            identity.id.toString(),
             arrayHelpers,
           )
         }
@@ -77,7 +78,7 @@ export function EditIdentityRow({
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
-              country: identity.countryIso3,
+              country: identity.country.isoCode3,
               partner: identity.partner,
               number: identity.number,
             });
@@ -97,7 +98,7 @@ export function EditIdentityRow({
       </Grid>
       <Grid size={{ xs: 4 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={identity.country} />
+          <LabelizedField label={t('Country')} value={identity.country.name} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 3 }}>
@@ -123,7 +124,7 @@ export function EditIdentityRow({
                 onClick={() => {
                   arrayHelpers.push({
                     id: identity.id,
-                    country: identity.countryIso3,
+                    country: identity.country.isoCode3,
                     partner: identity.partner,
                     number: identity.number,
                   });

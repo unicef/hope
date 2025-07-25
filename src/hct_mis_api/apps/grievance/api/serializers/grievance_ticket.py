@@ -24,6 +24,7 @@ from hct_mis_api.apps.household.api.serializers.household import (
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
+    IndividualIdentitySerializer,
 )
 from hct_mis_api.apps.household.models import (
     Document,
@@ -252,12 +253,6 @@ class EditIndividualDocumentSerializer(serializers.Serializer):
     number = serializers.CharField()
     photo = serializers.FileField(use_url=False, required=False, allow_null=True)
     photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
-
-
-class IndividualIdentitySerializer(serializers.Serializer):
-    country = serializers.CharField()
-    partner = serializers.CharField()
-    number = serializers.CharField()
 
 
 class EditIndividualIdentitySerializer(serializers.Serializer):

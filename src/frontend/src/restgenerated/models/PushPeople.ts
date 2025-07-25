@@ -356,6 +356,10 @@ export type PushPeople = {
      */
     migratedAt?: string | null;
     /**
+     * Key used to identify Collisions in the system
+     */
+    identificationKey?: string | null;
+    /**
      * Database vector column for search [sys]
      */
     vectorColumn?: string | null;
