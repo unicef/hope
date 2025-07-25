@@ -14,7 +14,7 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver.common.by import By
+from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual

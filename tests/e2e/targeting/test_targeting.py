@@ -32,8 +32,8 @@ from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from selenium.common import NoSuchElementException
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
+from e2e.webdriver import ActionChains, Keys
+from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import (

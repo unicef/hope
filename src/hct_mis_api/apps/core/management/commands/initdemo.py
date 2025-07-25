@@ -92,7 +92,7 @@ from flags.models import FlagState
 
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data
+from extras.test_utils.factories.aurora import generate_aurora_test_data
 
 logger = logging.getLogger(__name__)
 

@@ -70,7 +70,7 @@ from hct_mis_api.contrib.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
+from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,

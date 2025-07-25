@@ -8,7 +8,7 @@ from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDet
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
+from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle

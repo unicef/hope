@@ -31,7 +31,7 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
-from selenium.webdriver.common.by import By
+from e2e.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User

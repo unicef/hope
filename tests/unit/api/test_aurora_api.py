@@ -13,7 +13,7 @@ from hct_mis_api.contrib.aurora.caches import (
     ProjectListVersionsKeyBit,
     RegistrationListVersionsKeyBit,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
+from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,

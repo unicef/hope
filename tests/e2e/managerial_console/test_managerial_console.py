@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from selenium.webdriver.common.by import By
+from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType

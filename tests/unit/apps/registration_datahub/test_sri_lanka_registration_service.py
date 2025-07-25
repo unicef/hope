@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
+from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
