@@ -205,9 +205,9 @@ const DuplicateProgramPage = (): ReactElement => {
         partnerAccess: values.partnerAccess as PartnerAccessEnum,
       };
 
-      await copyProgram(programData);
+      const response = await copyProgram(programData);
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/list`);
+      navigate(`/${baseUrl}/details/${response.slug}`);
     } catch (e: any) {
       showApiErrorMessages(
         e,
@@ -245,7 +245,7 @@ const DuplicateProgramPage = (): ReactElement => {
   } = program;
 
   const initialValues = {
-    editMode: true,
+    editMode: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: null,
     startDate,
@@ -290,7 +290,6 @@ const DuplicateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const allAreasTree = treeData?.results || [];
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -419,7 +418,7 @@ const DuplicateProgramPage = (): ReactElement => {
                     {step === 2 && (
                       <PartnersStep
                         values={values}
-                        allAreasTreeData={allAreasTree}
+                        allAreasTreeData={treeData || []}
                         partnerChoices={mappedPartnerChoices}
                         step={step}
                         setStep={setStep}
