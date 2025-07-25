@@ -9,7 +9,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import AllValuesComboFilter
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.admin.forms import (
+from hct_mis_api.admin.account_admin.forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )

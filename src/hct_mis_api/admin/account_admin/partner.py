@@ -10,7 +10,7 @@ from django.utils.html import format_html
 from adminfilters.autocomplete import AutoCompleteFilter
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
+from hct_mis_api.admin.account_admin.user_role import RoleAssignmentInline
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
