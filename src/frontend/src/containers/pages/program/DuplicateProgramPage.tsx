@@ -198,6 +198,7 @@ const DuplicateProgramPage = (): ReactElement => {
             ? null
             : requestValues.endDate,
         pduFields: pduFieldsToSend,
+        //TODO: FIX this partners sent incorrectly if not modified
         partners: partnersToSet.map(({ partner, areas }) => ({
           partner,
           areas,
