@@ -1,7 +1,7 @@
 import pytest
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from extras.test_utils.factories.account import UserFactory
-from selenium.webdriver import Chrome
+from e2e.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User

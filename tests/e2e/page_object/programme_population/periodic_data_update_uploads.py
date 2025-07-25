@@ -1,5 +1,5 @@
 from e2e.page_object.base_components import BaseComponents
-from selenium.webdriver.remote.webelement import WebElement
+from e2e.webdriver.remote.webelement import WebElement
 
 
 class PeriodicDataUpdateUploads(BaseComponents):

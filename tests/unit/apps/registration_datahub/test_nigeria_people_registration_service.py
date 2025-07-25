@@ -22,7 +22,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.contrib.aurora.fixtures import (
+from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,

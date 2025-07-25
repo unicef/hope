@@ -11,7 +11,7 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
+from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 from hct_mis_api.apps.program.models import BeneficiaryGroup
@@ -66,7 +66,7 @@ class TestSmokeCountryDashboard:
         pageCountryDashboard.getNavCountryDashboard().click()
         pageCountryDashboard.switch_to_dashboard_iframe()
 
-        from selenium.webdriver.support.ui import WebDriverWait
+        from e2e.webdriver.support.ui import WebDriverWait
 
         wait = WebDriverWait(pageCountryDashboard.driver, 20)
         wait.until(

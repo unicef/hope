@@ -3,9 +3,9 @@ from typing import List
 
 from e2e.page_object.base_components import BaseComponents
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.common.by import By
+from e2e.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
+from e2e.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 

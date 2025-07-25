@@ -5,12 +5,12 @@ from typing import Literal, Optional, Union
 
 from django.conf import settings
 
-from selenium.common import NoSuchElementException
+from e2e.common import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import Chrome, Keys
+from e2e.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
+from e2e.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 

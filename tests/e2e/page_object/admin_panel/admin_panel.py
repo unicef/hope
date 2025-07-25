@@ -1,6 +1,6 @@
 from e2e.page_object.base_components import BaseComponents
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
+from e2e.webdriver.common.by import By
+from e2e.webdriver.remote.webelement import WebElement
 
 
 class AdminPanel(BaseComponents):

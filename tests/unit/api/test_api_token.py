@@ -12,7 +12,7 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from unit.api.factories import APITokenFactory
 
-from hct_mis_api.api.admin import TOKEN_INFO_EMAIL, APITokenAdmin
+from admin.api_admin import TOKEN_INFO_EMAIL, APITokenAdmin
 from hct_mis_api.api.models import Grant
 
 
