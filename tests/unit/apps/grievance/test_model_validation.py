@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import TestCase
 
+import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -9,9 +10,11 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     generate_delivery_mechanisms,
 )
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.payment.admin import FspXlsxTemplatePerDeliveryMechanismForm
 from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
 
@@ -156,3 +159,32 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
         ):
             form.clean()
+
+
+class TestDataChangeValidator:
+    def test_non_dict_input_raises_graphql_error(self) -> None:
+        with pytest.raises(DRFValidationError, match="Fields must be a dictionary"):
+            DataChangeValidator.verify_approve_data("not a dict")  # type: ignore
+
+    def test_missing_individual_id_raises_graphql_error(self) -> None:
+        data = {"roles": [{"approve_status": True}]}
+        with pytest.raises(DRFValidationError, match="individual_id in role"):
+            DataChangeValidator.verify_approve_data(data)
+
+    def test_missing_approve_status_raises_graphql_error(self) -> None:
+        data = {"roles": [{"individual_id": "123"}]}
+        with pytest.raises(DRFValidationError, match="approve_status in role"):
+            DataChangeValidator.verify_approve_data(data)
+
+    def test_non_boolean_approve_status_raises_graphql_error(self) -> None:
+        data = {"roles": [{"individual_id": "123", "approve_status": "yes"}]}
+        with pytest.raises(DRFValidationError, match="approve_status must be boolean"):
+            DataChangeValidator.verify_approve_data(data)
+
+    def test_non_boolean_top_level_field_raises_graphql_error(self) -> None:
+        data = {
+            "village": "yes",
+            "roles": [{"individual_id": "123", "approve_status": True}],
+        }
+        with pytest.raises(DRFValidationError, match="Values must be booleans"):
+            DataChangeValidator.verify_approve_data(data)
