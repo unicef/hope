@@ -1,5 +1,3 @@
-from typing import Dict, List, Union
-
 from django.db.models import Q
 
 from rest_framework import serializers
@@ -89,7 +87,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
 
     def resolve_batch_duplicates_count_and_percentage(
         self, obj: RegistrationDataImport
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(obj.batch_duplicates, obj.number_of_individuals),  # biographical
         ]
@@ -97,9 +95,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             result.append(get_count_and_percentage(obj.dedup_engine_batch_duplicates, obj.number_of_individuals))
         return result
 
-    def resolve_batch_unique_count_and_percentage(
-        self, obj: RegistrationDataImport
-    ) -> List[Dict[str, Union[int, float]]]:
+    def resolve_batch_unique_count_and_percentage(self, obj: RegistrationDataImport) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(obj.batch_unique, obj.number_of_individuals),  # biographical
         ]
@@ -110,14 +106,14 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
 
     def resolve_golden_record_duplicates_count_and_percentage(
         self, obj: RegistrationDataImport
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         return [
             get_count_and_percentage(obj.golden_record_duplicates, obj.number_of_individuals),  # biographical
         ]
 
     def resolve_golden_record_possible_duplicates_count_and_percentage(
         self, obj: RegistrationDataImport
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(obj.golden_record_possible_duplicates, obj.number_of_individuals),  # biographical
         ]
@@ -129,7 +125,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
 
     def resolve_golden_record_unique_count_and_percentage(
         self, obj: RegistrationDataImport
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(obj.golden_record_unique, obj.number_of_individuals),  # biographical
         ]
@@ -139,14 +135,13 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
         return result
 
     def get_total_households_count_with_valid_phone_no(self, obj: RegistrationDataImport) -> int:
-        count = (
+        return (
             obj.households.filter(
                 Q(head_of_household__phone_no_valid=True) | Q(head_of_household__phone_no_alternative_valid=True)
             )
             .distinct()
             .count()
         )
-        return count
 
 
 class RefuseRdiSerializer(serializers.Serializer):

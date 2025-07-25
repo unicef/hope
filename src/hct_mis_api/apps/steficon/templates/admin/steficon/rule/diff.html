@@ -1,5 +1,4 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load engine static %}
-{% load engine i18n admin_urls static admin_modify %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls engine i18n static %}
 {% block extrastyle %}
     <link rel="stylesheet" type="text/css" href="{% static "admin/steficon/diff.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
@@ -14,7 +13,8 @@
             height: 50px;
         }
     </style>
-{% endblock %}
+{% endblock extrastyle %}
+
 {% block action-content %}
     <table>
         <tr>
@@ -70,7 +70,8 @@
             </td>
         </tr>
     </table>
-{% endblock %}
+{% endblock action-content %}
+
 {% block document_ready %}{{ block.super }}
     <script>
         window.addEventListener("load", function () {
@@ -83,4 +84,4 @@
             }
         });
     </script>
-{% endblock %}
+{% endblock document_ready %}

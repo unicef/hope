@@ -1,15 +1,15 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_urls smart %}
+{% load admin_urls i18n smart %}
 
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
         &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
         &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ module_name }}</a>
         &rsaquo; <a href="{% url opts|admin_urlname:'change' object.pk|admin_urlquote %}">{{ object|truncatewords:"18" }}</a>
-        &rsaquo; {% trans 'History' %}
+        &rsaquo; {% translate 'History' %}
     </div>
-{% endblock %}
+{% endblock breadcrumbs %}
 
 {% block content %}
     <div id="content-main">
@@ -19,10 +19,10 @@
                 <table id="change-history">
                     <thead>
                     <tr>
-                        <th scope="col">{% trans 'Date/time' %}</th>
-                        <th scope="col">{% trans 'User' %}</th>
-                        <th scope="col">{% trans 'Action' %}</th>
-                        <th scope="col">{% trans 'Details' %}</th>
+                        <th scope="col">{% translate 'Date/time' %}</th>
+                        <th scope="col">{% translate 'User' %}</th>
+                        <th scope="col">{% translate 'Action' %}</th>
+                        <th scope="col">{% translate 'Details' %}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -45,8 +45,8 @@
                     </tbody>
                 </table>
             {% else %}
-                <p>{% trans 'This object doesn’t have a change history. It probably wasn’t added via this admin site.' %}</p>
+                <p>{% translate 'This object doesn’t have a change history. It probably wasn’t added via this admin site.' %}</p>
             {% endif %}
         </div>
     </div>
-{% endblock %}
+{% endblock content %}

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 from django.core.cache import cache
 from django.db import transaction
@@ -26,7 +26,7 @@ from hct_mis_api.apps.utils.querysets import evaluate_qs
 log = logging.getLogger(__name__)
 
 
-def _get_query_dict(sanction_list_individual: SanctionListIndividual, individuals_ids: Optional[List[str]]) -> Dict:
+def _get_query_dict(sanction_list_individual: SanctionListIndividual, individuals_ids: list[str] | None) -> dict:
     documents = [
         doc
         for doc in sanction_list_individual.documents.all()
@@ -88,9 +88,9 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
 
 def _generate_ticket(
     marked_individual: Individual,
-    registration_data_import: Optional[RegistrationDataImport],
+    registration_data_import: RegistrationDataImport | None,
     sanction_list_individual: SanctionListIndividual,
-) -> Optional[Tuple[GrievanceTicket, TicketSystemFlaggingDetails, Any]]:
+) -> tuple[GrievanceTicket, TicketSystemFlaggingDetails, Any] | None:
     GrievanceTicketProgramThrough = GrievanceTicket.programs.through
     household = marked_individual.household
     admin_level_2 = getattr(household, "admin2", None)
@@ -127,9 +127,9 @@ def _generate_ticket(
 @transaction.atomic
 def check_against_sanction_list_pre_merge(
     program_id: str,
-    individuals_ids: Optional[List[str]] = None,
-    sanction_list_individuals: Optional[Iterable[SanctionListIndividual]] = None,
-    registration_data_import: Optional[RegistrationDataImport] = None,
+    individuals_ids: list[str] | None = None,
+    sanction_list_individuals: Iterable[SanctionListIndividual] | None = None,
+    registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
     program = Program.objects.get(id=program_id)
     sanction_lists = program.sanction_lists
@@ -148,7 +148,7 @@ def check_against_sanction_list_pre_merge(
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-    documents: Tuple = (get_individual_doc(program.business_area.slug),)
+    documents: tuple = (get_individual_doc(program.business_area.slug),)
 
     tickets_to_create = []
     ticket_details_to_create = []

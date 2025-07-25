@@ -40,7 +40,7 @@
         });
 
          $(document).ready(function () {
-            editor = CodeMirror.fromTextArea(document.getElementById('{{widget.attrs.id}}'), {
+            editor = CodeMirror.fromTextArea(document.getElementById('{{ widget.attrs.id }}'), {
                 mode: "python",
                 lineNumbers: true,
                 lineWrapping: true,
@@ -67,7 +67,7 @@
             });
             editor.execCommand("unfoldAll");
             editor.foldCode(CodeMirror.Pos(0, 0));
-            $('#{{widget.attrs.id}}').data('CodeMirror', editor);
+            $('#{{ widget.attrs.id }}').data('CodeMirror', editor);
          });
     })(django.jQuery);
 

@@ -1,4 +1,4 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls engine i18n static %}
 {% block extrahead %}
     <style>
             table.messagelist tr.warning {
@@ -10,7 +10,8 @@
             background-size: 14px auto;
         }
     </style>
-{% endblock %}
+{% endblock extrahead %}
+
 {% block content %}
     <table>
         <tr>
@@ -29,4 +30,4 @@
         </tr>
     {% endfor %}
     </table>
-{% endblock %}
+{% endblock content %}

@@ -1,5 +1,3 @@
-from typing import Dict
-
 from django.contrib import admin, messages
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
@@ -144,5 +142,5 @@ class UploadedXLSXFileAdmin(HOPEModelAdminBase):
     list_display = ("id", "file", "associated_email")
     filter_horizontal = ("selected_lists",)
 
-    def get_actions(self, request: HttpRequest) -> Dict:
+    def get_actions(self, request: HttpRequest) -> dict:
         return super().get_actions(request)

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -114,7 +114,7 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
     close_needs_adjudication_new_ticket(ticket_details, user)
 
 
-def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
+def _get_min_max_score(golden_records: list[dict]) -> tuple[float, float]:
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)
@@ -122,14 +122,14 @@ def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
 
 def create_grievance_ticket_with_details(
     main_individual: Individual,
-    possible_duplicate: Optional[Individual],
+    possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    dedup_engine_similarity_pair: Optional[DeduplicationEngineSimilarityPair] = None,
-    possible_duplicates: Optional[List[Individual]] = None,
-    registration_data_import: Optional[RegistrationDataImport] = None,
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = None,
+    possible_duplicates: list[Individual] | None = None,
+    registration_data_import: RegistrationDataImport | None = None,
     is_multiple_duplicates_version: bool = False,
-) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
+) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
@@ -210,12 +210,12 @@ def create_needs_adjudication_tickets(
     results_key: str,
     business_area: BusinessArea,
     issue_type: int,
-    registration_data_import: Optional[RegistrationDataImport] = None,
+    registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
-        return None
+        return
 
     unique_individuals = set()
     individuals_to_remove_from_es = set()
@@ -260,7 +260,7 @@ def create_needs_adjudication_tickets_for_biometrics(
     deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair], rdi: RegistrationDataImport
 ) -> None:
     if not deduplication_pairs.exists():
-        return None
+        return
 
     new_tickets = []
 
@@ -304,8 +304,8 @@ def create_needs_adjudication_tickets_for_biometrics(
 
 def mark_as_duplicate_individual(
     individual_to_remove: Individual,
-    unique_individual: Optional[Individual],
-    household: Optional[Household],
+    unique_individual: Individual | None,
+    household: Household | None,
     user: AbstractUser,
     program: "Program",
 ) -> None:

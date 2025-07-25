@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from rest_framework.authentication import SessionAuthentication
 
 
-def humanize_errors(errors: Dict) -> Dict:
+def humanize_errors(errors: dict) -> dict:
     try:
         households = errors.pop("households", [])
         errs = {}
@@ -14,7 +14,7 @@ def humanize_errors(errors: Dict) -> Dict:
             for i, h in enumerate(households, 1):
                 if h and isinstance(h, dict):
                     members = h.pop("members", [])
-                    mm_info: Union[List, Dict]
+                    mm_info: list | dict
                     if isinstance(members, list) and len(members) == 1 and isinstance(members[0], str):
                         mm_info = members
                     else:

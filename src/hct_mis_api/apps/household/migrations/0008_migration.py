@@ -4,14 +4,16 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0007_migration'),
+        ("household", "0007_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='individual',
-            options={'permissions': (('update_individual_iban', 'Can update individual IBAN'),), 'verbose_name': 'Individual'},
+            name="individual",
+            options={
+                "permissions": (("update_individual_iban", "Can update individual IBAN"),),
+                "verbose_name": "Individual",
+            },
         ),
     ]

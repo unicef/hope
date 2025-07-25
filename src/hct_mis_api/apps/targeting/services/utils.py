@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, Type, Union
 
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -16,7 +15,7 @@ from hct_mis_api.apps.targeting.models import (
 logger = logging.getLogger(__name__)
 
 
-def get_existing_unicef_ids(ids_string: str, model: Union[Type[Household], Type[Individual]], program: Program) -> str:
+def get_existing_unicef_ids(ids_string: str, model: type[Household] | type[Individual], program: Program) -> str:
     ids_list = [i.strip() for i in ids_string.split(",")]
     return ", ".join(
         model.objects.filter(unicef_id__in=ids_list, program=program)
@@ -26,7 +25,7 @@ def get_existing_unicef_ids(ids_string: str, model: Union[Type[Household], Type[
 
 
 def from_input_to_targeting_criteria(
-    targeting_criteria_input: Dict, program: "Program", payment_plan: PaymentPlan
+    targeting_criteria_input: dict, program: "Program", payment_plan: PaymentPlan
 ) -> None:
     # TODO: FIX ME PLEASE ["rules"] ????
     for rule in targeting_criteria_input.pop("rules", []):

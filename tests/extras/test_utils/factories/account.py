@@ -129,9 +129,7 @@ def create_superuser(**kwargs: Any) -> User:
         "is_active": True,
         "password": password,
     }
-    user = User.objects.create_superuser(**user_data)
-    print("*** Super User Created with password: ", password)
-    return user
+    return User.objects.create_superuser(**user_data)
 
 
 def generate_unicef_partners() -> None:

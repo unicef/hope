@@ -1,10 +1,11 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load engine i18n admin_urls static admin_modify jsonfy %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls engine i18n jsonfy static %}
 {% block extrastyle %}{{ block.super }}
-  {#  {{ form.media }}#}
+  {# {{ form.media }} #}
   <script src="/static/admin/js/vendor/jquery/jquery.js"></script>
   <script src="/static/admin/js/jquery.init.js"></script>
 
-{% endblock %}
+{% endblock extrastyle %}
+
 {% block action-content %}
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -37,7 +38,8 @@
     {% endif %}
   </form>
 
-{% endblock %}
+{% endblock action-content %}
+
 {% block document_ready %}{{ block.super }}
 
-{% endblock %}
+{% endblock document_ready %}

@@ -1,6 +1,6 @@
 import json
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
@@ -80,7 +80,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
         return file
 
-    def validate(self, data: Dict) -> Dict:
+    def validate(self, data: dict) -> dict:
         payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_id"]
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         data["payment_plan"] = payment_plan
@@ -94,7 +94,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def create(self, validated_data: Dict[str, Any]) -> PaymentPlanSupportingDocument:
+    def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
 
@@ -108,7 +108,7 @@ class XlsxErrorSerializer(serializers.Serializer):
         return parent.sheet
 
     @staticmethod
-    def get_coordinates(parent: XlsxError) -> Optional[str]:
+    def get_coordinates(parent: XlsxError) -> str | None:
         return parent.coordinates
 
     @staticmethod
@@ -218,10 +218,10 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
     def get_xlsx_file_was_downloaded(self, obj: PaymentVerificationPlan) -> bool:
         return obj.xlsx_payment_verification_plan_file_was_downloaded
 
-    def get_age_filter_min(self, obj: PaymentVerificationPlan) -> Optional[int]:
+    def get_age_filter_min(self, obj: PaymentVerificationPlan) -> int | None:
         return obj.age_filter.get("min") if obj.age_filter else None
 
-    def get_age_filter_max(self, obj: PaymentVerificationPlan) -> Optional[int]:
+    def get_age_filter_max(self, obj: PaymentVerificationPlan) -> int | None:
         return obj.age_filter.get("max") if obj.age_filter else None
 
 
@@ -339,7 +339,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
         )
 
     @staticmethod
-    def get_last_approval_process_by(obj: PaymentPlan) -> Optional[str]:
+    def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
     @staticmethod
@@ -459,7 +459,7 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
             else ""
         )
 
-    def get_rejected_on(self, obj: ApprovalProcess) -> Optional[str]:
+    def get_rejected_on(self, obj: ApprovalProcess) -> str | None:
         if obj.approvals.filter(type=Approval.REJECT).exists():
             if obj.sent_for_finance_release_date:
                 return "IN_REVIEW"
@@ -469,7 +469,7 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
                 return "IN_APPROVAL"
         return None
 
-    def get_actions(self, obj: ApprovalProcess) -> Dict[str, Any]:
+    def get_actions(self, obj: ApprovalProcess) -> dict[str, Any]:
         actions_data = {
             "approval": obj.approvals.filter(type=Approval.APPROVAL),
             "authorization": obj.approvals.filter(type=Approval.AUTHORIZATION),
@@ -497,7 +497,7 @@ class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
         )
 
 
-def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Optional[Decimal]:
+def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Decimal | None:
     if not payment_plan.financial_service_provider:
         return None
     return payment_plan.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
@@ -523,10 +523,10 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
     volume = serializers.SerializerMethodField()
     volume_usd = serializers.SerializerMethodField()
 
-    def get_volume(self, obj: DeliveryMechanismPerPaymentPlan) -> Optional[Decimal]:  # non-usd
+    def get_volume(self, obj: DeliveryMechanismPerPaymentPlan) -> Decimal | None:  # non-usd
         return _calculate_volume(obj.payment_plan, "entitlement_quantity")
 
-    def get_volume_usd(self, obj: DeliveryMechanismPerPaymentPlan) -> Optional[Decimal]:
+    def get_volume_usd(self, obj: DeliveryMechanismPerPaymentPlan) -> Decimal | None:
         return _calculate_volume(obj.payment_plan, "entitlement_quantity_usd")
 
     class Meta:
@@ -543,7 +543,7 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
     excluded_households_ids = serializers.ListField(child=serializers.CharField(), required=True)
     exclusion_reason = serializers.CharField(required=False)
 
-    def validate_excluded_households_ids(self, value: List[str]) -> List[str]:
+    def validate_excluded_households_ids(self, value: list[str]) -> list[str]:
         if len(value) != len(set(value)):
             raise serializers.ValidationError("Duplicate IDs are not allowed.")
         return value
@@ -562,7 +562,7 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
     version = serializers.IntegerField(required=False, read_only=True)
 
-    def validate_version(self, value: Optional[int]) -> Optional[int]:
+    def validate_version(self, value: int | None) -> int | None:
         payment_plan = self.context.get("payment_plan")
         if payment_plan and value:
             check_concurrency_version_in_mutation(value, payment_plan)
@@ -705,7 +705,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         ).count()
 
     @staticmethod
-    def get_reconciliation_summary(obj: PaymentPlan) -> Dict[str, int]:
+    def get_reconciliation_summary(obj: PaymentPlan) -> dict[str, int]:
         return obj.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
@@ -720,7 +720,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
 
     @staticmethod
-    def get_excluded_households(obj: PaymentPlan) -> Dict[str, Any]:
+    def get_excluded_households(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
             Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
             if not obj.is_social_worker_program
@@ -729,7 +729,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return HouseholdSmallSerializer(qs, many=True).data
 
     @staticmethod
-    def get_excluded_individuals(obj: PaymentPlan) -> Dict[str, Any]:
+    def get_excluded_individuals(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
             Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
             if obj.is_social_worker_program
@@ -832,10 +832,10 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 return obj.has_export_file
         return False
 
-    def get_split_choices(self, obj: PaymentPlan) -> List[Dict[str, Any]]:
+    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> Dict[str, Any]:
+    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
         qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=obj).order_by("delivery_mechanism_order")
         return VolumeByDeliveryMechanismSerializer(qs, many=True).data
 
@@ -845,7 +845,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
-    def get_funds_commitments(self, obj: PaymentPlan) -> Optional[Dict[str, Any]]:
+    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
         available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
         # Prefetch related items grouped by `funds_commitment_group`
         group = (
@@ -863,7 +863,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             ).data
         return None
 
-    def get_available_funds_commitments(self, obj: PaymentPlan) -> List[Dict[str, Any]]:
+    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         available_items_qs = FundsCommitmentItem.objects.filter(
             Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
         )
@@ -930,7 +930,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
     @staticmethod
-    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> List[str]:
+    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> list[str]:
         fsp = getattr(obj, "financial_service_provider", None)
         dm = getattr(obj, "delivery_mechanism", None)
         if not fsp or not dm:
@@ -1026,14 +1026,14 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> Optional[str]:
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
                 household_snapshot_data.get("primary_collector")
                 or household_snapshot_data.get("alternate_collector")
-                or dict()
+                or {}
             )
             return collector_data.get(field_name)
         return None
@@ -1055,7 +1055,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             return ""
         return obj.fsp_auth_code or ""
 
-    def get_verification(self, obj: Payment) -> Dict[str, Any]:
+    def get_verification(self, obj: Payment) -> dict[str, Any]:
         # TODO: only one Verification per Payment?
         return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
 
@@ -1068,15 +1068,15 @@ class PaymentListSerializer(serializers.ModelSerializer):
     def get_payment_plan_soft_conflicted(self, obj: Payment) -> bool:
         return obj.parent.status == PaymentPlan.Status.OPEN and getattr(obj, "payment_plan_soft_conflicted", False)
 
-    def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> List[Any]:
+    def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> list[Any]:
         if obj.parent.status != PaymentPlan.Status.OPEN:
-            return list()
+            return []
         conflicts_data = getattr(obj, "payment_plan_hard_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
-    def get_payment_plan_soft_conflicted_data(self, obj: Payment) -> List[Any]:
+    def get_payment_plan_soft_conflicted_data(self, obj: Payment) -> list[Any]:
         if obj.parent.status != PaymentPlan.Status.OPEN:
-            return list()
+            return []
         conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
@@ -1106,14 +1106,14 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         )
 
     @staticmethod
-    def collector_field(payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+    def collector_field(payment: "Payment", field_name: str) -> None | str | dict:
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
                 household_snapshot_data.get("primary_collector")
                 or household_snapshot_data.get("alternate_collector")
-                or dict()
+                or {}
             )
             return collector_data.get(field_name)
         return None
@@ -1136,7 +1136,7 @@ class PaymentSmallSerializer(serializers.ModelSerializer):
             "verification",
         )
 
-    def get_verification(self, obj: Payment) -> Optional[str]:
+    def get_verification(self, obj: Payment) -> str | None:
         verification = obj.payment_verifications.first()
         return getattr(verification, "id", None)
 
@@ -1177,14 +1177,14 @@ class VerificationListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> Optional[str]:
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
                 household_snapshot_data.get("primary_collector")
                 or household_snapshot_data.get("alternate_collector")
-                or dict()
+                or {}
             )
             return collector_data.get(field_name)
         return None
@@ -1301,10 +1301,9 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         program_slug = request.parser_context["kwargs"]["program_slug"]
-        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
-        return program
+        return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
-    def create(self, data: Dict) -> PaymentPlan:
+    def create(self, data: dict) -> PaymentPlan:
         request = self.context["request"]
         program = self.get_program()
         data["program"] = program
@@ -1323,7 +1322,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         )
         return payment_plan
 
-    def update(self, payment_plan: PaymentPlan, validated_data: Dict) -> PaymentPlan:
+    def update(self, payment_plan: PaymentPlan, validated_data: dict) -> PaymentPlan:
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)

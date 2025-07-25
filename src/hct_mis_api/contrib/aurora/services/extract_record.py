@@ -11,12 +11,11 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> Any:
     def _filter(d: Any) -> Any:
         if isinstance(d, list):
             return [_filter(v) for v in d]
-        elif isinstance(d, dict):
+        if isinstance(d, dict):
             return {k: _filter(v) for k, v in d.items()}
-        elif is_image(d):
+        if is_image(d):
             return "::image::"
-        else:
-            return d
+        return d
 
     for record_id in records_ids:
         record = Record.objects.get(pk=record_id)

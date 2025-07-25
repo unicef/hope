@@ -1,7 +1,6 @@
 import base64
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -25,7 +24,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 logger = logging.getLogger(__name__)
 
 
-def get_photo_from_stream(stream: Optional[str]) -> Optional[SimpleUploadedFile]:
+def get_photo_from_stream(stream: str | None) -> SimpleUploadedFile | None:
     if stream:
         base64_img_bytes = stream.encode("utf-8")
         decoded_image_data = base64.decodebytes(base64_img_bytes)
@@ -42,7 +41,7 @@ class Totals:
 
 class DocumentMixin:
     @staticmethod
-    def save_document(member: PendingIndividual, doc: Dict) -> None:
+    def save_document(member: PendingIndividual, doc: dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
             photo=get_photo_from_stream(doc.get("image", None)),
@@ -55,24 +54,21 @@ class DocumentMixin:
 
 class AccountMixin:
     @staticmethod
-    def save_account(member: PendingIndividual, doc: Dict) -> None:
+    def save_account(member: PendingIndividual, doc: dict) -> None:
         PendingAccount.objects.create(individual=member, **doc)
 
 
 class PhotoMixin:
     @staticmethod
-    def get_photo(photo: Optional[str]) -> Optional[SimpleUploadedFile]:
+    def get_photo(photo: str | None) -> SimpleUploadedFile | None:
         if photo:
             data = photo.removeprefix("data:image/png;base64,")
-            p = get_photo_from_stream(data)
-            return p
+            return get_photo_from_stream(data)
         return None
 
 
 class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
-    def _manage_collision(
-        self, household: Household, registration_data_import: RegistrationDataImport
-    ) -> Optional[str]:
+    def _manage_collision(self, household: Household, registration_data_import: RegistrationDataImport) -> str | None:
         """
         Detects collisions in the provided households data against the existing population.
         """
@@ -80,10 +76,9 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         if not program.collision_detection_enabled or not program.collision_detector:
             return None
         colision_detector = program.collision_detector
-        household_id = colision_detector.detect_collision(household)
-        return household_id
+        return colision_detector.detect_collision(household)
 
-    def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: Dict) -> PendingIndividual:
+    def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: dict) -> PendingIndividual:
         photo = self.get_photo(member_data.pop("photo", None))
         documents = member_data.pop("documents", [])
         accounts = member_data.pop("accounts", [])
@@ -113,7 +108,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.individuals_and_roles.create(individual=ind, role=ROLE_ALTERNATE)
         return ind
 
-    def save_households(self, rdi: RegistrationDataImport, households_data: List[Dict]) -> Totals:
+    def save_households(self, rdi: RegistrationDataImport, households_data: list[dict]) -> Totals:
         totals = Totals(0, 0)
         household_ids_to_add_extra_rdis = []
         for household_data in households_data:

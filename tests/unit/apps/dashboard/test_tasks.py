@@ -72,10 +72,13 @@ def test_update_dashboard_figures_retry_on_global_failure(afghanistan: BusinessA
     Test that update_dashboard_figures retries on failure of global data refresh.
     """
     mocked_error_message = "Mocked global error"
-    with patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data") as mock_ba_refresh, patch(
-        "hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data",
-        side_effect=Exception(mocked_error_message),
-    ) as mock_global_refresh:
+    with (
+        patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data") as mock_ba_refresh,
+        patch(
+            "hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data",
+            side_effect=Exception(mocked_error_message),
+        ) as mock_global_refresh,
+    ):
         if not BusinessArea.objects.filter(slug=afghanistan.slug, active=True).exists():
             afghanistan.active = True
             afghanistan.save()
@@ -162,7 +165,7 @@ def test_update_recent_dashboard_figures_ba_error_continues(
         if slug == afghanistan.slug:
             raise Exception("BA refresh error for afghanistan")
         # For other BAs (e.g., iraq), the mock should behave normally (return None)
-        return None
+        return
 
     mock_ba_refresh.side_effect = ba_refresh_side_effect_func
 

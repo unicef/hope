@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 import graphene
 from graphene import ObjectType, relay
@@ -23,7 +23,7 @@ class AreaTypeNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     @staticmethod
-    def resolve_areas(parent: Area, info: Any, **kwargs: Any) -> List[Area]:
+    def resolve_areas(parent: Area, info: Any, **kwargs: Any) -> list[Area]:
         return parent.get_children()
 
     @staticmethod

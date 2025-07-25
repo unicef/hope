@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Dict, Optional
+from typing import Any
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -132,7 +132,7 @@ class DeduplicationResultSerializer(serializers.Serializer):
         individual = Individual.all_objects.get(id=obj.get("hit_id"))
         return str(individual.unicef_id)
 
-    def get_age(self, obj: Any) -> Optional[int]:
+    def get_age(self, obj: Any) -> int | None:
         date_of_birth = obj.get("dob")
         if date_of_birth:
             today = date.today()
@@ -146,7 +146,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     full_name = serializers.CharField()
     unicef_id = serializers.CharField()
 
-    def get_photo(self, obj: Any) -> Optional[str]:
+    def get_photo(self, obj: Any) -> str | None:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
         return individual.photo.url if individual and individual.photo else None
 
@@ -163,7 +163,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
     possible_duplicate = DeduplicationResultSerializer(many=True)
     dedup_engine_similarity_pair = serializers.SerializerMethodField()
 
-    def get_dedup_engine_similarity_pair(self, obj: Any) -> Dict:
+    def get_dedup_engine_similarity_pair(self, obj: Any) -> dict:
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         if program_slug := self.context["request"].parser_context["kwargs"].get("program_slug"):
             scope = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
@@ -203,7 +203,7 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     def get_has_duplicated_document(self, obj: TicketNeedsAdjudicationDetails) -> bool:
         return obj.has_duplicated_document
 
-    def get_extra_data(self, obj: TicketSystemFlaggingDetails) -> Dict:
+    def get_extra_data(self, obj: TicketSystemFlaggingDetails) -> dict:
         return TicketNeedsAdjudicationDetailsExtraDataSerializer(
             {
                 "golden_records": obj.extra_data.get("golden_records"),

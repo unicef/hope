@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Type
+from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -44,7 +44,7 @@ class DashboardDataView(APIView):
         If data is not cached or needs updating, refresh it.
         """
         is_global = business_area_slug.lower() == "global"
-        data_cache: Type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
+        data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
         has_permission = False
 
@@ -113,7 +113,7 @@ class CreateOrUpdateDashReportView(APIView):
         try:
             task_identifier = GLOBAL_SLUG if is_global else business_area_slug
 
-            data_cache_class: Type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
+            data_cache_class: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
             data_cache_key_to_clear = data_cache_class.get_cache_key(task_identifier)
             cache.delete(data_cache_key_to_clear)
 
@@ -133,7 +133,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
 
     template_name = "dashboard/dashboard.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         is_global = business_area_slug.lower() == "global"

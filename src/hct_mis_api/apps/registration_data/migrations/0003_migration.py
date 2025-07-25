@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration_data', '0002_migration'),
+        ("registration_data", "0002_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='registrationdataimport',
-            options={'permissions': (('rerun_rdi', 'Can Rerun RDI'),), 'verbose_name': 'Registration data import'},
+            name="registrationdataimport",
+            options={"permissions": (("rerun_rdi", "Can Rerun RDI"),), "verbose_name": "Registration data import"},
         ),
     ]

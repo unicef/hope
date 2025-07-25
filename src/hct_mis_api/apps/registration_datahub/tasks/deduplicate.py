@@ -2,7 +2,7 @@ import itertools
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, fields
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Iterable
 
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
@@ -75,16 +75,16 @@ class Thresholds:
 class TicketData:
     ticket: GrievanceTicket
     ticket_details: TicketNeedsAdjudicationDetails
-    possible_duplicates_throughs: List[Any]
+    possible_duplicates_throughs: list[Any]
 
 
 @dataclass
 class DeduplicationResult:
-    duplicates: List
-    possible_duplicates: List
-    original_individuals_ids_duplicates: List
-    original_individuals_ids_possible_duplicates: List
-    results_data: Dict[str, Any]
+    duplicates: list
+    possible_duplicates: list
+    original_individuals_ids_duplicates: list
+    original_individuals_ids_possible_duplicates: list
+    results_data: dict[str, Any]
 
 
 class DeduplicateTask:
@@ -96,7 +96,7 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
 
-    def __init__(self, business_area_slug: str, program_id: Optional[str]):
+    def __init__(self, business_area_slug: str, program_id: str | None):
         self.business_area: BusinessArea = BusinessArea.objects.get(slug=business_area_slug)
         if program_id:
             self.program: Program = Program.objects.get(id=program_id)
@@ -206,14 +206,13 @@ class DeduplicateTask:
             if program.collision_detector.detect_collision(household):
                 households_to_exclude.append(household.id)
 
-        individuals_ids_to_exclude = [
+        return [
             str(x)
             for x in PendingIndividual.objects.filter(
                 registration_data_import=registration_data_import,
                 household_id__in=households_to_exclude,
             ).values_list("id", flat=True)
         ]
-        return individuals_ids_to_exclude
 
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
         pending_individuals = PendingIndividual.objects.filter(registration_data_import=registration_data_import)
@@ -378,10 +377,10 @@ class DeduplicateTask:
 
     def _prepare_fields(
         self,
-        individual: Union[Individual, PendingIndividual],
-        fields_names: Tuple[str, ...],
-        dict_fields: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        individual: Individual | PendingIndividual,
+        fields_names: tuple[str, ...],
+        dict_fields: dict[str, Any],
+    ) -> dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
@@ -390,8 +389,8 @@ class DeduplicateTask:
         return fields
 
     def _prepare_query_dict(
-        self, individual_id: str, individual_fields: Dict, min_score: Union[int, float]
-    ) -> Dict[str, Any]:
+        self, individual_id: str, individual_fields: dict, min_score: int | float
+    ) -> dict[str, Any]:
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -438,7 +437,7 @@ class DeduplicateTask:
             },
         }
 
-    def _prepare_queries_for_names_from_fields(self, individual_fields: Dict) -> List[Dict]:
+    def _prepare_queries_for_names_from_fields(self, individual_fields: dict) -> list[dict]:
         """
         prepares ES queries for
         * givenName
@@ -481,7 +480,7 @@ class DeduplicateTask:
 
         return [max_from_should_and_must]
 
-    def _get_complex_query_for_name(self, name: str, field_name: str) -> Dict:
+    def _get_complex_query_for_name(self, name: str, field_name: str) -> dict:
         name_phonetic_query_dict = {"match": {f"{field_name}.phonetic": {"query": name}}}
         # phonetic analyzer not working with fuzziness
         name_fuzzy_query_dict = {
@@ -500,7 +499,7 @@ class DeduplicateTask:
         # fuzzy score <=1 changes if there is need make change
         return {"dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}}
 
-    def _prepare_identities_queries_from_fields(self, identities: List) -> List[Dict]:
+    def _prepare_identities_queries_from_fields(self, identities: list) -> list[dict]:
         queries = []
         for item in identities:
             doc_number = item.get("number")
@@ -524,10 +523,10 @@ class DeduplicateTask:
 
     def _get_deduplicate_result(
         self,
-        query_dict: Dict,
+        query_dict: dict,
         duplicate_score: float,
-        document: Union[Type[IndividualDocument]],
-        individual: Union[Individual, PendingIndividual],
+        document: type[IndividualDocument],
+        individual: Individual | PendingIndividual,
     ) -> DeduplicationResult:
         duplicates = []
         possible_duplicates = []
@@ -577,7 +576,7 @@ class DeduplicateTask:
         )
 
     def _deduplicate_single_pending_individual(self, individual: PendingIndividual, rdi_id: str) -> DeduplicationResult:
-        fields_names: Tuple[str, ...] = (
+        fields_names: tuple[str, ...] = (
             "given_name",
             "full_name",
             "middle_name",
@@ -588,7 +587,7 @@ class DeduplicateTask:
             "sex",
             "birth_date",
         )
-        dict_fields: Dict[str, Tuple[str, ...]] = {
+        dict_fields: dict[str, tuple[str, ...]] = {
             "identities": ("document_number", "partner"),
         }
         individual_fields = self._prepare_fields(individual, fields_names, dict_fields)
@@ -614,7 +613,7 @@ class DeduplicateTask:
             individual,
         )
 
-    def _deduplicate_single_individual(self, individual: Union[Individual, PendingIndividual]) -> DeduplicationResult:
+    def _deduplicate_single_individual(self, individual: Individual | PendingIndividual) -> DeduplicationResult:
         fields_names = (
             "given_name",
             "full_name",
@@ -681,8 +680,8 @@ class HardDocumentDeduplication:
     def deduplicate(
         self,
         new_documents: QuerySet[Document],
-        registration_data_import: Optional[RegistrationDataImport] = None,
-        program: Optional[Program] = None,
+        registration_data_import: RegistrationDataImport | None = None,
+        program: Program | None = None,
     ) -> None:
         if program:
             program_ids = [str(program.id)]
@@ -883,17 +882,16 @@ class HardDocumentDeduplication:
     def _generate_signature(self, document: Document) -> str:
         if document.type.valid_for_deduplication:
             return f"{document.type_id}--{document.document_number}--{document.country_id}"
-        else:
-            return f"{document.document_number}--{document.country_id}"
+        return f"{document.document_number}--{document.country_id}"
 
     def _prepare_grievance_ticket_documents_deduplication(
         self,
         main_individual: Individual,
-        possible_duplicates_individuals: List[Individual],
+        possible_duplicates_individuals: list[Individual],
         business_area: BusinessArea,
-        registration_data_import: Optional[RegistrationDataImport],
-        possible_duplicates_through_dict: Dict,
-    ) -> Optional[TicketData]:
+        registration_data_import: RegistrationDataImport | None,
+        possible_duplicates_through_dict: dict,
+    ) -> TicketData | None:
         from hct_mis_api.apps.grievance.models import (
             GrievanceTicket,
             TicketNeedsAdjudicationDetails,

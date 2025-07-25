@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 def calculate_age_at_registration(
     created_at: Any,
     birth_date: str,
-) -> Optional[int]:
+) -> int | None:
     try:
         return relativedelta(created_at.date(), parser.parse(birth_date).date()).years
     except Exception:
