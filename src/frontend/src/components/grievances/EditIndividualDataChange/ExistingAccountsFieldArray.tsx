@@ -25,10 +25,10 @@ export function ExistingAccountsFieldArray({
       <FieldArray
         name="individualDataUpdateAccountsToEdit"
         render={(arrayHelpers) =>
-          individual?.accounts?.edges?.length > 0 ? (
+          individual?.accounts?.length > 0 ? (
             <>
-              {individual.accounts.edges.map((item) => (
-                <Grid size={{ xs: 12 }} key={item.node.id}>
+              {individual.accounts.map((item) => (
+                <Grid size={{ xs: 12 }} key={item.id}>
                   <Grid
                     container
                     direction="row"
@@ -37,8 +37,8 @@ export function ExistingAccountsFieldArray({
                   >
                     <EditAccountRow
                       values={values}
-                      account={item.node}
-                      id={item.node.id}
+                      account={item}
+                      id={item.id}
                       arrayHelpers={arrayHelpers}
                       individualChoicesData={individualChoicesData}
                     />

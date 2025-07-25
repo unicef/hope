@@ -131,6 +131,7 @@ export type { IndividualDeleteIssueTypeExtras as IndividualDeleteIssueTypeExtras
 export type { IndividualDetail as IndividualDetailCamelCase } from './models/IndividualDetail';
 export type { IndividualDocument as IndividualDocumentCamelCase } from './models/IndividualDocument';
 export type { IndividualIdentity as IndividualIdentityCamelCase } from './models/IndividualIdentity';
+export type { IndividualIdentityGT as IndividualIdentityGTCamelCase } from './models/IndividualIdentityGT';
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
 export type { IndividualPhotoDetail as IndividualPhotoDetailCamelCase } from './models/IndividualPhotoDetail';
 export type { IndividualSimple as IndividualSimpleCamelCase } from './models/IndividualSimple';

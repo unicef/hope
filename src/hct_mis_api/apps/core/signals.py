@@ -22,6 +22,12 @@ def validate_compatible_types(
             raise ValidationError("DCTs of different types cannot be compatible with each other.")
 
 
+@receiver(post_save, sender=DataCollectingType)
+def add_self_to_compatible_types(sender: Any, instance: DataCollectingType, created: bool, **kwargs: Any) -> None:
+    if created:
+        instance.compatible_types.add(instance)
+
+
 @receiver(post_save, sender=BusinessArea)
 def business_area_created(sender: Any, instance: BusinessArea, created: bool, **kwargs: Any) -> None:
     """

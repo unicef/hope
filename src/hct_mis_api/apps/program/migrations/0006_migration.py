@@ -6,6 +6,8 @@ from django.db import migrations, models
 def generate_slug(apps, schema_editor):
     Program = apps.get_model("program", "Program")
     for program in Program.objects.all():
+        if not program.programme_code:
+            program.programme_code = program.generate_code()
         program.slug = program.programme_code.lower().replace("/", "_").replace(".", "*")
         program.save()
 

@@ -16,8 +16,6 @@ class TestDCTValidation(TestCase):
     def test_change_type_without_compatible_with_different_type(self) -> None:
         dct_full = DataCollectingTypeFactory(label="Full", code="full", business_areas=[self.business_area])
 
-        dct_full.compatible_types.add(dct_full)
-
         dct_full.type = DataCollectingType.Type.SOCIAL
         dct_full.save()
 
@@ -25,7 +23,6 @@ class TestDCTValidation(TestCase):
         dct_full = DataCollectingTypeFactory(label="Full", code="full", business_areas=[self.business_area])
         dct_partial = DataCollectingTypeFactory(label="Partial", code="partial", business_areas=[self.business_area])
 
-        dct_full.compatible_types.add(dct_full)
         dct_full.compatible_types.add(dct_partial)
 
         dct_full.type = DataCollectingType.Type.SOCIAL
@@ -45,8 +42,6 @@ class TestDCTValidation(TestCase):
             business_areas=[self.business_area],
             type=DataCollectingType.Type.SOCIAL,
         )
-
-        dct_full.compatible_types.add(dct_full)
 
         with self.assertRaises(ValidationError) as error:
             dct_full.compatible_types.add(dct_social)
