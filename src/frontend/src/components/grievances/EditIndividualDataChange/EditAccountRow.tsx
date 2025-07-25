@@ -7,10 +7,11 @@ import { AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { Account } from '@restgenerated/models/Account';
 
 export interface EditAccountRowProps {
   values;
-  account: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts']['edges'][number]['node'];
+  account: Account;
   arrayHelpers;
   id: string;
   individualChoicesData: IndividualChoices
@@ -26,7 +27,7 @@ export function EditAccountRow({
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [isEdited, setEdit] = useState(false);
-  const dataFields = JSON.parse(account.dataFields);
+  const dataFields = JSON.parse(account.data);
   return isEdited ? (
     <>
       <AccountField
@@ -48,7 +49,7 @@ export function EditAccountRow({
           onClick={() => {
             arrayHelpers.remove({
               id: account.id,
-              ...account.dataFields,
+              ...account.data,
             });
             setEdit(false);
           }}
@@ -62,7 +63,7 @@ export function EditAccountRow({
       <Grid size={{ xs: 4 }} key="type">
         <LabelizedField
           label="type"
-          value={String(account.name)}
+          value={String(account.accountType)}
         />
       </Grid>
     {Object.entries(dataFields).map(([key, value]) => (
