@@ -2,11 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Country } from './Country';
-export type IndividualIdentity = {
-    readonly id: number;
-    country: Country;
+export type IndividualIdentityGT = {
+    country: string;
+    partner: string;
     number: string;
-    partner?: number | null;
 };
 
