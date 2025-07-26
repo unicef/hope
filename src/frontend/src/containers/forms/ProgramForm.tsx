@@ -28,7 +28,6 @@ const ProgramForm = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
-  const isEditProgram = location.pathname.includes('edit');
 
   const { data } = useQuery<ProgramChoices>({
     queryKey: ['programChoices', businessArea],
@@ -167,7 +166,6 @@ const ProgramForm = ({
             maxLength={4}
             required
             data-cy="input-programme-code"
-            disabled={isEditProgram}
           />
         </Grid>
         <Grid size={{ xs: 6 }}>
