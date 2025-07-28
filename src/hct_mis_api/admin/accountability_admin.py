@@ -8,7 +8,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class MessageRecipientMapInline(admin.TabularInline):

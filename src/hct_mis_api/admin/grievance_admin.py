@@ -23,7 +23,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class GrievanceTicketCopiedToInline(admin.TabularInline):

@@ -22,7 +22,7 @@ from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
 

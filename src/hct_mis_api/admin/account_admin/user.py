@@ -30,7 +30,7 @@ from hct_mis_api.admin.account_admin.forms import (
 from hct_mis_api.admin.account_admin.mixins import KoboAccessMixin
 from hct_mis_api.admin.account_admin.user_role import RoleAssignmentInline
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
+from hct_mis_api.admin.utils_admin import HopeModelAdminMixin
 
 if TYPE_CHECKING:
     from uuid import UUID

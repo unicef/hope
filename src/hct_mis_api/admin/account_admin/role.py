@@ -22,7 +22,7 @@ from hct_mis_api.admin.account_admin.filters import (
 )
 from hct_mis_api.admin.account_admin.forms import RoleAdminForm
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
 

@@ -34,7 +34,7 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )

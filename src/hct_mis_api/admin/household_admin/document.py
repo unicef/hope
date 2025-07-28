@@ -16,7 +16,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Individual,
 )
-from hct_mis_api.apps.utils.admin import (
+from hct_mis_api.admin.utils_admin import (
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,

@@ -58,7 +58,7 @@ from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
 from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
-from hct_mis_api.apps.utils.admin import (
+from hct_mis_api.admin.utils_admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,

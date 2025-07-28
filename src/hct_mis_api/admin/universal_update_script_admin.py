@@ -26,7 +26,7 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     household_fields,
     individual_fields,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):

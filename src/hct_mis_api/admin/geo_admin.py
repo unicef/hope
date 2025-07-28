@@ -28,7 +28,7 @@ from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
 
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 if TYPE_CHECKING:
     from django.http import (

@@ -24,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.services.biometric_deduplication impo
     BiometricDeduplicationService,
 )
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
-from hct_mis_api.apps.utils.admin import (
+from hct_mis_api.admin.utils_admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,

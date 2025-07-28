@@ -45,7 +45,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hct_mis_api.apps.utils.security import is_root
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
