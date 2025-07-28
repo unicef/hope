@@ -238,7 +238,6 @@ class TestFeedback:
         pageNewFeedback.getDescription().send_keys("Test")
         pageNewFeedback.getButtonNext().click()
         pageFeedbackDetails.getButtonCreateLinkedTicket()
-        # pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
         # Check Details page
         assert pageFeedbackDetails.textCategory in pageFeedbackDetails.getCategory().text
         assert issue_type in pageFeedbackDetails.getIssueType().text
@@ -272,7 +271,7 @@ class TestFeedback:
         pageNewFeedback.getButtonNext().click()
         assert "Feedback" in pageNewFeedback.getLabelCategory().text
         pageNewFeedback.getDescription().send_keys("Test")
-        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
+        pageNewFeedback.getButtonNext().click()
         # Check Details page
         assert pageFeedbackDetails.textCategory in pageFeedbackDetails.getCategory().text
         assert issue_type in pageFeedbackDetails.getIssueType().text
@@ -351,7 +350,7 @@ class TestFeedback:
         pageNewFeedback.getButtonNext().click()
         assert "Feedback" in pageNewFeedback.getLabelCategory().text
         pageNewFeedback.getDescription().send_keys("Test")
-        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
+        pageNewFeedback.getButtonNext().click()
         # Check Details page
         assert "Test Programm" in pageFeedbackDetails.getProgramme().text
         pageFeedback.getNavFeedback().click()
@@ -381,7 +380,7 @@ class TestFeedback:
         pageNewFeedback.getButtonNext().click()
         assert "Feedback" in pageNewFeedback.getLabelCategory().text
         pageNewFeedback.getDescription().send_keys("Test")
-        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
+        pageNewFeedback.getButtonNext().click()
         # Check Details page
         assert "Test Programm" in pageFeedbackDetails.getProgramme().text
         pageFeedback.getNavFeedback().click()
@@ -412,7 +411,7 @@ class TestFeedback:
         pageNewFeedback.getButtonNext().click()
         assert "Feedback" in pageNewFeedback.getLabelCategory().text
         pageNewFeedback.getDescription().send_keys("Test")
-        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
+        pageNewFeedback.getButtonNext().click()
         # Check Details page
         assert "Test Programm" in pageFeedbackDetails.getProgramme().text
         pageFeedback.getNavFeedback().click()
@@ -450,6 +449,7 @@ class TestFeedback:
         assert "New comment, new comment. New comment?" in pageFeedbackDetails.getComments().text
         assert "Abkamari" in pageFeedbackDetails.getAreaVillagePayPoint().text
         assert "English" in pageFeedbackDetails.getLanguagesSpoken().text
+        assert "Shakardara" in pageFeedbackDetails.getAdministrativeLevel2().text
 
     @pytest.mark.skip(reason="Unskip after REST refactoring is complete - Jan to fix the grievance payload")
     def test_create_linked_ticket(

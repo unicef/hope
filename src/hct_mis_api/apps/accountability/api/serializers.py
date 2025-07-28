@@ -137,6 +137,7 @@ class FeedbackUpdateSerializer(serializers.ModelSerializer):
     admin2 = serializers.UUIDField(allow_null=True, required=False)
     language = serializers.CharField(allow_blank=True, required=False)
     consent = serializers.BooleanField(required=False)
+    program_id = serializers.UUIDField(allow_null=True, required=False)
 
     class Meta:
         model = Feedback
@@ -150,6 +151,7 @@ class FeedbackUpdateSerializer(serializers.ModelSerializer):
             "language",
             "comments",
             "consent",
+            "program_id",
         )
 
 

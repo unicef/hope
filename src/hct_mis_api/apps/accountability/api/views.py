@@ -189,8 +189,11 @@ class FeedbackViewSet(
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
         program = feedback.program
 
+        if program_id := serializer.validated_data.get("program_id"):
+            program = Program.objects.get(id=program_id)
+
         if program and program.status == Program.FINISHED:
-            raise ValidationError("It is not possible to create Feedback for a Finished Program.")
+            raise ValidationError("It is not possible to update Feedback for a Finished Program.")
 
         # additional check for global scope - check if user has permission in the target program
         if program:
