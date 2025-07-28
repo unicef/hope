@@ -203,8 +203,7 @@ class MessageCreateSerializer(serializers.Serializer):
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
     households = serializers.ListSerializer(
-        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
-        required=False, allow_empty=True
+        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()), required=False, allow_empty=True
     )
 
 
