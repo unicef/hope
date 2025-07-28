@@ -147,7 +147,7 @@ class TestLogEntryView:
                 assert log_result["changes"] == log.changes
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
-                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["content_type"] == log.content_type.model.title()
                 assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
@@ -206,7 +206,7 @@ class TestLogEntryView:
                 assert log_result["changes"] == log.changes
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
-                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["content_type"] == log.content_type.model.title()
                 assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
