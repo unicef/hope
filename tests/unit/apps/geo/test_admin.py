@@ -11,7 +11,7 @@ from flaky import flaky
 from webtest import Upload
 
 from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.geo.admin import AreaAdmin
+from hct_mis_api.admin.geo_admin import AreaAdmin
 from hct_mis_api.apps.geo.models import Area, AreaType
 
 

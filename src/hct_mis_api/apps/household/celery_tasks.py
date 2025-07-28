@@ -197,7 +197,7 @@ def enroll_households_to_program_task(households_ids: List, program_for_enroll_i
 @log_start_and_end
 @sentry_tags
 def mass_withdraw_households_from_list_task(household_id_list: list, tag: str, program_id: str) -> None:
-    from hct_mis_api.apps.household.admin.household import (
+    from hct_mis_api.admin.household_admin.household import (
         HouseholdWithdrawFromListMixin,
     )
 

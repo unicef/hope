@@ -17,7 +17,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.household.admin.household import HouseholdWithdrawFromListMixin
+from hct_mis_api.admin.household_admin.household import HouseholdWithdrawFromListMixin
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 

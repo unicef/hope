@@ -14,7 +14,7 @@ from parameterized import parameterized
 from rest_framework import status
 
 from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.core.admin import (
+from hct_mis_api.admin.core_admin import (
     AcceptanceProcessThresholdFormset,
     DataCollectingTypeForm,
 )

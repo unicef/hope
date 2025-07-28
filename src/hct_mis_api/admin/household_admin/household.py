@@ -26,7 +26,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import JSONBSet
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.admin.mixins import HouseholdWithDrawnMixin
+from hct_mis_api.admin.household_admin.mixins import HouseholdWithDrawnMixin
 from hct_mis_api.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
