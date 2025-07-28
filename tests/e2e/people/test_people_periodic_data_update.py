@@ -163,7 +163,6 @@ def string_attribute() -> FlexibleAttribute:
 
 @pytest.mark.usefixtures("login")
 class TestPeoplePeriodicDataUpdateUpload:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_people_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
@@ -214,7 +213,6 @@ class TestPeoplePeriodicDataUpdateUpload:
         pageIndividuals.screenshot("0")
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_people_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -258,7 +256,6 @@ class TestPeoplePeriodicDataUpdateUpload:
         assert pageIndividuals.getPduFormErrors().text == error_text
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_people_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,
