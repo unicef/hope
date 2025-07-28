@@ -27,7 +27,7 @@ function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
   const {
@@ -41,10 +41,10 @@ function SurveyDetailsPage(): ReactElement {
   );
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['surveyCategoryChoices', baseUrl, programId],
+    queryKey: ['surveyCategoryChoices', businessArea, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
-        businessAreaSlug: baseUrl,
+        businessAreaSlug: businessArea,
         programSlug: programId,
       }),
   });
@@ -52,7 +52,7 @@ function SurveyDetailsPage(): ReactElement {
   const exportSurveyMutation = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsSurveysExportSampleRetrieve({
-        businessAreaSlug: baseUrl,
+        businessAreaSlug: businessArea,
         programSlug: programId,
         id: id,
       }),

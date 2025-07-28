@@ -9,7 +9,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
 import { Survey } from '@restgenerated/models/Survey';
-import { choicesToDict, renderUserName } from '@utils/utils';
+import { choicesToDict } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -48,10 +48,7 @@ function SurveyDetails({
             <LabelizedField label={t('Survey Title')} value={title} />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Created By')}
-              value={renderUserName(createdBy)}
-            />
+            <LabelizedField label={t('Created By')} value={createdBy} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Date Created')}>
