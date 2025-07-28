@@ -15,7 +15,6 @@ import styled from 'styled-components';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
-import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 const HeaderWrapper = styled.div`
