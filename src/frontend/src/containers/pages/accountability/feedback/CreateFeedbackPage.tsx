@@ -23,6 +23,7 @@ import {
   StepLabel,
   Stepper,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
@@ -45,7 +46,8 @@ import {
 } from '../../../../config/permissions';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { createApiParams } from '@utils/apiUtils';
-import { decodeIdString, showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
+import { Admin2SyncEffect } from './Admin2SyncEffect';
 
 // Constants for feedback issue types
 const FEEDBACK_ISSUE_TYPE = {
@@ -239,7 +241,10 @@ function CreateFeedbackPage(): ReactElement {
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
     issueType: values.issueType,
-    admin2: decodeIdString(values.admin2),
+    admin2:
+      typeof values.admin2 === 'object' && values.admin2 !== null
+        ? values.admin2.id
+        : values.admin2,
     language: values.language || '',
     program: values.program,
   });
@@ -253,6 +258,7 @@ function CreateFeedbackPage(): ReactElement {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
+        console.log('values', values); // Debugging line to check form values
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({
@@ -276,6 +282,12 @@ function CreateFeedbackPage(): ReactElement {
       // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
+        // Sync admin2 with selectedHousehold.admin2
+        <Admin2SyncEffect
+          selectedHousehold={values.selectedHousehold}
+          admin2={values.admin2}
+          setFieldValue={setFieldValue}
+        />;
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
@@ -293,6 +305,11 @@ function CreateFeedbackPage(): ReactElement {
         }
         return (
           <>
+            <Admin2SyncEffect
+              selectedHousehold={values.selectedHousehold}
+              admin2={values.admin2}
+              setFieldValue={setFieldValue}
+            />
             <PageHeader
               title="New Feedback"
               breadCrumbs={
@@ -341,6 +358,12 @@ function CreateFeedbackPage(): ReactElement {
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
+                            {touched.issueType &&
+                              typeof errors.issueType === 'string' && (
+                                <FormHelperText error>
+                                  {errors.issueType}
+                                </FormHelperText>
+                              )}
                           </Grid>
                         </Grid>
                       )}
@@ -451,6 +474,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
+                              {touched.description &&
+                                typeof errors.description === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.description}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 12 }}>
                               <Field
@@ -464,15 +493,36 @@ function CreateFeedbackPage(): ReactElement {
                               />
                             </Grid>
                             <Grid size={{ xs: 6 }}>
-                              <Field
-                                name="admin2"
-                                variant="outlined"
-                                component={FormikAdminAreaAutocomplete}
-                                dataCy="input-admin2"
-                                disabled={Boolean(
-                                  values.selectedHousehold?.admin2,
+                              {values.selectedHousehold?.admin2 ? (
+                                <Tooltip
+                                  title="This field is set automatically from the selected household."
+                                  placement="top"
+                                  arrow
+                                >
+                                  <span>
+                                    <Field
+                                      name="admin2"
+                                      variant="outlined"
+                                      component={FormikAdminAreaAutocomplete}
+                                      dataCy="input-admin2"
+                                      disabled
+                                    />
+                                  </span>
+                                </Tooltip>
+                              ) : (
+                                <Field
+                                  name="admin2"
+                                  variant="outlined"
+                                  component={FormikAdminAreaAutocomplete}
+                                  dataCy="input-admin2"
+                                />
+                              )}
+                              {touched.admin2 &&
+                                typeof errors.admin2 === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.admin2}
+                                  </FormHelperText>
                                 )}
-                              />
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -483,6 +533,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-area"
                               />
+                              {touched.area &&
+                                typeof errors.area === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.area}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -494,6 +550,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-languages"
                               />
+                              {touched.language &&
+                                typeof errors.language === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.language}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 3 }}>
                               <Field
@@ -505,6 +567,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikSelectField}
                                 disabled={!isAllPrograms || !isAnonymousTicket}
                               />
+                              {touched.program &&
+                                typeof errors.program === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.program}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                           </Grid>
                         </BoxPadding>
