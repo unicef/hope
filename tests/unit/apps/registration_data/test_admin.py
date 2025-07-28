@@ -25,7 +25,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
 )
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.registration_data.admin import RegistrationDataImportAdmin
+from admin.registration_data_admin import RegistrationDataImportAdmin
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

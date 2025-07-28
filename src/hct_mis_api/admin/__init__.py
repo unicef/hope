@@ -12,3 +12,6 @@ from .geo_admin import *
 from .household_admin import *
 from .periodic_data_update_admin import *
 from .program_admin import *
+from .registration_data_admin import *
+from .sanction_list_admin import *
+from .steficon_admin import *

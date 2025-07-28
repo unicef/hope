@@ -18,7 +18,7 @@ from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftG
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.steficon.admin import AutocompleteWidget
+from hct_mis_api.admin.steficon_admin import AutocompleteWidget
 
 logger = logging.getLogger(__name__)
 
