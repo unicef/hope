@@ -1,5 +1,3 @@
-from django.contrib.contenttypes.models import ContentType
-
 from rest_framework import serializers
 
 from hct_mis_api.apps.activity_log.models import LogEntry
@@ -39,3 +37,4 @@ class LogEntrySerializer(serializers.ModelSerializer):
     def get_content_type(self, obj: LogEntry) -> str:
         if obj.content_type:
             return obj.content_type.model.title()
+        return ""
