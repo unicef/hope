@@ -24,7 +24,6 @@ import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  decodeIdString,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
   showApiErrorMessages,
@@ -198,6 +197,7 @@ const DuplicateProgramPage = (): ReactElement => {
             ? null
             : requestValues.endDate,
         pduFields: pduFieldsToSend,
+        //TODO: FIX this partners sent incorrectly if not modified
         partners: partnersToSet.map(({ partner, areas }) => ({
           partner,
           areas,
@@ -205,9 +205,17 @@ const DuplicateProgramPage = (): ReactElement => {
         partnerAccess: values.partnerAccess as PartnerAccessEnum,
       };
 
-      await copyProgram(programData);
+      const response = await copyProgram(programData);
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/list`);
+      // Extract program slug from response.message
+      //@ts-ignore
+      const slugMatch = (response.message as string).match(
+        /New Program slug: ([^\s]+)/,
+      );
+      const newSlug = slugMatch ? slugMatch[1] : null;
+      if (newSlug) {
+        navigate(`/${baseUrl}/details/${newSlug}`);
+      }
     } catch (e: any) {
       showApiErrorMessages(
         e,
@@ -245,7 +253,7 @@ const DuplicateProgramPage = (): ReactElement => {
   } = program;
 
   const initialValues = {
-    editMode: true,
+    editMode: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: null,
     startDate,
@@ -263,7 +271,7 @@ const DuplicateProgramPage = (): ReactElement => {
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
-        areas: partner.areas.map((area) => decodeIdString(area.id)),
+        areas: partner.areas.map((area) => area.id),
         areaAccess: partner.areaAccess,
       })),
     partnerAccess: partnerAccess,
@@ -290,7 +298,6 @@ const DuplicateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const allAreasTree = treeData?.results || [];
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -419,7 +426,7 @@ const DuplicateProgramPage = (): ReactElement => {
                     {step === 2 && (
                       <PartnersStep
                         values={values}
-                        allAreasTreeData={allAreasTree}
+                        allAreasTreeData={treeData || []}
                         partnerChoices={mappedPartnerChoices}
                         step={step}
                         setStep={setStep}
