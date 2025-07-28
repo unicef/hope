@@ -1393,7 +1393,6 @@ class TestMessageViewSet:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert f"Must not provide full_list_arguments for {Survey.SAMPLING_RANDOM}" in response.json()
 
-
     def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
