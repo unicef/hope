@@ -11,18 +11,18 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="targetingcriteriarule",
-            name="targeting_criteria",
-        ),
-        migrations.AlterField(
-            model_name="targetingcriteriarule",
-            name="payment_plan",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="rules", to="payment.paymentplan"
-            ),
-        ),
-        migrations.DeleteModel(
-            name="TargetingCriteria",
-        ),
+        # migrations.RemoveField(
+        #     model_name="targetingcriteriarule",
+        #     name="targeting_criteria",
+        # ),
+        # migrations.AlterField(
+        #     model_name="targetingcriteriarule",
+        #     name="payment_plan",
+        #     field=models.ForeignKey(
+        #         on_delete=django.db.models.deletion.CASCADE, related_name="rules", to="payment.paymentplan"
+        #     ),
+        # ),
+        # migrations.DeleteModel(
+        #     name="TargetingCriteria",
+        # ),
     ]
