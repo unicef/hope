@@ -4,15 +4,15 @@ from django.db import migrations
 
 
 def remove_targeting_criteria_rules_without_payment_plan(apps, schema_editor):  # pragma no cover
-    TargetingCriteriaRule = apps.get_model('targeting', 'TargetingCriteriaRule')
+    TargetingCriteriaRule = apps.get_model("targeting", "TargetingCriteriaRule")
     TargetingCriteriaRule.objects.filter(payment_plan__isnull=True).delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0037_migration'),
-        ('targeting', '0005_migration'),
+        ("payment", "0037_migration"),
+        ("targeting", "0005_migration"),
     ]
 
     operations = [

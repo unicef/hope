@@ -7,21 +7,21 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0038_migration'),
-        ('targeting', '0006_migration'),
+        ("payment", "0038_migration"),
+        ("targeting", "0006_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='targetingcriteriarule',
-            name='targeting_criteria',
+            model_name="targetingcriteriarule",
+            name="targeting_criteria",
         ),
         migrations.AlterField(
-            model_name='targetingcriteriarule',
-            name='payment_plan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rules', to='payment.paymentplan'),
+            model_name="targetingcriteriarule",
+            name="payment_plan",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="rules", to="payment.paymentplan"),
         ),
         migrations.DeleteModel(
-            name='TargetingCriteria',
+            name="TargetingCriteria",
         ),
     ]
