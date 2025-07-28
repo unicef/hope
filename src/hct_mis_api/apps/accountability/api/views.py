@@ -129,6 +129,7 @@ class FeedbackViewSet(
             queryset = queryset.filter(program__slug=program_slug)
         return queryset
 
+    @transaction.atomic
     @extend_schema(
         responses={
             201: FeedbackDetailSerializer,
@@ -173,6 +174,7 @@ class FeedbackViewSet(
 
         return Response(FeedbackDetailSerializer(feedback).data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @transaction.atomic
     @extend_schema(
         responses={
             200: FeedbackDetailSerializer,
@@ -209,6 +211,7 @@ class FeedbackViewSet(
         )
         return Response(FeedbackDetailSerializer(updated_feedback).data, status=status.HTTP_200_OK)
 
+    @transaction.atomic
     @extend_schema(
         request=FeedbackMessageCreateSerializer,
         responses={
@@ -271,6 +274,7 @@ class MessageViewSet(
         "sample_size": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
     }
 
+    @transaction.atomic
     @extend_schema(
         responses={
             201: MessageDetailSerializer,
@@ -288,6 +292,7 @@ class MessageViewSet(
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @transaction.atomic
     @extend_schema(responses=SampleSizeSerializer)
     @action(detail=False, methods=["post"], url_path="sample-size")
     def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -345,6 +350,7 @@ class SurveyViewSet(
         "id",
     )
 
+    @transaction.atomic
     @extend_schema(
         responses={
             201: SurveySerializer,

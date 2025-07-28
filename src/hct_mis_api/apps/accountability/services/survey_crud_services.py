@@ -38,6 +38,7 @@ class SurveyCrudServices:
         survey.full_list_arguments = result.full_list_arguments if result.full_list_arguments else {}
         survey.random_sampling_arguments = result.random_sampling_arguments if result.random_sampling_arguments else {}
         survey.number_of_recipients = result.number_of_recipients
+        survey.recipients.set(result.households)
 
         if "flow" in input_data:
             survey.flow_id = input_data["flow"]
@@ -45,7 +46,4 @@ class SurveyCrudServices:
         if not result.households:
             raise Exception("There are no selected recipients or no recipient meets criteria.")
         survey.save()
-
-        survey.recipients.set(result.households)
-
         return survey
