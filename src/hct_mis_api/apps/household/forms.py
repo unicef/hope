@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.steficon.admin import AutocompleteWidget
+from hct_mis_api.admin.steficon_admin import AutocompleteWidget
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
