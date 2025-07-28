@@ -129,7 +129,7 @@ const EditProgramCycle = ({
         program.startDate,
         t('Start Date cannot be before Programme Start Date'),
       ),
-    end_date: endDateValidationSchema(),
+    endDate: endDateValidationSchema(),
   });
 
   return (
@@ -186,7 +186,7 @@ const EditProgramCycle = ({
                   </Grid>
                   <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                     <Field
-                      name="end_date"
+                      name="endDate"
                       label={t('End Date')}
                       component={FormikDateField}
                       required={isEndDateRequired}
