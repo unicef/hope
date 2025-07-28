@@ -24,7 +24,6 @@ import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  decodeIdString,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
   showApiErrorMessages,
@@ -272,7 +271,7 @@ const DuplicateProgramPage = (): ReactElement => {
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
-        areas: partner.areas.map((area) => decodeIdString(area.id)),
+        areas: partner.areas.map((area) => area.id),
         areaAccess: partner.areaAccess,
       })),
     partnerAccess: partnerAccess,

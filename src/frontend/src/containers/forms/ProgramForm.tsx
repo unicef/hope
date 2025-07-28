@@ -1,7 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Grid2 as Grid, Tooltip } from '@mui/material';
+import { Grid2 as Grid, Tooltip, FormHelperText } from '@mui/material';
 import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
@@ -19,11 +19,13 @@ import { useLocation } from 'react-router-dom';
 interface ProgramFormPropTypes {
   values;
   programHasRdi?: boolean;
+  errors;
 }
 
 const ProgramForm = ({
   values,
   programHasRdi,
+  errors,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -191,6 +193,11 @@ const ProgramForm = ({
             minDate={values.startDate}
             data-cy="input-end-date"
           />
+          {errors?.endDate && (
+            <FormHelperText error data-cy="error-end-date">
+              {errors.endDate}
+            </FormHelperText>
+          )}
         </Grid>
         <Grid size={{ xs: 6 }}>
           <Field
