@@ -1,5 +1,3 @@
-from typing import Dict
-
 from rest_framework import serializers
 
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -104,7 +102,7 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
             "collectors_filters_blocks",
         )
 
-    def to_representation(self, instance: TargetingCriteriaRule) -> Dict:
+    def to_representation(self, instance: TargetingCriteriaRule) -> dict:
         data = super().to_representation(instance)
         filters_data = instance.filters if hasattr(instance, "filters") else {}
         if filters_data:

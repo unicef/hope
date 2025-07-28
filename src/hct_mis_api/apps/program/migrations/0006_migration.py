@@ -4,22 +4,23 @@ from django.db import migrations, models
 
 
 def generate_slug(apps, schema_editor):
-    Program = apps.get_model('program', 'Program')
+    Program = apps.get_model("program", "Program")
     for program in Program.objects.all():
+        if not program.programme_code:
+            program.programme_code = program.generate_code()
         program.slug = program.programme_code.lower().replace("/", "_").replace(".", "*")
         program.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('program', '0005_migration'),
+        ("program", "0005_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='program',
-            name='slug',
+            model_name="program",
+            name="slug",
             field=models.CharField(max_length=4, null=True),
             preserve_default=False,
         ),
@@ -30,10 +31,11 @@ class Migration(migrations.Migration):
             field=models.CharField(db_index=True, max_length=4),
         ),
         migrations.AddConstraint(
-            model_name='program',
+            model_name="program",
             constraint=models.UniqueConstraint(
-                condition=models.Q(('is_removed', False)),
-                fields=('business_area', 'slug'),
-                name='unique_for_business_area_and_slug_if_not_removed'),
+                condition=models.Q(("is_removed", False)),
+                fields=("business_area", "slug"),
+                name="unique_for_business_area_and_slug_if_not_removed",
+            ),
         ),
     ]

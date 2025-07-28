@@ -274,7 +274,7 @@ class TestPeoplePeriodicDataUpdateUpload:
             program=program,
             business_area=program.business_area,
             status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,

@@ -5,23 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('core', '0001_migration'),
-        ('api', '0001_migration'),
+        ("core", "0001_migration"),
+        ("api", "0001_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='apitoken',
-            name='valid_for',
-            field=models.ManyToManyField(to='core.BusinessArea'),
+            model_name="apitoken",
+            name="valid_for",
+            field=models.ManyToManyField(to="core.BusinessArea"),
         ),
         migrations.AddField(
-            model_name='apilogentry',
-            name='token',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='api.apitoken'),
+            model_name="apilogentry",
+            name="token",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="api.apitoken"),
         ),
     ]

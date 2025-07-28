@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from rest_framework.exceptions import ValidationError
 
@@ -17,7 +17,7 @@ class FlexibleAttributeForPDUService:
         self.pdu_fields: list = pdu_fields
 
     @staticmethod
-    def _validate_pdu_data(pdu_data: Dict) -> None:
+    def _validate_pdu_data(pdu_data: dict) -> None:
         if pdu_data["number_of_rounds"] != len(pdu_data["rounds_names"]):
             raise ValidationError("Number of rounds does not match the number of round names.")
 
@@ -111,7 +111,7 @@ class FlexibleAttributeForPDUService:
             pdu_field["label"] = {"English(EN)": pdu_field["label"]}
 
     @staticmethod
-    def _validate_pdu_data_for_program_with_rdi(pdu_data_object: PeriodicFieldData, pdu_data: Dict) -> None:
+    def _validate_pdu_data_for_program_with_rdi(pdu_data_object: PeriodicFieldData, pdu_data: dict) -> None:
         current_number_of_rounds = pdu_data_object.number_of_rounds
         current_rounds_names = pdu_data_object.rounds_names
         new_number_of_rounds = pdu_data["number_of_rounds"]

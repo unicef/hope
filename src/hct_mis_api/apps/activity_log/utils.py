@@ -1,14 +1,14 @@
 import decimal
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from hct_mis_api.apps.core.utils import nested_getattr
 
 
-def field_list_to_dict(field_list: List) -> Dict:
+def field_list_to_dict(field_list: list) -> dict:
     return {field: field for field in field_list}
 
 
-def create_mapping_dict(simple_mapping: List, complex_mapping: Optional[Dict] = None) -> Dict:
+def create_mapping_dict(simple_mapping: list, complex_mapping: dict | None = None) -> dict:
     concatenated_dict = {}
     concatenated_dict.update({field: field for field in simple_mapping})
     if complex_mapping is not None:
@@ -16,7 +16,7 @@ def create_mapping_dict(simple_mapping: List, complex_mapping: Optional[Dict] = 
     return concatenated_dict
 
 
-def create_diff(old_object: Any, new_object: Any, mapping: Dict) -> Dict:
+def create_diff(old_object: Any, new_object: Any, mapping: dict) -> dict:
     changes_dict = {}
     for field_name, repr_name in mapping.items():
         old_value = None
@@ -36,7 +36,7 @@ def create_diff(old_object: Any, new_object: Any, mapping: Dict) -> Dict:
 
         if str(old_value) == str(new_value):
             continue
-        change: Dict[str, Any] = {"from": None, "to": None}
+        change: dict[str, Any] = {"from": None, "to": None}
         if old_value is not None:
             change["from"] = str(old_value)
         if new_value is not None:
@@ -45,7 +45,7 @@ def create_diff(old_object: Any, new_object: Any, mapping: Dict) -> Dict:
     return changes_dict
 
 
-def copy_model_object(model_object: Any) -> Dict:
+def copy_model_object(model_object: Any) -> dict:
     model_dict = {}
     model_dict.update(model_object.__dict__)
     if "_state" in model_dict:

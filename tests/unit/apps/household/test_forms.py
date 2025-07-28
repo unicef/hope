@@ -19,7 +19,6 @@ class MassEnrollFormTest(TestCase):
         partial = DataCollectingTypeFactory(
             business_areas=[afg],
         )
-        partial.compatible_types.add(partial)
         self.program = ProgramFactory(
             name="Test Program 333", business_area_id=afg.id, status=Program.ACTIVE, data_collecting_type=partial
         )

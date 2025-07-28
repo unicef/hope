@@ -1,5 +1,4 @@
 from tempfile import NamedTemporaryFile
-from typing import Optional, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -120,7 +119,7 @@ class PeriodicDataUpdateExportTemplateService:
             )
         return header
 
-    def _generate_row(self, individual: Individual) -> Optional[list[str]]:
+    def _generate_row(self, individual: Individual) -> list[str] | None:
         individual_uuid = individual.pk
         individual_unicef_id = individual.unicef_id
         first_name = individual.given_name
@@ -144,7 +143,7 @@ class PeriodicDataUpdateExportTemplateService:
 
     def _get_round_value(
         self, individual: Individual, pdu_field_name: str, round_number: int
-    ) -> Optional[Union[str, int, float, bool]]:
+    ) -> str | int | float | bool | None:
         flex_fields_data = individual.flex_fields
         field_data = flex_fields_data.get(pdu_field_name)
         if field_data:

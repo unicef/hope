@@ -1,6 +1,5 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.db.models import Case, DateField, F, QuerySet, When
 from django.shortcuts import get_object_or_404
@@ -107,6 +106,9 @@ from hct_mis_api.apps.grievance.utils import (
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import HEAD, Household, IndividualRoleInHousehold
 from hct_mis_api.apps.utils.exceptions import log_and_raise
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractUser
 
 
 class GrievanceTicketViewSet(

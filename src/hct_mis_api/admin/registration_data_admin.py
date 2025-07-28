@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -230,7 +230,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         permission=is_root,
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
-    def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+    def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
         try:
             rdi = RegistrationDataImport.objects.get(pk=pk)
             if request.method == "POST":
@@ -279,7 +279,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
 
     @button(permission="program.enroll_beneficiaries")
-    def enroll_to_program(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+    def enroll_to_program(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
         url = reverse("admin:registration_data_registrationdataimport_change", args=[pk])
         qs = RegistrationDataImport.objects.filter(pk=pk).first().households.all()
         if not qs.exists():

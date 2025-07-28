@@ -1,6 +1,6 @@
 import logging
 from functools import cached_property
-from typing import Any, Optional
+from typing import Any
 
 from django.db.models import QuerySet
 
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class BaseCeleryTaskManager:
-    pending_status: Optional[str] = None
+    pending_status: str | None = None
     queue = "default"
 
-    def __init__(self, business_area: Optional[BusinessArea] = None) -> None:
+    def __init__(self, business_area: BusinessArea | None = None) -> None:
         self.all_celery_tasks = get_all_celery_tasks(self.queue)
         self.business_area = business_area
 
@@ -67,7 +67,7 @@ class BaseCeleryTaskManager:
             logger.info(f"registration_xlsx_import_task scheduled with kwargs {task_kwargs}")
             self.celery_task.delay(**task_kwargs)
 
-    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> Optional[dict]:
+    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> dict | None:
         return get_task_in_queue_or_running(
             name=self.celery_task.name,
             all_celery_tasks=self.all_celery_tasks,

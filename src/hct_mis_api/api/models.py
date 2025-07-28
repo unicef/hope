@@ -1,7 +1,7 @@
 import binascii
 import os
 from enum import Enum, auto, unique
-from typing import Any, List, Tuple
+from typing import Any
 
 from django.db import models
 from django.utils import timezone
@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
         return name
 
     API_READ_ONLY = auto()
@@ -23,7 +23,7 @@ class Grant(Enum):
     API_PROGRAM_CREATE = auto()
 
     @classmethod
-    def choices(cls) -> Tuple[Tuple[Any, Any], ...]:
+    def choices(cls) -> tuple[tuple[Any, Any], ...]:
         return tuple((i.value, i.value) for i in cls)
 
 

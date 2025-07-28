@@ -1,6 +1,6 @@
 import json
 import tempfile
-from typing import Callable, Optional
+from typing import Callable
 
 from django.core.files.base import ContentFile
 
@@ -25,7 +25,7 @@ def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:
     return [row[col_index - 1] for row in ws.iter_rows(min_row=2, values_only=True)]
 
 
-def _get_unicef_ids_from_workbook(workbook: Workbook, sheet_name: Optional[str] = None) -> list[str]:
+def _get_unicef_ids_from_workbook(workbook: Workbook, sheet_name: str | None = None) -> list[str]:
     ws = workbook[sheet_name] if sheet_name else workbook.active
     return _get_unicef_ids_from_sheet(ws)
 
@@ -84,5 +84,4 @@ def create_snapshot_content(log_message: Callable[[str], None], program_id: str,
         tmp_file.write("\n]")
         tmp_file.flush()
         tmp_file.seek(0)
-        content = tmp_file.read()
-    return content
+        return tmp_file.read()

@@ -148,10 +148,10 @@ class TestDocument(TestCase):
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "Other",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -178,10 +178,10 @@ class TestDocument(TestCase):
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "Other",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -210,10 +210,10 @@ class TestDocument(TestCase):
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -240,10 +240,10 @@ class TestDocument(TestCase):
     def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -270,10 +270,10 @@ class TestDocument(TestCase):
     def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -300,10 +300,10 @@ class TestDocument(TestCase):
     ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -330,17 +330,17 @@ class TestDocument(TestCase):
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
         document_type2, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-            defaults=dict(
-                label="Tax Number Identification",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "Tax Number Identification",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(

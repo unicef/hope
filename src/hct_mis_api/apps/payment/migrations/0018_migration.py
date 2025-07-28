@@ -2,47 +2,56 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from django.db.models import Subquery, OuterRef
-import uuid
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0017_migration'),
+        ("payment", "0017_migration"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FinancialInstitution',
+            name="FinancialInstitution",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('name', models.CharField(max_length=255)),
-                ('type',
-                 models.CharField(choices=[('bank', 'Bank'), ('telco', 'Telco'), ('other', 'Other')], max_length=30)),
-                ('country', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                              to='geo.country')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "type",
+                    models.CharField(choices=[("bank", "Bank"), ("telco", "Telco"), ("other", "Other")], max_length=30),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='FinancialInstitutionMapping',
+            name="FinancialInstitutionMapping",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('code', models.CharField(max_length=30)),
-                ('financial_institution',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='payment.financialinstitution')),
-                ('financial_service_provider',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='payment.financialserviceprovider')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("code", models.CharField(max_length=30)),
+                (
+                    "financial_institution",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.financialinstitution"),
+                ),
+                (
+                    "financial_service_provider",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="payment.financialserviceprovider"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('financial_service_provider', 'financial_institution')},
+                "unique_together": {("financial_service_provider", "financial_institution")},
             },
         ),
     ]

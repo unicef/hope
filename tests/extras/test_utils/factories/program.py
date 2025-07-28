@@ -137,36 +137,31 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan")
     dct = DataCollectingTypeFactory(type=dct_type)
-    program = ProgramFactory(
+    return ProgramFactory(
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         **kwargs,
     )
-    return program
 
 
 def generate_beneficiary_groups() -> None:
     BeneficiaryGroupFactory(
-        **{
-            "name": "Household",
-            "group_label": "Household",
-            "group_label_plural": "Households",
-            "member_label": "Individual",
-            "member_label_plural": "Individuals",
-            "master_detail": True,
-        }
+        name="Household",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=True,
     )
     BeneficiaryGroupFactory(
-        **{
-            "name": "Social Workers",
-            "group_label": "Household",
-            "group_label_plural": "Households",
-            "member_label": "Individual",
-            "member_label_plural": "Individuals",
-            "master_detail": False,
-        }
+        name="Social Workers",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=False,
     )
 
 
@@ -180,28 +175,25 @@ def generate_people_program() -> None:
 
     ba = BusinessArea.objects.get(name="Afghanistan")
     people_program = ProgramFactory(
-        **{
-            "name": "Initial_Program_People (sw)",
-            "status": "ACTIVE",
-            "start_date": "2023-06-19",
-            "end_date": "2029-12-24",
-            "description": "qwerty",
-            "business_area": ba,
-            "budget": "100000.00",
-            "frequency_of_payments": "REGULAR",
-            "sector": "EDUCATION",
-            "scope": "UNICEF",
-            "cash_plus": False,
-            "data_collecting_type": DataCollectingType.objects.get(code="partial_individuals"),
-            "programme_code": "ABC1",
-            "beneficiary_group": BeneficiaryGroup.objects.get(name="Social Workers"),
-            # cycle data
-            "cycle__unicef_id": "PC-23-0060-000001",
-            "cycle__title": "Default Program Cycle 1",
-            "cycle__status": "DRAFT",
-            "cycle__start_date": "2023-06-19",
-            "cycle__end_date": "2023-12-24",
-        }
+        name="Initial_Program_People (sw)",
+        status="ACTIVE",
+        start_date="2023-06-19",
+        end_date="2029-12-24",
+        description="qwerty",
+        business_area=ba,
+        budget="100000.00",
+        frequency_of_payments="REGULAR",
+        sector="EDUCATION",
+        scope="UNICEF",
+        cash_plus=False,
+        data_collecting_type=DataCollectingType.objects.get(code="partial_individuals"),
+        programme_code="ABC1",
+        beneficiary_group=BeneficiaryGroup.objects.get(name="Social Workers"),
+        cycle__unicef_id="PC-23-0060-000001",
+        cycle__title="Default Program Cycle 1",
+        cycle__status="DRAFT",
+        cycle__start_date="2023-06-19",
+        cycle__end_date="2023-12-24",
     )
     # add one individual
     household, individuals = create_household(

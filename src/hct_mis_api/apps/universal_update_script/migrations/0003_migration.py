@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0032_migration'),
-        ('universal_update_script', '0002_migration'),
+        ("payment", "0032_migration"),
+        ("universal_update_script", "0002_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='universalupdate',
-            name='delivery_mechanisms',
+            model_name="universalupdate",
+            name="delivery_mechanisms",
         ),
         migrations.AddField(
-            model_name='universalupdate',
-            name='account_types',
-            field=models.ManyToManyField(blank=True, help_text='Selected Account Types of which Wallets data can be updated', to='payment.AccountType'),
+            model_name="universalupdate",
+            name="account_types",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Selected Account Types of which Wallets data can be updated",
+                to="payment.AccountType",
+            ),
         ),
     ]

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -22,7 +22,7 @@ class PermissionsBackend(BaseBackend):
     and the RoleAssignments for the User or their Partner.
     """
 
-    def get_all_permissions(self, user: User, obj: Optional[Model] = None) -> set[str]:  # type: ignore
+    def get_all_permissions(self, user: User, obj: Model | None = None) -> set[str]:  # type: ignore
         filters: dict[str, Any]
         if not obj:
             program = None
@@ -114,7 +114,7 @@ class PermissionsBackend(BaseBackend):
 
         return permissions_set
 
-    def has_perm(self, user_obj: Union[User, AnonymousUser], perm: str, obj: Optional[Model] = None) -> bool:  # type: ignore
+    def has_perm(self, user_obj: User | AnonymousUser, perm: str, obj: Model | None = None) -> bool:  # type: ignore
         if user_obj.is_superuser:
             return True
         if isinstance(user_obj, AnonymousUser):

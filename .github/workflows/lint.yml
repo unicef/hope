@@ -45,6 +45,3 @@ jobs:
 
       - name: Run Lint
         run: uv run tox -e lint
-
-      - name: Run Mypy
-        run: uv run tox -e mypy

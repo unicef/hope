@@ -108,9 +108,12 @@ class TestIndividualList:
 
         self.household1, (self.individual1_1, self.individual1_2) = self._create_household(self.program)
         self.household2, (self.individual2_1, self.individual2_2) = self._create_household(self.program)
-        self.household_from_different_program, (
-            self.individual_from_different_program_1,
-            self.individual_from_different_program_2,
+        (
+            self.household_from_different_program,
+            (
+                self.individual_from_different_program_1,
+                self.individual_from_different_program_2,
+            ),
         ) = self._create_household(different_program)
 
     def _create_household(self, program: Program) -> tuple[Household, List[Individual]]:
@@ -291,9 +294,12 @@ class TestIndividualList:
         )
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
 
-        household_without_areas, (
-            individual_without_areas1,
-            individual_without_areas2,
+        (
+            household_without_areas,
+            (
+                individual_without_areas1,
+                individual_without_areas2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "program": self.program,
@@ -966,6 +972,7 @@ class TestIndividualDetail:
                     "name": self.country.name,
                     "iso_code3": self.country.iso_code3,
                 },
+                "partner": None,
                 "number": self.identity.number,
             }
         ]
@@ -1054,9 +1061,12 @@ class TestIndividualGlobalViewSet:
         self.area3 = AreaFactory(parent=self.area2, p_code="AF010101", area_type=admin_type_2)
         self.area4 = AreaFactory(parent=self.area3, p_code="AF01010101", area_type=admin_type_2)
 
-        self.household_afghanistan1, (
-            self.individual_afghanistan1_1,
-            self.individual_afghanistan1_2,
+        (
+            self.household_afghanistan1,
+            (
+                self.individual_afghanistan1_1,
+                self.individual_afghanistan1_2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1068,9 +1078,12 @@ class TestIndividualGlobalViewSet:
             },
             individuals_data=[{}, {}],
         )
-        self.household_afghanistan2, (
-            self.individual_afghanistan2_1,
-            self.individual_afghanistan2_2,
+        (
+            self.household_afghanistan2,
+            (
+                self.individual_afghanistan2_1,
+                self.individual_afghanistan2_2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1083,9 +1096,12 @@ class TestIndividualGlobalViewSet:
             individuals_data=[{}, {}],
         )
 
-        self.household_ukraine, (
-            self.individual_ukraine_1,
-            self.individual_ukraine_2,
+        (
+            self.household_ukraine,
+            (
+                self.individual_ukraine_1,
+                self.individual_ukraine_2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1248,9 +1264,12 @@ class TestIndividualGlobalViewSet:
             whole_business_area_access=True,
         )
         set_admin_area_limits_in_program(self.partner, self.program_afghanistan2, [self.area1, self.area2])
-        household_afghanistan_without_areas, (
-            individual_afghanistan_without_areas1,
-            individual_afghanistan_without_areas2,
+        (
+            household_afghanistan_without_areas,
+            (
+                individual_afghanistan_without_areas1,
+                individual_afghanistan_without_areas2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "program": self.program_afghanistan2,
@@ -1259,9 +1278,12 @@ class TestIndividualGlobalViewSet:
             individuals_data=[{}, {}],
         )
         area_different = AreaFactory(parent=None, p_code="AF05", area_type=self.admin_type_1)
-        household_afghanistan_different_areas, (
-            individual_afghanistan_different_areas1,
-            individual_afghanistan_different_areas2,
+        (
+            household_afghanistan_different_areas,
+            (
+                individual_afghanistan_different_areas1,
+                individual_afghanistan_different_areas2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": area_different,

@@ -159,12 +159,12 @@ class TestAttributesGetQueries(APITestCase):
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
 
     def test_get_has_bank_account_number_query_true(self) -> None:
-        expected_query = Q(**{"accounts__account_type__key": "bank"})
+        expected_query = Q(accounts__account_type__key="bank")
         result = get_has_bank_account_number_query(None, [True])
         self.assertEqual(result, expected_query)
 
     def test_get_has_bank_account_number_query_false(self) -> None:
-        expected_query = ~Q(**{"accounts__account_type__key": "bank"})
+        expected_query = ~Q(accounts__account_type__key="bank")
         result = get_has_bank_account_number_query(None, [False])
         self.assertEqual(result, expected_query)
 

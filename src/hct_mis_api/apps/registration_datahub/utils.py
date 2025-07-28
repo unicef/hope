@@ -2,7 +2,7 @@ import hashlib
 import json
 import re
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
@@ -29,7 +29,7 @@ def post_process_dedupe_results(record: Any) -> None:
             field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
 
 
-def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: bool = True) -> Dict:
+def combine_collections(a: dict, b: dict, path: list | None = None, update: bool = True) -> dict:
     """merges b into a
     version from flex registration"""
     if path is None:
@@ -54,7 +54,7 @@ def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: b
     return a
 
 
-def find_attachment_in_kobo(attachments: List[Dict], value: str) -> Optional[Dict]:
+def find_attachment_in_kobo(attachments: list[dict], value: str) -> dict | None:
     file_extension = value.split(".")[-1]
     filename = re.escape(".".join(value.split(".")[:-1]))
     regex_name = re.compile(f"{filename}(_\\w+)?\\.{file_extension}")
@@ -64,7 +64,7 @@ def find_attachment_in_kobo(attachments: List[Dict], value: str) -> Optional[Dic
     return None
 
 
-def calculate_hash_for_kobo_submission(submission: Dict) -> str:
+def calculate_hash_for_kobo_submission(submission: dict) -> str:
     keys_to_remove = [
         "_id",
         "start",
@@ -80,16 +80,15 @@ def calculate_hash_for_kobo_submission(submission: Dict) -> str:
     d_string = json.dumps(submission_copy, sort_keys=True)
     d_bytes = d_string.encode("utf-8")
     hash_object = hashlib.sha256(d_bytes)
-    hex_dig = hash_object.hexdigest()
-    return hex_dig
+    return hash_object.hexdigest()
 
 
 def get_rdi_program_population(
     import_from_program_id: str,
     import_to_program_id: str,
-    import_from_ids: Optional[str],
+    import_from_ids: str | None,
     exclude_external_collectors: bool = False,
-) -> Tuple[QuerySet[Household], QuerySet[Individual]]:
+) -> tuple[QuerySet[Household], QuerySet[Individual]]:
     program = get_object_or_404(Program, pk=import_to_program_id)
 
     # filter by rdi.import_from_ids HH or Ins ids based on Program.DCT
@@ -142,9 +141,7 @@ def get_rdi_program_population(
         .distinct()
         .order_by("first_registration_date")
     )
-    if (
-        exclude_external_collectors
-    ):  # exclude external collectors holding alternate role -> import only individuals that belong to households or hold the primary role
+    if exclude_external_collectors:  # exclude external collectors holding alternate role -> import only individuals that belong to households or hold the primary role
         individuals = individuals.filter(
             Q(household__program_id=import_from_program_id) | Q(households_and_roles__role=ROLE_PRIMARY)
         )

@@ -3,7 +3,7 @@ import time
 from argparse import ArgumentParser
 from decimal import Decimal
 from functools import partial
-from typing import Any, Callable, Dict
+from typing import Any, Callable, TYPE_CHECKING
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -35,9 +35,11 @@ from extras.test_utils.factories.targeting import (
 from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 class Command(BaseCommand):
@@ -74,7 +76,7 @@ class Command(BaseCommand):
             action="store",
             nargs="?",
             type=int,
-            help="Creates provided amount of payment records assigned to " "household and cash plan.",
+            help="Creates provided amount of payment records assigned to household and cash plan.",
         )
         parser.add_argument(
             "--business-area",
@@ -103,7 +105,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _generate_program_with_dependencies(options: Dict, business_area_index: int) -> None:
+    def _generate_program_with_dependencies(options: dict, business_area_index: int) -> None:
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
 
@@ -153,7 +155,7 @@ class Command(BaseCommand):
                 if should_create_grievance:
                     grievance_type = random.choice(("feedback", "sensitive", "complaint"))
                     should_contain_payment_record = random.choice((True, False))
-                    switch_dict: Dict[str, Callable[[], GrievanceTicket]] = {
+                    switch_dict: dict[str, Callable[[], GrievanceTicket]] = {
                         "feedback": partial(
                             GrievanceTicketFactory,
                             admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)

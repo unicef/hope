@@ -12,246 +12,405 @@ import hct_mis_api.apps.utils.models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='GrievanceDocument',
+            name="GrievanceDocument",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=100, null=True)),
-                ('file', models.FileField(blank=True, null=True, upload_to='')),
-                ('file_size', models.IntegerField(null=True)),
-                ('content_type', models.CharField(max_length=100)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=100, null=True)),
+                ("file", models.FileField(blank=True, null=True, upload_to="")),
+                ("file_size", models.IntegerField(null=True)),
+                ("content_type", models.CharField(max_length=100)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='GrievanceTicket',
+            name="GrievanceTicket",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('version', concurrency.fields.IntegerVersionField(default=0, help_text='record revision number')),
-                ('unicef_id', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ('user_modified', models.DateTimeField(blank=True, db_index=True, help_text='Date this ticket was most recently changed.', null=True, verbose_name='Modified')),
-                ('last_notification_sent', models.DateTimeField(blank=True, db_index=True, help_text='Date this ticket was most recently changed.', null=True, verbose_name='Modified')),
-                ('status', models.IntegerField(choices=[(1, 'New'), (2, 'Assigned'), (6, 'Closed'), (5, 'For Approval'), (3, 'In Progress'), (4, 'On Hold')], default=1, verbose_name='Status')),
-                ('category', models.IntegerField(choices=[(8, 'Needs Adjudication'), (1, 'Payment Verification'), (9, 'System Flagging'), (2, 'Data Change'), (4, 'Grievance Complaint'), (5, 'Negative Feedback'), (7, 'Positive Feedback'), (6, 'Referral'), (3, 'Sensitive Grievance')], verbose_name='Category')),
-                ('issue_type', models.IntegerField(blank=True, null=True, verbose_name='Type')),
-                ('description', models.TextField(blank=True, help_text='The content of the customers query.', verbose_name='Description')),
-                ('area', models.CharField(blank=True, max_length=250)),
-                ('language', models.TextField(blank=True)),
-                ('consent', models.BooleanField(default=True)),
-                ('extras', models.JSONField(blank=True, default=dict)),
-                ('ignored', models.BooleanField(db_index=True, default=False)),
-                ('household_unicef_id', models.CharField(blank=True, db_index=True, max_length=250, null=True)),
-                ('priority', models.IntegerField(choices=[(0, 'Not set'), (1, 'High'), (2, 'Medium'), (3, 'Low')], default=0, verbose_name='Priority')),
-                ('urgency', models.IntegerField(choices=[(0, 'Not set'), (1, 'Very urgent'), (2, 'Urgent'), (3, 'Not urgent')], default=0, verbose_name='Urgency')),
-                ('comments', models.TextField(blank=True, null=True)),
-                ('is_original', models.BooleanField(db_index=True, default=False)),
-                ('is_migration_handled', models.BooleanField(default=False)),
-                ('migrated_at', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "user_modified",
+                    models.DateTimeField(
+                        blank=True,
+                        db_index=True,
+                        help_text="Date this ticket was most recently changed.",
+                        null=True,
+                        verbose_name="Modified",
+                    ),
+                ),
+                (
+                    "last_notification_sent",
+                    models.DateTimeField(
+                        blank=True,
+                        db_index=True,
+                        help_text="Date this ticket was most recently changed.",
+                        null=True,
+                        verbose_name="Modified",
+                    ),
+                ),
+                (
+                    "status",
+                    models.IntegerField(
+                        choices=[
+                            (1, "New"),
+                            (2, "Assigned"),
+                            (6, "Closed"),
+                            (5, "For Approval"),
+                            (3, "In Progress"),
+                            (4, "On Hold"),
+                        ],
+                        default=1,
+                        verbose_name="Status",
+                    ),
+                ),
+                (
+                    "category",
+                    models.IntegerField(
+                        choices=[
+                            (8, "Needs Adjudication"),
+                            (1, "Payment Verification"),
+                            (9, "System Flagging"),
+                            (2, "Data Change"),
+                            (4, "Grievance Complaint"),
+                            (5, "Negative Feedback"),
+                            (7, "Positive Feedback"),
+                            (6, "Referral"),
+                            (3, "Sensitive Grievance"),
+                        ],
+                        verbose_name="Category",
+                    ),
+                ),
+                ("issue_type", models.IntegerField(blank=True, null=True, verbose_name="Type")),
+                (
+                    "description",
+                    models.TextField(
+                        blank=True, help_text="The content of the customers query.", verbose_name="Description"
+                    ),
+                ),
+                ("area", models.CharField(blank=True, max_length=250)),
+                ("language", models.TextField(blank=True)),
+                ("consent", models.BooleanField(default=True)),
+                ("extras", models.JSONField(blank=True, default=dict)),
+                ("ignored", models.BooleanField(db_index=True, default=False)),
+                ("household_unicef_id", models.CharField(blank=True, db_index=True, max_length=250, null=True)),
+                (
+                    "priority",
+                    models.IntegerField(
+                        choices=[(0, "Not set"), (1, "High"), (2, "Medium"), (3, "Low")],
+                        default=0,
+                        verbose_name="Priority",
+                    ),
+                ),
+                (
+                    "urgency",
+                    models.IntegerField(
+                        choices=[(0, "Not set"), (1, "Very urgent"), (2, "Urgent"), (3, "Not urgent")],
+                        default=0,
+                        verbose_name="Urgency",
+                    ),
+                ),
+                ("comments", models.TextField(blank=True, null=True)),
+                ("is_original", models.BooleanField(db_index=True, default=False)),
+                ("is_migration_handled", models.BooleanField(default=False)),
+                ("migrated_at", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'verbose_name': 'Grievance Ticket',
-                'ordering': ('status', 'created_at'),
+                "verbose_name": "Grievance Ticket",
+                "ordering": ("status", "created_at"),
             },
             bases=(hct_mis_api.apps.utils.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='GrievanceTicketThrough',
+            name="GrievanceTicketThrough",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
             ],
         ),
         migrations.CreateModel(
-            name='TicketAddIndividualDetails',
+            name="TicketAddIndividualDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('individual_data', models.JSONField(null=True)),
-                ('approve_status', models.BooleanField(default=False)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("individual_data", models.JSONField(null=True)),
+                ("approve_status", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Add Individual Details',
+                "verbose_name_plural": "Ticket Add Individual Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketComplaintDetails',
+            name="TicketComplaintDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('payment_object_id', models.UUIDField(null=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("payment_object_id", models.UUIDField(null=True)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Complaint Details',
+                "verbose_name_plural": "Ticket Complaint Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketDeleteHouseholdDetails',
+            name="TicketDeleteHouseholdDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('role_reassign_data', models.JSONField(default=dict)),
-                ('approve_status', models.BooleanField(default=False)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("role_reassign_data", models.JSONField(default=dict)),
+                ("approve_status", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Delete Household Details',
+                "verbose_name_plural": "Ticket Delete Household Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketDeleteIndividualDetails',
+            name="TicketDeleteIndividualDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('role_reassign_data', models.JSONField(default=dict)),
-                ('approve_status', models.BooleanField(default=False)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("role_reassign_data", models.JSONField(default=dict)),
+                ("approve_status", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Delete Individual Details',
+                "verbose_name_plural": "Ticket Delete Individual Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketHouseholdDataUpdateDetails',
+            name="TicketHouseholdDataUpdateDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('household_data', models.JSONField(null=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("household_data", models.JSONField(null=True)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Household Data Update Details',
+                "verbose_name_plural": "Ticket Household Data Update Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketIndividualDataUpdateDetails',
+            name="TicketIndividualDataUpdateDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('individual_data', models.JSONField(null=True)),
-                ('role_reassign_data', models.JSONField(default=dict)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("individual_data", models.JSONField(null=True)),
+                ("role_reassign_data", models.JSONField(default=dict)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Individual Data Update Details',
+                "verbose_name_plural": "Ticket Individual Data Update Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketNeedsAdjudicationDetails',
+            name="TicketNeedsAdjudicationDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('is_multiple_duplicates_version', models.BooleanField(default=False)),
-                ('role_reassign_data', models.JSONField(default=dict)),
-                ('extra_data', models.JSONField(default=dict)),
-                ('score_min', models.FloatField(default=0.0)),
-                ('score_max', models.FloatField(default=0.0)),
-                ('is_cross_area', models.BooleanField(default=False)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("is_multiple_duplicates_version", models.BooleanField(default=False)),
+                ("role_reassign_data", models.JSONField(default=dict)),
+                ("extra_data", models.JSONField(default=dict)),
+                ("score_min", models.FloatField(default=0.0)),
+                ("score_max", models.FloatField(default=0.0)),
+                ("is_cross_area", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Needs Adjudication Details',
+                "verbose_name_plural": "Ticket Needs Adjudication Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketNegativeFeedbackDetails',
+            name="TicketNegativeFeedbackDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Negative Feedback Details',
+                "verbose_name_plural": "Ticket Negative Feedback Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketNote',
+            name="TicketNote",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('description', models.TextField(help_text='The content of the customers query.', verbose_name='Description')),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "description",
+                    models.TextField(help_text="The content of the customers query.", verbose_name="Description"),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='TicketPaymentVerificationDetails',
+            name="TicketPaymentVerificationDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('payment_verification_status', models.CharField(choices=[('NOT_RECEIVED', 'NOT RECEIVED'), ('PENDING', 'PENDING'), ('RECEIVED', 'RECEIVED'), ('RECEIVED_WITH_ISSUES', 'RECEIVED WITH ISSUES')], max_length=50)),
-                ('new_status', models.CharField(choices=[('NOT_RECEIVED', 'NOT RECEIVED'), ('PENDING', 'PENDING'), ('RECEIVED', 'RECEIVED'), ('RECEIVED_WITH_ISSUES', 'RECEIVED WITH ISSUES')], default=None, max_length=50, null=True)),
-                ('old_received_amount', models.DecimalField(decimal_places=2, max_digits=12, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0.01'))])),
-                ('new_received_amount', models.DecimalField(decimal_places=2, max_digits=12, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0.01'))])),
-                ('approve_status', models.BooleanField(default=False)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "payment_verification_status",
+                    models.CharField(
+                        choices=[
+                            ("NOT_RECEIVED", "NOT RECEIVED"),
+                            ("PENDING", "PENDING"),
+                            ("RECEIVED", "RECEIVED"),
+                            ("RECEIVED_WITH_ISSUES", "RECEIVED WITH ISSUES"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "new_status",
+                    models.CharField(
+                        choices=[
+                            ("NOT_RECEIVED", "NOT RECEIVED"),
+                            ("PENDING", "PENDING"),
+                            ("RECEIVED", "RECEIVED"),
+                            ("RECEIVED_WITH_ISSUES", "RECEIVED WITH ISSUES"),
+                        ],
+                        default=None,
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
+                (
+                    "old_received_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                (
+                    "new_received_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                ("approve_status", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Payment Verification Details',
+                "verbose_name_plural": "Ticket Payment Verification Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketPositiveFeedbackDetails',
+            name="TicketPositiveFeedbackDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Positive Feedback Details',
+                "verbose_name_plural": "Ticket Positive Feedback Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketReferralDetails',
+            name="TicketReferralDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Referral Details',
+                "verbose_name_plural": "Ticket Referral Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketSensitiveDetails',
+            name="TicketSensitiveDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('payment_object_id', models.UUIDField(null=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("payment_object_id", models.UUIDField(null=True)),
             ],
             options={
-                'verbose_name_plural': 'Ticket Sensitive Details',
+                "verbose_name_plural": "Ticket Sensitive Details",
             },
         ),
         migrations.CreateModel(
-            name='TicketSystemFlaggingDetails',
+            name="TicketSystemFlaggingDetails",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('approve_status', models.BooleanField(default=False)),
-                ('role_reassign_data', models.JSONField(default=dict)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("approve_status", models.BooleanField(default=False)),
+                ("role_reassign_data", models.JSONField(default=dict)),
             ],
             options={
-                'verbose_name_plural': 'Ticket System Flagging Details',
+                "verbose_name_plural": "Ticket System Flagging Details",
             },
         ),
     ]

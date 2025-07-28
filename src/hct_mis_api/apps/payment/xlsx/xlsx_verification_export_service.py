@@ -1,6 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
@@ -95,12 +95,12 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return wb
 
     def _add_version(self) -> None:
-        self.ws_meta[
-            XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
-        ] = XlsxVerificationExportService.VERSION_CELL_NAME
+        self.ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES] = (
+            XlsxVerificationExportService.VERSION_CELL_NAME
+        )
         self.ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES] = XlsxVerificationExportService.VERSION
 
-    def _to_received_column(self, payment_record_verification: PaymentVerification) -> Optional[str]:
+    def _to_received_column(self, payment_record_verification: PaymentVerification) -> str | None:
         status = payment_record_verification.status
         if payment_record_verification.status == PaymentVerification.STATUS_PENDING:
             return None
@@ -168,7 +168,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
         self.dv_received.add(f"B2:B{len(self.ws_export_list['B'])}")
         self.ws_export_list.add_data_validation(self.dv_received)
-        self.ws_export_list["B2":f"B{len(self.ws_export_list['B'])}"]
+        self.ws_export_list["B2" : f"B{len(self.ws_export_list['B'])}"]
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
@@ -199,7 +199,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
-        context = {
+        return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
@@ -207,5 +207,3 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             "link": link,
             "title": "Verification Plan XLSX file generated",
         }
-
-        return context

@@ -1,6 +1,5 @@
-from typing import Any, Dict, Optional
+from typing import Any, TYPE_CHECKING
 
-from django import forms
 from django.contrib import admin, messages
 from django.db import transaction
 from django.db.models.query import QuerySet
@@ -21,6 +20,9 @@ from hct_mis_api.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
 )
+
+if TYPE_CHECKING:
+    from django import forms
 
 
 @admin.register(XlsxUpdateFile)
@@ -91,7 +93,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
-    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> Any:
+    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: dict | None = None) -> Any:
         return self.xlsx_update(request)
 
     def xlsx_update(self, request: HttpRequest) -> Any:

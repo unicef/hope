@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable, Optional, Tuple
+from typing import Any, Iterable
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -232,7 +232,7 @@ class IndividualAdmin(
 class InputFilter(admin.SimpleListFilter):
     template: str = "admin/household/individual/business_area_slug_input_filter.html"
 
-    def lookups(self, request: HttpRequest, model_admin: Any) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: Any) -> Iterable[tuple[Any, str]] | None:
         return [(None, "")]
 
 
@@ -315,7 +315,7 @@ class IndividualRepresentationInline(admin.TabularInline):
             Individual.all_objects.select_related("program").all().only("unicef_id", "copied_from", "program__name")
         )  # pragma: no cover
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: Individual | None = None) -> bool:
         return False  # Disable adding new individual representations inline
 
 
@@ -342,5 +342,5 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     def number_of_representations(self, obj: IndividualCollection) -> int:
         return obj.individuals(manager="all_objects").count()
 
-    def business_area(self, obj: IndividualCollection) -> Optional[BusinessArea]:
+    def business_area(self, obj: IndividualCollection) -> BusinessArea | None:
         return obj.business_area

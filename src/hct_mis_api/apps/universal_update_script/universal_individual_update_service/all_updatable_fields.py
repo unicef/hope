@@ -1,7 +1,8 @@
 """
 This is static by design, it could be made dynamic by fetching the fields from the model itself.
 """
-from typing import Any, Dict, List, Optional, Tuple, Type
+
+from typing import Any
 
 from django.db.models import Model
 
@@ -24,7 +25,7 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     validate_string,
 )
 
-individual_fields: Dict[str, Tuple[str, Any, Any]] = {
+individual_fields: dict[str, tuple[str, Any, Any]] = {
     # "photo": ("photo", validate_string, handle_simple_field), # TODO: Handle photo
     "full_name": ("full_name", validate_string, handle_simple_field),
     "given_name": ("given_name", validate_string, handle_simple_field),
@@ -60,7 +61,7 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "preferred_language": ("preferred_language", validate_string, handle_simple_field),
     "age_at_registration": ("age_at_registration", validate_string, handle_simple_field),
 }
-household_fields: Dict[str, Tuple[str, Any, Any]] = {
+household_fields: dict[str, tuple[str, Any, Any]] = {
     "consent": ("consent", validate_boolean, handle_boolean_field),
     # "consent_sharing": ("consent_sharing", validate_boolean, handle_boolean_field), # TODO handle multiselect
     "residence_status": ("residence_status", validate_choices, handle_simple_field),
@@ -145,7 +146,7 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
 
 
 def get_individual_flex_fields() -> dict[Any, Any]:
-    flex_fields_dict = dict()
+    flex_fields_dict = {}
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
     ):
@@ -158,7 +159,7 @@ def get_individual_flex_fields() -> dict[Any, Any]:
 
 
 def get_household_flex_fields() -> dict[Any, Any]:
-    flex_fields_dict = dict()
+    flex_fields_dict = {}
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
     ):
@@ -178,7 +179,7 @@ def get_account_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
     for account_type_instance in AccountType.objects.all():
         account_type = account_type_instance.key
-        wallet_fields: set[tuple[str, Optional[str]]] = set()
+        wallet_fields: set[tuple[str, str | None]] = set()
         wallet_fields.add((f"account__{account_type}__*", None))
         wallet_fields.add((f"account__{account_type}__number", "number"))
         wallet_fields.add((f"account__{account_type}__financial_institution_pk", "financial_institution"))
@@ -187,7 +188,7 @@ def get_account_fields() -> dict[Any, Any]:
     return deliver_mechanism_data_fields
 
 
-def _get_db_fields(model_class: Type[Model]) -> List[str]:
+def _get_db_fields(model_class: type[Model]) -> list[str]:
     """
     Returns a list of field names that correspond to the columns stored
     in the model's database table, excluding related fields.
