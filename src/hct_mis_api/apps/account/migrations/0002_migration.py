@@ -7,95 +7,130 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('core', '0001_migration'),
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('account', '0001_migration'),
+        ("core", "0001_migration"),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("account", "0001_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userrole',
-            name='business_area',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_roles', to='core.businessarea'),
+            model_name="userrole",
+            name="business_area",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_roles", to="core.businessarea"
+            ),
         ),
         migrations.AddField(
-            model_name='userrole',
-            name='role',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_roles', to='account.role'),
+            model_name="userrole",
+            name="role",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_roles", to="account.role"
+            ),
         ),
         migrations.AddField(
-            model_name='userrole',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_roles', to=settings.AUTH_USER_MODEL),
+            model_name="userrole",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_roles", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='usergroup',
-            name='business_area',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_groups', to='core.businessarea'),
+            model_name="usergroup",
+            name="business_area",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to="core.businessarea"
+            ),
         ),
         migrations.AddField(
-            model_name='usergroup',
-            name='group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_groups', to='auth.group'),
+            model_name="usergroup",
+            name="group",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to="auth.group"
+            ),
         ),
         migrations.AddField(
-            model_name='usergroup',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_groups', to=settings.AUTH_USER_MODEL),
+            model_name="usergroup",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='role',
-            unique_together={('name', 'subsystem')},
+            name="role",
+            unique_together={("name", "subsystem")},
         ),
         migrations.AddField(
-            model_name='partner',
-            name='allowed_business_areas',
-            field=models.ManyToManyField(blank=True, to='core.BusinessArea'),
+            model_name="partner",
+            name="allowed_business_areas",
+            field=models.ManyToManyField(blank=True, to="core.BusinessArea"),
         ),
         migrations.AddField(
-            model_name='partner',
-            name='parent',
-            field=mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='account.partner', verbose_name='Parent'),
+            model_name="partner",
+            name="parent",
+            field=mptt.fields.TreeForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="account.partner",
+                verbose_name="Parent",
+            ),
         ),
         migrations.AddField(
-            model_name='incompatibleroles',
-            name='role_one',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='incompatible_roles_one', to='account.role'),
+            model_name="incompatibleroles",
+            name="role_one",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="incompatible_roles_one", to="account.role"
+            ),
         ),
         migrations.AddField(
-            model_name='incompatibleroles',
-            name='role_two',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='incompatible_roles_two', to='account.role'),
+            model_name="incompatibleroles",
+            name="role_two",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="incompatible_roles_two", to="account.role"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='groups',
-            field=models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups'),
+            model_name="user",
+            name="groups",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                related_name="user_set",
+                related_query_name="user",
+                to="auth.Group",
+                verbose_name="groups",
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='partner',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='account.partner'),
+            model_name="user",
+            name="partner",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to="account.partner"),
         ),
         migrations.AddField(
-            model_name='user',
-            name='user_permissions',
-            field=models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions'),
+            model_name="user",
+            name="user_permissions",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Specific permissions for this user.",
+                related_name="user_set",
+                related_query_name="user",
+                to="auth.Permission",
+                verbose_name="user permissions",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='userrole',
-            unique_together={('business_area', 'user', 'role')},
+            name="userrole",
+            unique_together={("business_area", "user", "role")},
         ),
         migrations.AlterUniqueTogether(
-            name='usergroup',
-            unique_together={('business_area', 'user', 'group')},
+            name="usergroup",
+            unique_together={("business_area", "user", "group")},
         ),
         migrations.AlterUniqueTogether(
-            name='incompatibleroles',
-            unique_together={('role_one', 'role_two')},
+            name="incompatibleroles",
+            unique_together={("role_one", "role_two")},
         ),
     ]

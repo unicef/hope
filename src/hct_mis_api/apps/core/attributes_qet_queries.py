@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def age_to_birth_date_range_query(
-    field_name: str, age_min: Optional[int], age_max: Optional[int], is_social_worker_query: bool = False
+    field_name: str, age_min: int | None, age_max: int | None, is_social_worker_query: bool = False
 ) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     query_dict = {}
@@ -242,7 +242,7 @@ def country_generic_query(comparison_method: str, args: Any, lookup: Any, is_soc
     query = Q(**{lookup_prefix + lookup: Countries.get_country_value(args[0])})
     if comparison_method == "EQUALS":
         return query
-    elif comparison_method == "NOT_EQUALS":
+    if comparison_method == "NOT_EQUALS":
         return ~query
     logger.warning(f"Country filter query does not support {comparison_method} type")
     raise ValidationError(f"Country filter query does not support {comparison_method} type")

@@ -126,7 +126,6 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
                 continue
             form_data_inline_query_dict[key] = value
         form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
-        print(form.errors)
         self.assertTrue(form.is_valid())
         form.clean()
 

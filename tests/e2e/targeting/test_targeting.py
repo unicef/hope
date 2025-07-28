@@ -229,7 +229,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
@@ -240,7 +240,6 @@ def get_program_with_dct_type_and_name(
         cycle__end_date=datetime.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 @pytest.fixture
@@ -1129,7 +1128,7 @@ class TestTargeting:
         pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
         pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         # pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingDetails.getInputName().send_keys(Keys.CONTROL + "a")
+        pageTargetingDetails.clear_input(pageTargetingDetails.getInputName())
         pageTargetingDetails.getInputName().send_keys("New Test Data")
         pageTargetingDetails.getInputName().send_keys(Keys.ENTER)
         # pageTargetingCreate.getButtonSave().click()

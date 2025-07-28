@@ -4,24 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0027_migration'),
+        ("payment", "0027_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='account',
-            name='active',
+            model_name="account",
+            name="active",
             field=models.BooleanField(default=True),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='unique_key',
+            model_name="account",
+            name="unique_key",
             field=models.CharField(blank=True, editable=False, max_length=256, null=True),
         ),
         migrations.AddConstraint(
-            model_name='account',
-            constraint=models.UniqueConstraint(condition=models.Q(('active', True), ('unique_key__isnull', False), ('is_unique', True)), fields=('unique_key', 'active', 'is_unique'), name='unique_active_wallet'),
+            model_name="account",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("active", True), ("unique_key__isnull", False), ("is_unique", True)),
+                fields=("unique_key", "active", "is_unique"),
+                name="unique_active_wallet",
+            ),
         ),
     ]

@@ -257,7 +257,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)
         ApprovalProcessFactory(payment_plan=self.payment_plan2)
-        response = self.client.post(
+        return self.client.post(
             reverse(
                 "api:payments:payment-plans-managerial-bulk-action",
                 kwargs={"business_area_slug": self.afghanistan.slug},
@@ -268,7 +268,6 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
                 "comment": "Test comment",
             },
         )
-        return response
 
     def test_bulk_action(
         self,

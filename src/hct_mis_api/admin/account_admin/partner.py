@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Type
+from typing import Any, Sequence
 
 from django import forms
 from django.contrib import admin
@@ -42,12 +42,12 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
 
-    def get_inline_instances(self, request: Any, obj: Optional[account_models.Partner] = None) -> list:
+    def get_inline_instances(self, request: Any, obj: account_models.Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
 
-    def sub_partners(self, obj: Any) -> Optional[str]:
+    def sub_partners(self, obj: Any) -> str | None:
         return self.links_to_objects(obj.get_children()) if obj else None
 
     sub_partners.short_description = "Sub-Partners"
@@ -61,15 +61,15 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         rel_list += "</ul>"
         return format_html(rel_list)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: account_models.Partner | None = None) -> Sequence[str]:
         additional_fields = []
         if obj and (obj.is_unicef or obj.is_unicef_subpartner):
             additional_fields.extend(["name", "parent"])
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[account_models.Partner] = None, change: bool = False, **kwargs: Any
-    ) -> Type[ModelForm]:
+        self, request: HttpRequest, obj: account_models.Partner | None = None, change: bool = False, **kwargs: Any
+    ) -> type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
         if not (obj and (obj.is_unicef_subpartner or obj.is_unicef)):

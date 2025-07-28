@@ -5,39 +5,32 @@ import django.db.models.deletion
 
 
 def remove_targeting_criteria_rules_without_payment_plan(apps, schema_editor):  # pragma no cover
-    TargetingCriteriaRule = apps.get_model('targeting', 'TargetingCriteriaRule')
+    TargetingCriteriaRule = apps.get_model("targeting", "TargetingCriteriaRule")
     TargetingCriteriaRule.objects.filter(payment_plan__isnull=True).delete()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0037_migration'),
-        ('targeting', '0005_migration'),
+        ("payment", "0037_migration"),
+        ("targeting", "0005_migration"),
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            database_operations=[
-                migrations.RunPython(
-                    remove_targeting_criteria_rules_without_payment_plan,
-                    reverse_code=migrations.RunPython.noop
-                ),
-            ],
-            state_operations=[
-                migrations.RemoveField(
-                    model_name='targetingcriteriarule',
-                    name='targeting_criteria',
-                ),
-                migrations.DeleteModel(
-                    name='TargetingCriteria',
-                ),
-                migrations.AlterField(
-                    model_name='targetingcriteriarule',
-                    name='payment_plan',
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rules',
-                                            to='payment.paymentplan'),
-                ),
-            ]
-        )
+        migrations.RunPython(
+            remove_targeting_criteria_rules_without_payment_plan, reverse_code=migrations.RunPython.noop
+        ),
+        migrations.RemoveField(
+            model_name="targetingcriteriarule",
+            name="targeting_criteria",
+        ),
+        migrations.DeleteModel(
+            name="TargetingCriteria",
+        ),
+        migrations.AlterField(
+            model_name="targetingcriteriarule",
+            name="payment_plan",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="rules", to="payment.paymentplan"
+            ),
+        ),
     ]

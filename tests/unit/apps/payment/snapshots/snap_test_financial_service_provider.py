@@ -7,30 +7,20 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_providers 1'] = {
-    'errors': [
+snapshots["TestAllFinancialServiceProviders::test_fetch_all_financial_service_providers 1"] = {
+    "errors": [
         {
-            'locations': [
-                {
-                    'column': 9,
-                    'line': 3
-                }
-            ],
-            'message': 'Cannot query field "allFinancialServiceProviders" on type "Query".'
+            "locations": [{"column": 9, "line": 3}],
+            "message": 'Cannot query field "allFinancialServiceProviders" on type "Query".',
         }
     ]
 }
 
-snapshots['TestAllFinancialServiceProviders::test_fetch_count_financial_service_providers 1'] = {
-    'errors': [
+snapshots["TestAllFinancialServiceProviders::test_fetch_count_financial_service_providers 1"] = {
+    "errors": [
         {
-            'locations': [
-                {
-                    'column': 9,
-                    'line': 3
-                }
-            ],
-            'message': 'Cannot query field "allFinancialServiceProviders" on type "Query".'
+            "locations": [{"column": 9, "line": 3}],
+            "message": 'Cannot query field "allFinancialServiceProviders" on type "Query".',
         }
     ]
 }

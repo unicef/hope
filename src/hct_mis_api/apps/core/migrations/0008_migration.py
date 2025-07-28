@@ -5,21 +5,26 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('geo', '0004_migration'),
-        ('core', '0007_migration'),
+        ("geo", "0004_migration"),
+        ("core", "0007_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='businessarea',
-            name='office_country',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='business_area', to='geo.country'),
+            model_name="businessarea",
+            name="office_country",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="business_area",
+                to="geo.country",
+            ),
         ),
         migrations.AddField(
-            model_name='businessarea',
-            name='payment_countries',
-            field=models.ManyToManyField(related_name='payment_business_areas', to='geo.Country'),
+            model_name="businessarea",
+            name="payment_countries",
+            field=models.ManyToManyField(related_name="payment_business_areas", to="geo.Country"),
         ),
     ]

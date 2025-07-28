@@ -1,18 +1,17 @@
 {% extends "base.html" %}
-{% load markdownify %}
-{% load static %}
+{% load markdownify static %}
 {% block content %}
-    
+
 <p>
     <a class="btn btn-info" href="{% url 'changelog_changelog_list' %}">
     Changelog Listing
     </a>
 </p>
-    
+
 <table class="table">
     <tr><td>Version</td><td class="label label-info">{{ object.version }}</td></tr>
     <tr><td>Date</td><td class="label label-info">{{ object.date }}</td></tr>
-    <tr><td>Description</td><td class="well">{{ object.description |markdownify  }}</td></tr>
+    <tr><td>Description</td><td class="well">{{ object.description|markdownify }}</td></tr>
 </table>
 
-{% endblock %}
+{% endblock content %}

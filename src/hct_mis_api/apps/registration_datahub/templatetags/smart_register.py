@@ -2,7 +2,7 @@ import base64
 import io
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.template import Context, Library, Node
 
@@ -13,14 +13,13 @@ register = Library()
 
 
 class EscapeScriptNode(Node):
-    def __init__(self, nodelist: List[Node]) -> None:
-        super(EscapeScriptNode, self).__init__()
+    def __init__(self, nodelist: list[Node]) -> None:
+        super().__init__()
         self.nodelist = nodelist
 
     def render(self, context: Context) -> str:
         out = self.nodelist.render(context)
-        escaped_out = out.replace("</script>", "<\\/script>")
-        return escaped_out
+        return out.replace("</script>", "<\\/script>")
 
 
 @register.tag()
@@ -32,31 +31,31 @@ def escapescript(parser: Any, token: Any) -> EscapeScriptNode:
 
 @register.filter
 def islist(value: Any) -> bool:
-    return isinstance(value, (list, tuple))
+    return isinstance(value, list | tuple)
 
 
 @register.filter
 def isstring(value: Any) -> bool:
-    return isinstance(value, (str,))
+    return isinstance(value, str)
 
 
 @register.filter
 def isdict(value: Any) -> bool:
-    return isinstance(value, (dict,))
+    return isinstance(value, dict)
 
 
 @register.inclusion_tag("dump/dump.html")
-def dump(value: Any, key: Optional[Any] = None, original: Optional[Any] = None) -> Dict:
+def dump(value: Any, key: Any | None = None, original: Any | None = None) -> dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/list.html")
-def dump_list(value: Any, key: Optional[Any] = None, original: Optional[Any] = None) -> Dict:
+def dump_list(value: Any, key: Any | None = None, original: Any | None = None) -> dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/dict.html")
-def dump_dict(value: Any, key: Optional[Any] = None, original: Optional[Any] = None) -> Dict:
+def dump_dict(value: Any, key: Any | None = None, original: Any | None = None) -> dict:
     return {"value": value, "key": key, "original": original}
 
 

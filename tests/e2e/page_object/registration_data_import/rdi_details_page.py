@@ -112,5 +112,4 @@ class RDIDetailsPage(BaseComponents):
             sleep(1)
             if string in self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text:
                 return True
-        print(self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text)
         return False

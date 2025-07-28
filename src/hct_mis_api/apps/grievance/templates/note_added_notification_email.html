@@ -1,7 +1,8 @@
 {% extends 'base_notification_email.html' %}
+
 {% block content %}
-    A note has been left by {{created_by}} in Grievance & Feedback ticket <a href="{{ ticket_url }}">{{ ticket_id }}</a>.
+    A note has been left by {{ created_by }} in Grievance & Feedback ticket <a href="{{ ticket_url }}">{{ ticket_id }}</a>.
     <p>
         {{ ticket_note.description }}
     </p>
-{% endblock %}
+{% endblock content %}

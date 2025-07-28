@@ -2,7 +2,6 @@ import abc
 import json
 import logging
 import os
-from typing import Dict, Optional
 
 from django.conf import settings
 
@@ -15,25 +14,25 @@ logger = logging.getLogger(__name__)
 
 class ExchangeRateClient(abc.ABC):
     @abc.abstractmethod
-    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
+    def fetch_exchange_rates(self, mode: str = "short") -> dict:
         pass
 
 
 class ExchangeRateClientDummy(ExchangeRateClient):
-    def __init__(self, exchange_rates: Optional[Dict] = None):
+    def __init__(self, exchange_rates: dict | None = None):
         self.exchange_rates = exchange_rates or self.populate_from_file()
 
-    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
+    def fetch_exchange_rates(self, mode: str = "short") -> dict:
         return self.exchange_rates
 
-    def populate_from_file(self) -> Dict:
+    def populate_from_file(self) -> dict:
         exchange_rates_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exchange_rates.json")
-        with open(exchange_rates_file_path, "r") as exchange_rates_file:
+        with open(exchange_rates_file_path) as exchange_rates_file:
             return json.load(exchange_rates_file)
 
 
 class ExchangeRateClientAPI(ExchangeRateClient):
-    def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
+    def __init__(self, api_key: str | None = None, api_url: str | None = None) -> None:
         self.api_key = api_key or settings.EXCHANGE_RATES_API_KEY
         self.api_url: str = api_url or settings.EXCHANGE_RATES_API_URL
         if self.api_key is None:
@@ -44,7 +43,7 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
-    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
+    def fetch_exchange_rates(self, mode: str = "short") -> dict:
         params = {}
 
         if mode == "yes":

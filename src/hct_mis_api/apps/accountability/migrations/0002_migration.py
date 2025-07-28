@@ -6,30 +6,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0001_migration'),
-        ('accountability', '0001_migration'),
-        ('program', '0001_migration'),
+        ("core", "0001_migration"),
+        ("accountability", "0001_migration"),
+        ("program", "0001_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='survey',
-            name='business_area',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.businessarea'),
+            model_name="survey",
+            name="business_area",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
         ),
         migrations.AddField(
-            model_name='survey',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='surveys', to=settings.AUTH_USER_MODEL, verbose_name='Created by'),
+            model_name="survey",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="surveys",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Created by",
+            ),
         ),
         migrations.AddField(
-            model_name='survey',
-            name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='surveys', to='program.program'),
+            model_name="survey",
+            name="program",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="surveys",
+                to="program.program",
+            ),
         ),
     ]

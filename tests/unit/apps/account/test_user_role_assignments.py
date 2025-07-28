@@ -1,7 +1,6 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from django.forms.models import inlineformset_factory
-from django.forms.utils import ErrorList
 from django.test import TestCase
 
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
@@ -22,6 +21,9 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
 )
 from hct_mis_api.apps.core.models import BusinessArea
+
+if TYPE_CHECKING:
+    from django.forms.utils import ErrorList
 
 
 class RoleAssignmentsTest(TestCase):

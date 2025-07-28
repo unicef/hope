@@ -5,15 +5,14 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0034_migration'),
+        ("payment", "0034_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='account',
-            name='account_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='payment.accounttype'),
+            model_name="account",
+            name="account_type",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="payment.accounttype"),
         ),
     ]

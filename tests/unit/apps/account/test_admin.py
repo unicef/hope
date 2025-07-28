@@ -50,7 +50,7 @@ def test_role_sync(django_app: DjangoTestApp, superuser: User, role: Role) -> No
     res = django_app.get(url, user=superuser)
     assert res.status_code == 200
     jres = json.loads(unquote(res.json["data"]))
-    models = set([item["model"] for item in jres])
+    models = {item["model"] for item in jres}
     assert len(models) == 1
     assert models == {"account.role"}
 

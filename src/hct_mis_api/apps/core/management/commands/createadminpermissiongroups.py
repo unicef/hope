@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -19,10 +19,9 @@ class Command(BaseCommand):
             self.create_group_and_set_permissions(group_name, [perm])
             self.perms_list_map.get(action).append(perm)
         else:
-            print(f"Not found Permission with codename {codename}")
+            pass
 
     def handle(self, *args: Any, **options: Any) -> Any:
-        print("Starting create/update Groups...")
         actions = ("view", "add", "change", "delete")
         app_model_map = {
             "account": ["incompatibleroles", "partner", "role", "userrole", "user"],
@@ -93,25 +92,23 @@ class Command(BaseCommand):
             "delete": "All Models Can DELETE",
         }
 
-        self.view_perms, self.add_perms, self.change_perms, self.delete_perms = list(), list(), list(), list()
-        self.perms_list_map: Dict[str, List] = defaultdict(list)
+        self.view_perms, self.add_perms, self.change_perms, self.delete_perms = [], [], [], []
+        self.perms_list_map: dict[str, list] = defaultdict(list)
         self.perms_list_map.update(
             {"view": self.view_perms, "add": self.add_perms, "change": self.change_perms, "delete": self.delete_perms}
         )
 
         for app, models in app_model_map.items():
             for model in models:
-                ct: Optional[ContentType] = ContentType.objects.filter(app_label=app, model=model).first()
+                ct: ContentType | None = ContentType.objects.filter(app_label=app, model=model).first()
 
                 if not ct:
-                    print(f"Not found ContentType for {app} {model}")
                     continue
 
                 for action in actions:
                     perm_codename = action + "_" + model
                     perm = ct.permission_set.filter(codename=perm_codename).first()
                     if not perm:
-                        print(f"Not found Permission with codename {perm_codename}")
                         continue
 
                     self.create_group_and_set_permissions(f"{ct.app_labeled_name} | Can {action} {ct.name}", [perm])
@@ -123,7 +120,6 @@ class Command(BaseCommand):
                 for codename, name in model_obj_perms:
                     perm = Permission.objects.filter(codename=codename).first()
                     if not perm:
-                        print(f"Not found Permission with codename {codename}")
                         continue
 
                     self.create_group_and_set_permissions(f"{ct.app_labeled_name} | {name}", [perm])

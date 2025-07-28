@@ -40,31 +40,27 @@ def create_afghanistan() -> BusinessArea:
 
 def create_ukraine() -> BusinessArea:
     return BusinessArea.objects.create(
-        **{
-            "code": "4410",
-            "name": "Ukraine",
-            "long_name": "UKRAINE",
-            "region_code": "66",
-            "region_name": "ECAR",
-            "slug": "ukraine",
-            "has_data_sharing_agreement": True,
-            "kobo_token": "YYY",
-        }
+        code="4410",
+        name="Ukraine",
+        long_name="UKRAINE",
+        region_code="66",
+        region_name="ECAR",
+        slug="ukraine",
+        has_data_sharing_agreement=True,
+        kobo_token="YYY",
     )
 
 
 def create_kenya() -> BusinessArea:
     return BusinessArea.objects.create(
-        **{
-            "code": "2400",
-            "name": "Kenya",
-            "long_name": "THE REPUBLIC OF KENYA",
-            "region_code": "63",
-            "region_name": "ESAR",
-            "slug": "kenya",
-            "has_data_sharing_agreement": True,
-            "kobo_token": "ZZZ",
-        }
+        code="2400",
+        name="Kenya",
+        long_name="THE REPUBLIC OF KENYA",
+        region_code="63",
+        region_name="ESAR",
+        slug="kenya",
+        has_data_sharing_agreement=True,
+        kobo_token="ZZZ",
     )
 
 
@@ -128,8 +124,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
         label = kwargs.pop("label", None)
         kwargs["label"] = {"English(EN)": label}
-        obj = super()._create(target_class, *args, **kwargs)
-        return obj
+        return super()._create(target_class, *args, **kwargs)
 
 
 def create_pdu_flexible_attribute(
@@ -327,29 +322,29 @@ def generate_business_areas() -> None:
         if country := Country.objects.filter(short_name=country_name).first():
             business_area, _ = BusinessArea.objects.get_or_create(
                 code=ba_code,
-                defaults=dict(
-                    name=country.short_name,
-                    long_name=country.name,
-                    region_code=country.iso_num,
-                    region_name=country.iso_code3,
-                    has_data_sharing_agreement=True,
-                    active=True,
-                    kobo_token="abc_test",
-                    is_accountability_applicable=True,
-                ),
+                defaults={
+                    "name": country.short_name,
+                    "long_name": country.name,
+                    "region_code": country.iso_num,
+                    "region_name": country.iso_code3,
+                    "has_data_sharing_agreement": True,
+                    "active": True,
+                    "kobo_token": "abc_test",
+                    "is_accountability_applicable": True,
+                },
             )
             business_area.countries.add(country)
 
     # create Global
     BusinessArea.objects.get_or_create(
         code="GLOBAL",
-        defaults=dict(
-            name="Global",
-            long_name="Global Business Area",
-            region_code="GLOBAL",
-            region_name="GLOBAL",
-            has_data_sharing_agreement=True,
-        ),
+        defaults={
+            "name": "Global",
+            "long_name": "Global Business Area",
+            "region_code": "GLOBAL",
+            "region_name": "GLOBAL",
+            "has_data_sharing_agreement": True,
+        },
     )
 
 
@@ -383,18 +378,16 @@ def generate_data_collecting_types() -> None:
     ]
 
     for data_dict in data_collecting_types:
-        dct = DataCollectingTypeFactory(
+        DataCollectingTypeFactory(
             label=data_dict["label"],
             code=data_dict["code"],
             business_areas=all_ba_id_list,
             type=data_dict["type"],
             household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
         )
-        dct.compatible_types.add(dct)
 
 
 def generate_pdu_data() -> None:
-    print("Generating PDU Data...")
     test_program = Program.objects.get(business_area__slug="afghanistan", name="Test Program")
     group = FlexibleAttributeGroup.objects.create(name="Group 1", label={"english": "english"})
     pdu_data = PeriodicFieldData.objects.create(

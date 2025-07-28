@@ -568,13 +568,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         self.pp.delivery_mechanism = self.dm_cash_over_the_counter
         self.pp.save()
@@ -604,13 +607,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration_mobile(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         primary_collector = self.payments[0].collector
         fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, name="ABC")
@@ -670,13 +676,16 @@ class TestPaymentGatewayService(APITestCase):
     def test_api_add_records_to_payment_instruction_wallet_integration_bank(self, post_mock: Any) -> None:
         uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
 
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         primary_collector = self.payments[0].collector
 
@@ -803,13 +812,16 @@ class TestPaymentGatewayService(APITestCase):
         payment.household_snapshot.delete()
         payment.refresh_from_db()
 
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": payment.id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": payment.id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         with self.assertRaisesMessage(
             PaymentGatewayAPI.PaymentGatewayAPIException,
@@ -819,71 +831,83 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_fsps(self, get_mock: Any) -> None:
-        get_mock.return_value = [
-            {
-                "id": "123",
-                "remote_id": "123",
-                "name": "123",
-                "vendor_number": "123",
-                "configs": [
-                    {
-                        "id": "123",
-                        "key": "123",
-                        "delivery_mechanism": "123",
-                        "delivery_mechanism_name": "123",
-                        "label": "123",
-                        "required_fields": ["123", "123"],
-                    }
-                ],
-            }
-        ], 200
+        get_mock.return_value = (
+            [
+                {
+                    "id": "123",
+                    "remote_id": "123",
+                    "name": "123",
+                    "vendor_number": "123",
+                    "configs": [
+                        {
+                            "id": "123",
+                            "key": "123",
+                            "delivery_mechanism": "123",
+                            "delivery_mechanism_name": "123",
+                            "label": "123",
+                            "required_fields": ["123", "123"],
+                        }
+                    ],
+                }
+            ],
+            200,
+        )
 
         response_data = PaymentGatewayAPI().get_fsps()
         assert isinstance(response_data[0], FspData)
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_account_types(self, get_mock: Any) -> None:
-        get_mock.return_value = [
-            {
-                "id": "123",
-                "key": "123",
-                "label": "123",
-                "unique_fields": ["123"],
-            }
-        ], 200
+        get_mock.return_value = (
+            [
+                {
+                    "id": "123",
+                    "key": "123",
+                    "label": "123",
+                    "unique_fields": ["123"],
+                }
+            ],
+            200,
+        )
 
         response_data = PaymentGatewayAPI().get_account_types()
         assert isinstance(response_data[0], AccountTypeData)
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_create_payment_instruction(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "external_code": "123",
-            "status": "123",
-            "fsp": "123",
-            "system": "123",
-            "payload": "123",
-        }, 200
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "external_code": "123",
+                "status": "123",
+                "fsp": "123",
+                "system": "123",
+                "payload": "123",
+            },
+            200,
+        )
 
         response_data = PaymentGatewayAPI().create_payment_instruction({})
         assert isinstance(response_data, PaymentInstructionData)
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_record(self, get_mock: Any) -> None:
-        get_mock.return_value = [
-            {
-                "id": "123",
-                "remote_id": "123",
-                "created": "123",
-                "modified": "123",
-                "parent": "123",
-                "status": "PENDING",
-                "auth_code": "123",
-                "record_code": "123",
-                "fsp_code": "123",
-            }
-        ], 200
+        get_mock.return_value = (
+            [
+                {
+                    "id": "123",
+                    "remote_id": "123",
+                    "created": "123",
+                    "modified": "123",
+                    "parent": "123",
+                    "status": "PENDING",
+                    "auth_code": "123",
+                    "record_code": "123",
+                    "fsp_code": "123",
+                }
+            ],
+            200,
+        )
 
         response_data = PaymentGatewayAPI().get_record("123")
         assert isinstance(response_data, PaymentRecordData)

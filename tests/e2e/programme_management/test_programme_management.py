@@ -547,12 +547,12 @@ class TestBusinessAreas:
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("None of the Partners should have access")
         pageProgrammeManagement.getButtonSave().click()
+
+        # Copy Programme
         pageProgrammeDetails.getCopyProgram().click()
         # 1st step (Details)
         programme_name = pageProgrammeManagement.getInputProgrammeName()
-        programme_name.click()
-        programme_name.send_keys(Keys.CONTROL + "a")
-        programme_name.send_keys(Keys.DELETE)
+        pageProgrammeManagement.clear_input(programme_name)
         programme_name.send_keys("New Programme")
 
         pageProgrammeManagement.getButtonNext().click()
@@ -574,7 +574,6 @@ class TestBusinessAreas:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -590,7 +589,7 @@ class TestAdminAreas:
             ),
         ],
     )
-    def test_create_programme_add_partners_Admin_Area(
+    def test_create_programme_add_partners_admin_Area(
         self,
         change_super_user: None,
         pageProgrammeManagement: ProgrammeManagement,
@@ -688,8 +687,7 @@ class TestComeBackScenarios:
         pageProgrammeManagement.getButtonBack().click()
         pageProgrammeManagement.getButtonBack().click()
         assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
-        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL, "a")
-        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.DELETE)
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeName())
         for _ in range(len(pageProgrammeManagement.getInputProgrammeName().get_attribute("value"))):
             pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.BACKSPACE)
         assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
@@ -760,7 +758,6 @@ class TestManualCalendar:
         end_date = datetime.now() + relativedelta(months=1)
         assert str(end_date.strftime("25 %b %Y")) in pageProgrammeDetails.getLabelEndDate().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -833,15 +830,13 @@ class TestManualCalendar:
         pageProgrammeManagement.getSelectEditProgramDetails().click()
 
         # 1st step (Details)
-        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeName())
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
-        pageProgrammeManagement.getInputProgrammeCode().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeCode())
         pageProgrammeManagement.getInputProgrammeCode().send_keys("NEW1")
-        pageProgrammeManagement.getInputStartDate().click()
-        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.pageProgrammeManagement.getInputStartDate())
         pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
-        pageProgrammeManagement.getInputEndDate().click()
-        pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputEndDate())
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
@@ -943,7 +938,6 @@ class TestManualCalendar:
         assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -1004,7 +998,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getSelectEditProgramDetails().click()
 
         # 1st step (Details)
-        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeName())
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)

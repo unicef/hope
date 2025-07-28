@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration_data', '0005_migration'),
+        ("registration_data", "0005_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deduplicationenginesimilaritypair',
-            name='status_code',
-            field=models.CharField(choices=[('200', 'Deduplication success'), ('404', 'No file found'), ('412', 'No face detected'), ('429', 'Multiple faces detected'), ('500', 'Generic error')], max_length=20),
+            model_name="deduplicationenginesimilaritypair",
+            name="status_code",
+            field=models.CharField(
+                choices=[
+                    ("200", "Deduplication success"),
+                    ("404", "No file found"),
+                    ("412", "No face detected"),
+                    ("429", "Multiple faces detected"),
+                    ("500", "Generic error"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

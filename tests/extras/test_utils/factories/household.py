@@ -534,8 +534,7 @@ def create_individual_document(individual: Individual, document_type: Optional[s
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)
         additional_fields["type"] = document_type
-    document = DocumentFactory(individual=individual, **additional_fields)
-    return document
+    return DocumentFactory(individual=individual, **additional_fields)
 
 
 def generate_additional_doc_types() -> None:

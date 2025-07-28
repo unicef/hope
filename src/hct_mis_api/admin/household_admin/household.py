@@ -1,7 +1,7 @@
 import logging
 import re
 from itertools import chain
-from typing import Any, List, Optional
+from typing import Any
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -68,7 +68,7 @@ class HouseholdRepresentationInline(admin.TabularInline):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return Household.all_objects.all().select_related("program").only("unicef_id", "copied_from", "program__name")
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Household] = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: Household | None = None) -> bool:
         return False  # Disable adding new individual representations inline
 
 
@@ -122,7 +122,7 @@ class HouseholdWithdrawFromListMixin:
         context["program"] = request.POST.get("program")
         context["business_area"] = request.POST.get("business_area")
 
-    def withdraw_households_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def withdraw_households_from_list(self, request: HttpRequest) -> HttpResponse | None:
         step = request.POST.get("step", "0")
         context = self.get_common_context(request, title="Withdraw households from list")
 
@@ -296,13 +296,13 @@ class HouseholdAdmin(
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_ignored_linked_objects(self, request: HttpRequest) -> List:
+    def get_ignored_linked_objects(self, request: HttpRequest) -> list:
         return []
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
     @button(permission="grievance.view_grievanceticket")
@@ -326,7 +326,7 @@ class HouseholdAdmin(
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
-        warnings: List[List] = []
+        warnings: list[list] = []
         primary = None
         head = None
         try:
@@ -421,7 +421,7 @@ class HouseholdAdmin(
             "Successfully executed",
         )
 
-    def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+    def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> HttpResponse | None:
         context = self.get_common_context(request, title="Mass enroll households to another program")
         business_area_id = qs.first().business_area_id
         if "apply" in request.POST or "acknowledge" in request.POST:
@@ -460,7 +460,7 @@ class HouseholdAdmin(
         label="Withdraw households from list",
         permission="household.can_withdrawn",
     )
-    def withdraw_households_from_list_button(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def withdraw_households_from_list_button(self, request: HttpRequest) -> HttpResponse | None:
         return self.withdraw_households_from_list(request)
 
 
@@ -487,5 +487,5 @@ class HouseholdCollectionAdmin(admin.ModelAdmin):
     def number_of_representations(self, obj: HouseholdCollection) -> int:
         return obj.households(manager="all_objects").count()
 
-    def business_area(self, obj: HouseholdCollection) -> Optional[BusinessArea]:
+    def business_area(self, obj: HouseholdCollection) -> BusinessArea | None:
         return obj.business_area

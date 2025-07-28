@@ -1307,7 +1307,7 @@ class TestGrievanceTicketDetail:
         assert response.status_code == status.HTTP_200_OK
 
         assert response.data["ticket_details"]["extra_data"]["dedup_engine_similarity_pair"] == {
-            "similarity_score": f'{ticket_details.extra_data["dedup_engine_similarity_pair"]["similarity_score"]:.1f}',
+            "similarity_score": f"{ticket_details.extra_data['dedup_engine_similarity_pair']['similarity_score']:.1f}",
             "status_code": ticket_details.extra_data["dedup_engine_similarity_pair"]["status_code"],
             "individual1": {
                 "id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["id"],
@@ -1381,7 +1381,7 @@ class TestGrievanceTicketDetail:
                 "name": grievance_ticket.admin2.name,
                 "p_code": grievance_ticket.admin2.p_code,
                 "area_type": grievance_ticket.admin2.area_type.id,
-                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
             if grievance_ticket.admin2
             else None
@@ -1560,7 +1560,7 @@ class TestGrievanceTicketDetail:
                     "email": self.user.email,
                     "username": self.user.username,
                 },
-                "created_at": f"{self.ticket_note.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "created_at": f"{self.ticket_note.created_at:%Y-%m-%dT%H:%M:%SZ}",
                 "updated_at": f"{self.ticket_note.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
         ]
@@ -1580,7 +1580,7 @@ class TestGrievanceTicketDetail:
                     "email": self.user.email,
                     "username": self.user.username,
                 },
-                "created_at": f"{self.grievance_document.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "created_at": f"{self.grievance_document.created_at:%Y-%m-%dT%H:%M:%SZ}",
                 "updated_at": f"{self.grievance_document.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
         ]

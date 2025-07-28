@@ -2,10 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Account } from './Account';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
+import type { Document } from './Document';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { HouseholdSimple } from './HouseholdSimple';
+import type { IndividualIdentity } from './IndividualIdentity';
 import type { MaritalStatusEnum } from './MaritalStatusEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { ObservedDisabilityEnum } from './ObservedDisabilityEnum';
@@ -202,9 +205,9 @@ export type IndividualDetail = {
      * * `not disabled` - not disabled
      */
     disability?: DisabilityEnum;
-    readonly documents: Record<string, any>;
-    readonly identities: Record<string, any>;
-    readonly accounts: Record<string, any>;
+    readonly documents: Array<Document>;
+    readonly identities: Array<IndividualIdentity>;
+    readonly accounts: Array<Account>;
     /**
      * Beneficiary email address
      */
