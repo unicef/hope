@@ -217,8 +217,8 @@ class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
 class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgumentsSerializer):
     confidence_interval = serializers.FloatField(required=True)
     margin_of_error = serializers.FloatField(required=True)
-    age = AccountabilityCommunicationMessageAgeInput(required=False)
-    sex = serializers.CharField(required=False)
+    age = AccountabilityCommunicationMessageAgeInput(allow_null=True)
+    sex = serializers.CharField(allow_null=True)
 
 
 class SurveySerializer(serializers.ModelSerializer):
