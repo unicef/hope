@@ -69,8 +69,6 @@ const ProgramCyclesTableProgramDetails = ({
       ),
   });
 
-  console.log('dataProgramCyclesCount', dataProgramCyclesCount);
-
   const canViewDetails = businessAreaSlug !== 'all';
 
   const renderRow = (row: ProgramCycleList): ReactElement => {
