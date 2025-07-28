@@ -6,3 +6,7 @@ from .account_admin import *
 from .accountability_admin import *
 from .activity_log_admin import *
 from .administration_admin import *
+from .changelog_admin import *
+from .core_admin import *
+from .geo_admin import *
+from .household_admin import *
