@@ -124,25 +124,26 @@ const EditTargetPopulation = ({
 
   const handleSubmit = async (values): Promise<void> => {
     try {
+      const requestBody: PatchedTargetPopulationCreate = {
+        excludedIds: values.excludedIds,
+        exclusionReason: values.exclusionReason,
+        programCycleId: values.programCycleId.value,
+        ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
+          name: values.name,
+        }),
+        ...getTargetingCriteriaVariables({
+          flagExcludeIfActiveAdjudicationTicket:
+          values.flagExcludeIfActiveAdjudicationTicket,
+          flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+          criterias: values.targetingCriteria,
+        }),
+      };
       await updateTargetPopulation(
         {
           businessAreaSlug: businessArea,
           tpId: id,
           slug: programSlug,
-          requestBody: {
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            programCycleId: values.programCycleId.value,
-            ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
-              name: values.name,
-            }),
-            ...getTargetingCriteriaVariables({
-              flagExcludeIfActiveAdjudicationTicket:
-                values.flagExcludeIfActiveAdjudicationTicket,
-              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-              criterias: values.targetingCriteria,
-            }),
-          },
+          requestBody,
         },
         {
           onSuccess: () => {

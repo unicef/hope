@@ -836,7 +836,6 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.checkAlert("You cant discard if xlsx file was downloaded or imported")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_xlsx_invalid(
         self,
         clear_downloaded_files: None,

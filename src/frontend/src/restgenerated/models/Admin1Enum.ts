@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR70` - Castroberg
- * * `UA65` - East Brianview
- * * `UA91` - East Tanya
- * * `AF10` - Freemanton
- * * `UA56` - Hallchester
- * * `AF75` - New Cindyland
- * * `AF13` - North Arthurmouth
- * * `HR15` - Sarahport
- * * `HR60` - West Jenniferhaven
+ * * `AF21` - Bentleyport
+ * * `HR10` - Danielmouth
+ * * `UA66` - Ibarratown
+ * * `AF11` - Johnshire
+ * * `UA41` - Michaelmouth
+ * * `HR64` - New Williammouth
+ * * `UA59` - Port Jonathanburgh
+ * * `AF63` - Port Stephen
+ * * `HR96` - West Joel
  */
 export enum Admin1Enum {
-    HR70 = 'HR70',
-    UA65 = 'UA65',
-    UA91 = 'UA91',
-    AF10 = 'AF10',
-    UA56 = 'UA56',
-    AF75 = 'AF75',
-    AF13 = 'AF13',
-    HR15 = 'HR15',
-    HR60 = 'HR60',
+    AF21 = 'AF21',
+    HR10 = 'HR10',
+    UA66 = 'UA66',
+    AF11 = 'AF11',
+    UA41 = 'UA41',
+    HR64 = 'HR64',
+    UA59 = 'UA59',
+    AF63 = 'AF63',
+    HR96 = 'HR96',
 }

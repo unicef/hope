@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type TPHouseholdList = {
+export type PendingPayment = {
     readonly id: string;
+    householdId: string;
     householdUnicefId: string;
     readonly hohFullName: string;
     householdSize: number;

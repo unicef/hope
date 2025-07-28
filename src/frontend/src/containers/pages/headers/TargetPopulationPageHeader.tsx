@@ -15,11 +15,14 @@ import styled from 'styled-components';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
+import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 const HeaderWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
   div {
     margin: 0 0 0 ${({ theme }) => theme.spacing(3)};
   }
@@ -30,7 +33,7 @@ const StatusWrapper = styled.div`
 `;
 
 export interface TargetPopulationPageHeaderProps {
-  paymentPlan;
+  paymentPlan: TargetPopulationDetail;
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -71,7 +74,7 @@ export function TargetPopulationPageHeader({
   let buttons;
 
   switch (paymentPlan.status) {
-    case PaymentPlanStatusEnum.OPEN:
+    case PaymentPlanStatusEnum.TP_OPEN:
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}
