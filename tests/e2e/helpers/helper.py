@@ -6,8 +6,8 @@ from typing import Literal, Optional, Union
 from django.conf import settings
 
 from e2e.common import NoSuchElementException
-from e2e.webdriver import Chrome, Keys
-from e2e.webdriver.remote.webelement import WebElement
+from selenium.webdriver import Chrome, Keys
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By

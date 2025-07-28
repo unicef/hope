@@ -15,8 +15,8 @@ from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from e2e.webdriver.common.by import By
-from e2e.webdriver.remote.webelement import WebElement
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,

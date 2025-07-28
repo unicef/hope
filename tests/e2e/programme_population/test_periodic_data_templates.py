@@ -7,7 +7,7 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
     PeriodicDatUpdateTemplates,
     PeriodicDatUpdateTemplatesDetails,
 )
-from e2e.webdriver.common.by import By
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (

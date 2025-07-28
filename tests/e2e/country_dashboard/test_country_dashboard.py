@@ -7,7 +7,7 @@ from django.utils import timezone
 import factory
 import pytest
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
-from e2e.webdriver.common.by import By
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
@@ -66,7 +66,7 @@ class TestSmokeCountryDashboard:
         pageCountryDashboard.getNavCountryDashboard().click()
         pageCountryDashboard.switch_to_dashboard_iframe()
 
-        from e2e.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support.ui import WebDriverWait
 
         wait = WebDriverWait(pageCountryDashboard.driver, 20)
         wait.until(
