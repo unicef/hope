@@ -16,6 +16,7 @@ coverage:
     - "*/migrations/*"
     - "*/apps.py"
     - "*/admin/*.py"
+    - "*/admin.py"
     - "**/fixtures.py"
     - "src/hct_mis_api/one_time_scripts/*"
     - "src/hct_mis_api/libs/*"
