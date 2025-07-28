@@ -19,7 +19,7 @@ interface HouseholdQuestionnaireProps {
 function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -38,13 +38,15 @@ function HouseholdQuestionnaire({
         id: householdId,
         programSlug: programId,
       }),
-    enabled: !!householdId,
+    enabled: !!householdId && !isAllPrograms,
   });
 
   if (isLoading) return <LoadingComponent />;
   if (error) return <div>Error loading household data</div>;
 
-  const selectedHouseholdData = household || values.selectedHousehold;
+  const selectedHouseholdData = isAllPrograms
+    ? values.selectedHousehold
+    : household;
 
   if (!selectedHouseholdData) return null;
 
