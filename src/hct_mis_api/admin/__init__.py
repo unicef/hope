@@ -1,15 +1,15 @@
-from .payment_admin import *
-from .api_admin import *
-from .aurora_admin import *
-from .vision_admin import *
+# flake8: noqa
 from .account_admin import *
 from .accountability_admin import *
 from .activity_log_admin import *
 from .administration_admin import *
+from .api_admin import *
+from .aurora_admin import *
 from .changelog_admin import *
 from .core_admin import *
 from .geo_admin import *
 from .household_admin import *
+from .payment_admin import *
 from .periodic_data_update_admin import *
 from .program_admin import *
 from .registration_data_admin import *
@@ -17,3 +17,4 @@ from .sanction_list_admin import *
 from .steficon_admin import *
 from .universal_update_script_admin import *
 from .utils_admin import *
+from .vision_admin import *

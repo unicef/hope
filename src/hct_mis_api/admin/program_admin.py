@@ -14,6 +14,11 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
+from hct_mis_api.admin.utils_admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -24,11 +29,6 @@ from hct_mis_api.apps.registration_datahub.services.biometric_deduplication impo
     BiometricDeduplicationService,
 )
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
-from hct_mis_api.admin.utils_admin import (
-    HOPEModelAdminBase,
-    LastSyncDateResetMixin,
-    SoftDeletableAdminMixin,
-)
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from mptt.forms import TreeNodeMultipleChoiceField
 

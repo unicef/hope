@@ -7,6 +7,11 @@ from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
@@ -18,11 +23,6 @@ from hct_mis_api.apps.household.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-)
-from extras.test_utils.factories.aurora import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (

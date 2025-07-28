@@ -13,11 +13,11 @@ from extras.test_utils.factories.core import (
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.admin.core_admin import (
     AcceptanceProcessThresholdFormset,
     DataCollectingTypeForm,
 )
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.models import DataCollectingType
 
 

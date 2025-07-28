@@ -2,9 +2,9 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.changelog.models import Changelog
 from hct_mis_api.apps.changelog.widget import HTMLEditor
-from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class ChangelogAdminForm(forms.ModelForm):

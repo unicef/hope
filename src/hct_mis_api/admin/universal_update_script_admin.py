@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from admin_extra_buttons.buttons import Button
 from admin_extra_buttons.decorators import button
 
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
@@ -26,7 +27,6 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     household_fields,
     individual_fields,
 )
-from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
