@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, FormHelperText } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProgramForm from '@containers/forms/ProgramForm';
@@ -31,7 +31,14 @@ export const DetailsStep: FC<DetailsStepProps> = ({
 
   return (
     <>
-      <ProgramForm values={values} programHasRdi={programHasRdi} />
+      <ProgramForm
+        values={values}
+        programHasRdi={programHasRdi}
+        errors={errors}
+      />
+      {errors?.documentationToUpdate && (
+        <FormHelperText error>{errors.documentationToUpdate}</FormHelperText>
+      )}
       <Box display="flex" justifyContent="space-between">
         <Button
           data-cy="button-cancel"
