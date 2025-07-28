@@ -75,7 +75,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
-    TPHouseholdListSerializer,
+    PendingPaymentSerializer,
     XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -1240,6 +1240,7 @@ class TargetPopulationViewSet(
         "partial_update": TargetPopulationCreateSerializer,
         "copy": TargetPopulationCopySerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
+        "pending_payments": PendingPaymentSerializer,  # to show list of households in target population
     }
     permissions_by_action = {
         "list": [Permissions.TARGETING_VIEW_LIST],
@@ -1249,6 +1250,7 @@ class TargetPopulationViewSet(
         "destroy": [Permissions.TARGETING_REMOVE],
         "copy": [Permissions.TARGETING_DUPLICATE],
         "apply_engine_formula": [Permissions.TARGETING_UPDATE],
+        "pending_payments": [Permissions.TARGETING_VIEW_DETAILS],
     }
     filterset_class = TargetPopulationFilter
 
@@ -1326,6 +1328,20 @@ class TargetPopulationViewSet(
             new_object=tp,
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Target Population rebuilding"})
+
+    @extend_schema(responses={200: PendingPaymentSerializer(many=True)})
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="pending-payments",
+        PERMISSIONS=[Permissions.TARGETING_VIEW_DETAILS],
+        filter_backends=(),
+    )
+    def pending_payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        queryset = tp.payment_items.all()
+        data = PendingPaymentSerializer(self.paginate_queryset(queryset), many=True).data
+        return self.get_paginated_response(data)
 
     @action(
         detail=True,
@@ -1647,27 +1663,27 @@ class PaymentViewSet(
         )
 
 
-class TPHouseholdViewSet(
-    CountActionMixin,
-    SerializerActionMixin,
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    BaseViewSet,
-):
-    queryset = Payment.objects.all()
-    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
-    serializer_classes_by_action = {
-        "list": TPHouseholdListSerializer,
-        "retrieve": TPHouseholdListSerializer,
-    }
-    permissions_by_action = {
-        "list": [
-            Permissions.TARGETING_VIEW_LIST,
-        ],
-        "retrieve": [
-            Permissions.TARGETING_VIEW_DETAILS,
-        ],
-    }
+# class TPHouseholdViewSet(
+#     CountActionMixin,
+#     SerializerActionMixin,
+#     mixins.RetrieveModelMixin,
+#     mixins.ListModelMixin,
+#     BaseViewSet,
+# ):
+#     queryset = Payment.objects.all()
+#     PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
+#     serializer_classes_by_action = {
+#         "list": TPHouseholdListSerializer,
+#         "retrieve": TPHouseholdListSerializer,
+#     }
+#     permissions_by_action = {
+#         "list": [
+#             Permissions.TARGETING_VIEW_LIST,
+#         ],
+#         "retrieve": [
+#             Permissions.TARGETING_VIEW_DETAILS,
+#         ],
+#     }
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore

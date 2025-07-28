@@ -167,6 +167,7 @@ export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
 
 export const clearField = (arrayHelpers, index): void =>
   arrayHelpers.replace(index, {});
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapFiltersToInitialValues(filters): any[] {
   const mappedFilters = [];
@@ -383,6 +384,7 @@ export function formatCriteriaFilters(filters) {
     };
   });
 }
+
 // TODO Marcin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaIndividualsFiltersBlocks(
@@ -446,29 +448,24 @@ function mapFilterToVariable(filter: Filter): Result {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function getTargetingCriteriaVariables(values) {
   return {
-    targetingCriteria: {
-      flagExcludeIfActiveAdjudicationTicket:
-        values.flagExcludeIfActiveAdjudicationTicket,
-      flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-      rules: values.criterias.map((criteria) => ({
-        individualIds: criteria.individualIds,
-        householdIds: criteria.householdIds,
-        householdsFiltersBlocks:
-          criteria.householdsFiltersBlocks.map(mapFilterToVariable),
-        individualsFiltersBlocks: criteria.individualsFiltersBlocks.map(
-          (block) => ({
-            individualBlockFilters:
-              block.individualBlockFilters.map(mapFilterToVariable),
-          }),
-        ),
-        collectorsFiltersBlocks: criteria.collectorsFiltersBlocks.map(
-          (block) => ({
-            collectorBlockFilters:
-              block.collectorBlockFilters.map(mapFilterToVariable),
-          }),
-        ),
-      })),
-    },
+    rules: values.criterias.map((criteria) => ({
+      individualIds: criteria.individualIds,
+      householdIds: criteria.householdIds,
+      householdsFiltersBlocks:
+        criteria.householdsFiltersBlocks.map(mapFilterToVariable),
+      individualsFiltersBlocks: criteria.individualsFiltersBlocks.map(
+        (block) => ({
+          individualBlockFilters:
+            block.individualBlockFilters.map(mapFilterToVariable),
+        }),
+      ),
+      collectorsFiltersBlocks: criteria.collectorsFiltersBlocks.map(
+        (block) => ({
+          collectorBlockFilters:
+            block.collectorBlockFilters.map(mapFilterToVariable),
+        }),
+      ),
+    })),
   };
 }
 

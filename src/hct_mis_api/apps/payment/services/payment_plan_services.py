@@ -523,16 +523,13 @@ class PaymentPlanService:
         vulnerability_score_max = input_data.get("vulnerability_score_max")
         excluded_ids = input_data.get("excluded_ids")
         exclusion_reason = input_data.get("exclusion_reason")
-        targeting_criteria_input = input_data.get("targeting_criteria")
+        rules = input_data.get("rules")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
         fsp_id = input_data.get("fsp_id")
         delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
-        if (
-            any([excluded_ids, exclusion_reason, targeting_criteria_input])
-            and not self.payment_plan.is_population_open()
-        ):
+        if any([excluded_ids, exclusion_reason, rules]) and not self.payment_plan.is_population_open():
             raise ValidationError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
 
         if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
@@ -576,7 +573,16 @@ class PaymentPlanService:
             vulnerability_filter = True
             self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
-        if targeting_criteria_input and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+        if rules and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+            targeting_criteria_input = {"rules": input_data["rules"]}
+            if "flag_exclude_if_on_sanction_list" in input_data:
+                targeting_criteria_input["flag_exclude_if_on_sanction_list"] = input_data[
+                    "flag_exclude_if_on_sanction_list"
+                ]
+            if "flag_exclude_if_active_adjudication_ticket" in input_data:
+                targeting_criteria_input["flag_exclude_if_active_adjudication_ticket"] = input_data[
+                    "flag_exclude_if_active_adjudication_ticket"
+                ]
             should_rebuild_list = True
             TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
             self.payment_plan.rules.all().delete()
