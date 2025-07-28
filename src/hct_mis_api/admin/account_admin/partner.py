@@ -14,7 +14,7 @@ from hct_mis_api.admin.account_admin.user_role import RoleAssignmentInline
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
+from hct_mis_api.admin.utils_admin import HopeModelAdminMixin
 from mptt.forms import TreeNodeMultipleChoiceField
 
 

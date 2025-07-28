@@ -15,3 +15,5 @@ from .program_admin import *
 from .registration_data_admin import *
 from .sanction_list_admin import *
 from .steficon_admin import *
+from .universal_update_script_admin import *
+from .utils_admin import *

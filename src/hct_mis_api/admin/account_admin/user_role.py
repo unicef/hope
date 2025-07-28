@@ -15,7 +15,7 @@ from hct_mis_api.admin.account_admin.forms import (
 )
 from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
 

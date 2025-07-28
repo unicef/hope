@@ -18,7 +18,7 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividualNationalities,
     UploadedXLSXFile,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class SanctionListIndividualDateOfBirthInline(admin.StackedInline):

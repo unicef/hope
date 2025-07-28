@@ -44,7 +44,7 @@ from hct_mis_api.apps.steficon.forms import (
     RuleTestForm,
 )
 from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)

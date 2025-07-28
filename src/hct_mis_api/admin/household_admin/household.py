@@ -43,7 +43,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.admin import (
+from hct_mis_api.admin.utils_admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
