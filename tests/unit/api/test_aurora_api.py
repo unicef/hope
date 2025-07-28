@@ -3,6 +3,11 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from unit.api.base import HOPEApiTestCase, token_grant_permission
@@ -12,11 +17,6 @@ from hct_mis_api.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,
     RegistrationListVersionsKeyBit,
-)
-from extras.test_utils.factories.aurora import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 

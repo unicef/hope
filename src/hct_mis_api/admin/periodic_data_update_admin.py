@@ -7,11 +7,11 @@ from django.http import HttpRequest
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )
-from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 
 class PeriodicDataUpdateUploadInline(admin.TabularInline):

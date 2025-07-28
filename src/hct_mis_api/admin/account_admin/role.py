@@ -15,14 +15,14 @@ from admin_sync.protocol import LoadDumpProtocol
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.admin.account_admin.filters import (
     IncompatibleRoleFilter,
     PermissionFilter,
 )
 from hct_mis_api.admin.account_admin.forms import RoleAdminForm
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
+from hct_mis_api.apps.account import models as account_models
+from hct_mis_api.apps.account.permissions import Permissions
 
 logger = logging.getLogger(__name__)
 

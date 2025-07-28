@@ -13,6 +13,7 @@ from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
+from e2e.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
@@ -31,7 +32,6 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
-from e2e.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User

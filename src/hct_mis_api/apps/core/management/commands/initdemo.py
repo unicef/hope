@@ -67,6 +67,7 @@ from extras.test_utils.factories.accountability import (
     generate_feedback,
     generate_messages,
 )
+from extras.test_utils.factories.aurora import generate_aurora_test_data
 from extras.test_utils.factories.core import (
     generate_business_areas,
     generate_country_codes,
@@ -92,7 +93,6 @@ from flags.models import FlagState
 
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
-from extras.test_utils.factories.aurora import generate_aurora_test_data
 
 logger = logging.getLogger(__name__)
 

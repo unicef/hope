@@ -8,14 +8,14 @@ from django.http import HttpRequest
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import AllValuesComboFilter
 
-from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.admin.account_admin.forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
+from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
 

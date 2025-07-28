@@ -19,6 +19,7 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 
+from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.documents import get_individual_doc
@@ -34,7 +35,6 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
-from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )

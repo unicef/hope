@@ -8,6 +8,8 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
+from e2e.webdriver import ActionChains, Keys
+from e2e.webdriver.common.by import By
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -32,8 +34,6 @@ from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from selenium.common import NoSuchElementException
-from e2e.webdriver import ActionChains, Keys
-from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import (

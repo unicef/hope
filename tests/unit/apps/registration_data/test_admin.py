@@ -11,6 +11,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
+from hct_mis_api.admin.registration_data_admin import RegistrationDataImportAdmin
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -25,7 +26,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
 )
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.admin.registration_data_admin import RegistrationDataImportAdmin
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

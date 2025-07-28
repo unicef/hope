@@ -6,6 +6,7 @@ from django.utils import timezone
 import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
+from e2e.webdriver.common.by import By
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import (
@@ -13,7 +14,6 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from e2e.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType

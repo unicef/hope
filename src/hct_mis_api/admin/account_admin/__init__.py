@@ -1,3 +1,4 @@
+# flake8: noqa
 from .ad import *
 from .filters import *
 from .forms import *

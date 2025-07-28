@@ -9,6 +9,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 import pytest
+from apps.account.admin import PartnerAdmin
 from django_webtest import DjangoTestApp
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
@@ -19,7 +20,6 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 
-from apps.account.admin import PartnerAdmin
 from hct_mis_api.admin.account_admin.user_role import (
     RoleAssignmentAdmin,
     RoleAssignmentInline,
