@@ -202,7 +202,10 @@ class MessageCreateSerializer(serializers.Serializer):
     registration_data_import = serializers.PrimaryKeyRelatedField(
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
-    households = serializers.ListSerializer(child=serializers.UUIDField(), required=False, allow_empty=True)
+    households = serializers.ListSerializer(
+        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
+        required=False, allow_empty=True
+    )
 
 
 class AccountabilityFullListArgumentsSerializer(serializers.Serializer):

@@ -285,7 +285,12 @@ class MessageViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        message = MessageCrudServices.create(request.user, business_area, serializer.validated_data)
+        program = Program.objects.get(slug=self.program_slug)
+
+        input_data = serializer.validated_data
+        input_data["program"] = str(program.pk)
+
+        message = MessageCrudServices.create(request.user, business_area, input_data)
 
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, str(self.program.id), None, message)
         serializer = MessageDetailSerializer(instance=message)
@@ -404,6 +409,7 @@ class SurveyViewSet(
         api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
         return Response(api.get_flows())
 
+    @transaction.atomic
     @extend_schema(responses=SampleSizeSerializer)
     @action(detail=False, methods=["post"], url_path="sample-size")
     def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
