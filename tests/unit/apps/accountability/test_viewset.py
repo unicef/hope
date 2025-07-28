@@ -1335,34 +1335,34 @@ class TestMessageViewSet:
         )
         rdi = RegistrationDataImportFactory(imported_by=self.user, business_area=self.afghanistan)
 
-        with pytest.raises(ValidationError) as e:
-            self.client.post(
-                self.url_list,
-                {
-                    "title": "Test Error",
-                    "body": "Thank you for tests!",
-                    "sampling_type": Survey.SAMPLING_FULL_LIST,
-                    "full_list_arguments": {"excluded_admin_areas": []},
-                    "payment_plan": str(payment_plan.pk),
-                },
-                format="json",
-            )
-        assert "No recipients found for the given criteria" in str(e.value)
+        response = self.client.post(
+            self.url_list,
+            {
+                "title": "Test Error",
+                "body": "Thank you for tests!",
+                "sampling_type": Survey.SAMPLING_FULL_LIST,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "payment_plan": str(payment_plan.pk),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "No recipients found for the given criteria" in response.json()
 
-        with pytest.raises(ValidationError) as e:
-            self.client.post(
-                self.url_list,
-                {
-                    "title": "Test Error",
-                    "body": "Thank you for tests!",
-                    "sampling_type": Survey.SAMPLING_FULL_LIST,
-                    "full_list_arguments": {"excluded_admin_areas": []},
-                    "random_sampling_arguments": None,
-                    "registration_data_import": str(rdi.pk),
-                },
-                format="json",
-            )
-        assert "No recipients found for the given criteria" in str(e.value)
+        response_2 = self.client.post(
+            self.url_list,
+            {
+                "title": "Test Error",
+                "body": "Thank you for tests!",
+                "sampling_type": Survey.SAMPLING_FULL_LIST,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "random_sampling_arguments": None,
+                "registration_data_import": str(rdi.pk),
+            },
+            format="json",
+        )
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "No recipients found for the given criteria" in response_2.json()
 
     def test_create_message_invalid_request(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1372,26 +1372,27 @@ class TestMessageViewSet:
             self.program_active,
         )
 
-        with pytest.raises(ValidationError) as e:
-            self.client.post(
-                self.url_list,
-                {
-                    "title": "Test Error",
-                    "body": "Thank you for tests!",
-                    "sampling_type": Survey.SAMPLING_RANDOM,
-                    "full_list_arguments": {"excluded_admin_areas": []},
-                    "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
-                        "sex": "MALE",
-                        "margin_of_error": 20.0,
-                        "confidence_interval": 0.9,
-                        "excluded_admin_areas": [],
-                    },
-                    "households": [str(self.households[0].pk)],
+        response = self.client.post(
+            self.url_list,
+            {
+                "title": "Test Error",
+                "body": "Thank you for tests!",
+                "sampling_type": Survey.SAMPLING_RANDOM,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "random_sampling_arguments": {
+                    "age": {"max": 80, "min": 30},
+                    "sex": "MALE",
+                    "margin_of_error": 20.0,
+                    "confidence_interval": 0.9,
+                    "excluded_admin_areas": [],
                 },
-                format="json",
-            )
-        assert f"Must not provide full_list_arguments for {Survey.SAMPLING_RANDOM}" in str(e.value)
+                "households": [str(self.households[0].pk)],
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert f"Must not provide full_list_arguments for {Survey.SAMPLING_RANDOM}" in response.json()
+
 
     def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
