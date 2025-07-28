@@ -8,8 +8,8 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from e2e.webdriver import ActionChains, Keys
-from e2e.webdriver.common.by import By
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,

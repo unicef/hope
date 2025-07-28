@@ -2,8 +2,8 @@ from time import sleep
 import sys
 
 from e2e.helpers.helper import Common
-from e2e.webdriver import Keys
-from e2e.webdriver.remote.webelement import WebElement
+from selenium.webdriver import Keys
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait

@@ -8,7 +8,7 @@ docker compose -f compose.selenium.yml build ; docker compose -f compose.seleniu
 
 How to simulate a CI run (from `deployment` dir) - is incompatible with M1/M2/M3 chips:
 ```bash
-sh -c "cd .. && docker build . -f ./docker/Dockerfile --target dev --tag unicef/hct-mis-backend-dev && docker build . -f ./docker/Dockerfile --target dist --tag unicef/hct-mis-backend-dist" && dev_backend_image=unicef/hct-mis-backend-dev dist_backend_image=unicef/hct-mis-backend-dist docker compose -f docker-compose.e2e.yml run --build --rm e2e; dev_backend_image=unicef/hct-mis-backend-dev dist_backend_image=unicef/hct-mis-backend-dist docker compose -f docker-compose.e2e.yml down --remove-orphans
+sh -c "cd .. && docker build . -f ./docker/Dockerfile --target dev --tag unicef/hct-mis-backend-dev && docker build . -f ./docker/Dockerfile --target dist --tag unicef/hct-mis-backend-dist" && dev_backend_image=unicef/hct-mis-backend-dev dist_backend_image=unicef/hct-mis-backend-dist docker compose -f docker-compose.selenium.yml run --build --rm e2e; dev_backend_image=unicef/hct-mis-backend-dev dist_backend_image=unicef/hct-mis-backend-dist docker compose -f docker-compose.selenium.yml down --remove-orphans
 ```
 
 <b><h2>How to run tests locally on Macs with M1/M2/M3:</h2></b>

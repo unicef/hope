@@ -1,7 +1,7 @@
 from time import sleep
 
 from e2e.page_object.base_components import BaseComponents
-from e2e.webdriver.remote.webelement import WebElement
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class NewFeedback(BaseComponents):

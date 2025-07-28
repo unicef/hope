@@ -16,7 +16,7 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.payment_module.test_payment_plans import find_file
-from e2e.webdriver.common.by import By
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import (
