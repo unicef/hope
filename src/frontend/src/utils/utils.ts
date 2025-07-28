@@ -1342,8 +1342,37 @@ export function showApiErrorMessages(
   ) {
     Object.entries(error.body).forEach(([field, messages]) => {
       if (Array.isArray(messages)) {
-        messages.forEach((msg: string) => {
-          if (msg) showMessage(`${field}: ${msg}`);
+        // Check for array of objects (nested errors)
+        if (
+          messages.length > 0 &&
+          typeof messages[0] === 'object' &&
+          messages[0] !== null
+        ) {
+          messages.forEach((nestedObj, idx) => {
+            Object.entries(nestedObj).forEach(
+              ([nestedField, nestedMessages]) => {
+                if (Array.isArray(nestedMessages)) {
+                  nestedMessages.forEach((msg: string) => {
+                    if (msg)
+                      showMessage(`${field}[${idx}].${nestedField}: ${msg}`);
+                  });
+                }
+              },
+            );
+          });
+        } else {
+          messages.forEach((msg: string) => {
+            if (msg) showMessage(`${field}: ${msg}`);
+          });
+        }
+      } else if (typeof messages === 'object' && messages !== null) {
+        // Handle single nested error object
+        Object.entries(messages).forEach(([nestedField, nestedMessages]) => {
+          if (Array.isArray(nestedMessages)) {
+            nestedMessages.forEach((msg: string) => {
+              if (msg) showMessage(`${field}.${nestedField}: ${msg}`);
+            });
+          }
         });
       }
     });
