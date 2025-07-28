@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
+from django.db import transaction
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -94,6 +95,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
             )
         return data
 
+    @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
@@ -1311,6 +1313,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program_slug = request.parser_context["kwargs"]["program_slug"]
         return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
+    @transaction.atomic
     def create(self, data: dict) -> PaymentPlan:
         request = self.context["request"]
         program = self.get_program()
