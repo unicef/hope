@@ -8,6 +8,7 @@ from .aurora_admin import *
 from .changelog_admin import *
 from .core_admin import *
 from .geo_admin import *
+from .grievance_admin import *
 from .household_admin import *
 from .payment_admin import *
 from .periodic_data_update_admin import *
