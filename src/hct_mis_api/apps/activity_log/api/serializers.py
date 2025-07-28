@@ -5,15 +5,9 @@ from rest_framework import serializers
 from hct_mis_api.apps.activity_log.models import LogEntry
 
 
-class ContentTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContentType
-        fields = ("model",)
-
-
 class LogEntrySerializer(serializers.ModelSerializer):
     is_user_generated = serializers.SerializerMethodField()
-    content_type = ContentTypeSerializer()
+    content_type = serializers.SerializerMethodField()
     action = serializers.CharField(source="get_action_display")
     user = serializers.SerializerMethodField()
 
@@ -41,3 +35,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
         if not obj.user:
             return "-"
         return f"{obj.user.first_name} {obj.user.last_name}"
+
+    def get_content_type(self, obj: LogEntry) -> str:
+        if obj.content_type:
+            return obj.content_type.model.title()
