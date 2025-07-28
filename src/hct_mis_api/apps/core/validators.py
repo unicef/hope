@@ -3,7 +3,7 @@ import typing
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 
 import xlrd
 from graphql.execution.base import ResolveInfo

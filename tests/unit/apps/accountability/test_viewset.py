@@ -3,7 +3,6 @@ from typing import Any, List
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
-from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
@@ -25,6 +24,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Survey
