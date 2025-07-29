@@ -23,7 +23,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
-from hct_mis_api.admin.household_admin.mixins import HouseholdWithDrawnMixin
+from hct_mis_api.admin.household_admin_mixins import HouseholdWithDrawnMixin
 from hct_mis_api.admin.utils_admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,

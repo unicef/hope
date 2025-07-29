@@ -24,7 +24,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
@@ -223,16 +223,3 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         populate_index(Household.all_merge_status_objects.filter(program=program), HouseholdDocument)
         messages.success(request, f"Program {program.name} reindexed.")
         return HttpResponseRedirect(reverse("admin:program_program_changelist"))
-
-
-@admin.register(BeneficiaryGroup)
-class BeneficiaryGroupAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("name", "group_label", "group_label_plural", "member_label", "member_label_plural", "master_detail")
-    search_fields = (
-        "name",
-        "group_label",
-        "group_label_plural",
-        "member_label",
-        "member_label_plural",
-    )
-    ordering = ("name",)
