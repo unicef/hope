@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.program.models import Program
+from extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import IndividualRoleInHousehold, ROLE_ALTERNATE
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -24,6 +26,12 @@ class TestHouseholdDataUpdateService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
+            name="program afghanistan 1",
+        )
+        cls.user = UserFactory()
 
     def test_propagate_admin_areas_on_close_ticket(self) -> None:
         # Given
@@ -292,3 +300,62 @@ class TestHouseholdDataUpdateService(TestCase):
             "flex_fields": {},
         }
         self.assertEqual(details.household_data, expected_dict)
+
+    def test_close_household_update_new_roles(self) -> None:
+        first_individual = IndividualFactory(program=self.program)
+        household = first_individual.household
+        second_individual = IndividualFactory(program=self.program, household=household)
+        # add ALTERNATE role for first_individual
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=first_individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        household_data_change_grv_new = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            business_area=self.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        details = TicketHouseholdDataUpdateDetailsFactory(
+            ticket=household_data_change_grv_new,
+            household=household,
+            household_data={
+                "village": {
+                    "value": "Test new",
+                    "approve_status": True,
+                },
+                "flex_fields": {},
+                "roles": [
+                    {
+                        "value": "PRIMARY",
+                        "individual_id": str(first_individual.id),
+                        "approve_status": True,
+                        "full_name": first_individual.full_name,
+                        "unicef_id": first_individual.unicef_id,
+                        "previous_value": "ALTERNATE",
+                    },
+                    {
+                        "value": "ALTERNATE",
+                        "individual_id": str(second_individual.id),
+                        "approve_status": True,
+                        "full_name": second_individual.full_name,
+                        "unicef_id": second_individual.unicef_id,
+                        "previous_value": "-",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 1)
+        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=first_individual).role, "ALTERNATE")
+
+        service = HouseholdDataUpdateService(
+            grievance_ticket=household_data_change_grv_new, extras=details.household_data
+        )
+        service.close(self.user)
+
+        # check if role updated and new one created for second_individual
+        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 2)
+        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=first_individual).role, "PRIMARY")
+        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=second_individual).role, "ALTERNATE")
