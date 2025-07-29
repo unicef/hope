@@ -1,7 +1,6 @@
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { renderUserName } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -29,10 +28,7 @@ function CommunicationDetails({
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Created By')}
-              value={renderUserName(message.createdBy)}
-            />
+            <LabelizedField label={t('Created By')} value={message.createdBy} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Date Created')}>

@@ -1,23 +1,19 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { StatusBox } from '@components/core/StatusBox';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { choicesToDict, householdStatusToColor } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import TableCell from '@mui/material/TableCell';
+import { HeadOfHousehold } from '@restgenerated/models/HeadOfHousehold';
+import { Recipient } from '@restgenerated/models/Recipient';
+import { householdStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import { useNavigate } from 'react-router-dom';
 
 interface RecipientsTableRowProps {
-  household: HouseholdList;
-  headOfHousehold: IndividualList;
+  household: Recipient;
+  headOfHousehold: HeadOfHousehold;
   canViewDetails: boolean;
 }
 
@@ -27,27 +23,12 @@ export const RecipientsTableRow = ({
   canViewDetails,
 }: RecipientsTableRowProps): ReactElement => {
   const navigate = useNavigate();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
 
-  const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-    });
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
     navigate(householdDetailsPath);
   };
-
-  if (choicesLoading) return <LoadingComponent />;
-  if (!choicesData) return null;
-
-  const residenceStatusChoiceDict = choicesToDict(
-    choicesData?.residenceStatusChoices,
-  );
 
   return (
     <ClickableTableRow
@@ -68,9 +49,7 @@ export const RecipientsTableRow = ({
       <AnonTableCell>{headOfHousehold.fullName}</AnonTableCell>
       <TableCell align="left">{household.size}</TableCell>
       <TableCell align="left">{household.admin2?.name || '-'}</TableCell>
-      <TableCell align="left">
-        {residenceStatusChoiceDict[household.residenceStatus]}
-      </TableCell>
+      <TableCell align="left">{household.residenceStatus}</TableCell>
       <TableCell align="right">
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
