@@ -24,11 +24,11 @@ from hct_mis_api.apps.core.models import (
 from mptt.admin import MPTTModelAdmin
 
 if TYPE_CHECKING:
-    from django.contrib.admin import ModelAdmin
     from django.db.models.query import QuerySet
 
 
 logger = logging.getLogger(__name__)
+
 
 class FlexibleAttributeInline(admin.TabularInline):
     model = FlexibleAttribute
