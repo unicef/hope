@@ -9,7 +9,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
 import { Survey } from '@restgenerated/models/Survey';
-import { choicesToDict, renderUserName } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -19,17 +18,13 @@ interface SurveyDetailsProps {
   choicesData: PaginatedSurveyCategoryChoiceList;
 }
 
-function SurveyDetails({
-  survey,
-  choicesData,
-}: SurveyDetailsProps): ReactElement {
+function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, programId } = useBaseUrl();
   const {
     selectedProgram: { name: programName },
   } = useProgramContext();
   const { category, title, createdBy, createdAt, body } = survey;
-  const categoryDict = choicesToDict(choicesData.results);
 
   return (
     <ContainerColumnWithBorder>
@@ -39,19 +34,13 @@ function SurveyDetails({
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Category')}
-              value={categoryDict[category]}
-            />
+            <LabelizedField label={t('Category')} value={category} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Survey Title')} value={title} />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Created By')}
-              value={renderUserName(createdBy)}
-            />
+            <LabelizedField label={t('Created By')} value={createdBy} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Date Created')}>

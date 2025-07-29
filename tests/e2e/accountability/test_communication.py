@@ -25,7 +25,8 @@ def test_program() -> Program:
 def add_accountability_communication_message() -> Message:
     ba = BusinessArea.objects.first()
     user = User.objects.first()
-    cycle = Program.objects.get(name="Test Program").cycles.first()
+    program = Program.objects.get(name="Test Program")
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_LOCKED,
         created_by=user,
@@ -39,12 +40,12 @@ def add_accountability_communication_message() -> Message:
         business_area=ba,
         payment_plan=payment_plan,
         created_by=user,
+        program=program,
     )
 
 
 @pytest.mark.usefixtures("login")
 class TestSmokeAccountabilityCommunication:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_accountability_communication(
         self,
         test_program: Program,
@@ -74,7 +75,6 @@ class TestSmokeAccountabilityCommunication:
         )
         assert 1 == len(pageAccountabilityCommunication.getRows())
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_accountability_communication_details(
         self,
         test_program: Program,
