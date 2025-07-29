@@ -158,7 +158,7 @@ const EditFeedbackPage = (): ReactElement => {
     area: values.area,
     language: values.language || '',
     consent: values.consent,
-    programId: values.programId,
+    programId: values.programId || null,
   });
 
   const canViewHouseholdDetails = hasPermissions(

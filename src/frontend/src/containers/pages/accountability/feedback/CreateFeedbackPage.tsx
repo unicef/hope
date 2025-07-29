@@ -246,7 +246,7 @@ function CreateFeedbackPage(): ReactElement {
         ? values.admin2.id
         : values.admin2,
     language: values.language || '',
-    programId: values.programId,
+    programId: values.programId || null,
   });
 
   const mappedProgramChoices = programsData?.results?.map((element) => ({
