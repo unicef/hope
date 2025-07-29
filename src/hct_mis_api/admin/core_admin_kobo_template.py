@@ -39,7 +39,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-
 class XLSImportForm(forms.Form):
     xls_file = forms.FileField()
 

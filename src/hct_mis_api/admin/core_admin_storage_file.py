@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.contrib import admin
 from django.http import (
@@ -10,9 +10,6 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin
 from hct_mis_api.apps.core.models import (
     StorageFile,
 )
-
-if TYPE_CHECKING:
-    from django.contrib.admin import ModelAdmin
 
 
 logger = logging.getLogger(__name__)

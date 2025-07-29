@@ -146,8 +146,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         return HttpResponseRedirect(f"{url}?{flt}")
 
 
-
-
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
     readonly_fields = ("snapshot_data", "household_id")
@@ -260,4 +258,3 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
         "payment_plan",
         "created_by",
     )
-

@@ -1,5 +1,4 @@
 import logging
-from typing import TYPE_CHECKING
 
 from django.contrib import admin
 
@@ -10,9 +9,6 @@ from hct_mis_api.apps.core.forms import DataCollectingTypeForm
 from hct_mis_api.apps.core.models import (
     DataCollectingType,
 )
-
-if TYPE_CHECKING:
-    from django.contrib.admin import ModelAdmin
 
 
 logger = logging.getLogger(__name__)

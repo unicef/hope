@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.main import ChangeList
 from django.core.signing import BadSignature, Signer
-from django.db.models import JSONField, QuerySet
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -17,24 +17,17 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.mass_update import mass_update
-from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.json import JsonFieldFilter
-from adminfilters.mixin import AdminFiltersMixin
 from adminfilters.numbers import NumberFilter
 from adminfilters.querystring import QueryStringFilter
-from jsoneditor.forms import JSONEditor
 from requests.auth import HTTPBasicAuth
-from smart_admin.decorators import smart_register
 
 from hct_mis_api.admin.utils_admin import HOPEModelAdminBase
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.security import is_root
-from hct_mis_api.contrib.aurora import models
 from hct_mis_api.contrib.aurora.celery_tasks import fresh_extract_records_task
 from hct_mis_api.contrib.aurora.models import Record, Registration
 from hct_mis_api.contrib.aurora.services.extract_record import extract
@@ -68,50 +61,6 @@ class StatusFilter(ChoicesFieldComboFilter):
                     ),
                     "display": title,
                 }
-
-
-@smart_register(models.Organization)
-class OrganizationAdmin(AdminFiltersMixin, admin.ModelAdmin):
-    search_fields = ("name", "slug")
-    list_display = ("name", "slug", "business_area")
-    readonly_fields = (
-        "name",
-        "slug",
-    )
-    list_filter = (("business_area", AutoCompleteFilter),)
-
-
-@smart_register(models.Project)
-class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
-    list_display = ("name", "organization", "programme")
-    list_filter = (("organization", AutoCompleteFilter), ("programme", AutoCompleteFilter))
-    readonly_fields = ("name", "organization")
-    search_fields = ("name",)
-    raw_id_fields = ("programme",)
-
-    def get_form(
-        self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any
-    ) -> type[forms.ModelForm]:
-        form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(
-            business_area=obj.organization.business_area,
-            status=Program.ACTIVE,
-            data_collecting_type__isnull=False,
-            data_collecting_type__deprecated=False,
-        ).exclude(data_collecting_type__code="unknown")
-        return form
-
-
-@smart_register(models.Registration)
-class RegistrationAdmin(AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("name", "slug", "project", "rdi_policy")
-    readonly_fields = ("name", "project", "slug", "extra", "metadata")
-    list_filter = ("rdi_policy", ("project", AutoCompleteFilter))
-    search_fields = ("name",)
-    raw_id_fields = ("steficon_rule",)
-    formfield_overrides = {
-        JSONField: {"widget": JSONEditor},
-    }
 
 
 class BaseRDIForm(forms.Form):

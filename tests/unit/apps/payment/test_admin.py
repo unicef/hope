@@ -2,7 +2,6 @@ import os
 from typing import Any
 from unittest.mock import patch
 
-from django import forms
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
