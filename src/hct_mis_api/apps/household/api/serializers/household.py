@@ -165,6 +165,9 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
 
 class RecipientSerializer(serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
+    admin2 = AreaSimpleSerializer()
+    residence_status = serializers.CharField(source="get_residence_status_display")
+
 
     class Meta:
         model = Household
@@ -173,6 +176,10 @@ class RecipientSerializer(serializers.ModelSerializer):
             "unicef_id",
             "size",
             "head_of_household",
+            "admin2",
+            "status",
+            "residence_status",
+            "last_registration_date",
         )
 
 
