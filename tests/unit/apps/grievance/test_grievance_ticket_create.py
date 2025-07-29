@@ -444,7 +444,7 @@ class TestGrievanceTicketCreate:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
 
-    def test_create_grievance_ticket_111(self, create_user_role_with_permissions: Any) -> None:
+    def test_create_grievance_ticket_duplicate_roles_not_allowed(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
         individual = IndividualFactory(program=self.program)
         household = individual.household
@@ -455,7 +455,6 @@ class TestGrievanceTicketCreate:
             role=ROLE_ALTERNATE,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
-
         extras = {
             "issue_type": {
                 "household_data_update_issue_type_extras": {
@@ -491,3 +490,10 @@ class TestGrievanceTicketCreate:
                 "roles"
             ]
         )
+        # coverage
+        extras["issue_type"]["household_data_update_issue_type_extras"]["household_data"]["roles"] = [
+            {"individual": str(individual.pk), "new_role": ROLE_PRIMARY},
+            {"individual": str(individual_2.pk), "new_role": ROLE_ALTERNATE},
+        ]
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
