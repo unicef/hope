@@ -242,7 +242,6 @@ class SurveySerializer(serializers.ModelSerializer):
     has_valid_sample_file = serializers.SerializerMethodField()
     rapid_pro_url = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
-    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = Survey
@@ -282,6 +281,11 @@ class SurveySerializer(serializers.ModelSerializer):
 
     def get_created_by(self, obj: Feedback) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+
+    def to_representation(self, obj: Survey) -> dict:
+        representation = super().to_representation(obj)
+        representation["category"] = obj.get_category_display()
+        return representation
 
 
 class SurveyCategoryChoiceSerializer(serializers.Serializer):
