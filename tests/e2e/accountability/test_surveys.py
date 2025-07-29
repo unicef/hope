@@ -90,7 +90,6 @@ class TestSmokeAccountabilitySurveys:
         assert "SUR-24-0005" in pageAccountabilitySurveys.getRows()[0].text
         assert "Test survey" in pageAccountabilitySurveys.getRows()[0].text
 
-
     def test_smoke_accountability_surveys_details(
         self,
         test_program: Program,
