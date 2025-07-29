@@ -228,7 +228,6 @@ class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgu
 class SurveySerializer(serializers.ModelSerializer):
     title = serializers.CharField()
     body = serializers.CharField(required=False, allow_blank=True)
-    category = serializers.CharField()
     sampling_type = serializers.CharField()
     flow = serializers.CharField(required=False, write_only=True, allow_blank=True)
     payment_plan = serializers.SlugRelatedField(
@@ -243,6 +242,7 @@ class SurveySerializer(serializers.ModelSerializer):
     has_valid_sample_file = serializers.SerializerMethodField()
     rapid_pro_url = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
+    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = Survey
