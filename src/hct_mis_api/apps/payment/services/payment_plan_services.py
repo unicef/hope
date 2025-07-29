@@ -584,9 +584,9 @@ class PaymentPlanService:
                     "flag_exclude_if_active_adjudication_ticket"
                 ]
             should_rebuild_list = True
-            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
             self.payment_plan.rules.all().delete()
-            from_input_to_targeting_criteria(targeting_criteria_input, program, self.payment_plan)
+            # Use create_targeting_criteria to set flags and rules
+            self.create_targeting_criteria(targeting_criteria_input, program)
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids
