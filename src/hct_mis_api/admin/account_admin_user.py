@@ -19,15 +19,15 @@ from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from jsoneditor.forms import JSONEditor
 
-from hct_mis_api.admin.account_admin.ad import ADUSerMixin
-from hct_mis_api.admin.account_admin.filters import BusinessAreaFilter, HasKoboAccount
-from hct_mis_api.admin.account_admin.forms import (
+from hct_mis_api.admin.account_admin_ad import ADUSerMixin
+from hct_mis_api.admin.account_admin_filters import BusinessAreaFilter, HasKoboAccount
+from hct_mis_api.admin.account_admin_forms import (
     AddRoleForm,
     HopeUserCreationForm,
     ImportCSVForm,
 )
-from hct_mis_api.admin.account_admin.mixins import KoboAccessMixin
-from hct_mis_api.admin.account_admin.user_role import RoleAssignmentInline
+from hct_mis_api.admin.account_admin_mixins import KoboAccessMixin
+from hct_mis_api.admin.account_admin_user_role import RoleAssignmentInline
 from hct_mis_api.admin.utils_admin import HopeModelAdminMixin
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.models import Partner

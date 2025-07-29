@@ -1,25 +1,20 @@
 from typing import TYPE_CHECKING, Any
 
 from django import forms
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
-from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
-from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.admin.utils_admin import (
     HOPEModelAdminBase,
@@ -42,12 +37,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
 )
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
+
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.security import is_root
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
@@ -56,175 +47,6 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.forms import Form
-
-
-class ArrayFieldWidget(forms.Textarea):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.delimiter = kwargs.pop("delimiter", ",")
-        super().__init__(*args, **kwargs)
-
-    def format_value(self, value: Any) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, list):
-            # Join list items with newline instead of comma for each value to be in a new line
-            return "\n".join(str(v) for v in value)
-        return value
-
-    def value_from_datadict(self, data: Any, files: Any, name: Any) -> list[str]:
-        value = data.get(name, "")
-        if not value:
-            return []
-        # Split by newline and strip any extra spaces
-        return [v.strip() for v in value.splitlines()]
-
-
-class CommaSeparatedArrayField(forms.Field):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.base_field = forms.CharField()
-        self.widget = ArrayFieldWidget()
-        self.delimiter = kwargs.pop("delimiter", ",")
-        super().__init__(*args, **kwargs)
-
-    def prepare_value(self, value: Any) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, list):
-            # Prepare value to be displayed as a newline-separated string
-            return "\n".join(str(self.base_field.prepare_value(v)) for v in value)
-        return value
-
-    def to_python(self, value: Any) -> list[str]:
-        if not value:
-            return []
-        if isinstance(value, list):
-            return value
-        return [self.base_field.to_python(v) for v in value.splitlines()]
-
-    def validate(self, value: Any) -> None:
-        super().validate(value)
-        for item in value:
-            self.base_field.validate(item)
-
-
-@admin.register(PaymentVerificationPlan)
-class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = (
-        "payment_plan",
-        "status",
-        "verification_channel",
-        "sampling",
-        "sample_size",
-        "activation_date",
-        "completion_date",
-        "responded_count",
-        "received_count",
-        "not_received_count",
-        "received_with_problems_count",
-        "xlsx_file_exporting",
-        "xlsx_file_imported",
-        "error",
-    )
-    list_filter = (
-        ("payment_plan__program_cycle__program__business_area", AutoCompleteFilter),
-        ("payment_plan__program_cycle__program", AutoCompleteFilter),
-        ("payment_plan", AutoCompleteFilter),
-        ("status", ChoicesFieldComboFilter),
-        ("verification_channel", ChoicesFieldComboFilter),
-        "sampling",
-        "xlsx_file_exporting",
-        "xlsx_file_imported",
-    )
-    date_hierarchy = "updated_at"
-    search_fields = ("payment_plan__name",)
-    raw_id_fields = ("payment_plan",)
-
-    @button(permission="payment.view_paymentverification")
-    def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        list_url = reverse("admin:payment_paymentverification_changelist")
-        url = f"{list_url}?payment_verification_plan__exact={pk}"
-        return HttpResponseRedirect(url)
-
-    @button(permission="core.execute_sync_rapid_pro")
-    def execute_sync_rapid_pro(self, request: HttpRequest) -> HttpResponseRedirect | None:
-        if request.method == "POST":
-            from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-                CheckRapidProVerificationTask,
-            )
-
-            task = CheckRapidProVerificationTask()
-            task.execute()
-            self.message_user(request, "Rapid Pro synced", messages.SUCCESS)
-        else:
-            return confirm_action(
-                self,
-                request,
-                self.execute_sync_rapid_pro,
-                mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
-                        <h3>Import will only be simulated</h3>
-                        """
-                ),
-                "Successfully executed",
-                template="admin_extra_buttons/confirm.html",
-            )
-        return None
-
-    def activate(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
-        return confirm_action(
-            self,
-            request,
-            lambda _: VerificationPlanStatusChangeServices(PaymentVerificationPlan.objects.get(pk=pk)).activate(),
-            "This action will trigger Cash Plan Payment Verification activation (also sending messages via Rapid Pro).",
-            "Successfully activated.",
-        )
-
-
-@admin.register(PaymentVerification)
-class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
-    list_display = (
-        "payment",
-        "household",
-        "business_area",
-        "status",
-        "status_date",
-        "received_amount",
-        "payment_plan_name",
-        "sent_to_rapid_pro",
-    )
-
-    list_filter = (
-        ("payment_verification_plan__payment_plan__program_cycle__program__business_area", AutoCompleteFilter),
-        ("payment_verification_plan__payment_plan__program_cycle__program", AutoCompleteFilter),
-        DepotManager,
-        QueryStringFilter,
-        ("status", ChoicesFieldComboFilter),
-        ("payment__household__unicef_id", ValueFilter),
-        "sent_to_rapid_pro",
-    )
-    date_hierarchy = "updated_at"
-    raw_id_fields = ("payment_verification_plan", "payment")
-
-    def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
-        payment_plan = obj.payment_verification_plan.payment_plan
-        return getattr(payment_plan, "name", "~no name~")
-
-    def household(self, obj: PaymentVerification) -> str:  # pragma: no cover
-        payment = obj.payment
-        return payment.household.unicef_id if payment else ""
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("payment_verification_plan")
-            .prefetch_related(
-                "payment",
-                "payment__household",
-                "payment_verification_plan__payment_plan",
-                "payment_verification_plan__payment_plan__business_area",
-            )
-        )
 
 
 class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline

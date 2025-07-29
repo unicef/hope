@@ -9,7 +9,7 @@ from django.utils.html import format_html
 
 from adminfilters.autocomplete import AutoCompleteFilter
 
-from hct_mis_api.admin.account_admin.user_role import RoleAssignmentInline
+from hct_mis_api.admin.account_admin_user_role import RoleAssignmentInline
 from hct_mis_api.admin.utils_admin import HopeModelAdminMixin
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.core.models import BusinessArea

@@ -27,9 +27,6 @@ from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual, PendingIndividual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    ImportData,
-    KoboImportData,
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -308,44 +305,3 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["action"] = "mass_enroll_to_another_program"
         context["enroll_from"] = "RDI"
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
-
-
-@admin.register(ImportData)
-class ImportDataAdmin(HOPEModelAdminBase):
-    search_fields = ("business_area_slug",)
-    list_display = ("business_area_slug", "status", "data_type", "number_of_households", "number_of_individuals")
-    list_filter = (
-        "status",
-        "data_type",
-        ("created_by_id", AutoCompleteFilter),
-    )
-
-
-@admin.register(KoboImportData)
-class KoboImportDataDataAdmin(HOPEModelAdminBase):
-    search_fields = ("business_area_slug",)
-    list_display = (
-        "business_area_slug",
-        "status",
-        "data_type",
-        "kobo_asset_id",
-        "number_of_households",
-        "number_of_individuals",
-        "only_active_submissions",
-        "pull_pictures",
-    )
-    list_filter = (
-        "status",
-        "data_type",
-        ("created_by_id", AutoCompleteFilter),
-        "only_active_submissions",
-        "pull_pictures",
-    )
-
-
-@admin.register(DeduplicationEngineSimilarityPair)
-class DeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
-    list_display = ("program", "individual1", "individual2", "similarity_score")
-    list_filter = (("program", AutoCompleteFilter),)
-    raw_id_fields = ("program", "individual1", "individual2")
-    search_fields = ("program", "individual1", "individual2")
