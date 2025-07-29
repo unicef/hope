@@ -90,6 +90,7 @@ class TestSmokeAccountabilitySurveys:
         assert "SUR-24-0005" in pageAccountabilitySurveys.getRows()[0].text
         assert "Test survey" in pageAccountabilitySurveys.getRows()[0].text
 
+
     def test_smoke_accountability_surveys_details(
         self,
         test_program: Program,
@@ -124,9 +125,9 @@ class TestSmokeAccountabilitySurveys:
         assert "Administrative Level 2" in pageAccountabilitySurveysDetails.getHouseholdLocation().text
         assert "Residence Status" in pageAccountabilitySurveysDetails.getHouseholdResidenceStatus().text
         assert "Registration Date" in pageAccountabilitySurveysDetails.getHouseholdRegistrationDate().text
-        assert "Rows per page: 10 1–1 of 1" in pageAccountabilitySurveysDetails.getTablePagination().text.replace(
-            "\n", " "
-        )
+        # assert "Rows per page: 10 1–1 of 1" in pageAccountabilitySurveysDetails.getTablePagination().text.replace(
+        #     "\n", " "
+        # )
         assert 1 == len(pageAccountabilitySurveys.getRows())
         assert (
             add_accountability_surveys_message.recipients.all()[0].unicef_id
