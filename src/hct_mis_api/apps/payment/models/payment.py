@@ -439,7 +439,7 @@ class PaymentPlan(
     imported_file_date = models.DateTimeField(blank=True, null=True, help_text="Imported File Date [sys]")
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
@@ -447,7 +447,7 @@ class PaymentPlan(
     )
     total_entitled_quantity_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         null=True,
         blank=True,
@@ -455,7 +455,7 @@ class PaymentPlan(
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
@@ -464,7 +464,7 @@ class PaymentPlan(
     )
     total_entitled_quantity_revised_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         null=True,
         blank=True,
@@ -472,7 +472,7 @@ class PaymentPlan(
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
@@ -481,7 +481,7 @@ class PaymentPlan(
     )
     total_delivered_quantity_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         null=True,
         blank=True,
@@ -489,7 +489,7 @@ class PaymentPlan(
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
@@ -498,7 +498,7 @@ class PaymentPlan(
     )
     total_undelivered_quantity_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=14,
         validators=[MinValueValidator(Decimal("0"))],
         null=True,
         blank=True,
