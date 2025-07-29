@@ -142,7 +142,7 @@ const EditFeedbackPage = (): ReactElement => {
     area: feedback.area || null,
     language: feedback.language || null,
     consent: feedback.consent || false,
-    program: feedback.programId || null,
+    programId: feedback.programId || null,
   };
 
   const prepareVariables = (values) => ({
@@ -158,7 +158,7 @@ const EditFeedbackPage = (): ReactElement => {
     area: values.area,
     language: values.language || '',
     consent: values.consent,
-    program: values.program,
+    programId: values.programId,
   });
 
   const canViewHouseholdDetails = hasPermissions(
@@ -326,7 +326,6 @@ const EditFeedbackPage = (): ReactElement => {
                           name="admin2"
                           variant="outlined"
                           component={FormikAdminAreaAutocomplete}
-                          disabled={Boolean(feedback.admin2?.name)}
                         />
                       </Grid>
                       <Grid size={{ xs: 6 }}>
@@ -350,7 +349,7 @@ const EditFeedbackPage = (): ReactElement => {
                       </Grid>
                       <Grid size={{ xs: 3 }}>
                         <Field
-                          name="program"
+                          name="programId"
                           label={t('Programme Name')}
                           fullWidth
                           variant="outlined"

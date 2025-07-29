@@ -23,17 +23,19 @@ import {
   StepLabel,
   Stepper,
   Typography,
-  Tooltip,
 } from '@mui/material';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
+import { showApiErrorMessages } from '@utils/utils';
+import React, { ReactElement, ReactNode, useState } from 'react';
 import { Field, Formik } from 'formik';
-import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -44,10 +46,8 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { createApiParams } from '@utils/apiUtils';
-import { showApiErrorMessages } from '@utils/utils';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
+import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
 // Constants for feedback issue types
 const FEEDBACK_ISSUE_TYPE = {
@@ -90,7 +90,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     consent: Yup.bool().nullable(),
     area: Yup.string().nullable(),
     language: Yup.string().nullable(),
-    program: Yup.string().nullable(),
+    programId: Yup.string().nullable(),
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
@@ -174,7 +174,7 @@ function CreateFeedbackPage(): ReactElement {
     area: null,
     language: null,
     consent: false,
-    program: isAllPrograms ? '' : programId,
+    programId: isAllPrograms ? '' : programId,
     verificationRequired: false,
   };
 
@@ -282,29 +282,12 @@ function CreateFeedbackPage(): ReactElement {
       // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
-        // Sync admin2 with selectedHousehold.admin2
-        <Admin2SyncEffect
-          selectedHousehold={values.selectedHousehold}
-          admin2={values.admin2}
-          setFieldValue={setFieldValue}
-        />;
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
-        // Set program value based on selected household or individual
-        if (
-          values.selectedHousehold?.program?.id &&
-          values.program !== values.selectedHousehold.program.id
-        ) {
-          setFieldValue('program', values.selectedHousehold.program.id);
-        } else if (
-          values.selectedIndividual?.program?.id &&
-          values.program !== values.selectedIndividual.program.id
-        ) {
-          setFieldValue('program', values.selectedIndividual.program.id);
-        }
         return (
           <>
+            <ProgramIdSyncEffect />
             <Admin2SyncEffect
               selectedHousehold={values.selectedHousehold}
               admin2={values.admin2}
@@ -493,30 +476,12 @@ function CreateFeedbackPage(): ReactElement {
                               />
                             </Grid>
                             <Grid size={{ xs: 6 }}>
-                              {values.selectedHousehold?.admin2 ? (
-                                <Tooltip
-                                  title="This field is set automatically from the selected household."
-                                  placement="top"
-                                  arrow
-                                >
-                                  <span>
-                                    <Field
-                                      name="admin2"
-                                      variant="outlined"
-                                      component={FormikAdminAreaAutocomplete}
-                                      dataCy="input-admin2"
-                                      disabled
-                                    />
-                                  </span>
-                                </Tooltip>
-                              ) : (
-                                <Field
-                                  name="admin2"
-                                  variant="outlined"
-                                  component={FormikAdminAreaAutocomplete}
-                                  dataCy="input-admin2"
-                                />
-                              )}
+                              <Field
+                                name="admin2"
+                                variant="outlined"
+                                component={FormikAdminAreaAutocomplete}
+                                dataCy="input-admin2"
+                              />
                               {touched.admin2 &&
                                 typeof errors.admin2 === 'string' && (
                                   <FormHelperText error>
@@ -559,7 +524,7 @@ function CreateFeedbackPage(): ReactElement {
                             </Grid>
                             <Grid size={{ xs: 3 }}>
                               <Field
-                                name="program"
+                                name="programId"
                                 label={t('Programme Name')}
                                 fullWidth
                                 variant="outlined"
@@ -567,10 +532,10 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikSelectField}
                                 disabled={!isAllPrograms || !isAnonymousTicket}
                               />
-                              {touched.program &&
-                                typeof errors.program === 'string' && (
+                              {touched.programId &&
+                                typeof errors.programId === 'string' && (
                                   <FormHelperText error>
-                                    {errors.program}
+                                    {errors.programId}
                                   </FormHelperText>
                                 )}
                             </Grid>

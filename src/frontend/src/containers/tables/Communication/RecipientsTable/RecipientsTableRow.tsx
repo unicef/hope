@@ -12,12 +12,12 @@ import { ReactElement } from 'react';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { HeadOfHousehold } from '@restgenerated/models/HeadOfHousehold';
+import { Recipient } from '@restgenerated/models/Recipient';
 
 interface RecipientsTableRowProps {
-  household: HouseholdDetail;
-  headOfHousehold: IndividualDetail;
+  household: Recipient;
+  headOfHousehold: HeadOfHousehold;
   canViewDetails: boolean;
 }
 
