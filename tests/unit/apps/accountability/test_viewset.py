@@ -1626,7 +1626,7 @@ class TestSurveyViewSet:
                 assert survey_result["unicef_id"] == str(survey.unicef_id)
                 assert survey_result["title"] == survey.title
                 assert survey_result["body"] == survey.body
-                assert survey_result["category"] == survey.category
+                assert survey_result["category"] == survey.get_category_display()
                 assert survey_result["flow_id"] == survey.flow_id
                 assert survey_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{survey.flow_id}/"
                 assert survey_result["created_by"] == f"{survey.created_by.first_name} {survey.created_by.last_name}"
@@ -1683,7 +1683,7 @@ class TestSurveyViewSet:
             assert "id" in resp_data
             assert resp_data["title"] == "Survey 1"
             assert resp_data["body"] == "Survey 1 body"
-            assert resp_data["category"] == "SMS"
+            assert resp_data["category"] == "Survey with SMS"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
