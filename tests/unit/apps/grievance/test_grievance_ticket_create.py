@@ -32,13 +32,17 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     RELATIONSHIP_UNKNOWN,
+    ROLE_ALTERNATE,
     ROLE_NO_ROLE,
+    ROLE_PRIMARY,
     SINGLE,
     UNHCR,
     WIDOWED,
     DocumentType,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -439,3 +443,51 @@ class TestGrievanceTicketCreate:
         response = self.api_client.post(self.list_url, data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
+
+    def test_create_grievance_ticket_111(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        individual = IndividualFactory(program=self.program)
+        household = individual.household
+        individual_2 = IndividualFactory(program=self.program, household=household)
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+
+        extras = {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": str(household.pk),
+                    "household_data": {
+                        "village": "New Village",
+                        "country": "AGO",
+                        "flex_fields": {},
+                        "roles": [
+                            {"individual": str(individual.pk), "new_role": ROLE_PRIMARY},
+                            {"individual": str(individual_2.pk), "new_role": ROLE_PRIMARY},
+                        ],
+                    },
+                }
+            }
+        }
+        input_data = {
+            "description": "Test update roles",
+            "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+            "consent": False,
+            "language": "",
+            "linked_feedback_id": None,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            "extras": extras,
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketComplaintDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            f"Duplicate roles are not allowed: {ROLE_PRIMARY}"
+            in response.json()["extras"]["issue_type"]["household_data_update_issue_type_extras"]["household_data"][
+                "roles"
+            ]
+        )
