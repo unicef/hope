@@ -378,7 +378,7 @@ class TestHouseholdList:
         survey = SurveyFactory(created_by=self.user)
         survey.recipients.set([self.household1])
 
-        response = self.api_client.get(list_url, {"survey": str(survey.pk)})
+        response = self.api_client.get(list_url, {"survey_id": str(survey.pk)})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
         recipient_1_results = response.json()["results"][0]
