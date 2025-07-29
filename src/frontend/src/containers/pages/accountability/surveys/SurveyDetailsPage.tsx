@@ -8,7 +8,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
@@ -40,15 +40,6 @@ function SurveyDetailsPage(): ReactElement {
     {},
   );
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['surveyCategoryChoices', businessArea, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
-  });
-
   const exportSurveyMutation = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsSurveysExportSampleRetrieve({
@@ -59,11 +50,11 @@ function SurveyDetailsPage(): ReactElement {
   });
   const permissions = usePermissions();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data || permissions === null) return null;
 
   const survey = data; // REST API returns survey directly, not wrapped in { survey }
 
@@ -143,7 +134,7 @@ function SurveyDetailsPage(): ReactElement {
         {renderActions()}
       </PageHeader>
       <Box display="flex" flexDirection="column">
-        <SurveyDetails survey={survey} choicesData={choicesData} />
+        <SurveyDetails survey={survey} />
         <RecipientsTable
           canViewDetails={hasPermissions(
             PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
