@@ -21,7 +21,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
 import { Survey } from '@restgenerated/models/Survey';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
-import RecipientsTable from '@containers/tables/Communication/RecipientsTable/RecipientsTable';
+import RecipientsTable from '@containers/tables/Surveys/RecipientsTable/RecipientsTable';
 
 function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
