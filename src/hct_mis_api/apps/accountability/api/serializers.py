@@ -137,6 +137,7 @@ class FeedbackUpdateSerializer(serializers.ModelSerializer):
     admin2 = serializers.UUIDField(allow_null=True, required=False)
     language = serializers.CharField(allow_blank=True, required=False)
     consent = serializers.BooleanField(required=False)
+    program_id = serializers.UUIDField(allow_null=True, required=False)
 
     class Meta:
         model = Feedback
@@ -150,6 +151,7 @@ class FeedbackUpdateSerializer(serializers.ModelSerializer):
             "language",
             "comments",
             "consent",
+            "program_id",
         )
 
 
@@ -226,7 +228,6 @@ class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgu
 class SurveySerializer(serializers.ModelSerializer):
     title = serializers.CharField()
     body = serializers.CharField(required=False, allow_blank=True)
-    category = serializers.CharField()
     sampling_type = serializers.CharField()
     flow = serializers.CharField(required=False, write_only=True, allow_blank=True)
     payment_plan = serializers.SlugRelatedField(
@@ -280,6 +281,11 @@ class SurveySerializer(serializers.ModelSerializer):
 
     def get_created_by(self, obj: Feedback) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+
+    def to_representation(self, obj: Survey) -> dict:
+        representation = super().to_representation(obj)
+        representation["category"] = obj.get_category_display()
+        return representation
 
 
 class SurveyCategoryChoiceSerializer(serializers.Serializer):

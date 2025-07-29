@@ -762,7 +762,7 @@ class TestFeedbackViewSet:
             format="json",
         )
         assert response.status_code == expected_status
-        assert "It is not possible to create Feedback for a Finished Program." in response.json()
+        assert "It is not possible to update Feedback for a Finished Program." in response.json()
 
     def test_list_feedback_issue_type(self) -> None:
         response_data = self.client.get(reverse("api:choices-feedback-issue-type")).data
@@ -1626,7 +1626,7 @@ class TestSurveyViewSet:
                 assert survey_result["unicef_id"] == str(survey.unicef_id)
                 assert survey_result["title"] == survey.title
                 assert survey_result["body"] == survey.body
-                assert survey_result["category"] == survey.category
+                assert survey_result["category"] == survey.get_category_display()
                 assert survey_result["flow_id"] == survey.flow_id
                 assert survey_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{survey.flow_id}/"
                 assert survey_result["created_by"] == f"{survey.created_by.first_name} {survey.created_by.last_name}"
@@ -1683,7 +1683,7 @@ class TestSurveyViewSet:
             assert "id" in resp_data
             assert resp_data["title"] == "Survey 1"
             assert resp_data["body"] == "Survey 1 body"
-            assert resp_data["category"] == "SMS"
+            assert resp_data["category"] == "Survey with SMS"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
