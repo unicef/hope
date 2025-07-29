@@ -1,5 +1,6 @@
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import * as Yup from 'yup';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -15,41 +16,35 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
+  FormHelperText,
   Typography,
-  Tooltip,
+  Button,
 } from '@mui/material';
+import { Grid, Box } from '@mui/system';
+import { RestService } from '@restgenerated/index';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
-import React, { ReactElement, ReactNode, useState } from 'react';
-import { Field, Formik } from 'formik';
+import { Formik, Field } from 'formik';
+import { ReactElement, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
-import styled from 'styled-components';
-import * as Yup from 'yup';
+import { useNavigate, Link } from 'react-router-dom';
 import {
+  hasPermissions,
   PERMISSIONS,
   hasPermissionInModule,
-  hasPermissions,
-} from '../../../../config/permissions';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { createApiParams } from '@utils/apiUtils';
-import { showApiErrorMessages } from '@utils/utils';
+} from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
 import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 

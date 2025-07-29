@@ -101,7 +101,7 @@ function ObjectRepresentations({
 }
 
 interface LogRowProps {
-  logEntry: LogEntry;
+  logEntry;
   actionChoicesDict: { [id: string]: string };
 }
 
@@ -113,6 +113,7 @@ export function MainActivityLogTableRow({
   const [expanded, setExpanded] = useState(false);
   const keys = Object.keys(changes);
   const { length } = keys;
+  console.log('logEntry', logEntry);
   if (length <= 1) {
     return (
       <Row role="checkbox" data-cy="log-row-single-change">
@@ -123,13 +124,13 @@ export function MainActivityLogTableRow({
           {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType.model}
+          {logEntry.contentType}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
         </Cell>
         <Cell weight={headCells[4].weight} data-cy="action-cell">
-          {actionChoicesDict[logEntry.action]}
+          {logEntry.action}
         </Cell>
         <Cell weight={headCells[5].weight} data-cy="change-key-cell">
           <Dashable>{snakeToFieldReadable(keys[0])}</Dashable>
@@ -158,13 +159,13 @@ export function MainActivityLogTableRow({
           {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType.model}
+          {logEntry.contentType}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
         </Cell>
         <Cell weight={headCells[4].weight} data-cy="action-cell">
-          {actionChoicesDict[logEntry.action]}
+          {logEntry.action}
         </Cell>
         <Cell weight={headCells[5].weight} data-cy="changes-cell">
           Multiple
