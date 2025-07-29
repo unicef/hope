@@ -168,7 +168,6 @@ class RecipientSerializer(serializers.ModelSerializer):
     admin2 = AreaSimpleSerializer()
     residence_status = serializers.CharField(source="get_residence_status_display")
 
-
     class Meta:
         model = Household
         fields = (
