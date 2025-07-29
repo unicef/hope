@@ -203,6 +203,7 @@ class FeedbackViewSet(
                 raise PermissionDenied
 
         input_data = serializer.validated_data
+        input_data["program"] = str(program.pk) if program else None
         updated_feedback = FeedbackCrudServices.update(feedback, input_data)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING,
