@@ -9,7 +9,7 @@ import {
 import { Box, Button, IconButton } from '@mui/material';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -40,6 +40,7 @@ export function OpenTargetPopulationHeaderButtons({
   const [openDelete, setOpenDelete] = useState(false);
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: rebuild, isPending: loadingRebuild } = useMutation({
     mutationFn: ({
@@ -56,7 +57,12 @@ export function OpenTargetPopulationHeaderButtons({
         programSlug,
         id,
       }),
-    onSuccess: () => showMessage(t('Payment Plan has been rebuilt.')),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been rebuilt.'));
+      queryClient.invalidateQueries({
+        queryKey: ['targetPopulation', businessArea, targetPopulation.id, programId],
+      });
+    },
     onError: (e) => showApiErrorMessages(e, showMessage),
   });
 

@@ -23,7 +23,7 @@ import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFi
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
@@ -77,6 +77,7 @@ const EditTargetPopulation = ({
     },
   };
 
+  const queryClient = useQueryClient();
   const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
     useMutation({
       mutationFn: ({
@@ -96,6 +97,12 @@ const EditTargetPopulation = ({
           programSlug: slug,
           requestBody,
         }),
+      onSuccess: () => {
+        // Invalidate and refetch the grievance ticket details
+        queryClient.invalidateQueries({
+          queryKey: ['targetPopulation', businessArea, id, programSlug],
+        });
+      },
     });
 
   const handleValidate = (values): { targetingCriteria?: string } => {
