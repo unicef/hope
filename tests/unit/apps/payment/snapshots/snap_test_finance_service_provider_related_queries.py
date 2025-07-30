@@ -14,19 +14,19 @@ snapshots['TestFSPRelatedSchema::test_query_all_financial_service_provider_xlsx_
                 {
                     'node': {
                         'columns': [
-                            'column_3',
-                            'column_4'
+                            'column_1',
+                            'column_2'
                         ],
-                        'name': 'FSP_template_2'
+                        'name': 'FSP_template_1'
                     }
                 },
                 {
                     'node': {
                         'columns': [
-                            'column_1',
-                            'column_2'
+                            'column_3',
+                            'column_4'
                         ],
-                        'name': 'FSP_template_1'
+                        'name': 'FSP_template_2'
                     }
                 }
             ]
