@@ -8,7 +8,7 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -47,7 +47,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           data?.backgroundActionStatus !==
-            PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
+            BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
       ) {
         return 3000;
       }

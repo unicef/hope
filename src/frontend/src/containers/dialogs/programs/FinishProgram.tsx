@@ -12,7 +12,7 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
-import { ProgramStatusEnum} from '@restgenerated/models/ProgramStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { showApiErrorMessages } from '@utils/utils';
 

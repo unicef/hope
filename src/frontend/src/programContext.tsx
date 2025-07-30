@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 export type ProgramContextType = Partial<ProgramDetail> | null;
 
@@ -28,7 +28,7 @@ export function ProgramProvider({
 }): ReactElement {
   const [selectedProgram, setSelectedProgram] =
     useState<ProgramContextType>(null);
-  let isActiveProgram = selectedProgram?.status === Status791Enum.ACTIVE;
+  let isActiveProgram = selectedProgram?.status === ProgramStatusEnum.ACTIVE;
   const isSocialDctType =
     selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'SOCIAL';
   const isStandardDctType =

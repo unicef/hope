@@ -12,7 +12,7 @@ import { PaymentPlanDetails } from '@components/paymentmodulepeople/PaymentPlanD
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';
 import PeoplePaymentsTable from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable/PeoplePaymentsTable';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -47,7 +47,7 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           data?.backgroundActionStatus !==
-            PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
+            BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
       ) {
         return 3000;
       }
