@@ -45,7 +45,6 @@ export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/Co
 export { CommunicationChannelEnum as CommunicationChannelEnumCamelCase } from './models/CommunicationChannelEnum';
 export { ComparisonMethod7bbEnum as ComparisonMethod7bbEnumCamelCase } from './models/ComparisonMethod7bbEnum';
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
-export type { ContentType as ContentTypeCamelCase } from './models/ContentType';
 export type { CoreFieldChoice as CoreFieldChoiceCamelCase } from './models/CoreFieldChoice';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
 export { CountriesEnum as CountriesEnumCamelCase } from './models/CountriesEnum';
