@@ -15,7 +15,7 @@ from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from smart_admin.modeladmin import SmartModelAdmin
 
-from hct_mis_api.api.models import APILogEntry, APIToken
+from hct_mis_api.api.models import APIToken
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.security import is_root
@@ -174,17 +174,3 @@ class APITokenAdmin(SmartModelAdmin):
             self._send_token_email(request, obj, TOKEN_UPDATED_EMAIL)
         else:
             self._send_token_email(request, obj, TOKEN_CREATED_EMAIL)
-
-
-@admin.register(APILogEntry)
-class APILogEntryAdmin(SmartModelAdmin):
-    list_display = ("token", "url", "method", "timestamp")
-    list_filter = (("token", AutoCompleteFilter), "method")
-    date_hierarchy = "timestamp"
-    search_fields = "url"
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return False
