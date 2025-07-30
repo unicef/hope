@@ -9,7 +9,6 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from selenium.webdriver import Keys
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
