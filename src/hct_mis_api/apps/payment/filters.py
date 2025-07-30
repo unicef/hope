@@ -147,7 +147,7 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
     )
 
     def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(financial_service_providers__allowed_business_areas__slug=value).distinct()
+        return qs.filter(financial_service_providers__allowed_business_areas__slug=value).distinct().order_by("name")
 
 
 class FinancialServiceProviderFilter(FilterSet):
