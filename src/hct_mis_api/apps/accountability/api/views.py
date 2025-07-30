@@ -129,6 +129,7 @@ class FeedbackViewSet(
             queryset = queryset.filter(program__slug=program_slug)
         return queryset
 
+    @transaction.atomic
     @extend_schema(
         responses={
             201: FeedbackDetailSerializer,
@@ -173,6 +174,7 @@ class FeedbackViewSet(
 
         return Response(FeedbackDetailSerializer(feedback).data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @transaction.atomic
     @extend_schema(
         responses={
             200: FeedbackDetailSerializer,
@@ -187,8 +189,11 @@ class FeedbackViewSet(
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
         program = feedback.program
 
+        if program_id := serializer.validated_data.get("program_id"):
+            program = Program.objects.get(id=program_id)
+
         if program and program.status == Program.FINISHED:
-            raise ValidationError("It is not possible to create Feedback for a Finished Program.")
+            raise ValidationError("It is not possible to update Feedback for a Finished Program.")
 
         # additional check for global scope - check if user has permission in the target program
         if program:
@@ -198,6 +203,7 @@ class FeedbackViewSet(
                 raise PermissionDenied
 
         input_data = serializer.validated_data
+        input_data["program"] = str(program.pk) if program else None
         updated_feedback = FeedbackCrudServices.update(feedback, input_data)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING,
@@ -209,6 +215,7 @@ class FeedbackViewSet(
         )
         return Response(FeedbackDetailSerializer(updated_feedback).data, status=status.HTTP_200_OK)
 
+    @transaction.atomic
     @extend_schema(
         request=FeedbackMessageCreateSerializer,
         responses={
@@ -271,6 +278,7 @@ class MessageViewSet(
         "sample_size": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
     }
 
+    @transaction.atomic
     @extend_schema(
         responses={
             201: MessageDetailSerializer,
@@ -281,13 +289,19 @@ class MessageViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        message = MessageCrudServices.create(request.user, business_area, serializer.validated_data)
+        program = Program.objects.get(slug=self.program_slug)
+
+        input_data = serializer.validated_data
+        input_data["program"] = str(program.pk)
+
+        message = MessageCrudServices.create(request.user, business_area, input_data)
 
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, str(self.program.id), None, message)
         serializer = MessageDetailSerializer(instance=message)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @transaction.atomic
     @extend_schema(responses=SampleSizeSerializer)
     @action(detail=False, methods=["post"], url_path="sample-size")
     def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -345,6 +359,7 @@ class SurveyViewSet(
         "id",
     )
 
+    @transaction.atomic
     @extend_schema(
         responses={
             201: SurveySerializer,
@@ -398,6 +413,7 @@ class SurveyViewSet(
         api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
         return Response(api.get_flows())
 
+    @transaction.atomic
     @extend_schema(responses=SampleSizeSerializer)
     @action(detail=False, methods=["post"], url_path="sample-size")
     def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:

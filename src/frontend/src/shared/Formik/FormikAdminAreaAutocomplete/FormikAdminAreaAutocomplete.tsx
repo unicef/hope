@@ -19,7 +19,7 @@ export function FormikAdminAreaAutocomplete({
     if (!option) {
       form.setFieldValue(field.name, null);
     } else {
-      form.setFieldValue(field.name, option.node.id);
+      form.setFieldValue(field.name, option.id);
     }
   };
   return (

@@ -24,15 +24,18 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
+import { showApiErrorMessages } from '@utils/utils';
+import React, { ReactElement, ReactNode, useState } from 'react';
 import { Field, Formik } from 'formik';
-import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -43,9 +46,8 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { createApiParams } from '@utils/apiUtils';
-import { decodeIdString, showApiErrorMessages } from '@utils/utils';
+import { Admin2SyncEffect } from './Admin2SyncEffect';
+import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
 // Constants for feedback issue types
 const FEEDBACK_ISSUE_TYPE = {
@@ -88,7 +90,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     consent: Yup.bool().nullable(),
     area: Yup.string().nullable(),
     language: Yup.string().nullable(),
-    program: Yup.string().nullable(),
+    programId: Yup.string().nullable(),
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
@@ -172,7 +174,7 @@ function CreateFeedbackPage(): ReactElement {
     area: null,
     language: null,
     consent: false,
-    program: isAllPrograms ? '' : programId,
+    programId: isAllPrograms ? '' : programId,
     verificationRequired: false,
   };
 
@@ -239,9 +241,12 @@ function CreateFeedbackPage(): ReactElement {
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
     issueType: values.issueType,
-    admin2: decodeIdString(values.admin2),
+    admin2:
+      typeof values.admin2 === 'object' && values.admin2 !== null
+        ? values.admin2.id
+        : values.admin2,
     language: values.language || '',
-    program: values.program,
+    programId: values.programId || null,
   });
 
   const mappedProgramChoices = programsData?.results?.map((element) => ({
@@ -253,6 +258,7 @@ function CreateFeedbackPage(): ReactElement {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
+        console.log('values', values); // Debugging line to check form values
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({
@@ -279,20 +285,14 @@ function CreateFeedbackPage(): ReactElement {
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
-        // Set program value based on selected household or individual
-        if (
-          values.selectedHousehold?.program?.id &&
-          values.program !== values.selectedHousehold.program.id
-        ) {
-          setFieldValue('program', values.selectedHousehold.program.id);
-        } else if (
-          values.selectedIndividual?.program?.id &&
-          values.program !== values.selectedIndividual.program.id
-        ) {
-          setFieldValue('program', values.selectedIndividual.program.id);
-        }
         return (
           <>
+            <ProgramIdSyncEffect />
+            <Admin2SyncEffect
+              selectedHousehold={values.selectedHousehold}
+              admin2={values.admin2}
+              setFieldValue={setFieldValue}
+            />
             <PageHeader
               title="New Feedback"
               breadCrumbs={
@@ -341,6 +341,12 @@ function CreateFeedbackPage(): ReactElement {
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
+                            {touched.issueType &&
+                              typeof errors.issueType === 'string' && (
+                                <FormHelperText error>
+                                  {errors.issueType}
+                                </FormHelperText>
+                              )}
                           </Grid>
                         </Grid>
                       )}
@@ -451,6 +457,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
+                              {touched.description &&
+                                typeof errors.description === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.description}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 12 }}>
                               <Field
@@ -469,10 +481,13 @@ function CreateFeedbackPage(): ReactElement {
                                 variant="outlined"
                                 component={FormikAdminAreaAutocomplete}
                                 dataCy="input-admin2"
-                                disabled={Boolean(
-                                  values.selectedHousehold?.admin2,
-                                )}
                               />
+                              {touched.admin2 &&
+                                typeof errors.admin2 === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.admin2}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -483,6 +498,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-area"
                               />
+                              {touched.area &&
+                                typeof errors.area === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.area}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -494,10 +515,16 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-languages"
                               />
+                              {touched.language &&
+                                typeof errors.language === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.language}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 3 }}>
                               <Field
-                                name="program"
+                                name="programId"
                                 label={t('Programme Name')}
                                 fullWidth
                                 variant="outlined"
@@ -505,6 +532,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikSelectField}
                                 disabled={!isAllPrograms || !isAnonymousTicket}
                               />
+                              {touched.programId &&
+                                typeof errors.programId === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.programId}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                           </Grid>
                         </BoxPadding>
