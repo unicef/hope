@@ -15,41 +15,41 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='paymentplan',
             name='total_delivered_quantity',
-            field=models.DecimalField(blank=True, db_index=True, decimal_places=2, help_text='Total Delivered Quantity [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, db_index=True, decimal_places=2, help_text='Total Delivered Quantity [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_delivered_quantity_usd',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Delivered Quantity USD [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Delivered Quantity USD [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_entitled_quantity',
-            field=models.DecimalField(db_index=True, decimal_places=2, help_text='Total Entitled Quantity [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(db_index=True, decimal_places=2, help_text='Total Entitled Quantity [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_entitled_quantity_revised',
-            field=models.DecimalField(blank=True, db_index=True, decimal_places=2, help_text='Total Entitled Quantity Revised [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, db_index=True, decimal_places=2, help_text='Total Entitled Quantity Revised [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_entitled_quantity_revised_usd',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Entitled Quantity Revised USD [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Entitled Quantity Revised USD [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_entitled_quantity_usd',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Entitled Quantity USD [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Entitled Quantity USD [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_undelivered_quantity',
-            field=models.DecimalField(blank=True, db_index=True, decimal_places=2, help_text='Total Undelivered Quantity [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, db_index=True, decimal_places=2, help_text='Total Undelivered Quantity [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
         migrations.AlterField(
             model_name='paymentplan',
             name='total_undelivered_quantity_usd',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Undelivered Quantity USD [sys]', max_digits=14, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
+            field=models.DecimalField(blank=True, decimal_places=2, help_text='Total Undelivered Quantity USD [sys]', max_digits=15, null=True, validators=[django.core.validators.MinValueValidator(Decimal('0'))]),
         ),
     ]
