@@ -36,7 +36,6 @@ export function ProgramProvider({
 
   const programHasPdu =
     selectedProgram?.pduFields && selectedProgram.pduFields.length > 0;
-
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {
     isActiveProgram = true;
