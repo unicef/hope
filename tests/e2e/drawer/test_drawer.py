@@ -166,4 +166,4 @@ class TestDrawer:
         # first have to search Finished program because of default filtering
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name)
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "programme inactive"
+        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "Programme Inactive"
