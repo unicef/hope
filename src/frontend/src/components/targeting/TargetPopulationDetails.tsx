@@ -11,9 +11,10 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 interface ProgramDetailsProps {
-  targetPopulation;
+  targetPopulation : TargetPopulationDetail;
 }
 
 function TargetPopulationDetails({

@@ -1,8 +1,6 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedTPHouseholdListList } from '@restgenerated/models/PaginatedTPHouseholdListList';
-import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
@@ -12,6 +10,8 @@ import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
+import { PendingPayment } from '@restgenerated/models/PendingPayment';
+import { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
 
 interface TargetPopulationHouseholdProps {
   id?: string;
@@ -25,16 +25,16 @@ export function TargetPopulationHouseholdTable({
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
   const initialQueryVariables = useMemo(
     () => ({
       ...variables,
-      businessAreaSlug: businessArea,
-      programSlug: programId,
-      targetPopulationId: id,
+      businessAreaSlug,
+      programSlug,
+      id,
     }),
-    [variables, businessArea, programId, id],
+    [variables, businessAreaSlug, programSlug, id],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -46,21 +46,21 @@ export function TargetPopulationHouseholdTable({
     data: householdsData,
     isLoading,
     error,
-  } = useQuery<PaginatedTPHouseholdListList>({
+  } = useQuery<PaginatedPendingPaymentList>({
     queryKey: [
       'businessAreasProgramsPaymentPlansPaymentsList',
-      businessArea,
-      programId,
+      businessAreaSlug,
+      programSlug,
       queryVariables,
       id,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
+      return RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList(
         createApiParams(
           {
-            businessAreaSlug: businessArea,
-            programSlug: programId,
-            targetPopulationId: id,
+            businessAreaSlug,
+            programSlug,
+            id,
           },
           queryVariables,
           { withPagination: true },
@@ -96,7 +96,7 @@ export function TargetPopulationHouseholdTable({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        renderRow={(row: TPHouseholdList) => (
+        renderRow={(row: PendingPayment) => (
           <TargetPopulationHouseholdTableRow
             key={row.id}
             payment={row}
