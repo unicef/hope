@@ -520,7 +520,7 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
     issue_type = serializers.IntegerField(required=False)
     admin = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Area.objects.all())
     area = serializers.CharField(required=False, allow_blank=True)
-    language = serializers.CharField(allow_blank=True)
+    language = serializers.CharField(required=False, allow_blank=True)
     consent = serializers.BooleanField()
     linked_tickets = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=GrievanceTicket.objects.all()),

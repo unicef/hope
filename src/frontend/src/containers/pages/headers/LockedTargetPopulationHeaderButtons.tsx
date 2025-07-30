@@ -4,7 +4,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { FileCopy } from '@mui/icons-material';
 import { Box, Button, Tooltip } from '@mui/material';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -105,7 +105,7 @@ export function LockedTargetPopulationHeaderButtons({
         <Box m={2}>
           <Tooltip
             title={
-              targetPopulation.program.status !== Status791Enum.ACTIVE
+              targetPopulation.program.status !== ProgramStatusEnum.ACTIVE
                 ? t('Assigned programme is not ACTIVE')
                 : ''
             }

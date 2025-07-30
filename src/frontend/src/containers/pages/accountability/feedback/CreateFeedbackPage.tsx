@@ -257,7 +257,6 @@ function CreateFeedbackPage(): ReactElement {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        console.log('values', values); // Debugging line to check form values
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({

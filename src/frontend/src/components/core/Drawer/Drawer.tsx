@@ -7,7 +7,6 @@ import Divider from '@mui/material/Divider';
 import MUIDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -16,6 +15,7 @@ import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -156,7 +156,7 @@ export const Drawer = ({
 
   let notActiveBar = null;
   const programStatus = selectedProgram?.status;
-  const isActive = programStatus === Status791Enum.ACTIVE;
+  const isActive = programStatus === ProgramStatusEnum.ACTIVE;
   const isDefined = programStatus !== undefined && programStatus !== null;
   if (!isAllPrograms && !isActive && isDefined) {
     notActiveBar = (

@@ -422,7 +422,7 @@ class TestPaymentPlanList:
         assert str(self.pp.id) == payment_plan["id"]
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
-        assert payment_plan["status"] == self.pp.get_status_display().upper()
+        assert payment_plan["status"] == self.pp.status
         assert payment_plan["total_households_count"] == self.pp.total_households_count
         assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
@@ -582,7 +582,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["id"] == str(self.pp.id)
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
-        assert payment_plan["status"] == self.pp.get_status_display().upper()
+        assert payment_plan["status"] == self.pp.status
         assert payment_plan["total_households_count"] == self.pp.total_households_count
         assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
@@ -720,7 +720,7 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(self.pp.id)
-        assert response_data[0]["status"] == "IN APPROVAL"
+        assert response_data[0]["status"] == "IN_APPROVAL"
         assert response_data[0]["name"] == self.pp.name
 
     def test_filter_by_program_cycle(self) -> None:
@@ -1406,9 +1406,12 @@ class TestTargetPopulationActions:
     )
     def test_mark_ready(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.target_population.financial_service_provider = FinancialServiceProviderFactory()
+        self.target_population.delivery_mechanism = DeliveryMechanismFactory()
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        self.target_population.save()
 
         response = self.client.get(self.url_mark_ready)
-
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json() == {"message": "Target Population ready for Payment Plan"}
@@ -1829,7 +1832,7 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "Exclude Beneficiaries Running" == resp_data["background_action_status"]
+            assert "EXCLUDE_BENEFICIARIES" == resp_data["background_action_status"]
 
     def test_exclude_beneficiaries_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1876,7 +1879,7 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "Rule Engine Running" in resp_data["background_action_status"]
+            assert "RULE_ENGINE_RUN" in resp_data["background_action_status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -2011,7 +2014,7 @@ class TestPaymentPlanActions:
         assert response.status_code == status.HTTP_200_OK
         if response.status_code == status.HTTP_200_OK:
             pp = response.json()
-            assert pp["background_action_status"] == "Importing Entitlements XLSX file"
+            assert pp["background_action_status"] == "XLSX_IMPORTING_ENTITLEMENTS"
             assert pp["imported_file_name"].startswith("pp_entitlement_valid") is True
 
     def test_pp_entitlement_import_xlsx_status_invalid(self, create_user_role_with_permissions: Any) -> None:
@@ -2043,7 +2046,7 @@ class TestPaymentPlanActions:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "IN APPROVAL"
+            assert response.json()["status"] == "IN_APPROVAL"
 
     @pytest.mark.parametrize(
         "permissions, expected_status, payment_plan_status",
@@ -2080,7 +2083,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_reject, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "LOCKED FSP"
+            assert response.json()["status"] == "LOCKED_FSP"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2102,7 +2105,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_approve, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "IN AUTHORIZATION"
+            assert response.json()["status"] == "IN_AUTHORIZATION"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2124,7 +2127,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_authorize, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "IN REVIEW"
+            assert response.json()["status"] == "IN_REVIEW"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
