@@ -102,12 +102,10 @@ function ObjectRepresentations({
 
 interface LogRowProps {
   logEntry;
-  actionChoicesDict: { [id: string]: string };
 }
 
 export function MainActivityLogTableRow({
   logEntry,
-  actionChoicesDict,
 }: LogRowProps): ReactElement {
   const changes = logEntry.changes || {};
   const [expanded, setExpanded] = useState(false);
@@ -124,7 +122,9 @@ export function MainActivityLogTableRow({
           {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType}
+          {logEntry.contentType === 'Program'
+            ? 'Programme'
+            : logEntry.contentType}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
