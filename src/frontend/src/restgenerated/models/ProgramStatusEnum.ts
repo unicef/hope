@@ -7,7 +7,7 @@
  * * `DRAFT` - Draft
  * * `FINISHED` - Finished
  */
-export enum Status791Enum {
+export enum ProgramStatusEnum {
     ACTIVE = 'ACTIVE',
     DRAFT = 'DRAFT',
     FINISHED = 'FINISHED',

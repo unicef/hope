@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaymentVerificationPlanStatusEnum } from './PaymentVerificationPlanStatusEnum';
 export type PaymentVerificationSummary = {
     readonly id: string;
-    status: PaymentVerificationPlanStatusEnum;
+    status: string;
     activationDate?: string | null;
     completionDate?: string | null;
     readonly numberOfVerificationPlans: number;

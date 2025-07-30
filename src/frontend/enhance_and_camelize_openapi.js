@@ -339,7 +339,7 @@ async function main() {
     let openApiSchema = yaml.load(fileContent);
 
     console.log('Enhancing OpenAPI specification with enums...');
-    openApiSchema = enhanceOpenApiWithEnums(openApiSchema, choices);
+    // openApiSchema = enhanceOpenApiWithEnums(openApiSchema, choices);
 
     // Debug: Check if enums were added
     console.log(

@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Status791Enum } from './Status791Enum';
+import type { ProgramStatusEnum } from './ProgramStatusEnum';
 export type ProgramSmall = {
     readonly id: string;
     /**
@@ -24,7 +24,7 @@ export type ProgramSmall = {
      * * `DRAFT` - Draft
      * * `FINISHED` - Finished
      */
-    status: Status791Enum;
+    status: ProgramStatusEnum;
     readonly screenBeneficiary: boolean;
 };
 

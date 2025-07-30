@@ -4,15 +4,15 @@
 /* eslint-disable */
 import type { AreaList } from './AreaList';
 import type { CategoryEnum } from './CategoryEnum';
+import type { GrievanceTicketStatusEnum } from './GrievanceTicketStatusEnum';
 import type { HouseholdSimple } from './HouseholdSimple';
 import type { PriorityEnum } from './PriorityEnum';
-import type { StatusEbbEnum } from './StatusEbbEnum';
 import type { UrgencyEnum } from './UrgencyEnum';
 import type { User } from './User';
 export type GrievanceTicketList = {
     readonly id: string;
     unicefId?: string | null;
-    status?: StatusEbbEnum;
+    status?: GrievanceTicketStatusEnum;
     readonly programs: Record<string, any>;
     household: HouseholdSimple | null;
     admin?: string;

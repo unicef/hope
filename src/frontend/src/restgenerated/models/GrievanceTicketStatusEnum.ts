@@ -10,7 +10,7 @@
  * * `3` - In Progress
  * * `4` - On Hold
  */
-export enum StatusEbbEnum {
+export enum GrievanceTicketStatusEnum {
     '_1' = 1,
     '_2' = 2,
     '_6' = 6,

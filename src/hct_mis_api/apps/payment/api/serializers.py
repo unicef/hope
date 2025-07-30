@@ -176,7 +176,7 @@ class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status_display = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
     sampling = serializers.CharField(source="get_sampling_display")
     has_xlsx_file = serializers.SerializerMethodField()
@@ -190,6 +190,7 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
             "id",
             "unicef_id",
             "status",
+            "status_display",
             "verification_channel",
             "sampling",
             "sex_filter",
@@ -580,7 +581,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
-    background_action_status = serializers.CharField(source="get_background_action_status_display")
+    background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
@@ -623,6 +624,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
             "version",
             "background_action_status",
+            "background_action_status_display",
             "start_date",
             "end_date",
             "program",
