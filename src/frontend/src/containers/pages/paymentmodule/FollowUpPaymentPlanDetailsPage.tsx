@@ -3,7 +3,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
-import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
@@ -92,7 +91,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

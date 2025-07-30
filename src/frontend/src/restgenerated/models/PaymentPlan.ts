@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
+import type { Status9d7Enum } from './Status9d7Enum';
 export type PaymentPlan = {
     readonly id: string;
     unicefId?: string | null;
@@ -12,7 +12,29 @@ export type PaymentPlan = {
      * Name
      */
     name?: string | null;
-    status: PaymentPlanStatusEnum;
+    /**
+     * Status [sys]
+     *
+     * * `TP_OPEN` - Open
+     * * `TP_LOCKED` - Locked
+     * * `PROCESSING` - Processing
+     * * `STEFICON_WAIT` - Steficon Wait
+     * * `STEFICON_RUN` - Steficon Run
+     * * `STEFICON_COMPLETED` - Steficon Completed
+     * * `STEFICON_ERROR` - Steficon Error
+     * * `DRAFT` - Draft
+     * * `PREPARING` - Preparing
+     * * `OPEN` - Open
+     * * `LOCKED` - Locked
+     * * `LOCKED_FSP` - Locked FSP
+     * * `IN_APPROVAL` - In Approval
+     * * `IN_AUTHORIZATION` - In Authorization
+     * * `IN_REVIEW` - In Review
+     * * `ACCEPTED` - Accepted
+     * * `FINISHED` - Finished
+     */
+    status?: Status9d7Enum;
+    statusDisplay: string;
     /**
      * Total Households Count [sys]
      */

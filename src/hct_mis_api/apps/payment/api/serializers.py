@@ -306,7 +306,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source="get_status_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
@@ -321,6 +321,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "unicef_id",
             "name",
             "status",
+            "status_display",
             "total_households_count",
             "currency",
             "total_entitled_quantity",
@@ -344,13 +345,8 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
-    @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
-        return obj.get_status_display().upper()
-
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
 
@@ -380,10 +376,6 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_created_by(obj: PaymentPlan) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
-
-    @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
-        return obj.get_status_display().upper()
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
@@ -948,10 +940,6 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
     @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
-        return obj.status
-
-    @staticmethod
     def get_status_display(obj: PaymentPlan) -> str:
         return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
 
@@ -977,7 +965,6 @@ class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     household_id = serializers.UUIDField(read_only=True)
     collector_id = serializers.UUIDField(read_only=True)
-    status = serializers.CharField(source="get_status_display")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
     household_status = serializers.SerializerMethodField()
@@ -996,6 +983,11 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
+
+    status_display = serializers.CharField(
+        source="get_status_display",  # <- metoda modelu
+        read_only=True,
+    )
 
     class Meta:
         model = Payment
@@ -1018,6 +1010,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "delivery_date",
             "delivery_type",
             "status",
+            "status_display",
             "currency",
             "fsp_auth_code",
             "hoh_full_name",

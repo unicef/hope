@@ -179,14 +179,14 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'PENDING':
-    case 'SENT_TO_PAYMENT_GATEWAY':
-    case 'SENT_TO_FSP':
+    case 'Pending':
+    case 'Sent to Payment Gateway':
+    case 'Sent to FSP':
       return theme.hctPalette.orange;
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case 'PARTIALLY_DISTRIBUTED':
+    case 'Partially Distributed':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -195,22 +195,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case 'PENDING':
+    case 'Pending':
       return 'PENDING';
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return 'DELIVERED FULLY';
-    case 'PARTIALLY_DISTRIBUTED':
+    case 'Partially Distributed':
       return 'DELIVERED PARTIALLY';
-    case 'NOT_DISTRIBUTED':
+    case 'Not Distributed':
       return 'NOT DELIVERED';
-    case 'FORCE_FAILED':
+    case 'Force failed':
       return 'FORCE FAILED';
-    case 'MANUALLY_CANCELLED':
+    case 'Manually Cancelled':
       return 'MANUALLY CANCELLED';
-    case 'SENT_TO_PAYMENT_GATEWAY':
+    case 'Sent to Payment Gateway':
       return 'SENT TO PAYMENT GATEWAY';
-    case 'SENT_TO_FSP':
+    case 'Sent to FSP':
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';

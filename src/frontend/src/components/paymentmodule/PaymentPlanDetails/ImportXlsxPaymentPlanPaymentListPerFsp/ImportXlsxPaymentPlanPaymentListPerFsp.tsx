@@ -68,19 +68,19 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       businessAreaSlug,
       id,
       programSlug,
-      requestBody,
+      formData,
     }: {
       businessAreaSlug: string;
       id: string;
       programSlug: string;
-      requestBody: PaymentPlanImportFile;
+      formData: PaymentPlanImportFile;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
         {
           businessAreaSlug,
           id,
           programSlug,
-          requestBody,
+          formData,
         },
       ),
     onSuccess: () => {
@@ -98,7 +98,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
         programSlug: programId,
-        requestBody: {
+        formData: {
           file: fileToImport,
         },
       });

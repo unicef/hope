@@ -18,7 +18,7 @@ import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +38,7 @@ export function MarkAsReleasedPaymentPlan({
   const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] =
     useState(false);
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const { mutateAsync: markAsReleased, isPending: loadingMarkAsReleased } =
     useMutation({
       mutationFn: ({
@@ -60,6 +61,9 @@ export function MarkAsReleasedPaymentPlan({
       onSuccess: () => {
         showMessage(t('Payment Plan has been marked as released.'));
         setMarkAsReleasedDialogOpen(false);
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
       },
     });
 

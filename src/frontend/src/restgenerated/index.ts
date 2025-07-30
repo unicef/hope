@@ -302,7 +302,9 @@ export type { SensitiveGrievanceTicketExtras as SensitiveGrievanceTicketExtrasCa
 export { SexEnum as SexEnumCamelCase } from './models/SexEnum';
 export type { SplitPaymentPlan as SplitPaymentPlanCamelCase } from './models/SplitPaymentPlan';
 export { SplitTypeEnum as SplitTypeEnumCamelCase } from './models/SplitTypeEnum';
+export { Status220Enum as Status220EnumCamelCase } from './models/Status220Enum';
 export { Status791Enum as Status791EnumCamelCase } from './models/Status791Enum';
+export { Status9d7Enum as Status9d7EnumCamelCase } from './models/Status9d7Enum';
 export { StatusEbbEnum as StatusEbbEnumCamelCase } from './models/StatusEbbEnum';
 export { SubtypeEnum as SubtypeEnumCamelCase } from './models/SubtypeEnum';
 export type { Survey as SurveyCamelCase } from './models/Survey';

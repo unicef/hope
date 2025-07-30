@@ -1,7 +1,6 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsHeader } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
@@ -102,7 +101,6 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
-          {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <PeoplePaymentPlanDetailsResults paymentPlan={paymentPlan} />
