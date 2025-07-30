@@ -58,9 +58,12 @@ function ObjectRepresentations({
 }: ObjectRepresentationsProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const id = logEntry.objectId;
-  const { model } = logEntry.contentType;
+  const { programSlug } = logEntry;
+  // Normalize model key: lowercase and remove spaces
+  const model = (logEntry.contentType || '').toLowerCase().replace(/\s+/g, '');
+
   const modelToUrlDict = {
-    program: `/${baseUrl}/details/${btoa('ProgramNode:' + id)}`,
+    programme: `/${baseUrl}/details/${programSlug}`,
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
@@ -111,7 +114,6 @@ export function MainActivityLogTableRow({
   const [expanded, setExpanded] = useState(false);
   const keys = Object.keys(changes);
   const { length } = keys;
-  console.log('logEntry', logEntry);
   if (length <= 1) {
     return (
       <Row role="checkbox" data-cy="log-row-single-change">
@@ -122,9 +124,7 @@ export function MainActivityLogTableRow({
           {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType === 'Program'
-            ? 'Programme'
-            : logEntry.contentType}
+          {logEntry.contentType}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
