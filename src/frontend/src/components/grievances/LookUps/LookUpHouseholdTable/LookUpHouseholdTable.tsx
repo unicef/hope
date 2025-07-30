@@ -119,7 +119,7 @@ export function LookUpHouseholdTable({
           { withPagination: true },
         ),
       ),
-    enabled: !!businessArea && !!programId,
+    enabled: !!businessArea && !isAllPrograms,
   });
 
   //selectedProgram
@@ -134,7 +134,7 @@ export function LookUpHouseholdTable({
         businessAreaSlug: businessArea,
         programSlug: programId,
       }),
-    enabled: !!businessArea && !!programId,
+    enabled: !!businessArea && !isAllPrograms,
   });
 
   //allPrograms
@@ -155,7 +155,7 @@ export function LookUpHouseholdTable({
         ),
       );
     },
-    enabled: !!businessArea && isAllPrograms,
+    enabled: isAllPrograms,
   });
   //allPrograms
 
@@ -172,7 +172,7 @@ export function LookUpHouseholdTable({
         createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
       );
     },
-    enabled: !!businessArea && isAllPrograms,
+    enabled: isAllPrograms,
   });
 
   const [selected, setSelected] = useState<string[]>(

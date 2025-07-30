@@ -1,3 +1,5 @@
+import React, { ReactElement, useState } from 'react';
+import { Formik, useFormikContext } from 'formik';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
@@ -44,8 +46,6 @@ import {
   showApiErrorMessages,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -72,6 +72,26 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 function EmptyComponent(): ReactElement {
+  return null;
+}
+function FormikSelectedEntitiesSync({
+  fetchedHousehold,
+  fetchedIndividual,
+}: {
+  fetchedHousehold: any;
+  fetchedIndividual: any;
+}) {
+  const { values, setFieldValue } = useFormikContext<any>();
+  React.useEffect(() => {
+    if (fetchedHousehold && values.selectedHousehold !== fetchedHousehold) {
+      setFieldValue('selectedHousehold', fetchedHousehold);
+    }
+  }, [fetchedHousehold, values.selectedHousehold, setFieldValue]);
+  React.useEffect(() => {
+    if (fetchedIndividual && values.selectedIndividual !== fetchedIndividual) {
+      setFieldValue('selectedIndividual', fetchedIndividual);
+    }
+  }, [fetchedIndividual, values.selectedIndividual, setFieldValue]);
   return null;
 }
 
@@ -101,7 +121,47 @@ const CreateGrievancePage = (): ReactElement => {
 
   const linkedTicketId = location.state?.linkedTicketId;
   const selectedHousehold = location.state?.selectedHousehold;
+
+  // Fetch full household object if selectedHousehold is an ID (string/number)
+  const shouldFetchHousehold =
+    selectedHousehold &&
+    (typeof selectedHousehold === 'string' ||
+      typeof selectedHousehold === 'number');
+
+  const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
+    useQuery({
+      queryKey: ['household', businessArea, programId, selectedHousehold],
+      queryFn: shouldFetchHousehold
+        ? () =>
+            RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+              businessAreaSlug: businessArea,
+              programSlug: programId,
+              id: String(selectedHousehold),
+            })
+        : undefined,
+      enabled: shouldFetchHousehold,
+    });
   const selectedIndividual = location.state?.selectedIndividual;
+
+  // Fetch full individual object if selectedIndividual is an ID (string/number)
+  const shouldFetchIndividual =
+    selectedIndividual &&
+    (typeof selectedIndividual === 'string' ||
+      typeof selectedIndividual === 'number');
+
+  const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
+    useQuery({
+      queryKey: ['individual', businessArea, programId, selectedIndividual],
+      queryFn: shouldFetchIndividual
+        ? () =>
+            RestService.restBusinessAreasProgramsIndividualsRetrieve({
+              businessAreaSlug: businessArea,
+              programSlug: programId,
+              id: String(selectedIndividual),
+            })
+        : undefined,
+      enabled: shouldFetchIndividual,
+    });
   const category = location.state?.category;
   const linkedFeedbackId = location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
@@ -252,7 +312,9 @@ const CreateGrievancePage = (): ReactElement => {
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
     programsDataLoading ||
-    allEditPeopleFieldsLoading
+    allEditPeopleFieldsLoading ||
+    fetchedIndividualLoading ||
+    fetchedHouseholdLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -403,6 +465,18 @@ const CreateGrievancePage = (): ReactElement => {
 
         return (
           <>
+            <FormikSelectedEntitiesSync
+              fetchedHousehold={
+                shouldFetchHousehold
+                  ? fetchedHousehold
+                  : values.selectedHousehold
+              }
+              fetchedIndividual={
+                shouldFetchIndividual
+                  ? fetchedIndividual
+                  : values.selectedIndividual
+              }
+            />
             <AutoSubmitFormOnEnter />
             <PageHeader
               title="New Ticket"
