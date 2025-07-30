@@ -260,62 +260,6 @@ async function fetchChoices() {
   return choices;
 }
 
-function enhanceOpenApiWithEnums(openApiSchema, choices) {
-  // Add enum schemas to components
-  if (!openApiSchema.components) {
-    openApiSchema.components = {};
-  }
-  if (!openApiSchema.components.schemas) {
-    openApiSchema.components.schemas = {};
-  }
-
-  // Add enum definitions
-  for (const [enumName, enumData] of Object.entries(choices)) {
-    const description = Object.entries(enumData.descriptions)
-      .map(([value, name]) => `* \`${value}\` - ${name}`)
-      .join('\n');
-
-    openApiSchema.components.schemas[enumName] = {
-      enum: enumData.values,
-      type: 'string',
-      description: description,
-    };
-  }
-
-  // Update field references to use enums (before camelizing)
-  for (const [enumName, enumData] of Object.entries(choices)) {
-    // Find field mappings for this enum
-    const fieldMappings = findFieldMappings(
-      openApiSchema,
-      enumName,
-      enumData.endpoint,
-    );
-
-    console.log(
-      `Found ${fieldMappings.length} field mappings for ${enumName}:`,
-      fieldMappings,
-    );
-
-    for (const fieldPath of fieldMappings) {
-      const [schemaName, fieldName] = fieldPath.split('.');
-
-      if (
-        openApiSchema.components.schemas[schemaName] &&
-        openApiSchema.components.schemas[schemaName].properties &&
-        openApiSchema.components.schemas[schemaName].properties[fieldName]
-      ) {
-        // Replace string type with enum reference
-        openApiSchema.components.schemas[schemaName].properties[fieldName] = {
-          $ref: `#/components/schemas/${enumName}`,
-        };
-        console.log(`✓ Updated ${fieldPath} to use ${enumName}`);
-      }
-    }
-  }
-
-  return openApiSchema;
-}
-
 function camelizeProperties(properties) {
   var newProperties = {};
   for (var key in properties) {
@@ -337,9 +281,6 @@ async function main() {
     console.log('Reading OpenAPI specification...');
     const fileContent = fs.readFileSync('data/openapi.yml', 'utf8');
     let openApiSchema = yaml.load(fileContent);
-
-    console.log('Enhancing OpenAPI specification with enums...');
-    openApiSchema = enhanceOpenApiWithEnums(openApiSchema, choices);
 
     // Debug: Check if enums were added
     console.log(
