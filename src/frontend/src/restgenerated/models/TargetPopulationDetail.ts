@@ -7,7 +7,7 @@ import type { CurrencyEnum } from './CurrencyEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
@@ -19,7 +19,28 @@ export type TargetPopulationDetail = {
      * Name
      */
     name?: string | null;
-    readonly status: string;
+    /**
+     * Status [sys]
+     *
+     * * `TP_OPEN` - Open
+     * * `TP_LOCKED` - Locked
+     * * `PROCESSING` - Processing
+     * * `STEFICON_WAIT` - Steficon Wait
+     * * `STEFICON_RUN` - Steficon Run
+     * * `STEFICON_COMPLETED` - Steficon Completed
+     * * `STEFICON_ERROR` - Steficon Error
+     * * `DRAFT` - Draft
+     * * `PREPARING` - Preparing
+     * * `OPEN` - Open
+     * * `LOCKED` - Locked
+     * * `LOCKED_FSP` - Locked FSP
+     * * `IN_APPROVAL` - In Approval
+     * * `IN_AUTHORIZATION` - In Authorization
+     * * `IN_REVIEW` - In Review
+     * * `ACCEPTED` - Accepted
+     * * `FINISHED` - Finished
+     */
+    status?: PaymentPlanStatusEnum;
     /**
      * Total Households Count [sys]
      */
@@ -228,7 +249,7 @@ export type TargetPopulationDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
+    backgroundActionStatus: string;
     /**
      * Payment Plan start date
      */

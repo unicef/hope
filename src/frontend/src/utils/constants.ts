@@ -1,7 +1,7 @@
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
-import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 export const TARGETING_STATES = {
   NONE: 'None',
@@ -18,9 +18,9 @@ export const TARGETING_STATES = {
 };
 
 export const PROGRAM_STATES = {
-  [ProgramStatus.ACTIVE]: 'Active',
-  [ProgramStatus.DRAFT]: 'Draft',
-  [ProgramStatus.FINISHED]: 'Finished',
+  [ProgramStatusEnum.ACTIVE]: 'Active',
+  [ProgramStatusEnum.DRAFT]: 'Draft',
+  [ProgramStatusEnum.FINISHED]: 'Finished',
 };
 
 export const PAYMENT_PLAN_STATES = {
@@ -36,18 +36,18 @@ export const PAYMENT_PLAN_STATES = {
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+  [BackgroundActionStatusEnum.RULE_ENGINE_RUN]:
     'Entitlement Formula Run',
-  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
+  [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
     'Entitlement Formula Error',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+  [BackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
+  [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
     'XLSX Export Error',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
+  [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
     'XLSX Importing Entitlements',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
+  [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+  [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
     'XLSX Import Error',
 };
 

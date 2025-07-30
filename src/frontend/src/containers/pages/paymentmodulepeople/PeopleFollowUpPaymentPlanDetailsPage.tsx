@@ -3,7 +3,6 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
-import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
@@ -12,7 +11,7 @@ import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/
 import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
@@ -46,7 +45,7 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           data?.backgroundActionStatus !==
-            PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
+            BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
       ) {
         return 3000;
       }
@@ -71,7 +70,6 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
     status !== PaymentPlanStatusEnum.OPEN &&
     status !== PaymentPlanStatusEnum.ACCEPTED;
 
-  const shouldDisplayFsp = status !== PaymentPlanStatusEnum.OPEN;
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
@@ -88,7 +86,6 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

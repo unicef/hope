@@ -21,7 +21,7 @@ export function LockedFspPaymentPlanHeaderButtons({
   canSendForApproval,
 }: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
+  const { showMessage, showRestApiError } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
@@ -41,7 +41,7 @@ export function LockedFspPaymentPlanHeaderButtons({
       });
     },
     onError: (error) => {
-      showMessage(error.message || t('An error occurred while unlocking FSP.'));
+      showRestApiError(error, 'An error occurred while unlocking FSP.');
     },
   });
 
