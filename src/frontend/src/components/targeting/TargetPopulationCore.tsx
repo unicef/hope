@@ -62,7 +62,7 @@ export const TargetPopulationCore = ({
   );
 
   const recordInfo =
-    targetPopulation.backgroundActionStatus === 'OK' ? (
+    targetPopulation.buildStatus === 'OK' ? (
       recordsTable
     ) : (
       <PaperContainer>

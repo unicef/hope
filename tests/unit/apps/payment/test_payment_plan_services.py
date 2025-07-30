@@ -1192,3 +1192,42 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=payment_plan).acceptance_process()
 
         self.assertIn(f"Approval Process object not found for PaymentPlan {payment_plan.id}", str(error.exception))
+
+    def test_update_rules_tp_open(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.TP_OPEN,
+        )
+        input_data = {
+            "rules": [
+                {
+                    "individual_ids": "",
+                    "household_ids": "",
+                    "households_filters_blocks": [],
+                    "individuals_filters_blocks": [
+                        {
+                            "individual_block_filters": [
+                                {
+                                    "comparison_method": "RANGE",
+                                    "arguments": [10, 20],
+                                    "field_name": "age",
+                                    "flex_field_classification": "NOT_FLEX_FIELD",
+                                }
+                            ]
+                        }
+                    ],
+                    "collectors_filters_blocks": [],
+                }
+            ],
+            "flag_exclude_if_on_sanction_list": True,
+            "flag_exclude_if_active_adjudication_ticket": False,
+        }
+        # Should not raise ValidationError
+        PaymentPlanService(payment_plan).update(input_data)
+        payment_plan.refresh_from_db()
+        # Check that rules were updated
+        self.assertEqual(payment_plan.rules.count(), 1)
+        # Check flags
+        self.assertTrue(payment_plan.flag_exclude_if_on_sanction_list)
+        self.assertFalse(payment_plan.flag_exclude_if_active_adjudication_ticket)

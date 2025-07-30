@@ -7,7 +7,7 @@ import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -19,6 +19,7 @@ const IconContainer = styled.span`
   button {
     color: #949494;
     min-width: 40px;
+
     svg {
       width: 20px;
       height: 20px;
@@ -46,6 +47,7 @@ export function LockedTargetPopulationHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: unlockAction, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
@@ -55,6 +57,14 @@ export function LockedTargetPopulationHeaderButtons({
         id: targetPopulation.id,
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'targetPopulation',
+          businessArea,
+          targetPopulation.id,
+          programId,
+        ],
+      });
       showMessage(t('Target Population Unlocked'));
     },
     onError: (error) => {
