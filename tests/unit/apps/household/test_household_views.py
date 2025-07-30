@@ -378,10 +378,26 @@ class TestHouseholdList:
         survey = SurveyFactory(created_by=self.user)
         survey.recipients.set([self.household1])
 
-        response = self.api_client.get(list_url, {"survey": str(survey.pk)})
+        response = self.api_client.get(list_url, {"survey_id": str(survey.pk)})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
-        assert response.json()["results"][0]["id"] == str(self.household1.pk)
+        recipient_1_results = response.json()["results"][0]
+        assert recipient_1_results == {
+            "id": str(self.household1.pk),
+            "unicef_id": self.household1.unicef_id,
+            "size": self.household1.size,
+            "head_of_household": {
+                "id": str(self.household1.head_of_household.pk),
+                "full_name": self.household1.head_of_household.full_name,
+            },
+            "admin2": {
+                "id": str(self.household1.admin2.pk),
+                "name": self.household1.admin2.name,
+            },
+            "status": self.household1.status,
+            "residence_status": self.household1.get_residence_status_display(),
+            "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        }
 
     def test_household_recipients(self, create_user_role_with_permissions: Any) -> None:
         list_url = reverse(
