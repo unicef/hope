@@ -13,6 +13,7 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -49,6 +50,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from test_utils.factories.household import create_household_and_individuals
 
 pytestmark = pytest.mark.django_db()
 
@@ -1027,7 +1029,7 @@ class TestTargetPopulationDetail:
         assert tp["name"] == self.tp.name
         assert tp["program_cycle"]["title"] == self.cycle.title
         assert tp["program"]["name"] == self.program_active.name
-        assert tp["status"] == self.tp.get_status_display().upper()
+        assert tp["status"] == self.tp.status
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
         assert tp["created_by"] == f"{self.user.first_name} {self.user.last_name}"
@@ -1553,6 +1555,85 @@ class TestTargetPopulationActions:
             assert response.status_code == status.HTTP_204_NO_CONTENT
             assert PaymentPlan.objects.filter(name="TP_to_delete").count() == 0
             assert PaymentPlan.all_objects.filter(name="TP_to_delete").count() == 1  # is_removed = True
+
+
+class TestPendingPaymentsAction:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.pending_payments_url_name = "api:payments:target-populations-pending-payments"
+
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+
+        self.cycle = self.program.cycles.first()
+        self.api_client = api_client(self.user)
+
+        self.household1, (self.individual1_1, self.individual1_2) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+            ],
+        )
+
+        self.target_population = PaymentPlanFactory(
+            name="TP_OPEN",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        Payment.objects.create(
+            household=self.household1,
+            parent=self.target_population,
+            business_area=self.afghanistan,
+            collector_id=self.individual1_1.id,
+            status_date="2022-02-24",
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_VIEW_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pending_payments(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.pending_payments_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.target_population.id),
+                },
+            )
+        )
+
+        assert response.status_code == expected_status
 
 
 class TestPaymentPlanActions:

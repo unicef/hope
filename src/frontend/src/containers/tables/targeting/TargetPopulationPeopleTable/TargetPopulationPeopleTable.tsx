@@ -1,8 +1,6 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedTPHouseholdListList } from '@restgenerated/models/PaginatedTPHouseholdListList';
-import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -10,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
 import { createApiParams } from '@utils/apiUtils';
+import { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
+import { PendingPayment } from '@restgenerated/models/PendingPayment';
 
 interface TargetPopulationPeopleTableProps {
   id?: string;
@@ -42,7 +42,7 @@ export function TargetPopulationPeopleTable({
     data: householdsData,
     isLoading,
     error,
-  } = useQuery<PaginatedTPHouseholdListList>({
+  } = useQuery<PaginatedPendingPaymentList>({
     queryKey: [
       'businessAreasProgramsPaymentPlansPaymentsList',
       businessArea,
@@ -51,12 +51,12 @@ export function TargetPopulationPeopleTable({
       id,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
+      return RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList(
         createApiParams(
           {
             businessAreaSlug: businessArea,
             programSlug: programId,
-            targetPopulationId: id,
+            id,
           },
           queryVariables,
           { withPagination: true },
@@ -76,7 +76,7 @@ export function TargetPopulationPeopleTable({
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         data={householdsData}
-        renderRow={(row: TPHouseholdList) => (
+        renderRow={(row: PendingPayment) => (
           <TargetPopulationPeopleTableRow
             key={row.id}
             payment={row}

@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF39` - Lake Bryan
- * * `UA25` - North Charlesville
- * * `UA81` - North Michellebury
- * * `AF49` - Petersonview
- * * `UA96` - Port Georgebury
- * * `HR87` - Port Kathleen
- * * `AF80` - Shannonberg
- * * `HR55` - South Sarah
- * * `HR78` - Wesleyfurt
+ * * `AF34` - Campbellport
+ * * `AF87` - Gonzalesside
+ * * `UA97` - Lake Brandon
+ * * `AF47` - Lake Ronnie
+ * * `HR48` - Lake William
+ * * `UA70` - Port Dawnhaven
+ * * `UA43` - Port Jessicahaven
+ * * `HR17` - Wallsside
+ * * `HR88` - West Kristopherchester
  */
 export enum Admin1Enum {
-    AF39 = 'AF39',
-    UA25 = 'UA25',
-    UA81 = 'UA81',
-    AF49 = 'AF49',
-    UA96 = 'UA96',
-    HR87 = 'HR87',
-    AF80 = 'AF80',
-    HR55 = 'HR55',
-    HR78 = 'HR78',
+    AF34 = 'AF34',
+    AF87 = 'AF87',
+    UA97 = 'UA97',
+    AF47 = 'AF47',
+    HR48 = 'HR48',
+    UA70 = 'UA70',
+    UA43 = 'UA43',
+    HR17 = 'HR17',
+    HR88 = 'HR88',
 }

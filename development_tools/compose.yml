@@ -17,7 +17,6 @@ services:
       - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
-      - EXTRA_CONF=max_connections=1000
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASS=postgres

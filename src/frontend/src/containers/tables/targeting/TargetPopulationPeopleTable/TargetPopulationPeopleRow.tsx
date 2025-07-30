@@ -4,10 +4,10 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
-import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
+import { PendingPayment } from '@restgenerated/models/PendingPayment';
 
 interface TargetPopulationPeopleTableRowProps {
-  payment: TPHouseholdList;
+  payment: PendingPayment;
   canViewDetails?: boolean;
 }
 
