@@ -24,7 +24,11 @@ function HouseholdQuestionnaire({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const householdId = values.selectedHousehold?.id;
+  const householdId =
+    typeof values.selectedHousehold === 'object' &&
+    values.selectedHousehold !== null
+      ? values.selectedHousehold.id
+      : values.selectedHousehold;
 
   const {
     data: household,

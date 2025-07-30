@@ -13,7 +13,7 @@
  * * `6` - Referral
  * * `3` - Sensitive Grievance
  */
-export enum CategoryEnum {
+export enum CategoryB41Enum {
     '_8' = 8,
     '_1' = 1,
     '_9' = 9,

@@ -8,7 +8,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
@@ -21,13 +21,13 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
 import { Survey } from '@restgenerated/models/Survey';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
-import RecipientsTable from '@containers/tables/Communication/RecipientsTable/RecipientsTable';
+import RecipientsTable from '@containers/tables/Surveys/RecipientsTable/RecipientsTable';
 
 function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
   const {
@@ -40,30 +40,21 @@ function SurveyDetailsPage(): ReactElement {
     {},
   );
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['surveyCategoryChoices', baseUrl, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
-        businessAreaSlug: baseUrl,
-        programSlug: programId,
-      }),
-  });
-
   const exportSurveyMutation = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsSurveysExportSampleRetrieve({
-        businessAreaSlug: baseUrl,
+        businessAreaSlug: businessArea,
         programSlug: programId,
         id: id,
       }),
   });
   const permissions = usePermissions();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data || permissions === null) return null;
 
   const survey = data; // REST API returns survey directly, not wrapped in { survey }
 
@@ -143,7 +134,7 @@ function SurveyDetailsPage(): ReactElement {
         {renderActions()}
       </PageHeader>
       <Box display="flex" flexDirection="column">
-        <SurveyDetails survey={survey} choicesData={choicesData} />
+        <SurveyDetails survey={survey} />
         <RecipientsTable
           canViewDetails={hasPermissions(
             PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
