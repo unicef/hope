@@ -3,10 +3,10 @@ import yaml from 'js-yaml';
 
 // Mapping of choice endpoints to their corresponding enum names and field paths
 const CHOICE_MAPPINGS = {
-  'payment-plan-status': {
-    enumName: 'PaymentPlanStatusEnum',
-    fields: ['PaymentPlan.status', 'FollowUpPaymentPlan.status'],
-  },
+  // 'payment-plan-status': {
+  //   enumName: 'PaymentPlanStatusEnum',
+  //   fields: ['PaymentPlan.status', 'FollowUpPaymentPlan.status'],
+  // },
   'payment-plan-background-action-status': {
     enumName: 'PaymentPlanBackgroundActionStatusEnum',
     fields: ['PaymentPlanBulkAction.status'],

@@ -14,7 +14,7 @@
  * * `Sent to FSP` - Sent to FSP
  * * `Manually Cancelled` - Manually Cancelled
  */
-export enum Status220Enum {
+export enum PaymentStatusEnum {
     DISTRIBUTION_SUCCESSFUL = 'Distribution Successful',
     NOT_DISTRIBUTED = 'Not Distributed',
     TRANSACTION_SUCCESSFUL = 'Transaction Successful',

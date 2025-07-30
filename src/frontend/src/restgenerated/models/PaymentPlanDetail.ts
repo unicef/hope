@@ -3,18 +3,18 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApprovalProcess } from './ApprovalProcess';
+import type { BackgroundActionStatusEnum } from './BackgroundActionStatusEnum';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { DeliveryMechanismPerPaymentPlan } from './DeliveryMechanismPerPaymentPlan';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
-import type { Status9d7Enum } from './Status9d7Enum';
 export type PaymentPlanDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -43,7 +43,7 @@ export type PaymentPlanDetail = {
      * * `ACCEPTED` - Accepted
      * * `FINISHED` - Finished
      */
-    status?: Status9d7Enum;
+    status?: PaymentPlanStatusEnum;
     /**
      * Total Households Count [sys]
      */
@@ -256,7 +256,23 @@ export type PaymentPlanDetail = {
      * record revision number
      */
     version?: number;
-    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
+    /**
+     * Background Action Status for celery task [sys]
+     *
+     * * `RULE_ENGINE_RUN` - Rule Engine Running
+     * * `RULE_ENGINE_ERROR` - Rule Engine Errored
+     * * `XLSX_EXPORTING` - Exporting XLSX file
+     * * `XLSX_EXPORT_ERROR` - Export XLSX file Error
+     * * `XLSX_IMPORT_ERROR` - Import XLSX file Error
+     * * `XLSX_IMPORTING_ENTITLEMENTS` - Importing Entitlements XLSX file
+     * * `XLSX_IMPORTING_RECONCILIATION` - Importing Reconciliation XLSX file
+     * * `EXCLUDE_BENEFICIARIES` - Exclude Beneficiaries Running
+     * * `EXCLUDE_BENEFICIARIES_ERROR` - Exclude Beneficiaries Error
+     * * `SEND_TO_PAYMENT_GATEWAY` - Sending to Payment Gateway
+     * * `SEND_TO_PAYMENT_GATEWAY_ERROR` - Send to Payment Gateway Error
+     */
+    backgroundActionStatus?: BackgroundActionStatusEnum | null;
+    backgroundActionStatusDisplay: string;
     /**
      * Payment Plan start date
      */

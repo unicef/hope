@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { Status9d7Enum } from './Status9d7Enum';
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 export type PaymentPlanList = {
     readonly id: string;
     unicefId?: string | null;
@@ -33,7 +33,7 @@ export type PaymentPlanList = {
      * * `ACCEPTED` - Accepted
      * * `FINISHED` - Finished
      */
-    status?: Status9d7Enum;
+    status?: PaymentPlanStatusEnum;
     /**
      * Total Households Count [sys]
      */
