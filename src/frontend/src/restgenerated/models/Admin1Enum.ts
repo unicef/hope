@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF34` - Campbellport
- * * `AF87` - Gonzalesside
- * * `UA97` - Lake Brandon
- * * `AF47` - Lake Ronnie
- * * `HR48` - Lake William
- * * `UA70` - Port Dawnhaven
- * * `UA43` - Port Jessicahaven
- * * `HR17` - Wallsside
- * * `HR88` - West Kristopherchester
+ * * `AF43` - East Juliahaven
+ * * `UA35` - Estradaview
+ * * `UA59` - Evansbury
+ * * `AF48` - Frosthaven
+ * * `HR60` - Jamesview
+ * * `HR94` - Lake Amberbury
+ * * `UA50` - Michaelhaven
+ * * `HR48` - New Christopherside
+ * * `AF69` - Port Debrahaven
  */
 export enum Admin1Enum {
-    AF34 = 'AF34',
-    AF87 = 'AF87',
-    UA97 = 'UA97',
-    AF47 = 'AF47',
+    AF43 = 'AF43',
+    UA35 = 'UA35',
+    UA59 = 'UA59',
+    AF48 = 'AF48',
+    HR60 = 'HR60',
+    HR94 = 'HR94',
+    UA50 = 'UA50',
     HR48 = 'HR48',
-    UA70 = 'UA70',
-    UA43 = 'UA43',
-    HR17 = 'HR17',
-    HR88 = 'HR88',
+    AF69 = 'AF69',
 }
