@@ -500,7 +500,7 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         pageProgrammeDetails.getButtonEditProgramCycle()[0].click()
-        pageProgrammeDetails.getInputTitle().send_keys(Keys.CONTROL, "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getInputTitle())
         pageProgrammeDetails.getInputTitle().send_keys("Edited title check")
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(

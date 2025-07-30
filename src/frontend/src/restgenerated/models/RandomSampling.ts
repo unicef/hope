@@ -7,7 +7,7 @@ export type RandomSampling = {
     confidenceInterval: number;
     marginOfError: number;
     excludedAdminAreas: Array<string>;
-    age: Age;
-    sex: string;
+    age: Age | null;
+    sex: string | null;
 };
 

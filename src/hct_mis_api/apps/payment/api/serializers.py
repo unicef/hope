@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
+from django.db import transaction
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -94,6 +95,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
             )
         return data
 
+    @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
@@ -121,16 +123,16 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 
 
 class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
-    fsp_xlsx_template_id = serializers.CharField(required=True)
+    fsp_xlsx_template_id = serializers.CharField()
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
-    split_type = serializers.ChoiceField(required=True, choices=PaymentPlanSplit.SplitType)
+    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)
     payments_no = serializers.IntegerField(required=False)
 
 
 class PaymentPlanImportFileSerializer(serializers.Serializer):
-    file = serializers.FileField(use_url=False, required=True)
+    file = serializers.FileField(use_url=False)
 
     def validate_file(self, file: Any) -> Any:
         allowed_extensions = ["xlsx"]
@@ -540,7 +542,7 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
-    excluded_households_ids = serializers.ListField(child=serializers.CharField(), required=True)
+    excluded_households_ids = serializers.ListField(child=serializers.CharField())
     exclusion_reason = serializers.CharField(required=False)
 
     def validate_excluded_households_ids(self, value: list[str]) -> list[str]:
@@ -550,16 +552,16 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
 
 
 class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
-    delivered_quantity = serializers.FloatField(required=True)
-    delivery_date = serializers.DateField(required=True)
+    delivered_quantity = serializers.FloatField()
+    delivery_date = serializers.DateField()
 
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     target_population_id = serializers.UUIDField()
-    dispersion_start_date = serializers.DateField(required=True)
-    dispersion_end_date = serializers.DateField(required=True)
-    currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
+    dispersion_start_date = serializers.DateField()
+    dispersion_end_date = serializers.DateField()
+    currency = serializers.ChoiceField(choices=CURRENCY_CHOICES)
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
@@ -581,8 +583,8 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
-    dispersion_start_date = serializers.DateField(required=True)
-    dispersion_end_date = serializers.DateField(required=True)
+    dispersion_start_date = serializers.DateField()
+    dispersion_end_date = serializers.DateField()
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
@@ -906,6 +908,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
             "background_action_status",
+            "status",
             "start_date",
             "end_date",
             "program",
@@ -927,6 +930,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "screen_beneficiary",
             "flag_exclude_if_on_sanction_list",
             "flag_exclude_if_active_adjudication_ticket",
+            "build_status",
         )
 
     @staticmethod
@@ -945,6 +949,10 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
 
     @staticmethod
     def get_status(obj: PaymentPlan) -> str:
+        return obj.status
+
+    @staticmethod
+    def get_status_display(obj: PaymentPlan) -> str:
         return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
 
 
@@ -1203,20 +1211,20 @@ class AgeSerializer(serializers.Serializer):
 
 
 class RandomSamplingSerializer(serializers.Serializer):
-    confidence_interval = serializers.FloatField(required=True)
-    margin_of_error = serializers.FloatField(required=True)
+    confidence_interval = serializers.FloatField()
+    margin_of_error = serializers.FloatField()
     excluded_admin_areas = serializers.ListField(child=serializers.CharField())
-    age = AgeSerializer()
-    sex = serializers.CharField()
+    age = AgeSerializer(allow_null=True)
+    sex = serializers.CharField(allow_null=True)
 
 
 class RapidProSerializer(serializers.Serializer):
-    flow_id = serializers.CharField(required=True)
+    flow_id = serializers.CharField()
 
 
 class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
-    sampling = serializers.CharField(required=True)
-    verification_channel = serializers.CharField(required=True)
+    sampling = serializers.CharField()
+    verification_channel = serializers.CharField()
     full_list_arguments = FullListSerializer()
     random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
     rapid_pro_arguments = RapidProSerializer(allow_null=True)
@@ -1227,7 +1235,7 @@ class PaymentVerificationPlanActivateSerializer(serializers.Serializer):
 
 
 class PaymentVerificationPlanImportSerializer(serializers.Serializer):
-    file = serializers.FileField(use_url=False, required=True)
+    file = serializers.FileField(use_url=False)
     version = serializers.IntegerField(required=False)
 
     def validate_file(self, file: Any) -> Any:
@@ -1240,19 +1248,21 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
 
 class PaymentVerificationUpdateSerializer(serializers.Serializer):
     received_amount = serializers.FloatField(required=False)
-    received = serializers.BooleanField(required=True)
+    received = serializers.BooleanField()
     version = serializers.IntegerField(required=False)
 
 
-class TPHouseholdListSerializer(serializers.ModelSerializer):
+class PendingPaymentSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     hoh_full_name = serializers.SerializerMethodField()
     household_size = serializers.IntegerField(source="household.size")
+    household_id = serializers.CharField(source="household.id")
 
     class Meta:
         model = Payment
         fields = (
             "id",
+            "household_id",
             "household_unicef_id",
             "hoh_full_name",
             "household_size",
@@ -1266,9 +1276,9 @@ class TPHouseholdListSerializer(serializers.ModelSerializer):
 
 class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    name = serializers.CharField(required=True)
-    program_cycle_id = serializers.UUIDField(required=True)
-    rules = TargetingCriteriaRuleSerializer(many=True, required=True)
+    name = serializers.CharField()
+    program_cycle_id = serializers.UUIDField()
+    rules = TargetingCriteriaRuleSerializer(many=True)
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     fsp_id = serializers.UUIDField(required=False, allow_null=True)
@@ -1303,6 +1313,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program_slug = request.parser_context["kwargs"]["program_slug"]
         return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
+    @transaction.atomic
     def create(self, data: dict) -> PaymentPlan:
         request = self.context["request"]
         program = self.get_program()
@@ -1326,7 +1337,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)
-
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=validated_data)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1340,13 +1350,13 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
 
 
 class TargetPopulationCopySerializer(serializers.Serializer):
-    name = serializers.CharField(required=True)
-    target_population_id = serializers.CharField(required=True)
-    program_cycle_id = serializers.CharField(required=True)
+    name = serializers.CharField()
+    target_population_id = serializers.CharField()
+    program_cycle_id = serializers.CharField()
 
 
 class ApplyEngineFormulaSerializer(serializers.Serializer):
-    engine_formula_rule_id = serializers.CharField(required=True)
+    engine_formula_rule_id = serializers.CharField()
     version = serializers.IntegerField(required=False)
 
 
@@ -1362,8 +1372,8 @@ class FspChoiceSerializer(serializers.ModelSerializer):
 
 
 class DeliveryMechanismChoiceSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True)
-    code = serializers.CharField(required=True)
+    name = serializers.CharField()
+    code = serializers.CharField()
 
 
 class FspChoicesSerializer(serializers.Serializer):

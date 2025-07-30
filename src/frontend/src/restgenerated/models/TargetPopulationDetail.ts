@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { BuildStatusEnum } from './BuildStatusEnum';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
@@ -285,5 +286,14 @@ export type TargetPopulationDetail = {
      * Exclude households with individuals (members or collectors) that have active adjudication ticket(s).
      */
     flagExcludeIfActiveAdjudicationTicket?: boolean;
+    /**
+     * Build Status for celery task [sys]
+     *
+     * * `PENDING` - Pending
+     * * `BUILDING` - Building
+     * * `FAILED` - Failed
+     * * `OK` - Ok
+     */
+    buildStatus?: BuildStatusEnum | null;
 };
 

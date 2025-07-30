@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TPHouseholdList } from './TPHouseholdList';
-export type PaginatedTPHouseholdListList = {
+import type { PendingPayment } from './PendingPayment';
+export type PaginatedPendingPaymentList = {
     next?: string | null;
     previous?: string | null;
-    results: Array<TPHouseholdList>;
+    results: Array<PendingPayment>;
 };
 

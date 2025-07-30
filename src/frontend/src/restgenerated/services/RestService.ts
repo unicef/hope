@@ -68,6 +68,7 @@ import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListLis
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
 import type { PaginatedPaymentVerificationPlanListList } from '../models/PaginatedPaymentVerificationPlanListList';
+import type { PaginatedPendingPaymentList } from '../models/PaginatedPendingPaymentList';
 import type { PaginatedPeriodicDataUpdateTemplateListList } from '../models/PaginatedPeriodicDataUpdateTemplateListList';
 import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/PaginatedPeriodicDataUpdateUploadListList';
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
@@ -84,7 +85,6 @@ import type { PaginatedSurveyCategoryChoiceList } from '../models/PaginatedSurve
 import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
 import type { PaginatedSurveyRapidProFlowList } from '../models/PaginatedSurveyRapidProFlowList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
-import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
 import type { PatchedFeedbackUpdate } from '../models/PatchedFeedbackUpdate';
 import type { PatchedPaymentPlanCreateUpdate } from '../models/PatchedPaymentPlanCreateUpdate';
@@ -139,7 +139,6 @@ import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
 import type { TicketNote } from '../models/TicketNote';
-import type { TPHouseholdList } from '../models/TPHouseholdList';
 import type { UserChoices } from '../models/UserChoices';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -3810,7 +3809,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -3911,7 +3910,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -3955,7 +3954,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -4015,7 +4014,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -4108,7 +4107,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -4150,7 +4149,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -6036,7 +6035,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -6138,7 +6137,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -6183,7 +6182,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -6296,7 +6295,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -6402,7 +6401,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -6448,7 +6447,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -6520,7 +6519,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -6622,7 +6621,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -6667,7 +6666,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -6713,7 +6712,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -6815,7 +6814,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -6860,7 +6859,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -6904,7 +6903,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -6998,7 +6997,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -7041,7 +7040,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -7087,7 +7086,7 @@ export class RestService {
         sizeRange,
         sizeMax,
         sizeMin,
-        survey,
+        surveyId,
         unicefId,
         updatedAtAfter,
         updatedAtBefore,
@@ -7189,7 +7188,7 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
-        survey?: string,
+        surveyId?: string,
         unicefId?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -7234,7 +7233,7 @@ export class RestService {
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
-                'survey': survey,
+                'survey_id': surveyId,
                 'unicef_id': unicefId,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
@@ -11649,6 +11648,46 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedPendingPaymentList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsPendingPaymentsList({
+        businessAreaSlug,
+        id,
+        programSlug,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedPendingPaymentList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/pending-payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -11697,95 +11736,6 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'program_slug': programSlug,
-            },
-        });
-    }
-    /**
-     * @returns PaginatedTPHouseholdListList
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsTargetPopulationsHouseholdsList({
-        businessAreaSlug,
-        programSlug,
-        targetPopulationId,
-        limit,
-        offset,
-    }: {
-        businessAreaSlug: string,
-        programSlug: string,
-        targetPopulationId: string,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-    }): CancelablePromise<PaginatedTPHouseholdListList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{target_population_id}/households/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
-                'target_population_id': targetPopulationId,
-            },
-            query: {
-                'limit': limit,
-                'offset': offset,
-            },
-        });
-    }
-    /**
-     * @returns TPHouseholdList
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsTargetPopulationsHouseholdsRetrieve({
-        businessAreaSlug,
-        id,
-        programSlug,
-        targetPopulationId,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this payment.
-         */
-        id: string,
-        programSlug: string,
-        targetPopulationId: string,
-    }): CancelablePromise<TPHouseholdList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{target_population_id}/households/{id}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_slug': programSlug,
-                'target_population_id': targetPopulationId,
-            },
-        });
-    }
-    /**
-     * @returns CountResponse
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsTargetPopulationsHouseholdsCountRetrieve({
-        businessAreaSlug,
-        programSlug,
-        targetPopulationId,
-    }: {
-        businessAreaSlug: string,
-        programSlug: string,
-        targetPopulationId: string,
-    }): CancelablePromise<CountResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{target_population_id}/households/count/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
-                'target_population_id': targetPopulationId,
             },
         });
     }
