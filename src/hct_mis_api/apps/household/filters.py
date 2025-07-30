@@ -96,7 +96,7 @@ class HouseholdFilter(UpdatedAtFilter):
     admin1 = CharFilter(method="admin_field_filter", field_name="admin1")
     admin2 = CharFilter(method="admin_field_filter", field_name="admin2")
     address = CharFilter(field_name="address", lookup_expr="icontains")
-    survey = CharFilter(method="filter_survey")
+    survey_id = CharFilter(method="filter_survey_id")
     message_id = CharFilter(method="filter_message_id")
     recipient_id = CharFilter(method="filter_recipient_id")
 
@@ -277,7 +277,7 @@ class HouseholdFilter(UpdatedAtFilter):
     def admin_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(admin1=value) | Q(admin2=value) | Q(admin3=value) | Q(admin4=value))
 
-    def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
+    def filter_survey_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
         return queryset.filter(surveys__id=value)
 
     def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:

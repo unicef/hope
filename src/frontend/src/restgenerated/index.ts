@@ -33,7 +33,7 @@ export type { BulkUpdateGrievanceTicketsAssignees as BulkUpdateGrievanceTicketsA
 export type { BulkUpdateGrievanceTicketsPriority as BulkUpdateGrievanceTicketsPriorityCamelCase } from './models/BulkUpdateGrievanceTicketsPriority';
 export type { BulkUpdateGrievanceTicketsUrgency as BulkUpdateGrievanceTicketsUrgencyCamelCase } from './models/BulkUpdateGrievanceTicketsUrgency';
 export type { BusinessArea as BusinessAreaCamelCase } from './models/BusinessArea';
-export { CategoryEnum as CategoryEnumCamelCase } from './models/CategoryEnum';
+export { CategoryB41Enum as CategoryB41EnumCamelCase } from './models/CategoryB41Enum';
 export type { CategoryExtras as CategoryExtrasCamelCase } from './models/CategoryExtras';
 export type { CheckAgainstSanctionList as CheckAgainstSanctionListCamelCase } from './models/CheckAgainstSanctionList';
 export type { CheckAgainstSanctionListCreate as CheckAgainstSanctionListCreateCamelCase } from './models/CheckAgainstSanctionListCreate';
@@ -307,6 +307,7 @@ export { StatusEbbEnum as StatusEbbEnumCamelCase } from './models/StatusEbbEnum'
 export { SubtypeEnum as SubtypeEnumCamelCase } from './models/SubtypeEnum';
 export type { Survey as SurveyCamelCase } from './models/Survey';
 export type { SurveyCategoryChoice as SurveyCategoryChoiceCamelCase } from './models/SurveyCategoryChoice';
+export { SurveyCategoryEnum as SurveyCategoryEnumCamelCase } from './models/SurveyCategoryEnum';
 export type { SurveyRapidProFlow as SurveyRapidProFlowCamelCase } from './models/SurveyRapidProFlow';
 export type { SurveySampleSize as SurveySampleSizeCamelCase } from './models/SurveySampleSize';
 export { SurveySampleSizeSamplingTypeEnum as SurveySampleSizeSamplingTypeEnumCamelCase } from './models/SurveySampleSizeSamplingTypeEnum';
