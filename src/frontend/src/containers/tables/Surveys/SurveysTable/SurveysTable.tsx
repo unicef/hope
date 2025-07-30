@@ -114,6 +114,7 @@ function SurveysTable({
         defaultOrderBy="created_at"
         defaultOrderDirection="desc"
         itemsCount={dataSurveysCount?.count}
+        initialRowsPerPage={10}
         renderRow={(row: Survey) => (
           <SurveysTableRow
             key={row.id}
