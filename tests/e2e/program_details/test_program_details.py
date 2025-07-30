@@ -17,7 +17,6 @@ from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -500,7 +499,7 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         pageProgrammeDetails.getButtonEditProgramCycle()[0].click()
-        pageProgrammeDetails.getInputTitle().send_keys(Keys.CONTROL, "a")
+        pageProgrammeDetails.clear_input(pageProgrammeDetails.getInputTitle())
         pageProgrammeDetails.getInputTitle().send_keys("Edited title check")
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(

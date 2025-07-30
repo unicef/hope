@@ -8,7 +8,6 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
-import { renderUserName } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -119,7 +118,7 @@ function FeedbackDetails({
               },
               {
                 label: t('Created By'),
-                value: renderUserName(feedback.createdBy),
+                value: feedback.createdBy,
                 size: 3,
               },
               {

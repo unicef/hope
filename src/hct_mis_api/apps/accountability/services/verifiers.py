@@ -1,6 +1,6 @@
 import logging
 
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.accountability.models import Message
 

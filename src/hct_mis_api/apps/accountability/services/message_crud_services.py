@@ -2,8 +2,9 @@ import logging
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.db.models import Q, QuerySet
+from rest_framework.generics import get_object_or_404
 
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.accountability.services.sampling import Sampling
@@ -12,6 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
@@ -46,6 +48,10 @@ class MessageCrudServices:
         if registration_data_import := input_data.get("registration_data_import"):
             message.registration_data_import = registration_data_import
 
+        if program := input_data.get("program"):
+            obj = get_object_or_404(Program, id=program)
+            message.program = obj
+
         if message.number_of_recipients == 0:
             raise ValidationError("No recipients found for the given criteria")
 
@@ -59,8 +65,8 @@ class MessageCrudServices:
 
     @classmethod
     def _get_households(cls, input_data: dict) -> QuerySet[Household]:
-        if household_ids := input_data.get("households", []):
-            return Household.objects.filter(id__in=household_ids).exclude(
+        if households := input_data.get("households", []):
+            return Household.objects.filter(id__in=[hh.id for hh in households]).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )

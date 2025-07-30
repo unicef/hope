@@ -69,7 +69,7 @@ const ProgramCyclesTableProgramDetails = ({
       ),
   });
 
-  const canViewDetails = businessAreaSlug !== 'all';
+  const canViewDetails = programId !== 'all';
 
   const renderRow = (row: ProgramCycleList): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;

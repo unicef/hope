@@ -27,7 +27,7 @@ class NewFeedback(BaseComponents):
     adminAreaAutocomplete = 'div[data-cy="admin-area-autocomplete"]'
     inputLanguage = 'textarea[data-cy="input-language"]'
     inputArea = 'input[data-cy="input-area"]'
-    programmeSelect = 'div[data-cy="select-program"]'
+    programmeSelect = 'div[data-cy="select-programId"]'
     hhRadioButton = 'span[data-cy="input-radio-household"]'
     individualRadioButton = 'span[data-cy="input-radio-individual"]'
     inputQuestionnaire_size = 'span[data-cy="input-questionnaire_size"]'

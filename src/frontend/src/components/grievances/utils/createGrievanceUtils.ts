@@ -1,4 +1,3 @@
-import { CategoryEnum } from '@restgenerated/models/CategoryEnum';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import {
   GRIEVANCE_CATEGORIES,
@@ -8,6 +7,7 @@ import {
 import { thingForSpecificGrievanceType } from '@utils/utils';
 import camelCase from 'lodash/camelCase';
 import { removeIdPropertyFromObjects } from './helpers';
+import { CategoryB41Enum } from '@restgenerated/models/CategoryB41Enum';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   if (!_beneficiaryGroup || !text) {
@@ -21,7 +21,7 @@ export const replaceLabels = (text, _beneficiaryGroup) => {
     .replace(/Household/g, _beneficiaryGroup.groupLabel);
 };
 
-export function isShowIssueType(category: string | CategoryEnum): boolean {
+export function isShowIssueType(category: string | CategoryB41Enum): boolean {
   const cat = category?.toString();
   return (
     cat === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -293,15 +293,33 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
   const newlyAddedAccountsWithoutIds = removeIdPropertyFromObjects(
     values.individualDataUpdateFieldsAccounts,
-  )?.map(account => {
-      const { name, ...dataFields } = account;
+  )?.map((account) => {
+    const { name, ...dataFields } = account;
+    const { dynamicFields, ...restDataFields } = dataFields;
+    const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
+      if (curr.key) acc[curr.key] = curr.value;
+      return acc;
+    }, {});
+
+    return {
+      name,
+      dataFields: {
+        ...restDataFields,
+        ...mappedDynamicFields,
+      },
+    };
+  });
+
+  const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(
+    (account) => {
+      const { id, name, ...dataFields } = account;
       const { dynamicFields, ...restDataFields } = dataFields;
       const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
         if (curr.key) acc[curr.key] = curr.value;
         return acc;
       }, {});
-
       return {
+        id,
         name,
         dataFields: {
           ...restDataFields,
@@ -310,23 +328,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       };
     },
   );
-
-  const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(account => {
-    const { id, name, ...dataFields } = account;
-     const { dynamicFields, ...restDataFields } = dataFields;
-    const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
-    if (curr.key) acc[curr.key] = curr.value;
-    return acc;
-        }, {});
-    return {
-      id,
-      name,
-      dataFields: {
-          ...restDataFields,
-          ...mappedDynamicFields,
-        },
-    };
-  });
 
   return {
     variables: {

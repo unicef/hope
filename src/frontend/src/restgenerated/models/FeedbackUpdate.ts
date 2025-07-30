@@ -13,5 +13,6 @@ export type FeedbackUpdate = {
     language?: string;
     comments?: string | null;
     consent?: boolean;
+    programId?: string | null;
 };
 

@@ -158,7 +158,9 @@ def migrate_partner_roles_and_access(apps, schema_editor):
         for partner_role in batched_partner_roles:
             partner = partner_role.partner
             business_area = partner_role.business_area
-            roles = partner_role.roles.all()
+            roles = partner_role.roles.exclude(name="Role with all permissions")
+            # in case some existing Partner on any env has "Role with all permissions" -
+            # which is not allowed for Partners anymore
 
             programs = program_access_mapping.get((partner.id, business_area.id), [])
 

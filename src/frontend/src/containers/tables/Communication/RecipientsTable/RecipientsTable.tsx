@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useState, useEffect } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-
+import { Recipient } from '@restgenerated/models/Recipient';
 interface RecipientsTableProps {
   id: string;
   canViewDetails: boolean;
@@ -24,18 +25,35 @@ function RecipientsTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessAreaSlug, programSlug } = useBaseUrl();
 
-  const initialVariables = useMemo(
+  const initialQueryVariables = useMemo(
     () => ({
+      businessAreaSlug,
+      programSlug,
       messageId: id,
     }),
-    [id],
+    [businessAreaSlug, programSlug, id],
   );
 
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'businessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList',
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList(
+        queryVariables,
+      ),
+  });
+
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
-    head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+    unicefId: (bg) => `${bg?.groupLabel} ID`,
+    head_of_household__full_name: (bg) => `Head of ${bg?.groupLabel}`,
+    size: (bg) => `${bg?.groupLabel} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -46,19 +64,19 @@ function RecipientsTable({
 
   return (
     <TableWrapper>
-      <UniversalRestQueryTable
+      <UniversalRestTable
         title={t('Recipients')}
         headCells={adjustedHeadCells}
+        data={data}
+        error={error}
+        isLoading={isLoading}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
         rowsPerPageOptions={[10, 15, 20]}
-        query={
-          RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList
-        }
-        queryVariables={{ businessAreaSlug, programSlug, ...initialVariables }}
-        setQueryVariables={() => {}}
-        renderRow={(row) => (
+        renderRow={(row: Recipient) => (
           <RecipientsTableRow
             key={row.id}
-            household={row.headOfHousehold.household}
+            household={row}
             headOfHousehold={row.headOfHousehold}
             canViewDetails={canViewDetails}
           />

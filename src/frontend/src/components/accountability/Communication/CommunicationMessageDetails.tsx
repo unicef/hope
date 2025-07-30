@@ -1,13 +1,12 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { renderUserName } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { MessageDetail } from '@restgenerated/models/MessageDetail';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -38,7 +37,7 @@ const CommunicationMessageDetails = ({
               <Grid container justifyContent="space-between" size={{ xs: 12 }}>
                 <Box ml={2}>
                   <Typography variant="subtitle2" data-cy="message-created-by">
-                    {renderUserName(message.createdBy)}
+                    {message.createdBy}
                   </Typography>
                 </Box>
                 <Typography color="textSecondary" data-cy="message-created-at">

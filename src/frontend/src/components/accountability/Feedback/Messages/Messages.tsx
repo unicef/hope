@@ -115,7 +115,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   );
 
   const mappedMessages = messages?.map((el) =>
-    note(renderUserName(el.createdBy), el.createdAt, el.description, el.id),
+    note(el.createdBy, el.createdAt, el.description, el.id),
   );
 
   const initialValues: { [key: string]: string } = {

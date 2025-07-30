@@ -7,7 +7,7 @@ export type AccountabilityRandomSamplingArguments = {
     excludedAdminAreas: Array<string>;
     confidenceInterval: number;
     marginOfError: number;
-    age?: AccountabilityCommunicationMessageAgeInput;
-    sex?: string;
+    age: AccountabilityCommunicationMessageAgeInput | null;
+    sex: string | null;
 };
 

@@ -35,7 +35,19 @@ import { showApiErrorMessages } from '@utils/utils';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
-  admin2: Yup.string().nullable(),
+  admin2: Yup.mixed()
+    .test(
+      'admin2-id-or-null',
+      'Admin2 must be a string id or an object with an id',
+      (value) =>
+        value === null ||
+        typeof value === 'string' ||
+        (typeof value === 'object' &&
+          value !== null &&
+          //@ts-ignore
+          typeof value.id === 'string'),
+    )
+    .nullable(),
   description: Yup.string().nullable().required('Description is required'),
   consent: Yup.bool(),
   area: Yup.string().nullable(),
@@ -126,11 +138,11 @@ const EditFeedbackPage = (): ReactElement => {
       : null,
     description: feedback.description || null,
     comments: feedback.comments || null,
-    admin2: feedback.admin2?.id,
+    admin2: feedback.admin2 || null,
     area: feedback.area || null,
     language: feedback.language || null,
     consent: feedback.consent || false,
-    program: feedback.programId || null,
+    programId: feedback.programId || null,
   };
 
   const prepareVariables = (values) => ({
@@ -139,11 +151,14 @@ const EditFeedbackPage = (): ReactElement => {
     individualLookup: values.selectedIndividual?.id,
     description: values.description,
     comments: values.comments,
-    admin2: values.admin2,
+    admin2:
+      typeof values.admin2 === 'object' && values.admin2 !== null
+        ? values.admin2.id
+        : values.admin2,
     area: values.area,
     language: values.language || '',
     consent: values.consent,
-    program: values.program,
+    programId: values.programId || null,
   });
 
   const canViewHouseholdDetails = hasPermissions(
@@ -164,7 +179,9 @@ const EditFeedbackPage = (): ReactElement => {
   return (
     <Formik
       initialValues={initialValues}
+      enableReinitialize={true}
       onSubmit={async (values) => {
+        console.log('values', values);
         try {
           await mutate({
             businessAreaSlug: businessArea,
@@ -309,7 +326,6 @@ const EditFeedbackPage = (): ReactElement => {
                           name="admin2"
                           variant="outlined"
                           component={FormikAdminAreaAutocomplete}
-                          disabled={Boolean(feedback.admin2?.name)}
                         />
                       </Grid>
                       <Grid size={{ xs: 6 }}>
@@ -333,7 +349,7 @@ const EditFeedbackPage = (): ReactElement => {
                       </Grid>
                       <Grid size={{ xs: 3 }}>
                         <Field
-                          name="program"
+                          name="programId"
                           label={t('Programme Name')}
                           fullWidth
                           variant="outlined"

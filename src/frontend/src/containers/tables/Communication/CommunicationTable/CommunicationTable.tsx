@@ -104,6 +104,7 @@ function CommunicationTable({
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count}
+        initialRowsPerPage={10}
       />
     </TableWrapper>
   );
