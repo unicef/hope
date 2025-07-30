@@ -30,6 +30,7 @@ describe('IndividualsListTable', () => {
         relationship: RelationshipEnum.HEAD,
         status: 'ACTIVE',
         role: 'PRIMARY',
+        residentStatus: '',
         relationshipDisplay: 'Head of household (self)',
         deduplicationBatchStatusDisplay: 'Unique in batch',
         biometricDeduplicationBatchStatusDisplay: 'Not processed',
@@ -53,6 +54,7 @@ describe('IndividualsListTable', () => {
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
           importId: 'import-1',
+          residenceStatus: '',
         },
         program: {
           id: 'test-program',
