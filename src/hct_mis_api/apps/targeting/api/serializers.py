@@ -1,6 +1,16 @@
+from typing import Any
+
 from rest_framework import serializers
 
+from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.api.utils import get_field_by_name, filter_choices
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
@@ -76,6 +86,8 @@ class TargetingIndividualRuleFilterBlockSerializer(serializers.ModelSerializer):
 
 
 class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
+    field_attribute = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = TargetingCriteriaRuleFilter
         fields = (
@@ -84,7 +96,20 @@ class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
             "field_name",
             "arguments",
             "round_number",
+            "field_attribute",
         )
+
+    def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
+        if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
+            field_attribute = get_field_by_name(obj.field_name, obj.targeting_criteria_rule.payment_plan)
+            return filter_choices(field_attribute, obj.arguments)
+        program = None
+        if obj.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+            request = self.context["request"]
+            business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+            program_slug = request.parser_context["kwargs"]["program_slug"]
+            program = Program.objects.get(slug=program_slug, business_area__slug=business_area_slug)
+        return FieldAttributeSerializer(FlexibleAttribute.objects.get(name=obj.field_name, program=program)).data
 
 
 class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
