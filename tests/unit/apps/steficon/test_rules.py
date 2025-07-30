@@ -5,8 +5,8 @@ import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory
 
-from hct_mis_api.admin.steficon_admin_rule import RuleAdmin
-from hct_mis_api.admin.steficon_admin_rule_commit import RuleCommitAdmin
+from hct_mis_api.admin.rule import RuleAdmin
+from hct_mis_api.admin.rule_commit import RuleCommitAdmin
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.household.models import Household
