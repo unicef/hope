@@ -30,7 +30,7 @@ export function LockFspPaymentPlan({
   permissions,
 }: LockFspPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
+  const { showMessage, showRestApiError } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
@@ -58,6 +58,9 @@ export function LockFspPaymentPlan({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         exact: false,
       });
+    },
+    onError: (error) => {
+      showRestApiError(error);
     },
   });
 

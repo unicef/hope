@@ -1,9 +1,9 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { ChoiceObject } from '@generated/graphql';
 import { Choice } from '@restgenerated/models/Choice';
-import { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatus } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import localForage from 'localforage';
 import _ from 'lodash';
 import camelCase from 'lodash/camelCase';
@@ -103,11 +103,11 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case ProgramStatus.DRAFT:
+    case ProgramStatusEnum.DRAFT:
       return theme.hctPalette.gray;
-    case ProgramStatus.ACTIVE:
+    case ProgramStatusEnum.ACTIVE:
       return theme.hctPalette.green;
-    case ProgramStatus.FINISHED:
+    case ProgramStatusEnum.FINISHED:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
@@ -179,14 +179,14 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'PENDING':
-    case 'SENT_TO_PAYMENT_GATEWAY':
-    case 'SENT_TO_FSP':
+    case 'Pending':
+    case 'Sent to Payment Gateway':
+    case 'Sent to FSP':
       return theme.hctPalette.orange;
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case 'PARTIALLY_DISTRIBUTED':
+    case 'Partially Distributed':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -195,22 +195,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case 'PENDING':
+    case 'Pending':
       return 'PENDING';
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return 'DELIVERED FULLY';
-    case 'PARTIALLY_DISTRIBUTED':
+    case 'Partially Distributed':
       return 'DELIVERED PARTIALLY';
-    case 'NOT_DISTRIBUTED':
+    case 'Not Distributed':
       return 'NOT DELIVERED';
-    case 'FORCE_FAILED':
+    case 'Force failed':
       return 'FORCE FAILED';
-    case 'MANUALLY_CANCELLED':
+    case 'Manually Cancelled':
       return 'MANUALLY CANCELLED';
-    case 'SENT_TO_PAYMENT_GATEWAY':
+    case 'Sent to Payment Gateway':
       return 'SENT TO PAYMENT GATEWAY';
-    case 'SENT_TO_FSP':
+    case 'Sent to FSP':
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
@@ -401,21 +401,21 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatus.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.RULE_ENGINE_ERROR]:
+    [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XLSX_EXPORT_ERROR]:
+    [BackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS]:
+    [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION]:
+    [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XLSX_IMPORT_ERROR]:
+    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY]:
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR]:
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
   if (status in colorsMap) {
@@ -609,9 +609,9 @@ export function choicesToDict(choices: ChoiceObject[]): {
 
 export function programStatusToPriority(status: string): number {
   switch (status) {
-    case ProgramStatus.DRAFT:
+    case ProgramStatusEnum.DRAFT:
       return 1;
-    case ProgramStatus.ACTIVE:
+    case ProgramStatusEnum.ACTIVE:
       return 2;
     default:
       return 3;

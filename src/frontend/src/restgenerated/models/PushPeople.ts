@@ -3,10 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Account } from './Account';
-import type { Admin1Enum } from './Admin1Enum';
-import type { Admin2Enum } from './Admin2Enum';
-import type { Admin3Enum } from './Admin3Enum';
-import type { Admin4Enum } from './Admin4Enum';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
@@ -44,10 +40,10 @@ export type PushPeople = {
     village?: string | null;
     phoneNo?: string | null;
     phoneNoAlternative?: string | null;
-    admin1?: Admin1Enum | null;
-    admin2?: Admin2Enum | null;
-    admin3?: Admin3Enum | null;
-    admin4?: Admin4Enum | null;
+    admin1?: string | null;
+    admin2?: string | null;
+    admin3?: string | null;
+    admin4?: string | null;
     consentSharing?: Array<ConsentSharingEnum>;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;

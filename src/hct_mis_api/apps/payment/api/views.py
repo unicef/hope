@@ -34,6 +34,7 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.parsers import DictDrfNestedParser
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.payment.api.caches import (
@@ -636,6 +637,8 @@ class PaymentPlanViewSet(
 
     @transaction.atomic
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if "target_population_id" not in request.data:
+            raise ValidationError("target_population_id is required")
         payment_plan = get_object_or_404(PaymentPlan, id=request.data["target_population_id"])
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
@@ -1044,6 +1047,7 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )
 
+    # TODO:
     @action(detail=True, methods=["post"], url_path="generate-xlsx-with-auth-code")
     @transaction.atomic
     def generate_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1057,7 +1061,7 @@ class PaymentPlanViewSet(
             )
         if payment_plan.export_file_per_fsp is not None:
             raise ValidationError("Export failed: Payment Plan already has created exported file.")
-        if not payment_plan.can_create_xlsx_with_fsp_auth_code:
+        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
             raise ValidationError(
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
             )
@@ -1126,7 +1130,7 @@ class PaymentPlanViewSet(
     @extend_schema(
         request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer}
     )
-    @action(detail=True, methods=["post"], url_path="reconciliation-import-xlsx")
+    @action(detail=True, methods=["post"], url_path="reconciliation-import-xlsx", parser_classes=[DictDrfNestedParser])
     @transaction.atomic
     def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -1395,7 +1399,7 @@ class TargetPopulationViewSet(
         old_tp = copy_model_object(tp)
 
         payment_plan = PaymentPlanService(tp).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.TP_REBUILD}, user=request.user
+            input_data={"action": PaymentPlan.Action.DRAFT}, user=request.user
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

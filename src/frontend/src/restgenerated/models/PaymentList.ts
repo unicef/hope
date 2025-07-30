@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { IndividualList } from './IndividualList';
+import type { PaymentStatusEnum } from './PaymentStatusEnum';
 export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
@@ -24,7 +25,8 @@ export type PaymentList = {
     deliveredQuantityUsd?: string | null;
     deliveryDate?: string | null;
     deliveryType?: string | null;
-    status: string;
+    status?: PaymentStatusEnum;
+    readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
     hohFullName: string;
