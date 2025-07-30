@@ -22,6 +22,7 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -93,7 +94,7 @@ export const PaymentPlanDetailsHeader = ({
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
-    case 'OPEN':
+    case PaymentPlanStatusEnum.OPEN:
       buttons = (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -103,7 +104,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'LOCKED':
+    case PaymentPlanStatusEnum.LOCKED:
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -112,7 +113,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'LOCKED_FSP':
+    case PaymentPlanStatusEnum.LOCKED_FSP:
       buttons = (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -121,7 +122,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_APPROVAL':
+    case PaymentPlanStatusEnum.IN_APPROVAL:
       buttons = (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -133,7 +134,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_AUTHORIZATION':
+    case PaymentPlanStatusEnum.IN_AUTHORIZATION:
       buttons = (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -145,7 +146,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_REVIEW':
+    case PaymentPlanStatusEnum.IN_REVIEW:
       buttons = (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -157,8 +158,8 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'FINISHED':
-    case 'ACCEPTED':
+    case PaymentPlanStatusEnum.FINISHED:
+    case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}

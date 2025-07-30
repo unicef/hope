@@ -1,5 +1,4 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
@@ -100,7 +99,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
-          {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

@@ -8,6 +8,7 @@ import type { IndividualDetail } from './IndividualDetail';
 import type { IndividualList } from './IndividualList';
 import type { PaymentList } from './PaymentList';
 import type { PaymentPlanDetail } from './PaymentPlanDetail';
+import type { Status220Enum } from './Status220Enum';
 export type PaymentDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -29,7 +30,8 @@ export type PaymentDetail = {
     deliveredQuantityUsd?: string | null;
     deliveryDate?: string | null;
     deliveryType?: string | null;
-    status: string;
+    status?: Status220Enum;
+    readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
     hohFullName: string;
