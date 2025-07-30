@@ -3,7 +3,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,7 @@ export const LockTargetPopulationDialog = ({
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: lock, isPending: loadingLock } = useMutation({
     mutationFn: ({
@@ -44,7 +45,18 @@ export const LockTargetPopulationDialog = ({
         programSlug,
         id,
       }),
-    onSuccess: () => showMessage(t('Payment Plan has been locked.')),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'targetPopulation',
+          businessArea,
+          targetPopulationId,
+          programId,
+        ],
+      });
+      showMessage(t('Payment Plan has been locked.'));
+    },
     onError: (e) => showMessage(e.message),
   });
 
