@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
+from django.db import transaction
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -94,6 +95,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
             )
         return data
 
+    @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
@@ -906,6 +908,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
             "background_action_status",
+            "status",
             "start_date",
             "end_date",
             "program",
@@ -927,6 +930,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "screen_beneficiary",
             "flag_exclude_if_on_sanction_list",
             "flag_exclude_if_active_adjudication_ticket",
+            "build_status",
         )
 
     @staticmethod
@@ -945,6 +949,10 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
 
     @staticmethod
     def get_status(obj: PaymentPlan) -> str:
+        return obj.status
+
+    @staticmethod
+    def get_status_display(obj: PaymentPlan) -> str:
         return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
 
 
@@ -1244,15 +1252,17 @@ class PaymentVerificationUpdateSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 
 
-class TPHouseholdListSerializer(serializers.ModelSerializer):
+class PendingPaymentSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     hoh_full_name = serializers.SerializerMethodField()
     household_size = serializers.IntegerField(source="household.size")
+    household_id = serializers.CharField(source="household.id")
 
     class Meta:
         model = Payment
         fields = (
             "id",
+            "household_id",
             "household_unicef_id",
             "hoh_full_name",
             "household_size",
@@ -1303,6 +1313,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program_slug = request.parser_context["kwargs"]["program_slug"]
         return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
+    @transaction.atomic
     def create(self, data: dict) -> PaymentPlan:
         request = self.context["request"]
         program = self.get_program()
@@ -1326,7 +1337,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)
-
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=validated_data)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
