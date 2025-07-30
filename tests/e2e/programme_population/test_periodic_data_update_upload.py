@@ -294,7 +294,6 @@ class TestPeriodicDataUpdateUpload:
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,
