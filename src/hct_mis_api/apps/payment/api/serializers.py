@@ -123,16 +123,16 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 
 
 class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
-    fsp_xlsx_template_id = serializers.CharField(required=True)
+    fsp_xlsx_template_id = serializers.CharField()
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
-    split_type = serializers.ChoiceField(required=True, choices=PaymentPlanSplit.SplitType)
+    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)
     payments_no = serializers.IntegerField(required=False)
 
 
 class PaymentPlanImportFileSerializer(serializers.Serializer):
-    file = serializers.FileField(use_url=False, required=True)
+    file = serializers.FileField(use_url=False)
 
     def validate_file(self, file: Any) -> Any:
         allowed_extensions = ["xlsx"]
@@ -535,7 +535,7 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
-    excluded_households_ids = serializers.ListField(child=serializers.CharField(), required=True)
+    excluded_households_ids = serializers.ListField(child=serializers.CharField())
     exclusion_reason = serializers.CharField(required=False)
 
     def validate_excluded_households_ids(self, value: list[str]) -> list[str]:
@@ -545,16 +545,16 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
 
 
 class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
-    delivered_quantity = serializers.FloatField(required=True)
-    delivery_date = serializers.DateField(required=True)
+    delivered_quantity = serializers.FloatField()
+    delivery_date = serializers.DateField()
 
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     target_population_id = serializers.UUIDField()
-    dispersion_start_date = serializers.DateField(required=True)
-    dispersion_end_date = serializers.DateField(required=True)
-    currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
+    dispersion_start_date = serializers.DateField()
+    dispersion_end_date = serializers.DateField()
+    currency = serializers.ChoiceField(choices=CURRENCY_CHOICES)
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
@@ -576,8 +576,8 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
-    dispersion_start_date = serializers.DateField(required=True)
-    dispersion_end_date = serializers.DateField(required=True)
+    dispersion_start_date = serializers.DateField()
+    dispersion_end_date = serializers.DateField()
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
@@ -1206,20 +1206,20 @@ class AgeSerializer(serializers.Serializer):
 
 
 class RandomSamplingSerializer(serializers.Serializer):
-    confidence_interval = serializers.FloatField(required=True)
-    margin_of_error = serializers.FloatField(required=True)
+    confidence_interval = serializers.FloatField()
+    margin_of_error = serializers.FloatField()
     excluded_admin_areas = serializers.ListField(child=serializers.CharField())
-    age = AgeSerializer()
-    sex = serializers.CharField()
+    age = AgeSerializer(allow_null=True)
+    sex = serializers.CharField(allow_null=True)
 
 
 class RapidProSerializer(serializers.Serializer):
-    flow_id = serializers.CharField(required=True)
+    flow_id = serializers.CharField()
 
 
 class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
-    sampling = serializers.CharField(required=True)
-    verification_channel = serializers.CharField(required=True)
+    sampling = serializers.CharField()
+    verification_channel = serializers.CharField()
     full_list_arguments = FullListSerializer()
     random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
     rapid_pro_arguments = RapidProSerializer(allow_null=True)
@@ -1230,7 +1230,7 @@ class PaymentVerificationPlanActivateSerializer(serializers.Serializer):
 
 
 class PaymentVerificationPlanImportSerializer(serializers.Serializer):
-    file = serializers.FileField(use_url=False, required=True)
+    file = serializers.FileField(use_url=False)
     version = serializers.IntegerField(required=False)
 
     def validate_file(self, file: Any) -> Any:
@@ -1243,7 +1243,7 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
 
 class PaymentVerificationUpdateSerializer(serializers.Serializer):
     received_amount = serializers.FloatField(required=False)
-    received = serializers.BooleanField(required=True)
+    received = serializers.BooleanField()
     version = serializers.IntegerField(required=False)
 
 
@@ -1271,9 +1271,9 @@ class PendingPaymentSerializer(serializers.ModelSerializer):
 
 class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    name = serializers.CharField(required=True)
-    program_cycle_id = serializers.UUIDField(required=True)
-    rules = TargetingCriteriaRuleSerializer(many=True, required=True)
+    name = serializers.CharField()
+    program_cycle_id = serializers.UUIDField()
+    rules = TargetingCriteriaRuleSerializer(many=True)
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     fsp_id = serializers.UUIDField(required=False, allow_null=True)
@@ -1345,13 +1345,13 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
 
 
 class TargetPopulationCopySerializer(serializers.Serializer):
-    name = serializers.CharField(required=True)
-    target_population_id = serializers.CharField(required=True)
-    program_cycle_id = serializers.CharField(required=True)
+    name = serializers.CharField()
+    target_population_id = serializers.CharField()
+    program_cycle_id = serializers.CharField()
 
 
 class ApplyEngineFormulaSerializer(serializers.Serializer):
-    engine_formula_rule_id = serializers.CharField(required=True)
+    engine_formula_rule_id = serializers.CharField()
     version = serializers.IntegerField(required=False)
 
 
@@ -1367,8 +1367,8 @@ class FspChoiceSerializer(serializers.ModelSerializer):
 
 
 class DeliveryMechanismChoiceSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True)
-    code = serializers.CharField(required=True)
+    name = serializers.CharField()
+    code = serializers.CharField()
 
 
 class FspChoicesSerializer(serializers.Serializer):
