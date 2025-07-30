@@ -1,5 +1,3 @@
-from typing import Optional
-
 from rest_framework import serializers
 
 from hct_mis_api.apps.activity_log.models import LogEntry
