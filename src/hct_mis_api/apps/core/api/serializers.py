@@ -159,7 +159,7 @@ class FieldAttributeSerializer(serializers.Serializer):
 
     @staticmethod
     def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, Any] | None:
-        if isinstance(obj, FlexibleAttribute):
+        if isinstance(obj, FlexibleAttribute) and obj.pdu_data:
             return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
 
