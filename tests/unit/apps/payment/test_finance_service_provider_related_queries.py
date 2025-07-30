@@ -162,7 +162,7 @@ class TestFSPRelatedSchema(APITestCase):
         self.snapshot_graphql_request(
             request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES,
             context={"user": self.user},
-            variables={"businessArea": self.business_area.slug},
+            variables={"businessArea": self.business_area.slug, "orderBy": "name"},
         )
 
     def test_query_all_financial_service_providers(self) -> None:
