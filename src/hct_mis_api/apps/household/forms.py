@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
-from hct_mis_api.admin.steficon_admin import AutocompleteWidget
+from hct_mis_api.admin.steficon import AutocompleteWidget
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     Household,

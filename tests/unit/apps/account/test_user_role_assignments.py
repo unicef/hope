@@ -6,7 +6,7 @@ from django.test import TestCase
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 
-from hct_mis_api.admin.account_admin_forms import (
+from hct_mis_api.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )

@@ -12,7 +12,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.admin.household_admin_household import HouseholdWithdrawFromListMixin
+from hct_mis_api.admin.household import HouseholdWithdrawFromListMixin
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
