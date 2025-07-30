@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ExchangeRateClient(abc.ABC):
     @abc.abstractmethod
-    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
+    def fetch_exchange_rates(self) -> Dict:
         pass
 
 
@@ -23,7 +23,7 @@ class ExchangeRateClientDummy(ExchangeRateClient):
     def __init__(self, exchange_rates: Optional[Dict] = None):
         self.exchange_rates = exchange_rates or self.populate_from_file()
 
-    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
+    def fetch_exchange_rates(self) -> Dict:
         return self.exchange_rates
 
     def populate_from_file(self) -> Dict:
@@ -33,6 +33,9 @@ class ExchangeRateClientDummy(ExchangeRateClient):
 
 
 class ExchangeRateClientAPI(ExchangeRateClient):
+    HISTORY_MODE_PARAM_SHORT = "short"
+    HISTORY_MODE_PARAM_LONG = "yes"
+
     def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
         self.api_key = api_key or settings.EXCHANGE_RATES_API_KEY
         self.api_url: str = api_url or settings.EXCHANGE_RATES_API_URL
@@ -44,13 +47,12 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
-    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
+    def fetch_exchange_rates(self, history_mode: Optional[str] = HISTORY_MODE_PARAM_LONG) -> Dict:
         params = {}
 
-        if mode == "yes":
-            params["history"] = "yes"
-        elif mode == "short":
-            params["history"] = "short"
+        if history_mode:
+            params["history"] = history_mode
+
         response = self._client.get(self.api_url, params=params)
 
         try:
