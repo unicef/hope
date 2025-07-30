@@ -18,7 +18,7 @@ from django_filters import (
     UUIDFilter,
 )
 
-from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.activity_log.filters import LogEntryFilter
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.payment.models import (
