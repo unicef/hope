@@ -46,6 +46,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
+from hct_mis_api.apps.program.models import Program
 
 
 class BusinessAreaViewSet(
@@ -102,9 +103,11 @@ class BusinessAreaViewSet(
             200: FieldAttributeSimpleSerializer(many=True),
         },
     )
-    @action(detail=False, methods=["get"], url_path="all-fields-attributes")
+    @action(detail=True, methods=["get"], url_path="all-fields-attributes")
     def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        result_list = get_fields_attr_generators()
+        program_id = request.query_params.get("program_id", None)
+        business_area_slug = self.kwargs["slug"]
+        result_list = get_fields_attr_generators(business_area_slug=business_area_slug, program_id=program_id)
         return Response(FieldAttributeSimpleSerializer(result_list, many=True).data, status=200)
 
     @extend_schema(
