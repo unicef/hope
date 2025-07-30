@@ -11,6 +11,7 @@ import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 
 interface RegistrationDataImportProps {
   filter;
@@ -129,6 +130,25 @@ function RegistrationDataImportTable({
     return header;
   };
 
+  const { data: countData } = useQuery<{ count: number }>({
+    queryKey: [
+      'businessAreasProgramsRegistrationDataImportsCount',
+      businessArea,
+      programSlug,
+      queryVariables,
+    ],
+    queryFn: async () => {
+      const params = createApiParams(
+        { businessAreaSlug: businessArea, programSlug },
+        queryVariables,
+        { withPagination: false },
+      );
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
+        params,
+      );
+    },
+  });
+
   const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalRestQueryTable
@@ -144,7 +164,10 @@ function RegistrationDataImportTable({
             }
           />
         )}
-        title={noTitle ? null : t('List of Imports')}
+        title={
+          noTitle ? null : `${t('List of Imports')} (${countData?.count || 0})`
+        }
+        itemsCount={countData?.count || 0}
         headCells={prepareHeadCells()}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
