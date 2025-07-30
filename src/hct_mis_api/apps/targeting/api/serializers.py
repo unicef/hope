@@ -63,6 +63,8 @@ class TargetingCollectorRuleFilterBlockSerializer(serializers.ModelSerializer):
 
 
 class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
+    field_attribute = serializers.SerializerMethodField()
+
     class Meta:
         model = TargetingIndividualBlockRuleFilter
         fields = (
@@ -71,7 +73,23 @@ class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
             "field_name",
             "arguments",
             "round_number",
+            "field_attribute",
         )
+
+    def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
+        if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
+            field_attribute = get_field_by_name(
+                obj.field_name, obj.individuals_filters_block.targeting_criteria_rule.payment_plan
+            )
+            result = filter_choices(field_attribute, obj.arguments)
+            return FieldAttributeSerializer(result).data
+        program = None
+        if obj.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+            request = self.context["request"]
+            business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+            program_slug = request.parser_context["kwargs"]["program_slug"]
+            program = Program.objects.get(slug=program_slug, business_area__slug=business_area_slug)
+        return FieldAttributeSerializer(FlexibleAttribute.objects.get(name=obj.field_name, program=program)).data
 
 
 class TargetingIndividualRuleFilterBlockSerializer(serializers.ModelSerializer):
@@ -84,9 +102,16 @@ class TargetingIndividualRuleFilterBlockSerializer(serializers.ModelSerializer):
             "individual_block_filters",
         )
 
+    def to_representation(self, instance: TargetingCriteriaRule) -> dict:
+        data = super().to_representation(instance)
+        data["individual_block_filters"] = TargetingIndividualBlockRuleFilterSerializer(
+            instance.individual_block_filters, many=True, context=self.context,
+        ).data
+        return data
+
 
 class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
-    field_attribute = serializers.SerializerMethodField(read_only=True)
+    field_attribute = serializers.SerializerMethodField()
 
     class Meta:
         model = TargetingCriteriaRuleFilter
@@ -102,7 +127,8 @@ class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
     def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
         if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(obj.field_name, obj.targeting_criteria_rule.payment_plan)
-            return filter_choices(field_attribute, obj.arguments)
+            result = filter_choices(field_attribute, obj.arguments)
+            return FieldAttributeSerializer(result).data
         program = None
         if obj.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             request = self.context["request"]
@@ -131,6 +157,10 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         filters_data = instance.filters if hasattr(instance, "filters") else {}
         if filters_data:
-            data["households_filters_blocks"] = TargetingCriteriaRuleFilterSerializer(filters_data, many=True).data
-
+            data["households_filters_blocks"] = TargetingCriteriaRuleFilterSerializer(
+                filters_data, many=True, context=self.context,
+            ).data
+        data["individuals_filters_blocks"] = TargetingIndividualRuleFilterBlockSerializer(
+            instance.individuals_filters_blocks, many=True, context=self.context,
+        ).data
         return data
