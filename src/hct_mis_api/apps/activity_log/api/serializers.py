@@ -44,7 +44,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
             return obj.content_type.name
         return ""
 
-    def get_program_slug(self, obj: LogEntry) -> Optional[str]:
-        if obj.content_type and obj.content_type.model  == Program._meta.model_name:
+    def get_program_slug(self, obj: LogEntry) -> str | None:
+        if obj.content_type and obj.content_type.model == Program._meta.model_name:
             return Program.objects.get(id=obj.object_id).slug
         return None
