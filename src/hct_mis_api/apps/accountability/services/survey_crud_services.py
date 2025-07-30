@@ -44,6 +44,6 @@ class SurveyCrudServices:
             survey.flow_id = input_data["flow"]
 
         if not result.households:
-            raise Exception("There are no selected recipients or no recipient meets criteria.")
+            raise ValidationError("There are no selected recipients or no recipient meets criteria.")
         survey.save()
         return survey
