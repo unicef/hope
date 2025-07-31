@@ -6,6 +6,11 @@ from django.utils import timezone
 
 import pytz
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -22,11 +27,6 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
-)
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_service import (

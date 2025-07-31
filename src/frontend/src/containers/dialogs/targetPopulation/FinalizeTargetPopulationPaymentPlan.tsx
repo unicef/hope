@@ -54,8 +54,14 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
     },
     onError: (error) => {
+      let backendMessage: string = null;
+      const backendError = error as any;
+      if (backendError?.body && Array.isArray(backendError?.body)) {
+        backendMessage = backendError.body.join('\n');
+      }
       showMessage(
-        error.message ||
+        backendMessage ||
+          error.message ||
           t('An error occurred while marking target population as ready.'),
       );
     },

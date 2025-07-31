@@ -11,7 +11,7 @@ export type CreateGrievanceTicket = {
     issueType?: number;
     admin?: string | null;
     area?: string;
-    language: string;
+    language?: string;
     consent: boolean;
     linkedTickets?: Array<string>;
     extras?: CreateGrievanceTicketExtras | null;

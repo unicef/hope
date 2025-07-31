@@ -3,12 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApprovalProcess } from './ApprovalProcess';
+import type { BackgroundActionStatusEnum } from './BackgroundActionStatusEnum';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { DeliveryMechanismPerPaymentPlan } from './DeliveryMechanismPerPaymentPlan';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
@@ -22,7 +22,28 @@ export type PaymentPlanDetail = {
      * Name
      */
     name?: string | null;
-    status: PaymentPlanStatusEnum;
+    /**
+     * Status [sys]
+     *
+     * * `TP_OPEN` - Open
+     * * `TP_LOCKED` - Locked
+     * * `PROCESSING` - Processing
+     * * `STEFICON_WAIT` - Steficon Wait
+     * * `STEFICON_RUN` - Steficon Run
+     * * `STEFICON_COMPLETED` - Steficon Completed
+     * * `STEFICON_ERROR` - Steficon Error
+     * * `DRAFT` - Draft
+     * * `PREPARING` - Preparing
+     * * `OPEN` - Open
+     * * `LOCKED` - Locked
+     * * `LOCKED_FSP` - Locked FSP
+     * * `IN_APPROVAL` - In Approval
+     * * `IN_AUTHORIZATION` - In Authorization
+     * * `IN_REVIEW` - In Review
+     * * `ACCEPTED` - Accepted
+     * * `FINISHED` - Finished
+     */
+    status?: PaymentPlanStatusEnum;
     /**
      * Total Households Count [sys]
      */
@@ -235,7 +256,23 @@ export type PaymentPlanDetail = {
      * record revision number
      */
     version?: number;
-    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
+    /**
+     * Background Action Status for celery task [sys]
+     *
+     * * `RULE_ENGINE_RUN` - Rule Engine Running
+     * * `RULE_ENGINE_ERROR` - Rule Engine Errored
+     * * `XLSX_EXPORTING` - Exporting XLSX file
+     * * `XLSX_EXPORT_ERROR` - Export XLSX file Error
+     * * `XLSX_IMPORT_ERROR` - Import XLSX file Error
+     * * `XLSX_IMPORTING_ENTITLEMENTS` - Importing Entitlements XLSX file
+     * * `XLSX_IMPORTING_RECONCILIATION` - Importing Reconciliation XLSX file
+     * * `EXCLUDE_BENEFICIARIES` - Exclude Beneficiaries Running
+     * * `EXCLUDE_BENEFICIARIES_ERROR` - Exclude Beneficiaries Error
+     * * `SEND_TO_PAYMENT_GATEWAY` - Sending to Payment Gateway
+     * * `SEND_TO_PAYMENT_GATEWAY_ERROR` - Send to Payment Gateway Error
+     */
+    backgroundActionStatus?: BackgroundActionStatusEnum | null;
+    backgroundActionStatusDisplay: string;
     /**
      * Payment Plan start date
      */

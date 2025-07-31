@@ -6,7 +6,8 @@ import type { PaymentVerificationPlanStatusEnum } from './PaymentVerificationPla
 export type PaymentVerificationPlan = {
     readonly id: string;
     unicefId?: string | null;
-    status: PaymentVerificationPlanStatusEnum;
+    status?: PaymentVerificationPlanStatusEnum;
+    statusDisplay: string;
     verificationChannel: string;
     sampling: string;
     sexFilter?: string | null;

@@ -2,7 +2,6 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { createApiParams } from '@utils/apiUtils';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
@@ -13,6 +12,7 @@ import styled from 'styled-components';
 import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 interface TargetPopulationProps {
   filter;
@@ -129,7 +129,7 @@ export function TargetPopulationForPeopleTable({
         data={targetPopulationsData}
         isLoading={isLoading}
         error={targetPopulationsError}
-        renderRow={(row: PaymentPlanDetail) => (
+        renderRow={(row: TargetPopulationList) => (
           <TargetPopulationForPeopleTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}
