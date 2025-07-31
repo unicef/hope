@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { DataCollectingTypeTypeEnum } from '@restgenerated/models/DataCollectingTypeTypeEnum';
 
 export type ProgramContextType = Partial<ProgramDetail> | null;
 
@@ -30,9 +31,11 @@ export function ProgramProvider({
     useState<ProgramContextType>(null);
   let isActiveProgram = selectedProgram?.status === ProgramStatusEnum.ACTIVE;
   const isSocialDctType =
-    selectedProgram?.dataCollectingType?.type === 'Social Workers';
+    selectedProgram?.dataCollectingType?.type ===
+    DataCollectingTypeTypeEnum.SOCIAL;
   const isStandardDctType =
-    selectedProgram?.dataCollectingType?.type === 'Standard';
+    selectedProgram?.dataCollectingType?.type ===
+    DataCollectingTypeTypeEnum.STANDARD;
 
   const programHasPdu =
     selectedProgram?.pduFields && selectedProgram.pduFields.length > 0;
