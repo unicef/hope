@@ -42,10 +42,7 @@ class Migration(migrations.Migration):
                 help_text="Exclude households with individuals (members or collectors) on sanction list.",
             ),
         ),
-        migrations.RunPython(
-            transfer_targeting_criteria_data,
-            reverse_code=migrations.RunPython.noop
-        ),
+        migrations.RunPython(transfer_targeting_criteria_data, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="paymentplan",
             name="targeting_criteria",
