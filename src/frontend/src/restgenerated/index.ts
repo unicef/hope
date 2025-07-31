@@ -55,6 +55,7 @@ export type { CreateGrievanceTicketExtras as CreateGrievanceTicketExtrasCamelCas
 export { CurrenciesEnum as CurrenciesEnumCamelCase } from './models/CurrenciesEnum';
 export { CurrencyEnum as CurrencyEnumCamelCase } from './models/CurrencyEnum';
 export type { DataCollectingType as DataCollectingTypeCamelCase } from './models/DataCollectingType';
+export { DataCollectingTypeTypeEnum as DataCollectingTypeTypeEnumCamelCase } from './models/DataCollectingTypeTypeEnum';
 export { DataSourceEnum as DataSourceEnumCamelCase } from './models/DataSourceEnum';
 export { DeduplicationBatchStatusEnum as DeduplicationBatchStatusEnumCamelCase } from './models/DeduplicationBatchStatusEnum';
 export type { DeduplicationEngineSimilarityPairIndividual as DeduplicationEngineSimilarityPairIndividualCamelCase } from './models/DeduplicationEngineSimilarityPairIndividual';
