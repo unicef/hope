@@ -3,7 +3,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
@@ -31,7 +31,7 @@ export function ProgramDetailsPageHeader({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   switch (program.status) {
-    case Status791Enum.ACTIVE:
+    case ProgramStatusEnum.ACTIVE:
       buttons = (
         <ActiveProgramDetailsPageHeaderButtons
           program={program}
@@ -41,7 +41,7 @@ export function ProgramDetailsPageHeader({
         />
       );
       break;
-    case Status791Enum.DRAFT:
+    case ProgramStatusEnum.DRAFT:
       buttons = (
         <DraftProgramDetailsPageHeaderButtons
           program={program}

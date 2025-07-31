@@ -4,7 +4,8 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
-from django.core.exceptions import ValidationError
+
+from rest_framework.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
@@ -108,7 +109,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Deletion is only allowed when the status is 'Open'",
         )
 
@@ -460,7 +461,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Cannot create a follow-up of a follow-up Payment Plan",
         )
 
@@ -794,7 +795,7 @@ class TestPaymentPlanServices(APITestCase):
             "SEND_XLSX_PASSWORD",
         ]
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}",
         )
 
@@ -837,7 +838,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).tp_rebuild()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Can only Rebuild Population for Locked or Open Population status",
         )
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
@@ -878,7 +879,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "At least one valid Payment should exist in order to Lock the Payment Plan",
         )
 
@@ -891,28 +892,28 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Not Allow edit targeting criteria within status {payment_plan.status}",
         )
 
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status",
         )
 
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"currency": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Not Allow edit Payment Plan within status {payment_plan.status}",
         )
 
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Name can be changed only within Open status",
         )
 
@@ -927,7 +928,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Name 'test_data' and program '{self.cycle.program.name}' already exists.",
         )
 
@@ -936,7 +937,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"program_cycle_id": str(self.cycle.id)})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Not possible to assign Finished Program Cycle",
         )
 
@@ -982,7 +983,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
         )
         payment_plan.financial_service_provider = self.fsp
@@ -992,7 +993,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "All Payments must have entitlement quantity set.",
         )
         payment.entitlement_quantity = 100
@@ -1192,3 +1193,42 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=payment_plan).acceptance_process()
 
         self.assertIn(f"Approval Process object not found for PaymentPlan {payment_plan.id}", str(error.exception))
+
+    def test_update_rules_tp_open(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.TP_OPEN,
+        )
+        input_data = {
+            "rules": [
+                {
+                    "individual_ids": "",
+                    "household_ids": "",
+                    "households_filters_blocks": [],
+                    "individuals_filters_blocks": [
+                        {
+                            "individual_block_filters": [
+                                {
+                                    "comparison_method": "RANGE",
+                                    "arguments": [10, 20],
+                                    "field_name": "age",
+                                    "flex_field_classification": "NOT_FLEX_FIELD",
+                                }
+                            ]
+                        }
+                    ],
+                    "collectors_filters_blocks": [],
+                }
+            ],
+            "flag_exclude_if_on_sanction_list": True,
+            "flag_exclude_if_active_adjudication_ticket": False,
+        }
+        # Should not raise ValidationError
+        PaymentPlanService(payment_plan).update(input_data)
+        payment_plan.refresh_from_db()
+        # Check that rules were updated
+        self.assertEqual(payment_plan.rules.count(), 1)
+        # Check flags
+        self.assertTrue(payment_plan.flag_exclude_if_on_sanction_list)
+        self.assertFalse(payment_plan.flag_exclude_if_active_adjudication_ticket)

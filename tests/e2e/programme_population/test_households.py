@@ -45,7 +45,7 @@ def add_household() -> Household:
     household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
+            "admin1": Area.objects.filter(name="Kabul").first(),
             "program": Program.objects.filter(name="Test Programm").first(),
             "size": 7,
             "residence_status": REFUGEE,
@@ -65,7 +65,6 @@ def add_household() -> Household:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeHouseholds:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_page_households(
         self, create_programs: None, add_household: Household, pageHouseholds: Households
     ) -> None:
@@ -83,7 +82,6 @@ class TestSmokeHouseholds:
         assert "Total Cash Received" in pageHouseholds.getHouseholdTotalCashReceived().text
         assert "Registration Date" in pageHouseholds.getHouseholdRegistrationDate().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_page_households_details(
         self,
         create_programs: None,
@@ -103,7 +101,7 @@ class TestSmokeHouseholds:
         assert "938 Luna Cliffs Apt. 551 Jameschester, SC 24934" in pageHouseholdsDetails.getLabelAddress().text
         assert "Small One" in pageHouseholdsDetails.getLabelVillage().text
         assert "-" in pageHouseholdsDetails.getLabelZipCode().text
-        assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel1().text
+        assert "Kabul" in pageHouseholdsDetails.getLabelAdministrativeLevel1().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel2().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel3().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel4().text

@@ -11,6 +11,7 @@ from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     create_household,
@@ -18,7 +19,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
@@ -113,7 +113,6 @@ def get_social_program_with_dct_type_and_name(
 
 @pytest.mark.usefixtures("login")
 class TestSmokePeople:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()

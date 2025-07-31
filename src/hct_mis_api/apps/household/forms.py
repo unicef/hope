@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
+from hct_mis_api.admin.steficon import AutocompleteWidget
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     Household,
@@ -17,7 +18,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:

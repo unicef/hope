@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
+import hct_mis_api.admin
 import hct_mis_api.apps.account.views
 import hct_mis_api.apps.accountability.views
 import hct_mis_api.apps.household.views

@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentListSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanListSerializer,
-    TPHouseholdListSerializer,
+    PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
 from hct_mis_api.apps.payment.models import (
@@ -55,7 +55,7 @@ class TPHouseholdListSerializerTest(TestCase):
         cls.payment = PaymentFactory(parent=cls.pp, household=cls.hh1, vulnerability_score=123.012)
 
     def test_serializer_all_data(self) -> None:
-        serializer = TPHouseholdListSerializer(instance=self.payment)
+        serializer = PendingPaymentSerializer(instance=self.payment)
         data = serializer.data
 
         self.assertEqual(data["id"], str(self.payment.id))
@@ -68,7 +68,7 @@ class TPHouseholdListSerializerTest(TestCase):
     def test_hoh_full_name_if_no_hoh(self) -> None:
         self.payment.head_of_household = None
         self.payment.save()
-        serializer = TPHouseholdListSerializer(instance=self.payment)
+        serializer = PendingPaymentSerializer(instance=self.payment)
         data = serializer.data
 
         self.assertEqual(data["hoh_full_name"], "")

@@ -15,6 +15,11 @@ from django.utils import timezone
 from django.utils.functional import classproperty
 
 import pytest
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import (
@@ -69,11 +74,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.contrib.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
-)
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (

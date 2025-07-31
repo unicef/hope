@@ -4,7 +4,7 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 const customRender = (
   ui: ReactElement,
@@ -57,7 +57,7 @@ export const fakeContextProgram = {
     id: '1',
     name: 'someName',
     programme_code: 'A123',
-    status: 'ACTIVE' as Status791Enum,
+    status: 'ACTIVE' as ProgramStatusEnum,
     pduFields: null,
     program_code: 'A123',
     dataCollectingType: {

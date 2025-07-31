@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
+from django.db import transaction
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -94,6 +95,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
             )
         return data
 
+    @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
@@ -174,7 +176,7 @@ class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status_display = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
     sampling = serializers.CharField(source="get_sampling_display")
     has_xlsx_file = serializers.SerializerMethodField()
@@ -188,6 +190,7 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
             "id",
             "unicef_id",
             "status",
+            "status_display",
             "verification_channel",
             "sampling",
             "sex_filter",
@@ -304,7 +307,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source="get_status_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
@@ -319,6 +322,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "unicef_id",
             "name",
             "status",
+            "status_display",
             "total_households_count",
             "currency",
             "total_entitled_quantity",
@@ -342,13 +346,8 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
-    @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
-        return obj.get_status_display().upper()
-
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
 
@@ -378,10 +377,6 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_created_by(obj: PaymentPlan) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
-
-    @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
-        return obj.get_status_display().upper()
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
@@ -586,7 +581,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
-    background_action_status = serializers.CharField(source="get_background_action_status_display")
+    background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
@@ -629,6 +624,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
             "version",
             "background_action_status",
+            "background_action_status_display",
             "start_date",
             "end_date",
             "program",
@@ -906,6 +902,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
             "background_action_status",
+            "status",
             "start_date",
             "end_date",
             "program",
@@ -927,6 +924,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "screen_beneficiary",
             "flag_exclude_if_on_sanction_list",
             "flag_exclude_if_active_adjudication_ticket",
+            "build_status",
         )
 
     @staticmethod
@@ -944,7 +942,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
     @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
+    def get_status_display(obj: PaymentPlan) -> str:
         return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
 
 
@@ -969,7 +967,6 @@ class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     household_id = serializers.UUIDField(read_only=True)
     collector_id = serializers.UUIDField(read_only=True)
-    status = serializers.CharField(source="get_status_display")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
     household_status = serializers.SerializerMethodField()
@@ -988,6 +985,11 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
+
+    status_display = serializers.CharField(
+        source="get_status_display",  # <- metoda modelu
+        read_only=True,
+    )
 
     class Meta:
         model = Payment
@@ -1010,6 +1012,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "delivery_date",
             "delivery_type",
             "status",
+            "status_display",
             "currency",
             "fsp_auth_code",
             "hoh_full_name",
@@ -1244,15 +1247,17 @@ class PaymentVerificationUpdateSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 
 
-class TPHouseholdListSerializer(serializers.ModelSerializer):
+class PendingPaymentSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     hoh_full_name = serializers.SerializerMethodField()
     household_size = serializers.IntegerField(source="household.size")
+    household_id = serializers.CharField(source="household.id")
 
     class Meta:
         model = Payment
         fields = (
             "id",
+            "household_id",
             "household_unicef_id",
             "hoh_full_name",
             "household_size",
@@ -1303,6 +1308,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program_slug = request.parser_context["kwargs"]["program_slug"]
         return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
+    @transaction.atomic
     def create(self, data: dict) -> PaymentPlan:
         request = self.context["request"]
         program = self.get_program()
@@ -1326,7 +1332,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)
-
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=validated_data)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

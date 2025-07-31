@@ -7,8 +7,8 @@ import type { DataCollectingType } from './DataCollectingType';
 import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
 import type { PartnerAccessEnum } from './PartnerAccessEnum';
 import type { PeriodicField } from './PeriodicField';
+import type { ProgramStatusEnum } from './ProgramStatusEnum';
 import type { SectorEnum } from './SectorEnum';
-import type { Status791Enum } from './Status791Enum';
 export type ProgramDetail = {
     readonly id: string;
     /**
@@ -71,7 +71,7 @@ export type ProgramDetail = {
      * * `DRAFT` - Draft
      * * `FINISHED` - Finished
      */
-    status: Status791Enum;
+    status: ProgramStatusEnum;
     pduFields: Array<PeriodicField>;
     /**
      * Program household count [sys]

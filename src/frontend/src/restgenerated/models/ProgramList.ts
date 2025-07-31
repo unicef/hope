@@ -5,8 +5,8 @@
 import type { BeneficiaryGroup } from './BeneficiaryGroup';
 import type { DataCollectingType } from './DataCollectingType';
 import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
+import type { ProgramStatusEnum } from './ProgramStatusEnum';
 import type { SectorEnum } from './SectorEnum';
-import type { Status791Enum } from './Status791Enum';
 export type ProgramList = {
     readonly id: string;
     /**
@@ -69,7 +69,7 @@ export type ProgramList = {
      * * `DRAFT` - Draft
      * * `FINISHED` - Finished
      */
-    status: Status791Enum;
+    status: ProgramStatusEnum;
     readonly pduFields: Array<string>;
     /**
      * Program household count [sys]

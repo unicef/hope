@@ -18,7 +18,7 @@ import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +38,7 @@ export function AuthorizePaymentPlan({
   const { businessArea, programId } = useBaseUrl();
 
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const { mutateAsync: authorize, isPending: loadingAuthorize } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -59,6 +60,9 @@ export function AuthorizePaymentPlan({
     onSuccess: () => {
       showMessage(t('Payment Plan has been authorized.'));
       setAuthorizeDialogOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
     },
   });
   const initialValues = {

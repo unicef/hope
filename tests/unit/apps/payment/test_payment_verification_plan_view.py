@@ -185,7 +185,7 @@ class TestPaymentVerificationViewSet:
             assert "id" in resp_data
             assert 2 == resp_data["available_payment_records_count"]
             assert 2 == resp_data["eligible_payments_count"]
-            assert "Pending" == resp_data["payment_verification_plans"][0]["status"]
+            assert PaymentVerificationPlan.STATUS_PENDING == resp_data["payment_verification_plans"][0]["status"]
             assert "Random sampling" == resp_data["payment_verification_plans"][0]["sampling"]
             assert (
                 PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
@@ -221,7 +221,7 @@ class TestPaymentVerificationViewSet:
             assert "id" in resp_data
             assert 2 == len(resp_data["payment_verification_plans"])
             pvp = resp_data["payment_verification_plans"][1]
-            assert "Pending" == pvp["status"]
+            assert PaymentVerificationPlan.STATUS_PENDING == pvp["status"]
             assert PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX == pvp["verification_channel"]
             assert "Full list" == pvp["sampling"]
             assert pvp["excluded_admin_areas_filter"] == []
@@ -254,7 +254,7 @@ class TestPaymentVerificationViewSet:
             assert "id" in resp_data
             assert 1 == len(resp_data["payment_verification_plans"])
             pvp = resp_data["payment_verification_plans"][0]
-            assert "Pending" == pvp["status"]
+            assert PaymentVerificationPlan.STATUS_PENDING == pvp["status"]
             assert "MANUAL" == pvp["verification_channel"]
             assert "Full list" == pvp["sampling"]
             assert pvp["excluded_admin_areas_filter"] == []
@@ -278,7 +278,7 @@ class TestPaymentVerificationViewSet:
             resp_data = response.json()
             assert "id" in resp_data
             assert 1 == len(resp_data["payment_verification_plans"])
-            assert resp_data["payment_verification_plans"][0]["status"] == "Active"
+            assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_ACTIVE
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -298,7 +298,7 @@ class TestPaymentVerificationViewSet:
             resp_data = response.json()
             assert "id" in resp_data
             assert 1 == len(resp_data["payment_verification_plans"])
-            assert resp_data["payment_verification_plans"][0]["status"] == "Finished"
+            assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_FINISHED
 
     def test_pvp_finish_validation_error(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -326,7 +326,7 @@ class TestPaymentVerificationViewSet:
             resp_data = response.json()
             assert "id" in resp_data
             assert 1 == len(resp_data["payment_verification_plans"])
-            assert resp_data["payment_verification_plans"][0]["status"] == "Pending"
+            assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_PENDING
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -348,7 +348,7 @@ class TestPaymentVerificationViewSet:
             resp_data = response.json()
             assert "id" in resp_data
             assert 1 == len(resp_data["payment_verification_plans"])
-            assert resp_data["payment_verification_plans"][0]["status"] == "Invalid"
+            assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_INVALID
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

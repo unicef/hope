@@ -31,11 +31,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
 
   return (
     <>
-      <ProgramForm
-        values={values}
-        programHasRdi={programHasRdi}
-        errors={errors}
-      />
+      <ProgramForm values={values} programHasRdi={programHasRdi} />
       <Box display="flex" justifyContent="space-between">
         <Button
           data-cy="button-cancel"

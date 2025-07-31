@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
+import { PendingPayment } from '@restgenerated/models/PendingPayment';
 
-export const headCells: HeadCell<TPHouseholdList>[] = [
+export const headCells: HeadCell<PendingPayment>[] = [
   {
     disablePadding: false,
     label: 'ID',

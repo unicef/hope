@@ -124,9 +124,9 @@ class TestSmokeAccountabilitySurveys:
         assert "Administrative Level 2" in pageAccountabilitySurveysDetails.getHouseholdLocation().text
         assert "Residence Status" in pageAccountabilitySurveysDetails.getHouseholdResidenceStatus().text
         assert "Registration Date" in pageAccountabilitySurveysDetails.getHouseholdRegistrationDate().text
-        # assert "Rows per page: 10 1–1 of 1" in pageAccountabilitySurveysDetails.getTablePagination().text.replace(
-        #     "\n", " "
-        # )
+        assert "Rows per page: 10 1–1 of 1" in pageAccountabilitySurveysDetails.getTablePagination().text.replace(
+            "\n", " "
+        )
         assert 1 == len(pageAccountabilitySurveys.getRows())
         assert (
             add_accountability_surveys_message.recipients.all()[0].unicef_id

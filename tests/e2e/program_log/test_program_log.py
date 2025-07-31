@@ -18,7 +18,6 @@ def standard_program() -> Program:
 
 @pytest.mark.usefixtures("login")
 class TestProgrammeLog:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_program_log(
         self, standard_program: Program, pageProgramLog: ProgramLog, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -37,7 +36,6 @@ class TestProgrammeLog:
         assert "FINISHED" in pageProgramLog.getToValueCell().text
         assert "Rows per page: 20 1–1 of 1" in pageProgramLog.getTablePagination().text.replace("\n", " ")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_activity_log(
         self, standard_program: Program, pageProgramLog: ProgramLog, pageProgrammeDetails: ProgrammeDetails
     ) -> None:

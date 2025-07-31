@@ -111,6 +111,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         : null;
 
       const requestBody = {
+        targetPopulationId: values.paymentPlanId,
         dispersionStartDate,
         dispersionEndDate,
         currency: values.currency,

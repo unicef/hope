@@ -181,7 +181,6 @@ const EditFeedbackPage = (): ReactElement => {
       initialValues={initialValues}
       enableReinitialize={true}
       onSubmit={async (values) => {
-        console.log('values', values);
         try {
           await mutate({
             businessAreaSlug: businessArea,

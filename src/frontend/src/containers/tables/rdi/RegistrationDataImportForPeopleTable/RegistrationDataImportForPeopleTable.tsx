@@ -89,6 +89,30 @@ export function RegistrationDataImportForPeopleTable({
         ),
     });
 
+  // Query for count endpoint
+  const {
+    data: countData,
+    isLoading: isCountLoading,
+    error: countError,
+  } = useQuery<{ count: number }>({
+    queryKey: [
+      'businessAreasProgramsRegistrationDataImportsCount',
+      businessArea,
+      programSlug,
+      queryVariables,
+    ],
+    queryFn: async () => {
+      const params = createApiParams(
+        { businessAreaSlug: businessArea, programSlug },
+        queryVariables,
+        { withPagination: false },
+      );
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
+        params,
+      );
+    },
+  });
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -96,19 +120,21 @@ export function RegistrationDataImportForPeopleTable({
   const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalRestTable<RegistrationDataImportList, any>
-        title={noTitle ? null : t('List of Imports')}
-        getTitle={(tableData) =>
-          noTitle ? null : `${t('List of Imports')} (${tableData?.count || 0})`
+        title={
+          noTitle
+            ? null
+            : `${t('List of Imports')} (${countData?.count ?? (data as any)?.count ?? 0})`
         }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         defaultOrderBy="importDate"
         defaultOrderDirection="desc"
         rowsPerPageOptions={[10, 15, 20]}
         data={data}
-        isLoading={isLoading}
-        error={error}
+        isLoading={isLoading || isCountLoading}
+        error={error || countError}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        itemsCount={countData?.count ?? (data as any)?.count ?? 0}
         renderRow={(row) => (
           <RegistrationDataImportForPeopleTableRow
             key={row.id}

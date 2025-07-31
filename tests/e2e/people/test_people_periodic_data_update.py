@@ -258,7 +258,6 @@ class TestPeoplePeriodicDataUpdateUpload:
         assert pageIndividuals.getPduFormErrors().text == error_text
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_people_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,

@@ -22,7 +22,7 @@ class Config(SmartConfig):
 
         from smart_admin.smart_auth.admin import ContentTypeAdmin, PermissionAdmin
 
-        from .admin import LogEntryAdmin  # noqa
+        from hct_mis_api.admin.log_entry import LogEntryAdmin  # noqa
 
         smart_register(ContentType)(ContentTypeAdmin)
         smart_register(LogEntry)(LogEntryAdmin)

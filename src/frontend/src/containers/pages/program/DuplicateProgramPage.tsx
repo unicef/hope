@@ -340,7 +340,7 @@ const DuplicateProgramPage = (): ReactElement => {
       onSubmit={(values) => {
         handleSubmit(values);
       }}
-      validationSchema={editProgramDetailsValidationSchema(t, initialValues)}
+      validationSchema={editProgramDetailsValidationSchema(t)}
       validateOnChange={true}
     >
       {({

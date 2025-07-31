@@ -340,7 +340,7 @@ class TestGrievanceTicketGlobalList:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": household.residence_status,
+                    "residence_status": household.get_residence_status_display(),
                     "country_origin": household.country_origin.name,
                     "country": household.country.name,
                     "address": household.address,

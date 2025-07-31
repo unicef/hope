@@ -11,7 +11,6 @@ from hct_mis_api.apps.payment.api.views import (
     PaymentVerificationViewSet,
     PaymentViewSet,
     TargetPopulationViewSet,
-    TPHouseholdViewSet,
     available_fsps_for_delivery_mechanisms,
 )
 from hct_mis_api.apps.program.api.urls import program_base_router
@@ -39,11 +38,11 @@ program_nested_router.register(
     TargetPopulationViewSet,
     basename="target-populations",
 )
-program_nested_router.register(
-    r"target-populations/(?P<target_population_id>[^/.]+)/households",
-    TPHouseholdViewSet,
-    basename="tp-households",
-)
+# program_nested_router.register(
+#     r"target-populations/(?P<target_population_id>[^/.]+)/households",
+#     TPHouseholdViewSet,
+#     basename="tp-households",
+# )
 program_nested_router.register(
     r"payment-plans/(?P<payment_plan_id>[^/.]+)/payments",
     PaymentViewSet,

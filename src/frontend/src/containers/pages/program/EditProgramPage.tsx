@@ -383,10 +383,7 @@ const EditProgramPage = (): ReactElement => {
           onSubmit={(values) => {
             handleSubmitProgramDetails(values);
           }}
-          validationSchema={editProgramDetailsValidationSchema(
-            t,
-            initialValuesProgramDetails,
-          )}
+          validationSchema={editProgramDetailsValidationSchema(t)}
           validationContext={{ isEdit: true }}
           validateOnChange={true}
         >

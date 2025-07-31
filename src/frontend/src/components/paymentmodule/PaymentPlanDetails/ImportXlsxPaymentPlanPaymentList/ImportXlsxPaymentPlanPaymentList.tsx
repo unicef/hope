@@ -48,19 +48,19 @@ export function ImportXlsxPaymentPlanPaymentList({
       businessAreaSlug,
       id,
       programSlug,
-      requestBody,
+                   formData,
     }: {
       businessAreaSlug: string;
       id: string;
       programSlug: string;
-      requestBody: PaymentPlanImportFile;
+      formData: PaymentPlanImportFile;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
         {
           businessAreaSlug,
           id,
           programSlug,
-          requestBody,
+          formData,
         },
       ),
     onSuccess: () => {
@@ -79,14 +79,15 @@ export function ImportXlsxPaymentPlanPaymentList({
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
+        const formData = {
+          // @ts-ignore - File object is expected here despite the string type in the model
+          file: fileToImport,
+        };
         await mutate({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
           programSlug: programId,
-          requestBody: {
-            // @ts-ignore - File object is expected here despite the string type in the model
-            file: fileToImport,
-          },
+          formData: formData as any,
         });
       } catch (e) {
         // Error is already handled by onError in mutation

@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from django_countries import Countries
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiTypes
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -42,6 +42,12 @@ PEOPLE_TYPE_CHOICES = (
 )
 
 
+# Don't show this choices in the API documentation, but use it for validation
+@extend_schema_field(OpenApiTypes.STR)
+class DynamicAreaChoiceField(serializers.ChoiceField):
+    pass
+
+
 class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -62,10 +68,10 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     phone_no_alternative = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
-    admin1 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
-    admin2 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
-    admin3 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
-    admin4 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin1 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin2 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin3 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
 
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 

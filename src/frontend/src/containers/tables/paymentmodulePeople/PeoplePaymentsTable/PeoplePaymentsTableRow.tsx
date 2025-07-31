@@ -18,6 +18,7 @@ import { ReactElement, SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -79,7 +80,7 @@ export const PeoplePaymentsTableRow = ({
   const renderDeliveredQuantity = (): ReactElement => {
     const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
       payment;
-    if (status === 'TRANSACTION_ERRONEOUS') {
+    if (status === PaymentStatusEnum.TRANSACTION_ERRONEOUS) {
       return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
     }
     if (deliveredQuantity === null) {

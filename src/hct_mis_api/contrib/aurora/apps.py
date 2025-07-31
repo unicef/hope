@@ -28,8 +28,6 @@ class Config(AppConfig):
             UkraineRegistrationService,
         )
 
-        from . import admin  # noqa
-
         registry.register(GenericRegistrationService)
         registry.register(PeopleRegistrationService)
         registry.register(SriLankaRegistrationService)

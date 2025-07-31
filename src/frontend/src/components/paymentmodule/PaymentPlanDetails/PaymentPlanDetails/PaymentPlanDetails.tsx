@@ -116,6 +116,20 @@ const PaymentPlanDetails = ({
                   </IconButton>
                 </Tooltip>
               </Grid>
+              <Grid size={{ xs: 3 }}>
+                <Box mr={1}>
+                  <LabelizedField label={t('FSP')}>
+                    {paymentPlan.financialServiceProvider.name}
+                  </LabelizedField>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <Box mr={1}>
+                  <LabelizedField label={t('Delivery Mechanism')}>
+                    {paymentPlan.deliveryMechanism.name}
+                  </LabelizedField>
+                </Box>
+              </Grid>
             </Grid>
             <Grid container direction="column" size={{ xs: 3 }} spacing={6}>
               <Grid size={{ xs: 12 }}>

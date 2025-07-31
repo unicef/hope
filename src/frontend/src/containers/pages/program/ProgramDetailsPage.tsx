@@ -8,7 +8,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -111,7 +111,7 @@ function ProgramDetailsPage(): ReactElement {
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
-        {program?.status === Status791Enum.DRAFT ? (
+        {program?.status === ProgramStatusEnum.DRAFT ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
               {t('Activate the Programme to create a Cycle')}

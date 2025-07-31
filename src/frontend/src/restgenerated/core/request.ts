@@ -221,8 +221,8 @@ export const sendRequest = async (
 ): Promise<Response> => {
   const controller = new AbortController();
   let requestBody = body;
-  if (isFormData(body)) {
-    requestBody = body; // send as-is
+  if (isFormData(formData)) {
+    requestBody = formData; // send as-is
   } else if (body) {
     requestBody = JSON.stringify(deepUnderscore(JSON.parse(body)));
   }

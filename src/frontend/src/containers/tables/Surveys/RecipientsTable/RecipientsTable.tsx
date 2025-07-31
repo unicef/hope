@@ -74,6 +74,7 @@ function RecipientsTable({
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         rowsPerPageOptions={[10, 15, 20]}
+        itemsCount={data?.results?.length || 0}
         renderRow={(row: Recipient) => (
           <RecipientsTableRow
             key={row.id}
