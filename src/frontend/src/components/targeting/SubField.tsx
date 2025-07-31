@@ -109,6 +109,13 @@ const SubField: FC<SubFieldProps> = ({
   if (!field) {
     return null;
   }
+  const getLabel = () =>
+    field.fieldAttribute?.label?.englishEn ||
+    field.label?.englishEn ||
+    field.fieldAttribute?.labelEn ||
+    field.labelEn ||
+    '';
+
   const renderFieldByType = (type: string) => {
     const typeForSwitch = fieldTypeProp || type;
     switch (typeForSwitch) {
@@ -123,7 +130,7 @@ const SubField: FC<SubFieldProps> = ({
                     ? `${baseName}-cleared-from`
                     : `${baseName}-from`
                 }
-                label={`${field.fieldAttribute.labelEn} from`}
+                label={`${getLabel()} from`}
                 variant="outlined"
                 fullWidth
                 component={FormikDecimalField}
@@ -137,7 +144,7 @@ const SubField: FC<SubFieldProps> = ({
                 key={
                   isNullSelected ? `${baseName}-cleared-to` : `${baseName}-to`
                 }
-                label={`${field.fieldAttribute.labelEn} to`}
+                label={`${getLabel()} to`}
                 variant="outlined"
                 fullWidth
                 component={FormikDecimalField}
@@ -153,7 +160,7 @@ const SubField: FC<SubFieldProps> = ({
             <InlineField>
               <Field
                 name={`${baseName}.value.from`}
-                label={`${field.fieldAttribute.labelEn} from`}
+                label={`${getLabel()} from`}
                 fullWidth
                 component={FormikDateField}
                 decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
@@ -164,7 +171,7 @@ const SubField: FC<SubFieldProps> = ({
             <InlineField>
               <Field
                 name={`${baseName}.value.to`}
-                label={`${field.fieldAttribute.labelEn} to`}
+                label={`${getLabel()} to`}
                 fullWidth
                 component={FormikDateField}
                 decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
@@ -180,7 +187,7 @@ const SubField: FC<SubFieldProps> = ({
             <InlineField>
               <Field
                 name={`${baseName}.value.from`}
-                label={`${field.fieldAttribute.labelEn} from`}
+                label={`${getLabel()} from`}
                 type="number"
                 integer
                 variant="outlined"
@@ -193,7 +200,7 @@ const SubField: FC<SubFieldProps> = ({
             <InlineField>
               <Field
                 name={`${baseName}.value.to`}
-                label={`${field.fieldAttribute.labelEn} to`}
+                label={`${getLabel()} to`}
                 type="number"
                 integer
                 variant="outlined"
@@ -209,7 +216,7 @@ const SubField: FC<SubFieldProps> = ({
         return field.fieldName.includes('admin') ? (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={getLabel()}
             choices={choicesDict[field.fieldName]}
             index={index}
             component={FormikAutocomplete}
@@ -218,7 +225,7 @@ const SubField: FC<SubFieldProps> = ({
         ) : (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={getLabel()}
             choices={choicesDict[field.fieldName]}
             index={index}
             component={FormikSelectField}
@@ -230,7 +237,7 @@ const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={getLabel()}
             choices={choicesDict[field.fieldName]}
             index={index}
             multiple
@@ -243,7 +250,7 @@ const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute?.labelEn}`}
+            label={getLabel()}
             fullWidth
             variant="outlined"
             component={FormikTextField}
@@ -255,7 +262,7 @@ const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute?.labelEn || field?.labelEn}`}
+            label={getLabel()}
             choices={[
               {
                 admin: null,

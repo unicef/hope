@@ -105,6 +105,12 @@ const AddFilterTargetingCriteriaDisplay = ({
       staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
     });
 
+  console.log('allCoreFieldsAttributesData', allCoreFieldsAttributesData);
+  console.log(
+    'allcollectorFieldsAttributesData',
+    allCollectorFieldsAttributesData,
+  );
+
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(0);
   const [criteriaObject, setCriteria] = useState({});
