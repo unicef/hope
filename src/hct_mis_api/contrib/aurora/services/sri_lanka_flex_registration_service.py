@@ -212,7 +212,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
 
         PendingIndividual.objects.bulk_create(individuals_to_create)
-        for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create):
+        for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create, strict=True):
             self._prepare_birth_certificate(individual_data_dict, imported_individual)
         household.size = len(individuals_to_create) + 1
         household.head_of_household = head_of_household

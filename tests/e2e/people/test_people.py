@@ -242,7 +242,7 @@ class TestSmokePeople:
         pagePeople.getIndividualTableRow(0).click()
         assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
         pagePeopleDetails.waitForRows()
-        assert 1 == len(pagePeopleDetails.getRows())
+        assert len(pagePeopleDetails.getRows()) == 1
         assert "21.36" in pagePeopleDetails.getRows()[0].text
         assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
         assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text

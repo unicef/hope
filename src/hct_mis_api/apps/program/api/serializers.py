@@ -36,23 +36,24 @@ def validate_cycle_timeframes_overlapping(
     current_cycle_id: str | None = None,
 ) -> None:
     cycle_qs = program.cycles.exclude(id=current_cycle_id)
-    if start_date:
-        if cycle_qs.filter(Q(start_date__lte=start_date) & Q(end_date__gte=start_date)).exists():
-            raise serializers.ValidationError(
-                {"start_date": "Programme Cycles' timeframes must not overlap with the provided start date."}
-            )
-    if end_date:
-        if cycle_qs.filter(Q(start_date__lte=end_date) & Q(end_date__gte=end_date)).exists():
-            raise serializers.ValidationError(
-                {"end_date": "Programme Cycles' timeframes must not overlap with the provided end date."}
-            )
-    if start_date and end_date:
-        if cycle_qs.filter(
+    if start_date and cycle_qs.filter(Q(start_date__lte=start_date) & Q(end_date__gte=start_date)).exists():
+        raise serializers.ValidationError(
+            {"start_date": "Programme Cycles' timeframes must not overlap with the provided start date."}
+        )
+    if end_date and cycle_qs.filter(Q(start_date__lte=end_date) & Q(end_date__gte=end_date)).exists():
+        raise serializers.ValidationError(
+            {"end_date": "Programme Cycles' timeframes must not overlap with the provided end date."}
+        )
+    if (
+        start_date
+        and end_date
+        and cycle_qs.filter(
             Q(start_date__lte=start_date) & Q(end_date__gte=end_date)
             | Q(start_date__gte=start_date) & Q(end_date__lte=end_date)
             | Q(start_date__lte=end_date) & Q(end_date__gte=start_date)
-        ).exists():
-            raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
+        ).exists()
+    ):
+        raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
 
 
 def validate_programme_code(programme_code: str) -> str:
@@ -276,11 +277,10 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
                 )
 
         if end_date:
-            if program_end_date:
-                if not (program_start_date <= end_date <= program_end_date):
-                    raise serializers.ValidationError(
-                        {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
-                    )
+            if program_end_date and not (program_start_date <= end_date <= program_end_date):
+                raise serializers.ValidationError(
+                    {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
+                )
             if start_date and end_date < start_date:
                 raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
             if end_date < self.instance.start_date:
@@ -597,9 +597,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, obj: Program) -> dict:
-        """
-        Override to_representation to include the partners and pdu_fields in the correct format.
-        """
+        """Override to_representation to include the partners and pdu_fields in the correct format."""
         representation = super().to_representation(obj)
         partners_qs = (
             Partner.objects.filter(

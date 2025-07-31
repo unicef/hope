@@ -133,9 +133,7 @@ class FieldAttributeSimpleSerializer(serializers.Serializer):
         return None
 
     def get_is_flex_field(self, obj: Any) -> bool:
-        if isinstance(obj, FlexibleAttribute):
-            return True
-        return False
+        return isinstance(obj, FlexibleAttribute)
 
     def get_associated_with(self, obj: Any) -> str | None:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
@@ -173,9 +171,7 @@ class FieldAttributeSerializer(serializers.Serializer):
         return None
 
     def get_is_flex_field(self, obj: Any) -> bool:
-        if isinstance(obj, FlexibleAttribute):
-            return True
-        return False
+        return isinstance(obj, FlexibleAttribute)
 
     def get_associated_with(self, obj: Any) -> Any | None:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)

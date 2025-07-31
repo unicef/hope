@@ -101,7 +101,7 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
-        for field in individual_data_with_approve_status.keys():
+        for field in individual_data_with_approve_status:
             current_value = getattr(individual, field, None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
@@ -174,7 +174,7 @@ class IndividualDataUpdateService(DataChangeService):
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
         }
-        for field in individual_data_with_approve_status.keys():
+        for field in individual_data_with_approve_status:
             current_value = getattr(individual, field, None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
