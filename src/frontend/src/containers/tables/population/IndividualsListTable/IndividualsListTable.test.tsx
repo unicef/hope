@@ -7,7 +7,7 @@ import { IndividualsListTable } from './IndividualsListTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { SexEnum } from '@restgenerated/models/SexEnum';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -30,6 +30,7 @@ describe('IndividualsListTable', () => {
         relationship: RelationshipEnum.HEAD,
         status: 'ACTIVE',
         role: 'PRIMARY',
+        residentStatus: '',
         relationshipDisplay: 'Head of household (self)',
         deduplicationBatchStatusDisplay: 'Unique in batch',
         biometricDeduplicationBatchStatusDisplay: 'Not processed',
@@ -53,12 +54,13 @@ describe('IndividualsListTable', () => {
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
           importId: 'import-1',
+          residenceStatus: '',
         },
         program: {
           id: 'test-program',
           name: 'Test Program',
           slug: 'test-program',
-          status: Status791Enum.ACTIVE,
+          status: ProgramStatusEnum.ACTIVE,
           screenBeneficiary: true,
         },
         lastRegistrationDate: '2023-01-15T10:30:00Z',

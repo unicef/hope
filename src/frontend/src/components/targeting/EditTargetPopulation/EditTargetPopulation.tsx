@@ -134,6 +134,8 @@ const EditTargetPopulation = ({
       const requestBody: PatchedTargetPopulationCreate = {
         excludedIds: values.excludedIds,
         exclusionReason: values.exclusionReason,
+        fspId: values.targetingCriteria[0]?.fsp,
+        deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
         programCycleId: values.programCycleId.value,
         ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
           name: values.name,

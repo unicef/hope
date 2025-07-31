@@ -32,7 +32,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../programContext';
-import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 interface PopperComponentProps {
@@ -168,7 +168,7 @@ export const GlobalProgramSelect = () => {
       },
       id: 'all',
       name: 'All Programmes',
-      status: ProgramStatus.ACTIVE,
+      status: ProgramStatusEnum.ACTIVE,
       dataCollectingType: null,
       pduFields: null,
       programmeCode: null,
@@ -273,7 +273,7 @@ export const GlobalProgramSelect = () => {
           },
           id: 'all',
           name: 'All Programmes',
-          status: ProgramStatus.ACTIVE,
+          status: ProgramStatusEnum.ACTIVE,
           dataCollectingType: null,
           pduFields: null,
           programmeCode: null,
@@ -296,9 +296,9 @@ export const GlobalProgramSelect = () => {
         first: 10,
         orderBy: 'name',
         status: [
-          ProgramStatus.ACTIVE,
-          ProgramStatus.DRAFT,
-          ProgramStatus.FINISHED,
+          ProgramStatusEnum.ACTIVE,
+          ProgramStatusEnum.DRAFT,
+          ProgramStatusEnum.FINISHED,
         ],
         name: inputValue,
       });

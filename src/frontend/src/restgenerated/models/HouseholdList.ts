@@ -5,7 +5,6 @@
 import type { AreaSimple } from './AreaSimple';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { ProgramSmall } from './ProgramSmall';
-import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdList = {
     readonly id: string;
     unicefId: string | null;
@@ -18,18 +17,7 @@ export type HouseholdList = {
      * Household size
      */
     size?: number | null;
-    /**
-     * Household residence status
-     *
-     * * `` - None
-     * * `IDP` - Displaced  |  Internally Displaced People
-     * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
-     * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
-     * * `HOST` - Non-displaced  |   Host
-     * * `NON_HOST` - Non-displaced  |   Non-host
-     * * `RETURNEE` - Displaced  |   Returnee
-     */
-    residenceStatus?: ResidenceStatusEnum;
+    residenceStatus: string;
     totalCashReceived: string;
     totalCashReceivedUsd: string;
     /**
