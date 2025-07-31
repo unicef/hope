@@ -306,7 +306,11 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
-        if (each.associatedWith === 'Account') {
+        if (
+          each.associatedWith === 'Account' ||
+          //trick for Collector fields
+          each.associatedWith === undefined
+        ) {
           comparisonMethod = 'EQUALS';
         }
         values = [each.value];

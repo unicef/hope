@@ -127,7 +127,6 @@ const AddFilterTargetingCriteriaDisplay = ({
     setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [allCoreFieldsAttributesData, loading]);
 
-
   useEffect(() => {
     if (loading) return;
     const allCollectorDataChoicesDictTmp =
@@ -199,8 +198,7 @@ const AddFilterTargetingCriteriaDisplay = ({
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
-  const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === 'SOCIAL';
+
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
@@ -239,7 +237,6 @@ const AddFilterTargetingCriteriaDisplay = ({
           open={isOpen}
           onClose={() => closeModal()}
           addCriteria={addCriteria}
-          isSocialWorkingProgram={isSocialWorkingProgram}
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           collectorsFiltersAvailable={true}

@@ -77,6 +77,11 @@ const requiredSchema = Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
     }),
   ),
+  householdsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
+  ),
   individualsFiltersBlocks: Yup.array().of(
     Yup.object().shape({
       individualBlockFilters: Yup.array().of(
@@ -123,6 +128,11 @@ const optionalSchema = Yup.object().shape({
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   filters: Yup.array().of(
+    Yup.object().shape({
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
+  ),
+  householdsFiltersBlocks: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
     }),
@@ -191,7 +201,6 @@ interface TargetingCriteriaFormPropTypes {
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
   collectorsFiltersAvailable: boolean;
-  isSocialWorkingProgram: boolean;
   criteriaIndex: number;
 }
 
@@ -206,11 +215,11 @@ export const TargetingCriteriaForm = ({
   individualFiltersAvailable,
   householdFiltersAvailable,
   collectorsFiltersAvailable,
-  isSocialWorkingProgram,
   criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   const confirm = useConfirmation();
   const confirmationText = t(
@@ -239,10 +248,10 @@ export const TargetingCriteriaForm = ({
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['businessAreasAllFieldsAttributesList', selectedProgram.slug],
+    queryKey: ['businessAreasAllFieldsAttributesList', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
-        slug: selectedProgram.slug,
+        slug: businessArea,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
   });
@@ -411,7 +420,7 @@ export const TargetingCriteriaForm = ({
                   )
                 }
                 <DialogDescription>
-                  {isSocialWorkingProgram
+                  {isSocialDctType
                     ? ''
                     : `All rules defined below have to be true for the entire ${beneficiaryGroup?.groupLabelPlural}.`}{' '}
                 </DialogDescription>
@@ -450,7 +459,7 @@ export const TargetingCriteriaForm = ({
                           key={index}
                           index={index}
                           data={
-                            isSocialWorkingProgram
+                            isSocialDctType
                               ? data
                               : householdData.allFieldsAttributes
                           }
@@ -473,7 +482,7 @@ export const TargetingCriteriaForm = ({
                     </ArrayFieldWrapper>
                   )}
                 />
-                {householdFiltersAvailable || isSocialWorkingProgram ? (
+                {householdFiltersAvailable || isSocialDctType ? (
                   <Box display="flex" flexDirection="column">
                     <ButtonBox>
                       <Button
@@ -487,7 +496,7 @@ export const TargetingCriteriaForm = ({
                         data-cy="button-household-rule"
                       >
                         ADD{' '}
-                        {isSocialWorkingProgram
+                        {isSocialDctType
                           ? 'PEOPLE'
                           : beneficiaryGroup?.groupLabel.toUpperCase()}{' '}
                         RULE
