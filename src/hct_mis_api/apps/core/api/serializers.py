@@ -30,7 +30,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
 
 
 class DataCollectingTypeSerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source="get_type_display")
+    type_display = serializers.CharField(source="get_type_display")
 
     class Meta:
         model = DataCollectingType
@@ -39,8 +39,9 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
             "label",
             "code",
             "type",
-            "household_filters_available",
+            "type_display",
             "individual_filters_available",
+            "household_filters_available",
         )
 
 
