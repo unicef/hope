@@ -13,8 +13,8 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.steficon import RuleFactory
 
+from hct_mis_api.admin.steficon import AutocompleteWidget
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 from hct_mis_api.apps.steficon.forms import RuleTestForm
 from hct_mis_api.apps.steficon.models import Rule
 
