@@ -28,7 +28,7 @@ export function LockPaymentPlan({
   paymentPlan,
 }: LockPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
+  const { showMessage, showRestApiError } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
@@ -57,6 +57,9 @@ export function LockPaymentPlan({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         exact: false,
       });
+    },
+    onError: (error) => {
+      showRestApiError(error);
     },
   });
 

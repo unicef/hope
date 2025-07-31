@@ -12,7 +12,29 @@ export type PaymentPlan = {
      * Name
      */
     name?: string | null;
-    status: PaymentPlanStatusEnum;
+    /**
+     * Status [sys]
+     *
+     * * `TP_OPEN` - Open
+     * * `TP_LOCKED` - Locked
+     * * `PROCESSING` - Processing
+     * * `STEFICON_WAIT` - Steficon Wait
+     * * `STEFICON_RUN` - Steficon Run
+     * * `STEFICON_COMPLETED` - Steficon Completed
+     * * `STEFICON_ERROR` - Steficon Error
+     * * `DRAFT` - Draft
+     * * `PREPARING` - Preparing
+     * * `OPEN` - Open
+     * * `LOCKED` - Locked
+     * * `LOCKED_FSP` - Locked FSP
+     * * `IN_APPROVAL` - In Approval
+     * * `IN_AUTHORIZATION` - In Authorization
+     * * `IN_REVIEW` - In Review
+     * * `ACCEPTED` - Accepted
+     * * `FINISHED` - Finished
+     */
+    status?: PaymentPlanStatusEnum;
+    statusDisplay: string;
     /**
      * Total Households Count [sys]
      */

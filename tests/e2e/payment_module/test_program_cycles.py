@@ -5,10 +5,10 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
@@ -78,7 +78,6 @@ def create_program_cycle_without_payment_plan(create_test_program: Program) -> P
 
 @pytest.mark.usefixtures("login")
 class TestSmokeProgramCycle:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_program_cycles(self, create_program_cycle: ProgramCycle, pageProgramCycle: ProgramCyclePage) -> None:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
@@ -129,7 +128,6 @@ class TestSmokeProgramCycle:
             in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]').text
         )
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_program_cycles_details(
         self,
         create_program_cycle: ProgramCycle,
@@ -150,7 +148,6 @@ class TestSmokeProgramCycle:
 
 @pytest.mark.usefixtures("login")
 class TestProgramCycle:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_cycles_finish_and_reactivate(
         self,
         create_program_cycle_without_payment_plan: ProgramCycle,
@@ -183,7 +180,6 @@ class TestProgramCycle:
         else:
             assert "Active" in pageProgramCycleDetails.getStatusContainer().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_cycles_finish_with_error(
         self,
         create_program_cycle: ProgramCycle,

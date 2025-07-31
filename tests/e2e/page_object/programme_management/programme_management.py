@@ -1,10 +1,10 @@
 from time import sleep
 
 from e2e.page_object.base_components import BaseComponents
-from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.common import NoSuchElementException
 
 
 class ProgrammeManagement(BaseComponents):
