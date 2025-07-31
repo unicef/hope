@@ -3,11 +3,9 @@ from typing import Any
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
-from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.api.utils import get_field_by_name, filter_choices
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
@@ -105,7 +103,9 @@ class TargetingIndividualRuleFilterBlockSerializer(serializers.ModelSerializer):
     def to_representation(self, instance: TargetingCriteriaRule) -> dict:
         data = super().to_representation(instance)
         data["individual_block_filters"] = TargetingIndividualBlockRuleFilterSerializer(
-            instance.individual_block_filters, many=True, context=self.context,
+            instance.individual_block_filters,
+            many=True,
+            context=self.context,
         ).data
         return data
 
@@ -158,9 +158,13 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
         filters_data = instance.filters if hasattr(instance, "filters") else {}
         if filters_data:
             data["households_filters_blocks"] = TargetingCriteriaRuleFilterSerializer(
-                filters_data, many=True, context=self.context,
+                filters_data,
+                many=True,
+                context=self.context,
             ).data
         data["individuals_filters_blocks"] = TargetingIndividualRuleFilterBlockSerializer(
-            instance.individuals_filters_blocks, many=True, context=self.context,
+            instance.individuals_filters_blocks,
+            many=True,
+            context=self.context,
         ).data
         return data

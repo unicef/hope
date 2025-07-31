@@ -402,7 +402,6 @@ class TestAllFieldsAttributes:
             program=self.program,
         )
 
-
     def test_all_fields_attributes(self) -> None:
         response = self.client.get(self.all_fields_attributes_url)
         assert response.status_code == status.HTTP_200_OK
@@ -478,7 +477,11 @@ class TestAllFieldsAttributes:
                     for choice in attr.choices.all()
                 ],
             }
-            for attr in get_fields_attr_generators(flex_field=True, business_area_slug=self.afghanistan.slug, program_id=self.program.id)
+            for attr in get_fields_attr_generators(
+                flex_field=True,
+                business_area_slug=self.afghanistan.slug,
+                program_id=self.program.id,
+            )
         ]
         expected_response_core_fields = [
             {

@@ -46,7 +46,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
-from hct_mis_api.apps.program.models import Program
 
 
 class BusinessAreaViewSet(

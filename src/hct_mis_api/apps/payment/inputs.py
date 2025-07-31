@@ -62,16 +62,6 @@ class ActionPaymentPlanInput(graphene.InputObjectType):
     comment = graphene.String()
 
 
-class CreatePaymentPlanInput(graphene.InputObjectType):
-    program_cycle_id = graphene.ID(required=True)
-    name = graphene.String(required=True)
-    targeting_criteria = TargetingCriteriaObjectType(required=True)
-    excluded_ids = graphene.String(required=True)
-    exclusion_reason = graphene.String()
-    fsp_id = graphene.ID(required=False)
-    delivery_mechanism_code = graphene.String(required=False)
-
-
 class OpenPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     dispersion_start_date = graphene.Date(required=True)
