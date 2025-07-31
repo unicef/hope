@@ -147,7 +147,7 @@ class TestLogEntryView:
                 assert log_result["changes"] == log.changes
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
-                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["content_type"] == log.content_type.name
                 assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
@@ -155,6 +155,11 @@ class TestLogEntryView:
                 else:
                     expected_is_user_generated = None
                 assert log_result["is_user_generated"] == expected_is_user_generated
+
+            assert response_results[0]["program_slug"] is None
+            assert response_results[1]["program_slug"] == self.program_1.slug
+            assert response_results[2]["program_slug"] == self.program_2.slug
+            assert response_results[3]["program_slug"] == self.program_1.slug
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -206,7 +211,7 @@ class TestLogEntryView:
                 assert log_result["changes"] == log.changes
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
-                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["content_type"] == log.content_type.name
                 assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):

@@ -1,5 +1,6 @@
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import * as Yup from 'yup';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -15,37 +16,35 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
+  FormHelperText,
   Typography,
+  Button,
 } from '@mui/material';
+import { Grid, Box } from '@mui/system';
+import { RestService } from '@restgenerated/index';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
-import React, { ReactElement, ReactNode, useState } from 'react';
-import { Field, Formik } from 'formik';
+import { Formik, Field } from 'formik';
+import { ReactElement, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
-import styled from 'styled-components';
-import * as Yup from 'yup';
+import { useNavigate, Link } from 'react-router-dom';
 import {
+  hasPermissions,
   PERMISSIONS,
   hasPermissionInModule,
-  hasPermissions,
-} from '../../../../config/permissions';
+} from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
 import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
@@ -258,7 +257,6 @@ function CreateFeedbackPage(): ReactElement {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        console.log('values', values); // Debugging line to check form values
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({
@@ -282,6 +280,12 @@ function CreateFeedbackPage(): ReactElement {
       // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
+        // Sync admin2 with selectedHousehold.admin2
+        <Admin2SyncEffect
+          selectedHousehold={values.selectedHousehold}
+          admin2={values.admin2}
+          setFieldValue={setFieldValue}
+        />;
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 

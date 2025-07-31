@@ -118,34 +118,6 @@ export function ActivityLogPage(): ReactElement {
     ),
   });
 
-  const { data: actionChoicesData } = useQuery({
-    queryKey: [
-      'activityLogsActionChoices',
-      businessArea,
-      programId,
-      isAllPrograms,
-    ],
-    queryFn: () => {
-      if (isAllPrograms) {
-        return RestService.restBusinessAreasActivityLogsActionChoicesList({
-          businessAreaSlug: businessArea,
-        });
-      } else {
-        return RestService.restBusinessAreasProgramsActivityLogsActionChoicesList(
-          {
-            businessAreaSlug: businessArea,
-            programSlug: programId,
-          },
-        );
-      }
-    },
-    enabled: !!(
-      businessArea &&
-      permissions &&
-      hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
-    ),
-  });
-
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
     return <PermissionDenied />;
@@ -157,9 +129,6 @@ export function ActivityLogPage(): ReactElement {
 
   // Use REST API LogEntry data directly
   const logEntries = logsData.results;
-
-  // Transform action choices from REST format to expected format
-  const actionChoices = actionChoicesData?.results || [];
 
   // Get total count for pagination
   const totalCount = countData?.count ?? 0;
@@ -189,7 +158,6 @@ export function ActivityLogPage(): ReactElement {
           totalCount={totalCount}
           rowsPerPage={rowsPerPage}
           logEntries={logEntries}
-          actionChoices={actionChoices}
           page={page}
           loading={logsLoading}
           onChangePage={handlePageChange}

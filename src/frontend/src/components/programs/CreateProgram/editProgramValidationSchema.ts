@@ -5,9 +5,8 @@ import { TFunction } from 'i18next';
 
 export const editProgramDetailsValidationSchema = (
   t: TFunction<'translation', undefined>,
-  initialValues: any,
 ): Yup.ObjectSchema<any, any, any, any> => {
-  let endDate = Yup.date()
+  const endDate = Yup.date()
     .transform((curr, orig) => (orig === '' ? null : curr))
     .when('startDate', (startDate, schema) =>
       startDate instanceof Date && !isNaN(startDate.getTime())
@@ -21,10 +20,6 @@ export const editProgramDetailsValidationSchema = (
     )
     .min(today, t('End Date cannot be in the past'))
     .nullable();
-
-  if (initialValues.editMode) {
-    endDate = endDate.required(t('End Date is required'));
-  }
 
   return Yup.object().shape({
     editMode: Yup.boolean(),
