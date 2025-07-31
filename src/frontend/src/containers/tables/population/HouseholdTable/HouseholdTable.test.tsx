@@ -5,7 +5,7 @@ import { renderWithProviders } from 'src/testUtils/testUtils';
 import { setupCommonMocks } from 'src/testUtils/commonMocks';
 import { HouseholdTable } from './HouseholdTable';
 import { RestService } from '@restgenerated/services/RestService';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
 import { CurrencyEnum } from '@restgenerated/models/CurrencyEnum';
 
@@ -47,7 +47,7 @@ describe('HouseholdTable', () => {
           id: 'test-program',
           name: 'Test Program',
           slug: 'test-program',
-          status: Status791Enum.ACTIVE,
+          status: ProgramStatusEnum.ACTIVE,
           screenBeneficiary: false,
         },
       },

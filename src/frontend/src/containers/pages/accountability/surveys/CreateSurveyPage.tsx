@@ -9,7 +9,6 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import { SurveyCategoryEnum } from '@utils/enums';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -36,7 +35,8 @@ import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
-import { getPercentage } from '@utils/utils';
+import { SurveyCategoryEnum } from '@utils/enums';
+import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import {
   ReactElement,
@@ -448,7 +448,7 @@ const CreateSurveyPage = (): ReactElement => {
                 showMessage(t('Survey created.'));
                 navigate(`/${baseUrl}/accountability/surveys/${response.id}`);
               } catch (e) {
-                showMessage(e.message || 'Error creating survey');
+                showApiErrorMessages(e, showMessage);
               }
             });
           } else {

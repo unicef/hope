@@ -14,7 +14,7 @@ vi.mock('@restgenerated/services/RestService', () => ({
 }));
 
 import { RestService } from '@restgenerated/services/RestService';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { FrequencyOfPaymentsEnum } from '@restgenerated/models/FrequencyOfPaymentsEnum';
 import { SectorEnum } from '@restgenerated/models/SectorEnum';
 
@@ -42,7 +42,7 @@ describe('ProgrammesTable', () => {
         budget: '500000.00',
         frequencyOfPayments: FrequencyOfPaymentsEnum.ONE_OFF,
         sector: SectorEnum.MULTI_PURPOSE,
-        status: Status791Enum.ACTIVE,
+        status: ProgramStatusEnum.ACTIVE,
         cashPlus: true,
         populationGoal: 1000,
         dataCollectingType: {
@@ -77,7 +77,7 @@ describe('ProgrammesTable', () => {
         budget: '750000.00',
         frequencyOfPayments: FrequencyOfPaymentsEnum.REGULAR,
         sector: SectorEnum.EDUCATION,
-        status: Status791Enum.DRAFT,
+        status: ProgramStatusEnum.DRAFT,
         cashPlus: false,
         populationGoal: 500,
         dataCollectingType: {

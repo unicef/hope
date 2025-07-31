@@ -7,6 +7,7 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
     PeriodicDatUpdateTemplates,
     PeriodicDatUpdateTemplatesDetails,
 )
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
@@ -14,7 +15,6 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
@@ -117,7 +117,6 @@ def create_flexible_attribute(
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataTemplates:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_export_and_download(
         self,
         clear_downloaded_files: None,
@@ -165,7 +164,6 @@ class TestPeriodicDataTemplates:
         )
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_list(
         self,
         program: Program,
@@ -214,7 +212,6 @@ class TestPeriodicDataTemplates:
         assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_details(
         self,
         program: Program,
@@ -262,9 +259,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
-    # ToDo: Does not work locally
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
