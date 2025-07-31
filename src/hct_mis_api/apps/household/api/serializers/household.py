@@ -53,6 +53,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
     program = ProgramSmallSerializer()
+    residence_status = serializers.CharField(source="get_residence_status_display")
 
     class Meta:
         model = Household
@@ -100,6 +101,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     delivered_quantities = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
+    residence_status = serializers.CharField(source="get_residence_status_display")
 
     class Meta:
         model = Household
@@ -211,6 +213,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     active_individuals_count = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
     delivered_quantities = serializers.SerializerMethodField()
+    residence_status = serializers.CharField(source="get_residence_status_display")
 
     class Meta:
         model = Household
@@ -326,6 +329,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
     country_origin = serializers.CharField(source="country_origin.name", default="")
     head_of_household = HeadOfHouseholdSerializer()
     active_individuals_count = serializers.SerializerMethodField()
+    residence_status = serializers.CharField(source="get_residence_status_display")
 
     class Meta:
         model = Household

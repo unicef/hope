@@ -8,6 +8,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { SexEnum } from '@restgenerated/models/SexEnum';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 import { DataSourceEnum } from '@restgenerated/models/DataSourceEnum';
+import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -124,6 +125,12 @@ describe('HouseholdMembersTable', () => {
           totalCashReceived: '1000.00',
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
+          residenceStatus: ResidenceStatusEnum.HOST,
+          countryOrigin: 'Country 1',
+          country: 'Country 1',
+          zipCode: null,
+          address: '',
+          start: null,
           geopoint: null,
           importId: 'import-1',
         },
@@ -149,6 +156,12 @@ describe('HouseholdMembersTable', () => {
           totalCashReceived: '1000.00',
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
+          residenceStatus: ResidenceStatusEnum.HOST,
+          countryOrigin: 'Country 1',
+          country: 'Country 1',
+          zipCode: null,
+          address: '',
+          start: null,
           geopoint: null,
           importId: 'import-1',
         },
@@ -174,6 +187,12 @@ describe('HouseholdMembersTable', () => {
           totalCashReceived: '1000.00',
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
+          residenceStatus: ResidenceStatusEnum.HOST,
+          countryOrigin: 'Country 1',
+          country: 'Country 1',
+          zipCode: null,
+          address: '',
+          start: null,
           geopoint: null,
           importId: 'import-1',
         },

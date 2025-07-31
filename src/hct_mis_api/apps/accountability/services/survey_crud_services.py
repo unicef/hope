@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.accountability.models import Survey
