@@ -2,12 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DataCollectingTypeTypeEnum } from './DataCollectingTypeTypeEnum';
 export type DataCollectingType = {
     readonly id: number;
     label: string;
     code: string;
-    type: string;
-    householdFiltersAvailable?: boolean;
+    type?: DataCollectingTypeTypeEnum | null;
+    typeDisplay: string;
     individualFiltersAvailable?: boolean;
+    householdFiltersAvailable?: boolean;
 };
 
