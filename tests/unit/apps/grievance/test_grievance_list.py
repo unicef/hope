@@ -344,7 +344,7 @@ class TestGrievanceTicketList:
                     ],
                     "start": f"{household.start:%Y-%m-%dT%H:%M:%SZ}",
                     "zip_code": household.zip_code,
-                    "residence_status": household.residence_status,
+                    "residence_status": household.get_residence_status_display(),
                     "import_id": household.unicef_id,
                 }
                 if household

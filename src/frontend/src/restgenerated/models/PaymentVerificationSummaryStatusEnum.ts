@@ -5,14 +5,10 @@
 /**
  * * `ACTIVE` - Active
  * * `FINISHED` - Finished
- * * `INVALID` - Invalid
  * * `PENDING` - Pending
- * * `RAPID_PRO_ERROR` - RapidPro Error
  */
-export enum PaymentVerificationPlanStatusEnum {
+export enum PaymentVerificationSummaryStatusEnum {
     ACTIVE = 'ACTIVE',
     FINISHED = 'FINISHED',
-    INVALID = 'INVALID',
     PENDING = 'PENDING',
-    RAPID_PRO_ERROR = 'RAPID_PRO_ERROR',
 }

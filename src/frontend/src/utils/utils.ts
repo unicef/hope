@@ -1397,3 +1397,13 @@ export function showApiErrorMessages(
   }
   showMessage(fallbackMsg);
 }
+
+// Utility to split camelCase/PascalCase and capitalize
+export function splitCamelCase(str: string): string {
+  if (!str) return '';
+  // Insert space before all caps, then capitalize first letter
+  const withSpaces = str
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s) => s.toUpperCase());
+  return withSpaces.trim();
+}

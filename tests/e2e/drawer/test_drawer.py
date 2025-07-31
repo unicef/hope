@@ -78,7 +78,6 @@ def get_social_program_with_dct_type_and_name(
 
 @pytest.mark.usefixtures("login")
 class TestDrawer:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_social_worker_program_drawer_order(
         self,
         social_worker_program: Program,
@@ -103,7 +102,6 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_normal_program_drawer_order(
         self,
         normal_program: Program,
@@ -128,7 +126,6 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_all_program_drawer_order(
         self,
         social_worker_program: Program,
@@ -145,7 +142,6 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,
@@ -160,7 +156,7 @@ class TestDrawer:
 
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name)
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "programme inactive"
+        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "Programme Inactive"
 
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name)
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
@@ -170,4 +166,4 @@ class TestDrawer:
         # first have to search Finished program because of default filtering
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name)
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "programme inactive"
+        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "Programme Inactive"
