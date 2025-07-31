@@ -6,12 +6,17 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   const { data } = useQuery({
-    queryKey: ['allFieldsAttributes'],
-    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    queryKey: ['allFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+      }),
   });
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
