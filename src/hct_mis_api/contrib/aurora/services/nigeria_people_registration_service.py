@@ -89,7 +89,7 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         if not national_id:
             return None
         photo = None
-        if photo_base_64 := individual_dict.get("national_id_photo_i_c", None):
+        if photo_base_64 := individual_dict.get("national_id_photo_i_c"):
             photo = self._prepare_picture_from_base64(photo_base_64, national_id)
         return PendingDocument.objects.create(
             program=imported_individual.program,

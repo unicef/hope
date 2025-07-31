@@ -588,7 +588,7 @@ class PaymentPlan(
         )
 
     def update_money_fields(self) -> None:
-        """update money fields only for PaymentPlan with currency"""
+        """Update money fields only for PaymentPlan with currency."""
         if self.status not in self.PRE_PAYMENT_PLAN_STATUSES:
             payments = self.eligible_payments.aggregate(
                 total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
@@ -664,8 +664,7 @@ class PaymentPlan(
         return self.eligible_payments.filter(status__in=Payment.FAILED_STATUSES)
 
     def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
-        """
-        used for creation FPP
+        """Used for creation FPP.
         need to call from source_payment_plan level
         like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
         """
@@ -696,22 +695,19 @@ class PaymentPlan(
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
             if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
-                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
+                approval = approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last()
+                if approval:
                     return ModifiedData(approval.created_at, approval.created_by)
             if self.status == PaymentPlan.Status.IN_REVIEW:
-                if (
-                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
-                    .order_by("created_at")
-                    .last()
-                ):
+                approval = approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
+                if approval:
                     return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.ACCEPTED:
-                if (
-                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
-                    .order_by("created_at")
-                    .last()
-                ):
-                    return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.ACCEPTED and (
+                approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
+                .order_by("created_at")
+                .last()
+            ):
+                return ModifiedData(approval.created_at, approval.created_by)
         return ModifiedData(self.updated_at)
 
     # from generic pp
@@ -779,10 +775,7 @@ class PaymentPlan(
 
     @property
     def can_create_xlsx_with_fsp_auth_code(self) -> bool:
-        """
-        export MTCN file
-        xlsx file with password
-        """
+        """Export MTCN file - xlsx file with password."""
         all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
         return self.is_payment_gateway and all_sent_to_fsp
 
@@ -879,7 +872,8 @@ class PaymentPlan(
 
     @property
     def payment_list_export_file_link(self) -> str | None:
-        """
+        """Return expor file which is different in various statues.
+
         for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
         """
@@ -1411,7 +1405,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return collector_data.get(lookup, None) or collector_data.get(main_key, None)
 
         if core_field["associated_with"] == _HOUSEHOLD:
-            return household_data.get(lookup, None)
+            return household_data.get(lookup)
 
         return None
 
@@ -1893,7 +1887,7 @@ class Payment(
 
     @property
     def people_individual(self) -> Individual | None:
-        """for DCT social worker return first Individual from Household"""
+        """Return first Individual from Household for DCT social worker."""
         return self.household.individuals.first() if self.parent.is_social_worker_program else None
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
@@ -2093,7 +2087,7 @@ class PaymentDataCollector(Account):
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
 
         for field in dm_config.required_fields:
-            if fsp_name_mapping := fsp_names_mappings.get(field, None):
+            if fsp_name_mapping := fsp_names_mappings.get(field):
                 internal_field = fsp_name_mapping.hope_name
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
             else:
@@ -2134,7 +2128,7 @@ class PaymentDataCollector(Account):
             return True
 
         for field in dm_config.required_fields:
-            if fsp_name_mapping := fsp_names_mappings.get(field, None):
+            if fsp_name_mapping := fsp_names_mappings.get(field):
                 field = fsp_name_mapping.hope_name
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
             else:

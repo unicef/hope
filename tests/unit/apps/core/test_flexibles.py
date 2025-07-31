@@ -104,7 +104,7 @@ class TestFlexibles(TestCase):
         yes_choice = FlexibleAttributeChoice.objects.get(list_name="yes_no", name=1)
         no_choice = FlexibleAttributeChoice.objects.get(list_name="yes_no", name=0)
 
-        for name, label in zip(selected_attribs, attrib_english_labels):
+        for name, label in zip(selected_attribs, attrib_english_labels, strict=True):
             attrib = FlexibleAttribute.objects.get(name=name)
             expected_associated_with = 0 if attrib.name[-4:] == "_h_f" else 1
             self.assertEqual(attrib.label["English(EN)"], label)

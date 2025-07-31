@@ -5,7 +5,6 @@ from uuid import uuid4
 
 from django.http import HttpRequest
 from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -247,7 +246,6 @@ OTHER_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
-# LOGIN_REDIRECT_URL = f'/api/{ADMIN_PANEL_URL}/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -274,8 +272,7 @@ NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 # helper function to extend all the common lists
 def extend_list_avoid_repeats(list_to_extend: list, extend_with: list) -> None:
-    """Extends the first list with the elements in the second one, making sure its elements are not already there in the
-    original list."""
+    """Extend the first list with the elements in the second one, making sure its elements are not already there."""
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
@@ -337,7 +334,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 # MICROSOFT GRAPH
 AZURE_GRAPH_API_BASE_URL = "https://graph.microsoft.com"
 AZURE_GRAPH_API_VERSION = "v1.0"
-AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
+AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"  # noqa
 
 TEST_OUTPUT_DIR = "./test-results"
 TEST_OUTPUT_FILE_NAME = "result.xml"
@@ -376,17 +373,13 @@ def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
     from ..apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
-        return mark_safe(value.replace(":", r":<br>"))
+        return value.replace(":", r":<br>")
     if not is_root(request):
         if key.startswith("DATABASE_URL"):
             from urllib.parse import urlparse
 
-            try:
-                c = urlparse(value)
-                value = f"{c.scheme}://****:****@{c.hostname}{c.path}?{c.query}"
-            except Exception:
-                value = "<wrong url>"
-            return value
+            c = urlparse(value)
+            return f"{c.scheme}://****:****@{c.hostname}{c.path}?{c.query}"
         return cleanse_setting(key, value, config, request)
     return value
 

@@ -62,6 +62,6 @@ class GeoCountryField(models.CharField):
                 blank_choice = [("", self.blank_label)]
         if self.multiple:
             include_blank = False
-        return super().get_choices(include_blank=include_blank, blank_choice=blank_choice, *args, **kwargs)
+        return super().get_choices(*args, **kwargs, include_blank=include_blank, blank_choice=blank_choice)
 
     get_choices = lazy(get_choices, list)

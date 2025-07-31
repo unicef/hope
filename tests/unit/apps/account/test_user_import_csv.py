@@ -145,13 +145,15 @@ class UserKoboActionsTest(WebTest):
         responses.add(
             responses.GET,
             f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=1",
-            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
+            body=f'action-checkbox. value="111"></td>< field-username <a>'
+            f'{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
         responses.add(
             responses.GET,
             f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=2",
-            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
+            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}'
+            f'</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
 

@@ -46,8 +46,6 @@ class SanctionList(TimeStampedModel):
     config = models.JSONField(default=dict, blank=True)
     strategy = StrategyField(registry=registry, unique=True)
 
-    # enabled = models.BooleanField(default=True)
-
     class Meta:
         ordering = ["name"]
 
