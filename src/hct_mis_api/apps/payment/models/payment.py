@@ -434,7 +434,7 @@ class PaymentPlan(
     )
     built_at = models.DateTimeField(null=True, blank=True, help_text="Built at [sys]")
     exchange_rate = models.DecimalField(
-        decimal_places=8, blank=True, null=True, max_digits=14, help_text="Exchange Rate [sys]"
+        decimal_places=8, blank=True, null=True, max_digits=15, help_text="Exchange Rate [sys]"
     )
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
@@ -445,7 +445,7 @@ class PaymentPlan(
     imported_file_date = models.DateTimeField(blank=True, null=True, help_text="Imported File Date [sys]")
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
@@ -453,7 +453,7 @@ class PaymentPlan(
     )
     total_entitled_quantity_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
@@ -461,7 +461,7 @@ class PaymentPlan(
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
@@ -470,7 +470,7 @@ class PaymentPlan(
     )
     total_entitled_quantity_revised_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
@@ -478,7 +478,7 @@ class PaymentPlan(
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
@@ -487,7 +487,7 @@ class PaymentPlan(
     )
     total_delivered_quantity_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
@@ -495,7 +495,7 @@ class PaymentPlan(
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
@@ -504,7 +504,7 @@ class PaymentPlan(
     )
     total_undelivered_quantity_usd = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
