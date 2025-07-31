@@ -239,8 +239,11 @@ export const TargetingCriteriaForm = ({
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['businessAreasAllFieldsAttributesList'],
-    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    queryKey: ['businessAreasAllFieldsAttributesList', selectedProgram.slug],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: selectedProgram.slug,
+      }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
   });
 

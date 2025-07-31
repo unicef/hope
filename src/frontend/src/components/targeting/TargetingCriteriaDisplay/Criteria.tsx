@@ -98,7 +98,6 @@ const PduDataBox = styled(Box)`
 `;
 
 const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
-  console.log('choicesDict', choicesDict);
   const extractChoiceLabel = (choiceField, argument) => {
     let choices = choicesDict?.[choiceField.fieldName];
     if (!choices) {

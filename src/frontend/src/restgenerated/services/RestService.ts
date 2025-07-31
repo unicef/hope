@@ -12731,6 +12731,43 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedFieldAttributeSimpleList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllFieldsAttributesList({
+        slug,
+        limit,
+        offset,
+        ordering,
+    }: {
+        slug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{slug}/all-fields-attributes/',
+            path: {
+                'slug': slug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
      * All Kobo projects/assets.
      * @returns PaginatedKoboAssetObjectList
      * @throws ApiError
@@ -12797,38 +12834,6 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/all-collector-fields-attributes/',
-            query: {
-                'limit': limit,
-                'offset': offset,
-                'ordering': ordering,
-            },
-        });
-    }
-    /**
-     * @returns PaginatedFieldAttributeSimpleList
-     * @throws ApiError
-     */
-    public static restBusinessAreasAllFieldsAttributesList({
-        limit,
-        offset,
-        ordering,
-    }: {
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-    }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/all-fields-attributes/',
             query: {
                 'limit': limit,
                 'offset': offset,

@@ -93,8 +93,11 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { selectedProgram } = useProgramContext();
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
-    queryKey: ['allFieldsAttributes'],
-    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    queryKey: ['allFieldsAttributes', selectedProgram.slug],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: selectedProgram.slug,
+      }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
   });
   const { data: allCollectorFieldsAttributesData } =
@@ -104,12 +107,6 @@ const AddFilterTargetingCriteriaDisplay = ({
         RestService.restBusinessAreasAllCollectorFieldsAttributesList({}),
       staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
     });
-
-  console.log('allCoreFieldsAttributesData', allCoreFieldsAttributesData);
-  console.log(
-    'allcollectorFieldsAttributesData',
-    allCollectorFieldsAttributesData,
-  );
 
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(0);
@@ -129,6 +126,7 @@ const AddFilterTargetingCriteriaDisplay = ({
     );
     setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [allCoreFieldsAttributesData, loading]);
+
 
   useEffect(() => {
     if (loading) return;
