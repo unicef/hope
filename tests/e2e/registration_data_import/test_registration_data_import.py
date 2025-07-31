@@ -138,7 +138,6 @@ def areas(country: Country) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeRegistrationDataImport:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_registration_data_import(
         self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
@@ -159,7 +158,7 @@ class TestSmokeRegistrationDataImport:
         assert "Imported by" in pageRegistrationDataImport.getTableLabel()[5].text
         assert "Data Source" in pageRegistrationDataImport.getTableLabel()[6].text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    @pytest.mark.skip(reason="RDI import only possible though Program Population")
     def test_smoke_registration_data_import_select_file(
         self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
@@ -179,7 +178,6 @@ class TestSmokeRegistrationDataImport:
         pageRegistrationDataImport.getExcelItem().click()
         pageRegistrationDataImport.getInputName()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_registration_data_details_page(
         self,
         create_programs: None,
@@ -196,7 +194,7 @@ class TestSmokeRegistrationDataImport:
         # Check Elements on Details page
         assert "Test Other Status" in pageDetailsRegistrationDataImport.getPageHeaderTitle().text
         assert "IN REVIEW" in pageDetailsRegistrationDataImport.getLabelStatus().text
-        assert "KOBO" in pageDetailsRegistrationDataImport.getLabelSourceOfData().text
+        assert "KoBo" in pageDetailsRegistrationDataImport.getLabelSourceOfData().text
         assert datetime.now().strftime("%-d %b %Y") in pageDetailsRegistrationDataImport.getLabelImportDate().text
         pageDetailsRegistrationDataImport.getLabelImportedBy()
         assert (
@@ -217,7 +215,7 @@ class TestSmokeRegistrationDataImport:
 
 
 class TestRegistrationDataImport:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    @pytest.mark.skip(reason="RDI import only possible though Program Population")
     def test_registration_data_import_happy_path(
         self,
         registration_datahub: None,

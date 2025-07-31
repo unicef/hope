@@ -147,7 +147,7 @@ class TestHouseholdList:
             }
             assert household_result["status"] == household.status
             assert household_result["size"] == household.size
-            assert household_result["residence_status"] == household.residence_status
+            assert household_result["residence_status"] == household.get_residence_status_display()
             assert household_result["total_cash_received"] == household.total_cash_received
             assert household_result["total_cash_received_usd"] == household.total_cash_received_usd
             assert (
@@ -595,7 +595,7 @@ class TestHouseholdDetail:
         assert data["child_hoh"] == self.household.child_hoh
         assert data["returnee"] == self.household.returnee
         assert data["size"] == self.household.size
-        assert data["residence_status"] == self.household.residence_status
+        assert data["residence_status"] == self.household.get_residence_status_display()
         assert data["program_registration_id"] == self.household.program_registration_id
         assert data["delivered_quantities"] == [
             {
@@ -822,7 +822,7 @@ class TestHouseholdMembers:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household1.residence_status,
+                    "residence_status": self.household1.get_residence_status_display(),
                     "country_origin": "",
                     "country": "",
                     "address": self.household1.address,
@@ -854,7 +854,7 @@ class TestHouseholdMembers:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household1.residence_status,
+                    "residence_status": self.household1.get_residence_status_display(),
                     "country_origin": "",
                     "country": "",
                     "address": self.household1.address,
@@ -886,7 +886,7 @@ class TestHouseholdMembers:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household2.residence_status,
+                    "residence_status": self.household2.get_residence_status_display(),
                     "country_origin": "",
                     "country": "",
                     "address": self.household2.address,
@@ -1028,7 +1028,7 @@ class TestHouseholdGlobalViewSet:
             }
             assert household_result_first["status"] == household.status
             assert household_result_first["size"] == household.size
-            assert household_result_first["residence_status"] == household.residence_status
+            assert household_result_first["residence_status"] == household.get_residence_status_display()
             assert household_result_first["total_cash_received"] == household.total_cash_received
             assert household_result_first["total_cash_received_usd"] == household.total_cash_received_usd
             assert (

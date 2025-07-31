@@ -67,6 +67,7 @@ from extras.test_utils.factories.accountability import (
     generate_feedback,
     generate_messages,
 )
+from extras.test_utils.factories.aurora import generate_aurora_test_data
 from extras.test_utils.factories.core import (
     generate_business_areas,
     generate_country_codes,
@@ -92,7 +93,6 @@ from flags.models import FlagState
 
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +159,16 @@ class Command(BaseCommand):
             RoleAssignment.objects.get_or_create(
                 user=user, role=role_with_all_perms, business_area=BusinessArea.objects.get(name=ba_name)
             )
+        # Create role for WFP and UNHCR in Afghanistan
+        role_planner = Role.objects.get(name="Planner")
+        wfp_partner = Partner.objects.get(name="WFP")
+        unhcr_partner = Partner.objects.get(name="UNHCR")
+        afghanistan = BusinessArea.objects.get(slug="afghanistan")
+        for partner in [wfp_partner, unhcr_partner]:
+            partner.allowed_business_areas.add(afghanistan)
+            # TODO: remove the below line when the temporary solution is replaces with proper one
+            # (right now partner has to have a role in whole BA so it can be selected in program actions)
+            RoleAssignment.objects.get_or_create(partner=partner, role=role_planner, business_area=afghanistan)
 
         # Geo app
         generate_area_types()
