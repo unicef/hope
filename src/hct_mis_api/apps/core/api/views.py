@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
     CollectorAttributeSerializer,
-    FieldAttributeSimpleSerializer,
+    FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
 )
@@ -100,7 +100,7 @@ class BusinessAreaViewSet(
     @extend_schema(parameters=[OpenApiParameter(name="program_id")])
     @extend_schema(
         responses={
-            200: FieldAttributeSimpleSerializer(many=True),
+            200: FieldAttributeSerializer(many=True),
         },
     )
     @action(detail=True, methods=["get"], url_path="all-fields-attributes")
@@ -108,7 +108,7 @@ class BusinessAreaViewSet(
         program_id = request.query_params.get("program_id", None)
         business_area_slug = self.kwargs["slug"]
         result_list = get_fields_attr_generators(business_area_slug=business_area_slug, program_id=program_id)
-        return Response(FieldAttributeSimpleSerializer(result_list, many=True).data, status=200)
+        return Response(FieldAttributeSerializer(result_list, many=True).data, status=200)
 
     @extend_schema(
         request=GetKoboAssetListSerializer,

@@ -118,32 +118,6 @@ class CollectorAttributeSerializer(serializers.Serializer):
     choices = serializers.ListField(child=serializers.CharField())
 
 
-class FieldAttributeSimpleSerializer(serializers.Serializer):
-    id = serializers.CharField()
-    type = serializers.CharField()
-    name = serializers.CharField()
-    label_en = serializers.SerializerMethodField()
-    associated_with = serializers.SerializerMethodField()
-    is_flex_field = serializers.SerializerMethodField()
-    choices = CoreFieldChoiceSerializer(many=True)
-
-    def get_label_en(self, obj: Any) -> str | None:
-        if data := _custom_dict_or_attr_resolver("label", None, obj):
-            return data["English(EN)"]
-        return None
-
-    def get_is_flex_field(self, obj: Any) -> bool:
-        return isinstance(obj, FlexibleAttribute)
-
-    def get_associated_with(self, obj: Any) -> str | None:
-        resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
-        if resolved == 0:
-            return "Household"
-        if resolved == 1:
-            return "Individual"
-        return resolved
-
-
 class FieldAttributeSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
