@@ -60,7 +60,7 @@ class PaymentRecord(BaseComponents):
         return self.wait_for(self.statusContainer)
 
     def waitForStatusContainer(self, status: str, timeout: int = 20) -> []:
-        return self.wait_for_text(status, self.statusContainer, timeout=timeout)
+        return self.wait_for_text_to_be_exact(status, self.statusContainer, timeout=timeout)
 
     def getLabelHousehold(self) -> WebElement:
         return self.wait_for(self.labelHousehold)

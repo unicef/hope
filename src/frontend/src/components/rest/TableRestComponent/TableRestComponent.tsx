@@ -43,6 +43,7 @@ const StyledTableRow = styled(MuiTableRow)`
 
 const StyledTableCell = styled(MuiTableCell)`
   col-span: ${(props) => props.colSpan};
+
   && {
     white-space: nowrap;
     overflow: auto;
@@ -206,7 +207,7 @@ export function TableRestComponent<T>({
       <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
         component="div"
-        count={itemsCount}
+        count={itemsCount || -1}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePageProp}

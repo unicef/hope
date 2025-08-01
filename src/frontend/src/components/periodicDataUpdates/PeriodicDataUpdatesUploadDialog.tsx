@@ -45,15 +45,12 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
       setIsLoading(true);
       setError(null);
       try {
-        const formData = new FormData();
-        formData.append('file', fileToImport);
-        // Add any additional params to formData here if needed
 
         await RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate(
           {
             businessAreaSlug: businessArea,
             programSlug: programId,
-            requestBody: formData as any,
+            formData: { file: fileToImport as any },
           },
         );
         showMessage(t('File uploaded successfully'));
@@ -103,7 +100,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
               {t('Select Files to Upload')}
               <GreyText>
                 {t(
-                  'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.',
+                  'The system accepts the following file extensions: XLSX. File size must be ≤ 10MB.',
                 )}
               </GreyText>
             </Box>

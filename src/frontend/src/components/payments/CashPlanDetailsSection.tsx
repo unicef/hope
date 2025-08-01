@@ -67,7 +67,7 @@ export function CashPlanDetailsSection({
                 label: t('START DATE'),
                 value: (
                   <UniversalMoment>
-                    {planNode.programCycleStartDate}
+                    {planNode.startDate}
                   </UniversalMoment>
                 ),
               },
@@ -75,7 +75,7 @@ export function CashPlanDetailsSection({
                 label: t('END DATE'),
                 value: (
                   <UniversalMoment>
-                    {planNode.programCycleEndDate}
+                    {planNode.endDate}
                   </UniversalMoment>
                 ),
               },

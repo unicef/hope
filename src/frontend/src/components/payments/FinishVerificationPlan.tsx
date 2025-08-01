@@ -16,7 +16,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useProgramContext } from '../../programContext';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
@@ -34,6 +34,7 @@ export function FinishVerificationPlan({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId: programSlug } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const finishVerificationPlanMutation = useMutation({
     mutationFn: () =>
@@ -45,6 +46,17 @@ export function FinishVerificationPlan({
           verificationPlanId: verificationPlan.id,
         },
       ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
+    },
   });
 
   const finish = async (): Promise<void> => {

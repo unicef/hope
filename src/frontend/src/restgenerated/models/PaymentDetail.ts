@@ -9,6 +9,7 @@ import type { IndividualList } from './IndividualList';
 import type { PaymentList } from './PaymentList';
 import type { PaymentPlanDetail } from './PaymentPlanDetail';
 import type { PaymentStatusEnum } from './PaymentStatusEnum';
+import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
 export type PaymentDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -38,7 +39,7 @@ export type PaymentDetail = {
     readonly collectorId: string;
     collectorPhoneNo: string;
     collectorPhoneNoAlt: string;
-    readonly verification: Record<string, any>;
+    readonly verification: PaymentVerificationDetails;
     readonly paymentPlanHardConflicted: boolean;
     readonly paymentPlanHardConflictedData: Array<any>;
     readonly paymentPlanSoftConflicted: boolean;

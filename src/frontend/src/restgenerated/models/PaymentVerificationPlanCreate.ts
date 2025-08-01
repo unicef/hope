@@ -8,7 +8,7 @@ import type { RapidPro } from './RapidPro';
 export type PaymentVerificationPlanCreate = {
     sampling: string;
     verificationChannel: string;
-    fullListArguments: FullList;
+    fullListArguments: FullList | null;
     randomSamplingArguments: RandomSampling | null;
     rapidProArguments: RapidPro | null;
 };
