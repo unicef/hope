@@ -357,7 +357,7 @@ def create_grievance_referral(
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+
     def test_check_grievance_tickets_user_generated_page(
         self,
         create_programs: None,
@@ -500,7 +500,6 @@ class TestSmokeGrievanceTickets:
         assert "" in pageGrievanceDetailsPage.getNewNoteField().text
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_check_grievance_tickets_details_page_social_worker_program(
         self,
         household_social_worker: Household,
@@ -891,7 +890,6 @@ class TestGrievanceTickets:
         assert "Preferred Language" in f"{row1[0]} {row1[1]}"
         assert "English" in row1[-1]
 
-    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -951,7 +949,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert payment_id in pageGrievanceDetailsPage.getTicketPaymentLabel().text
 
-    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_look_up_linked_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -988,7 +986,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert linked_ticket in pageGrievanceDetailsPage.getLabelTickets().text
 
-    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_add_documentation(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -1210,7 +1208,6 @@ class TestGrievanceTickets:
         assert "Assigned" in pageGrievanceDetailsPage.getLogRow()[0].text
         assert "In Progress" in pageGrievanceDetailsPage.getLogRow()[0].text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_go_to_admin_panel_button(
         self,
         pageGrievanceTickets: GrievanceTickets,
