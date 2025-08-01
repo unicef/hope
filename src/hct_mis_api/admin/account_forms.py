@@ -125,8 +125,10 @@ class KoboImportUsersForm(forms.Form):
 
 class ImportCSVForm(forms.Form):
     file = forms.FileField()
-    delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
-    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
+    delimiter = forms.ChoiceField(
+        label=_("Delimiter"), choices=list(zip(delimiters, delimiters, strict=True)), initial=","
+    )
+    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes, strict=True)), initial="'")
     quoting = forms.ChoiceField(
         label=_("Quoting"),
         choices=(
@@ -165,4 +167,3 @@ class ImportCSVForm(forms.Form):
             {"classes": ["collapse"], "fields": (("delimiter", "quotechar", "quoting", "escapechar"),)},
         ),
     )
-    # row_attrs = {'one': {'style': 'display: none'}}

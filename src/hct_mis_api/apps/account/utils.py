@@ -5,9 +5,7 @@ from django.conf import settings
 
 
 def test_conditional(decorator: Any) -> Any:
-    """
-    A conditional decorator that applies the inner decorator only if not in a test environment.
-    """
+    """A conditional decorator that applies the inner decorator only if not in a test environment."""
 
     def conditional_decorator(fn: Any) -> Any:
         _decorated = decorator(fn)

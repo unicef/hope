@@ -59,10 +59,10 @@ class UsersFilter(FilterSet):
     def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         values = value.split(" ")
         q_obj = Q()
-        for value in values:
-            q_obj |= Q(first_name__startswith=value)
-            q_obj |= Q(last_name__startswith=value)
-            q_obj |= Q(email__startswith=value)
+        for v in values:
+            q_obj |= Q(first_name__startswith=v)
+            q_obj |= Q(last_name__startswith=v)
+            q_obj |= Q(email__startswith=v)
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":

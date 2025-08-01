@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 import time
+from contextlib import suppress
 from functools import reduce
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Iterable, Optional
@@ -194,8 +195,6 @@ class UploadDocumentsBase(APITestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        try:
+        with suppress(OSError):
             shutil.rmtree(cls.TEST_DIR)
-        except OSError:
-            pass
         super().tearDownClass()

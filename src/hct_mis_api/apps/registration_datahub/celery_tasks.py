@@ -417,7 +417,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = N
 @sentry_tags
 @log_start_and_end
 def remove_old_rdi_links_task(page_count: int = 100) -> None:
-    """This task removes linked RDI objects for households and related objects (individuals, documents etc.)"""
+    """Remove linked RDI objects for households and related objects (individuals, documents etc.)."""
 
     from datetime import timedelta
 
