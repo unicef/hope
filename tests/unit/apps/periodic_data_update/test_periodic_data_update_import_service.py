@@ -1,7 +1,8 @@
 import datetime
 import json
 import uuid
-from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
+from io import BytesIO
+from tempfile import _TemporaryFileWrapper
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -40,8 +41,8 @@ def add_pdu_data_to_xlsx(
     for row_index, row in enumerate(rows):
         for col_index, value in enumerate(row):
             ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
-    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
-    wb.save(tmp_file.name)
+    tmp_file = BytesIO()
+    wb.save(tmp_file)
     tmp_file.seek(0)
     return tmp_file
 
@@ -423,52 +424,52 @@ class TestPeriodicDataUpdateImportService(TestCase):
         self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-            wb.save(tmp_file.name)
-            tmp_file.seek(0)
-            periodic_data_update_template_from_xlsx = (
-                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
-            )
-            self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
+        tmp_file = BytesIO()
+        wb.save(tmp_file)
+        tmp_file.seek(0)
+        periodic_data_update_template_from_xlsx = (
+            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+        )
+        self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
         ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = ""
-        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-            wb.save(tmp_file.name)
-            tmp_file.seek(0)
-            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID is missing in the file"):
-                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+        tmp_file = BytesIO()
+        wb.save(tmp_file)
+        tmp_file.seek(0)
+        with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID is missing in the file"):
+            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
         ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = "abc"
-        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-            wb.save(tmp_file.name)
-            tmp_file.seek(0)
-            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be a number"):
-                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+        tmp_file = BytesIO()
+        wb.save(tmp_file)
+        tmp_file.seek(0)
+        with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be a number"):
+            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
         ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = True
-        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-            wb.save(tmp_file.name)
-            tmp_file.seek(0)
-            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be an integer"):
-                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+        tmp_file = BytesIO()
+        wb.save(tmp_file)
+        tmp_file.seek(0)
+        with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be an integer"):
+            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
         ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = -1
-        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-            wb.save(tmp_file.name)
-            tmp_file.seek(0)
-            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template with ID -1 not found"):
-                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+        tmp_file = BytesIO()
+        wb.save(tmp_file)
+        tmp_file.seek(0)
+        with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template with ID -1 not found"):
+            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
     def test_read_flexible_attributes(self) -> None:
         periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(

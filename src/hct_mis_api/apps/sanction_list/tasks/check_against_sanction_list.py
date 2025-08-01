@@ -1,5 +1,6 @@
 import base64
 import io
+from contextlib import suppress
 from datetime import date, datetime
 from itertools import permutations
 from typing import TYPE_CHECKING
@@ -47,16 +48,13 @@ class CheckAgainstSanctionListTask:
             }
 
             row_number = 1
-            for cell, header in zip(row, headers.keys()):
+            for cell, header in zip(row, headers.keys(), strict=True):
                 value = cell.value
                 row_number = cell.row
                 header_as_key = header.replace(" ", "_").lower().strip()
-                if header_as_key == "date_of_birth":
-                    if not isinstance(value, datetime | date):
-                        try:
-                            value = dateutil.parser.parse(value)
-                        except Exception:
-                            pass
+                if header_as_key == "date_of_birth" and not isinstance(value, datetime | date):
+                    with suppress(Exception):
+                        value = dateutil.parser.parse(value)
                 if value:
                     filter_values[header_as_key] = value
 
