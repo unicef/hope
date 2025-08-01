@@ -29,7 +29,6 @@ class TestRuleForm(APITestCase):
         form = RuleForm(data=form_data)
         self.assertTrue(form.is_valid())
 
-        # config.USE_BLACK = True
         with self.settings(USE_BLACK=True):
             form_data_with_black = {
                 "name": "Test",

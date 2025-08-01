@@ -62,7 +62,7 @@ class HouseholdDataUpdateService(DataChangeService):
         household_data_with_approve_status = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
         }
-        for field in household_data_with_approve_status.keys():
+        for field in household_data_with_approve_status:
             current_value = getattr(household, field, None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
@@ -72,7 +72,7 @@ class HouseholdDataUpdateService(DataChangeService):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
 
-        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title"):
             area = getattr(household, "admin_area", None)
             current_value = getattr(area, "p_code", None)
 
@@ -114,7 +114,7 @@ class HouseholdDataUpdateService(DataChangeService):
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_household_data.items()
         }
-        for field in household_data_with_approve_status.keys():
+        for field in household_data_with_approve_status:
             current_value = getattr(household, field, None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
@@ -124,7 +124,7 @@ class HouseholdDataUpdateService(DataChangeService):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
 
-        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title"):
             area = getattr(household, "admin_area", None)
             current_value = getattr(area, "p_code", None)
 

@@ -93,8 +93,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                     f"Different count of headers. Acceptable headers are: [{accepted_headers}]",
                 )
             )
-        column = 0
-        for header in headers_row:
+        for column, header in enumerate(headers_row):
             if column >= len(accepted_headers):
                 self.errors.append(
                     XlsxError(
@@ -111,7 +110,6 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                         f"Unexpected header {header.value} expected {accepted_headers[column]}",
                     )
                 )
-            column += 1
 
     def _validate_row_types(self, row: Row) -> None:
         column = 0
