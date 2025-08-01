@@ -18,12 +18,11 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
 
   useEffect(() => {
     const optionValue =
-      otherProps.choices?.find((choice) => choice.name === field.value) || null;
+      otherProps.choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
   }, [field.value, otherProps.choices]);
   useEffect(() => {
-    const choices = otherProps.choices || [];
-    const uniqueChoices = choices.filter(
+    const uniqueChoices = otherProps.choices.filter(
       (choice, index, self) =>
         index === self.findIndex((t) => t.name === choice.name),
     );
@@ -47,9 +46,10 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
       options={choicesWithoutDuplicates || []}
       value={newValue}
       getOptionLabel={(option) => {
-        if (option) {
-          return option?.labelEn || option.label?.englishEn || '';
-        }
+        if (!option) return '';
+        if (typeof option.labelEn === 'string') return option.labelEn;
+        if (option.labelEn?.englishEn) return String(option.labelEn.englishEn);
+        if (option.label?.englishEn) return String(option.label.englishEn);
         return '';
       }}
       renderInput={(params) => (

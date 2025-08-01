@@ -109,12 +109,13 @@ const SubField: FC<SubFieldProps> = ({
   if (!field) {
     return null;
   }
-  const getLabel = () =>
-    field.fieldAttribute?.label?.englishEn ||
-    field.label?.englishEn ||
-    field.fieldAttribute?.labelEn ||
-    field.labelEn ||
-    '';
+  const getLabel = () => {
+    const labelEn = field.fieldAttribute?.labelEn;
+    if (typeof labelEn === 'string') return labelEn;
+    if (labelEn && typeof labelEn.englishEn === 'string')
+      return labelEn.englishEn;
+    return '';
+  };
 
   const renderFieldByType = (type: string) => {
     const typeForSwitch = fieldTypeProp || type;
