@@ -9,7 +9,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
 import { showApiErrorMessages } from '@utils/utils';
 
@@ -31,11 +31,11 @@ export const ImportXlsx = ({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
 }: ImportXlsxProps): ReactElement => {
-  const { showMessage } = useSnackbar();
+  const { showMessage, showRestApiError } = useSnackbar();
   const { businessArea, programId: programSlug } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
-
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   const importMutation = useMutation({
@@ -46,33 +46,42 @@ export const ImportXlsx = ({
           id: cashOrPaymentPlanId,
           programSlug: programSlug,
           verificationPlanId: paymentVerificationPlanId,
-          requestBody: data,
+          formData: data,
         },
       ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasProgramsPaymentVerificationsVerificationsList',
+        ],
+      });
+    },
   });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
-        //TODO: is it just type issue?
-        // Convert file to base64 string as required by the API
-        const base64String = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(fileToImport);
-        });
 
         await importMutation.mutateAsync({
-          file: base64String,
+          file: fileToImport,
         });
         setOpenImport(false);
         showMessage(t('Your import was successful!'));
       } catch (e) {
-        showApiErrorMessages(e, showMessage, t('Failed to import file'));
+        showRestApiError(e);
       }
     }
   };
+  const errorWithBody = importMutation.error as any;
+  const errorBody = errorWithBody?.body;
 
   return (
     <>
@@ -118,7 +127,7 @@ export const ImportXlsx = ({
             {fileToImport && importMutation.error && (
               <Error>
                 <p>Errors</p>
-                <p>{importMutation.error.message}</p>
+                <p>{JSON.stringify(errorBody)}</p>
               </Error>
             )}
           </>

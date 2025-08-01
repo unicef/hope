@@ -191,7 +191,7 @@ class TestPaymentVerificationViewSet:
                 PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
                 == resp_data["payment_verification_plans"][0]["verification_channel"]
             )
-            assert "Pending" == resp_data["payment_verification_summary"]["status"]
+            assert "PENDING" == resp_data["payment_verification_summary"]["status"]
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -225,7 +225,7 @@ class TestPaymentVerificationViewSet:
             assert PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX == pvp["verification_channel"]
             assert "Full list" == pvp["sampling"]
             assert pvp["excluded_admin_areas_filter"] == []
-            assert "Pending" == resp_data["payment_verification_summary"]["status"]
+            assert "PENDING" == resp_data["payment_verification_summary"]["status"]
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -258,7 +258,7 @@ class TestPaymentVerificationViewSet:
             assert "MANUAL" == pvp["verification_channel"]
             assert "Full list" == pvp["sampling"]
             assert pvp["excluded_admin_areas_filter"] == []
-            assert "Pending" == resp_data["payment_verification_summary"]["status"]
+            assert "PENDING" == resp_data["payment_verification_summary"]["status"]
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

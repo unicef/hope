@@ -83,7 +83,6 @@ import type { PaginatedRuleList } from '../models/PaginatedRuleList';
 import type { PaginatedSanctionListIndividualList } from '../models/PaginatedSanctionListIndividualList';
 import type { PaginatedSurveyCategoryChoiceList } from '../models/PaginatedSurveyCategoryChoiceList';
 import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
-import type { PaginatedSurveyRapidProFlowList } from '../models/PaginatedSurveyRapidProFlowList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
 import type { PatchedFeedbackUpdate } from '../models/PatchedFeedbackUpdate';
@@ -134,6 +133,7 @@ import type { SampleSize } from '../models/SampleSize';
 import type { SanctionListIndividual } from '../models/SanctionListIndividual';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
+import type { SurveyRapidProFlow } from '../models/SurveyRapidProFlow';
 import type { SurveySampleSize } from '../models/SurveySampleSize';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
@@ -9989,7 +9989,7 @@ export class RestService {
         id,
         programSlug,
         verificationPlanId,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
@@ -9998,7 +9998,7 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanImport,
+        formData: PaymentVerificationPlanImport,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -10009,8 +10009,8 @@ export class RestService {
                 'program_slug': programSlug,
                 'verification_plan_id': verificationPlanId,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -11053,7 +11053,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedSurveyRapidProFlowList
+     * @returns SurveyRapidProFlow
      * @throws ApiError
      */
     public static restBusinessAreasProgramsSurveysAvailableFlowsList({
@@ -11062,8 +11062,6 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
-        limit,
-        offset,
         orderBy,
         ordering,
         paymentPlan,
@@ -11075,14 +11073,6 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
         /**
          * Ordering
          *
@@ -11110,7 +11100,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
-    }): CancelablePromise<PaginatedSurveyRapidProFlowList> {
+    }): CancelablePromise<Array<SurveyRapidProFlow>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/available-flows/',
@@ -11122,8 +11112,6 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
-                'limit': limit,
-                'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'payment_plan': paymentPlan,

@@ -189,7 +189,6 @@ export type { PaginatedRuleList as PaginatedRuleListCamelCase } from './models/P
 export type { PaginatedSanctionListIndividualList as PaginatedSanctionListIndividualListCamelCase } from './models/PaginatedSanctionListIndividualList';
 export type { PaginatedSurveyCategoryChoiceList as PaginatedSurveyCategoryChoiceListCamelCase } from './models/PaginatedSurveyCategoryChoiceList';
 export type { PaginatedSurveyList as PaginatedSurveyListCamelCase } from './models/PaginatedSurveyList';
-export type { PaginatedSurveyRapidProFlowList as PaginatedSurveyRapidProFlowListCamelCase } from './models/PaginatedSurveyRapidProFlowList';
 export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationListListCamelCase } from './models/PaginatedTargetPopulationListList';
 export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
 export type { Partner as PartnerCamelCase } from './models/Partner';
@@ -217,6 +216,8 @@ export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/Payme
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
+export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
+export { PaymentVerificationDetailsStatusEnum as PaymentVerificationDetailsStatusEnumCamelCase } from './models/PaymentVerificationDetailsStatusEnum';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
@@ -225,6 +226,7 @@ export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCame
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
+export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';
 export type { PDUDataCreate as PDUDataCreateCamelCase } from './models/PDUDataCreate';
 export type { PDUFieldsCreate as PDUFieldsCreateCamelCase } from './models/PDUFieldsCreate';
 export type { PDUFieldsUpdate as PDUFieldsUpdateCamelCase } from './models/PDUFieldsUpdate';

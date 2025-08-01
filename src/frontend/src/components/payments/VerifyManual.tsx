@@ -17,7 +17,7 @@ import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedP
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -27,9 +27,10 @@ export interface Props {
   paymentVerificationId: string;
   status: string;
   enabled: boolean;
-  receivedAmount: number;
-  cashOrPaymentPlanId: string;
+  receivedAmount: string;
   verificationPlanId: string;
+  paymentId: string;
+  paymentPlanId: string;
 }
 
 export function VerifyManual({
@@ -37,25 +38,38 @@ export function VerifyManual({
   status,
   enabled,
   receivedAmount,
-  cashOrPaymentPlanId,
   verificationPlanId,
+  paymentId,
+  paymentPlanId,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, programId: programSlug } = useBaseUrl();
-
+  const queryClient = useQueryClient();
+  const { programSlug, businessAreaSlug } = useBaseUrl();
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsPartialUpdate(
         {
-          businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
-          programSlug: programSlug,
+          businessAreaSlug,
+          id: paymentId,
+          programSlug,
           paymentVerificationPk: verificationPlanId,
           requestBody: data,
         },
       ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'payment',
+          businessAreaSlug,
+          paymentId,
+          programSlug,
+          paymentPlanId,
+        ],
+      });
+    },
   });
 
   const submit = async (values): Promise<void> => {

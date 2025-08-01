@@ -5,6 +5,7 @@ from typing import Any
 from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import serializers
 from django.db import transaction
@@ -143,12 +144,19 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
 
 
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status_display = serializers.CharField(source="get_status_display")
     number_of_verification_plans = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentVerificationSummary
-        fields = ("id", "status", "activation_date", "completion_date", "number_of_verification_plans")
+        fields = (
+            "id",
+            "status",
+            "activation_date",
+            "completion_date",
+            "number_of_verification_plans",
+            "status_display",
+        )
 
     def get_number_of_verification_plans(self, obj: PaymentVerificationSummary) -> int:
         return obj.payment_plan.payment_verification_plans.count()
@@ -274,6 +282,8 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "can_create_payment_verification_plan",
             "payment_verification_plans",
             "payment_verification_summary",
+            "start_date",
+            "end_date",
             "is_follow_up",
             "version",
         )
@@ -291,6 +301,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
+    program_cycle_title = serializers.CharField(source="program_cycle.title")
 
     class Meta:
         model = PaymentPlan
@@ -302,7 +313,10 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
             "program_cycle_start_date",
             "program_cycle_end_date",
             "verification_status",
+            "dispersion_start_date",
+            "dispersion_end_date",
             "updated_at",
+            "program_cycle_title",
         )
 
 
@@ -960,6 +974,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
             "verification_channel",
             "admin_url",
             "version",
+            "is_manually_editable",
         )
 
 
@@ -1058,6 +1073,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             return ""
         return obj.fsp_auth_code or ""
 
+    @extend_schema_field(PaymentVerificationDetailsSerializer)
     def get_verification(self, obj: Payment) -> dict[str, Any]:
         # TODO: only one Verification per Payment?
         return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
@@ -1220,7 +1236,7 @@ class RapidProSerializer(serializers.Serializer):
 class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
     sampling = serializers.CharField()
     verification_channel = serializers.CharField()
-    full_list_arguments = FullListSerializer()
+    full_list_arguments = FullListSerializer(allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
     rapid_pro_arguments = RapidProSerializer(allow_null=True)
 

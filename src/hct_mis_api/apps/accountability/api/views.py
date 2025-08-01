@@ -68,7 +68,7 @@ from hct_mis_api.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvided
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
@@ -408,9 +408,12 @@ class SurveyViewSet(
         return Response(to_choice_object(Survey.CATEGORY_CHOICES))
 
     @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
-    @action(detail=False, methods=["get"], url_path="available-flows")
+    @action(detail=False, methods=["get"], url_path="available-flows", pagination_class=None)
     def available_flows(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
+        try:
+            api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
+        except TokenNotProvided:
+            raise ValidationError("Token is not provided.")
         return Response(api.get_flows())
 
     @transaction.atomic

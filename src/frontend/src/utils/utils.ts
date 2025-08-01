@@ -1323,6 +1323,7 @@ export function showApiErrorMessages(
 ): void {
   // Handle array of errors in error.body
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
+
     error.body.forEach((msg: string) => {
       if (msg) showMessage(msg);
     });
