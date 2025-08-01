@@ -93,12 +93,14 @@ urlpatterns = [
                     name="program-create",
                 ),
                 path("rdi/create/", endpoints.rdi.CreateRDIView().as_view(), name="rdi-create"),
+                path("rdi/upload/", endpoints.rdi.UploadRDIView().as_view(), name="rdi-upload"),
                 path("rdi/<uuid:rdi>/completed/", endpoints.rdi.CompleteRDIView().as_view(), name="rdi-complete"),
                 path(
                     "rdi/<uuid:rdi>/delegate/people/",
                     endpoints.rdi.DelegatePeopleRDIView().as_view(),
                     name="rdi-delegate-people",
                 ),
+                path("rdi/<uuid:rdi>/push/", endpoints.rdi.PushToRDIView().as_view(), name="rdi-push"),
                 path(
                     "rdi/<uuid:rdi>/push/people/", endpoints.rdi.PushPeopleToRDIView().as_view(), name="rdi-push-people"
                 ),
