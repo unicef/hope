@@ -26,7 +26,7 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualListSerializer,
     IndividualSmallSerializer,
-    IndividualUnicefIdNameSerializer,
+    IndividualIdNameSerializer,
 )
 from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
@@ -1259,7 +1259,7 @@ class PendingPaymentSerializer(serializers.ModelSerializer):
         )
 
     def get_head_of_household(self, obj: Payment) -> Any:
-        return IndividualUnicefIdNameSerializer(obj.head_of_household).data
+        return IndividualIdNameSerializer(obj.head_of_household).data if obj.head_of_household else None
 
 
 class TargetPopulationCreateSerializer(serializers.ModelSerializer):

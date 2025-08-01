@@ -89,13 +89,13 @@ class IndividualSmallSerializer(serializers.ModelSerializer):
         )
 
 
-class IndividualUnicefIdNameSerializer(serializers.ModelSerializer):
+class IndividualIdNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Individual
         fields = (
             "id",
             "unicef_id",
-            "full_name"
+            "full_name",
         )
 
 
