@@ -357,7 +357,6 @@ def create_grievance_referral(
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
-
     def test_check_grievance_tickets_user_generated_page(
         self,
         create_programs: None,
