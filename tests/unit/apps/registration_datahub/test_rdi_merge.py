@@ -256,7 +256,6 @@ class TestRdiMergeTask(TestCase):
         self.assertEqual(str(kobo_import_submission.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
         self.assertEqual(kobo_import_submission.kobo_asset_id, "123456123")
         self.assertEqual(str(kobo_import_submission.kobo_submission_time), "2022-02-22 12:22:22+00:00")
-        # self.assertEqual(kobo_import_submission.imported_household, None)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()

@@ -84,7 +84,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 27,
                 "relationship": GRANDDAUGHTER_GRANDSON,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("1993-09-01", "%Y-%m-%d").date(),
@@ -95,7 +94,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 0,
                 "relationship": HEAD,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2021-06-29", "%Y-%m-%d").date(),
@@ -133,7 +131,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 5,
                 "relationship": NON_BENEFICIARY,
                 "sex": MALE,
                 "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
@@ -144,7 +141,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 59,
                 "relationship": COUSIN,
                 "sex": MALE,
                 "birth_date": datetime.datetime.strptime("1961-07-29", "%Y-%m-%d").date(),
@@ -337,7 +333,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 23,
                 "relationship": BROTHER_SISTER,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2000-01-01", "%Y-%m-%d").date(),

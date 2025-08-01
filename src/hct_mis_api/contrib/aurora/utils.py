@@ -24,54 +24,51 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_metadata(auth_token: str) -> list:
-    decoders = [
-        # codecs.CoreJSONCodec(),
-        codecs.JSONCodec()
-    ]
+    decoders = [codecs.JSONCodec()]
     auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
 
     client = coreapi.Client(auth=auth, decoders=decoders)
     schema = client.get(config.AURORA_SERVER)
     page = client.get(schema["organization"])
     ret = []
-    for dataOrg in page["results"]:
-        ret.append(dataOrg)
+    for data_org in page["results"]:
+        ret.append(data_org)
         org, __ = Organization.objects.update_or_create(
-            source_id=dataOrg["id"],
+            source_id=data_org["id"],
             defaults={
-                "name": dataOrg["name"],
-                "slug": dataOrg["slug"],
+                "name": data_org["name"],
+                "slug": data_org["slug"],
             },
         )
-        prjs = client.get(dataOrg["projects"])
+        prjs = client.get(data_org["projects"])
         ret[-1]["projects"] = []
-        for dataPrj in prjs["results"]:
+        for data_prj in prjs["results"]:
             prj, __ = Project.objects.update_or_create(
-                source_id=dataPrj["id"],
+                source_id=data_prj["id"],
                 defaults={
                     "organization": org,
-                    "name": dataPrj["name"],
+                    "name": data_prj["name"],
                 },
             )
-            regs = client.get(dataPrj["registrations"])
-            dataPrj["registrations"] = []
-            for dataReg in regs:
+            regs = client.get(data_prj["registrations"])
+            data_prj["registrations"] = []
+            for data_reg in regs:
                 try:
-                    mt = client.get(dataReg["metadata"])
+                    mt = client.get(data_reg["metadata"])
                 except NoCodecAvailable as e:
                     logger.exception(e)
                     mt = {}
                 reg, __ = Registration.objects.update_or_create(
-                    source_id=dataReg["id"],
+                    source_id=data_reg["id"],
                     defaults={
                         "project": prj,
-                        "name": dataReg["name"],
-                        "slug": dataReg["slug"],
+                        "name": data_reg["name"],
+                        "slug": data_reg["slug"],
                         "metadata": mt,
                     },
                 )
-                dataPrj["registrations"].append(dataReg)
-            ret[-1]["projects"].append(dataPrj)
+                data_prj["registrations"].append(data_reg)
+            ret[-1]["projects"].append(data_prj)
     return ret
 
 

@@ -155,7 +155,7 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
         household.individuals.exclude(id=new_individual.id).order_by("id")
     )
     for individual_before_change, individual_after_change in zip(
-        individuals_to_change_relationship_to_unknown, updated_individuals_with_relationship_unknown
+        individuals_to_change_relationship_to_unknown, updated_individuals_with_relationship_unknown, strict=True
     ):
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,
@@ -237,11 +237,7 @@ def reassign_roles_on_disable_individual_service(
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
         log_and_raise("Ticket cannot be closed, not all roles have been reassigned")
 
-    if (
-        all(HEAD not in key for key in role_reassign_data.keys())
-        and individual_to_remove.is_head()
-        and not is_one_individual
-    ):
+    if all(HEAD not in key for key in role_reassign_data) and individual_to_remove.is_head() and not is_one_individual:
         log_and_raise("Ticket cannot be closed, head of household has not been reassigned")
 
     for role_to_delete in roles_to_delete:

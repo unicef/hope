@@ -2,7 +2,6 @@ import json
 from typing import Callable
 
 from django.core.cache import cache
-from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -282,15 +281,12 @@ class TestPeriodicDataUpdateUploadViews:
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
 
-        file = File(tmp_file)
-        with open(file.name, "rb") as f:  # type: ignore
-            simple_file = SimpleUploadedFile(
-                "file.xlsx",
-                f.read(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+        simple_file = SimpleUploadedFile(
+            "file.xlsx",
+            tmp_file.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
         response = self.client.post(self.url_upload, {"file": simple_file}, format="multipart")
-        file.close()
 
         assert response.status_code == expected_status
 
@@ -351,15 +347,12 @@ class TestPeriodicDataUpdateUploadViews:
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
 
-        file = File(tmp_file)
-        with open(file.name, "rb") as f:  # type: ignore
-            simple_file = SimpleUploadedFile(
-                "file.xlsx",
-                f.read(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+        simple_file = SimpleUploadedFile(
+            "file.xlsx",
+            tmp_file.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
         response = self.client.post(self.url_upload, {"file": simple_file}, format="multipart")
-        file.close()
 
         assert response.status_code == status.HTTP_202_ACCEPTED
 
