@@ -1,8 +1,11 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 
-from extras.test_utils.factories.core import create_afghanistan, PeriodicFieldDataFactory, \
-    FlexibleAttributeForPDUFactory
+from extras.test_utils.factories.core import (
+    create_afghanistan,
+    PeriodicFieldDataFactory,
+    FlexibleAttributeForPDUFactory,
+)
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.core.models import PeriodicFieldData, FlexibleAttribute
 
@@ -10,7 +13,9 @@ from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaRuleSeri
 from hct_mis_api.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter, TargetingIndividualBlockRuleFilter, TargetingIndividualRuleFilterBlock,
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
 )
 from test_utils.factories.program import ProgramFactory
 
@@ -58,7 +63,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "pdu_data": None,
         }
         field_attribute_data.pop("id")
-        self.assertEqual(field_attribute_data , expected_field_attribute_data)
+        self.assertEqual(field_attribute_data, expected_field_attribute_data)
 
     def test_targeting_criteria_serializer_for_not_flex_field_on_ind(self) -> None:
         create_afghanistan()
@@ -70,7 +75,10 @@ class TargetingCriteriaSerializerTest(TestCase):
             "flex_field_classification": "NOT_FLEX_FIELD",
         }
         ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
-        targeting_criteria_rule_filter = TargetingIndividualBlockRuleFilter.objects.create(**ind_rule_data, individuals_filters_block=ind_block)
+        targeting_criteria_rule_filter = TargetingIndividualBlockRuleFilter.objects.create(
+            **ind_rule_data,
+            individuals_filters_block=ind_block,
+        )
 
         data = TargetingCriteriaRuleSerializer(instance=rule).data
 
@@ -86,12 +94,8 @@ class TargetingCriteriaSerializerTest(TestCase):
             data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"],
             "NOT_FLEX_FIELD",
         )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "size"
-        )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"],  [2]
-        )
+        self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "size")
+        self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"],  [2])
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_result = filter_choices(
             get_field_by_name(targeting_criteria_rule_filter.field_name, rule.payment_plan),
@@ -109,7 +113,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "pdu_data": None,
         }
         field_attribute_data.pop("id")
-        self.assertEqual(field_attribute_data , expected_field_attribute_data)
+        self.assertEqual(field_attribute_data, expected_field_attribute_data)
 
     def test_targeting_criteria_serializer_for_flex_field_on_hh(self) -> None:
         create_afghanistan()
@@ -138,7 +142,7 @@ class TargetingCriteriaSerializerTest(TestCase):
         self.assertEqual(data["households_filters_blocks"][0]["comparison_method"], "EQUALS")
         self.assertEqual(data["households_filters_blocks"][0]["flex_field_classification"], "FLEX_FIELD_BASIC")
         self.assertEqual(data["households_filters_blocks"][0]["field_name"], "flex_field")
-        self.assertEqual(data["households_filters_blocks"][0]["arguments"],  ["test_value"])
+        self.assertEqual(data["households_filters_blocks"][0]["arguments"], ["test_value"])
         field_attribute_data = data["households_filters_blocks"][0]["field_attribute"]
         expected_field_attribute_data = {
             "id": str(flex_field.id),
@@ -152,7 +156,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "is_flex_field": True,
             "pdu_data": None,
         }
-        self.assertEqual(field_attribute_data , expected_field_attribute_data)
+        self.assertEqual(field_attribute_data, expected_field_attribute_data)
 
     def test_targeting_criteria_serializer_for_flex_field_on_ind(self) -> None:
         create_afghanistan()
@@ -191,7 +195,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "flex_field"
         )
         self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"],  ["test_value"]
+            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"], ["test_value"]
         )
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_field_attribute_data = {
@@ -206,7 +210,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "is_flex_field": True,
             "pdu_data": None,
         }
-        self.assertEqual(field_attribute_data , expected_field_attribute_data)
+        self.assertEqual(field_attribute_data, expected_field_attribute_data)
 
     def test_targeting_criteria_serializer_for_pdu_flex_field(self) -> None:
         afghanistan = create_afghanistan()
@@ -259,7 +263,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "pdu_field"
         )
         self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"],  ["test_value"]
+            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"], ["test_value"]
         )
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_field_attribute_data = {
@@ -278,4 +282,4 @@ class TargetingCriteriaSerializerTest(TestCase):
                 "rounds_names": pdu_data.rounds_names,
             },
         }
-        self.assertEqual(field_attribute_data , expected_field_attribute_data)
+        self.assertEqual(field_attribute_data, expected_field_attribute_data)
