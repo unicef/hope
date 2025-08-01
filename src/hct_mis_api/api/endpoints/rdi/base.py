@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth import get_user_model
@@ -16,7 +15,7 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hct_mis_api.api.endpoints.rdi.upload import HouseholdSerializer
+from hct_mis_api.api.endpoints.rdi.serializers import HouseholdSerializer
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.geo.models import Country
@@ -82,32 +81,6 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             status=status.HTTP_201_CREATED,
             headers=headers,
         )
-
-
-class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
-    """Api to link Households with selected RDI."""
-
-    permission = Grant.API_RDI_CREATE
-
-    @cached_property
-    def selected_rdi(self) -> RegistrationDataImport:
-        try:
-            return RegistrationDataImport.objects.get(
-                status=RegistrationDataImport.LOADING,
-                id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
-            )
-        except RegistrationDataImport.DoesNotExist:
-            raise Http404
-
-    @atomic()
-    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
-        serializer = HouseholdSerializer(data=request.data, many=True)
-
-        if serializer.is_valid():
-            totals = self.save_households(self.selected_rdi, serializer.validated_data)
-            return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
-        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
 class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):

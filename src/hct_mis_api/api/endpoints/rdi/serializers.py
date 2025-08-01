@@ -1,87 +1,24 @@
-import logging
-from dataclasses import asdict
-from datetime import date, datetime
-from typing import TYPE_CHECKING, Any
-
-from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils import timezone
-
 from django_countries import Countries
-from drf_spectacular.utils import extend_schema
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 
-from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
-from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hct_mis_api.api.models import Grant
-from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.api.endpoints.rdi.validators import BirthDateValidator
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    DATA_SHARING_CHOICES,
-    HEAD,
-    IDENTIFICATION_TYPE_CHOICE,
-    ROLE_ALTERNATE,
+    PendingDocument,
+    PendingIndividual,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
-    PendingDocument,
+    ROLE_ALTERNATE,
+    IDENTIFICATION_TYPE_CHOICE,
+    DATA_SHARING_CHOICES,
     PendingHousehold,
-    PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-if TYPE_CHECKING:
-    from rest_framework.request import Request
-
-    from hct_mis_api.apps.core.models import BusinessArea
-
-logger = logging.getLogger(__name__)
-
-
-class BirthDateValidator:
-    def __call__(self, value: date) -> None:
-        if value >= datetime.today().date():
-            raise ValidationError("Birth date must be in the past")
-
-
-class HouseholdValidator:
-    def __call__(self, value: Any) -> None:  # noqa
-        head_of_household = None
-        alternate_collector = None
-        primary_collector = None
-        members = value.get("members", [])
-        errs = {}
-        if not members:
-            raise ValidationError({"members": "This field is required"})
-        for data in members:
-            rel = data.get("relationship", None)
-            role = data.get("role", None)
-            if rel == HEAD:
-                if head_of_household:
-                    errs["head_of_household"] = "Only one HoH allowed"
-                head_of_household = data
-            if role == ROLE_PRIMARY:
-                if primary_collector:
-                    errs["primary_collector"] = "Only one Primary Collector allowed"
-                primary_collector = data
-            elif role == ROLE_ALTERNATE:
-                if alternate_collector:
-                    errs["alternate_collector"] = "Only one Alternate Collector allowed"
-                alternate_collector = data
-        if not head_of_household:
-            errs["head_of_household"] = "Missing Head Of Household"
-        if not primary_collector:
-            errs["primary_collector"] = "Missing Primary Collector"
-        if errs:
-            raise ValidationError(errs)
+from hct_mis_api.apps.household.validators import HouseholdValidator
+from hct_mis_api.apps.payment.models import FinancialInstitution, PendingAccount, AccountType
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -219,63 +156,3 @@ class HouseholdSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         return attrs
-
-
-class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
-    name = serializers.CharField(required=True)
-    households = HouseholdSerializer(many=True, required=True)
-    program = serializers.SlugRelatedField(
-        slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
-    )
-
-    class Meta:
-        model = RegistrationDataImport
-        fields = ("name", "households", "program")
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.business_area = kwargs.pop("business_area", None)
-        super().__init__(*args, **kwargs)
-
-    def validate_households(self, value: Any) -> Any:
-        if not value:
-            raise ValidationError("This field is required.")
-        return value
-
-    @atomic()
-    def create(self, validated_data: dict) -> dict:
-        created_by = validated_data.pop("user")
-        households = validated_data.pop("households")
-        program = validated_data.pop("program")
-
-        rdi = RegistrationDataImport.objects.create(
-            **validated_data,
-            imported_by=created_by,
-            data_source=RegistrationDataImport.API,
-            number_of_individuals=0,
-            number_of_households=0,
-            business_area=self.business_area,
-            program=program,
-        )
-        if program.biometric_deduplication_enabled:
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
-
-        info = self.save_households(rdi, households)
-        rdi.number_of_households = info.households
-        rdi.number_of_individuals = info.individuals
-        rdi.save()
-
-        return dict(id=rdi.pk, name=rdi.name, **asdict(info))
-
-
-class UploadRDIView(HOPEAPIBusinessAreaView):
-    permission = Grant.API_RDI_UPLOAD
-
-    @extend_schema(request=RDINestedSerializer)
-    @atomic()
-    def post(self, request: "Request", business_area: "BusinessArea") -> Response:
-        serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
-        if serializer.is_valid():
-            info = serializer.save(user=request.user)
-            return Response(info, status=status.HTTP_201_CREATED)
-        errors = humanize_errors(serializer.errors)
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
