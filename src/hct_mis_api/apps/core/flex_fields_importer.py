@@ -131,7 +131,7 @@ class FlexibleAttributeImporter:
                 choice_key = value.split(" ")[0]
                 if choice_key == "calculate":
                     self.object_fields_to_create["type"] = "calculate"
-                elif choice_key in self.TYPE_CHOICE_MAP.keys():
+                elif choice_key in self.TYPE_CHOICE_MAP:
                     self.object_fields_to_create["type"] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
                 is_attribute_name_empty = header_name == "name" and value in (None, "")
@@ -162,7 +162,7 @@ class FlexibleAttributeImporter:
                 )
                 logger.warning(validation_error_message)
                 raise ValidationError(validation_error_message)
-            if choice_key not in self.CALCULATE_TYPE_CHOICE_MAP.keys():
+            if choice_key not in self.CALCULATE_TYPE_CHOICE_MAP:
                 validation_error_message = (
                     f"Survey Sheet: Row {row_number + 1}: "
                     f"Invalid type: {choice_key} for calculate field, valid choices are "
@@ -190,10 +190,7 @@ class FlexibleAttributeImporter:
                 self.current_group_tree = []
             return False
 
-        if is_core_field or is_in_excluded or is_version_field:
-            return False
-
-        return True
+        return not (is_core_field or is_in_excluded or is_version_field)
 
     def _get_list_of_field_choices(self, sheet: Worksheet) -> set:
         fields_with_choices = []
@@ -231,7 +228,7 @@ class FlexibleAttributeImporter:
             if row[0].value not in choices_assigned_to_fields:
                 continue
 
-            for cell, header_name in zip(row, choices_headers_map):
+            for cell, header_name in zip(row, choices_headers_map, strict=True):
                 cell_value = cell.value
                 if isinstance(cell_value, float) and cell_value.is_integer():
                     cell_value = str(int(cell_value))
@@ -288,13 +285,13 @@ class FlexibleAttributeImporter:
                 continue
 
             object_type_to_add = "group" if row[0].value in ("begin_group", "begin_repeat") else "attribute"
-            repeatable = True if row[0].value == "begin_repeat" else False
+            repeatable = bool(row[0].value == "begin_repeat")
             self._reset_model_fields_variables()
 
             if not self._can_add_row(row):
                 continue
 
-            for cell, header_name in zip(row, headers_map):
+            for cell, header_name in zip(row, headers_map, strict=True):
                 value = cell.value
 
                 self._assign_field_values(

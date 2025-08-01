@@ -422,7 +422,7 @@ class TestSmokeTargeting:
             "Created by",
         ]
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
-        assert 2 == len(pageTargeting.getTargetPopulationsRows())
+        assert len(pageTargeting.getTargetPopulationsRows()) == 2
         pageTargeting.getButtonCreateNew().click()
 
     @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
@@ -1154,7 +1154,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         old_list = pageTargeting.getTargetPopulationsRows()
-        assert 2 == len(old_list)
+        assert len(old_list) == 2
         assert "Copy TP" in old_list[0].text
 
         pageTargeting.chooseTargetPopulations(0).click()
@@ -1164,7 +1164,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
-        assert 1 == len(new_list)
+        assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")

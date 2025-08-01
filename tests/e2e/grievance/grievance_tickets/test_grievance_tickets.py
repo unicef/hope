@@ -377,7 +377,7 @@ class TestSmokeGrievanceTickets:
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 2
         expected_labels = [
             "Ticket ID",
             "Status",
@@ -412,7 +412,7 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
@@ -1184,7 +1184,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getInputNewnote().send_keys("Test adding new note.")
         pageGrievanceDetailsPage.getButtonNewNote().click()
         user = pageGrievanceDetailsPage.getNoteName().text
-        assert 1 == len(pageGrievanceDetailsPage.getNoteRows())
+        assert len(pageGrievanceDetailsPage.getNoteRows()) == 1
         assert user in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
@@ -1358,7 +1358,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()
-        assert 3 == len(pageIndividuals.getIndividualTableRow())
+        assert len(pageIndividuals.getIndividualTableRow()) == 3
         for icon in pageIndividuals.getIndividualTableRow()[0].find_elements(By.TAG_NAME, "svg"):
             assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
             break
