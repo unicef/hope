@@ -17,6 +17,7 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -91,12 +92,13 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { businessArea } = useBaseUrl();
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
-    queryKey: ['allFieldsAttributes', selectedProgram.slug],
+    queryKey: ['allFieldsAttributes', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
-        slug: selectedProgram.slug,
+        slug: businessArea,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
   });
