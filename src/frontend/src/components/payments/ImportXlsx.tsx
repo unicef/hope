@@ -11,7 +11,6 @@ import { LoadingButton } from '@core/LoadingButton';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
-import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};

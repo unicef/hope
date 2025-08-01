@@ -4,21 +4,21 @@
 /* eslint-disable */
 /**
  * * `atm_card` - ATM Card
+ * * `effd2313-1614-4ecf-bc7f-0103749fdd4b` - As discuss nature.
+ * * `26c1d6d3-7863-413e-8ad5-0a8321f9402f` - Back perhaps consumer speak animal.
  * * `cardless_cash_withdrawal` - Cardless cash withdrawal
  * * `cash` - Cash
  * * `cash_by_fsp` - Cash by FSP
  * * `cash_over_the_counter` - Cash over the counter
  * * `cheque` - Cheque
- * * `1b23ba20-6334-4fe3-8e5b-15b3c439f375` - Commercial audience nor part move.
  * * `deposit_to_card` - Deposit to Card
+ * * `b79b1045-2782-4005-a1e7-f509036a67c4` - Glass player water.
+ * * `b678376d-6002-44f2-847c-0213109e4ce3` - Hundred beat partner of.
+ * * `e6d06e3f-97db-4ebc-adcf-46b73b8cf175` - Instead relate government.
  * * `mobile_money` - Mobile Money
- * * `4b0ba724-45ec-49c1-9884-cf348b704ecc` - Pick down though effort.
- * * `4f9e338c-81c2-4455-b7f4-828e472e2b7d` - Popular first modern benefit.
  * * `pre-paid_card` - Pre-paid card
  * * `referral` - Referral
- * * `281c3422-90fd-4024-85d6-a3d7030b088e` - Soon letter his church himself.
- * * `7f52f779-0e62-4c48-8106-5ac2754c7272` - Standard suggest mean employee.
- * * `e7ddc46d-6b78-45d5-86be-212c41dc02c3` - Their kind capital.
+ * * `33689aff-7ab5-49c9-8fd8-0787515067c4` - Seat under.
  * * `transfer` - Transfer
  * * `transfer_to_account` - Transfer to Account
  * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
@@ -26,21 +26,21 @@
  */
 export enum PaymentRecordDeliveryTypeEnum {
     ATM_CARD = 'atm_card',
+    EFFD2313_1614_4ECF_BC7F_0103749FDD4B = 'effd2313-1614-4ecf-bc7f-0103749fdd4b',
+    _26C1D6D3_7863_413E_8AD5_0A8321F9402F = '26c1d6d3-7863-413e-8ad5-0a8321f9402f',
     CARDLESS_CASH_WITHDRAWAL = 'cardless_cash_withdrawal',
     CASH = 'cash',
     CASH_BY_FSP = 'cash_by_fsp',
     CASH_OVER_THE_COUNTER = 'cash_over_the_counter',
     CHEQUE = 'cheque',
-    _1B23BA20_6334_4FE3_8E5B_15B3C439F375 = '1b23ba20-6334-4fe3-8e5b-15b3c439f375',
     DEPOSIT_TO_CARD = 'deposit_to_card',
+    B79B1045_2782_4005_A1E7_F509036A67C4 = 'b79b1045-2782-4005-a1e7-f509036a67c4',
+    B678376D_6002_44F2_847C_0213109E4CE3 = 'b678376d-6002-44f2-847c-0213109e4ce3',
+    E6D06E3F_97DB_4EBC_ADCF_46B73B8CF175 = 'e6d06e3f-97db-4ebc-adcf-46b73b8cf175',
     MOBILE_MONEY = 'mobile_money',
-    _4B0BA724_45EC_49C1_9884_CF348B704ECC = '4b0ba724-45ec-49c1-9884-cf348b704ecc',
-    _4F9E338C_81C2_4455_B7F4_828E472E2B7D = '4f9e338c-81c2-4455-b7f4-828e472e2b7d',
     PRE_PAID_CARD = 'pre-paid_card',
     REFERRAL = 'referral',
-    _281C3422_90FD_4024_85D6_A3D7030B088E = '281c3422-90fd-4024-85d6-a3d7030b088e',
-    _7F52F779_0E62_4C48_8106_5AC2754C7272 = '7f52f779-0e62-4c48-8106-5ac2754c7272',
-    E7DDC46D_6B78_45D5_86BE_212C41DC02C3 = 'e7ddc46d-6b78-45d5-86be-212c41dc02c3',
+    _33689AFF_7AB5_49C9_8FD8_0787515067C4 = '33689aff-7ab5-49c9-8fd8-0787515067c4',
     TRANSFER = 'transfer',
     TRANSFER_TO_ACCOUNT = 'transfer_to_account',
     TRANSFER_TO_DIGITAL_WALLET = 'transfer_to_digital_wallet',

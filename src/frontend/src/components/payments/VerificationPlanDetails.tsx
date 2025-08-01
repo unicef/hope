@@ -4,7 +4,6 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { paymentVerificationStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';

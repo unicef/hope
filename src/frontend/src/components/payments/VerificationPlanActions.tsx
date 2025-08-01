@@ -19,7 +19,6 @@ import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
-import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { showApiErrorMessages } from '@utils/utils';
 
 const StyledLink = styled.a`

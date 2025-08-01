@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { AreaSimple } from './AreaSimple';
 import type { DeliveredQuantity } from './DeliveredQuantity';
+import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdSimple = {
     readonly id: string;
     unicefId?: string | null;
@@ -30,7 +31,18 @@ export type HouseholdSimple = {
      * Household zip code
      */
     zipCode?: string | null;
-    residenceStatus: string;
+    /**
+     * Household residence status
+     *
+     * * `` - None
+     * * `IDP` - Displaced  |  Internally Displaced People
+     * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+     * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+     * * `HOST` - Non-displaced  |   Host
+     * * `NON_HOST` - Non-displaced  |   Non-host
+     * * `RETURNEE` - Displaced  |   Returnee
+     */
+    residenceStatus?: ResidenceStatusEnum;
     countryOrigin?: string;
     country?: string;
     /**

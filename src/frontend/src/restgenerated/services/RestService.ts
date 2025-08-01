@@ -9455,7 +9455,7 @@ export class RestService {
         });
     }
     /**
-     * return list of verification records
+     * Return list of verification records.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */

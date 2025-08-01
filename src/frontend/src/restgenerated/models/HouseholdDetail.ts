@@ -9,6 +9,7 @@ import type { HeadOfHousehold } from './HeadOfHousehold';
 import type { OrgEnumeratorEnum } from './OrgEnumeratorEnum';
 import type { RegistrationDataImport } from './RegistrationDataImport';
 import type { RegistrationMethodEnum } from './RegistrationMethodEnum';
+import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdDetail = {
     readonly id: string;
     unicefId: string | null;
@@ -350,7 +351,18 @@ export type HouseholdDetail = {
      * Household size
      */
     size?: number | null;
-    residenceStatus: string;
+    /**
+     * Household residence status
+     *
+     * * `` - None
+     * * `IDP` - Displaced  |  Internally Displaced People
+     * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+     * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+     * * `HOST` - Non-displaced  |   Host
+     * * `NON_HOST` - Non-displaced  |   Non-host
+     * * `RETURNEE` - Displaced  |   Returnee
+     */
+    residenceStatus?: ResidenceStatusEnum;
     /**
      * Beneficiary Program Registration id [sys]
      */
