@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -97,6 +97,7 @@ class BusinessAreaViewSet(
         result_list = sorted(definitions, key=lambda attr: attr["label"]["English(EN)"])  # type: ignore
         return Response(CollectorAttributeSerializer(result_list, many=True).data, status=200)
 
+    @extend_schema(parameters=[OpenApiParameter(name="program_id")])
     @extend_schema(
         responses={
             200: FieldAttributeSimpleSerializer(many=True),
