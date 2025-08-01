@@ -21,9 +21,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:
-    """
-    Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
-    """
+    """Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area"""
     if separator in ["space", "tab"]:
         list_of_households = list(map(str.strip, text.split(" ")))
     elif separator == "new_line":

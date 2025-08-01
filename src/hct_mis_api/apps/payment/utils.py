@@ -126,11 +126,9 @@ def get_quantity_in_usd(
     if amount == 0:
         return Decimal(0)
 
-    if not exchange_rate:
-        if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates()
-
-            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
+    if not exchange_rate and exchange_rates_client is None:
+        exchange_rates_client = ExchangeRates()
+        exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
 
     if exchange_rate is None:
         return None

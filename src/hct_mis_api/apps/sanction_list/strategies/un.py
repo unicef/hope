@@ -296,9 +296,9 @@ class LoadSanctionListXMLTask:
                 raw_value = self._get_text_from_path(individual_tag, path_or_func)
                 value = self._cast_field_value_to_correct_type(SanctionListIndividual, field_name, raw_value)
 
-            if hasattr(individual, field_name) and field_name not in individual_data_dict.keys():
+            if hasattr(individual, field_name) and field_name not in individual_data_dict:
                 setattr(individual, field_name, value)
-            elif field_name in individual_data_dict.keys():
+            elif field_name in individual_data_dict:
                 individual_data_dict[field_name] = value
 
         return individual_data_dict

@@ -548,11 +548,7 @@ def reassign_roles_on_disable_individual(
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
         raise ValidationError("Ticket cannot be closed, not all roles have been reassigned")
 
-    if (
-        all(HEAD not in key for key in role_reassign_data.keys())
-        and individual_to_remove.is_head()
-        and not is_one_individual
-    ):
+    if all(HEAD not in key for key in role_reassign_data) and individual_to_remove.is_head() and not is_one_individual:
         raise ValidationError("Ticket cannot be closed, head of household has not been reassigned")
 
     for role_to_delete in roles_to_delete:

@@ -24,10 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class TargetingCriteriaQueryingBase:
-    """
-    Whole query is built here
-    this mixin connects OR blocks
-    """
+    """Whole query is built here this mixin connects OR blocks."""
 
     def get_household_queryset(self) -> QuerySet:
         return Household.objects.all()
@@ -89,10 +86,7 @@ class TargetingCriteriaQueryingBase:
 
 
 class TargetingCriteriaRuleQueryingBase:
-    """
-    Gets query for single block
-    combines individual filters block with household filters and collector filters
-    """
+    """Gets query for single block combines individual filters block with household filters and collector filters."""
 
     def __init__(
         self,

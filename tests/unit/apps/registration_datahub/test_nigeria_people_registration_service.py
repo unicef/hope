@@ -61,8 +61,12 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         files = {
             "individual-details": [
                 {
-                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
-                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////////////////"
+                    "/////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP"
+                    "/aAAgBAQABPxA=",
+                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////"
+                    "/////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFB"
+                    "ABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }
