@@ -52,7 +52,6 @@ import type { PaginatedCollectorAttributeList } from '../models/PaginatedCollect
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
-import type { PaginatedFieldAttributeSimpleList } from '../models/PaginatedFieldAttributeSimpleList';
 import type { PaginatedFinancialInstitutionListList } from '../models/PaginatedFinancialInstitutionListList';
 import type { PaginatedFSPXlsxTemplateList } from '../models/PaginatedFSPXlsxTemplateList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
@@ -221,7 +220,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -246,7 +245,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -271,7 +270,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -320,7 +319,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -341,7 +340,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -386,7 +385,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -9455,7 +9454,7 @@ export class RestService {
         });
     }
     /**
-     * return list of verification records
+     * Return list of verification records.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -12731,7 +12730,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedFieldAttributeSimpleList
+     * @returns PaginatedFieldAttributeList
      * @throws ApiError
      */
     public static restBusinessAreasAllFieldsAttributesList({
@@ -12755,7 +12754,7 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-    }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
+    }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{slug}/all-fields-attributes/',
