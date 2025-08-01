@@ -163,7 +163,6 @@ def string_attribute() -> FlexibleAttribute:
 
 @pytest.mark.usefixtures("login")
 class TestPeoplePeriodicDataUpdateUpload:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_people_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
@@ -214,7 +213,6 @@ class TestPeoplePeriodicDataUpdateUpload:
         pageIndividuals.screenshot("0")
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_people_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -254,7 +252,7 @@ class TestPeoplePeriodicDataUpdateUpload:
         assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
-        error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
+        error_text = "Row: 2\ntest_date_attribute_round_value\nEnter a valid date."
         assert pageIndividuals.getPduFormErrors().text == error_text
 
     @pytest.mark.night

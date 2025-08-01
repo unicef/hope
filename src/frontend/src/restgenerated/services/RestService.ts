@@ -221,7 +221,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -246,7 +246,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -271,7 +271,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -320,7 +320,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -341,7 +341,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -386,7 +386,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -10417,11 +10417,11 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate({
         businessAreaSlug,
         programSlug,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        requestBody: PeriodicDataUpdateUpload,
+        formData: PeriodicDataUpdateUpload,
     }): CancelablePromise<PeriodicDataUpdateUpload> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -10430,8 +10430,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
