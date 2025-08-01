@@ -39,7 +39,10 @@ def run_universal_individual_update(universal_update_id: str) -> str:
         create_and_save_snapshot_chunked(universal_update)
         universal_update.save_logs("Update was started")
         engine = UniversalIndividualUpdateService(
-            universal_update, ignore_empty_values=True, deduplicate_es=True, deduplicate_documents=True
+            universal_update,
+            ignore_empty_values=True,
+            deduplicate_es=True,
+            deduplicate_documents=True,
         )
         engine.execute()
         return RESULT_SUCCESS

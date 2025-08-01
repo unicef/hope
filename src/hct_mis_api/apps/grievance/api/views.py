@@ -348,23 +348,22 @@ class GrievanceTicketGlobalViewSet(
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
         # check if user has access to the program
-        if program := input_data.get("program"):
-            if not check_permissions(
-                user,
-                self.get_permissions_for_action(),
-                business_area=self.business_area,
-                program=program.slug,
-            ):
-                raise PermissionDenied
+        program = input_data.get("program")
+        if program and not check_permissions(
+            user,
+            self.get_permissions_for_action(),
+            business_area=self.business_area,
+            program=program.slug,
+        ):
+            raise PermissionDenied
 
-        if input_data.get("documentation"):
-            if not check_permissions(
-                user,
-                [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
-                business_area=self.business_area,
-                program=program.slug if program else None,
-            ):
-                raise PermissionDenied
+        if input_data.get("documentation") and not check_permissions(
+            user,
+            [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            business_area=self.business_area,
+            program=program.slug if program else None,
+        ):
+            raise PermissionDenied
 
         if input_data.get("category") in (
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
@@ -495,15 +494,16 @@ class GrievanceTicketGlobalViewSet(
             notifications.append(
                 GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
             )
-        if new_status == GrievanceTicket.STATUS_CLOSED:
-            if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
-                partner = user.partner
+        if new_status == GrievanceTicket.STATUS_CLOSED and isinstance(
+            grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
+        ):
+            partner = user.partner
 
-                for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                    if not partner.has_area_access(
-                        area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
-                    ):
-                        raise PermissionDenied("Permission Denied: User does not have access to close ticket")
+            for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+                if not partner.has_area_access(
+                    area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                ):
+                    raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
         if not grievance_ticket.can_change_status(new_status):
             log_and_raise("New status is incorrect")
@@ -631,7 +631,7 @@ class GrievanceTicketGlobalViewSet(
                     approved_documents_indexes = documents_mapping.get(field_name, [])
                     document_data["approve_status"] = index in approved_documents_indexes
             elif field_name == "flex_fields":
-                for flex_field_name in item.keys():
+                for flex_field_name in item:
                     individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
                         flex_field_name
                     )
@@ -681,7 +681,7 @@ class GrievanceTicketGlobalViewSet(
 
         for field_name, item in household_data.items():
             if field_name == "flex_fields":
-                for flex_field_name in item.keys():
+                for flex_field_name in item:
                     household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
                         flex_field_name
                     )
@@ -951,9 +951,6 @@ class GrievanceTicketGlobalViewSet(
             )
         ticket_details.save()
         grievance_ticket.refresh_from_db()
-        # return cls(household=household, individual=individual)
-        # TODO: check if we need to return here Ind and HH
-        # or Grievance Ticket
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,

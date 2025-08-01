@@ -383,7 +383,7 @@ def generate_data_collecting_types() -> None:
             code=data_dict["code"],
             business_areas=all_ba_id_list,
             type=data_dict["type"],
-            household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
+            household_filters_available=bool(data_dict["type"] == DataCollectingType.Type.STANDARD.value),
         )
 
 

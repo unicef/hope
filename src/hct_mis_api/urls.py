@@ -6,7 +6,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
 
-import adminactions.actions as actions
+from adminactions import actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.admin

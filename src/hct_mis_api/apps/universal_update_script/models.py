@@ -41,7 +41,8 @@ class UniversalUpdate(
     template_file = models.FileField(
         blank=True,
         null=True,
-        help_text="Generated Template XLSX File, contains columns for data to be updated. Contains also rows for unicef_ids to be updated",
+        help_text="Generated Template XLSX File, contains columns for data to be updated. "
+        "Contains also rows for unicef_ids to be updated",
     )
     update_file = models.FileField(
         blank=True,

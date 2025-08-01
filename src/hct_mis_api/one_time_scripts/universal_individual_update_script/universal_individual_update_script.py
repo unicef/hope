@@ -22,7 +22,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 
 class UniversalIndividualUpdateScript:
-    def __init__(
+    def __init__(  # noqa
         self,
         business_area: BusinessArea,
         program: Program,
@@ -300,7 +300,7 @@ class UniversalIndividualUpdateScript:
         )
         return individual_ids
 
-    def batch_update(
+    def batch_update(  # noqa
         self,
         document_fields_to_update: list,
         documents_to_create: list,
