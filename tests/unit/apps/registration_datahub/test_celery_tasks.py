@@ -723,7 +723,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
-        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
@@ -756,7 +756,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     @pytest.mark.skip("NEED TO BE FIXED")
     def test_ukraine_new_registration_form(self, mock_validate_data_collection_type: Any) -> None:
-        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(
@@ -772,7 +772,6 @@ class TestAutomatingRDICreationTask(TestCase):
         rdi = UkraineRegistrationService(self.registration).create_rdi(None, "ukraine rdi timezone UTC")
 
         assert Record.objects.count() == 1
-        # assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
         assert PendingIndividual.objects.count() == 0
         assert PendingHousehold.objects.count() == 0
 

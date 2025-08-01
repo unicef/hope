@@ -280,7 +280,7 @@ class TestGrievanceTicketFilters:
             timezone.make_aware(datetime(year=2020, month=8, day=25)),
             timezone.make_aware(datetime(year=2020, month=8, day=26)),
         ]
-        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set):
+        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set, strict=True):
             ticket.created_at = date
             ticket.save(update_fields=("created_at",))
 

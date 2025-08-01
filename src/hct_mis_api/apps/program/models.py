@@ -252,15 +252,19 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     def clean(self) -> None:
         super().clean()
-        if self.data_collecting_type and self.beneficiary_group:
-            if (
+        if (
+            self.data_collecting_type
+            and self.beneficiary_group
+            and (
                 self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
                 and self.beneficiary_group.master_detail
-            ) or (
+            )
+            or (
                 self.data_collecting_type.type == DataCollectingType.Type.STANDARD
                 and not self.beneficiary_group.master_detail
-            ):
-                raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+            )
+        ):
+            raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
@@ -318,8 +322,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def screen_beneficiary(self) -> None:
-        """
-        Returns if program will be screened against the sanction lists.
+        """Return if program will be screened against the sanction lists.
         :return:
         """
         return self.sanction_lists.exists()
@@ -466,7 +469,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
-        """validate status for Finishing Cycle"""
+        """Validate status for Finishing Cycle."""
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         if (

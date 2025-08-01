@@ -53,23 +53,23 @@ class DataCollectingTypeForm(forms.ModelForm):
 
     def clean(self) -> None:
         household_filters_available = self.cleaned_data["household_filters_available"]
-        type = self.cleaned_data.get("type")
+        dct = self.cleaned_data.get("type")
 
         # validate household filters for SOCIAL type
-        if type == DataCollectingType.Type.SOCIAL and household_filters_available is True:
+        if dct == DataCollectingType.Type.SOCIAL and household_filters_available is True:
             msg = "Household filters cannot be applied for data collecting type with social type"
             self.add_error("type", forms.ValidationError(msg))
 
         # validate compatible types against DCT's type
         compatible_dcts = self.cleaned_data.get("compatible_types")
-        incompatible_dcts = compatible_dcts.exclude(Q(id=self.instance.id) | Q(type=type))
+        incompatible_dcts = compatible_dcts.exclude(Q(id=self.instance.id) | Q(type=dct))
         if incompatible_dcts.exists():
-            if type != self.instance.type:
+            if dct != self.instance.type:
                 msg = "Type of DCT cannot be changed if it has compatible DCTs of different type"
                 self.add_error("type", forms.ValidationError(msg))
             msg = (
                 f"DCTs of different types cannot be compatible with each other. "
-                f"Following DCTs are not of type {type}: {list(incompatible_dcts.values_list('label', flat=True))}"
+                f"Following DCTs are not of type {dct}: {list(incompatible_dcts.values_list('label', flat=True))}"
             )
             self.add_error("compatible_types", forms.ValidationError(msg))
 

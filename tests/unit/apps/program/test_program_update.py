@@ -177,6 +177,7 @@ class TestProgramUpdate:
                 for pdu_field_data, pdu_field in zip(
                     self.base_payload_for_update_without_changes["pdu_fields"],
                     [self.pdu_field_to_be_preserved, self.pdu_field_to_be_removed, self.pdu_field_to_be_updated],
+                    strict=True,
                 )
             ],
             "partners": [

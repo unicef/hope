@@ -81,9 +81,6 @@ class Command(BaseCommand):
             "sanction_list": ["sanctionlistindividualdocument", "sanctionlistindividual"],
             "explorer": ["query"],
             "steficon": ["rulecommit"],  # 'rule' view only
-            # "targeting": ["householdselection", "targetpopulation"],
-            # "advanced_filters": ["advancedfilter"],  # change only
-            # "constance": ["config"],  # change only
         }
         general_groups_map = {
             "view": "All Models Can VIEW",
