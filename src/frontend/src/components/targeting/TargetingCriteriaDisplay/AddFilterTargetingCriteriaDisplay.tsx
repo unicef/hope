@@ -102,6 +102,7 @@ const AddFilterTargetingCriteriaDisplay = ({
         programId: selectedProgram?.id,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+    enabled: !!selectedProgram?.id, // Ensure the query runs only when programId is available
   });
   const { data: allCollectorFieldsAttributesData } =
     useQuery<PaginatedCollectorAttributeList>({

@@ -248,12 +248,18 @@ export const TargetingCriteriaForm = ({
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['businessAreasAllFieldsAttributesList', businessArea],
+    queryKey: [
+      'businessAreasAllFieldsAttributesList',
+      businessArea,
+      selectedProgram?.id,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
+        programId: selectedProgram?.id,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+    enabled: !!businessArea && !!selectedProgram?.id,
   });
 
   const householdsFiltersBlocksWrapperRef = useRef(null);

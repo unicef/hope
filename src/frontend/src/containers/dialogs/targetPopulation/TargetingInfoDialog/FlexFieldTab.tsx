@@ -20,6 +20,7 @@ export function FlexFieldTab(): ReactElement {
         slug: businessArea,
         programId: selectedProgram?.id,
       }),
+    enabled: !!selectedProgram?.id, // Ensure the query runs only when programId is available
   });
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
