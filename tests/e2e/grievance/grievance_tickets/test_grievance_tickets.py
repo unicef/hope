@@ -891,7 +891,7 @@ class TestGrievanceTickets:
         assert "Preferred Language" in f"{row1[0]} {row1[1]}"
         assert "English" in row1[-1]
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -951,7 +951,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert payment_id in pageGrievanceDetailsPage.getTicketPaymentLabel().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_look_up_linked_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -988,7 +988,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert linked_ticket in pageGrievanceDetailsPage.getLabelTickets().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_add_documentation(
         self,
         pageGrievanceTickets: GrievanceTickets,
