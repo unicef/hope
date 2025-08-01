@@ -95,7 +95,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "NOT_FLEX_FIELD",
         )
         self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "size")
-        self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"],  [2])
+        self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"], [2])
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_result = filter_choices(
             get_field_by_name(targeting_criteria_rule_filter.field_name, rule.payment_plan),
