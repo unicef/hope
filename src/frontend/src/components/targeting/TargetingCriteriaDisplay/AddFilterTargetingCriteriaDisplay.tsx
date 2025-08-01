@@ -92,13 +92,14 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
-    queryKey: ['allFieldsAttributes', businessArea],
+    queryKey: ['allFieldsAttributes', businessArea, programId],
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
+        programId,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
   });

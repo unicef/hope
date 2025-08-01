@@ -12739,6 +12739,7 @@ export class RestService {
         limit,
         offset,
         ordering,
+        programId,
     }: {
         slug: string,
         /**
@@ -12753,6 +12754,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        programId?: string,
     }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -12764,6 +12766,7 @@ export class RestService {
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
+                'program_id': programId,
             },
         });
     }

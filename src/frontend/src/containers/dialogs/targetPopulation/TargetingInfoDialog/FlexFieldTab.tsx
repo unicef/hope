@@ -10,12 +10,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { data } = useQuery({
-    queryKey: ['allFieldsAttributes', businessArea],
+    queryKey: ['allFieldsAttributes', businessArea, programId],
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
+        programId,
       }),
   });
   const [searchValue, setSearchValue] = useState('');
