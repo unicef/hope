@@ -137,10 +137,10 @@ def add_pdu_data_to_xlsx(
     for row_index, row in enumerate(rows):
         for col_index, value in enumerate(row):
             ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
-    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
-    wb.save(tmp_file.name)
-    tmp_file.seek(0)
-    return tmp_file
+    with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+        wb.save(tmp_file.name)
+        tmp_file.seek(0)
+        return tmp_file
 
 
 def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _TemporaryFileWrapper:
@@ -296,7 +296,6 @@ class TestPeriodicDataUpdateUpload:
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
     @pytest.mark.night
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,

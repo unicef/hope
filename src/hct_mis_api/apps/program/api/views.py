@@ -154,16 +154,23 @@ class ProgramViewSet(
     @action(detail=True, methods=["post"])
     def activate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
+        old_program = copy.deepcopy(program)
+
         if program.status == Program.ACTIVE:
             raise ValidationError("Program is already active.")
 
         program.status = Program.ACTIVE
         program.save(update_fields=["status"])
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+
         return Response(status=status.HTTP_200_OK, data={"message": "Program Activated."})
 
     @action(detail=True, methods=["post"])
     def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
+        old_program = copy.deepcopy(program)
+
         if program.status != Program.ACTIVE:
             raise ValidationError("Only active Program can be finished.")
         # check payment plans
@@ -189,6 +196,8 @@ class ProgramViewSet(
 
         if program.biometric_deduplication_enabled:
             BiometricDeduplicationService().delete_deduplication_set(program)
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Finished."})
 

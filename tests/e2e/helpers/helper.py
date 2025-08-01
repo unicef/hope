@@ -1,4 +1,5 @@
 import os
+import logging
 import time
 from time import sleep
 from typing import Literal, Optional, Union, Tuple, Callable
@@ -8,11 +9,15 @@ from django.conf import settings
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from selenium.webdriver import Chrome, Keys
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+import contextlib
+
+
+logger = logging.getLogger(__name__)
 
 
 def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable:
@@ -96,10 +101,8 @@ class Common:
             return True  # success!
         except TimeoutException:
             actual = ""
-            try:
+            with contextlib.suppress(Exception):
                 actual = self.driver.find_element(element_type, locator).text.strip()
-            except Exception:
-                pass
             raise TimeoutException(
                 f"Timed out after {timeout}s waiting for "
                 f"text '{text}' in element {locator}. "
@@ -241,9 +244,9 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                pass
+                logger.info(f"{ii.text}: {ii.get_attribute(attribute)}")
             except BaseException:
-                pass
+                logger.info(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)

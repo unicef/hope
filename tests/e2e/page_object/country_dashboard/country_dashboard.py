@@ -2,10 +2,10 @@ from time import sleep
 from typing import List
 
 from e2e.page_object.base_components import BaseComponents
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 
 
@@ -29,7 +29,7 @@ class CountryDashboard(BaseComponents):
 
     def switch_to_dashboard_iframe(self) -> None:
         retries = 3
-        for attempt in range(retries):
+        for _ in range(retries):
             try:
                 iframe = WebDriverWait(self.driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Dashboard"]'))

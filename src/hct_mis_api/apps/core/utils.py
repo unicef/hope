@@ -373,11 +373,11 @@ def build_arg_dict_from_dict(data_dict: dict, mapping_dict: dict) -> dict:
 
 
 def build_arg_dict_from_dict_if_exists(data_dict: dict, mapping_dict: dict) -> dict:
-    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict.keys()}
+    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict}
 
 
 def build_flex_arg_dict_from_list_if_exists(data_dict: dict, flex_list: list) -> dict:
-    return {key: data_dict[key] for key in flex_list if key in data_dict.keys()}
+    return {key: data_dict[key] for key in flex_list if key in data_dict}
 
 
 class CustomOrderingFilter(OrderingFilter):

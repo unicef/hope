@@ -500,7 +500,7 @@ class PaymentVerificationRecordViewSet(
         },
     )
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """return list of verification records"""
+        """Return list of verification records."""
         payment_plan = self.get_object()
         payments = payment_plan.eligible_payments.all()
         page = self.paginate_queryset(payments)

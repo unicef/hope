@@ -16,6 +16,7 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.payment_module.test_payment_plans import find_file
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import (
@@ -29,7 +30,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -496,7 +496,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
         pagePaymentVerificationDetails.checkAlert("Verification plan has been deleted.")
         for _ in range(50):
-            if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
+            if len(pagePaymentVerificationDetails.getVerificationPlanPrefix()) == 2:
                 break
             sleep(0.1)
         else:
@@ -547,7 +547,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
@@ -557,7 +557,7 @@ class TestPaymentVerification:
         pagePaymentRecord.getArrowBack().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
     def test_payment_verification_successful_not_received(
         self,
@@ -573,7 +573,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         pagePaymentRecord.getButtonEdPlan().click()
@@ -600,7 +600,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = float(pagePaymentRecord.getLabelDeliveredQuantity().text) - 1
@@ -616,7 +616,7 @@ class TestPaymentVerification:
 
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getTicketListRow()[0].click()
         pageGrievanceDetailsPage.getButtonAssignToMe().click()
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
@@ -636,7 +636,7 @@ class TestPaymentVerification:
         pagePaymentVerification.getCashPlanTableRow().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
         pageGrievanceTickets.scroll(execute=2)
 
@@ -694,7 +694,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED", timeout=60)
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_partially_successful(
@@ -714,7 +714,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = pagePaymentRecord.getLabelDeliveredQuantity().text

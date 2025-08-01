@@ -12,7 +12,6 @@ SMART_ADMIN_SECTIONS = {
     ],
     "RDI": [
         regex(r"registration_data\..*"),
-        # regex(r"registration_datahub\..*"),
     ],
     "Grievance": ["grievance"],
     "Configuration": [

@@ -4,12 +4,10 @@ import Collapse from '@mui/material/Collapse';
 import { Box, IconButton, Paper } from '@mui/material';
 import TablePagination from '@mui/material/TablePagination';
 import type { LogEntry } from '@restgenerated/models/LogEntry';
-import type { Choice } from '@restgenerated/models/Choice';
 import {
   ButtonPlaceHolder,
   Row,
 } from '@components/core/ActivityLogTable/TableStyledComponents';
-import { useArrayToDict } from '@hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
@@ -49,7 +47,6 @@ interface MainActivityLogTableProps {
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
-  actionChoices: Choice[];
   loading: boolean;
 }
 export function MainActivityLogTable({
@@ -59,11 +56,9 @@ export function MainActivityLogTable({
   page,
   onChangePage,
   onChangeRowsPerPage,
-  actionChoices,
   loading = false,
 }: MainActivityLogTableProps): ReactElement {
   const [expanded] = useState(true);
-  const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
 
   const TablePaginationActions = () => {
     const handleBackButtonClick = (event) => {
@@ -115,7 +110,6 @@ export function MainActivityLogTable({
           {logEntries.map((value, index) => (
             <MainActivityLogTableRow
               key={`${value.objectId}-${value.timestamp}-${index}`}
-              actionChoicesDict={choicesDict}
               logEntry={value}
               data-cy={`log-entry-row-${value.objectId}-${index}`}
             />

@@ -630,7 +630,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if not any(has_value(cell) for cell in row):
                     continue
                 row_number = 0
-                for cell, header in zip(row, first_row):
+                for cell, header in zip(row, first_row, strict=True):
                     current_field = combined_fields.get(header.value)
                     if not current_field:
                         continue
@@ -694,10 +694,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         else:
                             documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
 
-                    if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                    if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
                         document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
                         documents_dict = documents_numbers
-                        if document_key in identities_numbers.keys():
+                        if document_key in identities_numbers:
                             documents_dict = identities_numbers
                         if document_key:
                             documents_dict[document_key]["issuing_countries"].append(value)
@@ -711,7 +711,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
                     documents_or_identity_dict = (
-                        identities_numbers if header_value_doc in identities_numbers.keys() else documents_numbers
+                        identities_numbers if header_value_doc in identities_numbers else documents_numbers
                     )
                     documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
                 self.errors.extend(self._validate_pdu(row, first_row, row_number))
@@ -1513,10 +1513,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                     else:
                                         documents_numbers[i_field]["validation_data"].append({"value": i_value})
                                         documents_numbers[i_field]["numbers"].append(i_value)
-                                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
                                     document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
                                     documents_dict: dict[str, dict[str, Any]] = documents_numbers
-                                    if document_key in identities_numbers.keys():
+                                    if document_key in identities_numbers:
                                         documents_dict = identities_numbers
                                     documents_dict[document_key]["issuing_countries"].append(i_value)
 

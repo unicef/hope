@@ -5,9 +5,11 @@ import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory
 
+from hct_mis_api.admin.rule import RuleAdmin
+from hct_mis_api.admin.rule_commit import RuleCommitAdmin
+
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.config import settings
 
@@ -67,7 +69,6 @@ def test_history() -> None:
     rule = Rule(definition="result.value=1", enabled=True, name="Rule1")
     rule.save()
     # history on first save
-    # assert rule.history.first()
     assert rule.history.count() == 1
     assert rule.latest_commit
     assert rule.latest_commit.before == {}

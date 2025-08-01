@@ -246,7 +246,7 @@ class TestIndividualList:
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                 "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
-                "residence_status": individual.household.residence_status,
+                "residence_status": individual.household.get_residence_status_display(),
                 "country_origin": individual.household.country_origin.name,
                 "country": individual.household.country.name,
                 "address": individual.household.address,
@@ -632,12 +632,6 @@ class TestIndividualDetail:
             country=self.country,
         )
 
-        # self.bank_account_info = BankAccountInfoFactory(
-        #     individual=self.individual1,
-        #     bank_name="ING",
-        #     bank_account_number=11110000222255558888999925,
-        # )
-
         self.identity = IndividualIdentityFactory(
             country=self.country,
             individual=self.individual1,
@@ -756,7 +750,7 @@ class TestIndividualDetail:
             "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
             "start": self.individual1.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "zip_code": None,
-            "residence_status": self.individual1.household.residence_status,
+            "residence_status": self.individual1.household.get_residence_status_display(),
             "country_origin": self.individual1.household.country_origin.name,
             "country": self.individual1.household.country.name,
             "address": self.individual1.household.address,
@@ -814,7 +808,7 @@ class TestIndividualDetail:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household.residence_status,
+                    "residence_status": self.household.get_residence_status_display(),
                     "country_origin": self.household.country_origin.name,
                     "country": self.household.country.name,
                     "address": self.household.address,
@@ -840,7 +834,7 @@ class TestIndividualDetail:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household2.residence_status,
+                    "residence_status": self.household2.get_residence_status_display(),
                     "country_origin": self.household2.country_origin.name,
                     "country": self.household2.country.name,
                     "address": self.household2.address,
@@ -979,16 +973,16 @@ class TestIndividualDetail:
         assert len(data["accounts"]) == 2
         account_1 = data["accounts"][0]
         account_2 = data["accounts"][1]
-        assert {
+        assert account_1["data_fields"] == {
             "card_expiry_date__bank": "2022-01-01",
             "card_number__bank": "123",
             "name_of_cardholder__bank": "Marek",
-        } == account_1["data_fields"]
-        assert {
+        }
+        assert account_2["data_fields"] == {
             "service_provider_code__mobile": "ABC",
             "delivery_phone_number__mobile": "123456789",
             "provider__mobile": "Provider",
-        } == account_2["data_fields"]
+        }
 
         assert data["linked_grievances"] == [
             {
@@ -1211,7 +1205,7 @@ class TestIndividualGlobalViewSet:
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                 "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
-                "residence_status": individual.household.residence_status,
+                "residence_status": individual.household.get_residence_status_display(),
                 "country_origin": individual.household.country_origin.name,
                 "country": individual.household.country.name,
                 "address": individual.household.address,

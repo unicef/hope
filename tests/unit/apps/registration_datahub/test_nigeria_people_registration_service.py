@@ -6,6 +6,11 @@ from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 
@@ -22,11 +27,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
 from hct_mis_api.contrib.aurora.models import Record
 from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import (
     NigeriaPeopleRegistrationService,
@@ -61,8 +61,12 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         files = {
             "individual-details": [
                 {
-                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
-                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////////////////"
+                    "/////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP"
+                    "/aAAgBAQABPxA=",
+                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////"
+                    "/////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFB"
+                    "ABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }

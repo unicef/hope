@@ -15,6 +15,8 @@ from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -27,8 +29,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -378,7 +378,7 @@ class TestSmokeGrievanceTickets:
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 2
         expected_labels = [
             "Ticket ID",
             "Status",
@@ -413,7 +413,7 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
@@ -1187,7 +1187,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getInputNewnote().send_keys("Test adding new note.")
         pageGrievanceDetailsPage.getButtonNewNote().click()
         user = pageGrievanceDetailsPage.getNoteName().text
-        assert 1 == len(pageGrievanceDetailsPage.getNoteRows())
+        assert len(pageGrievanceDetailsPage.getNoteRows()) == 1
         assert user in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
@@ -1362,7 +1362,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()
-        assert 3 == len(pageIndividuals.getIndividualTableRow())
+        assert len(pageIndividuals.getIndividualTableRow()) == 3
         for icon in pageIndividuals.getIndividualTableRow()[0].find_elements(By.TAG_NAME, "svg"):
             assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
             break

@@ -8,6 +8,8 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -32,8 +34,6 @@ from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from selenium.common import NoSuchElementException
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import (
@@ -422,7 +422,7 @@ class TestSmokeTargeting:
             "Created by",
         ]
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
-        assert 2 == len(pageTargeting.getTargetPopulationsRows())
+        assert len(pageTargeting.getTargetPopulationsRows()) == 2
         pageTargeting.getButtonCreateNew().click()
 
     @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
@@ -1154,7 +1154,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         old_list = pageTargeting.getTargetPopulationsRows()
-        assert 2 == len(old_list)
+        assert len(old_list) == 2
         assert "Copy TP" in old_list[0].text
 
         pageTargeting.chooseTargetPopulations(0).click()
@@ -1164,7 +1164,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
-        assert 1 == len(new_list)
+        assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")

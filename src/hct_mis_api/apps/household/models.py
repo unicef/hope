@@ -876,7 +876,7 @@ class DocumentType(TimeStampedUUIDModel):
 
     @classmethod
     def get_all_doc_types(cls) -> list[str]:
-        """return list of Document Types keys"""
+        """Return list of Document Types keys."""
         return list(cls.objects.all().only("key").values_list("key", flat=True))
 
 
@@ -1438,7 +1438,7 @@ class Individual(
         should_be_disabled = self.disability == DISABLED
         for field in disability_fields:
             value = getattr(self, field, None)
-            should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
+            should_be_disabled = should_be_disabled or value in [CANNOT_DO, LOT_DIFFICULTY]
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
 
         if save:

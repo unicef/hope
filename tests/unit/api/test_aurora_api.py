@@ -3,6 +3,11 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from unit.api.base import HOPEApiTestCase, token_grant_permission
@@ -12,11 +17,6 @@ from hct_mis_api.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,
     RegistrationListVersionsKeyBit,
-)
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 
@@ -152,7 +152,10 @@ class ProjectListViewTests(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 3)
 
-        cache_key = f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
+        cache_key = (
+            f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:"
+            f"{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
+        )
         self.assertIsNotNone(cache.get(cache_key))
         self.assertGreater(len(queries), 0)
         # second call
