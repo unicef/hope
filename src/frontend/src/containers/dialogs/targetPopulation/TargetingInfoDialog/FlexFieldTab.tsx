@@ -7,16 +7,18 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { data } = useQuery({
-    queryKey: ['allFieldsAttributes', businessArea, programId],
+    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
-        programId,
+        programId: selectedProgram?.id,
       }),
   });
   const [searchValue, setSearchValue] = useState('');
