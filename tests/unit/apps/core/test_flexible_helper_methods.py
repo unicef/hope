@@ -68,7 +68,7 @@ class TestFlexibleHelperMethods(TestCase):
             ],
             None,
         )
-        for arg, expected_value in zip(args, expected_values):
+        for arg, expected_value in zip(args, expected_values, strict=True):
             returned_value = self.importer._get_model_fields(arg)
             self.assertEqual(returned_value, expected_value)
 

@@ -95,5 +95,5 @@ def is_base64(element: Any) -> bool:
 
 @register.filter
 def concat(a: Any, b: Any) -> str:
-    """concatenate arg1 & arg2"""
+    """Concatenate arg1 & arg2."""
     return "".join(map(str, (a, b)))

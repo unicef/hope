@@ -27,7 +27,8 @@ class AbstractCollisionDetector:
         raise NotImplementedError("Subclasses should implement this method")  # pragma: no cover
 
     def _update_roles_in_household(self, household_id_destination: str, roles_by_id: dict[int, str]) -> None:
-        """
+        """Clean Roles.
+
         1. Deletes all roles in destination household
         2. Reassigns roles from source household to destination household
         """
@@ -93,7 +94,8 @@ class AbstractCollisionDetector:
         return individual_destination
 
     def _update_accounts(self, individual_destination: Individual, individual_source: Individual) -> Individual:
-        """
+        """Clean accounts.
+
         1. Deletes all accounts in destination individual
         2. Reassigns accounts from source individual to destination individual
         """
@@ -120,7 +122,6 @@ class AbstractCollisionDetector:
             "collection",
             "created_at",
             "program_id",
-            "created_at",
             "individual_collection_id",
             "individual_collection",
             "rdi_merge_status",
@@ -128,7 +129,6 @@ class AbstractCollisionDetector:
             "registration_data_import_id",
             "household",
             "household_id",
-            "rdi_merge_status",
         }
         self._update_db_instance(individual_source, individual_destination, exclude)
 
@@ -141,7 +141,6 @@ class AbstractCollisionDetector:
             "unicef_id",
             "created_at",
             "program_id",
-            "created_at",
             "updated_at",
             "household_collection_id",
             "household_collection",
@@ -150,7 +149,6 @@ class AbstractCollisionDetector:
             "representatives",
             "registration_data_import",
             "registration_data_import_id",
-            "rdi_merge_status",
             "head_of_household",
             "head_of_household_id",
         }
@@ -212,8 +210,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
     @atomic
     def update_household(self, household_to_merge: Household) -> None:
-        """
-        Updates an existing household with data from another household based on matching identification keys.
+        """Update an existing household with data from another household based on matching identification keys.
 
         This method performs the following steps:
         1. Sanity check - household_to_merge must have an identification key

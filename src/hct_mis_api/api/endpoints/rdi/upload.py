@@ -53,7 +53,7 @@ class BirthDateValidator:
 
 
 class HouseholdValidator:
-    def __call__(self, value: Any) -> None:
+    def __call__(self, value: Any) -> None:  # noqa
         head_of_household = None
         alternate_collector = None
         primary_collector = None

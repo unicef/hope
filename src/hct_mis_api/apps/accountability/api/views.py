@@ -152,11 +152,14 @@ class FeedbackViewSet(
             raise ValidationError("It is not possible to create Feedback for a Finished Program.")
 
         # additional check for global scope - check if user has permission in the target program
-        if not program_slug and program:
-            if not check_permissions(
+        if (
+            not program_slug
+            and program
+            and not check_permissions(
                 self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
-            ):
-                raise PermissionDenied
+            )
+        ):
+            raise PermissionDenied
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
@@ -196,11 +199,10 @@ class FeedbackViewSet(
             raise ValidationError("It is not possible to update Feedback for a Finished Program.")
 
         # additional check for global scope - check if user has permission in the target program
-        if program:
-            if not check_permissions(
-                self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
-            ):
-                raise PermissionDenied
+        if program and not check_permissions(
+            self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
+        ):
+            raise PermissionDenied
 
         input_data = serializer.validated_data
         input_data["program"] = str(program.pk) if program else None
@@ -229,14 +231,13 @@ class FeedbackViewSet(
         feedback = self.get_object()
 
         # additional check for global scope - check if user has permission in the target program
-        if program := feedback.program:
-            if not check_permissions(
-                self.request.user,
-                self.get_permissions_for_action(),
-                business_area=feedback.business_area,
-                program=program.slug,
-            ):
-                raise PermissionDenied
+        if feedback.program and not check_permissions(
+            self.request.user,
+            self.get_permissions_for_action(),
+            business_area=feedback.business_area,
+            program=feedback.program.slug,
+        ):
+            raise PermissionDenied
 
         feedback_message = FeedbackMessage.objects.create(
             feedback=feedback, description=serializer.validated_data["description"], created_by=request.user

@@ -121,7 +121,10 @@ class TestMigrateAccountServiceProviderCodes(TestCase):
         migrate_account_service_provider_codes()
 
         """
-        Used 3 HOPE mappings: [{'uba_institution_name': 'Citi Bank', 'uba_code': '000009', 'moneygram_code': '000009', 'ecobank_code': '023'}, {'uba_institution_name': '9 PAYMENT SERVICE BANK', 'uba_code': '120001', 'moneygram_code': '100003', 'ecobank_code': None}, {'uba_institution_name': 'Access Bank', 'uba_code': '000014', 'moneygram_code': '000014', 'ecobank_code': '044'}]
+        Used 3 HOPE mappings: [{'uba_institution_name': 'Citi Bank', 'uba_code': '000009', 'moneygram_code': '000009',
+        ' ecobank_code': '023'}, {'uba_institution_name': '9 PAYMENT SERVICE BANK', 'uba_code': '120001',
+        ' moneygram_code': '100003', 'ecobank_code': None}, {'uba_institution_name': 'Access Bank',
+        ' uba_code': '000014', 'moneygram_code': '000014', 'ecobank_code': '044'}]
 
         Created 3 UBA FSP mappings: ['000009', '120001', '000014']
         Created 2 ECO FSP mappings: ['023', '044']
