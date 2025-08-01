@@ -16,7 +16,7 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hct_mis_api.api.endpoints.rdi.upload import HouseholdSerializer
+from hct_mis_api.api.endpoints.rdi.serializers import HouseholdSerializer
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.geo.models import Country

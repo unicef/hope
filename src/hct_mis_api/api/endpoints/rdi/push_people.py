@@ -13,11 +13,8 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
-from hct_mis_api.api.endpoints.rdi.upload import (
-    AccountSerializer,
-    BirthDateValidator,
-    DocumentSerializer,
-)
+from hct_mis_api.api.endpoints.rdi.serializers import AccountSerializer, DocumentSerializer
+from hct_mis_api.api.endpoints.rdi.validators import BirthDateValidator
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
