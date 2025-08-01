@@ -60,11 +60,14 @@ class TPHouseholdListSerializerTest(TestCase):
 
         self.assertEqual(data["id"], str(self.payment.id))
         self.assertEqual(data["household_unicef_id"], self.hh1.unicef_id)
-        self.assertEqual(data["head_of_household"], {
-            "id": str(self.payment.head_of_household.id),
-            "full_name": f"{self.payment.head_of_household.full_name}",
-            "unicef_id": self.payment.head_of_household.unicef_id,
-        })
+        self.assertEqual(
+            data["head_of_household"],
+            {
+                "id": str(self.payment.head_of_household.id),
+                "full_name": f"{self.payment.head_of_household.full_name}",
+                "unicef_id": self.payment.head_of_household.unicef_id,
+            },
+        )
         self.assertEqual(data["household_size"], 2)
         self.assertEqual(data["household_admin2"], "New admin22")
         self.assertEqual(data["vulnerability_score"], "123.012")
