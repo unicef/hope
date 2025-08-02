@@ -160,7 +160,7 @@ class GrievanceTicketViewSet(
                 )
             )
             .annotate(total_days=F("total__day"))
-            .order_by("created_at")
+            .order_by("-created_at")
         )
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
@@ -333,7 +333,7 @@ class GrievanceTicketGlobalViewSet(
                 )
             )
             .annotate(total_days=F("total__day"))
-            .order_by("created_at")
+            .order_by("-created_at")
         )
 
     @action(detail=False, methods=["get"])

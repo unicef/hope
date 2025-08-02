@@ -17,6 +17,7 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -91,11 +92,17 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { businessArea, isAllPrograms } = useBaseUrl();
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
-    queryKey: ['allFieldsAttributes'],
-    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+    enabled: !!selectedProgram?.id && !isAllPrograms, // Ensure the query runs only when programId is available
   });
   const { data: allCollectorFieldsAttributesData } =
     useQuery<PaginatedCollectorAttributeList>({
@@ -195,8 +202,7 @@ const AddFilterTargetingCriteriaDisplay = ({
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
-  const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === 'SOCIAL';
+
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
@@ -235,7 +241,6 @@ const AddFilterTargetingCriteriaDisplay = ({
           open={isOpen}
           onClose={() => closeModal()}
           addCriteria={addCriteria}
-          isSocialWorkingProgram={isSocialWorkingProgram}
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           collectorsFiltersAvailable={true}

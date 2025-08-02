@@ -89,6 +89,16 @@ class IndividualSmallSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualIdNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+        )
+
+
 class IndividualIdentitySerializer(serializers.ModelSerializer):
     country = CountrySerializer()
 
@@ -370,7 +380,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
         )
 
     def get_role(self, obj: Individual) -> str:
-        role = obj.households_and_roles(manager="all_merge_status_objects").order_by("created_at").first()
+        role = obj.households_and_roles(manager="all_merge_status_objects").order_by("-created_at").first()
         if role:
             return role.role
         return ROLE_NO_ROLE

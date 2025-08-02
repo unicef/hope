@@ -67,8 +67,7 @@ const EditTargetPopulation = ({
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.flagExcludeIfActiveAdjudicationTicket ||
-      false,
+      paymentPlan.flagExcludeIfActiveAdjudicationTicket || false,
     flagExcludeIfOnSanctionList:
       paymentPlan.flagExcludeIfOnSanctionList || false,
     programCycleId: {
@@ -134,7 +133,7 @@ const EditTargetPopulation = ({
       const requestBody: PatchedTargetPopulationCreate = {
         excludedIds: values.excludedIds,
         exclusionReason: values.exclusionReason,
-        fspId: values.targetingCriteria[0]?.fsp,
+        fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
         programCycleId: values.programCycleId.value,
         ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
@@ -142,7 +141,7 @@ const EditTargetPopulation = ({
         }),
         ...getTargetingCriteriaVariables({
           flagExcludeIfActiveAdjudicationTicket:
-          values.flagExcludeIfActiveAdjudicationTicket,
+            values.flagExcludeIfActiveAdjudicationTicket,
           flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
           criterias: values.targetingCriteria,
         }),

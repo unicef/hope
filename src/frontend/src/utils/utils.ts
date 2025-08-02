@@ -219,6 +219,12 @@ export function paymentStatusDisplayMap(status: string): string {
 
 export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
+    case PaymentPlanStatus.OPEN:
+      return 'OPEN';
+    case PaymentPlanStatus.ASSIGNED:
+      return 'ASSIGNED';
+    case PaymentPlanStatus.LOCKED:
+      return 'LOCKED';
     case PaymentPlanStatus.TP_OPEN:
       return 'OPEN';
     case PaymentPlanStatus.DRAFT:
@@ -402,19 +408,15 @@ export function paymentPlanBackgroundActionStatusToColor(
 ): string {
   const colorsMap = {
     [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
-      theme.palette.error.main,
+    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
     [BackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
-      theme.palette.error.main,
+    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
     [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
     [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
-      theme.palette.error.main,
-    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
-      theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };

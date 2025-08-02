@@ -35,15 +35,13 @@ export function TargetPopulationPeopleTableRow({
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
-            {payment.household.headOfHousehold.unicefId}
+            {payment.household.unicefId}
           </BlackLink>
         ) : (
           payment.household.unicefId
         )}
       </TableCell>
-      <AnonTableCell>
-        {payment.household.headOfHousehold.fullName}
-      </AnonTableCell>
+      <AnonTableCell>{payment.headOfHousehold?.fullName || '-'}</AnonTableCell>
       <TableCell align="left">
         {payment.household.admin2?.name || '-'}
       </TableCell>

@@ -6,7 +6,7 @@ export type PendingPayment = {
     readonly id: string;
     householdId: string;
     householdUnicefId: string;
-    readonly hohFullName: string;
+    readonly headOfHousehold: any;
     householdSize: number;
     readonly householdAdmin2: string;
     /**
