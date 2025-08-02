@@ -11,7 +11,7 @@ import { useProgramContext } from 'src/programContext';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const { data } = useQuery({
     queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
@@ -20,7 +20,7 @@ export function FlexFieldTab(): ReactElement {
         slug: businessArea,
         programId: selectedProgram?.id,
       }),
-    enabled: !!selectedProgram?.id, // Ensure the query runs only when programId is available
+    enabled: !!selectedProgram?.id && !isAllPrograms, // Ensure the query runs only when programId is available
   });
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);

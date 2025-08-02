@@ -92,7 +92,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
     queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
@@ -102,7 +102,7 @@ const AddFilterTargetingCriteriaDisplay = ({
         programId: selectedProgram?.id,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
-    enabled: !!selectedProgram?.id, // Ensure the query runs only when programId is available
+    enabled: !!selectedProgram?.id && !isAllPrograms, // Ensure the query runs only when programId is available
   });
   const { data: allCollectorFieldsAttributesData } =
     useQuery<PaginatedCollectorAttributeList>({

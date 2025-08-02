@@ -218,7 +218,7 @@ export const TargetingCriteriaForm = ({
   criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
   const confirm = useConfirmation();
@@ -259,7 +259,7 @@ export const TargetingCriteriaForm = ({
         programId: selectedProgram?.id,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
-    enabled: !!businessArea && !!selectedProgram?.id,
+    enabled: !!businessArea && !!selectedProgram?.id && !isAllPrograms,
   });
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
