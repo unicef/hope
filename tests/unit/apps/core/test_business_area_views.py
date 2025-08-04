@@ -20,9 +20,10 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
-    FlexibleAttributeChoice,
+    FlexibleAttributeChoice, PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import get_fields_attr_generators
+from test_utils.factories.core import PeriodicFieldDataFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -394,12 +395,18 @@ class TestAllFieldsAttributes:
         self.program = ProgramFactory(business_area=self.afghanistan)
 
         # pdu
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["January"],
+        )
         FlexibleAttribute.objects.create(
             label={"English(EN)": "PDU Field 1"},
             name="pdu_field_1",
             type=FlexibleAttribute.PDU,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             program=self.program,
+            pdu_data=pdu_data,
         )
 
     def test_all_fields_attributes(self) -> None:
@@ -412,9 +419,9 @@ class TestAllFieldsAttributes:
                 "id": str(attr.id),
                 "type": attr.type,
                 "name": attr.name,
+                "labels": [{"language": k, "label": v} for k, v in attr.label.items()],
                 "label_en": attr.label.get("English(EN)", None) if getattr(attr, "label", None) else None,
-                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
-                "is_flex_field": True,
+                "hint": str(attr.hint),
                 "choices": [
                     {
                         "labels": [{"language": k, "label": v} for k, v in choice.label.items()],
@@ -424,6 +431,16 @@ class TestAllFieldsAttributes:
                     }
                     for choice in attr.choices.all()
                 ],
+                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
+                "is_flex_field": True,
+                "pdu_data": (
+                    {
+                        "subtype": attr.pdu_data.subtype,
+                        "number_of_rounds": attr.pdu_data.number_of_rounds,
+                        "rounds_names": attr.pdu_data.rounds_names,
+                    }
+
+                ) if attr.pdu_data else None,
             }
             for attr in get_fields_attr_generators(flex_field=True)
         ]
@@ -432,9 +449,9 @@ class TestAllFieldsAttributes:
                 "id": attr_dict["id"],
                 "type": attr_dict["type"],
                 "name": attr_dict["name"],
+                "labels": [{"language": k, "label": v} for k, v in attr_dict["label"].items()],
                 "label_en": attr_dict.get("label", {}).get("English(EN)", None) if attr_dict.get("label") else None,
-                "associated_with": attr_dict.get("associated_with"),
-                "is_flex_field": False,
+                "hint": attr_dict["hint"],
                 "choices": [
                     {
                         "labels": [{"language": k, "label": v} for k, v in choice.get("label", {}).items()],
@@ -444,6 +461,9 @@ class TestAllFieldsAttributes:
                     }
                     for choice in attr_dict.get("choices", [])
                 ],
+                "associated_with": attr_dict.get("associated_with"),
+                "is_flex_field": False,
+                "pdu_data": None,
             }
             for attr_dict in get_fields_attr_generators(flex_field=False)
         ]
@@ -464,9 +484,9 @@ class TestAllFieldsAttributes:
                 "id": str(attr.id),
                 "type": attr.type,
                 "name": attr.name,
+                "labels": [{"language": k, "label": v} for k, v in attr.label.items()],
                 "label_en": attr.label.get("English(EN)", None) if getattr(attr, "label", None) else None,
-                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
-                "is_flex_field": True,
+                "hint": str(attr.hint),
                 "choices": [
                     {
                         "labels": [{"language": k, "label": v} for k, v in choice.label.items()],
@@ -476,6 +496,16 @@ class TestAllFieldsAttributes:
                     }
                     for choice in attr.choices.all()
                 ],
+                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
+                "is_flex_field": True,
+                "pdu_data": (
+                    {
+                        "subtype": attr.pdu_data.subtype,
+                        "number_of_rounds": attr.pdu_data.number_of_rounds,
+                        "rounds_names": attr.pdu_data.rounds_names,
+                    }
+
+                ) if attr.pdu_data else None,
             }
             for attr in get_fields_attr_generators(
                 flex_field=True,
@@ -488,9 +518,9 @@ class TestAllFieldsAttributes:
                 "id": attr_dict["id"],
                 "type": attr_dict["type"],
                 "name": attr_dict["name"],
+                "labels": [{"language": k, "label": v} for k, v in attr_dict["label"].items()],
                 "label_en": attr_dict.get("label", {}).get("English(EN)", None) if attr_dict.get("label") else None,
-                "associated_with": attr_dict.get("associated_with"),
-                "is_flex_field": False,
+                "hint": attr_dict["hint"],
                 "choices": [
                     {
                         "labels": [{"language": k, "label": v} for k, v in choice.get("label", {}).items()],
@@ -500,6 +530,9 @@ class TestAllFieldsAttributes:
                     }
                     for choice in attr_dict.get("choices", [])
                 ],
+                "associated_with": attr_dict.get("associated_with"),
+                "is_flex_field": False,
+                "pdu_data": None,
             }
             for attr_dict in get_fields_attr_generators(flex_field=False)
         ]
