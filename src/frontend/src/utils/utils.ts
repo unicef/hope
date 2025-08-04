@@ -221,8 +221,6 @@ export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentPlanStatus.OPEN:
       return 'OPEN';
-    case PaymentPlanStatus.ASSIGNED:
-      return 'ASSIGNED';
     case PaymentPlanStatus.LOCKED:
       return 'LOCKED';
     case PaymentPlanStatus.TP_OPEN:
