@@ -150,7 +150,6 @@ class Permissions(Enum):
 
     # Dashboard
     # Note: view HQ dashboard will be available for users in business area global and permission view_country
-    # DASHBOARD_VIEW_HQ = auto()
     DASHBOARD_VIEW_COUNTRY = auto()
     DASHBOARD_EXPORT = auto()
 

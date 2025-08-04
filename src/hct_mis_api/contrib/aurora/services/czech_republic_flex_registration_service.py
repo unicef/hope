@@ -87,12 +87,10 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         return individual_dict
 
     def _get_all_document_keys_from_individual_dict(self, individual_dict: dict) -> list[str]:
-        """Find all keys ending with DOCUMENT_NUMBER_SUFFIX in individuals_dict"""
+        """Find all keys ending with DOCUMENT_NUMBER_SUFFIX in individuals_dict."""
         suffix = self.DOCUMENT_NUMBER_SUFFIX
         return [
-            key[: -len(suffix)]
-            for key in individual_dict.keys()
-            if key.endswith(suffix) and key not in self.NOT_DOCUMENT_LIST
+            key[: -len(suffix)] for key in individual_dict if key.endswith(suffix) and key not in self.NOT_DOCUMENT_LIST
         ]
 
     def _prepare_household_data(
@@ -217,7 +215,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 "photo": photo,
                 "program": individual.program,
             }
-            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))
+            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))  # noqa
             form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)

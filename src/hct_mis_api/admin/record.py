@@ -91,14 +91,14 @@ class BaseRDIForm(forms.Form):
     status = forms.ChoiceField(label="Record status", required=True, choices=STATUSES_CHOICES)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        if request := kwargs.pop("request", None):
-            if is_root(request):
-                self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
+        request = kwargs.pop("request")
+        if request and is_root(request):
+            self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
     def clean_filters(self) -> QueryStringFilter:
-        filter = QueryStringFilter(None, {}, Record, None)
-        return filter.get_filters(self.cleaned_data["filters"])
+        qs_filter = QueryStringFilter(None, {}, Record, None)
+        return qs_filter.get_filters(self.cleaned_data["filters"])
 
     def clean(self) -> None:
         super().clean()
@@ -174,7 +174,7 @@ class RecordAdmin(HOPEModelAdminBase):
                         filters["registration"] = form.cleaned_data["registration"].source_id
                     info = fetch_records(aurora_token, form.cleaned_data["overwrite"], **filters)
                     ctx["info"] = info
-            except BaseException as e:
+            except BaseException as e:  # noqa
                 messages.add_message(request, messages.ERROR, str(e))
         else:
             form = FetchForm()
@@ -198,7 +198,7 @@ class RecordAdmin(HOPEModelAdminBase):
             records_ids = queryset.values_list("id", flat=True)
             fresh_extract_records_task.delay(list(records_ids))
             self.message_user(request, f"Extracting data for {len(records_ids)} records", messages.SUCCESS)
-        except Exception as e:
+        except Exception as e:  # noqa
             self.message_user(request, str(e), messages.ERROR)
 
     @button(label="Extract", permission="aurora.view_record")
@@ -206,7 +206,7 @@ class RecordAdmin(HOPEModelAdminBase):
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         try:
             extract(records_ids, raise_exception=True)
-        except Exception as e:
+        except Exception as e:  # noqa
             self.message_error_to_user(request, e)
 
     @button(permission="aurora.can_add_records")
@@ -241,10 +241,10 @@ class RecordAdmin(HOPEModelAdminBase):
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
                                 request,
-                                mark_safe("Started RDI Import with name: <a href='{}'>{}</a>").format(url, rdi.name),
+                                f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>",
                                 messages.SUCCESS,
                             )
-                        except Exception as e:
+                        except Exception as e:  # noqa
                             self.message_error_to_user(request, e)
 
                     else:
@@ -317,7 +317,7 @@ class RecordAdmin(HOPEModelAdminBase):
 
                 auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
                 url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
-                with requests.get(url, stream=True, auth=auth) as res:
+                with requests.get(url, stream=True, auth=auth, timeout=60) as res:
                     if res.status_code != 200:
                         raise Exception(str(res))
                     payload = res.json()

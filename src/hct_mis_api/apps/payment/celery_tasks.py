@@ -83,7 +83,7 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 @log_start_and_end
 @sentry_tags
 def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
-    """Remove old Payment Verification report XLSX files"""
+    """Remove old Payment Verification report XLSX files."""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
@@ -454,10 +454,12 @@ def payment_plan_exclude_beneficiaries(
                     # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_or_ind_ids.remove(unicef_id)
 
-            if payment_plan.status == PaymentPlan.Status.LOCKED:
-                # for Locked PaymentPlan we check if all HHs are not removed from PP
-                if len(excluding_hh_or_ind_ids) >= pp_payment_items.count():
-                    error_msg.append(f"Households cannot be entirely excluded from the {payment_plan_title}.")
+            # for Locked PaymentPlan we check if all HHs are not removed from PP
+            if (
+                payment_plan.status == PaymentPlan.Status.LOCKED
+                and len(excluding_hh_or_ind_ids) >= pp_payment_items.count()
+            ):
+                error_msg.append(f"Households cannot be entirely excluded from the {payment_plan_title}.")
 
             payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
                 **{f"{filter_key}__in": excluding_hh_or_ind_ids}

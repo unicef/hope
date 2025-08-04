@@ -137,9 +137,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
-        """
-        Return list of program ids that the partner has permissions for in the given business area
-        """
+        """Return list of program ids that the partner has permissions for in the given business area."""
         from hct_mis_api.apps.program.models import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
@@ -191,9 +189,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         super().save(*args, **kwargs)
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> list[str]:
-        """
-        Return list of program ids that the user (or user's partner) has access to in the given business area.
-        """
+        """Return list of program ids that the user (or user's partner) has access to in the given business area."""
         from hct_mis_api.apps.program.models import Program
 
         if not hasattr(self, "_program_ids_for_business_area_cache"):
@@ -224,9 +220,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
-        """
-        Return list of program ids that the user (or user's partner) has permissions for in the given business area.
-        """
+        """Return list of program ids that the user (or user's partner) has permissions for in the given business area."""
         from hct_mis_api.apps.program.models import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
