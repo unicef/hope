@@ -357,10 +357,7 @@ class IndividualGlobalViewSet(
     admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
 
     def get_queryset(self) -> QuerySet:
-        return (
-            super().get_queryset().select_related("household", "household__admin2", "program")
-            .order_by("created_at")
-        )
+        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
