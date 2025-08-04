@@ -114,7 +114,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -128,7 +128,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -142,7 +142,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -156,7 +156,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -170,7 +170,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -234,7 +234,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
           <p
             class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
           >
-            0–0 of 0
+            1–5 of more than 5
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -261,9 +261,8 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
             </button>
             <button
               aria-label="Go to next page"
-              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
-              disabled=""
-              tabindex="-1"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+              tabindex="0"
               title="Go to next page"
               type="button"
             >
@@ -401,7 +400,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -415,7 +414,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -429,7 +428,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -443,7 +442,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -457,7 +456,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -521,7 +520,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
           <p
             class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
           >
-            0–0 of 0
+            1–5 of more than 5
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -548,9 +547,8 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
             </button>
             <button
               aria-label="Go to next page"
-              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
-              disabled=""
-              tabindex="-1"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+              tabindex="0"
               title="Go to next page"
               type="button"
             >
@@ -688,7 +686,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -702,7 +700,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -716,7 +714,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -730,7 +728,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -744,7 +742,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV crqRUE css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kCuUfV jljNzi css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -808,7 +806,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
           <p
             class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
           >
-            0–0 of 0
+            1–5 of more than 5
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -835,9 +833,8 @@ exports[`HouseholdMembersTable > should render multiple household members with d
             </button>
             <button
               aria-label="Go to next page"
-              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
-              disabled=""
-              tabindex="-1"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+              tabindex="0"
               title="Go to next page"
               type="button"
             >
