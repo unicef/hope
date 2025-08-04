@@ -700,7 +700,7 @@ class TestCreateTargeting:
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-
+        pageTargetingCreate.getNoValidationFspAccept().click()
         assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
@@ -746,12 +746,11 @@ class TestCreateTargeting:
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("4")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getNoValidationFspAccept().click()
-        expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
+        expected_criteria_text = "Test Decimal Attribute: 2 - 4\nRound 1 (Test Round Decimal 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU decimal"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
         pageTargetingDetails.getLockButton()
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
@@ -772,6 +771,7 @@ class TestCreateTargeting:
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
 
         assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
         pageTargetingCreate.getButtonSave().click()
