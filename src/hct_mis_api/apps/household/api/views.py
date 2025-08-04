@@ -60,7 +60,7 @@ class HouseholdViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Household.all_merge_status_objects.order_by("-created_at")
+    queryset = Household.all_merge_status_objects.all()
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
@@ -111,7 +111,7 @@ class HouseholdViewSet(
             .get_queryset()
             .select_related("head_of_household", "program", "admin1", "admin2")
             .prefetch_related("program__sanction_lists")
-            .order_by("-created_at")
+            .order_by("created_at")
         )
 
     @etag_decorator(HouseholdListKeyConstructor)
@@ -128,7 +128,7 @@ class HouseholdViewSet(
         ids = set(individuals_ids + collectors_ids)
         members = (
             Individual.all_merge_status_objects.filter(id__in=ids)
-            .order_by("-created_at")
+            .order_by("created_at")
             .prefetch_related(
                 Prefetch(
                     "households_and_roles",
@@ -243,7 +243,7 @@ class HouseholdGlobalViewSet(
             super()
             .get_queryset()
             .select_related("head_of_household", "program", "admin1", "admin2")
-            .order_by("-created_at")
+            .order_by("created_at")
         )
 
     @action(detail=False, methods=["get"])
@@ -259,7 +259,7 @@ class IndividualViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Individual.all_merge_status_objects.order_by("-created_at")
+    queryset = Individual.all_merge_status_objects.all()
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
         "retrieve": IndividualDetailSerializer,
@@ -307,7 +307,7 @@ class IndividualViewSet(
                 "program",
             )
             .prefetch_related("accounts", "program__sanction_lists")
-            .order_by("-created_at")
+            .order_by("created_at")
         )
 
     @etag_decorator(IndividualListKeyConstructor)
@@ -357,7 +357,10 @@ class IndividualGlobalViewSet(
     admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("-created_at")
+        return (
+            super().get_queryset().select_related("household", "household__admin2", "program")
+            .order_by("created_at")
+        )
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
