@@ -67,6 +67,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "type",
             "country",
             "document_number",
+            "photo",
         )
 
 

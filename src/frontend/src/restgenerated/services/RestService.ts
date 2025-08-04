@@ -221,7 +221,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -246,7 +246,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -271,7 +271,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -320,7 +320,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -341,7 +341,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -386,7 +386,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -9455,7 +9455,7 @@ export class RestService {
         });
     }
     /**
-     * return list of verification records
+     * Return list of verification records.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
