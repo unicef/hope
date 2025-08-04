@@ -599,6 +599,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc2.png"),
         )
 
         self.birth_certificate = DocumentFactory(
@@ -607,6 +608,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc3.png"),
         )
 
         self.disability_card = DocumentFactory(
@@ -615,6 +617,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc4.png"),
         )
 
         self.drivers_license = DocumentFactory(
@@ -622,6 +625,7 @@ class TestIndividualDetail:
             type=DocumentType.objects.get(key="drivers_license"),
             individual=self.individual1,
             program=self.program,
+            photo=ContentFile(b"abc", name="doc5.png"),
         )
 
         self.tax_id = DocumentFactory(
@@ -630,6 +634,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc6.png"),
         )
 
         self.identity = IndividualIdentityFactory(
@@ -886,6 +891,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.national_id.document_number,
+                "photo": self.national_id.photo.url,
             },
             {
                 "id": str(self.national_passport.id),
@@ -900,6 +906,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.national_passport.document_number,
+                "photo": self.national_passport.photo.url,
             },
             {
                 "id": str(self.birth_certificate.id),
@@ -914,6 +921,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.birth_certificate.document_number,
+                "photo": self.birth_certificate.photo.url,
             },
             {
                 "id": str(self.disability_card.id),
@@ -928,6 +936,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.disability_card.document_number,
+                "photo": self.disability_card.photo.url,
             },
             {
                 "id": str(self.drivers_license.id),
@@ -942,6 +951,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.drivers_license.document_number,
+                "photo": self.drivers_license.photo.url,
             },
             {
                 "id": str(self.tax_id.id),
@@ -956,6 +966,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.tax_id.document_number,
+                "photo": self.tax_id.photo.url,
             },
         ]
         assert data["identities"] == [
