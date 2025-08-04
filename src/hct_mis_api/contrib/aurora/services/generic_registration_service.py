@@ -125,8 +125,8 @@ class GenericRegistrationService(BaseRegistrationService):
 
     @classmethod
     def get(cls, data: dict, key: str) -> Any:
-        """
-        utility method to get the value given a list of one dict or a dict
+        """Generate value given a list of one dict or a dict.
+
         {"key": "value"}
         {"key": ["value"]}
         [{"key": "value"}]
@@ -140,7 +140,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
     @classmethod
     def _create_household_dict(cls, data_dict: dict, mapping_dict: dict) -> dict:
-        """create household dictionary ready to be build"""
+        """Create household dictionary ready to be build."""
         my_dict = {}
         for key, value in mapping_dict.items():
             if isinstance(value, str):
@@ -183,7 +183,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
     @classmethod
     def create_individuals_dicts(cls, data_dict: list, mapping_dict: dict, mapping: dict) -> list:
-        """create individuals dicts, including documents"""
+        """Create individuals dicts, including documents."""
         individuals_dicts = []
         constances = mapping.get("individual_constances", {})
 
@@ -233,7 +233,6 @@ class GenericRegistrationService(BaseRegistrationService):
         flex_fields.update(**self.get_extra_ff(mapping.get("flex_fields", []), record_data_dict))
         household_data = {
             **household_payload,
-            # "flex_registrations_record": record,
             "registration_data_import": str(registration_data_import.pk),
             "business_area": registration_data_import.business_area,
             "program": registration_data_import.program,
@@ -244,11 +243,11 @@ class GenericRegistrationService(BaseRegistrationService):
             "consent": True,
             "flex_fields": flex_fields,
         }
-        if constances := mapping.get("household_constances", None):
+        if constances := mapping.get("household_constances"):
             household_data.update(constances)
         return self._create_object_and_validate(household_data, PendingHousehold)
 
-    def create_individuals(
+    def create_individuals(  # noqa
         self,
         record: Any,
         household: PendingHousehold,
@@ -301,7 +300,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     raise ValidationError("Head of Household already exist")
                 head = individual
 
-            for _, document_data in documents_data.items():
+            for document_data in documents_data.values():
                 key = document_data.pop("key", None)  # skip documents' without key
                 if key:
                     document_data["type"] = DocumentType.objects.get(key=key)
@@ -334,7 +333,8 @@ class GenericRegistrationService(BaseRegistrationService):
 
             individuals.append(individual)
         if not self.master_detail:
-            assert len(individuals) == 1
+            if len(individuals) != 1:
+                raise ValidationError("More than one individual found")
             head = pr_collector = individuals[0]
         return individuals, head, pr_collector, sec_collector
 

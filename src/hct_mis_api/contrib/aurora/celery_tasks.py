@@ -121,7 +121,7 @@ def automate_rdi_creation_task(
 @log_start_and_end
 @sentry_tags
 def clean_old_record_files_task() -> None:
-    """This task once a month clears (sets to null) Record's files field"""
+    """Task to clean (sets to null) Record's files field."""
     from datetime import timedelta
 
     try:
