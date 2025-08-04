@@ -15,7 +15,6 @@ export function TargetPopulationPeopleTableRow({
   payment,
   canViewDetails,
 }): ReactElement<TargetPopulationPeopleTableRowProps> {
-  console.log('payment.headOfHousehold', payment.headOfHousehold);
   const { baseUrl } = useBaseUrl();
   const householdDetailsPath = `/${baseUrl}/population/people/${payment.headOfHousehold.id}`;
   const handleClick = (): void => {
