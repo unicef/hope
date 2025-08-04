@@ -16,7 +16,7 @@ export function TargetPopulationPeopleTableRow({
   canViewDetails,
 }): ReactElement<TargetPopulationPeopleTableRowProps> {
   const { baseUrl } = useBaseUrl();
-  const householdDetailsPath = `/${baseUrl}/population/people/${payment.collector?.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/people/${payment.householdId}`;
   const handleClick = (): void => {
     const win = window.open(householdDetailsPath, '_blank');
     if (win != null) {
@@ -30,20 +30,21 @@ export function TargetPopulationPeopleTableRow({
       onClick={canViewDetails ? handleClick : undefined}
       role="checkbox"
       data-cy="target-population-people-row"
-      key={payment.household.id}
+      key={payment?.householdId}
     >
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
-            {payment.household.unicefId}
+            {payment?.householdUnicefId}
           </BlackLink>
         ) : (
-          payment.household.unicefId
+          payment?.householdUnicefId
         )}
       </TableCell>
-      <AnonTableCell>{payment.headOfHousehold?.fullName || '-'}</AnonTableCell>
+      <AnonTableCell>{payment?.headOfHousehold?.fullName || '-'}</AnonTableCell>
+      <TableCell align="left">{payment?.householdAdmin2 || '-'}</TableCell>
       <TableCell align="left">
-        {payment.household.admin2?.name || '-'}
+        {payment?.householdSize != null ? payment.householdSize : '-'}
       </TableCell>
       <TableCell align="left">
         {payment?.vulnerabilityScore == null
