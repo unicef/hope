@@ -238,14 +238,26 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
   return (
     <>
       <div data-cy={dataCy}>{fieldElement}</div>
-      {field.type === 'PDU' && field.pduData && (
-        <PduDataBox data-cy="round-number-round-name-display">
-          Round {field.roundNumber}
-          {field.pduData.roundsNames?.[field.roundNumber - 1] && (
-            <> ({field.pduData.roundsNames[field.roundNumber - 1]})</>
-          )}
-        </PduDataBox>
-      )}
+      {(field.type === 'PDU' || field.fieldAttribute?.type === 'PDU') &&
+        (field.pduData || field.fieldAttribute?.pduData) && (
+          <PduDataBox data-cy="round-number-round-name-display">
+            Round {field.roundNumber}
+            {(field.pduData?.roundsNames?.[field.roundNumber - 1] ||
+              field.fieldAttribute?.pduData?.roundsNames?.[
+                field.roundNumber - 1
+              ]) && (
+              <>
+                {' '}
+                (
+                {field.pduData?.roundsNames?.[field.roundNumber - 1] ||
+                  field.fieldAttribute?.pduData?.roundsNames?.[
+                    field.roundNumber - 1
+                  ]}
+                )
+              </>
+            )}
+          </PduDataBox>
+        )}
     </>
   );
 };
