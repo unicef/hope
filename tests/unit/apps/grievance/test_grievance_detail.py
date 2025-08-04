@@ -816,7 +816,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
-                    "photo": document.photo.url if document.photo else None
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -1115,7 +1115,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
-                    "photo": document.photo.url if document.photo else None
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
