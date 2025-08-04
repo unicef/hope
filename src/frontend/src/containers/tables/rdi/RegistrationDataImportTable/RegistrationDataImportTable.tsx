@@ -64,10 +64,8 @@ function RegistrationDataImportTable({
       program: programId,
       importDateAfter: filter.importDateRangeMin,
       importDateBefore: filter.importDateRangeMax,
-      size:
-        filter.sizeMin || filter.sizeMax
-          ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
-          : undefined,
+      sizeMin: filter.sizeMin,
+      sizeMax: filter.sizeMax,
     }),
     [
       filter.importDateRangeMax,

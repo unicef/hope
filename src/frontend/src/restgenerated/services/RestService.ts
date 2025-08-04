@@ -10486,8 +10486,8 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsList({
         businessAreaSlug,
         programSlug,
-        importDate,
-        importDateRange,
+        importDateAfter,
+        importDateBefore,
         importedById,
         limit,
         name,
@@ -10496,15 +10496,18 @@ export class RestService {
         orderBy,
         ordering,
         search,
-        size,
+        sizeMax,
+        sizeMin,
         status,
         totalHouseholdsCountWithValidPhoneNoMax,
         totalHouseholdsCountWithValidPhoneNoMin,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        importDate?: string,
-        importDateRange?: string,
+        importDateAfter?: string,
+        importDateBefore?: string,
         importedById?: string,
         /**
          * Number of results to return per page.
@@ -10540,7 +10543,8 @@ export class RestService {
          */
         ordering?: string,
         search?: string,
-        size?: number,
+        sizeMax?: number,
+        sizeMin?: number,
         /**
          * * `LOADING` - Loading
          * * `DEDUPLICATION` - Deduplication
@@ -10558,6 +10562,8 @@ export class RestService {
         status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
         totalHouseholdsCountWithValidPhoneNoMax?: any,
         totalHouseholdsCountWithValidPhoneNoMin?: any,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedRegistrationDataImportListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10567,8 +10573,8 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'import_date': importDate,
-                'import_date_range': importDateRange,
+                'import_date_after': importDateAfter,
+                'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
                 'limit': limit,
                 'name': name,
@@ -10577,10 +10583,13 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'search': search,
-                'size': size,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'status': status,
                 'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
                 'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -10749,23 +10758,26 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsCountRetrieve({
         businessAreaSlug,
         programSlug,
-        importDate,
-        importDateRange,
+        importDateAfter,
+        importDateBefore,
         importedById,
         name,
         nameStartswith,
         orderBy,
         ordering,
         search,
-        size,
+        sizeMax,
+        sizeMin,
         status,
         totalHouseholdsCountWithValidPhoneNoMax,
         totalHouseholdsCountWithValidPhoneNoMin,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        importDate?: string,
-        importDateRange?: string,
+        importDateAfter?: string,
+        importDateBefore?: string,
         importedById?: string,
         name?: string,
         nameStartswith?: string,
@@ -10793,7 +10805,8 @@ export class RestService {
          */
         ordering?: string,
         search?: string,
-        size?: number,
+        sizeMax?: number,
+        sizeMin?: number,
         /**
          * * `LOADING` - Loading
          * * `DEDUPLICATION` - Deduplication
@@ -10811,6 +10824,8 @@ export class RestService {
         status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
         totalHouseholdsCountWithValidPhoneNoMax?: any,
         totalHouseholdsCountWithValidPhoneNoMin?: any,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10820,18 +10835,21 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'import_date': importDate,
-                'import_date_range': importDateRange,
+                'import_date_after': importDateAfter,
+                'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
                 'name': name,
                 'name__startswith': nameStartswith,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'search': search,
-                'size': size,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'status': status,
                 'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
                 'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
