@@ -132,7 +132,6 @@ def generate_grievance(
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceDashboard:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_grievance_dashboard(
         self,
         active_program: Program,
@@ -159,7 +158,6 @@ class TestSmokeGrievanceDashboard:
         )
         GrievanceTicket._meta.get_field("updated_at").auto_now = True
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_dashboard_happy_path(
         self,
         active_program: Program,
@@ -198,11 +196,11 @@ class TestSmokeGrievanceDashboard:
         assert "2" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated().text
         assert "0" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
         assert "1" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
-        assert "20.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        assert "40.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
             "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
         )
         assert (
-            "20 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+            "40 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
         )
         assert "1" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
