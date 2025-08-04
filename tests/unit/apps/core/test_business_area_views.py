@@ -20,7 +20,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
-    FlexibleAttributeChoice, PeriodicFieldData,
+    FlexibleAttributeChoice,
+    PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import get_fields_attr_generators
 from test_utils.factories.core import PeriodicFieldDataFactory
@@ -439,8 +440,8 @@ class TestAllFieldsAttributes:
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
                     }
-
-                ) if attr.pdu_data else None,
+                ) if attr.pdu_data
+                else None,
             }
             for attr in get_fields_attr_generators(flex_field=True)
         ]
@@ -504,8 +505,8 @@ class TestAllFieldsAttributes:
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
                     }
-
-                ) if attr.pdu_data else None,
+                ) if attr.pdu_data
+                else None,
             }
             for attr in get_fields_attr_generators(
                 flex_field=True,
