@@ -15,8 +15,9 @@ export function TargetPopulationPeopleTableRow({
   payment,
   canViewDetails,
 }): ReactElement<TargetPopulationPeopleTableRowProps> {
+  console.log('payment.headOfHousehold', payment.headOfHousehold);
   const { baseUrl } = useBaseUrl();
-  const householdDetailsPath = `/${baseUrl}/population/people/${payment.householdId}`;
+  const householdDetailsPath = `/${baseUrl}/population/people/${payment.headOfHousehold.id}`;
   const handleClick = (): void => {
     const win = window.open(householdDetailsPath, '_blank');
     if (win != null) {
@@ -35,10 +36,10 @@ export function TargetPopulationPeopleTableRow({
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
-            {payment?.householdUnicefId}
+            {payment?.headOfHousehold.unicefId}
           </BlackLink>
         ) : (
-          payment?.householdUnicefId
+          payment?.headOfHousehold.unicefId
         )}
       </TableCell>
       <AnonTableCell>{payment?.headOfHousehold?.fullName || '-'}</AnonTableCell>
