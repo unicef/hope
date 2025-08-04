@@ -6,10 +6,7 @@ from django.db.models.functions import Lower
 from django_filters import CharFilter, DateFromToRangeFilter, RangeFilter
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
-from hct_mis_api.apps.core.filters import (
-    IntegerFilter,
-    IntegerRangeFilter,
-)
+from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 

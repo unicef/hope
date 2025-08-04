@@ -440,7 +440,8 @@ class TestAllFieldsAttributes:
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
                     }
-                ) if attr.pdu_data
+                )
+                if attr.pdu_data
                 else None,
             }
             for attr in get_fields_attr_generators(flex_field=True)
@@ -505,7 +506,8 @@ class TestAllFieldsAttributes:
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
                     }
-                ) if attr.pdu_data
+                )
+                if attr.pdu_data
                 else None,
             }
             for attr in get_fields_attr_generators(
