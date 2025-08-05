@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
     CollectorAttributeSerializer,
-    FieldAttributeSimpleSerializer,
+    FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
 )
@@ -97,15 +97,18 @@ class BusinessAreaViewSet(
         result_list = sorted(definitions, key=lambda attr: attr["label"]["English(EN)"])  # type: ignore
         return Response(CollectorAttributeSerializer(result_list, many=True).data, status=200)
 
+    @extend_schema(parameters=[OpenApiParameter(name="program_id")])
     @extend_schema(
         responses={
-            200: FieldAttributeSimpleSerializer(many=True),
+            200: FieldAttributeSerializer(many=True),
         },
     )
-    @action(detail=False, methods=["get"], url_path="all-fields-attributes")
+    @action(detail=True, methods=["get"], url_path="all-fields-attributes")
     def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        result_list = get_fields_attr_generators()
-        return Response(FieldAttributeSimpleSerializer(result_list, many=True).data, status=200)
+        program_id = request.query_params.get("program_id", None)
+        business_area_slug = self.kwargs["slug"]
+        result_list = get_fields_attr_generators(business_area_slug=business_area_slug, program_id=program_id)
+        return Response(FieldAttributeSerializer(result_list, many=True).data, status=200)
 
     @extend_schema(
         request=GetKoboAssetListSerializer,

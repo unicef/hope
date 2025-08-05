@@ -11,6 +11,7 @@ from django_filters import (
     CharFilter,
     ChoiceFilter,
     DateFilter,
+    DateFromToRangeFilter,
     FilterSet,
     MultipleChoiceFilter,
     NumberFilter,
@@ -19,7 +20,7 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.activity_log.filters import LogEntryFilter
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
@@ -211,7 +212,7 @@ class PaymentPlanFilter(FilterSet):
     total_households_count_with_valid_phone_no_min = IntegerFilter(
         method="filter_total_households_count_with_valid_phone_no_min"
     )
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = DateFromToRangeFilter(field_name="created_at")
     service_provider = CharFilter(method="filter_service_provider")
     delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices())
 
