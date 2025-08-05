@@ -3,21 +3,17 @@ from typing import Any
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, DateFilter, FilterSet
+from django_filters import CharFilter, DateFromToRangeFilter, RangeFilter
 
-from hct_mis_api.apps.core.filters import (
-    DateTimeRangeFilter,
-    IntegerFilter,
-    IntegerRangeFilter,
-)
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
+from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
-class RegistrationDataImportFilter(FilterSet):
-    import_date = DateFilter(field_name="import_date__date")
-    import_date_range = DateTimeRangeFilter(field_name="import_date")
-    size = IntegerRangeFilter(field_name="number_of_households")
+class RegistrationDataImportFilter(UpdatedAtFilter):
+    import_date = DateFromToRangeFilter(field_name="import_date")
+    size = RangeFilter(field_name="number_of_households")
     total_households_count_with_valid_phone_no_max = IntegerFilter(
         method="filter_total_households_count_with_valid_phone_no_max"
     )

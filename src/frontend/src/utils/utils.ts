@@ -222,6 +222,10 @@ export function paymentStatusDisplayMap(status: string): string {
 
 export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
+    case PaymentPlanStatus.OPEN:
+      return 'OPEN';
+    case PaymentPlanStatus.LOCKED:
+      return 'LOCKED';
     case PaymentPlanStatus.TP_OPEN:
       return 'OPEN';
     case PaymentPlanStatus.DRAFT:

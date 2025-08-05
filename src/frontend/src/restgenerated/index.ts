@@ -84,7 +84,6 @@ export type { FeedbackMessage as FeedbackMessageCamelCase } from './models/Feedb
 export type { FeedbackMessageCreate as FeedbackMessageCreateCamelCase } from './models/FeedbackMessageCreate';
 export type { FeedbackUpdate as FeedbackUpdateCamelCase } from './models/FeedbackUpdate';
 export type { FieldAttribute as FieldAttributeCamelCase } from './models/FieldAttribute';
-export type { FieldAttributeSimple as FieldAttributeSimpleCamelCase } from './models/FieldAttributeSimple';
 export type { FinancialInstitutionList as FinancialInstitutionListCamelCase } from './models/FinancialInstitutionList';
 export type { FinancialServiceProvider as FinancialServiceProviderCamelCase } from './models/FinancialServiceProvider';
 export { FlexFieldClassificationEnum as FlexFieldClassificationEnumCamelCase } from './models/FlexFieldClassificationEnum';
@@ -161,7 +160,6 @@ export type { PaginatedCollectorAttributeList as PaginatedCollectorAttributeList
 export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './models/PaginatedCountryList';
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedFieldAttributeList as PaginatedFieldAttributeListCamelCase } from './models/PaginatedFieldAttributeList';
-export type { PaginatedFieldAttributeSimpleList as PaginatedFieldAttributeSimpleListCamelCase } from './models/PaginatedFieldAttributeSimpleList';
 export type { PaginatedFinancialInstitutionListList as PaginatedFinancialInstitutionListListCamelCase } from './models/PaginatedFinancialInstitutionListList';
 export type { PaginatedFSPXlsxTemplateList as PaginatedFSPXlsxTemplateListCamelCase } from './models/PaginatedFSPXlsxTemplateList';
 export type { PaginatedGrievanceTicketDetailList as PaginatedGrievanceTicketDetailListCamelCase } from './models/PaginatedGrievanceTicketDetailList';

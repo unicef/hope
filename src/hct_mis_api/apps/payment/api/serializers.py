@@ -27,6 +27,7 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualListSerializer,
     IndividualSmallSerializer,
+    IndividualIdNameSerializer,
 )
 from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
@@ -1257,7 +1258,7 @@ class PaymentVerificationUpdateSerializer(serializers.Serializer):
 
 class PendingPaymentSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
-    hoh_full_name = serializers.SerializerMethodField()
+    head_of_household = serializers.SerializerMethodField()
     household_size = serializers.IntegerField(source="household.size")
     household_id = serializers.CharField(source="household.id")
 
@@ -1267,14 +1268,14 @@ class PendingPaymentSerializer(serializers.ModelSerializer):
             "id",
             "household_id",
             "household_unicef_id",
-            "hoh_full_name",
+            "head_of_household",
             "household_size",
             "household_admin2",
             "vulnerability_score",
         )
 
-    def get_hoh_full_name(self, obj: Payment) -> str:
-        return obj.head_of_household.full_name if obj.head_of_household else ""
+    def get_head_of_household(self, obj: Payment) -> Any:
+        return IndividualIdNameSerializer(obj.head_of_household).data if obj.head_of_household else None
 
 
 class TargetPopulationCreateSerializer(serializers.ModelSerializer):
