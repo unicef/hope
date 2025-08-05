@@ -113,6 +113,7 @@ export function programStatusToColor(
       return theme.hctPalette.orange;
   }
 }
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -132,6 +133,7 @@ export function maritalStatusToColor(
       return theme.hctPalette.gray;
   }
 }
+
 export function populationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -157,6 +159,7 @@ export function cashPlanStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function paymentRecordStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -275,6 +278,7 @@ export function verificationRecordsStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function registrationDataImportStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -378,6 +382,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   }
   return theme.palette.error.main;
 }
+
 export function periodicDataUpdatesUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -402,19 +407,15 @@ export function paymentPlanBackgroundActionStatusToColor(
 ): string {
   const colorsMap = {
     [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
-      theme.palette.error.main,
+    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
     [BackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
-      theme.palette.error.main,
+    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
     [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
     [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
-      theme.palette.error.main,
-    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
-      theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
@@ -617,6 +618,7 @@ export function programStatusToPriority(status: string): number {
       return 3;
   }
 }
+
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
@@ -1264,6 +1266,7 @@ export const filterEmptyParams = (params) => {
     }),
   );
 };
+
 /* eslint-enable @typescript-eslint/no-unused-vars,
                  @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
@@ -1274,6 +1277,11 @@ export function deepCamelize(data) {
       data,
       (result, value, key) => {
         const camelKey = _.camelCase(key);
+        if (key == 'form_errors') {
+          // Special handling for error_info to keep it as is
+          result[camelKey] = value;
+          return result;
+        }
         result[camelKey] = deepCamelize(value);
         return result;
       },
@@ -1323,7 +1331,6 @@ export function showApiErrorMessages(
 ): void {
   // Handle array of errors in error.body
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
-
     error.body.forEach((msg: string) => {
       if (msg) showMessage(msg);
     });

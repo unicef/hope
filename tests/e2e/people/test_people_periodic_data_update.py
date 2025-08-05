@@ -252,7 +252,7 @@ class TestPeoplePeriodicDataUpdateUpload:
         assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
-        error_text = "Row: 2\ntest_date_attribute_round_value\nEnter a valid date."
+        error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert pageIndividuals.getPduFormErrors().text == error_text
 
     @pytest.mark.night
