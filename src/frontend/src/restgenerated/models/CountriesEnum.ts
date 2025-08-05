@@ -80,7 +80,7 @@
  * * `Falkland Islands (Malvinas)` - FLK
  * * `France` - FRA
  * * `Faroe Islands` - FRO
- * * `Micronesia` - FSM
+ * * `Micronesia (Federated States of)` - FSM
  * * `Gabon` - GAB
  * * `United Kingdom` - GBR
  * * `Georgia` - GEO
@@ -229,7 +229,7 @@
  * * `Tonga` - TON
  * * `Trinidad and Tobago` - TTO
  * * `Tunisia` - TUN
- * * `Türkiye` - TUR
+ * * `Turkey` - TUR
  * * `Tuvalu` - TUV
  * * `Taiwan` - TWN
  * * `Tanzania` - TZA
@@ -332,7 +332,7 @@ export enum CountriesEnum {
     FALKLAND_ISLANDS_MALVINAS_ = 'Falkland Islands (Malvinas)',
     FRANCE = 'France',
     FAROE_ISLANDS = 'Faroe Islands',
-    MICRONESIA = 'Micronesia',
+    MICRONESIA_FEDERATED_STATES_OF_ = 'Micronesia (Federated States of)',
     GABON = 'Gabon',
     UNITED_KINGDOM = 'United Kingdom',
     GEORGIA = 'Georgia',
@@ -481,7 +481,7 @@ export enum CountriesEnum {
     TONGA = 'Tonga',
     TRINIDAD_AND_TOBAGO = 'Trinidad and Tobago',
     TUNISIA = 'Tunisia',
-    T_RKIYE = 'Türkiye',
+    TURKEY = 'Turkey',
     TUVALU = 'Tuvalu',
     TAIWAN = 'Taiwan',
     TANZANIA = 'Tanzania',

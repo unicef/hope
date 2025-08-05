@@ -21,8 +21,6 @@ interface TargetPopulationCoreProps {
   targetPopulation;
   permissions: string[];
   screenBeneficiary: boolean;
-  isStandardDctType: boolean;
-  isSocialDctType: boolean;
 }
 
 export const TargetPopulationCore = ({
@@ -30,20 +28,20 @@ export const TargetPopulationCore = ({
   targetPopulation,
   permissions,
   screenBeneficiary,
-  isStandardDctType,
-  isSocialDctType,
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
+
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   if (!targetPopulation) return null;
 
-  const ResultComponent = targetPopulation.program.isSocialWorkerProgram
+  const ResultComponent = isSocialDctType
     ? ResultsForPeople
     : ResultsForHouseholds;
 
-  const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
+  const recordsTable = isSocialDctType ? (
     <TargetPopulationPeopleTable
       id={id}
       canViewDetails={hasPermissions(
