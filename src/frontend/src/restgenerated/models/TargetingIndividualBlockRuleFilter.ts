@@ -15,5 +15,6 @@ export type TargetingIndividualBlockRuleFilter = {
      */
     arguments: any;
     roundNumber?: number | null;
+    readonly fieldAttribute: any;
 };
 

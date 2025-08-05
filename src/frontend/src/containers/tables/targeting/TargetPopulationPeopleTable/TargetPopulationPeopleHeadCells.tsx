@@ -22,6 +22,12 @@ export const headCells: HeadCell<PendingPayment>[] = [
   },
   {
     disablePadding: false,
+    label: 'Size',
+    id: 'household_size',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Score',
     id: 'household_selection__vulnerability_score',
     numeric: false,

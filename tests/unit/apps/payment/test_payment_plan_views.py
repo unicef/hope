@@ -920,7 +920,7 @@ class TestTargetPopulationList:
         assert response_count.json()["count"] == 2
 
         self.tp.refresh_from_db()
-        tp = response_data[0]
+        tp = response_data[1]
         assert str(self.tp.id) == tp["id"]
         assert tp["name"] == "Test new TP"
         assert tp["status"] == self.tp.get_status_display().upper()
@@ -1142,8 +1142,8 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 2
-        assert response_data[0]["name"] == "PP_1"
-        assert response_data[1]["name"] == "PP_2"
+        assert response_data[0]["name"] == "PP_2"
+        assert response_data[1]["name"] == "PP_1"
 
         response = self.client.get(self.list_url, {"total_households_count__lte": 101})
         assert response.status_code == status.HTTP_200_OK
