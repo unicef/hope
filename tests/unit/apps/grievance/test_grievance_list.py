@@ -297,7 +297,7 @@ class TestGrievanceTicketList:
         result_ids = [result["id"] for result in response_results]
         assert str(self.grievance_ticket_different_program.id) not in result_ids
 
-        for i, grievance_ticket in enumerate(self.grievance_tickets):
+        for i, grievance_ticket in enumerate(reversed(self.grievance_tickets)):
             grievance_ticket_result = response_results[i]
             assert grievance_ticket_result["id"] == str(grievance_ticket.id)
             assert grievance_ticket_result["unicef_id"] == grievance_ticket.unicef_id

@@ -20,10 +20,10 @@ import { useProgramContext } from 'src/programContext';
 const initialFilter = {
   name: '',
   status: '',
-  totalHouseholdsCountMin: '',
-  totalHouseholdsCountMax: '',
-  createdAtRangeMin: '',
-  createdAtRangeMax: '',
+  totalHouseholdsCountGte: '',
+  totalHouseholdsCountLte: '',
+  createdAtGte: '',
+  createdAtLte: '',
 };
 
 const TargetPopulationsPage = (): ReactElement => {
