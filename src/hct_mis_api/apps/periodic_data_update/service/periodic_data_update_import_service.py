@@ -203,7 +203,7 @@ class PeriodicDataUpdateImportService:
                 row_empty_values.append(None)
             else:
                 row_empty_values.append(value)
-        data = dict(zip(header, row_empty_values))
+        data = dict(zip(header, row_empty_values, strict=True))
         form = self._build_form()(data=data)
         if not form.is_valid():
             form_errors = json.loads(form.errors.as_json())
@@ -227,9 +227,9 @@ class PeriodicDataUpdateImportService:
         individual_uuid = cleaned_data["individual__uuid"]
         individual_unicef_id = cleaned_data["individual_unicef_id"]
         individual = Individual.objects.filter(id=individual_uuid).first()
-        for round in self.periodic_data_update_template.rounds_data:
-            field_name = round["field"]
-            round_number = round["round"]
+        for round_data in self.periodic_data_update_template.rounds_data:
+            field_name = round_data["field"]
+            round_number = round_data["round"]
             round_number_from_xlsx = cleaned_data[f"{field_name}__round_number"]
             value_from_xlsx = cleaned_data[f"{field_name}__round_value"]
             collection_date_from_xlsx = cleaned_data[f"{field_name}__collection_date"]

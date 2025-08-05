@@ -184,13 +184,13 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         return PaymentSmallSerializer(payment_record).data if payment_record else None
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> dict:
-        return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("created_at"), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("-created_at"), many=True).data
 
     def get_existing_tickets(self, obj: GrievanceTicket) -> dict:
-        return GrievanceTicketSimpleSerializer(obj._existing_tickets.order_by("created_at"), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._existing_tickets.order_by("-created_at"), many=True).data
 
     def get_documentation(self, obj: GrievanceTicket) -> dict:
-        return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at"), many=True).data
+        return GrievanceDocumentSerializer(obj.support_documents.order_by("-created_at"), many=True).data
 
     def get_ticket_details(self, obj: GrievanceTicket) -> dict | None:
         ticket_details = obj.ticket_details

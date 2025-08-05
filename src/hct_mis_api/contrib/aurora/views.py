@@ -39,7 +39,7 @@ class FetchDataView(ProcessFormView):
             try:
                 fetch_metadata(aurora_token)
                 messages.add_message(request, messages.SUCCESS, "Data fetched")
-            except Exception as e:
+            except Exception as e:  # noqa
                 messages.add_message(request, messages.ERROR, str(e))
         return HttpResponseRedirectToReferrer(request)
 

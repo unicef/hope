@@ -323,9 +323,7 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
 class PeriodicFieldData(models.Model):
-    """
-    Additional data for PDU
-    """
+    """Additional data for PDU."""
 
     STRING = "STRING"
     DECIMAL = "DECIMAL"
@@ -443,9 +441,7 @@ class CountryCodeMap(models.Model):
 
 
 class CustomModelEntry(ModelEntry):
-    """
-    don't update existing tasks
-    """
+    """don't update existing tasks"""
 
     @classmethod
     def from_entry(cls, name: str, app: str | None = None, **entry: Any) -> "CustomModelEntry":

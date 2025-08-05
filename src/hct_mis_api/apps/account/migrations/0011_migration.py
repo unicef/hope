@@ -205,7 +205,9 @@ def migrate_partner_roles_and_access(apps, schema_editor):
         if new_area_limits:
             AdminAreaLimitedTo.objects.bulk_create(new_area_limits)
 
-            for new_area_limit, areas in zip(new_area_limits, [access.areas.all() for access in batched_area_access]):
+            for new_area_limit, areas in zip(
+                new_area_limits, [access.areas.all() for access in batched_area_access], strict=True
+            ):
                 for area in areas:
                     new_area_limit_through.append(
                         AdminAreaLimitedTo.areas.through(adminarealimitedto_id=new_area_limit.id, area_id=area.id)

@@ -13,7 +13,6 @@ def migrate_mobile_money_accounts() -> None:
         key="mobile", defaults={"label": "Mobile", "unique_fields": []}
     )
     mobile_money_dm = DeliveryMechanism.objects.get(code="mobile_money")
-    # Chunk size
     CHUNK_SIZE = 10000
 
     handled_collectors_ids = []

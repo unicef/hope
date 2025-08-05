@@ -1068,7 +1068,6 @@ class TestAccountModel(TestCase):
         AccountFactory(individual=self.ind, unique_key="wallet-1", active=True, is_unique=True)
 
         test_cases = [
-            # (desc, active, is_unique, unique_key, should_raise)
             ("Inactive, should pass", False, True, "wallet-1", False),
             ("is_unique=False, should pass", True, False, "wallet-1", False),
             ("Both False, should pass", False, False, "wallet-1", False),

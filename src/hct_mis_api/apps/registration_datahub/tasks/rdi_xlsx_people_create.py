@@ -86,7 +86,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         registration_data_import = obj_to_create.registration_data_import
         excluded = ("pp_age", "pp_index_id")
 
-        for cell, header_cell in zip(row, first_row):
+        for cell, header_cell in zip(row, first_row, strict=True):
             try:
                 if header_cell.value in self._pdu_column_names:
                     continue

@@ -67,8 +67,7 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 def invalidate_permissions_cache_on_role_assignment_change(
     sender: Any, instance: RoleAssignment, **kwargs: Any
 ) -> None:
-    """
-    Invalidate the cache for the User/Partner's Users associated with the RoleAssignment
+    """Invalidate the cache for the User/Partner's Users associated with the RoleAssignment
     when the RoleAssignment is created, updated, or deleted.
     """
     if instance.user:
@@ -95,8 +94,8 @@ def invalidate_permissions_cache_on_role_change(sender: Any, instance: Role, **k
 def invalidate_permissions_cache_on_group_permissions_change(
     sender: Any, instance: Group, action: str, **kwargs: Any
 ) -> None:
-    """
-    Invalidate the cache for all Users that are assigned to that Group
+    """Invalidate the cache for all Users that are assigned to that Group.
+
     or are assigned to this Group's RoleAssignment
     or their Partner is assigned to this Group's RoleAssignment
     when the Group's permissions are updated.
@@ -111,8 +110,8 @@ def invalidate_permissions_cache_on_group_permissions_change(
 @receiver(post_save, sender=Group)
 @receiver(pre_delete, sender=Group)
 def invalidate_permissions_cache_on_group_change(sender: Any, instance: Group, **kwargs: Any) -> None:
-    """
-    Invalidate the cache for all Users that are assigned to that Group
+    """Invalidate the cache for all Users that are assigned to that Group.
+
     or are assigned to this Group's RoleAssignment
     or their Partner is assigned to this Group's RoleAssignment
     when the Group is created, updated, or deleted.
@@ -125,9 +124,7 @@ def invalidate_permissions_cache_on_group_change(sender: Any, instance: Group, *
 
 @receiver(m2m_changed, sender=User.groups.through)
 def invalidate_permissions_cache_on_user_groups_change(action: str, instance: User, pk_set: set, **kwargs: Any) -> None:
-    """
-    Invalidate the cache for a User when their Groups are modified.
-    """
+    """Invalidate the cache for a User when their Groups are modified."""
     if action in {"post_add", "post_remove", "post_clear"}:
         _invalidate_user_permissions_cache([instance])
 

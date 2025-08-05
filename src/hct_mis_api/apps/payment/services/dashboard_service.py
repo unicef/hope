@@ -45,7 +45,7 @@ def payment_verification_chart_query(
         payment_verifications.values("status").annotate(count=Count("status")).values_list("status", "count")
     )
     verifications_by_status_dict = dict(verifications_by_status)
-    dataset: list[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
+    dataset: list[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping]
     try:
         all_verifications = sum(dataset)
         dataset_percentage = [data / all_verifications for data in dataset]
@@ -53,7 +53,7 @@ def payment_verification_chart_query(
         dataset_percentage = [0] * len(status_choices_mapping.values())
     dataset_percentage_done = [
         {"label": status, "data": [dataset_percentage_value]}
-        for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
+        for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values(), strict=True)
     ]
 
     samples_count = payment_verifications.aggregate(payments_count=Count("payment"))["payments_count"]

@@ -124,10 +124,8 @@ class DeduplicateTask:
             "unicef_id",
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
-        index = 0
-        for individual in individual_qs:
+        for index, individual in enumerate(individual_qs):
             deduplication_result = self._deduplicate_single_individual(individual)
-            index += 1
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -410,7 +408,7 @@ class DeduplicateTask:
                 continue
             if isinstance(field_value, str) and field_value == "":
                 continue
-            if field_name not in fields_meta.keys():
+            if field_name not in fields_meta:
                 continue
             field_meta = fields_meta[field_name]
             queries_list.append(
@@ -438,8 +436,7 @@ class DeduplicateTask:
         }
 
     def _prepare_queries_for_names_from_fields(self, individual_fields: dict) -> list[dict]:
-        """
-        prepares ES queries for
+        """Prepare ES queries for:
         * givenName
         * familyName
         or

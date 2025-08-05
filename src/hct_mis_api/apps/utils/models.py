@@ -66,10 +66,7 @@ class SoftDeletablePendingManager(SoftDeletableManager):
 
 
 class SoftDeletableManagerMixin:
-    """
-    Manager that limits the queryset by default to show only not removed
-    instances of model.
-    """
+    """Manager that limits the queryset by default to show only not removed instances of model."""
 
     _queryset_class = SoftDeletableQuerySet
 
@@ -78,10 +75,7 @@ class SoftDeletableManagerMixin:
         super().__init__(*args, **kwargs)
 
     def get_queryset(self) -> "QuerySet":
-        """
-        Return queryset limited to not removed entries.
-        """
-
+        """Return queryset limited to not removed entries."""
         if self.emit_deprecation_warnings:
             warning_message = (
                 f"{self.model.__class__.__name__}.objects model manager will include soft-deleted objects in an "
@@ -90,7 +84,7 @@ class SoftDeletableManagerMixin:
                 "https://django-model-utils.readthedocs.io/en/stable/models.html"
                 "#softdeletablemodel for more information."
             )
-            warnings.warn(warning_message, DeprecationWarning)
+            warnings.warn(warning_message, stacklevel=DeprecationWarning)
 
         kwargs = {"model": self.model, "using": self._db}
         if hasattr(self, "_hints"):
@@ -114,11 +108,10 @@ class MergeStatusModel(models.Model):
 
 
 class SoftDeletableMergeStatusModel(MergeStatusModel):
-    """
-    An abstract base class model with a ``is_removed`` field that
-    marks entries that are not going to be used anymore, but are
-    kept in db for any reason.
-    Default manager returns only not-removed entries.
+    """Default manager returns only not-removed entries.
+
+    An abstract base class model with a ``is_removed`` field that marks entries that are not going to be used
+    anymore, but are kept in db for any reason.
     """
 
     is_removed = models.BooleanField(default=False, db_index=True)
@@ -136,8 +129,8 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+        """Soft delete object (set its ``is_removed`` field to True).
+
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
@@ -146,7 +139,7 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
             self.save(using=using)
             return 1, {self._meta.label: 1}
 
-        return models.Model.delete(self, using=using, *args, **kwargs)
+        return models.Model.delete(self, *args, **kwargs, using=using)
 
 
 class AdminUrlMixin:
@@ -173,9 +166,7 @@ class TimeStampedUUIDModel(UUIDModel):
 
 class SoftDeletionTreeManager(TreeManager):
     def get_queryset(self, *args: Any, **kwargs: Any) -> "QuerySet":
-        """
-        Return queryset limited to not removed entries.
-        """
+        """Return queryset limited to not removed entries."""
         return (
             super(TreeManager, self)
             .get_queryset(*args, **kwargs)
@@ -196,8 +187,8 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     def delete(
         self, using: Any | None = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]] | None:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+        """Soft delete object (set its ``is_removed`` field to True).
+
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
@@ -205,7 +196,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
             self.removed_date = timezone.now()
             self.save(using=using)
         else:
-            return super().delete(using=using, *args, **kwargs)
+            return super().delete(*args, **kwargs, using=using)
         return None
 
 
@@ -293,11 +284,11 @@ class AbstractSyncable(models.Model):
 
 
 class SoftDeletableDefaultManagerModel(models.Model):
-    """
+    """Default manager returns only not-removed entries.
+
     An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
     kept in db for any reason.
-    Default manager returns only not-removed entries.
     """
 
     is_removed = models.BooleanField(default=False)
@@ -311,8 +302,8 @@ class SoftDeletableDefaultManagerModel(models.Model):
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+        """Soft delete object (set its ``is_removed`` field to True).
+
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
@@ -320,7 +311,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
             self.save(using=using)
             return 1, {self._meta.label: 1}
 
-        return super().delete(using=using, *args, **kwargs)
+        return super().delete(*args, **kwargs, using=using)
 
 
 class ConcurrencyModel(models.Model):
@@ -498,7 +489,6 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
                 query_result_id = None
             return {
                 **info,
-                # "id": self.async_result.id,
                 "last_update": last_update,
                 "started_at": started_at,
                 "status": task_status,

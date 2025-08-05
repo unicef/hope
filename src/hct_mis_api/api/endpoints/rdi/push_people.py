@@ -161,9 +161,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
-        individual_data["flex_fields"] = populate_pdu_with_null_values(
-            rdi.program, individual_data.get("flex_fields", None)
-        )
+        individual_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, individual_data.get("flex_fields"))
 
         ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,

@@ -13,10 +13,6 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.grievance.celery_tasks.periodic_grievances_notifications",
         "schedule": crontab(minute="*/20"),
     },
-    # "recalculate_population_fields_task": {
-    #     "task": "hct_mis_api.apps.household.celery_tasks.interval_recalculate_population_fields_task",
-    #     "schedule": crontab(hour="*/24"),
-    # },
     "extract_records_task": {
         "task": "hct_mis_api.contrib.aurora.celery_tasks.extract_records_task",
         "schedule": crontab(hour="*/24"),

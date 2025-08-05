@@ -193,7 +193,7 @@ class Query(graphene.ObjectType):
                 idx = TICKET_ORDERING[ticket_name]
                 ticket_horizontal_counts[idx] = ticket_count
             results.append(ticket_horizontal_counts)
-        ticket_vertical_counts = list(zip(*results))
+        ticket_vertical_counts = list(zip(*results, strict=True))
 
         for key, value in enumerate(ticket_vertical_counts):
             totals.append({"label": TICKET_ORDERING_KEYS[key], "data": list(value)})

@@ -259,7 +259,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 "individual": individual.pk,
                 "program": individual.program,
             }
-            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))
+            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))  # noqa
             form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)

@@ -76,6 +76,8 @@ class CopyProgramPopulation:
         create_collection: bool = True,
     ):
         """
+        Copy the population data from a programme to another programme.
+
         copy_from_individuals: QuerySet of Individuals to copy
         copy_from_households: QuerySet of Households to copy
         program: Program to which the data will be copied
@@ -283,9 +285,7 @@ class CopyProgramPopulation:
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
     ) -> list[IndividualIdentity]:
-        """
-        Clone individual_identity for individual if new individual_representation has been created.
-        """
+        """Clone individual_identity for individual if new individual_representation has been created."""
         identities_list = []
         for identity in identities:
             original_identity_id = identity.id
@@ -477,7 +477,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
                     keys = document_data.group(1).split(", ")
                     values = document_data.group(2).split(", ")
-                    document_dict = dict(zip(keys, values))
+                    document_dict = dict(zip(keys, values, strict=True))
                     error_message = f"Document already exists: {document_dict.get('document_number')}"
             else:
                 detail_index = error_message.find("DETAIL")

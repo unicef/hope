@@ -61,7 +61,7 @@ def clear_default_cache() -> None:
 
 
 def pytest_configure(config: Config) -> None:
-    pytest.localhost = True if config.getoption("--localhost") else False
+    pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
     sys.path.append(str(utils))

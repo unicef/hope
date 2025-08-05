@@ -236,8 +236,8 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 if form.is_valid():
                     csv_config = self._get_csv_config(form)
                     f = request.FILES["file"]
-                    input = f.read().decode("utf-8")
-                    data = csv.DictReader(StringIO(input), fieldnames=None, **csv_config)
+                    input_file = f.read().decode("utf-8")
+                    data = csv.DictReader(StringIO(input_file), fieldnames=None, **csv_config)
                     context["fields"] = data.fieldnames
                     for attr in form.cleaned_data["results"]:
                         context["fields"].append(labelize(attr))

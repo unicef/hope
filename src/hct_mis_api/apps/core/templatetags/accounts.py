@@ -17,12 +17,9 @@ if TYPE_CHECKING:
 
 @register.simple_tag()
 def get_related(user: "User", field: Any) -> dict[str, Any]:
-    related = []
     info = {
         "to": field.model._meta.model_name,
         "field_name": field.name,
-        # 'related_name': field.related_name,
-        # 'related_query_name': field.related_query_name,
     }
 
     if field.related_name:

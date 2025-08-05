@@ -9,11 +9,6 @@ from hct_mis_api.apps.steficon.config import (
 )
 
 logger = logging.getLogger(__name__)
-#
-# SAFETY_NONE = 0  # accept any value
-# SAFETY_STANDARD = 1  # accept
-# SAFETY_MINIMUM = 2  # only accept promitives
-# SAFETY_HIGH = 3  # only accept json values
 
 
 def clean_context(context: dict) -> dict | None:

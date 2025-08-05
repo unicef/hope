@@ -207,7 +207,7 @@ class PaymentPlanCeleryTasksMixin:
         permission=is_root,
     )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Preparing Payment Plan"""
+        """Prepare Payment Plan."""
         from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 
         payment_plan = PaymentPlan.objects.get(pk=pk)
@@ -248,7 +248,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Exporting template for entitlement"""
+        """Exporting template for entitlement."""
 
         from hct_mis_api.apps.payment.celery_tasks import (
             create_payment_plan_payment_list_xlsx,
@@ -282,7 +282,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Importing entitlement file"""
+        """Importing entitlement file."""
 
         from hct_mis_api.apps.payment.celery_tasks import (
             import_payment_plan_payment_list_from_xlsx,
@@ -314,7 +314,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Exporting payment plan list"""
+        """Exporting payment plan list."""
 
         from hct_mis_api.apps.payment.celery_tasks import (
             create_payment_plan_payment_list_xlsx_per_fsp,
@@ -426,9 +426,7 @@ class LinkedObjectsManagerMixin:
         )
 
     def get_related(self, user: Model, field: Field, manager: str, max_records: int = 200) -> dict[str, Any]:
-        """
-        Override 'get_related' from 'smart_admin', to take related objects with a custom manager
-        """
+        """Override 'get_related' from 'smart_admin', to take related objects with a custom manager."""
         info = {
             "owner": user,
             "to": field.model._meta.model_name,

@@ -152,7 +152,10 @@ class ProjectListViewTests(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 3)
 
-        cache_key = f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
+        cache_key = (
+            f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:"
+            f"{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
+        )
         self.assertIsNotNone(cache.get(cache_key))
         self.assertGreater(len(queries), 0)
         # second call

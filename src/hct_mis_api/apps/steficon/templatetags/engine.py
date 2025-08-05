@@ -35,7 +35,7 @@ class HtmlDiff(difflib.HtmlDiff):
         context: bool = False,
         numlines: int = 5,
     ) -> str:
-        """Returns HTML table of side by side comparison with change highlights
+        """Return HTML table of side by side comparison with change highlights.
 
         Arguments:
         fromlines -- list of "from" lines
@@ -49,6 +49,7 @@ class HtmlDiff(difflib.HtmlDiff):
             When context is False, controls the number of lines to place
             the "next" link anchors before the next change (so click of
             "next" link jumps to just before the change).
+
         """
 
         # make unique anchor prefixes so that multiple tables may exist

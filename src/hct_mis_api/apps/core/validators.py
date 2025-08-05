@@ -77,14 +77,13 @@ class CommonValidator(BaseValidator):
     def validate_start_end_date(cls, *args: Any, **kwargs: Any) -> None:
         start_date = kwargs.get("start_date")
         end_date = kwargs.get("end_date")
-        if start_date and end_date:
-            if start_date > end_date:
-                logger.info(
-                    f"Start date cannot be greater than the end date, "
-                    f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
-                    f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
-                )
-                raise ValidationError("Start date cannot be greater than the end date.")
+        if start_date and end_date and start_date > end_date:
+            logger.info(
+                f"Start date cannot be greater than the end date, "
+                f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
+                f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
+            )
+            raise ValidationError("Start date cannot be greater than the end date.")
 
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list[str]]:
@@ -107,7 +106,7 @@ def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list
 
         last_list_name = None
         choice_value = None
-        for cell, header_name in zip(row, choices_headers_map):
+        for cell, header_name in zip(row, choices_headers_map, strict=True):
             cell_value = cell.value
             if header_name == "list_name" and cell_value != last_list_name:
                 last_list_name = str(cell_value).strip()
@@ -168,7 +167,7 @@ class KoboTemplateValidator:
 
         for index, cell in enumerate(first_row):
             column_name = cell.value
-            if column_name in columns_names_and_numbers_mapping.keys():
+            if column_name in columns_names_and_numbers_mapping:
                 columns_names_and_numbers_mapping[column_name] = index
 
         if None in columns_names_and_numbers_mapping.values():
@@ -193,14 +192,14 @@ class KoboTemplateValidator:
             if field_type.startswith("select_"):
                 field_type, choices_list_name, *_ = field_type.split(" ")
 
-            if field_type not in cls.CHOICE_MAP.keys():
+            if field_type not in cls.CHOICE_MAP:
                 continue
 
             required_value = str(row[columns_names_and_numbers_mapping["required"]].value)
             if required_value.lower() not in ("true", "false"):
                 is_field_required = False
             else:
-                is_field_required = True if required_value == "true" else False
+                is_field_required = bool(required_value == "true")
 
             field_type = cls.CHOICE_MAP[field_type] if field_type != "calculate" else "CALCULATE"
 
@@ -323,9 +322,13 @@ class DataCollectingTypeValidator(BaseValidator):
         business_area = kwargs.get("business_area") or getattr(program, "business_area", None)
 
         # validate program BA and DCT.limit_to
-        if data_collecting_type and business_area and data_collecting_type.limit_to.exists():
-            if business_area not in data_collecting_type.limit_to.all():
-                raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
+        if (
+            data_collecting_type
+            and business_area
+            and data_collecting_type.limit_to.exists()
+            and business_area not in data_collecting_type.limit_to.all()
+        ):
+            raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
 
         # user can update the program and don't update data collecting type
         if data_collecting_type:

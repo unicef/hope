@@ -1056,7 +1056,8 @@ class TestPartnerForGrievanceChoices:
             self.partner_with_access_to_test_program, [], self.afghanistan, self.program
         )
 
-        # partner with access to Test Program for Household - should be returned if Program is not passed and household/individual is passed
+        # partner with access to Test Program for Household - should be returned if Program
+        # is not passed and household/individual is passed
         # or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
         self.partner_with_access_to_test_program_for_hh = PartnerFactory(

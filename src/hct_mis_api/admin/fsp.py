@@ -89,9 +89,8 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         if delivery_mechanisms := self.data.getlist("delivery_mechanisms"):
             if delivery_mechanism and str(delivery_mechanism.id) not in delivery_mechanisms:
                 raise ValidationError(error_message)
-        else:
-            if delivery_mechanism and delivery_mechanism not in financial_service_provider.delivery_mechanisms.all():
-                raise ValidationError(error_message)
+        elif delivery_mechanism and delivery_mechanism not in financial_service_provider.delivery_mechanisms.all():
+            raise ValidationError(error_message)
 
         return cleaned_data
 

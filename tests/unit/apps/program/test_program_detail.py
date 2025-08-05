@@ -124,7 +124,8 @@ class TestProgramDetail:
             "id": self.program.data_collecting_type.id,
             "label": self.program.data_collecting_type.label,
             "code": self.program.data_collecting_type.code,
-            "type": self.program.data_collecting_type.get_type_display(),
+            "type": self.program.data_collecting_type.type,
+            "type_display": self.program.data_collecting_type.get_type_display(),
             "household_filters_available": self.program.data_collecting_type.household_filters_available,
             "individual_filters_available": self.program.data_collecting_type.individual_filters_available,
         }

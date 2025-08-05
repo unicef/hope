@@ -51,7 +51,7 @@ def export_periodic_data_update_export_template_service(self: Any, periodic_data
 @log_start_and_end
 @sentry_tags
 def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> None:
-    """Remove old Periodic Data Update Template XLSX files"""
+    """Remove old Periodic Data Update Template XLSX files."""
     try:
         with transaction.atomic():
             days = datetime.datetime.now() - datetime.timedelta(days=expiration_days)

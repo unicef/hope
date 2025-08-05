@@ -187,3 +187,6 @@ class DownPayment(models.Model):
         blank=True,
         help_text="This can be a business office or a business area",
     )
+
+    def __str__(self):
+        return str(self.rec_serial_number)

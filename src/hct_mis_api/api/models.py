@@ -13,8 +13,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
-        return name
+    def _generate_next_value_(self: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
+        return self
 
     API_READ_ONLY = auto()
     API_RDI_UPLOAD = auto()
@@ -60,3 +60,6 @@ class APILogEntry(models.Model):
 
     class Meta:
         verbose_name_plural = "Api Log Entries"
+
+    def __str__(self) -> str:
+        return f"{self.url} {self.method} {self.status_code}"

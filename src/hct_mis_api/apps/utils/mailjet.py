@@ -9,9 +9,7 @@ from hct_mis_api.apps.utils.celery_tasks import send_email_task
 
 
 class MailjetClient:
-    """
-    Mailjet client to send emails using Mailjet API.
-    """
+    """Mailjet client to send emails using Mailjet API."""
 
     def __init__(
         self,
@@ -79,9 +77,9 @@ class MailjetClient:
         send_email_task.delay(data_json)
 
     def _get_email_body(self) -> dict[str, Any]:
-        """
-        Construct the dictionary with the data responsible for email body,
-        built for passed content (html and/or text) or mailjet template (with variables).
+        """Construct the dictionary with the data responsible for email body.
+
+        Built for passed content (html and/or text) or mailjet template (with variables).
         """
         if self.mailjet_template_id:
             return {

@@ -1,3 +1,4 @@
+# noqa
 from hct_mis_api.config.env import env
 
 # TODO update when upgrading django: secrets are already in place

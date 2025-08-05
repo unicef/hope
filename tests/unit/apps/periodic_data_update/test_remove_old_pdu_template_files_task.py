@@ -36,9 +36,9 @@ class TestRemoveOldPDUTemplateFilesTask:
     def _create_file(self, pdu_template: PeriodicDataUpdateTemplate, days_ago: int) -> None:
         filename = f"Test File {pdu_template.pk}.xlsx"
         file_content = b"Test content"
-        file_temp = NamedTemporaryFile(delete=False)
-        file_temp.write(file_content)
-        file_temp.flush()
+        with NamedTemporaryFile(delete=False) as file_temp:
+            file_temp.write(file_content)
+            file_temp.flush()
 
         creation_time = timezone.now() - timedelta(days=days_ago)
         file = FileTemp.objects.create(

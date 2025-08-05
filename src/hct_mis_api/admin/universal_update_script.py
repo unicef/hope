@@ -188,7 +188,6 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         universal_update = self.get_object(request, pk)
         universal_update.queue(generate_universal_individual_update_template)
         self.message_user(request, "Gnerating Excel Template Task Scheduled")
-        return
 
     @button(
         label="Start Universal Update Task",
@@ -200,4 +199,3 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         universal_update = self.get_object(request, pk)
         universal_update.queue(run_universal_individual_update)
         self.message_user(request, "Universal individual update task scheduled")
-        return

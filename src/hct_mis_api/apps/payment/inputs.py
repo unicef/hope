@@ -1,7 +1,6 @@
 import graphene
 
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 
 
 class FullListArguments(graphene.InputObjectType):
@@ -63,36 +62,8 @@ class ActionPaymentPlanInput(graphene.InputObjectType):
     comment = graphene.String()
 
 
-class CreatePaymentPlanInput(graphene.InputObjectType):
-    program_cycle_id = graphene.ID(required=True)
-    name = graphene.String(required=True)
-    targeting_criteria = TargetingCriteriaObjectType(required=True)
-    excluded_ids = graphene.String(required=True)
-    exclusion_reason = graphene.String()
-    fsp_id = graphene.ID(required=False)
-    delivery_mechanism_code = graphene.String(required=False)
-
-
 class OpenPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     dispersion_start_date = graphene.Date(required=True)
     dispersion_end_date = graphene.Date(required=True)
     currency = graphene.String(required=True)
-
-
-class UpdatePaymentPlanInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    dispersion_start_date = graphene.Date(required=False)
-    dispersion_end_date = graphene.Date(required=False)
-    currency = graphene.String(required=False)
-
-    name = graphene.String()
-    targeting_criteria = TargetingCriteriaObjectType()
-    program_cycle_id = graphene.ID()
-    vulnerability_score_min = graphene.Decimal()
-    vulnerability_score_max = graphene.Decimal()
-    excluded_ids = graphene.String()
-    exclusion_reason = graphene.String()
-
-    fsp_id = graphene.ID(required=False)
-    delivery_mechanism_code = graphene.String(required=False)

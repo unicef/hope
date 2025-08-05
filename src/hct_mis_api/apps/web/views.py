@@ -18,7 +18,7 @@ def get_manifest() -> dict[str, dict[str, str]]:
     manifest_url = staticfiles_storage.url(manifest_path)
 
     if manifest_url.startswith("http"):
-        response = requests.get(manifest_url)
+        response = requests.get(manifest_url, timeout=60)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:

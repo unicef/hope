@@ -8,9 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def sentry_tags(func: Callable) -> Callable:
-    """
-    add sentry tags 'celery' and 'celery_task'
-    """
+    """Add sentry tags 'celery' and 'celery_task'."""
 
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -28,18 +26,14 @@ def set_sentry_business_area_tag(business_area_name: str = "NO_BA") -> None:
 
 
 class SentryFilter:
-    IGNORABLE_URLS = {
-        # "/health/",  # Example: Don't report healthcheck endpoint failures
-    }
+    IGNORABLE_URLS = {}
 
     @staticmethod
     def filter_exception(exc_info: dict, exc_to_filter: type[Exception], msg_to_filter: str | None = None) -> bool:
         exc_type, exc_value, tb = exc_info
         if not isinstance(exc_value, exc_to_filter):
             return False
-        if msg_to_filter and msg_to_filter not in getattr(exc_value, "message", str(exc_value)):
-            return False
-        return True
+        return not (msg_to_filter and msg_to_filter not in getattr(exc_value, "message", str(exc_value)))
 
     @staticmethod
     def filter_log(
@@ -55,19 +49,13 @@ class SentryFilter:
             return False
         if msg_to_filter and msg_to_filter not in log_record.msg:
             return False
-        if exc_text and exc_text not in getattr(log_record, "exc_text", ""):
-            return False
-        return True
+        return not exc_text and exc_text not in getattr(log_record, "exc_text", "")
 
     def filter_exceptions(self, hint: dict) -> bool:
-        if self.is_graphql_permission_denied_exception(hint["exc_info"]):
-            return True
-        return False
+        return self.is_graphql_permission_denied_exception(hint["exc_info"])
 
     def filter_logs(self, hint: dict, url: str | None = None) -> bool:
-        if self.is_graphql_permission_denied_log_error(hint, url):
-            return True
-        return False
+        return self.is_graphql_permission_denied_log_error(hint, url)
 
     def before_send(self, event: dict, hint: dict) -> dict | None:
         url = event.get("transaction")

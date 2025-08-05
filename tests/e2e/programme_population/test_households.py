@@ -71,7 +71,7 @@ class TestSmokeHouseholds:
         pageHouseholds.selectGlobalProgramFilter("Test Programm")
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
-        assert 1 == len(pageHouseholds.getHouseholdsRows())
+        assert len(pageHouseholds.getHouseholdsRows()) == 1
         assert "Items Groups" in pageHouseholds.getTableTitle().text
         assert "Items Group ID" in pageHouseholds.getHouseholdId().text
         assert "Status" in pageHouseholds.getStatus().text

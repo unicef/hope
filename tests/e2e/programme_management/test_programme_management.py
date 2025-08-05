@@ -893,10 +893,10 @@ class TestManualCalendar:
         pageProgrammeManagement.wait_for(pageProgrammeManagement.inputPartner).click()
         select_options_container = pageProgrammeManagement.getSelectOptionsContainer()
         options = select_options_container.find_elements(By.TAG_NAME, "li")
-        assert any("Test Partner 1" == li.text for li in options) is True
-        assert any("Test Partner 2" == li.text for li in options) is False
-        assert any("UNHCR" == li.text for li in options) is True
-        assert any("TEST" == li.text for li in options) is True
+        assert any(li.text == "Test Partner 1" for li in options)
+        assert not any(li.text == "Test Partner 2" for li in options)
+        assert any(li.text == "UNHCR" for li in options)
+        assert not any(li.text == "TEST" for li in options)
 
         pageProgrammeManagement.driver.find_element(By.CSS_SELECTOR, "body").click()
 

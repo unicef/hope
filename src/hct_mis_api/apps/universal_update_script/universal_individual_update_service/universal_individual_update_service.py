@@ -462,16 +462,16 @@ class UniversalIndividualUpdateService:
     def generate_xlsx_template(self) -> BytesIO:
         columns = ["unicef_id"]
 
-        for column_name in self.individual_fields.keys():
+        for column_name in self.individual_fields:
             columns.append(column_name)
 
-        for column_name in self.individual_flex_fields.keys():
+        for column_name in self.individual_flex_fields:
             columns.append(column_name)
 
-        for column_name in self.household_fields.keys():
+        for column_name in self.household_fields:
             columns.append(column_name)
 
-        for column_name in self.household_flex_fields.keys():
+        for column_name in self.household_flex_fields:
             columns.append(column_name)
 
         for col_pair in self.document_fields:

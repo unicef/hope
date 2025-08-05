@@ -127,9 +127,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
         request = self.context.get("request", {})
-        if program_slug := request.query_params.get("program"):  # scope program
-            if program := Program.objects.filter(slug=program_slug).first():
-                return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
+        program_slug = request.query_params.get("program")
+        program = Program.objects.filter(slug=program_slug).first()
+        if program_slug and program:
+            return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
 
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug != "undefined" else None

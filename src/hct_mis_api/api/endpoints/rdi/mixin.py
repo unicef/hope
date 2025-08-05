@@ -44,7 +44,7 @@ class DocumentMixin:
     def save_document(member: PendingIndividual, doc: dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
+            photo=get_photo_from_stream(doc.get("image")),
             individual=member,
             country=Country.objects.get(iso_code2=doc["country"]),
             type=DocumentType.objects.get(key=doc["type"]),
@@ -69,9 +69,7 @@ class PhotoMixin:
 
 class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     def _manage_collision(self, household: Household, registration_data_import: RegistrationDataImport) -> str | None:
-        """
-        Detects collisions in the provided households data against the existing population.
-        """
+        """Detect collisions in the provided households data against the existing population."""
         program = registration_data_import.program
         if not program.collision_detection_enabled or not program.collision_detector:
             return None
@@ -85,7 +83,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
-        member_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, member_data.get("flex_fields", None))
+        member_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, member_data.get("flex_fields"))
         role = member_data.pop("role", None)
         ind = PendingIndividual.objects.create(
             household=member_of,

@@ -55,7 +55,6 @@ class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSe
 
     @extend_schema(request=ProgramAPISerializer)
     def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
-        self.selected_business_area
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if Grant.API_PROGRAM_CREATE.name not in request.auth.grants:

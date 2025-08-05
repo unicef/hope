@@ -83,7 +83,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
 def get_household_snapshot(household: Household, payment: Payment | None = None) -> dict[Any, Any]:
     household_data = {}
     all_household_data_dict = household.__dict__
-    keys = [key for key in all_household_data_dict.keys() if key not in excluded_household_fields]
+    keys = [key for key in all_household_data_dict if key not in excluded_household_fields]
     household_data["individuals"] = []
     household_data["roles"] = []
     for key in keys:
@@ -121,7 +121,7 @@ def get_household_snapshot(household: Household, payment: Payment | None = None)
 
 def get_individual_snapshot(individual: Individual, payment: Payment | None = None) -> dict:
     all_individual_data_dict = individual.__dict__
-    keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
+    keys = [key for key in all_individual_data_dict if key not in excluded_individual_fields]
     individual_data = {}
     for key in keys:
         value = all_individual_data_dict[key]

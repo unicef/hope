@@ -82,11 +82,10 @@ def get_task_in_queue_or_running(
         if args is not None:
             if len(args) != len(task.get("args", [])):
                 continue
-            if not all(a == b for a, b in zip(args, task.get("args", []))):
+            if not all(a == b for a, b in zip(args, task.get("args", []), strict=True)):
                 continue
-        if kwargs is not None:
-            if not all(task.get("kwargs", {}).get(key) == value for key, value in kwargs.items()):
-                continue
+        if kwargs is not None and not all(task.get("kwargs", {}).get(key) == value for key, value in kwargs.items()):
+            continue
         return task
 
     return None

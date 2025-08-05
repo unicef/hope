@@ -94,9 +94,8 @@ class TemplateFileGeneratorService:
         return name_row, label_row
 
     def _get_label(self, flexible_attribute: FlexibleAttribute) -> str:
-        if flexible_attribute.label:
-            if "English(EN)" in flexible_attribute.label:
-                return flexible_attribute.label["English(EN)"]
+        if flexible_attribute.label and "English(EN)" in flexible_attribute.label:
+            return flexible_attribute.label["English(EN)"]
         return flexible_attribute.name
 
     def _handle_choices(self, fields: dict) -> None:

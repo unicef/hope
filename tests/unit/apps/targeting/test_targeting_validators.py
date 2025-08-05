@@ -129,42 +129,7 @@ class TestTargetingCriteriaRuleFilterInputValidator:
         with patch.object(FlexibleAttribute.objects, "get", side_effect=FlexibleAttribute.DoesNotExist):
             with pytest.raises(
                 ValidationError,
-                match=f"Can't find PDU flex field attribute associated with {self.field_name} field name in program {self.program.name}",
+                match=f"Can't find PDU flex field attribute associated with {self.field_name} "
+                f"field name in program {self.program.name}",
             ):
                 TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)
-
-    # def test_validation_error_unknown_comparison_method(self) -> None:
-    #     rule_filter = self.valid_rule_filter.copy()
-    #     rule_filter["comparison_method"] = "UNKNOWN_METHOD"
-    #
-    #     with pytest.raises(ValidationError, match=f"Unknown comparison method - {rule_filter['comparison_method']}"):
-    #         TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)
-
-    # def test_validation_error_select_many_with_no_arguments(self):
-    #     rule_filter = self.valid_rule_filter.copy()
-    #     rule_filter["arguments"] = []
-    #
-    #     with patch("hct_mis_api.apps.targeting.validators.get_attr_value", return_value="SELECT_MANY"):
-    #         with pytest.raises(ValidationError, match="SELECT_MANY expects at least 1 argument"):
-    #             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)
-
-    # def test_validation_error_argument_count_mismatch(self) -> None:
-    #     rule_filter = self.valid_rule_filter.copy()
-    #     rule_filter["arguments"] = [10, 20]  # expected 1 but got 2
-    #
-    #     comparison_attribute = {"arguments": 1, "supported_types": ["INTEGER"]}
-    #
-    #     with patch.dict("hct_mis_api.apps.targeting.models.TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES", {"EQUAL": comparison_attribute}):
-    #         with patch("hct_mis_api.apps.targeting.validators.get_attr_value", return_value="INTEGER"):
-    #             with pytest.raises(ValidationError, match="Comparison method 'EQUAL' expected 1 arguments, 2 given"):
-    #                 TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)
-
-    # def test_validation_error_unsupported_type_for_comparison(self) -> None:
-    #     rule_filter = self.valid_rule_filter.copy()
-    #
-    #     comparison_attribute = {"arguments": 1, "supported_types": ["STRING"]}
-    #
-    #     with patch.dict("hct_mis_api.apps.targeting.models.TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES", {"EQUAL": comparison_attribute}):
-    #         with patch("hct_mis_api.apps.targeting.validators.get_attr_value", return_value="INTEGER"):
-    #             with pytest.raises(ValidationError, match=f"{self.field_name} is 'INTEGER' type filter and does not accept 'EQUAL' comparison method"):
-    #                 TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)

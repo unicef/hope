@@ -1,9 +1,14 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from 'src/testUtils/testUtils';
 import { setupCommonMocks } from 'src/testUtils/commonMocks';
 import ProgrammesTable from './ProgrammesTable';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { FrequencyOfPaymentsEnum } from '@restgenerated/models/FrequencyOfPaymentsEnum';
+import { SectorEnum } from '@restgenerated/models/SectorEnum';
+import { DataCollectingTypeTypeEnum } from '@restgenerated/models/DataCollectingTypeTypeEnum';
 // Explicitly mock all relevant RestService methods as a named export
 vi.mock('@restgenerated/services/RestService', () => ({
   RestService: {
@@ -12,11 +17,6 @@ vi.mock('@restgenerated/services/RestService', () => ({
     restBusinessAreasUsersProfileRetrieve: vi.fn(),
   },
 }));
-
-import { RestService } from '@restgenerated/services/RestService';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { FrequencyOfPaymentsEnum } from '@restgenerated/models/FrequencyOfPaymentsEnum';
-import { SectorEnum } from '@restgenerated/models/SectorEnum';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -49,7 +49,8 @@ describe('ProgrammesTable', () => {
           id: 1,
           label: 'Full Individual',
           code: 'full',
-          type: 'FULL',
+          type: DataCollectingTypeTypeEnum.STANDARD,
+          typeDisplay: 'Full Individual',
           householdFiltersAvailable: true,
           individualFiltersAvailable: true,
         },
@@ -84,7 +85,8 @@ describe('ProgrammesTable', () => {
           id: 2,
           label: 'Partial Individual',
           code: 'partial',
-          type: 'PARTIAL',
+          type: DataCollectingTypeTypeEnum.SOCIAL,
+          typeDisplay: 'Full Individual',
           householdFiltersAvailable: false,
           individualFiltersAvailable: true,
         },

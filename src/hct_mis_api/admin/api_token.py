@@ -38,7 +38,7 @@ Business Areas: {areas}
 Regards
 
 The HOPE Team
-"""
+"""  # noqa
 
 TOKEN_CREATED_EMAIL = """
 Dear {friendly_name},
@@ -54,7 +54,7 @@ Business Areas: {areas}
 Regards
 
 The HOPE Team
-"""
+"""  # noqa
 
 TOKEN_UPDATED_EMAIL = """
 Dear {friendly_name},
@@ -69,13 +69,13 @@ Business Areas: {areas}
 Regards
 
 The HOPE Team
-"""
+"""  # noqa
 
 
 class APITokenForm(forms.ModelForm):
     class Meta:
         model = APIToken
-        exclude = ("key",)
+        fields = ("id", "user", "grants", "valid_from", "valid_to", "valid_for")
 
     def __init__(self, *args: Any, instance: Any | None = None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
@@ -93,7 +93,7 @@ class APITokenForm(forms.ModelForm):
             raise ValidationError("This user does not have any Business Areas assigned to him")
 
 
-class NoBusinessAreaAvailable(Exception):
+class NoBusinessAreaAvailableError(Exception):
     pass
 
 
@@ -158,12 +158,12 @@ class APITokenAdmin(SmartModelAdmin):
     ) -> HttpResponse | HttpResponse | HttpResponseRedirect:
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
-        except NoBusinessAreaAvailable:
+        except NoBusinessAreaAvailableError:
             self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
             return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))  # type: ignore # str vs SafeString
 
-    def log_addition(self, request: HttpRequest, object: Any, message: str) -> LogEntry:
-        return super().log_addition(request, object, message)
+    def log_addition(self, request: HttpRequest, obj: Any, message: str) -> LogEntry:
+        return super().log_addition(request, obj, message)
 
     @atomic()
     def save_model(self, request: HttpRequest, obj: Any, form: Form, change: bool) -> None:

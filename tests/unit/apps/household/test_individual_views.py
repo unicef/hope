@@ -632,12 +632,6 @@ class TestIndividualDetail:
             country=self.country,
         )
 
-        # self.bank_account_info = BankAccountInfoFactory(
-        #     individual=self.individual1,
-        #     bank_name="ING",
-        #     bank_account_number=11110000222255558888999925,
-        # )
-
         self.identity = IndividualIdentityFactory(
             country=self.country,
             individual=self.individual1,
@@ -979,16 +973,16 @@ class TestIndividualDetail:
         assert len(data["accounts"]) == 2
         account_1 = data["accounts"][0]
         account_2 = data["accounts"][1]
-        assert {
+        assert account_1["data_fields"] == {
             "card_expiry_date__bank": "2022-01-01",
             "card_number__bank": "123",
             "name_of_cardholder__bank": "Marek",
-        } == account_1["data_fields"]
-        assert {
+        }
+        assert account_2["data_fields"] == {
             "service_provider_code__mobile": "ABC",
             "delivery_phone_number__mobile": "123456789",
             "provider__mobile": "Provider",
-        } == account_2["data_fields"]
+        }
 
         assert data["linked_grievances"] == [
             {

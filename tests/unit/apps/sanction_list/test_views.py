@@ -68,8 +68,8 @@ class TestSanctionListIndividualViewSet:
             assert "id" in individual
             assert "documents" in individual
             assert "dates_of_birth" in individual
-            assert "Individual FullName" == individual["full_name"]
-            assert "123" == individual["reference_number"]
+            assert individual["full_name"] == "Individual FullName"
+            assert individual["reference_number"] == "123"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -109,8 +109,8 @@ class TestSanctionListIndividualViewSet:
             assert "id" in resp_data
             assert "documents" in resp_data
             assert "dates_of_birth" in resp_data
-            assert "Individual FullName" == resp_data["full_name"]
-            assert "123" == resp_data["reference_number"]
+            assert resp_data["full_name"] == "Individual FullName"
+            assert resp_data["reference_number"] == "123"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

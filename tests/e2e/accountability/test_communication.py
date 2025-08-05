@@ -73,7 +73,7 @@ class TestSmokeAccountabilityCommunication:
         assert "Rows per page: 10 1–1 of 1" in pageAccountabilityCommunication.getTablePagination().text.replace(
             "\n", " "
         )
-        assert 1 == len(pageAccountabilityCommunication.getRows())
+        assert len(pageAccountabilityCommunication.getRows()) == 1
 
     def test_smoke_accountability_communication_details(
         self,

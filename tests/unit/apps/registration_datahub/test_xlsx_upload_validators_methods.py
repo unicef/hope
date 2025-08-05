@@ -641,7 +641,8 @@ class TestXLSXValidatorsMethods(APITestCase):
             {
                 "row_number": 1,
                 "header": "People",
-                "message": "Invalid value in field 'pp_relationship_i_c' with index_id 99. Value can be HEAD or NON_BENEFICIARY",
+                "message": "Invalid value in field 'pp_relationship_i_c' with index_id 99. Value can be HEAD or"
+                " NON_BENEFICIARY",
             },
             {
                 "row_number": 3,

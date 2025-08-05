@@ -46,8 +46,10 @@ escapechars = " \\"
 
 
 class CSVOptionsForm(forms.Form):
-    delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
-    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
+    delimiter = forms.ChoiceField(
+        label=_("Delimiter"), choices=list(zip(delimiters, delimiters, strict=True)), initial=","
+    )
+    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes, strict=True)), initial="'")
     quoting = forms.ChoiceField(
         label=_("Quoting"),
         choices=(
@@ -200,7 +202,7 @@ class RuleForm(forms.ModelForm):
         exclude = ("updated_by", "created_by")
 
     def clean(self) -> dict | None:
-        if len(self.cleaned_data.keys()) == 1 and "allowed_business_areas" in self.cleaned_data.keys():
+        if len(self.cleaned_data) == 1 and "allowed_business_areas" in self.cleaned_data:
             # added that just for update 'allowed_business_areas'
             return self.cleaned_data
         self._validate_unique = True

@@ -25,7 +25,7 @@ function TargetingCriteriaCollectorBlockFilter({
     <div>
       <FieldChooser
         index={index}
-        choices={data.results}
+        choices={Array.isArray(data) ? data : data?.results || []}
         fieldName={each.fieldName}
         onChange={onChange}
         onDelete={onDelete}

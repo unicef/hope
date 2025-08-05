@@ -40,7 +40,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         call_command("init-geo-fixtures")
         document_types_to_create = []
 
-        DOCUMENT_MAPPING = {
+        document_mapping = {
             "birth_certificate": "Birth Certificate",
             "disability_card": "Disability Card",
             "national_id": "National ID",
@@ -50,7 +50,7 @@ class TestCzechRepublicRegistrationService(TestCase):
             "proof_legal_guardianship": "Proof of Legal Guardianship",
         }
 
-        for key, label in DOCUMENT_MAPPING.items():
+        for key, label in document_mapping.items():
             document_types_to_create.append(DocumentType(key=key, label=label))
 
         DocumentType.objects.bulk_create(document_types_to_create)

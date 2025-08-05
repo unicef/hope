@@ -30,7 +30,6 @@ class FlexibleAttributeInline(admin.TabularInline):
 class FlexibleAttributeGroupAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
-    # autocomplete_fields = ("parent",)
     raw_id_fields = ("parent",)
     list_filter = (
         ("parent", AutoCompleteFilter),

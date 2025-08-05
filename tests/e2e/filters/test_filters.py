@@ -508,7 +508,7 @@ class TestSmokeFilters:
             pytest.param(
                 [["Payment Module", "Payment Plans"], "filter-search", "PP-0060-22-11223344"], id="Payment Module"
             ),
-            # ToDo: uncomment after fix bug: 206395
+            # TODO: uncomment after fix bug: 206395
             # pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
         ],
     )

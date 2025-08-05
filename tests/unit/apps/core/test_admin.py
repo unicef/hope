@@ -98,7 +98,8 @@ class TestDataCollectingTypeForm(TestCase):
         )
         self.assertEqual(
             form.errors["compatible_types"][0],
-            f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
+            f"DCTs of different types cannot be compatible with each other."
+            f" Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
         )
 
     def test_cannot_add_compatible_dct_with_different_type(self) -> None:

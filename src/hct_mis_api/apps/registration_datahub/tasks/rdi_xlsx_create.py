@@ -519,7 +519,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 household_id = None
 
                 excluded = ("age",)
-                for cell, header_cell in zip(row, first_row):
+                for cell, header_cell in zip(row, first_row, strict=True):
                     try:
                         header = header_cell.value
                         if header in self._pdu_column_names:

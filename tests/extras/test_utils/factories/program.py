@@ -111,7 +111,7 @@ class ProgramFactory(DjangoModelFactory):
     programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
-            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            master_detail=bool(o.data_collecting_type.type != DataCollectingType.Type.SOCIAL),
             name=(
                 factory.Faker("word") if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else "Household"
             ),

@@ -103,33 +103,74 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
   return url;
 };
 
-export const getFormData = (
-  options: ApiRequestOptions,
-): FormData | undefined => {
-  if (options.formData) {
-    const formData = new FormData();
+export function customSnakeCase(str: string): string {
+  return (
+      str
+          // Insert _ between lowercase and uppercase
+          .replace(/([a-z])([A-Z])/g, '$1_$2')
+          // Insert _ between letter and number
+          .replace(/([a-zA-Z])([0-9])/g, '$1_$2')
+          // Insert _ between number and letter
+          .replace(/([0-9])([a-zA-Z])/g, '$1_$2')
+          // Replace age group numbers like 05, 611, 1217, 1859, 60 with correct underscores
+          .replace(/_0(\d)(_|$)/g, '_0_$1$2') // 05 -> 0_5
+          .replace(/_6(\d{2})(_|$)/g, '_6_$1$2') // 611 -> 6_11
+          .replace(/_1(\d{2})(_|$)/g, '_1_$1$2') // 1217, 1859 -> 12_17, 18_59
+          .replace(/_6_0(_|$)/g, '_60$1') // 60 stays as 60 (optional, if you want _60 not _6_0)
+          .toLowerCase()
+  );
+}
+export function processFormData(
+    obj: any,
+    form?: FormData,
+    parentKey?: string,
+): FormData {
+  const formData = form || new FormData();
+  for (const key in obj) {
+    if (obj[key] === undefined || obj[key] === null) continue;
+    const value = obj[key];
+    const snakeKey = customSnakeCase(key);
+    let formKey;
+    if (Array.isArray(obj)) {
+      // Array: use bracket notation for index
+      formKey = parentKey ? `${parentKey}[${key}]` : key;
+    } else {
+      // Object: use dot notation for nesting
+      formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
+    }
 
-    const process = (key: string, value: any) => {
-      if (isString(value) || isBlob(value)) {
-        formData.append(key, value);
+    if (value instanceof File) {
+      formData.append(formKey, value);
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        continue;
       } else {
-        formData.append(key, JSON.stringify(value));
+        value.forEach((item, idx) => {
+          processFormData(item, formData, `${formKey}[${idx}]`);
+        });
       }
-    };
-
-    Object.entries(options.formData)
-      .filter(([_, value]) => isDefined(value))
-      .forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          value.forEach((v) => process(key, v));
-        } else {
-          process(key, value);
-        }
-      });
-
-    return formData;
+    } else if (typeof value === 'object' && value !== null) {
+      if (Object.keys(value).length === 0) {
+        // Do not send empty objects at all
+        continue;
+      } else {
+        processFormData(value, formData, formKey);
+      }
+    } else if (typeof value === 'boolean') {
+      formData.append(formKey, value ? 'true' : 'false');
+    } else {
+      formData.append(formKey, value);
+    }
   }
-  return undefined;
+  return formData;
+}
+export const getFormData = (
+    options: ApiRequestOptions,
+): FormData | undefined => {
+  if (!options.formData) {
+    return undefined;
+  }
+  return processFormData(options.formData);
 };
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;

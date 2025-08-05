@@ -261,9 +261,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
                 RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
             ],
         ).exists()
-        if is_still_processing:
-            return False
-        return True
+        return not is_still_processing
 
     def update_duplicates_against_population_statistics(self) -> None:
         self.golden_record_duplicates = Individual.objects.filter(

@@ -26,6 +26,7 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualListSerializer,
     IndividualSmallSerializer,
+    IndividualIdNameSerializer,
 )
 from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
@@ -161,9 +162,6 @@ class PaymentVerificationSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
-    # status = serializers.CharField(source="get_status_display")
-    # verification_channel = serializers.CharField(source="get_verification_channel_display")
-
     class Meta:
         model = PaymentVerificationPlan
         fields = (
@@ -685,9 +683,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
         if not delivery_mechanism or not financial_service_provider:
             return False
-        if not payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism):
-            return False
-        return True
+        return bool(payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism))
 
     def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
@@ -775,12 +771,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         if parent.status != PaymentPlan.Status.ACCEPTED:
             return False
 
-        if parent.splits.filter(
+        return not parent.splits.filter(
             sent_to_payment_gateway=True,
-        ).exists():
-            return False
-
-        return True
+        ).exists()
 
     @staticmethod
     def get_total_households_count_with_valid_phone_no(parent: PaymentPlan) -> int:
@@ -1110,7 +1103,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
 
     @staticmethod
     def collector_field(payment: "Payment", field_name: str) -> None | str | dict:
-        """return primary_collector or alternate_collector field value or None"""
+        """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
@@ -1249,7 +1242,7 @@ class PaymentVerificationUpdateSerializer(serializers.Serializer):
 
 class PendingPaymentSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
-    hoh_full_name = serializers.SerializerMethodField()
+    head_of_household = serializers.SerializerMethodField()
     household_size = serializers.IntegerField(source="household.size")
     household_id = serializers.CharField(source="household.id")
 
@@ -1259,14 +1252,14 @@ class PendingPaymentSerializer(serializers.ModelSerializer):
             "id",
             "household_id",
             "household_unicef_id",
-            "hoh_full_name",
+            "head_of_household",
             "household_size",
             "household_admin2",
             "vulnerability_score",
         )
 
-    def get_hoh_full_name(self, obj: Payment) -> str:
-        return obj.head_of_household.full_name if obj.head_of_household else ""
+    def get_head_of_household(self, obj: Payment) -> Any:
+        return IndividualIdNameSerializer(obj.head_of_household).data if obj.head_of_household else None
 
 
 class TargetPopulationCreateSerializer(serializers.ModelSerializer):

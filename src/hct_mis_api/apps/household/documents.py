@@ -78,16 +78,14 @@ class IndividualDocument(Document):
 
     def prepare_admin1(self, instance: Individual) -> str | None:
         household = instance.household
-        if household:
-            if household.admin1:
-                return household.admin1.name
+        if household and household.admin1:
+            return household.admin1.name
         return None
 
     def prepare_admin2(self, instance: Individual) -> str | None:
         household = instance.household
-        if household:
-            if household.admin2:
-                return household.admin2.name
+        if household and household.admin2:
+            return household.admin2.name
         return None
 
     def prepare_hash_key(self, instance: Individual) -> str:
@@ -191,15 +189,13 @@ class HouseholdDocument(Document):
     program_registration_id = fields.TextField()
 
     def prepare_admin1(self, household: Household) -> str | None:
-        if household:
-            if household.admin1:
-                return household.admin1.name
+        if household and household.admin1:
+            return household.admin1.name
         return None
 
     def prepare_admin2(self, household: Household) -> str | None:
-        if household:
-            if household.admin2:
-                return household.admin2.name
+        if household and household.admin2:
+            return household.admin2.name
         return None
 
     def prepare_business_area(self, instance: Household) -> str:

@@ -69,7 +69,6 @@ def test_history() -> None:
     rule = Rule(definition="result.value=1", enabled=True, name="Rule1")
     rule.save()
     # history on first save
-    # assert rule.history.first()
     assert rule.history.count() == 1
     assert rule.latest_commit
     assert rule.latest_commit.before == {}

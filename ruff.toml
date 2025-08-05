@@ -1,6 +1,6 @@
 target-version = "py312"
 line-length = 120
-exclude = ["src/frontend"]
+exclude = ["src/frontend", "src/hct_mis_api/one_time_scripts"]
 
 [lint]
 select = [
@@ -30,7 +30,7 @@ select = [
     "R", # PyLint Refactor
     "RET", # flake8-return
 #    "S", # bandit,
-#    "SIM", # flake8-simplify
+    "SIM", # flake8-simplify
     "T10", # flake8-debugger
     "T20", # flake8-print
     "TC", # flake8-type-checking

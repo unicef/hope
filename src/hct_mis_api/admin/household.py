@@ -284,9 +284,7 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
-        """
-        Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces
-        """
+        """Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces"""
         return [hh_id.strip() for hh_id in re.split(r"new line|[,\|/\s]+", household_list) if hh_id]
 
     @staticmethod
@@ -614,15 +612,14 @@ class HouseholdAdmin(
                     level=messages.SUCCESS,
                 )
                 return None
-        else:
+        elif not all(obj.business_area_id == business_area_id for obj in qs):
             # Check if all selected objects have the same business_area
-            if not all(obj.business_area_id == business_area_id for obj in qs):
-                self.message_user(
-                    request,
-                    "Selected households need to belong to the same business area",
-                    level=messages.ERROR,
-                )
-                return None
+            self.message_user(
+                request,
+                "Selected households need to belong to the same business area",
+                level=messages.ERROR,
+            )
+            return None
         form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"

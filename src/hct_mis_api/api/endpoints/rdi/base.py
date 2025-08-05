@@ -44,7 +44,7 @@ class RDISerializer(serializers.ModelSerializer):
 
 
 class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
-    """Api to Create RDI for selected business area"""
+    """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
     serializer_class = RDISerializer
@@ -58,7 +58,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     @atomic()
     def perform_create(self, serializer: serializers.BaseSerializer) -> None:
         imported_by_email = serializer.validated_data.get("imported_by_email")
-        User = get_user_model()
+        User = get_user_model()  # noqa
         try:
             imported_by = User.objects.get(email=imported_by_email)
         except User.DoesNotExist:
@@ -85,7 +85,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
 
 
 class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
-    """Api to link Households with selected RDI"""
+    """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
 
@@ -111,7 +111,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
 
 
 class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
-    """Api to link Households with selected RDI"""
+    """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
 
@@ -132,7 +132,6 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         total_errors = 0
         total_accepted = 0
         errs = []
-        # created = []
 
         program_id = self.selected_rdi.program.id
 
@@ -157,7 +156,6 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
                 for member_data in members:
                     self.save_member(self.selected_rdi, hh, member_data)
                 errs.append({"pk": hh.pk})
-                # created.append(hh.id)
                 total_accepted += 1
             else:
                 errs.append(serializer.errors)
@@ -168,7 +166,6 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             {
                 "id": self.selected_rdi.id,
                 "processed": total_households,
-                # "created": created,
                 "accepted": total_accepted,
                 "errors": total_errors,
                 **results,
@@ -178,7 +175,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
 
 
 class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
-    """Api to Create RDI for selected business area"""
+    """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
     serializer_class = RDISerializer

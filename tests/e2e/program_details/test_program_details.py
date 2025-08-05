@@ -349,7 +349,7 @@ class TestProgrammeDetails:
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         pageProgrammeDetails.getButtonActivateProgram().click()
         pageProgrammeDetails.getButtonActivateProgramModal().click()
-        assert 1 == len(pageProgrammeDetails.getProgramCycleRow())
+        assert len(pageProgrammeDetails.getProgramCycleRow()) == 1
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         assert "-" in pageProgrammeDetails.getProgramCycleEndDate()[0].text
         assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
@@ -375,11 +375,11 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         pageProgrammeDetails.getProgramCycleRow()
         for _ in range(50):
-            if 2 == len(pageProgrammeDetails.getProgramCycleRow()):
+            if len(pageProgrammeDetails.getProgramCycleRow()) == 2:
                 break
             sleep(0.1)
         else:
-            assert 2 == len(pageProgrammeDetails.getProgramCycleRow())
+            assert len(pageProgrammeDetails.getProgramCycleRow()) == 2
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageProgrammeDetails.getProgramCycleEndDate()[0].text
@@ -527,21 +527,21 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         for _ in range(50):
-            if 3 == len(pageProgrammeDetails.getProgramCycleTitle()):
+            if len(pageProgrammeDetails.getProgramCycleTitle()) == 3:
                 break
             sleep(0.1)
         else:
-            assert 3 == len(pageProgrammeDetails.getProgramCycleTitle())
+            assert len(pageProgrammeDetails.getProgramCycleTitle()) == 3
         program_cycle_1 = pageProgrammeDetails.getProgramCycleTitle()[0].text
         program_cycle_3 = pageProgrammeDetails.getProgramCycleTitle()[2].text
         pageProgrammeDetails.getDeleteProgrammeCycle()[1].click()
         pageProgrammeDetails.getButtonDelete().click()
         for _ in range(50):
-            if 3 == len(pageProgrammeDetails.getProgramCycleTitle()):
+            if len(pageProgrammeDetails.getProgramCycleTitle()) == 3:
                 break
             sleep(0.1)
         else:
-            assert 2 == len(pageProgrammeDetails.getProgramCycleTitle())
+            assert len(pageProgrammeDetails.getProgramCycleTitle()) == 2
 
         assert program_cycle_1 in pageProgrammeDetails.getProgramCycleTitle()[0].text
         for _ in range(50):
@@ -556,11 +556,11 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         for _ in range(50):
-            if 3 == len(pageProgrammeDetails.getProgramCycleRow()):
+            if len(pageProgrammeDetails.getProgramCycleRow()) == 3:
                 break
             sleep(0.1)
         else:
-            assert 3 == len(pageProgrammeDetails.getProgramCycleRow())
+            assert len(pageProgrammeDetails.getProgramCycleRow()) == 3
         assert pageProgrammeDetails.getButtonEditProgramCycle()[0]
         assert pageProgrammeDetails.getButtonEditProgramCycle()[1]
         with pytest.raises(Exception):
@@ -666,7 +666,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getProgramCycleRow()
 
         for _ in range(50):
-            if 2 == len(pageProgrammeDetails.getProgramCycleStatus()):
+            if len(pageProgrammeDetails.getProgramCycleStatus()) == 2:
                 break
             sleep(0.1)
 

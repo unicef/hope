@@ -30,7 +30,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
 
 
 class DataCollectingTypeSerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source="get_type_display")
+    type_display = serializers.CharField(source="get_type_display")
 
     class Meta:
         model = DataCollectingType
@@ -39,8 +39,9 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
             "label",
             "code",
             "type",
-            "household_filters_available",
+            "type_display",
             "individual_filters_available",
+            "household_filters_available",
         )
 
 
@@ -117,34 +118,6 @@ class CollectorAttributeSerializer(serializers.Serializer):
     choices = serializers.ListField(child=serializers.CharField())
 
 
-class FieldAttributeSimpleSerializer(serializers.Serializer):
-    id = serializers.CharField()
-    type = serializers.CharField()
-    name = serializers.CharField()
-    label_en = serializers.SerializerMethodField()
-    associated_with = serializers.SerializerMethodField()
-    is_flex_field = serializers.SerializerMethodField()
-    choices = CoreFieldChoiceSerializer(many=True)
-
-    def get_label_en(self, obj: Any) -> str | None:
-        if data := _custom_dict_or_attr_resolver("label", None, obj):
-            return data["English(EN)"]
-        return None
-
-    def get_is_flex_field(self, obj: Any) -> bool:
-        if isinstance(obj, FlexibleAttribute):
-            return True
-        return False
-
-    def get_associated_with(self, obj: Any) -> str | None:
-        resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
-        if resolved == 0:
-            return "Household"
-        if resolved == 1:
-            return "Individual"
-        return resolved
-
-
 class FieldAttributeSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
@@ -159,7 +132,7 @@ class FieldAttributeSerializer(serializers.Serializer):
 
     @staticmethod
     def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, Any] | None:
-        if isinstance(obj, FlexibleAttribute):
+        if isinstance(obj, FlexibleAttribute) and obj.pdu_data:
             return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
 
@@ -172,9 +145,7 @@ class FieldAttributeSerializer(serializers.Serializer):
         return None
 
     def get_is_flex_field(self, obj: Any) -> bool:
-        if isinstance(obj, FlexibleAttribute):
-            return True
-        return False
+        return isinstance(obj, FlexibleAttribute)
 
     def get_associated_with(self, obj: Any) -> Any | None:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)

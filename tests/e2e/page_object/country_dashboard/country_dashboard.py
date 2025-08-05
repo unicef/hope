@@ -29,7 +29,7 @@ class CountryDashboard(BaseComponents):
 
     def switch_to_dashboard_iframe(self) -> None:
         retries = 3
-        for attempt in range(retries):
+        for _ in range(retries):
             try:
                 iframe = WebDriverWait(self.driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Dashboard"]'))

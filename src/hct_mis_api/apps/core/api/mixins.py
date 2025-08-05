@@ -287,9 +287,7 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        if auth_header and auth_header[0].lower() == b"token":
-            return True
-        return False
+        return auth_header and auth_header[0].lower() == b"token"
 
     def get_authenticators(self) -> list[Any]:
         if self.is_external_request():

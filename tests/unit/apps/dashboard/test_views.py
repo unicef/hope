@@ -268,7 +268,8 @@ def test_dashboard_report_view_global_slug(
 
     assert view.template_name == "dashboard/global_dashboard.html"
     assert context.get("has_permission") is True, (
-        f"Permission denied for global report. User superuser: {request.user.is_superuser}, User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
+        f"Permission denied for global report. User superuser: {request.user.is_superuser},"
+        f" User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
     )
     assert context["business_area_slug"] == "global"
     assert context["household_data_url"] == reverse("api:household-data", args=["global"])

@@ -1,5 +1,5 @@
-"""
-Settings for Steficon namespaced in the STEFICON setting.
+"""Settings for Steficon namespaced in the STEFICON setting.
+
 For example your project's `settings.py` file might look like this:
 STEFICON = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -65,9 +65,7 @@ class Config:
             # Fall back to defaults
             val = self.defaults[attr]
 
-        if attr in "RESULT":
-            val = import_string(val)
-        elif attr in "USED_BY" and val:
+        if attr in {"RESULT", "USED_BY"} and val:
             val = import_string(val)
 
         # Cache the result

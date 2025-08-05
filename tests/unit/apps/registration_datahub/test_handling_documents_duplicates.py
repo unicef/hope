@@ -423,8 +423,6 @@ class TestGoldenRecordDeduplication(TestCase):
             individual=individual,
             status=Document.STATUS_PENDING,
             rdi_merge_status=MergeStatusModel.MERGED,
-            # now filtering is by Individual.program
-            # program=program_2,
         )
         individual.refresh_from_db()
         self.assertEqual(str(individual.program_id), str(program_2.pk))

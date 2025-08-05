@@ -65,7 +65,8 @@ CONSTANCE_CONFIG = {
     ),
     "DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE": (
         6.0,
-        "Results equal or above this score are considered possible duplicates (needs adjudication) must be lower than DEDUPLICATION_DUPLICATE_SCORE",
+        "Results equal or above this score are considered possible duplicates (needs adjudication) "
+        "must be lower than DEDUPLICATION_DUPLICATE_SCORE",
         "positive_floats",
     ),
     "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE": (
@@ -174,7 +175,8 @@ Clear Cache,clear-cache/
     ),
     "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
         False,
-        "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
+        "The same user can have multiple approvals in acceptance process. "
+        "Intended to be used only for testing purposes",
         bool,
     ),
     "REMOVE_RDI_LINKS_TIMEDELTA": (

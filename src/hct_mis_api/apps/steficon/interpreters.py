@@ -58,7 +58,6 @@ class PythonExec(Interpreter):
                 "__name__": __name__,
                 "__import__": __import__,
                 "date": datetime.date,
-                # "relativedelta": dateutil.relativedelta,
                 "bytearray": bytearray,
                 "bytes": bytes,
                 "Decimal": Decimal,

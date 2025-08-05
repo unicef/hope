@@ -1,6 +1,4 @@
-"""
-This is static by design, it could be made dynamic by fetching the fields from the model itself.
-"""
+"""Static by design, it could be made dynamic by fetching the fields from the model itself."""
 
 from typing import Any
 
@@ -26,7 +24,6 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
 )
 
 individual_fields: dict[str, tuple[str, Any, Any]] = {
-    # "photo": ("photo", validate_string, handle_simple_field), # TODO: Handle photo
     "full_name": ("full_name", validate_string, handle_simple_field),
     "given_name": ("given_name", validate_string, handle_simple_field),
     "middle_name": ("middle_name", validate_string, handle_simple_field),
@@ -47,7 +44,6 @@ individual_fields: dict[str, tuple[str, Any, Any]] = {
     "pregnant": ("pregnant", validate_boolean, handle_boolean_field),
     "disability": ("disability", validate_choices, handle_simple_field),
     "observed_disability": ("observed_disability", validate_boolean, handle_boolean_field),
-    # "disability_certificate_picture": ("disability_certificate_picture", validate_string, handle_simple_field), # TODO: Handle picture
     "seeing_disability": ("seeing_disability", validate_boolean, handle_boolean_field),
     "hearing_disability": ("hearing_disability", validate_boolean, handle_boolean_field),
     "physical_disability": ("physical_disability", validate_boolean, handle_boolean_field),
@@ -63,10 +59,8 @@ individual_fields: dict[str, tuple[str, Any, Any]] = {
 }
 household_fields: dict[str, tuple[str, Any, Any]] = {
     "consent": ("consent", validate_boolean, handle_boolean_field),
-    # "consent_sharing": ("consent_sharing", validate_boolean, handle_boolean_field), # TODO handle multiselect
     "residence_status": ("residence_status", validate_choices, handle_simple_field),
     "country_origin": ("country_origin", validate_string, handle_simple_field),
-    # "country": ("country", validate_string, handle_simple_field), # TODO: Handle country
     "address": ("address", validate_string, handle_simple_field),
     "zip_code": ("zip_code", validate_string, handle_simple_field),
     "admin1": ("admin1", validate_admin, handle_admin_field),
@@ -189,8 +183,5 @@ def get_account_fields() -> dict[Any, Any]:
 
 
 def _get_db_fields(model_class: type[Model]) -> list[str]:
-    """
-    Returns a list of field names that correspond to the columns stored
-    in the model's database table, excluding related fields.
-    """
+    """Return a list of field names that correspond to the columns stored in the model's database table, excluding related fields."""
     return [field.name for field in model_class._meta.fields]

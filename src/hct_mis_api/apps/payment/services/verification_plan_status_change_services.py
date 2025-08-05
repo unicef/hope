@@ -165,7 +165,7 @@ class VerificationPlanStatusChangeServices:
         GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
 
         ticket_payment_verification_details_list = []
-        for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
+        for verification, grievance_ticket in zip(verifications, grievance_ticket_objs, strict=True):
             GrievanceNotification.send_all_notifications(
                 GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
             )

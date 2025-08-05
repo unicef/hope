@@ -14,7 +14,7 @@ interface TargetPopulationHouseholdTableRowProps {
 export function TargetPopulationHouseholdTableRow({
   payment,
   canViewDetails,
-}:TargetPopulationHouseholdTableRowProps): ReactElement<TargetPopulationHouseholdTableRowProps> {
+}: TargetPopulationHouseholdTableRowProps): ReactElement<TargetPopulationHouseholdTableRowProps> {
   const { baseUrl } = useBaseUrl();
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.householdId}`;
   const handleClick = (): void => {
@@ -41,13 +41,9 @@ export function TargetPopulationHouseholdTableRow({
           payment.householdUnicefId
         )}
       </TableCell>
-      <AnonTableCell>
-        {payment.hohFullName}
-      </AnonTableCell>
+      <AnonTableCell>{payment.headOfHousehold.fullName || '-'}</AnonTableCell>
       <TableCell align="left">{payment.householdSize}</TableCell>
-      <TableCell align="left">
-        {payment.householdAdmin2 || '-'}
-      </TableCell>
+      <TableCell align="left">{payment.householdAdmin2 || '-'}</TableCell>
       <TableCell align="left">
         {payment.vulnerabilityScore == null ? '-' : payment.vulnerabilityScore}
       </TableCell>

@@ -30,9 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingBase):
-    """
-    This is a set of ANDed Filters.
-    """
+    """Set of ANDed Filters."""
 
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
@@ -85,11 +83,11 @@ class TargetingIndividualRuleFilterBlock(
 
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one explicit filter like:
-        :Age <> 10-20
-        :Residential Status = Refugee
-        :Residential Status != Refugee
+    """Explicit filter.
+
+    :Age <> 10-20
+    :Residential Status = Refugee
+    :Residential Status != Refugee
     """
 
     comparison_method = models.CharField(
@@ -131,11 +129,11 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
 
 
 class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one explicit filter like:
-        :Age <> 10-20
-        :Residential Status = Refugee
-        :Residential Status != Refugee
+    """Explicit filter like.
+
+    :Age <> 10-20
+    :Residential Status = Refugee
+    :Residential Status != Refugee
     """
 
     comparison_method = models.CharField(

@@ -1,4 +1,5 @@
 import os
+import logging
 import time
 from time import sleep
 from typing import Literal, Optional, Union
@@ -13,6 +14,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
+
+logger = logging.getLogger(__name__)
 
 
 class Common:
@@ -208,9 +212,9 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                pass
+                logger.info(f"{ii.text}: {ii.get_attribute(attribute)}")
             except BaseException:
-                pass
+                logger.info(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)

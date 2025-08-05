@@ -35,9 +35,7 @@ def get_bookmarks(request: Any) -> list:
                     args = None
                     if len(parts) == 1:
                         args = parts[0], "viewlink", parts[0], parts[0]
-                    elif len(parts) == 2:
-                        args = parts[0], "viewlink", parts[1], parts[0]
-                    elif len(parts) == 3:
+                    elif len(parts) in [2, 3]:
                         args = parts[0], "viewlink", parts[1], parts[0]
                     elif len(parts) == 4:
                         parts.reverse()

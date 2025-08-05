@@ -46,6 +46,7 @@ class IncompatibleRolesTest(TestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            f"Users: [{user.email}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair.",
+            f"Users: [{user.email}] have these roles assigned to them in the same business area."
+            f" Please fix them before creating this incompatible roles pair.",
         ):
             test_role.full_clean()

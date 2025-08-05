@@ -46,9 +46,10 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
       options={choicesWithoutDuplicates || []}
       value={newValue}
       getOptionLabel={(option) => {
-        if (option) {
-          return option.labelEn;
-        }
+        if (!option) return '';
+        if (typeof option.labelEn === 'string') return option.labelEn;
+        if (option.labelEn?.englishEn) return String(option.labelEn.englishEn);
+        if (option.label?.englishEn) return String(option.label.englishEn);
         return '';
       }}
       renderInput={(params) => (

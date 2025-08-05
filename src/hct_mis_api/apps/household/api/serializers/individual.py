@@ -89,6 +89,16 @@ class IndividualSmallSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualIdNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+        )
+
+
 class IndividualIdentitySerializer(serializers.ModelSerializer):
     country = CountrySerializer()
 
