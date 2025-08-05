@@ -11,13 +11,11 @@ import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 
 export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
-  const { isStandardDctType, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
 
   const { businessAreaSlug, programSlug } = useBaseUrl();
@@ -48,7 +46,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
     Boolean(paymentPlan.rules);
@@ -68,8 +65,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
       <TargetPopulationCore
         id={paymentPlan?.id}
         targetPopulation={paymentPlan}
-        isStandardDctType={isStandardDctType}
-        isSocialDctType={isSocialDctType}
         permissions={permissions}
         screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
       />
