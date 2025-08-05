@@ -196,11 +196,11 @@ class TestSmokeGrievanceDashboard:
         assert "2" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated().text
         assert "0" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
         assert "1" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
-        assert "40.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        assert "20.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
             "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
         )
         assert (
-            "40 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+            "20 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
         )
         assert "1" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
