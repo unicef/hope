@@ -113,6 +113,7 @@ export function programStatusToColor(
       return theme.hctPalette.orange;
   }
 }
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -132,6 +133,7 @@ export function maritalStatusToColor(
       return theme.hctPalette.gray;
   }
 }
+
 export function populationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -157,6 +159,7 @@ export function cashPlanStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function paymentRecordStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -279,6 +282,7 @@ export function verificationRecordsStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function registrationDataImportStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -382,6 +386,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   }
   return theme.palette.error.main;
 }
+
 export function periodicDataUpdatesUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -617,6 +622,7 @@ export function programStatusToPriority(status: string): number {
       return 3;
   }
 }
+
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
@@ -1264,6 +1270,7 @@ export const filterEmptyParams = (params) => {
     }),
   );
 };
+
 /* eslint-enable @typescript-eslint/no-unused-vars,
                  @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
@@ -1274,6 +1281,11 @@ export function deepCamelize(data) {
       data,
       (result, value, key) => {
         const camelKey = _.camelCase(key);
+        if (key == 'form_errors') {
+          // Special handling for error_info to keep it as is
+          result[camelKey] = value;
+          return result;
+        }
         result[camelKey] = deepCamelize(value);
         return result;
       },

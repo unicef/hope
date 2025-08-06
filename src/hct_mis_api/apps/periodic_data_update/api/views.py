@@ -24,6 +24,7 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.parsers import DictDrfNestedParser
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
@@ -143,7 +144,7 @@ class PeriodicDataUpdateUploadViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], parser_classes=[DictDrfNestedParser])
     def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(
             data=request.data,
