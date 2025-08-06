@@ -333,6 +333,30 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 message="Do you confirm to Sync with Payment Gateway?",
             )
 
+    @button(
+        visible=lambda btn: can_sync_with_payment_gateway(btn.original),
+        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
+            request, payment_plan
+        ),
+    )
+    def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            from hct_mis_api.apps.payment.services.payment_gateway import (
+                PaymentGatewayService,
+            )
+
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            PaymentGatewayService().add_missing_records_to_payment_instructions(payment_plan)
+
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.sync_missing_records_with_payment_gateway,
+                message="Do you confirm to Sync with Payment Gateway missing Records?",
+            )
+
     @button(permission="payment.view_paymentplan")
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         obj = PaymentPlan.objects.get(pk=pk)

@@ -456,7 +456,7 @@ class PaymentGatewayService:
                 else:
                     _handle_success(response, payments_chunk)
 
-            if not add_records_error:
+            if not add_records_error and _payments:
                 _container.sent_to_payment_gateway = True
                 _container.save(update_fields=["sent_to_payment_gateway"])
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
