@@ -304,14 +304,14 @@ class TargetingCriteriaFilterBase:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
-        type = get_attr_value("type", field_attr, None)
-        if type == FlexibleAttribute.PDU:
+        typology = get_attr_value("type", field_attr, None)
+        if typology == FlexibleAttribute.PDU:
             if arguments == [None]:
                 return arguments
-            type = field_attr.pdu_data.subtype
-        if type == TYPE_DECIMAL:
+            typology = field_attr.pdu_data.subtypology
+        if typology == TYPE_DECIMAL:
             return [float(arg) for arg in arguments]
-        if type == TYPE_INTEGER:
+        if typology == TYPE_INTEGER:
             return [int(arg) for arg in arguments]
         return arguments
 
