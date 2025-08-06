@@ -116,7 +116,6 @@ class TestSmokeAccountabilityCommunication:
             "No results Try adjusting your search or your filters to find what you are looking for."
             in pageAccountabilityCommunicationDetails.getTableRow().text.replace("\n", " ")
         )
-        assert (
-            "Rows per page: 10 1–10 of more than 10"
-            in pageAccountabilityCommunicationDetails.getTablePagination().text.replace("\n", " ")
+        assert "Rows per page: 10 0–0 of 0" in pageAccountabilityCommunicationDetails.getTablePagination().text.replace(
+            "\n", " "
         )

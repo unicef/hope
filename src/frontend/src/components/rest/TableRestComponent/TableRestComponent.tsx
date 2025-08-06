@@ -207,7 +207,7 @@ export function TableRestComponent<T>({
       <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
         component="div"
-        count={itemsCount || -1}
+        count={itemsCount == null || itemsCount === undefined ? -1 : itemsCount}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePageProp}
