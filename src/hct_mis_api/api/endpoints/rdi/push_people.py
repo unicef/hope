@@ -175,6 +175,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
+            doc["photo"] = self.get_photo(doc.pop("image", None))
             self.save_document(ind, doc)
 
         for account in accounts:
