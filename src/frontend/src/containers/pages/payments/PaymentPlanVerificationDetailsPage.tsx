@@ -79,7 +79,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     isLoading,
     error,
   } = useQuery<PaymentVerificationPlanDetails>({
-    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryKey: ['PaymentVerificationPlanDetails', businessArea, paymentPlanId, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
         businessAreaSlug: businessArea,
@@ -225,7 +225,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
             <VerificationPlanDetails
               key={plan.id}
               verificationPlan={plan}
-              planNode={plan}
+              paymentPlanNode={paymentPlan}
             />
           ))
         : null}

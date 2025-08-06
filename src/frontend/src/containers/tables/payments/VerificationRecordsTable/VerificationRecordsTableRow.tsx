@@ -16,16 +16,18 @@ interface VerificationRecordsTableRowProps {
   payment: PaymentList;
   canViewRecordDetails: boolean;
   showStatusColumn?: boolean;
+  paymentPlanId?: string;
 }
 
 export function VerificationRecordsTableRow({
   payment,
   canViewRecordDetails,
+  paymentPlanId,
   showStatusColumn = true,
 }: VerificationRecordsTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
 
-  const linkPath = `/${baseUrl}/verification/payment/${payment.id}`;
+  const linkPath = `/${baseUrl}/payment-verification/payment-plan/${paymentPlanId}/verification/payment/${payment.id}`;
 
   return (
     <TableRow hover role="checkbox" key={payment.id}>
@@ -44,7 +46,7 @@ export function VerificationRecordsTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={payment.status}
+          status={payment.verification.status}
           statusToColor={verificationRecordsStatusToColor}
         />
       </TableCell>

@@ -10,6 +10,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PaymentVerificationTableProps {
   filter?;
@@ -50,7 +51,21 @@ function PaymentVerificationTable({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
-
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
   const {
     data: paymentPlansData,
     isLoading,
@@ -82,6 +97,7 @@ function PaymentVerificationTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      itemsCount={countData?.count}
       renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow
           key={paymentPlan.id}

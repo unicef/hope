@@ -181,6 +181,15 @@ export type PaymentVerificationPlanList = {
     programCycleStartDate: string;
     programCycleEndDate: string;
     verificationStatus: string;
+    /**
+     * Dispersion Start Date
+     */
+    dispersionStartDate?: string | null;
+    /**
+     * Dispersion End Date
+     */
+    dispersionEndDate?: string | null;
     readonly updatedAt: string;
+    programCycleTitle: string;
 };
 
