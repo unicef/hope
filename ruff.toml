@@ -4,7 +4,7 @@ exclude = ["src/frontend", "src/hct_mis_api/one_time_scripts"]
 
 [lint]
 select = [
-#    "A", # prevent using keywords that clobber python builtins
+    "A", # prevent using keywords that clobber python builtins
 #    "B", # bugbear: security warnings
 #    "BLE", # blind exceptions
     "C4", # flake8-comprehensions

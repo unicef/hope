@@ -30,19 +30,19 @@ def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
 
 @typing.no_type_check
 def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
-    min = None
-    max = None
+    minimum = None
+    maximum = None
     if obj.field_name == "age":
-        min = random.randint(1, 100)
-        max = random.randint(min, random.randint(min + 1, 116))
+        minimum = random.randint(1, 100)
+        maximum = random.randint(minimum, random.randint(minimum + 1, 116))
     if obj.field_name == "size":
-        min = random.randint(1, 5)
-        max = random.randint(min, random.randint(min + 1, 10))
+        minimum = random.randint(1, 5)
+        maximum = random.randint(minimum, random.randint(minimum + 1, 10))
     if obj.field_name == "residence_status":
         return [random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])]
     if obj.comparison_method == "RANGE" or obj.comparison_method == "NOT_IN_RANGE":
-        return [min, max]
-    return [min]
+        return [minimum, maximum]
+    return [minimum]
 
 
 class TargetingCriteriaRuleFilterFactory(DjangoModelFactory):

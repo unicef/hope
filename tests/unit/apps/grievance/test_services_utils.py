@@ -62,7 +62,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 class FlexibleAttribute:
     class objects:
         @staticmethod
-        def filter(type: Any) -> Any:
+        def filter(typology: Any) -> Any:
             return MagicMock()
 
 
