@@ -115,7 +115,6 @@ class ImportDataInstanceValidator:
         "national_passport_issuer_i_c": "national_passport_no_i_c",
         "tax_id_issuer_i_c": "tax_id_no_i_c",
         "other_id_issuer_i_c": "other_id_type_i_c",
-        # identities
         "scope_id_issuer_i_c": "scope_id_no_i_c",
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
