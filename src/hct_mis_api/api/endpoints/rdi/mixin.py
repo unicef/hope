@@ -101,6 +101,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             **member_data,
         )
         for doc in documents:
+            doc["photo"] = self.get_photo(doc.pop("image", None))
             self.save_document(ind, doc)
         for account in accounts:
             self.save_account(ind, account)
