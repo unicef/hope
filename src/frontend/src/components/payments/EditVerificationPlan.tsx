@@ -41,7 +41,7 @@ import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FullList } from '@restgenerated/models/FullList';
 import { RandomSampling } from '@restgenerated/models/RandomSampling';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
@@ -120,7 +120,7 @@ export const EditVerificationPlan = ({
   const { baseUrl, businessArea, programId: programSlug } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   // Helper function to prepare mutation data
   const prepareUpdateMutationData = (
     tab: number,
@@ -188,6 +188,17 @@ export const EditVerificationPlan = ({
           requestBody: requestData,
         },
       ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
+    },
   });
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
@@ -232,7 +243,7 @@ export const EditVerificationPlan = ({
   });
 
   const rapidProFlows = rapidProFlowsData
-    ? { allRapidProFlows: rapidProFlowsData.results }
+    ? { allRapidProFlows: rapidProFlowsData }
     : null;
   const loadRapidProFlows = refetchRapidProFlows;
 

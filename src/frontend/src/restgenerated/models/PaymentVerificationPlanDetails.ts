@@ -19,6 +19,14 @@ export type PaymentVerificationPlanDetails = {
     paymentVerificationPlans: Array<PaymentVerificationPlan>;
     paymentVerificationSummary: PaymentVerificationSummary;
     /**
+     * Payment Plan start date
+     */
+    startDate?: string | null;
+    /**
+     * Payment Plan end date
+     */
+    endDate?: string | null;
+    /**
      * Follow Up Payment Plan flag [sys]
      */
     isFollowUp?: boolean;

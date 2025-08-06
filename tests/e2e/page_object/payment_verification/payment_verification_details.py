@@ -51,6 +51,9 @@ class PaymentVerificationDetails(BaseComponents):
     buttonFinish = 'button[data-cy="button-ed-plan"]'
     rows = 'tr[role="checkbox"]'
     buttonDiscard = 'button[data-cy="button-discard-plan"]'
+    ageMinInput = 'input[data-cy="input-filterAgeMin"]'
+    ageMaxInput = 'input[data-cy="input-filterAgeMax"]'
+    sexSelect = 'div[data-cy="select-filterSex"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -196,3 +199,12 @@ class PaymentVerificationDetails(BaseComponents):
     def getRows(self) -> [WebElement]:
         self.wait_for(self.rows)
         return self.get_elements(self.rows)
+
+    def getAgeMinInput(self) -> WebElement:
+        return self.wait_for(self.ageMinInput)
+
+    def getAgeMaxInput(self) -> WebElement:
+        return self.wait_for(self.ageMaxInput)
+
+    def getSexSelect(self) -> WebElement:
+        return self.wait_for(self.sexSelect)

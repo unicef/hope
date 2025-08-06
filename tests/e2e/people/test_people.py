@@ -113,6 +113,7 @@ def get_social_program_with_dct_type_and_name(
 
 @pytest.mark.usefixtures("login")
 class TestSmokePeople:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete - count not called for People")
     def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()

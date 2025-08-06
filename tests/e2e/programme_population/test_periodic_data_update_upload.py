@@ -137,10 +137,10 @@ def add_pdu_data_to_xlsx(
     for row_index, row in enumerate(rows):
         for col_index, value in enumerate(row):
             ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
-    with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-        wb.save(tmp_file.name)
-        tmp_file.seek(0)
-        return tmp_file
+    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")  # noqa: SIM115
+    wb.save(tmp_file.name)
+    tmp_file.seek(0)
+    return tmp_file
 
 
 def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _TemporaryFileWrapper:

@@ -1,6 +1,9 @@
 import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
+
+from hct_mis_api.apps.core.services.rapid_pro.api import TokenNotProvided
+
 from urllib.parse import urlencode
 
 from django.urls import reverse
@@ -1886,3 +1889,17 @@ class TestSurveyViewSet:
         results_ids = [survey["id"] for survey in results]
         assert str(self.srv.id) in results_ids
         assert str(self.srv_2.id) in results_ids
+
+    def test_get_available_flows_no_token(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        with (
+            patch(
+                "hct_mis_api.apps.accountability.api.views.RapidProAPI.__init__",
+                MagicMock(side_effect=TokenNotProvided),
+            ),
+        ):
+            response = self.client.get(self.url_flows)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == ["Token is not provided."]
