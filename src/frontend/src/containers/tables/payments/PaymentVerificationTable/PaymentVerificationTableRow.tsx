@@ -10,9 +10,10 @@ import {
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 
 interface PaymentVerificationTableRowProps {
-  plan: any;
+  plan: PaymentVerificationPlanList;
   canViewDetails: boolean;
 }
 
@@ -44,7 +45,7 @@ export function PaymentVerificationTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={plan?.paymentVerificationSummary?.status}
+          status={plan?.verificationStatus}
           statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>
@@ -56,7 +57,7 @@ export function PaymentVerificationTableRow({
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left" data-cy="cycle-title">
-        {plan?.programCycle?.title || '-'}
+        {plan?.programCycleTitle || '-'}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>
