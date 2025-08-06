@@ -10,7 +10,7 @@ class TemplateConfig(AppConfig):
 
 
 class Config(SmartConfig):
-    default_site = "hct_mis_api.apps.administration.site.HopeAdminSite"
+    default_site = "hct_mis_api.apps.administration.admin_site.HopeAdminSite"
 
     def ready(self) -> None:
         super().ready()

@@ -128,15 +128,15 @@ def unique_slugify(
 
     # Find a unique slug. If one matches, at '-2' to the end and try again
     # (then '-3', etc).
-    next = 2
+    next_value = 2
     while not slug or queryset.filter(**{slug_field_name: slug}):
         slug = original_slug
-        end = f"{slug_separator}{next}"
+        end = f"{slug_separator}{next_value}"
         if slug_len and len(slug) + len(end) > slug_len:
             slug = slug[: slug_len - len(end)]
             slug = _slug_strip(slug, slug_separator)
         slug = f"{slug}{end}"
-        next += 1
+        next_value += 1
 
     setattr(instance, slug_field.attname, slug)
 

@@ -3,7 +3,7 @@ import importlib
 import logging
 import sys
 import traceback
-from builtins import __build_class__
+from builtins import __build_class__  # noqa
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
