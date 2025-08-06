@@ -113,6 +113,11 @@ urlpatterns = [
                         ]
                     ),
                 ),
+                path(
+                    "rdi/<uuid:rdi>/push/lax/individuals",
+                    endpoints.rdi.CreateLaxIndividuals().as_view(),
+                    name="rdi-push-lax-individuals",
+                ),
             ]
         ),
     ),
