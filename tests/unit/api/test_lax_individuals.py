@@ -1,3 +1,6 @@
+import base64
+from pathlib import Path
+
 from django.core.management import call_command
 
 from extras.test_utils.factories.household import DocumentTypeFactory
@@ -12,6 +15,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    PendingDocument,
     PendingIndividual,
 )
 from hct_mis_api.apps.payment.models import AccountType
@@ -28,6 +32,9 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         super().setUpTestData()
         call_command("loadcountries")
         call_command("loadcountrycodes")
+
+        image = Path(__file__).parent / "logo.png"
+        cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
 
         cls.document_type = DocumentTypeFactory(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
@@ -227,3 +234,63 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         response = self.client.post(self.url, [individual_data], format="json")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, str(response.json()))
+
+    def test_create_individual_with_photo(self) -> None:
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "observed_disability": "NONE",
+            "marital_status": "SINGLE",
+            "photo": self.base64_encoded_data,
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        self.assertEqual(response.data["processed"], 1)
+        self.assertEqual(response.data["accepted"], 1)
+        self.assertEqual(response.data["errors"], 0)
+
+        individual = PendingIndividual.objects.get(individual_id="IND001")
+        self.assertIsNotNone(individual.photo)
+        self.assertTrue(individual.photo.name.startswith("photo"))
+        self.assertTrue(individual.photo.name.endswith(".png"))
+
+    def test_create_individual_with_document_image(self) -> None:
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "observed_disability": "NONE",
+            "marital_status": "SINGLE",
+            "documents": [
+                {
+                    "type": self.document_type.key,
+                    "country": "AF",
+                    "document_number": "DOC123456",
+                    "issuance_date": "2020-01-01",
+                    "expiry_date": "2030-01-01",
+                    "image": self.base64_encoded_data,
+                }
+            ],
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        self.assertEqual(response.data["processed"], 1)
+        self.assertEqual(response.data["accepted"], 1)
+        self.assertEqual(response.data["errors"], 0)
+
+        individual = PendingIndividual.objects.get(individual_id="IND001")
+        document = PendingDocument.objects.get(individual=individual)
+        self.assertIsNotNone(document.photo)
+        self.assertTrue(document.photo.name.startswith("photo"))
+        self.assertTrue(document.photo.name.endswith(".png"))

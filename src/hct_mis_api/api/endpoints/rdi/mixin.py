@@ -45,7 +45,7 @@ class DocumentMixin:
     def save_document(member: PendingIndividual, doc: Dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
+            photo=doc["photo"],
             individual=member,
             country=Country.objects.get(iso_code2=doc["country"]),
             type=DocumentType.objects.get(key=doc["type"]),
