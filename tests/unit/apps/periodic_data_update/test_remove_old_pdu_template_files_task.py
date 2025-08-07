@@ -15,7 +15,7 @@ from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
 
 pytestmark = pytest.mark.django_db
 
@@ -33,7 +33,7 @@ class TestRemoveOldPDUTemplateFilesTask:
         self._create_file(self.pdu_template2, days_ago=35)  # Old file
         self._create_file(self.pdu_template3, days_ago=40)  # Older file
 
-    def _create_file(self, pdu_template: PeriodicDataUpdateTemplate, days_ago: int) -> None:
+    def _create_file(self, pdu_template: PeriodicDataUpdateXlsxTemplate, days_ago: int) -> None:
         filename = f"Test File {pdu_template.pk}.xlsx"
         file_content = b"Test content"
         with NamedTemporaryFile(delete=False) as file_temp:
@@ -48,7 +48,7 @@ class TestRemoveOldPDUTemplateFilesTask:
             file=ContentFile(file_content, filename),
         )
         pdu_template.file = file
-        pdu_template.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        pdu_template.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         pdu_template.save()
 
     def test_remove_old_pdu_template_files_task(self, afghanistan: BusinessAreaFactory) -> None:
@@ -58,9 +58,9 @@ class TestRemoveOldPDUTemplateFilesTask:
         assert self.pdu_template2.file is not None  # Older than 30 days
         assert self.pdu_template3.file is not None  # Older than 30 days
 
-        assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        assert self.pdu_template2.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        assert self.pdu_template3.status == PeriodicDataUpdateTemplate.Status.EXPORTED
+        assert self.pdu_template1.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template2.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template3.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
 
         remove_old_pdu_template_files_task()
 
@@ -72,9 +72,9 @@ class TestRemoveOldPDUTemplateFilesTask:
         assert self.pdu_template2.file is None  # Older than 30 days
         assert self.pdu_template3.file is None  # Older than 30 days
 
-        assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        assert self.pdu_template2.status == PeriodicDataUpdateTemplate.Status.TO_EXPORT
-        assert self.pdu_template3.status == PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        assert self.pdu_template1.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template2.status == PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
+        assert self.pdu_template3.status == PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
 
         assert self.pdu_template1.can_export is False
         assert self.pdu_template2.can_export is True

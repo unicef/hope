@@ -30,8 +30,8 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PeriodicDataUpdateXlsxTemplate,
+    PeriodicDataUpdateXlsxUpload,
 )
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
@@ -130,7 +130,7 @@ def create_flexible_attribute(
 
 
 def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]
+    periodic_data_update_template: PeriodicDataUpdateXlsxTemplate, rows: list[list[Any]]
 ) -> _TemporaryFileWrapper:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     ws_pdu = wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
@@ -144,7 +144,7 @@ def add_pdu_data_to_xlsx(
 
 
 def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _TemporaryFileWrapper:
-    periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+    periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.create(
         program=program,
         business_area=program.business_area,
         filters={},
@@ -194,8 +194,8 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
-        periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        periodic_data_update_upload = PeriodicDataUpdateXlsxUpload.objects.first()
+        assert periodic_data_update_upload.status == PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
@@ -241,8 +241,8 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
         pageIndividuals.getStatusContainer()
-        periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        periodic_data_update_upload = PeriodicDataUpdateXlsxUpload.objects.first()
+        assert periodic_data_update_upload.status == PeriodicDataUpdateXlsxUpload.Status.FAILED
         assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
@@ -261,7 +261,7 @@ class TestPeriodicDataUpdateUpload:
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.create(
             program=program,
             business_area=program.business_area,
             filters={},
@@ -308,7 +308,7 @@ class TestPeriodicDataUpdateUpload:
         periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
+            status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
             filters={},
             rounds_data=[
                 {
@@ -321,7 +321,7 @@ class TestPeriodicDataUpdateUpload:
         )
         pdu_upload = PeriodicDataUpdateUploadFactory(
             template=periodic_data_update_template,
-            status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+            status=PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL,
         )
         pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()

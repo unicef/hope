@@ -36,8 +36,8 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PeriodicDataUpdateXlsxTemplate,
+    PeriodicDataUpdateXlsxUpload,
 )
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
@@ -198,13 +198,13 @@ class TestPeoplePeriodicDataUpdateUpload:
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
         for i in range(5):
-            periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-            if periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL:
+            periodic_data_update_upload = PeriodicDataUpdateXlsxUpload.objects.first()
+            if periodic_data_update_upload.status == PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL:
                 break
             pageIndividuals.screenshot(i)
             sleep(1)
         else:
-            assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+            assert periodic_data_update_upload.status == PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
@@ -247,8 +247,8 @@ class TestPeoplePeriodicDataUpdateUpload:
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
         pageIndividuals.getStatusContainer()
-        periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        periodic_data_update_upload = PeriodicDataUpdateXlsxUpload.objects.first()
+        assert periodic_data_update_upload.status == PeriodicDataUpdateXlsxUpload.Status.FAILED
         assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
@@ -270,7 +270,7 @@ class TestPeoplePeriodicDataUpdateUpload:
         periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
+            status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
             filters={},
             rounds_data=[
                 {
@@ -283,7 +283,7 @@ class TestPeoplePeriodicDataUpdateUpload:
         )
         pdu_upload = PeriodicDataUpdateUploadFactory(
             template=periodic_data_update_template,
-            status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+            status=PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL,
         )
         pagePeople.selectGlobalProgramFilter(program.name)
         pagePeople.getNavPeople().click()

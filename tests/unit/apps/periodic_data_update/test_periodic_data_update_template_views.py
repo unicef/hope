@@ -26,7 +26,7 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
 
 pytestmark = pytest.mark.django_db
 
@@ -430,14 +430,14 @@ class TestPeriodicDataUpdateTemplateViews:
         assert response.status_code == status.HTTP_201_CREATED
 
         response_json = response.json()
-        assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).exists()
-        template = PeriodicDataUpdateTemplate.objects.get(id=response_json["id"])
+        assert PeriodicDataUpdateXlsxTemplate.objects.filter(id=response_json["id"]).exists()
+        template = PeriodicDataUpdateXlsxTemplate.objects.get(id=response_json["id"])
         assert template.program == self.program1
         assert template.business_area == self.afghanistan
         assert template.rounds_data == expected_result
         assert template.filters == data["filters"]
-        assert template.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).first().file is not None
+        assert template.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+        assert PeriodicDataUpdateXlsxTemplate.objects.filter(id=response_json["id"]).first().file is not None
 
     def test_create_periodic_data_update_template_duplicate_field(
         self,
@@ -517,7 +517,7 @@ class TestPeriodicDataUpdateTemplateViews:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
         self.pdu_template1.save()
 
         response = self.client.post(self.url_export_pdu_template_program1)
@@ -541,7 +541,7 @@ class TestPeriodicDataUpdateTemplateViews:
             self.program1,
         )
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
         self.pdu_template1.file = None
         self.pdu_template1.save()
 
@@ -549,7 +549,7 @@ class TestPeriodicDataUpdateTemplateViews:
         assert response.status_code == status.HTTP_200_OK
 
         self.pdu_template1.refresh_from_db()
-        assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
+        assert self.pdu_template1.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         assert self.pdu_template1.file is not None
 
     def test_export_periodic_data_update_template_already_exporting(
@@ -566,7 +566,7 @@ class TestPeriodicDataUpdateTemplateViews:
             self.program1,
         )
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTING
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTING
         self.pdu_template1.file = None
         self.pdu_template1.save()
 
@@ -597,7 +597,7 @@ class TestPeriodicDataUpdateTemplateViews:
             file=ContentFile(b"Test content", f"Test File {self.pdu_template1.pk}.xlsx"),
         )
         self.pdu_template1.file = file
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         self.pdu_template1.save()
 
         response = self.client.post(self.url_export_pdu_template_program1)
@@ -648,7 +648,7 @@ class TestPeriodicDataUpdateTemplateViews:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
 
         file = FileTemp.objects.create(
             object_id=self.pdu_template1.pk,
@@ -657,7 +657,7 @@ class TestPeriodicDataUpdateTemplateViews:
             file=ContentFile(b"Test content", f"Test File {self.pdu_template1.pk}.xlsx"),
         )
         self.pdu_template1.file = file
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         self.pdu_template1.save()
 
         response = self.client.get(self.url_download_pdu_template_program1)
@@ -688,14 +688,14 @@ class TestPeriodicDataUpdateTemplateViews:
             file=ContentFile(b"Test content", f"Test File {self.pdu_template1.pk}.xlsx"),
         )
         self.pdu_template1.file = file
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         self.pdu_template1.save()
 
         response = self.client.get(self.url_download_pdu_template_program1)
         assert response.status_code == status.HTTP_200_OK
 
         self.pdu_template1.refresh_from_db()
-        assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
+        assert self.pdu_template1.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         assert isinstance(response, FileResponse) is True
         assert f'filename="{file.file.name}"' in response["Content-Disposition"]
         assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -715,7 +715,7 @@ class TestPeriodicDataUpdateTemplateViews:
             self.program1,
         )
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
         self.pdu_template1.save()
 
         response = self.client.get(self.url_download_pdu_template_program1)
@@ -738,7 +738,7 @@ class TestPeriodicDataUpdateTemplateViews:
             self.program1,
         )
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         self.pdu_template1.number_of_records = 0
         self.pdu_template1.save()
 
@@ -762,7 +762,7 @@ class TestPeriodicDataUpdateTemplateViews:
             self.program1,
         )
 
-        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
         self.pdu_template1.number_of_records = 1
         self.pdu_template1.file = None
         self.pdu_template1.save()

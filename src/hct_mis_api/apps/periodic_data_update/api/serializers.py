@@ -10,8 +10,8 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PeriodicDataUpdateXlsxTemplate,
+    PeriodicDataUpdateXlsxUpload,
 )
 from hct_mis_api.apps.program.models import Program
 
@@ -23,7 +23,7 @@ class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
     can_export = serializers.BooleanField()
 
     class Meta:
-        model = PeriodicDataUpdateTemplate
+        model = PeriodicDataUpdateXlsxTemplate
         fields = (
             "id",
             "number_of_records",
@@ -37,7 +37,7 @@ class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
 
 class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateTemplate
+        model = PeriodicDataUpdateXlsxTemplate
         fields = (
             "id",
             "rounds_data",
@@ -52,7 +52,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
-    def create(self, validated_data: dict[str, Any]) -> PeriodicDataUpdateTemplate:
+    def create(self, validated_data: dict[str, Any]) -> PeriodicDataUpdateXlsxTemplate:
         validated_data["created_by"] = self.context["request"].user
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         program_slug = self.context["request"].parser_context["kwargs"]["program_slug"]
@@ -64,7 +64,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
 
 class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateTemplate
+        model = PeriodicDataUpdateXlsxTemplate
         fields = (
             "id",
             "rounds_data",
@@ -77,7 +77,7 @@ class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
-        model = PeriodicDataUpdateUpload
+        model = PeriodicDataUpdateXlsxUpload
         fields = (
             "id",
             "template",
@@ -95,7 +95,7 @@ class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
     errors_info = serializers.JSONField(source="errors")
 
     class Meta:
-        model = PeriodicDataUpdateUpload
+        model = PeriodicDataUpdateXlsxUpload
         fields = (
             "id",
             "template",
@@ -109,7 +109,7 @@ class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
 
 class PeriodicDataUpdateUploadSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateUpload
+        model = PeriodicDataUpdateXlsxUpload
         fields = ("file",)
 
 
