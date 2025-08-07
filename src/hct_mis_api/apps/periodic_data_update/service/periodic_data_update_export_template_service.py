@@ -24,7 +24,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
 
 
 class PeriodicDataUpdateExportTemplateService:
@@ -33,7 +33,7 @@ class PeriodicDataUpdateExportTemplateService:
     META_ID_ADDRESS = "B1"
     PROPERTY_ID_NAME = "pdu_template_id"
 
-    def __init__(self, periodic_data_update_template: PeriodicDataUpdateTemplate):
+    def __init__(self, periodic_data_update_template: PeriodicDataUpdateXlsxTemplate):
         self.periodic_data_update_template = periodic_data_update_template
         self.rounds_data = periodic_data_update_template.rounds_data
         self.program = periodic_data_update_template.program
@@ -66,7 +66,7 @@ class PeriodicDataUpdateExportTemplateService:
                         self.ws_pdu.append(row)
                 return self.wb
         except Exception:
-            self.periodic_data_update_template.status = PeriodicDataUpdateTemplate.Status.FAILED
+            self.periodic_data_update_template.status = PeriodicDataUpdateXlsxTemplate.Status.FAILED
             self.periodic_data_update_template.save()
             raise
 
@@ -82,7 +82,7 @@ class PeriodicDataUpdateExportTemplateService:
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
             self.periodic_data_update_template.file = xlsx_obj
-            self.periodic_data_update_template.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+            self.periodic_data_update_template.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
             self.periodic_data_update_template.save()
 
     def _create_workbook(self) -> openpyxl.Workbook:

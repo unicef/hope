@@ -12,8 +12,8 @@ import openpyxl
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PeriodicDataUpdateXlsxTemplate,
+    PeriodicDataUpdateXlsxUpload,
 )
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
@@ -93,21 +93,21 @@ def validation_error_to_json(
 
 
 class PeriodicDataUpdateImportService:
-    def __init__(self, periodic_data_update_upload: PeriodicDataUpdateUpload) -> None:
+    def __init__(self, periodic_data_update_upload: PeriodicDataUpdateXlsxUpload) -> None:
         self.periodic_data_update_upload = periodic_data_update_upload
         self.periodic_data_update_template = self.periodic_data_update_upload.template
         self.file = self.periodic_data_update_upload.file
 
     def import_data(self) -> None:
         try:
-            self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.PROCESSING
+            self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.PROCESSING
             self.periodic_data_update_upload.save()
             with transaction.atomic():
                 self._open_workbook()
                 self._read_flexible_attributes()
                 cleaned_data_list, form_errors = self._read_rows()
                 if form_errors:
-                    self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.FAILED
+                    self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.FAILED
                     self.periodic_data_update_upload.error_message = json.dumps(
                         {
                             "form_errors": form_errors,
@@ -118,10 +118,10 @@ class PeriodicDataUpdateImportService:
                     return
                 self._update_individuals(cleaned_data_list)
                 self.file.close()
-                self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.SUCCESSFUL
+                self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL
                 self.periodic_data_update_upload.save()
         except ValidationError as e:
-            self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.FAILED
+            self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.FAILED
             self.periodic_data_update_upload.error_message = json.dumps(
                 {
                     "non_form_errors": validation_error_to_json(e),
@@ -135,11 +135,11 @@ class PeriodicDataUpdateImportService:
         self.wb = openpyxl.load_workbook(self.file)
         self.ws_pdu = self.wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
         self.ws_meta = self.wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        self.periodic_data_update_template_id: PeriodicDataUpdateTemplate | None = None
+        self.periodic_data_update_template_id: PeriodicDataUpdateXlsxTemplate | None = None
         self.flexible_attributes_dict: dict[str, FlexibleAttribute] | None = None
 
     @classmethod
-    def read_periodic_data_update_template_object(cls, file: File) -> PeriodicDataUpdateTemplate:
+    def read_periodic_data_update_template_object(cls, file: File) -> PeriodicDataUpdateXlsxTemplate:
         wb = openpyxl.load_workbook(file)  # type: ignore
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
         try:
@@ -163,7 +163,7 @@ class PeriodicDataUpdateImportService:
         if type(periodic_data_update_template_id) is not int:
             raise ValidationError("Periodic Data Update Template ID must be an integer")
 
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.filter(
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.filter(
             id=periodic_data_update_template_id
         ).first()
         if not periodic_data_update_template:

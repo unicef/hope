@@ -37,8 +37,8 @@ from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicFieldSerializer,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PeriodicDataUpdateXlsxTemplate,
+    PeriodicDataUpdateXlsxUpload,
 )
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
@@ -55,7 +55,7 @@ class PeriodicDataUpdateTemplateViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PeriodicDataUpdateTemplate.objects.all()
+    queryset = PeriodicDataUpdateXlsxTemplate.objects.all()
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateTemplateListSerializer,
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
@@ -87,7 +87,7 @@ class PeriodicDataUpdateTemplateViewSet(
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pdu_template = self.get_object()
 
-        if pdu_template.status == PeriodicDataUpdateTemplate.Status.EXPORTING:
+        if pdu_template.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTING:
             raise ValidationError("Template is already being exported")
         if pdu_template.file:
             raise ValidationError("Template is already exported")
@@ -99,12 +99,12 @@ class PeriodicDataUpdateTemplateViewSet(
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         pdu_template = self.get_object()
 
-        if pdu_template.status != PeriodicDataUpdateTemplate.Status.EXPORTED:
+        if pdu_template.status != PeriodicDataUpdateXlsxTemplate.Status.EXPORTED:
             raise ValidationError("Template is not exported yet")
         if not pdu_template.number_of_records:
             raise ValidationError("Template has no records")
         if not pdu_template.file:
-            logger.warning(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
+            logger.warning(f"XLSX File not found. PeriodicDataUpdateXlsxTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
 
         return FileResponse(
@@ -122,7 +122,7 @@ class PeriodicDataUpdateUploadViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PeriodicDataUpdateUpload.objects.all()
+    queryset = PeriodicDataUpdateXlsxUpload.objects.all()
     program_model_field = "template__program"
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,

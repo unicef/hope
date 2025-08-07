@@ -8,8 +8,8 @@ from django.db import transaction
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PeriodicDataUpdateXlsxTemplate,
+    PeriodicDataUpdateXlsxUpload,
 )
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) -> bool:
-    periodic_data_update_upload = PeriodicDataUpdateUpload.objects.get(id=periodic_data_update_upload_id)
+    periodic_data_update_upload = PeriodicDataUpdateXlsxUpload.objects.get(id=periodic_data_update_upload_id)
     service = PeriodicDataUpdateImportService(periodic_data_update_upload)
     service.import_data()
     return True
@@ -40,7 +40,7 @@ def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) 
 @log_start_and_end
 @sentry_tags
 def export_periodic_data_update_export_template_service(self: Any, periodic_data_update_template_id: str) -> bool:
-    periodic_data_update_template = PeriodicDataUpdateTemplate.objects.get(id=periodic_data_update_template_id)
+    periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.get(id=periodic_data_update_template_id)
     service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
     service.generate_workbook()
     service.save_xlsx_file()
@@ -56,12 +56,12 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
         with transaction.atomic():
             days = datetime.datetime.now() - datetime.timedelta(days=expiration_days)
             file_qs = FileTemp.objects.filter(
-                content_type=get_content_type_for_model(PeriodicDataUpdateTemplate), created__lt=days
+                content_type=get_content_type_for_model(PeriodicDataUpdateXlsxTemplate), created__lt=days
             )
             if file_qs:
                 # update status
-                templates_qs = PeriodicDataUpdateTemplate.objects.filter(file__in=file_qs).all()
-                templates_qs.update(status=PeriodicDataUpdateTemplate.Status.TO_EXPORT)
+                templates_qs = PeriodicDataUpdateXlsxTemplate.objects.filter(file__in=file_qs).all()
+                templates_qs.update(status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT)
                 templates_qs.update(curr_async_result_id=None)
                 # increase cache version, as it is a bulk action
                 for business_area_slug, program_id in templates_qs.values_list("business_area__slug", "program_id"):

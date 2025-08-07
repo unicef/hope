@@ -18,7 +18,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -128,10 +128,10 @@ class TestPeriodicDataTemplates:
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.create(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
+            status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
             filters={},
             rounds_data=[
                 {
@@ -174,7 +174,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateTemplate.Status.EXPORTED,
+            status=PeriodicDataUpdateXlsxTemplate.Status.EXPORTED,
             number_of_records=10,
             filters={},
             rounds_data=[
@@ -230,10 +230,10 @@ class TestPeriodicDataTemplates:
                 "number_of_records": 0,
             }
         ]
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.create(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
+            status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
             filters={},
             rounds_data=rounds_data,
         )
@@ -286,8 +286,8 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
         pagePeriodicDataUpdateTemplates.getNewTemplateButton()  # wait for the page to load
-        assert PeriodicDataUpdateTemplate.objects.count() == 1
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.first()
+        assert PeriodicDataUpdateXlsxTemplate.objects.count() == 1
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.first()
         assert (
             str(periodic_data_update_template.id)
             in pagePeriodicDataUpdateTemplates.getTemplateId(periodic_data_update_template.id).text
