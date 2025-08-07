@@ -14,7 +14,7 @@ class SimilarityPair:
 
 @dataclasses.dataclass
 class DeduplicationSetData:
-    state: str  # "Clean", "Dirty", "Processing", "Error"
+    state: str  # "Clean", "Dirty"
 
 
 @dataclasses.dataclass

@@ -3,16 +3,16 @@ from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.utils import generate_cache_key
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):

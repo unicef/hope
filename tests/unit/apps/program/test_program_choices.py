@@ -1,4 +1,5 @@
-from hct_mis_api.apps.account.fixtures import UserFactory
+from extras.test_utils.factories.account import UserFactory
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 
 

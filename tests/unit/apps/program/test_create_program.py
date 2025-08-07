@@ -1,29 +1,29 @@
 from typing import Any, List
 
 import freezegun
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     BusinessAreaPartnerThrough,
     DataCollectingType,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

@@ -1247,6 +1247,8 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   femaleAdultsCount: Scalars['Int']['output'];
   femaleChildrenCount: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
+  flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean']['output'];
+  flagExcludeIfOnSanctionList: Scalars['Boolean']['output'];
   followUps: PaymentPlanNodeConnection;
   fsp?: Maybe<FinancialServiceProviderNode>;
   fundsCommitments: FundsCommitmentItemNodeConnection;
@@ -1264,6 +1266,7 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   paymentVerificationPlans: PaymentVerificationPlanNodeConnection;
   paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>;
   programCycle: ProgramCycleNode;
+  rules: Array<TargetingCriteriaRuleNode>;
   sourcePaymentPlan?: Maybe<PaymentPlanNode>;
   startDate?: Maybe<Scalars['DateTime']['output']>;
   status: PaymentPlanStatus;
@@ -1273,7 +1276,6 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   steficonRuleTargeting?: Maybe<RuleCommitNode>;
   steficonTargetingAppliedDate?: Maybe<Scalars['DateTime']['output']>;
   surveys: SurveyNodeConnection;
-  targetingCriteria: TargetingCriteriaNode;
   totalDeliveredQuantity?: Maybe<Scalars['Float']['output']>;
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalEntitledQuantity?: Maybe<Scalars['Float']['output']>;
@@ -4341,14 +4343,18 @@ export type PaymentPlanNode = Node & {
   femaleAdultsCount: Scalars['Int']['output'];
   femaleChildrenCount: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
+  flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean']['output'];
+  flagExcludeIfOnSanctionList: Scalars['Boolean']['output'];
   followUps: PaymentPlanNodeConnection;
   fspCommunicationChannel?: Maybe<Scalars['String']['output']>;
   fundsCommitments?: Maybe<FundsCommitmentNode>;
   hasFspDeliveryMechanismXlsxTemplate?: Maybe<Scalars['Boolean']['output']>;
   hasPaymentListExportFile?: Maybe<Scalars['Boolean']['output']>;
+  householdIds?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   importedFileDate?: Maybe<Scalars['DateTime']['output']>;
   importedFileName?: Maybe<Scalars['String']['output']>;
+  individualIds?: Maybe<Scalars['String']['output']>;
   internalData: Scalars['JSONString']['output'];
   isCashAssist: Scalars['Boolean']['output'];
   isFollowUp: Scalars['Boolean']['output'];
@@ -4364,6 +4370,7 @@ export type PaymentPlanNode = Node & {
   program?: Maybe<ProgramNode>;
   programCycle: ProgramCycleNode;
   reconciliationSummary?: Maybe<ReconciliationSummaryNode>;
+  rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>;
   sourcePaymentPlan?: Maybe<PaymentPlanNode>;
   splitChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   startDate?: Maybe<Scalars['Date']['output']>;
@@ -4375,7 +4382,6 @@ export type PaymentPlanNode = Node & {
   steficonTargetingAppliedDate?: Maybe<Scalars['DateTime']['output']>;
   supportingDocuments?: Maybe<Array<Maybe<PaymentPlanSupportingDocumentNode>>>;
   surveys: SurveyNodeConnection;
-  targetingCriteria: TargetingCriteriaNode;
   totalDeliveredQuantity?: Maybe<Scalars['Float']['output']>;
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalEntitledQuantity?: Maybe<Scalars['Float']['output']>;
@@ -7060,19 +7066,6 @@ export type TargetingCollectorRuleFilterBlockObjectType = {
   collectorBlockFilters?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
 };
 
-export type TargetingCriteriaNode = {
-  __typename?: 'TargetingCriteriaNode';
-  createdAt: Scalars['DateTime']['output'];
-  flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean']['output'];
-  flagExcludeIfOnSanctionList: Scalars['Boolean']['output'];
-  householdIds?: Maybe<Scalars['String']['output']>;
-  id: Scalars['UUID']['output'];
-  individualIds?: Maybe<Scalars['String']['output']>;
-  paymentPlan?: Maybe<PaymentPlanNode>;
-  rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
 export type TargetingCriteriaObjectType = {
   flagExcludeIfActiveAdjudicationTicket?: InputMaybe<Scalars['Boolean']['input']>;
   flagExcludeIfOnSanctionList?: InputMaybe<Scalars['Boolean']['input']>;
@@ -7128,7 +7121,7 @@ export type TargetingCriteriaRuleNode = {
   id: Scalars['UUID']['output'];
   individualIds: Scalars['String']['output'];
   individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockNode>>>;
-  targetingCriteria: TargetingCriteriaNode;
+  paymentPlan: PaymentPlanNode;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -9242,7 +9235,7 @@ export type PaymentPlanQueryVariables = Exact<{
 }>;
 
 
-export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, version: any, unicefId?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, canCreateFollowUp?: boolean | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, exchangeRate?: number | null, fspCommunicationChannel?: string | null, canExportXlsx?: boolean | null, canDownloadXlsx?: boolean | null, canSendXlsxPassword?: boolean | null, excludedIds?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, adminUrl?: string | null, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, canCreateXlsxWithFspAuthCode?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason?: string | null, excludeHouseholdError?: string | null, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, availableFundsCommitments?: Array<{ __typename?: 'FundsCommitmentNode', fundsCommitmentNumber?: string | null, fundsCommitmentItems?: Array<{ __typename?: 'FundsCommitmentItemNode', id: string, fundsCommitmentItem: string, recSerialNumber: number, paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null> | null } | null> | null, fundsCommitments?: { __typename?: 'FundsCommitmentNode', fundsCommitmentNumber?: string | null, insufficientAmount?: boolean | null, fundsCommitmentItems?: Array<{ __typename?: 'FundsCommitmentItemNode', id: string, fundsCommitmentItem: string, recSerialNumber: number, wbsElement?: string | null, grantNumber?: string | null, currencyCode?: string | null, commitmentAmountLocal?: number | null, commitmentAmountUsd?: number | null, totalOpenAmountLocal?: number | null, totalOpenAmountUsd?: number | null, sponsor?: string | null, sponsorName?: string | null, fund?: string | null, fundsCenter?: string | null } | null> | null } | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, programCycle: { __typename?: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, isSocialWorkerProgram?: boolean | null, screenBeneficiary?: boolean | null } | null, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null, supportingDocuments?: Array<{ __typename?: 'PaymentPlanSupportingDocumentNode', id: string, title: string, file: string } | null> | null, targetingCriteria: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } } | null };
+export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, version: any, unicefId?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, canCreateFollowUp?: boolean | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, exchangeRate?: number | null, fspCommunicationChannel?: string | null, canExportXlsx?: boolean | null, canDownloadXlsx?: boolean | null, canSendXlsxPassword?: boolean | null, excludedIds?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, adminUrl?: string | null, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, canCreateXlsxWithFspAuthCode?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason?: string | null, excludeHouseholdError?: string | null, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, availableFundsCommitments?: Array<{ __typename?: 'FundsCommitmentNode', fundsCommitmentNumber?: string | null, fundsCommitmentItems?: Array<{ __typename?: 'FundsCommitmentItemNode', id: string, fundsCommitmentItem: string, recSerialNumber: number, paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null> | null } | null> | null, fundsCommitments?: { __typename?: 'FundsCommitmentNode', fundsCommitmentNumber?: string | null, insufficientAmount?: boolean | null, fundsCommitmentItems?: Array<{ __typename?: 'FundsCommitmentItemNode', id: string, fundsCommitmentItem: string, recSerialNumber: number, wbsElement?: string | null, grantNumber?: string | null, currencyCode?: string | null, commitmentAmountLocal?: number | null, commitmentAmountUsd?: number | null, totalOpenAmountLocal?: number | null, totalOpenAmountUsd?: number | null, sponsor?: string | null, sponsorName?: string | null, fund?: string | null, fundsCenter?: string | null } | null> | null } | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, programCycle: { __typename?: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, isSocialWorkerProgram?: boolean | null, screenBeneficiary?: boolean | null } | null, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null, supportingDocuments?: Array<{ __typename?: 'PaymentPlanSupportingDocumentNode', id: string, title: string, file: string } | null> | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null };
 
 export type AllPaymentsForTableQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9875,7 +9868,7 @@ export type TargetPopulationQueryVariables = Exact<{
 }>;
 
 
-export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds?: string | null, exclusionReason?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } } | null };
+export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds?: string | null, exclusionReason?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null };
 
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
@@ -17274,65 +17267,18 @@ export const PaymentPlanDocument = gql`
       title
       file
     }
-    targetingCriteria {
+    flagExcludeIfActiveAdjudicationTicket
+    flagExcludeIfOnSanctionList
+    householdIds
+    individualIds
+    rules {
       __typename
       id
-      flagExcludeIfActiveAdjudicationTicket
-      flagExcludeIfOnSanctionList
       householdIds
       individualIds
-      rules {
+      individualsFiltersBlocks {
         __typename
-        id
-        householdIds
-        individualIds
-        individualsFiltersBlocks {
-          __typename
-          individualBlockFilters {
-            __typename
-            id
-            fieldName
-            flexFieldClassification
-            roundNumber
-            arguments
-            comparisonMethod
-            fieldAttribute {
-              __typename
-              id
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-              pduData {
-                id
-                subtype
-                numberOfRounds
-                roundsNames
-              }
-            }
-          }
-        }
-        collectorsFiltersBlocks {
-          __typename
-          id
-          createdAt
-          updatedAt
-          collectorBlockFilters {
-            __typename
-            id
-            createdAt
-            updatedAt
-            fieldName
-            comparisonMethod
-            flexFieldClassification
-            arguments
-            labelEn
-          }
-        }
-        householdsFiltersBlocks {
+        individualBlockFilters {
           __typename
           id
           fieldName
@@ -17356,6 +17302,49 @@ export const PaymentPlanDocument = gql`
               numberOfRounds
               roundsNames
             }
+          }
+        }
+      }
+      collectorsFiltersBlocks {
+        __typename
+        id
+        createdAt
+        updatedAt
+        collectorBlockFilters {
+          __typename
+          id
+          createdAt
+          updatedAt
+          fieldName
+          comparisonMethod
+          flexFieldClassification
+          arguments
+          labelEn
+        }
+      }
+      householdsFiltersBlocks {
+        __typename
+        id
+        fieldName
+        flexFieldClassification
+        roundNumber
+        arguments
+        comparisonMethod
+        fieldAttribute {
+          __typename
+          id
+          name
+          labelEn
+          type
+          choices {
+            value
+            labelEn
+          }
+          pduData {
+            id
+            subtype
+            numberOfRounds
+            roundsNames
           }
         }
       }
@@ -21379,65 +21368,18 @@ export const TargetPopulationDocument = gql`
       firstName
       lastName
     }
-    targetingCriteria {
+    flagExcludeIfActiveAdjudicationTicket
+    flagExcludeIfOnSanctionList
+    householdIds
+    individualIds
+    rules {
       __typename
       id
-      flagExcludeIfActiveAdjudicationTicket
-      flagExcludeIfOnSanctionList
       householdIds
       individualIds
-      rules {
+      individualsFiltersBlocks {
         __typename
-        id
-        householdIds
-        individualIds
-        individualsFiltersBlocks {
-          __typename
-          individualBlockFilters {
-            __typename
-            id
-            fieldName
-            flexFieldClassification
-            roundNumber
-            arguments
-            comparisonMethod
-            fieldAttribute {
-              __typename
-              id
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-              pduData {
-                id
-                subtype
-                numberOfRounds
-                roundsNames
-              }
-            }
-          }
-        }
-        collectorsFiltersBlocks {
-          __typename
-          id
-          createdAt
-          updatedAt
-          collectorBlockFilters {
-            __typename
-            id
-            createdAt
-            updatedAt
-            fieldName
-            comparisonMethod
-            flexFieldClassification
-            arguments
-            labelEn
-          }
-        }
-        householdsFiltersBlocks {
+        individualBlockFilters {
           __typename
           id
           fieldName
@@ -21461,6 +21403,49 @@ export const TargetPopulationDocument = gql`
               numberOfRounds
               roundsNames
             }
+          }
+        }
+      }
+      collectorsFiltersBlocks {
+        __typename
+        id
+        createdAt
+        updatedAt
+        collectorBlockFilters {
+          __typename
+          id
+          createdAt
+          updatedAt
+          fieldName
+          comparisonMethod
+          flexFieldClassification
+          arguments
+          labelEn
+        }
+      }
+      householdsFiltersBlocks {
+        __typename
+        id
+        fieldName
+        flexFieldClassification
+        roundNumber
+        arguments
+        comparisonMethod
+        fieldAttribute {
+          __typename
+          id
+          name
+          labelEn
+          type
+          choices {
+            value
+            labelEn
+          }
+          pduData {
+            id
+            subtype
+            numberOfRounds
+            roundsNames
           }
         }
       }
@@ -21964,7 +21949,6 @@ export type ResolversTypes = {
   TargetingCollectorBlockRuleFilterNode: ResolverTypeWrapper<TargetingCollectorBlockRuleFilterNode>;
   TargetingCollectorRuleFilterBlockNode: ResolverTypeWrapper<TargetingCollectorRuleFilterBlockNode>;
   TargetingCollectorRuleFilterBlockObjectType: TargetingCollectorRuleFilterBlockObjectType;
-  TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>;
   TargetingCriteriaObjectType: TargetingCriteriaObjectType;
   TargetingCriteriaRuleFilterComparisonMethod: TargetingCriteriaRuleFilterComparisonMethod;
   TargetingCriteriaRuleFilterFlexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification;
@@ -22388,7 +22372,6 @@ export type ResolversParentTypes = {
   TargetingCollectorBlockRuleFilterNode: TargetingCollectorBlockRuleFilterNode;
   TargetingCollectorRuleFilterBlockNode: TargetingCollectorRuleFilterBlockNode;
   TargetingCollectorRuleFilterBlockObjectType: TargetingCollectorRuleFilterBlockObjectType;
-  TargetingCriteriaNode: TargetingCriteriaNode;
   TargetingCriteriaObjectType: TargetingCriteriaObjectType;
   TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode;
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType;
@@ -23137,6 +23120,8 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
+  flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodeFollowUpsArgs>>;
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
   fundsCommitments?: Resolver<ResolversTypes['FundsCommitmentItemNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodeFundsCommitmentsArgs>>;
@@ -23154,6 +23139,7 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   paymentVerificationPlans?: Resolver<ResolversTypes['PaymentVerificationPlanNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodePaymentVerificationPlansArgs>>;
   paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>;
   programCycle?: Resolver<ResolversTypes['ProgramCycleNode'], ParentType, ContextType>;
+  rules?: Resolver<Array<ResolversTypes['TargetingCriteriaRuleNode']>, ParentType, ContextType>;
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   startDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>;
@@ -23163,7 +23149,6 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   steficonRuleTargeting?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>;
   steficonTargetingAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodeSurveysArgs>>;
-  targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -24482,14 +24467,18 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
+  flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeFollowUpsArgs>>;
   fspCommunicationChannel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fundsCommitments?: Resolver<Maybe<ResolversTypes['FundsCommitmentNode']>, ParentType, ContextType>;
   hasFspDeliveryMechanismXlsxTemplate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   hasPaymentListExportFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  householdIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   importedFileDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   importedFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  individualIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   internalData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   isCashAssist?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -24505,6 +24494,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   programCycle?: Resolver<ResolversTypes['ProgramCycleNode'], ParentType, ContextType>;
   reconciliationSummary?: Resolver<Maybe<ResolversTypes['ReconciliationSummaryNode']>, ParentType, ContextType>;
+  rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>;
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   splitChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
@@ -24516,7 +24506,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   steficonTargetingAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   supportingDocuments?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentPlanSupportingDocumentNode']>>>, ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeSurveysArgs>>;
-  targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25571,19 +25560,6 @@ export type TargetingCollectorRuleFilterBlockNodeResolvers<ContextType = any, Pa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  householdIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
-  individualIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
-  rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleFilterNode'] = ResolversParentTypes['TargetingCriteriaRuleFilterNode']> = {
   arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>;
   comparisonMethod?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterComparisonMethod'], ParentType, ContextType>;
@@ -25606,7 +25582,7 @@ export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType ext
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
   individualIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   individualsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>>, ParentType, ContextType>;
-  targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>;
+  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -26503,7 +26479,6 @@ export type Resolvers<ContextType = any> = {
   TableTotalCashTransferredForPeople?: TableTotalCashTransferredForPeopleResolvers<ContextType>;
   TargetingCollectorBlockRuleFilterNode?: TargetingCollectorBlockRuleFilterNodeResolvers<ContextType>;
   TargetingCollectorRuleFilterBlockNode?: TargetingCollectorRuleFilterBlockNodeResolvers<ContextType>;
-  TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>;
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>;
   TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>;
   TargetingIndividualBlockRuleFilterNode?: TargetingIndividualBlockRuleFilterNodeResolvers<ContextType>;

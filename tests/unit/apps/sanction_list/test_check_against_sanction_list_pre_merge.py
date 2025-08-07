@@ -5,23 +5,23 @@ from django.test import TestCase
 
 import pytest
 from constance.test import override_config
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from strategy_field.utils import fqn
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory,
-    DocumentTypeFactory,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.sanction_list.models import SanctionList
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (

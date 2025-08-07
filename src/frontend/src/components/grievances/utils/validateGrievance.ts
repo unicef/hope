@@ -5,12 +5,9 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
-
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
-
-// TODO MB ADD NEEDS ADJ TICKETS REQUIRED CATEGORY
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function validate(
@@ -91,9 +88,7 @@ export function validate(
         !values.individualDataUpdateFieldsIdentities?.length &&
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
-        !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsAccounts?.length &&
-        !values.individualDataUpdateAccountsToEdit?.length
+        !values.individualDataUpdateIdentitiesToEdit?.length
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
@@ -163,16 +158,6 @@ export function validate(
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
-            }
-          });
-      }
-      if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
-        values.individualDataUpdateFieldsAccountsToEdit
-          .filter((el) => el)
-          .forEach((doc) => {
-            if (!doc.number) {
-              errors.individualDataUpdateFieldsAccountsToEdit =
-                'Number is required';
             }
           });
       }
@@ -398,17 +383,47 @@ export function validateUsingSteps(
           },
         );
       }
-      if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
-        values.individualDataUpdateFieldsAccountsToEdit.forEach(
-          (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsAccountsToEdit[index];
-            if (!doc.number) {
-              errors.individualDataUpdateFieldsAccountsToEdit =
-                'Number is required';
+      if (values.individualDataUpdateFieldsAccounts?.length) {
+        values.individualDataUpdateFieldsAccounts
+          .filter((el) => el)
+          .forEach((acc) => {
+            if (!acc.number) {
+              errors.individualDataUpdateFieldsAccounts =
+                'Account Number is required';
             }
-          },
-        );
+            if (!acc.name) {
+              errors.individualDataUpdateFieldsAccounts =
+                'Account Type is required';
+            }
+            if (!acc.financial_institution) {
+              errors.individualDataUpdateFieldsAccounts =
+                'Account Financial Institution is required';
+            }
+            acc.dynamicFields?.forEach((field) => {
+              if (!field.key || !field.value) {
+                errors.individualDataUpdateFieldsAccounts = 'New Account fields need to have both key/value';
+              }
+            });
+          });
+      }
+      if (values.individualDataUpdateAccountsToEdit?.length) {
+        values.individualDataUpdateAccountsToEdit
+          .filter((el) => el)
+          .forEach((acc) => {
+            if (!acc.number) {
+              errors.individualDataUpdateAccountsToEdit =
+                'Account Number is required';
+            }
+            if (!acc.financial_institution) {
+              errors.individualDataUpdateAccountsToEdit =
+                'Account Financial Institution is required';
+            }
+            acc.dynamicFields?.forEach((field) => {
+              if (!field.key || !field.value) {
+                errors.individualDataUpdateFieldsAccounts = 'Edited Account fields need to have both key/value';
+              }
+            });
+          });
       }
     }
   }

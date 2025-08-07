@@ -240,9 +240,8 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str, file_pk: str) -> bool:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.services.payment_plan_services import (
             PaymentPlanService,
@@ -251,7 +250,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
-            service = XlsxPaymentPlanImportPerFspService(payment_plan, FileTemp.objects.get(pk=file_pk).file)
+            file_xlsx = payment_plan.reconciliation_import_file.file
+            service = XlsxPaymentPlanImportPerFspService(payment_plan, file_xlsx)
             service.open_workbook()
             with transaction.atomic():
                 service.import_payment_list()

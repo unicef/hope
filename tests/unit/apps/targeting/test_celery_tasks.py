@@ -2,13 +2,13 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 class CreateTPFromListTaskTest(TestCase):
@@ -17,12 +17,10 @@ class CreateTPFromListTaskTest(TestCase):
         self.user = UserFactory()
         self.program = ProgramFactory()
         self.program_cycle = ProgramCycleFactory(program=self.program)
-        self.targeting_criteria = TargetingCriteriaFactory()
         self.form_data = {
             "action": "create",
             "name": "Test TP",
             "target_field": "unicef_id",
-            "targeting_criteria": self.targeting_criteria.pk,
             "separator": ",",
             "criteria": "123,333",
             "program_cycle": self.program_cycle.pk,
@@ -36,7 +34,6 @@ class CreateTPFromListTaskTest(TestCase):
         mock_form.cleaned_data = {
             "name": "Test TP",
             "target_field": "unicef_id",
-            "targeting_criteria": self.targeting_criteria,
             "separator": ",",
             "criteria": ["123,333"],
             "program_cycle": self.program_cycle,
@@ -48,7 +45,6 @@ class CreateTPFromListTaskTest(TestCase):
         payment_plan = PaymentPlan.objects.get(name="Test TP")
 
         mock_create_payments.assert_called_once_with(payment_plan)
-        self.assertEqual(payment_plan.targeting_criteria, self.targeting_criteria)
         self.assertEqual(payment_plan.business_area, self.program.business_area)
         self.assertEqual(payment_plan.program_cycle, self.program_cycle)
         self.assertEqual(payment_plan.created_by, self.user)

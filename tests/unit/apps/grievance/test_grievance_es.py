@@ -7,12 +7,14 @@ from django.conf import settings
 from django.core.management import call_command
 
 from elasticsearch import Elasticsearch
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
+from unit.conftest import disabled_locally_test
 
-from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.constants import (
     PRIORITY_HIGH,
@@ -21,8 +23,6 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from tests.unit.conftest import disabled_locally_test
 
 
 def execute_test_es_query(query_dict: Dict) -> List[str]:

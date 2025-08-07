@@ -4,12 +4,14 @@ from unittest.mock import MagicMock, patch
 from django.test import TestCase
 from django.utils import timezone
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
     BROTHER_SISTER,
@@ -24,8 +26,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestRecalculateData(TestCase):

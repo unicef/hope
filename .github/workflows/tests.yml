@@ -242,7 +242,7 @@ jobs:
         continue-on-error: true
         with:
           name: report
-          path: ./tests/selenium/output_data/
+          path: ./tests/e2e/output_data/
           retention-days: 5
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

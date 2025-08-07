@@ -1,17 +1,17 @@
 from typing import Any
 
 import pytest
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Household, PendingIndividual
 from hct_mis_api.apps.program.collision_detectors import (
     IdentificationKeyCollisionDetector,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 

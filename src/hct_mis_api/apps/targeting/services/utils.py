@@ -1,65 +1,46 @@
 import logging
-from typing import TYPE_CHECKING, Dict
+from typing import Dict, Type, Union
 
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
 
-if TYPE_CHECKING:  # pragma: no cover
-    from hct_mis_api.apps.program.models import Program
-
-
 logger = logging.getLogger(__name__)
 
 
-def get_unicef_ids(ids_string: str, type_id: str, program: "Program") -> str:
-    list_ids = []
-    ids_list = ids_string.split(",")
-    ids_list = [i.strip() for i in ids_list]
-    if type_id == "household":
-        hh_ids = [hh_id for hh_id in ids_list if hh_id.startswith("HH")]
-        list_ids = (
-            Household.objects.filter(unicef_id__in=hh_ids, program=program)
-            .order_by("unicef_id")
-            .values_list("unicef_id", flat=True)
-        )
-    if type_id == "individual":
-        ind_ids = [ind_id for ind_id in ids_list if ind_id.startswith("IND")]
-        list_ids = (
-            Individual.objects.filter(unicef_id__in=ind_ids, program=program)
-            .order_by("unicef_id")
-            .values_list("unicef_id", flat=True)
-        )
-
-    return ", ".join(list_ids)
+def get_existing_unicef_ids(ids_string: str, model: Union[Type[Household], Type[Individual]], program: Program) -> str:
+    ids_list = [i.strip() for i in ids_string.split(",")]
+    return ", ".join(
+        model.objects.filter(unicef_id__in=ids_list, program=program)
+        .order_by("unicef_id")
+        .values_list("unicef_id", flat=True)
+    )
 
 
-def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: "Program") -> TargetingCriteria:
-    rules = targeting_criteria_input.pop("rules", [])
-
-    targeting_criteria = TargetingCriteria(**targeting_criteria_input)
-    targeting_criteria.save()
-
-    for rule in rules:
+def from_input_to_targeting_criteria(
+    targeting_criteria_input: Dict, program: "Program", payment_plan: PaymentPlan
+) -> None:
+    for rule in targeting_criteria_input.pop("rules", []):
         household_ids = rule.get("household_ids", "")
         individual_ids = rule.get("individual_ids", "")
         households_filters_blocks = rule.get("households_filters_blocks", [])
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
         collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
         if household_ids:
-            household_ids = get_unicef_ids(household_ids, "household", program)
+            household_ids = get_existing_unicef_ids(household_ids, Household, program)
         if individual_ids:
-            individual_ids = get_unicef_ids(individual_ids, "individual", program)
+            individual_ids = get_existing_unicef_ids(individual_ids, Individual, program)
 
         tc_rule = TargetingCriteriaRule(
-            targeting_criteria=targeting_criteria, household_ids=household_ids, individual_ids=individual_ids
+            payment_plan=payment_plan, household_ids=household_ids, individual_ids=individual_ids
         )
         tc_rule.save()
         for hh_filter in households_filters_blocks:
@@ -83,5 +64,3 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: "P
                     collector_block_filters=collector_block, **collectors_filter
                 )
                 collector_block_filters.save()
-
-    return targeting_criteria

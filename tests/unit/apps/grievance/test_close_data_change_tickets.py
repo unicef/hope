@@ -5,18 +5,10 @@ from typing import Any, List
 from django.core.management import call_command
 
 import pytest
-from flaky import flaky
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
     TicketDeleteHouseholdDetailsFactory,
@@ -24,12 +16,26 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketHouseholdDataUpdateDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
 )
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from flaky import flaky
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -42,13 +48,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    AccountFactory,
-    FinancialInstitutionFactory,
-    generate_delivery_mechanisms,
-)
 from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
