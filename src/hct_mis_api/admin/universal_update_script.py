@@ -119,9 +119,9 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         "saved_logs",
         "logs_property",
         "backup_snapshot",
-        "task_status",
+        "task_statuses",
         "template_file",
-        "curr_async_result_id",
+        "celery_tasks_results_ids",
     )
     fieldsets = (
         (
@@ -132,8 +132,8 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
                     "template_file",
                     "update_file",
                     "unicef_ids",
-                    "task_status",
-                    "curr_async_result_id",
+                    "task_statuses",
+                    "celery_tasks_results_ids",
                 ),
             },
         ),
@@ -169,10 +169,10 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
 
     logs_property.short_description = "Live Logs"
 
-    def task_status(self, obj: UniversalUpdate) -> str:
-        return obj.celery_status or "-"
+    def task_statuses(self, obj: UniversalUpdate) -> dict:
+        return obj.celery_statuses
 
-    task_status.short_description = "Task Status"
+    task_statuses.short_description = "Task Statuses"
 
     @staticmethod
     def start_universal_update_task_visible(btn: Button) -> bool:

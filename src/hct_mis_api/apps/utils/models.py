@@ -4,7 +4,6 @@ import json
 import logging
 import sys
 import warnings
-from functools import cached_property
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -586,6 +585,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     @classmethod
     def purge(cls) -> None:
         app.control.purge()
+
+    @property
+    def celery_statuses(self) -> dict[str, str]:
+        return {name: self.get_celery_status(name) for name in self.celery_task_names}
 
 
 class InternalDataFieldModel(models.Model):
