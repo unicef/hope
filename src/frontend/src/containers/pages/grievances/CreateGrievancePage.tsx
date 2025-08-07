@@ -71,9 +71,11 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
+
 function EmptyComponent(): ReactElement {
   return null;
 }
+
 function FormikSelectedEntitiesSync({
   fetchedHousehold,
   fetchedIndividual,
@@ -123,43 +125,40 @@ const CreateGrievancePage = (): ReactElement => {
   const selectedHousehold = location.state?.selectedHousehold;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
-  const shouldFetchHousehold =
+  const shouldFetchHousehold = Boolean(
     selectedHousehold &&
-    (typeof selectedHousehold === 'string' ||
-      typeof selectedHousehold === 'number');
-
+      (typeof selectedHousehold === 'string' ||
+        typeof selectedHousehold === 'number'),
+  );
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
       queryKey: ['household', businessArea, programId, selectedHousehold],
-      queryFn: shouldFetchHousehold
-        ? () =>
-            RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-              businessAreaSlug: businessArea,
-              programSlug: programId,
-              id: String(selectedHousehold),
-            })
-        : undefined,
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: String(selectedHousehold),
+        }),
       enabled: shouldFetchHousehold,
     });
   const selectedIndividual = location.state?.selectedIndividual;
 
   // Fetch full individual object if selectedIndividual is an ID (string/number)
-  const shouldFetchIndividual =
+  const shouldFetchIndividual = Boolean(
     selectedIndividual &&
-    (typeof selectedIndividual === 'string' ||
-      typeof selectedIndividual === 'number');
+      (typeof selectedIndividual === 'string' ||
+        typeof selectedIndividual === 'number'),
+  );
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
     useQuery({
       queryKey: ['individual', businessArea, programId, selectedIndividual],
-      queryFn: shouldFetchIndividual
-        ? () =>
-            RestService.restBusinessAreasProgramsIndividualsRetrieve({
-              businessAreaSlug: businessArea,
-              programSlug: programId,
-              id: String(selectedIndividual),
-            })
-        : undefined,
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: String(selectedIndividual),
+        }),
       enabled: shouldFetchIndividual,
     });
   const category = location.state?.category;
@@ -201,21 +200,10 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { mutateAsync, isPending: loading } = useMutation({
     mutationFn: (requestData: CreateGrievanceTicket) => {
-      // Check for files in requestData
-      const hasFile = (obj: any): boolean => {
-        if (obj instanceof File) return true;
-        if (Array.isArray(obj)) return obj.some(hasFile);
-        if (obj && typeof obj === 'object')
-          return Object.values(obj).some(hasFile);
-        return false;
-      };
-      const payload = hasFile(requestData)
-        ? grievanceRequestToFormData(requestData)
-        : requestData;
-
+      console.log(requestData);
       return RestService.restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug: businessArea,
-        formData: payload as any,
+        formData: requestData as any,
       });
     },
   });
