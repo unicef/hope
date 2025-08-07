@@ -378,6 +378,9 @@ class KoboImportedSubmission(models.Model):
         on_delete=models.CASCADE,
     )
 
+    def __str__(self):
+        return f"{self.kobo_submission_uuid} ({self.kobo_asset_id})"
+
 
 class DeduplicationEngineSimilarityPair(models.Model):
     class StatusCode(models.TextChoices):
@@ -411,6 +414,9 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 check=models.Q(individual1__lt=models.F("individual2")), name="individual1_lt_individual2"
             ),
         ]
+
+    def __str__(self):
+        return f"{self.program} - {self.individual1} / {self.individual2}"
 
     @classmethod
     def remove_pairs(cls, deduplication_set_id: str) -> None:

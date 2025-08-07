@@ -284,14 +284,14 @@ class PeriodicDataUpdateImportService:
 
     def _build_form(self) -> type[forms.Form]:
         form_fields_dict: dict[str, forms.Field] = {}
-        for round in self.periodic_data_update_template.rounds_data:
-            flexible_attribute = self.flexible_attributes_dict.get(round["field"])
+        for value in self.periodic_data_update_template.rounds_data:
+            flexible_attribute = self.flexible_attributes_dict.get(value["field"])
             if not flexible_attribute:
                 raise ValidationError(f"Flexible Attribute for field {round['field']} not found")
-            form_fields_dict[f"{round['field']}__round_number"] = forms.IntegerField()
-            form_fields_dict[f"{round['field']}__round_name"] = forms.CharField(required=False)
-            form_fields_dict[f"{round['field']}__round_value"] = self._get_form_field_for_value(flexible_attribute)
-            form_fields_dict[f"{round['field']}__collection_date"] = StrictDateField(required=False)
+            form_fields_dict[f"{value['field']}__round_number"] = forms.IntegerField()
+            form_fields_dict[f"{value['field']}__round_name"] = forms.CharField(required=False)
+            form_fields_dict[f"{value['field']}__round_value"] = self._get_form_field_for_value(flexible_attribute)
+            form_fields_dict[f"{value['field']}__collection_date"] = StrictDateField(required=False)
 
         return type("PeriodicDataUpdateForm", (PeriodicDataUpdateBaseForm,), form_fields_dict)
 

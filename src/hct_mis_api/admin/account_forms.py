@@ -27,8 +27,14 @@ class RoleAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = account_models.RoleAssignment
-        fields = "__all__"
+        model = account_models.Role
+        fields = (
+            "name",
+            "subsystem",
+            "permissions",
+            "is_visible_on_ui",
+            "is_available_for_partner",
+        )
 
 
 class RoleAssignmentAdminForm(forms.ModelForm):
@@ -37,7 +43,15 @@ class RoleAssignmentAdminForm(forms.ModelForm):
 
     class Meta:
         model = account_models.RoleAssignment
-        fields = "__all__"
+        fields = (
+            "business_area",
+            "user",
+            "partner",
+            "role",
+            "program",
+            "expiry_date",
+            "group",
+        )
 
     def clean(self) -> None:
         super().clean()
