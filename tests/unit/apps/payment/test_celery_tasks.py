@@ -18,8 +18,8 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.celery_tasks import (
+from hope.apps.core.models import FileTemp
+from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
@@ -27,13 +27,13 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.utils import generate_cache_key
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.payment.utils import generate_cache_key
+from hope.apps.steficon.models import Rule
 
 
 class TestPaymentCeleryTask(TestCase):
@@ -59,7 +59,7 @@ class TestPaymentCeleryTask(TestCase):
                 },
             },
             "loggers": {
-                "hct_mis_api.apps.payment.celery_tasks": {
+                "hope.apps.payment.celery_tasks": {
                     "handlers": ["console"],
                     "level": "INFO",
                     "propagate": False,
@@ -68,7 +68,7 @@ class TestPaymentCeleryTask(TestCase):
         }
         logging.config.dictConfig(self.TEST_LOGGING)
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.logger")
     def test_prepare_payment_plan_task_wrong_pp_status(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
@@ -82,7 +82,7 @@ class TestPaymentCeleryTask(TestCase):
         self.assertFalse(result)
         mock_logger.info.assert_called_with("The Payment Plan must have the status TP_OPEN.")
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.logger")
     def test_prepare_payment_plan_task_already_running(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_OPEN,
@@ -106,9 +106,9 @@ class TestPaymentCeleryTask(TestCase):
             f"Task prepare_payment_plan_task with payment_plan_id {pp_id_str} already running."
         )
 
-    @patch("hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
-    @patch("hct_mis_api.apps.payment.celery_tasks.prepare_payment_plan_task.retry")
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.prepare_payment_plan_task.retry")
     def test_prepare_payment_plan_task_exception_handling(
         self, mock_retry: Mock, mock_logger: Mock, mock_create_payments: Mock
     ) -> None:
@@ -152,8 +152,8 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_COMPLETED)
 
-    @patch("hct_mis_api.apps.steficon.models.RuleCommit.execute")
-    @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
+    @patch("hope.apps.steficon.models.RuleCommit.execute")
+    @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
     def test_payment_plan_apply_steficon_hh_selection_exception_handling(
         self, mock_retry: Mock, mock_rule_execute: Mock
     ) -> None:
@@ -178,7 +178,7 @@ class TestPaymentCeleryTask(TestCase):
         self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_ERROR)
 
     @patch(
-        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        "hope.apps.payment.models.PaymentPlan.get_exchange_rate",
         return_value=2.0,
     )
     def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
@@ -193,8 +193,8 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan_rebuild_stats(pp_id_str)
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.update_population_count_fields")
-    @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
+    @patch("hope.apps.payment.models.PaymentPlan.update_population_count_fields")
+    @patch("hope.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
     def test_payment_plan_rebuild_stats_exception_handling(
         self, mock_retry: Mock, mock_update_population_count_fields: Mock
     ) -> None:
@@ -227,8 +227,8 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
 
-    @patch("hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
-    @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_full_rebuild.retry")
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+    @patch("hope.apps.payment.celery_tasks.payment_plan_full_rebuild.retry")
     def test_payment_plan_full_rebuild_retry_exception_handling(
         self, mock_retry: Mock, mock_full_rebuild: Mock
     ) -> None:
@@ -273,7 +273,7 @@ class TestPaymentCeleryTask(TestCase):
         self.assertIsNotNone(file_obj.password)
         self.assertIsNotNone(file_obj.xlsx_password)
 
-    @patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @patch("hope.apps.payment.notifications.MailjetClient.send_email")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password(self, mock_mailjet_send: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.FINISHED,
@@ -303,8 +303,8 @@ class TestPaymentCeleryTask(TestCase):
             2,
         )
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
-    @patch("hct_mis_api.apps.payment.celery_tasks.get_user_model")
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.get_user_model")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:

@@ -14,13 +14,13 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.core.utils import encode_id_base64
+from hope.apps.household.models import Household, Individual
+from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
+from hope.apps.payment.models import PaymentPlan
 
 
 class TestExcludeHouseholds(APITestCase):
@@ -85,7 +85,7 @@ class TestExcludeHouseholds(APITestCase):
             parent=cls.another_payment_plan, household=cls.household_4, excluded=False, currency="PLN"
         )
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_payment_with_wrong_hh_ids(self, get_exchange_rate_mock: Any) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
@@ -171,7 +171,7 @@ class TestExcludeHouseholds(APITestCase):
         error_msg = f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_successfully(self, get_exchange_rate_mock: Any) -> None:
         self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
         self.payment_plan.save(update_fields=["background_action_status"])
@@ -196,7 +196,7 @@ class TestExcludeHouseholds(APITestCase):
         # excluded hh_1, hh_2
         self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {hh_unicef_id_1, hh_unicef_id_2})
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_individuals_people_program(self, get_exchange_rate_mock: Any) -> None:
         people_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
         beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)

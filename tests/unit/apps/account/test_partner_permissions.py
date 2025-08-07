@@ -6,16 +6,16 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import (
+from hope.apps.account.models import (
     AdminAreaLimitedTo,
     Role,
     RoleAssignment,
     User,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.geo.models import Area
+from hope.apps.program.models import Program
 
 
 class UserPartnerTest(TestCase):

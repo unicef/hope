@@ -5,13 +5,13 @@ import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory
 
-from hct_mis_api.admin.rule import RuleAdmin
-from hct_mis_api.admin.rule_commit import RuleCommitAdmin
+from hope.admin.rule import RuleAdmin
+from hope.admin.rule_commit import RuleCommitAdmin
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.config import settings
+from hope.apps.account.models import User
+from hope.apps.household.models import Household
+from hope.apps.steficon.models import Rule
+from hope.config import settings
 
 CODE = """
 class SteficonConfig:

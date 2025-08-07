@@ -6,8 +6,8 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.household.models import Household, Individual
+from hope.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
@@ -15,7 +15,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from hct_mis_api.apps.targeting.services.utils import (
+from hope.apps.targeting.services.utils import (
     from_input_to_targeting_criteria,
     get_existing_unicef_ids,
 )

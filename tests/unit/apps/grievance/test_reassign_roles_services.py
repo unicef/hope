@@ -5,19 +5,19 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestReassignRolesOnUpdate(APITestCase):

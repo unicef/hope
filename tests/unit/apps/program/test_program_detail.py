@@ -17,10 +17,10 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import Partner
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

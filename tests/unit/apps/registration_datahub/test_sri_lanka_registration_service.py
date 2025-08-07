@@ -13,10 +13,10 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,
     PendingDocument,
@@ -24,8 +24,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
 

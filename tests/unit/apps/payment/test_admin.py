@@ -15,7 +15,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
+from hope.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 
 @pytest.fixture(autouse=True)
@@ -45,8 +45,8 @@ class SyncWithPaymentGatewayTest(TestCase):
             parent=self.payment_plan,
         )
 
-    @patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_payment_plan")
-    @patch("hct_mis_api.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
+    @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_payment_plan")
+    @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
     def test_payment_plan_post_sync_with_payment_gateway(self: Any, mock_perm: Any, mock_sync: Any) -> None:
         url = reverse("admin:payment_paymentplan_sync_with_payment_gateway", args=[self.payment_plan.pk])
         response = self.client.post(url)
@@ -58,7 +58,7 @@ class SyncWithPaymentGatewayTest(TestCase):
             response["Location"],
         )
 
-    @patch("hct_mis_api.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
+    @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
     def test_payment_plan_get_sync_with_payment_gateway_confirmation(self: Any, mock_perm: Any) -> None:
         url = reverse("admin:payment_paymentplan_sync_with_payment_gateway", args=[self.payment_plan.pk])
         response = self.client.get(url)
@@ -66,8 +66,8 @@ class SyncWithPaymentGatewayTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway?")
 
-    @patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_record")
-    @patch("hct_mis_api.admin.payment_plan.has_payment_pg_sync_permission", return_value=True)
+    @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_record")
+    @patch("hope.admin.payment_plan.has_payment_pg_sync_permission", return_value=True)
     def test_payment_post_sync_with_payment_gateway(self: Any, mock_perm: Any, mock_sync: Any) -> None:
         url = reverse("admin:payment_payment_sync_with_payment_gateway", args=[self.payment.pk])
         response = self.client.post(url)
@@ -79,7 +79,7 @@ class SyncWithPaymentGatewayTest(TestCase):
             response["Location"],
         )
 
-    @patch("hct_mis_api.admin.payment_plan.has_payment_pg_sync_permission", return_value=True)
+    @patch("hope.admin.payment_plan.has_payment_pg_sync_permission", return_value=True)
     def test_payment_get_sync_with_payment_gateway_confirmation(self: Any, mock_perm: Any) -> None:
         url = reverse("admin:payment_payment_sync_with_payment_gateway", args=[self.payment.pk])
         response = self.client.get(url)

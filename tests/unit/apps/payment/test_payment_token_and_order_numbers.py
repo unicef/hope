@@ -7,11 +7,11 @@ from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+from hope.apps.geo.models import Country
+from hope.apps.household.models import Household
+from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.payment.validators import payment_token_and_order_number_validator
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     check_if_token_or_order_number_exists_per_program,
     generate_token_and_order_numbers,
 )

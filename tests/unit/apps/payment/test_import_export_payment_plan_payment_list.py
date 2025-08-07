@@ -27,22 +27,22 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework.exceptions import ValidationError
 
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import (
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import (
     BusinessArea,
     DataCollectingType,
     FileTemp,
     FlexibleAttribute,
 )
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Document,
     Household,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -51,19 +51,19 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import to_decimal
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     XlsxPaymentPlanExportPerFspService,
 )
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
     XlsxPaymentPlanExportService,
 )
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
+from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
 
@@ -174,7 +174,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service.validate()
         self.assertIn(error_msg, service.errors)
 
-    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
+    @patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         not_excluded_payments = self.payment_plan.eligible_payments.all()
@@ -193,7 +193,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service.validate()
         self.assertEqual(service.errors, [])
 
-        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
+        with patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
             mock.return_value = {}
             service.import_payment_list()
         payment_1.refresh_from_db()
@@ -274,7 +274,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                     file_list_fsp,
                 )
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 

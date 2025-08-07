@@ -7,11 +7,11 @@ from extras.test_utils.factories.household import HouseholdFactory, create_house
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import Partner, User
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.household.models import Household
+from hope.apps.program.models import Program
 
 
 class TestHouseholdRegistrationIdTrigger(APITestCase):

@@ -6,12 +6,12 @@ from extras.test_utils.factories.accountability import FeedbackFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.accountability.models import Message
-from hct_mis_api.apps.accountability.services.feedback_crud_services import (
+from hope.apps.accountability.models import Message
+from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
-from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hct_mis_api.apps.program.models import Program
+from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

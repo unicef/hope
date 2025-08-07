@@ -16,10 +16,10 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo.models import Country
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -29,8 +29,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.generic_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
 

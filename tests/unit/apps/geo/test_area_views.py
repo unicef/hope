@@ -21,8 +21,8 @@ from extras.test_utils.factories.geo import (
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hope.apps.account.permissions import Permissions
+from hope.apps.geo.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db()
 
