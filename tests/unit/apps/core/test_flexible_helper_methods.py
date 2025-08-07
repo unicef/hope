@@ -7,7 +7,7 @@ from django.test import TestCase
 import xlrd
 from xlrd.sheet import Cell
 
-from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
+from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
 
 
 class TestFlexibleHelperMethods(TestCase):
@@ -68,7 +68,7 @@ class TestFlexibleHelperMethods(TestCase):
             ],
             None,
         )
-        for arg, expected_value in zip(args, expected_values):
+        for arg, expected_value in zip(args, expected_values, strict=True):
             returned_value = self.importer._get_model_fields(arg)
             self.assertEqual(returned_value, expected_value)
 

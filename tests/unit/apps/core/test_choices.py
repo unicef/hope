@@ -6,7 +6,7 @@ from django.urls import reverse
 import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 
-from hct_mis_api.apps.core.languages import LANGUAGES, Languages
+from hope.apps.core.languages import LANGUAGES, Languages
 
 pytestmark = pytest.mark.django_db
 

@@ -6,8 +6,8 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.contrib.aurora.celery_tasks import extract_records_task
-from hct_mis_api.contrib.aurora.models import Record
+from hope.contrib.aurora.celery_tasks import extract_records_task
+from hope.contrib.aurora.models import Record
 
 
 class TestExtractRecords(TestCase):

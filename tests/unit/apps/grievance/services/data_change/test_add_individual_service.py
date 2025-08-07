@@ -16,11 +16,11 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.grievance.services.data_change.add_individual_service import (
+from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
-from hct_mis_api.apps.household.models import SINGLE, Document, Individual
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.household.models import SINGLE, Document, Individual
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

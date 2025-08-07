@@ -29,10 +29,10 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
-from hct_mis_api.apps.household.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FlexibleAttribute
+from hope.apps.core.utils import resolve_flex_fields_choices_to_string
+from hope.apps.household.models import (
     DUPLICATE,
     HOST,
     REFUGEE,
@@ -42,10 +42,10 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import Payment
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

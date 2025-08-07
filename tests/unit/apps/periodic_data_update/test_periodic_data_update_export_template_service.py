@@ -14,7 +14,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from freezegun import freeze_time
 
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
@@ -26,12 +26,12 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.models import FEMALE, MALE
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+from hope.apps.household.models import FEMALE, MALE
+from hope.apps.payment.models import Payment
+from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
 
 class TestPeriodicDataUpdateExportTemplateService(TestCase):

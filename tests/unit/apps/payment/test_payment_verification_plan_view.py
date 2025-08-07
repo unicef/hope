@@ -20,8 +20,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from openpyxl import Workbook
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -29,7 +29,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     build_summary,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -165,7 +165,7 @@ class TestPaymentVerificationViewSet:
             resp_data = response.json()
             assert len(resp_data["results"]) == 1
             pv = resp_data["results"][0]
-            assert "PENDING" == pv["verification_status"]
+            assert pv["verification_status"] == "PENDING"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -183,15 +183,15 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 2 == resp_data["available_payment_records_count"]
-            assert 2 == resp_data["eligible_payments_count"]
-            assert PaymentVerificationPlan.STATUS_PENDING == resp_data["payment_verification_plans"][0]["status"]
-            assert "Random sampling" == resp_data["payment_verification_plans"][0]["sampling"]
+            assert resp_data["available_payment_records_count"] == 2
+            assert resp_data["eligible_payments_count"] == 2
+            assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_PENDING
+            assert resp_data["payment_verification_plans"][0]["sampling"] == "Random sampling"
             assert (
-                PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
-                == resp_data["payment_verification_plans"][0]["verification_channel"]
+                resp_data["payment_verification_plans"][0]["verification_channel"]
+                == PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
             )
-            assert "Pending" == resp_data["payment_verification_summary"]["status"]
+            assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -219,13 +219,13 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert 2 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 2
             pvp = resp_data["payment_verification_plans"][1]
-            assert PaymentVerificationPlan.STATUS_PENDING == pvp["status"]
-            assert PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX == pvp["verification_channel"]
-            assert "Full list" == pvp["sampling"]
+            assert pvp["status"] == PaymentVerificationPlan.STATUS_PENDING
+            assert pvp["verification_channel"] == PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
+            assert pvp["sampling"] == "Full list"
             assert pvp["excluded_admin_areas_filter"] == []
-            assert "Pending" == resp_data["payment_verification_summary"]["status"]
+            assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -252,13 +252,13 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             pvp = resp_data["payment_verification_plans"][0]
-            assert PaymentVerificationPlan.STATUS_PENDING == pvp["status"]
-            assert "MANUAL" == pvp["verification_channel"]
-            assert "Full list" == pvp["sampling"]
+            assert pvp["status"] == PaymentVerificationPlan.STATUS_PENDING
+            assert pvp["verification_channel"] == "MANUAL"
+            assert pvp["sampling"] == "Full list"
             assert pvp["excluded_admin_areas_filter"] == []
-            assert "Pending" == resp_data["payment_verification_summary"]["status"]
+            assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -277,7 +277,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_ACTIVE
 
     @pytest.mark.parametrize(
@@ -297,7 +297,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_FINISHED
 
     def test_pvp_finish_validation_error(self, create_user_role_with_permissions: Any) -> None:
@@ -325,7 +325,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_PENDING
 
     @pytest.mark.parametrize(
@@ -347,7 +347,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_INVALID
 
     @pytest.mark.parametrize(
@@ -365,7 +365,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 0 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 0
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -387,7 +387,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             self.pvp.refresh_from_db()
             if not self.pvp.xlsx_file_exporting:
                 assert self.pvp.has_xlsx_payment_verification_plan_file is True
@@ -419,7 +419,7 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == len(resp_data["payment_verification_plans"])
+            assert len(resp_data["payment_verification_plans"]) == 1
             assert resp_data["payment_verification_plans"][0]["xlsx_file_imported"] is True
 
     @pytest.mark.parametrize(

@@ -9,8 +9,8 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
 
@@ -44,13 +44,13 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         )
         household_one.individuals.add(cls.individual)
 
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.HardDocumentDeduplication.deduplicate")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.HardDocumentDeduplication.deduplicate")
     @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
+        "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
     def test_execute(
         self,
         sanction_execute_mock: Any,
@@ -87,13 +87,13 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         assert create_needs_adjudication_tickets_mock.call_count == 2
         assert sanction_execute_mock.call_count == 0
 
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.HardDocumentDeduplication.deduplicate")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.HardDocumentDeduplication.deduplicate")
     @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
+        "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
-    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
+    @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
     def test_execute_enabled_screening(
         self,
         sanction_execute_mock: Any,

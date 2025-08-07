@@ -38,22 +38,22 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.constants import (
+from hope.apps.account.models import AdminAreaLimitedTo
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
     URGENCY_NOT_URGENT,
 )
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketNote,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     FEMALE,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -65,10 +65,10 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

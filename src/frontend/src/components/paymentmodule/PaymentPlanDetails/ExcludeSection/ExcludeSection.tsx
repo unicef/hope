@@ -26,6 +26,8 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { showApiErrorMessages } from '@utils/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { PaymentPlanExcludeBeneficiaries } from '@restgenerated/models/PaymentPlanExcludeBeneficiaries';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -58,6 +60,28 @@ function ExcludeSection({
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+  const { showMessage } = useSnackbar();
+  const { mutateAsync } = useMutation({
+    mutationFn: (requestBody: PaymentPlanExcludeBeneficiaries) => {
+      return RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
 
   const hasExcludePermission = hasPermissions(
     PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
@@ -77,7 +101,6 @@ function ExcludeSection({
     return '';
   };
 
-  const { showMessage } = useSnackbar();
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
 
@@ -94,25 +117,12 @@ function ExcludeSection({
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
-  const handleSave = async (values): Promise<void> => {
+  const handleSave = (values): void => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
-    try {
-      await RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
-        {
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-          id: paymentPlan.id,
-          requestBody: {
-            excludedHouseholdsIds: idsToSave,
-            exclusionReason: values.exclusionReason || null,
-          },
-        },
-      );
-      showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
-      setExclusionsOpen(false);
-    } catch (e) {
-      showApiErrorMessages(e, showMessage);
-    }
+    mutateAsync({
+      excludedHouseholdsIds:idsToSave,
+      exclusionReason: values.exclusionReason,
+    });
   };
 
   const handleApply = (): void => {

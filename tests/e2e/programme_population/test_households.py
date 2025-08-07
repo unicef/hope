@@ -12,11 +12,11 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import REFUGEE, Household
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.household.models import REFUGEE, Household
+from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -71,7 +71,7 @@ class TestSmokeHouseholds:
         pageHouseholds.selectGlobalProgramFilter("Test Programm")
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
-        assert 1 == len(pageHouseholds.getHouseholdsRows())
+        assert len(pageHouseholds.getHouseholdsRows()) == 1
         assert "Items Groups" in pageHouseholds.getTableTitle().text
         assert "Items Group ID" in pageHouseholds.getHouseholdId().text
         assert "Status" in pageHouseholds.getStatus().text

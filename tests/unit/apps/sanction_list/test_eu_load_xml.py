@@ -5,7 +5,7 @@ from django.core.management import call_command
 
 import pytest
 
-from hct_mis_api.apps.sanction_list.models import (
+from hope.apps.sanction_list.models import (
     SanctionList,
     SanctionListIndividual,
     SanctionListIndividualAliasName,
@@ -14,7 +14,7 @@ from hct_mis_api.apps.sanction_list.models import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.sanction_list.strategies.eu import EUSanctionList
+    from hope.apps.sanction_list.strategies.eu import EUSanctionList
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -16,13 +16,15 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
+    PeriodicFieldData,
 )
-from hct_mis_api.apps.core.utils import get_fields_attr_generators
+from test_utils.factories.core import PeriodicFieldDataFactory
+from hope.apps.core.utils import get_fields_attr_generators
 
 pytestmark = pytest.mark.django_db
 
@@ -317,8 +319,8 @@ class TestKoboAssetList:
             whole_business_area_access=True,
         )
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_all_projects_data")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.get_all_projects_data")
     def test_get_kobo_asset_list(self, mock_get_all_projects_data: Any, mock_kobo_init: Any) -> None:
         mock_kobo_init.return_value = None
         mock_get_all_projects_data.return_value = [
@@ -358,7 +360,13 @@ class TestAllFieldsAttributes:
     def setup(self, api_client: Any) -> None:
         self.user = UserFactory()
         self.client = api_client(self.user)
-        self.all_fields_attributes_url = reverse("api:core:business-areas-all-fields-attributes")
+        self.afghanistan = BusinessAreaFactory(slug="afghanistan", active=True)
+        self.all_fields_attributes_url = reverse(
+            "api:core:business-areas-all-fields-attributes",
+            kwargs={
+                "slug": self.afghanistan.slug,
+            },
+        )
 
         flex_field_1 = FlexibleAttribute.objects.create(
             type=FlexibleAttribute.STRING,
@@ -385,6 +393,23 @@ class TestAllFieldsAttributes:
         choice_1.flex_attributes.add(flex_field_1)
         choice_2.flex_attributes.add(flex_field_2)
 
+        self.program = ProgramFactory(business_area=self.afghanistan)
+
+        # pdu
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["January"],
+        )
+        FlexibleAttribute.objects.create(
+            label={"English(EN)": "PDU Field 1"},
+            name="pdu_field_1",
+            type=FlexibleAttribute.PDU,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            program=self.program,
+            pdu_data=pdu_data,
+        )
+
     def test_all_fields_attributes(self) -> None:
         response = self.client.get(self.all_fields_attributes_url)
         assert response.status_code == status.HTTP_200_OK
@@ -395,9 +420,9 @@ class TestAllFieldsAttributes:
                 "id": str(attr.id),
                 "type": attr.type,
                 "name": attr.name,
+                "labels": [{"language": k, "label": v} for k, v in attr.label.items()],
                 "label_en": attr.label.get("English(EN)", None) if getattr(attr, "label", None) else None,
-                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
-                "is_flex_field": True,
+                "hint": str(attr.hint),
                 "choices": [
                     {
                         "labels": [{"language": k, "label": v} for k, v in choice.label.items()],
@@ -407,6 +432,17 @@ class TestAllFieldsAttributes:
                     }
                     for choice in attr.choices.all()
                 ],
+                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
+                "is_flex_field": True,
+                "pdu_data": (
+                    {
+                        "subtype": attr.pdu_data.subtype,
+                        "number_of_rounds": attr.pdu_data.number_of_rounds,
+                        "rounds_names": attr.pdu_data.rounds_names,
+                    }
+                )
+                if attr.pdu_data
+                else None,
             }
             for attr in get_fields_attr_generators(flex_field=True)
         ]
@@ -415,9 +451,9 @@ class TestAllFieldsAttributes:
                 "id": attr_dict["id"],
                 "type": attr_dict["type"],
                 "name": attr_dict["name"],
+                "labels": [{"language": k, "label": v} for k, v in attr_dict["label"].items()],
                 "label_en": attr_dict.get("label", {}).get("English(EN)", None) if attr_dict.get("label") else None,
-                "associated_with": attr_dict.get("associated_with"),
-                "is_flex_field": False,
+                "hint": attr_dict["hint"],
                 "choices": [
                     {
                         "labels": [{"language": k, "label": v} for k, v in choice.get("label", {}).items()],
@@ -427,6 +463,79 @@ class TestAllFieldsAttributes:
                     }
                     for choice in attr_dict.get("choices", [])
                 ],
+                "associated_with": attr_dict.get("associated_with"),
+                "is_flex_field": False,
+                "pdu_data": None,
+            }
+            for attr_dict in get_fields_attr_generators(flex_field=False)
+        ]
+        sorted_response_data = sorted(response_data, key=lambda x: str(x.get("id")))
+        sorted_expected_attributes = sorted(
+            expected_response_flex_fields + expected_response_core_fields, key=lambda x: str(x.get("id"))
+        )
+        assert len(response_data) == len(sorted_expected_attributes)
+        assert sorted_response_data == sorted_expected_attributes
+
+    def test_all_fields_attributes_with_program(self) -> None:
+        response = self.client.get(self.all_fields_attributes_url, {"program_id": str(self.program.id)})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_data = response.data
+        expected_response_flex_fields = [
+            {
+                "id": str(attr.id),
+                "type": attr.type,
+                "name": attr.name,
+                "labels": [{"language": k, "label": v} for k, v in attr.label.items()],
+                "label_en": attr.label.get("English(EN)", None) if getattr(attr, "label", None) else None,
+                "hint": str(attr.hint),
+                "choices": [
+                    {
+                        "labels": [{"language": k, "label": v} for k, v in choice.label.items()],
+                        "label_en": choice.label.get("English(EN)", None) if getattr(choice, "label", None) else None,
+                        "value": choice.name,
+                        "list_name": choice.list_name,
+                    }
+                    for choice in attr.choices.all()
+                ],
+                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
+                "is_flex_field": True,
+                "pdu_data": (
+                    {
+                        "subtype": attr.pdu_data.subtype,
+                        "number_of_rounds": attr.pdu_data.number_of_rounds,
+                        "rounds_names": attr.pdu_data.rounds_names,
+                    }
+                )
+                if attr.pdu_data
+                else None,
+            }
+            for attr in get_fields_attr_generators(
+                flex_field=True,
+                business_area_slug=self.afghanistan.slug,
+                program_id=self.program.id,
+            )
+        ]
+        expected_response_core_fields = [
+            {
+                "id": attr_dict["id"],
+                "type": attr_dict["type"],
+                "name": attr_dict["name"],
+                "labels": [{"language": k, "label": v} for k, v in attr_dict["label"].items()],
+                "label_en": attr_dict.get("label", {}).get("English(EN)", None) if attr_dict.get("label") else None,
+                "hint": attr_dict["hint"],
+                "choices": [
+                    {
+                        "labels": [{"language": k, "label": v} for k, v in choice.get("label", {}).items()],
+                        "label_en": choice.get("label", {}).get("English(EN)", None) if choice.get("label") else None,
+                        "value": choice.get("value", None),
+                        "list_name": choice.get("list_name", None),
+                    }
+                    for choice in attr_dict.get("choices", [])
+                ],
+                "associated_with": attr_dict.get("associated_with"),
+                "is_flex_field": False,
+                "pdu_data": None,
             }
             for attr_dict in get_fields_attr_generators(flex_field=False)
         ]

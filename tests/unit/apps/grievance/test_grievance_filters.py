@@ -28,14 +28,14 @@ from extras.test_utils.factories.sanction_list import SanctionListIndividualFact
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.grievance.constants import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_MEDIUM,
     URGENCY_URGENT,
     URGENCY_VERY_URGENT,
 )
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
@@ -43,8 +43,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -280,7 +280,7 @@ class TestGrievanceTicketFilters:
             timezone.make_aware(datetime(year=2020, month=8, day=25)),
             timezone.make_aware(datetime(year=2020, month=8, day=26)),
         ]
-        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set):
+        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set, strict=True):
             ticket.created_at = date
             ticket.save(update_fields=("created_at",))
 

@@ -27,9 +27,9 @@ from extras.test_utils.factories.program import (
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -139,7 +139,7 @@ class TestProgramList:
         assert data_collecting_type_program_data1["id"] == self.program.data_collecting_type.id
         assert data_collecting_type_program_data1["label"] == self.program.data_collecting_type.label
         assert data_collecting_type_program_data1["code"] == self.program.data_collecting_type.code
-        assert data_collecting_type_program_data1["type"] == self.program.data_collecting_type.get_type_display()
+        assert data_collecting_type_program_data1["type"] == self.program.data_collecting_type.type
         assert (
             data_collecting_type_program_data1["household_filters_available"]
             == self.program.data_collecting_type.household_filters_available

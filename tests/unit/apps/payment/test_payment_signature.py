@@ -23,16 +23,16 @@ from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 from pytz import utc
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.models import ROLE_PRIMARY
+from hope.apps.payment.celery_tasks import prepare_payment_plan_task
+from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.models import Program
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.program.models import Program
 
 
 class TestPaymentSignature(APITestCase):
@@ -113,7 +113,7 @@ class TestPaymentSignature(APITestCase):
         self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -164,7 +164,7 @@ class TestPaymentSignature(APITestCase):
             "delivery_mechanism_code": dm_cash.code,
         }
 
-        with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
+        with mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(
                 input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
             )

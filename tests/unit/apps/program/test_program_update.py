@@ -26,13 +26,13 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import (
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hope.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -177,6 +177,7 @@ class TestProgramUpdate:
                 for pdu_field_data, pdu_field in zip(
                     self.base_payload_for_update_without_changes["pdu_fields"],
                     [self.pdu_field_to_be_preserved, self.pdu_field_to_be_removed, self.pdu_field_to_be_updated],
+                    strict=True,
                 )
             ],
             "partners": [

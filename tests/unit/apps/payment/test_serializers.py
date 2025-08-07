@@ -16,11 +16,11 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.payment.api.serializers import (
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import to_choice_object
+from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
     PaymentPlanDetailSerializer,
@@ -28,13 +28,13 @@ from hct_mis_api.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     Approval,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.models.payment import (
+from hope.apps.payment.models.payment import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -60,7 +60,14 @@ class TPHouseholdListSerializerTest(TestCase):
 
         self.assertEqual(data["id"], str(self.payment.id))
         self.assertEqual(data["household_unicef_id"], self.hh1.unicef_id)
-        self.assertEqual(data["hoh_full_name"], self.hoh.full_name)
+        self.assertEqual(
+            data["head_of_household"],
+            {
+                "id": str(self.payment.head_of_household.id),
+                "full_name": f"{self.payment.head_of_household.full_name}",
+                "unicef_id": self.payment.head_of_household.unicef_id,
+            },
+        )
         self.assertEqual(data["household_size"], 2)
         self.assertEqual(data["household_admin2"], "New admin22")
         self.assertEqual(data["vulnerability_score"], "123.012")
@@ -71,7 +78,7 @@ class TPHouseholdListSerializerTest(TestCase):
         serializer = PendingPaymentSerializer(instance=self.payment)
         data = serializer.data
 
-        self.assertEqual(data["hoh_full_name"], "")
+        self.assertEqual(data["head_of_household"], None)
 
 
 class PaymentListSerializerTest(TestCase):

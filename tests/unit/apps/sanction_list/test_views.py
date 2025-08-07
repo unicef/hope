@@ -12,9 +12,9 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.registration_datahub.validators import XlsxException
-from hct_mis_api.apps.sanction_list.api.views import SanctionListIndividualViewSet
+from hope.apps.account.permissions import Permissions
+from hope.apps.registration_datahub.validators import XlsxException
+from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet
 
 pytestmark = pytest.mark.django_db
 
@@ -68,8 +68,8 @@ class TestSanctionListIndividualViewSet:
             assert "id" in individual
             assert "documents" in individual
             assert "dates_of_birth" in individual
-            assert "Individual FullName" == individual["full_name"]
-            assert "123" == individual["reference_number"]
+            assert individual["full_name"] == "Individual FullName"
+            assert individual["reference_number"] == "123"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -109,8 +109,8 @@ class TestSanctionListIndividualViewSet:
             assert "id" in resp_data
             assert "documents" in resp_data
             assert "dates_of_birth" in resp_data
-            assert "Individual FullName" == resp_data["full_name"]
-            assert "123" == resp_data["reference_number"]
+            assert resp_data["full_name"] == "Individual FullName"
+            assert resp_data["reference_number"] == "123"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

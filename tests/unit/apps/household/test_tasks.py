@@ -11,9 +11,9 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, Household
-from hct_mis_api.apps.program.models import Program
+from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.models import ROLE_PRIMARY, Household
+from hope.apps.program.models import Program
 
 
 @pytest.mark.elasticsearch

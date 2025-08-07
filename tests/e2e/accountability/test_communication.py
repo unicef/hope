@@ -7,11 +7,11 @@ from e2e.page_object.accountability.comunication_details import (
 from extras.test_utils.factories.accountability import CommunicationMessageFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.accountability.models import Message
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import User
+from hope.apps.accountability.models import Message
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -73,7 +73,7 @@ class TestSmokeAccountabilityCommunication:
         assert "Rows per page: 10 1–1 of 1" in pageAccountabilityCommunication.getTablePagination().text.replace(
             "\n", " "
         )
-        assert 1 == len(pageAccountabilityCommunication.getRows())
+        assert len(pageAccountabilityCommunication.getRows()) == 1
 
     def test_smoke_accountability_communication_details(
         self,

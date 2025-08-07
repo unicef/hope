@@ -17,10 +17,10 @@ from django.utils import timezone
 import requests
 from extras.test_utils.factories.account import UserFactory
 
-from hct_mis_api.admin.kobo_template import XLSXKoboTemplateAdmin
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import XLSXKoboTemplate
-from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
+from hope.admin.kobo_template import XLSXKoboTemplateAdmin
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import XLSXKoboTemplate
+from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
 )
@@ -118,7 +118,7 @@ class TestKoboTemplateUpload(APITestCase):
         self.assertEqual(form.errors, expected_errors)
 
     @patch(
-        "hct_mis_api.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
+        "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
         new=lambda *args, **kwargs: None,
     )
     def test_upload_valid_template(self) -> None:
@@ -146,13 +146,13 @@ class TestKoboErrorHandling(APITestCase):
             template.save()
             return template
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_connection_retry_when_500(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         error_500_response = MockResponse(500, {"msg": "test_error"})
         mock_create_template_from_file = raise_as_func(requests.exceptions.HTTPError(response=error_500_response))  # type: ignore
         empty_template = self.generate_empty_template()
-        with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
+        with patch("hope.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             self.assertRaises(
                 KoboRetriableError,
                 UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute,
@@ -164,24 +164,24 @@ class TestKoboErrorHandling(APITestCase):
             one_day_earlier_time = timezone.now() - timedelta(days=1)
             self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_400(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         error_400_response = MockResponse(400, {"msg": "test_error"})
         mock_create_template_from_file = raise_as_func(requests.exceptions.HTTPError(response=error_400_response))  # type: ignore
         empty_template = self.generate_empty_template()
-        with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
+        with patch("hope.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
             self.assertEqual(empty_template.status, XLSXKoboTemplate.UNSUCCESSFUL)
             self.assertEqual(empty_template.first_connection_failed_time, None)
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_connection_retry_when_connection_problem(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         mock_create_template_from_file = raise_as_func(requests.exceptions.ConnectionError())
         empty_template = self.generate_empty_template()
-        with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
+        with patch("hope.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             self.assertRaises(
                 KoboRetriableError,
                 UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute,
@@ -193,12 +193,12 @@ class TestKoboErrorHandling(APITestCase):
             one_day_earlier_time = timezone.now() - timedelta(days=1)
             self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_exception(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         mock_create_template_from_file = raise_as_func(Exception())
         empty_template = self.generate_empty_template()
-        with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
+        with patch("hope.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             self.assertRaises(
                 Exception,
                 UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute,
@@ -208,12 +208,12 @@ class TestKoboErrorHandling(APITestCase):
             self.assertEqual(empty_template.status, XLSXKoboTemplate.UNSUCCESSFUL)
             self.assertEqual(empty_template.first_connection_failed_time, None)
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_error_in_response(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         mock_create_template_from_file = lambda *args, **kwargs: ({"status": "error"}, 123)
         empty_template = self.generate_empty_template()
-        with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
+        with patch("hope.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
             self.assertEqual(empty_template.status, XLSXKoboTemplate.UNSUCCESSFUL)

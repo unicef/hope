@@ -14,9 +14,9 @@ from extras.test_utils.factories.payment import (
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.geo.models import Area
+from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -34,10 +34,10 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.household.models import Individual
+from hope.apps.payment.models import PaymentVerification
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class GrievanceTicketFactory(DjangoModelFactory):

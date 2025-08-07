@@ -55,6 +55,7 @@ export type { CreateGrievanceTicketExtras as CreateGrievanceTicketExtrasCamelCas
 export { CurrenciesEnum as CurrenciesEnumCamelCase } from './models/CurrenciesEnum';
 export { CurrencyEnum as CurrencyEnumCamelCase } from './models/CurrencyEnum';
 export type { DataCollectingType as DataCollectingTypeCamelCase } from './models/DataCollectingType';
+export { DataCollectingTypeTypeEnum as DataCollectingTypeTypeEnumCamelCase } from './models/DataCollectingTypeTypeEnum';
 export { DataSourceEnum as DataSourceEnumCamelCase } from './models/DataSourceEnum';
 export { DeduplicationBatchStatusEnum as DeduplicationBatchStatusEnumCamelCase } from './models/DeduplicationBatchStatusEnum';
 export type { DeduplicationEngineSimilarityPairIndividual as DeduplicationEngineSimilarityPairIndividualCamelCase } from './models/DeduplicationEngineSimilarityPairIndividual';
@@ -83,7 +84,6 @@ export type { FeedbackMessage as FeedbackMessageCamelCase } from './models/Feedb
 export type { FeedbackMessageCreate as FeedbackMessageCreateCamelCase } from './models/FeedbackMessageCreate';
 export type { FeedbackUpdate as FeedbackUpdateCamelCase } from './models/FeedbackUpdate';
 export type { FieldAttribute as FieldAttributeCamelCase } from './models/FieldAttribute';
-export type { FieldAttributeSimple as FieldAttributeSimpleCamelCase } from './models/FieldAttributeSimple';
 export type { FinancialInstitutionList as FinancialInstitutionListCamelCase } from './models/FinancialInstitutionList';
 export type { FinancialServiceProvider as FinancialServiceProviderCamelCase } from './models/FinancialServiceProvider';
 export { FlexFieldClassificationEnum as FlexFieldClassificationEnumCamelCase } from './models/FlexFieldClassificationEnum';
@@ -162,7 +162,6 @@ export type { PaginatedCollectorAttributeList as PaginatedCollectorAttributeList
 export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './models/PaginatedCountryList';
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedFieldAttributeList as PaginatedFieldAttributeListCamelCase } from './models/PaginatedFieldAttributeList';
-export type { PaginatedFieldAttributeSimpleList as PaginatedFieldAttributeSimpleListCamelCase } from './models/PaginatedFieldAttributeSimpleList';
 export type { PaginatedFinancialInstitutionListList as PaginatedFinancialInstitutionListListCamelCase } from './models/PaginatedFinancialInstitutionListList';
 export type { PaginatedFSPXlsxTemplateList as PaginatedFSPXlsxTemplateListCamelCase } from './models/PaginatedFSPXlsxTemplateList';
 export type { PaginatedGrievanceTicketDetailList as PaginatedGrievanceTicketDetailListCamelCase } from './models/PaginatedGrievanceTicketDetailList';
@@ -193,7 +192,6 @@ export type { PaginatedRuleList as PaginatedRuleListCamelCase } from './models/P
 export type { PaginatedSanctionListIndividualList as PaginatedSanctionListIndividualListCamelCase } from './models/PaginatedSanctionListIndividualList';
 export type { PaginatedSurveyCategoryChoiceList as PaginatedSurveyCategoryChoiceListCamelCase } from './models/PaginatedSurveyCategoryChoiceList';
 export type { PaginatedSurveyList as PaginatedSurveyListCamelCase } from './models/PaginatedSurveyList';
-export type { PaginatedSurveyRapidProFlowList as PaginatedSurveyRapidProFlowListCamelCase } from './models/PaginatedSurveyRapidProFlowList';
 export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationListListCamelCase } from './models/PaginatedTargetPopulationListList';
 export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
 export type { Partner as PartnerCamelCase } from './models/Partner';
@@ -223,6 +221,8 @@ export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './model
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
 export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
+export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
+export { PaymentVerificationDetailsStatusEnum as PaymentVerificationDetailsStatusEnumCamelCase } from './models/PaymentVerificationDetailsStatusEnum';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';

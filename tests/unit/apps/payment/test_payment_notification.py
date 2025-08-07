@@ -14,11 +14,11 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import Approval, PaymentPlan
-from hct_mis_api.apps.payment.notifications import PaymentNotification
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.payment.models import Approval, PaymentPlan
+from hope.apps.payment.notifications import PaymentNotification
 
 
 class TestPaymentNotification(APITestCase):
@@ -615,7 +615,7 @@ class TestPaymentNotification(APITestCase):
                 payment_notification.user_recipients.all(),
             )
 
-    @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     def test_send_email_notification(self, mock_send: Any) -> None:
         payment_notification = PaymentNotification(
@@ -630,7 +630,7 @@ class TestPaymentNotification(APITestCase):
             1,
         )
 
-    @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     def test_send_email_notification_subject_test_env(self, mock_send: Any) -> None:
@@ -642,7 +642,7 @@ class TestPaymentNotification(APITestCase):
         )
         self.assertEqual(payment_notification.email.subject, "[test] Payment pending for Approval")
 
-    @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     @override_settings(EMAIL_SUBJECT_PREFIX="")
     def test_send_email_notification_subject_prod_env(self, mock_send: Any) -> None:
@@ -654,7 +654,7 @@ class TestPaymentNotification(APITestCase):
         )
         self.assertEqual(payment_notification.email.subject, "Payment pending for Approval")
 
-    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -681,7 +681,7 @@ class TestPaymentNotification(APITestCase):
             1,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -725,7 +725,7 @@ class TestPaymentNotification(APITestCase):
             1,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )

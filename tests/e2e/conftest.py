@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from contextlib import suppress
 from datetime import datetime
 from typing import Any
 
@@ -76,12 +77,12 @@ from pytest_html_reporter import attach
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.config.env import env
+from hope.apps.account.models import Partner, Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Country
+from hope.apps.household.models import DocumentType
+from hope.config.env import env
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -171,12 +172,12 @@ def pytest_configure(config) -> None:  # type: ignore
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+            "hope.apps.registration_datahub.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
@@ -225,10 +226,8 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    try:
+    with suppress(FileExistsError):
         os.makedirs(download_path)
-    except FileExistsError:
-        pass
     prefs = {
         "download.default_directory": download_path,
     }
@@ -281,14 +280,6 @@ def login(browser: Chrome) -> Chrome:
 
     sleep(0.3)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
-
-    # # Clear cache
-    # WebDriverWait(browser, 10).until(
-    #     EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
-    # ).click()
-    # WebDriverWait(browser, 10).until(
-    #     EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
-    # ).click()
 
     from django.core.cache import cache
 
@@ -693,9 +684,8 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
     yield
     if request.node.rep_setup.failed:
         pass
-    elif request.node.rep_setup.passed:
-        if request.node.rep_call.failed:
-            screenshot(browser, request.node.nodeid)
+    elif request.node.rep_setup.passed and request.node.rep_call.failed:
+        screenshot(browser, request.node.nodeid)
 
 
 # make a screenshot with a name of the test, date and time

@@ -10,9 +10,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.celery_tasks import recalculate_population_fields_task
+from hope.apps.household.models import (
     AUNT_UNCLE,
     BROTHER_SISTER,
     COUSIN,
@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     Household,
 )
-from hct_mis_api.apps.household.services.household_recalculate_data import (
+from hope.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 
@@ -84,7 +84,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 27,
                 "relationship": GRANDDAUGHTER_GRANDSON,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("1993-09-01", "%Y-%m-%d").date(),
@@ -95,7 +94,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 0,
                 "relationship": HEAD,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2021-06-29", "%Y-%m-%d").date(),
@@ -133,7 +131,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 5,
                 "relationship": NON_BENEFICIARY,
                 "sex": MALE,
                 "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
@@ -144,7 +141,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 59,
                 "relationship": COUSIN,
                 "sex": MALE,
                 "birth_date": datetime.datetime.strptime("1961-07-29", "%Y-%m-%d").date(),
@@ -290,12 +286,12 @@ class TestRecalculateData(TestCase):
         household = Household.objects.get(pk=self.household.pk)
         self.assertEqual(household.pregnant_count, 2)
 
-    @patch("hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay")
+    @patch("hope.apps.household.celery_tasks.recalculate_population_fields_task.delay")
     @freeze_time("2021-07-29")
     def test_interval_recalculate_population_fields_task(
         self, recalculate_population_fields_task_mock: MagicMock
     ) -> None:
-        from hct_mis_api.apps.household.celery_tasks import (
+        from hope.apps.household.celery_tasks import (
             interval_recalculate_population_fields_task,
         )
 
@@ -337,7 +333,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 23,
                 "relationship": BROTHER_SISTER,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2000-01-01", "%Y-%m-%d").date(),

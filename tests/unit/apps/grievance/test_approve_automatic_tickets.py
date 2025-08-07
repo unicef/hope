@@ -19,11 +19,11 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.sanction_list.models import SanctionListIndividual
 
 pytestmark = pytest.mark.django_db()
 
@@ -248,7 +248,7 @@ class TestGrievanceApproveAutomaticTickets:
         response = self.approve_multiple_needs_adjudication_ticket(self.needs_adjudication_grievance_ticket)
         resp_data = response.json()
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert "You do not have permission to perform this action." == resp_data["detail"]
+        assert resp_data["detail"] == "You do not have permission to perform this action."
 
     def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_permission(
         self, create_user_role_with_permissions: Any

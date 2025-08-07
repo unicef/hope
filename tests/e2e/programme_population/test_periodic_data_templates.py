@@ -16,15 +16,15 @@ from extras.test_utils.factories.periodic_data_update import (
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
-from hct_mis_api.apps.periodic_data_update.utils import (
+from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hope.apps.household.models import Individual
+from hope.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db()
 
