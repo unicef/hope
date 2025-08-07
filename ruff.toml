@@ -11,7 +11,7 @@ select = [
 #    "C90", # McCabe complexity
     "COM", # flake8-commas
 #    "D", # pydocstyle
-#    "DJ", # flake8-django
+    "DJ", # flake8-django
 #    "E", # pycodestylex
     "E4", "E7", "E9",
 #    "ERA", # eradicate

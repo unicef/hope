@@ -439,6 +439,9 @@ class CountryCodeMap(models.Model):
     class Meta:
         ordering = ("country",)
 
+    def __str__(self) -> str:
+        return f"{self.country.name} ({self.ca_code})"
+
 
 class CustomModelEntry(ModelEntry):
     """don't update existing tasks"""
@@ -486,6 +489,9 @@ class StorageFile(models.Model):
         max_length=25,
     )
 
+    def __str__(self) -> str:
+        return self.file.name
+
     @property
     def file_name(self) -> str:
         return self.file.name
@@ -497,9 +503,6 @@ class StorageFile(models.Model):
     @property
     def file_size(self) -> int:
         return self.file.size
-
-    def __str__(self) -> str:
-        return self.file.name
 
 
 class FileTemp(TimeStampedModel):

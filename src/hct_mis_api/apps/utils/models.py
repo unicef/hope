@@ -250,6 +250,9 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self) -> str:
+        return f"#{self.id} on {self.timestamp}"
+
     def process_exception(self, exc: BaseException, request: HttpRequest | None = None) -> int | None:
         try:
             from sentry_sdk import capture_exception
@@ -272,9 +275,6 @@ class AbstractSession(models.Model):
 
         return self.sentry_id
 
-    def __str__(self) -> str:
-        return f"#{self.id} on {self.timestamp}"
-
 
 class AbstractSyncable(models.Model):
     last_sync_at = models.DateTimeField(null=True, blank=True)
@@ -293,11 +293,11 @@ class SoftDeletableDefaultManagerModel(models.Model):
 
     is_removed = models.BooleanField(default=False)
 
-    class Meta:
-        abstract = True
-
     active_objects = SoftDeletableManager()
     objects = models.Manager()
+
+    class Meta:
+        abstract = True
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
