@@ -1,0 +1,75 @@
+{
+  "src/assets/TargetingDiagramImage.png": {
+    "file": "assets/TargetingDiagramImage-D9W5CCm5.png",
+    "src": "src/assets/TargetingDiagramImage.png"
+  },
+  "src/containers/pages/404/404_graphic.png": {
+    "file": "assets/404_graphic-D8eUPzUS.png",
+    "src": "src/containers/pages/404/404_graphic.png"
+  },
+  "src/containers/pages/404/404_hope_logo.png": {
+    "file": "assets/404_hope_logo-Cn7xyLMl.png",
+    "src": "src/containers/pages/404/404_hope_logo.png"
+  },
+  "src/containers/pages/accessDenied/access_denied.png": {
+    "file": "assets/access_denied-CEc2pi93.png",
+    "src": "src/containers/pages/accessDenied/access_denied.png"
+  },
+  "src/containers/pages/accessDenied/access_denied_hope_logo.png": {
+    "file": "assets/404_hope_logo-Cn7xyLMl.png",
+    "src": "src/containers/pages/404/404_hope_logo.png"
+  },
+  "src/containers/pages/maintenance/maintenance_graphic_painter.png": {
+    "file": "assets/maintenance_graphic_painter-C9vHXaqW.png",
+    "src": "src/containers/pages/maintenance/maintenance_graphic_painter.png"
+  },
+  "src/containers/pages/maintenance/maintenance_hope_logo.png": {
+    "file": "assets/404_hope_logo-Cn7xyLMl.png",
+    "src": "src/containers/pages/404/404_hope_logo.png"
+  },
+  "src/containers/pages/somethingWentWrong/something_went_wrong_graphic.png": {
+    "file": "assets/something_went_wrong_graphic-5NhFRnct.png",
+    "src": "src/containers/pages/somethingWentWrong/something_went_wrong_graphic.png"
+  },
+  "src/containers/pages/somethingWentWrong/something_went_wrong_hope_logo.png": {
+    "file": "assets/404_hope_logo-Cn7xyLMl.png",
+    "src": "src/containers/pages/404/404_hope_logo.png"
+  },
+  "src/images/logo-transparent.png": {
+    "file": "assets/logo-transparent-Bm-Z-8pA.png",
+    "src": "src/images/logo-transparent.png"
+  },
+  "src/images/logo-with-subtitle-transparent.png": {
+    "file": "assets/logo-with-subtitle-transparent-D7FKZ1Ev.png",
+    "src": "src/images/logo-with-subtitle-transparent.png"
+  },
+  "src/images/logo-with-subtitle.jpg": {
+    "file": "assets/logo-with-subtitle-xqn0OPW2.jpg",
+    "src": "src/images/logo-with-subtitle.jpg"
+  },
+  "src/images/logo.jpg": {
+    "file": "assets/logo-BC-2ZgLE.jpg",
+    "src": "src/images/logo.jpg"
+  },
+  "src/main.tsx": {
+    "file": "assets/main-D73V5wc4.js",
+    "name": "main",
+    "src": "src/main.tsx",
+    "isEntry": true,
+    "css": [
+      "assets/main-F-PFOQeq.css"
+    ],
+    "assets": [
+      "assets/404_graphic-D8eUPzUS.png",
+      "assets/404_hope_logo-Cn7xyLMl.png",
+      "assets/access_denied-CEc2pi93.png",
+      "assets/logo-transparent-Bm-Z-8pA.png",
+      "assets/logo-with-subtitle-transparent-D7FKZ1Ev.png",
+      "assets/logo-BC-2ZgLE.jpg",
+      "assets/logo-with-subtitle-xqn0OPW2.jpg",
+      "assets/maintenance_graphic_painter-C9vHXaqW.png",
+      "assets/something_went_wrong_graphic-5NhFRnct.png",
+      "assets/TargetingDiagramImage-D9W5CCm5.png"
+    ]
+  }
+}
