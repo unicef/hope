@@ -481,7 +481,7 @@ class BaseNodePermissionMixin:
 class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
-        type: type,
+        typology: type,
         fields: Any | None = None,
         order_by: Any | None = None,
         extra_filter_meta: Any | None = None,
@@ -496,7 +496,7 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         self._extra_filter_meta = extra_filter_meta
         self._base_args = None
         self.permission_classes = permission_classes
-        super().__init__(type, *args, **kwargs)
+        super().__init__(typology, *args, **kwargs)
 
     @property
     def args(self) -> dict:
