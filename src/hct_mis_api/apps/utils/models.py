@@ -411,23 +411,27 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     CELERY_STATUS_RETRY = states.RETRY
     CELERY_STATUS_REVOKED = states.REVOKED
 
-    curr_async_result_id = models.CharField(
-        max_length=36, blank=True, null=True, help_text="Current (active) AsyncResult is"
+    celery_tasks_results_ids = models.JSONField(
+        default=dict, blank=True, help_text="Current (active) AsyncResult ids for celery tasks."
     )
 
-    celery_task_name: str = "<define `celery_task_name`>"
+    celery_task_names: dict[str, str] = {}
 
     class Meta:
         abstract = True
 
-    def get_celery_queue_position(self) -> int:
+    def get_celery_queue_position(self, task_name: str) -> int:
         from hct_mis_api.apps.core.celery import app
+
+        task_id = self.celery_tasks_results_ids.get(task_name)
+        if not task_id:
+            return 0
 
         with app.pool.acquire(block=True) as conn:
             tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
         for i, task in enumerate(tasks, 1):
             j = json.loads(task)
-            if j["headers"]["id"] == self.curr_async_result_id:
+            if j["headers"]["id"] == task_id:
                 return i
         return 0
 
@@ -448,28 +452,31 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
                     conn.default_channel.client.srem(settings.CELERY_TASK_REVOKED_QUEUE, rem)
             return {"size": len(tasks), "pending": pending, "canceled": canceled, "revoked": len(revoked)}
 
-    @cached_property
-    def async_result(self) -> "AbortableAsyncResult|None":
-        if self.curr_async_result_id:
-            return AbortableAsyncResult(self.curr_async_result_id, app=celery.current_app)
+    def get_async_result(self, task_name: str) -> "AbortableAsyncResult|None":
+        task_id = self.celery_tasks_results_ids.get(task_name)
+        if task_id:
+            return AbortableAsyncResult(task_id, app=celery.current_app)
         return None
 
-    @property
-    def queue_info(self) -> "dict[str, Any]":
+    def get_queue_info(self, task_name: str) -> "dict[str, Any]":
+        async_result = self.get_async_result(task_name)
+        if not async_result:
+            return {"id": "NotFound"}
+
         with app.pool.acquire(block=True) as conn:
             tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
 
         for task in tasks:
             j = json.loads(task)
-            if j["headers"]["id"] == self.async_result.id:
+            if j["headers"]["id"] == async_result.id:
                 j["body"] = json.loads(base64.b64decode(j["body"]))
                 return j
         return {"id": "NotFound"}
 
-    @property
-    def task_info(self) -> dict[str, Any] | None:
-        if self.async_result:
-            info = self.async_result._get_task_meta()
+    def get_task_info(self, task_name: str) -> dict[str, Any] | None:
+        async_result = self.get_async_result(task_name)
+        if async_result:
+            info = async_result._get_task_meta()
             result, task_status = info["result"], info["status"]
             if task_status == self.CELERY_STATUS_SUCCESS:
                 started_at = result.get("start_time", 0)
@@ -498,38 +505,49 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         return None
 
     @classproperty
-    def task_handler(cls) -> Callable[[Any], Any]:
+    def task_handlers(cls) -> dict[str, Callable[[Any], Any]]:
         import importlib
 
-        module_path, func_name = cls.celery_task_name.rsplit(".", 1)
-        module = importlib.import_module(module_path)
-        return getattr(module, func_name)
+        handlers = {}
+        for name, path in cls.celery_task_names.items():
+            module_path, func_name = path.rsplit(".", 1)
+            module = importlib.import_module(module_path)
+            handlers[name] = getattr(module, func_name)
+        return handlers
 
-    def is_queued(self) -> bool:
+    def is_queued(self, task_name: str) -> bool:
         from hct_mis_api.apps.core.celery import app
+
+        task_id = self.celery_tasks_results_ids.get(task_name)
+        if not task_id:
+            return False
 
         with app.pool.acquire(block=True) as conn:
             tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
         for task in tasks:
             j = json.loads(task)
-            if j["headers"]["id"] == self.curr_async_result_id:
+            if j["headers"]["id"] == task_id:
                 return True
         return False
 
-    def is_canceled(self) -> bool:
+    def is_canceled(self, task_name: str) -> bool:
+        task_id = self.celery_tasks_results_ids.get(task_name)
+        if not task_id:
+            return False
         with app.pool.acquire(block=True) as conn:
-            return conn.default_channel.client.sismember(settings.CELERY_TASK_REVOKED_QUEUE, self.curr_async_result_id)
+            return conn.default_channel.client.sismember(settings.CELERY_TASK_REVOKED_QUEUE, task_id)
 
-    @property
-    def celery_status(self) -> str:
+    def get_celery_status(self, task_name: str) -> str:
         try:
-            if self.curr_async_result_id:
-                if self.is_canceled():
+            task_id = self.celery_tasks_results_ids.get(task_name)
+            if task_id:
+                if self.is_canceled(task_name):
                     return self.CELERY_STATUS_CANCELED
 
-                result = self.async_result.state
+                async_result = self.get_async_result(task_name)
+                result = async_result.state
                 if result == states.PENDING:
-                    if self.is_queued():
+                    if self.is_queued(task_name):
                         result = self.CELERY_STATUS_QUEUED
                     else:
                         result = self.CELERY_STATUS_NOT_SCHEDULED
@@ -539,30 +557,29 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         except Exception as e:
             return str(e)
 
-    def queue(self, task_handler: Callable[[Any], Any] | None = None) -> str | None:
-        if self.celery_status not in self.CELERY_STATUS_SCHEDULED:
-            if not task_handler:
-                res = self.task_handler.delay(self.pk)
-            else:
-                res = task_handler.delay(self.pk)
-            self.curr_async_result_id = res.id
-            self.save(update_fields=["curr_async_result_id"])
+    def queue(self, task_name: str) -> str | None:
+        if self.get_celery_status(task_name) not in self.CELERY_STATUS_SCHEDULED:
+            res = self.task_handlers[task_name].delay(self.pk)
+            self.celery_tasks_results_ids[task_name] = res.id
+            self.save(update_fields=["celery_tasks_results_ids"])
             return res
         return None
 
-    def terminate(self) -> None:
-        if self.celery_status in ["QUEUED", "PENDING"]:
+    def terminate(self, task_name: str) -> None:
+        task_id = self.celery_tasks_results_ids.get(task_name)
+        if not task_id:
+            return
+
+        if self.get_celery_status(task_name) in ["QUEUED", "PENDING"]:
             with app.pool.acquire(block=True) as conn:
-                conn.default_channel.client.sadd(
-                    settings.CELERY_TASK_REVOKED_QUEUE, self.curr_async_result_id, self.curr_async_result_id
-                )
+                conn.default_channel.client.sadd(settings.CELERY_TASK_REVOKED_QUEUE, task_id, task_id)
         else:
-            app.control.revoke(self.curr_async_result_id, terminate=True)
+            app.control.revoke(task_id, terminate=True)
 
     @classmethod
     def discard_all(cls) -> None:
         app.control.discard_all()
-        cls.objects.update(curr_async_result_id=None)
+        cls.objects.update(celery_tasks_results_ids={})
         with app.pool.acquire(block=True) as conn:
             conn.default_channel.client.delete(settings.CELERY_TASK_REVOKED_QUEUE)
 
