@@ -284,6 +284,7 @@ export function validateUsingSteps(
         // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName &&
+        !values.roles?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
@@ -400,16 +401,13 @@ export function validateUsingSteps(
         );
       }
       if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
-        values.individualDataUpdateFieldsAccountsToEdit.forEach(
-          (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsAccountsToEdit[index];
-            if (!doc.number) {
-              errors.individualDataUpdateFieldsAccountsToEdit =
-                'Number is required';
-            }
-          },
-        );
+        values.individualDataUpdateFieldsAccountsToEdit.forEach((el, index) => {
+          const doc = values.individualDataUpdateFieldsAccountsToEdit[index];
+          if (!doc.number) {
+            errors.individualDataUpdateFieldsAccountsToEdit =
+              'Number is required';
+          }
+        });
       }
     }
   }

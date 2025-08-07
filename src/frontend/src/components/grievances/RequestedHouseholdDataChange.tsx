@@ -15,7 +15,6 @@ import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/Griev
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { camelCase } from 'lodash';
-import { customSnakeCase } from '@components/grievances/utils/createGrievanceUtils';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -33,7 +32,9 @@ export function RequestedHouseholdDataChange({
 
   const getConfirmationText = (values): string => {
     const allSelected =
-      values.selected.length + values.selectedFlexFields.length || 0;
+      values.selectedRoles.length +
+        values.selected.length +
+        values.selectedFlexFields.length || 0;
     return `You approved ${allSelected} change${
       allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
@@ -101,7 +102,9 @@ export function RequestedHouseholdDataChange({
 
   const areAllApproved = (values): boolean => {
     const selectedCount =
-      values.selected.length + values.selectedFlexFields.length;
+      values.selected.length +
+      values.selectedFlexFields.length +
+      values.selectedRoles.length;
     const countAll = entries.length + flexFieldsEntries.length;
     return selectedCount === countAll;
   };
@@ -161,21 +164,36 @@ export function RequestedHouseholdDataChange({
             (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
           )
           .map((row) => row[0]),
+        selectedRoles: (
+          ticket.householdDataUpdateTicketDetails.householdData.roles || []
+        )
+          .filter((role) => role.approve_status)
+          .map((role) => role.individual_id),
       }}
       onSubmit={async (values) => {
-        const householdApproveData = values.selected.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
-          prev[customSnakeCase(curr)] = true;
-          return prev;
-        }, {});
-        const flexFieldsApproveData = values.selectedFlexFields.reduce(
-          (prev, curr) => {
-            // eslint-disable-next-line no-param-reassign
-            prev[customSnakeCase(curr)] = true;
-            return prev;
-          },
-          {},
-        );
+        // Build householdApproveData as a flat object
+        const householdApproveData: { [key: string]: boolean | any } = {};
+        // Top-level fields
+        entries.forEach(([key]) => {
+          if (key !== 'roles' && key !== 'flex_fields') {
+            householdApproveData[key] = values.selected.includes(key);
+          }
+        });
+        // Flex fields
+        const flexFieldsApproveData: { [key: string]: boolean } = {};
+        flexFieldsEntries.forEach(([key]) => {
+          if (typeof flexFields[key] === 'object' && flexFields[key] !== null) {
+            flexFieldsApproveData[key] =
+              values.selectedFlexFields.includes(key);
+          }
+        });
+        // Roles
+        const allRoles =
+          ticket.householdDataUpdateTicketDetails.householdData.roles || [];
+        householdApproveData.roles = allRoles.map((role) => ({
+          individual_id: role.individual_id,
+          approve_status: values.selectedRoles.includes(role.individual_id),
+        }));
 
         try {
           await mutate({

@@ -375,6 +375,18 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
       prev[current.fieldName] = current.fieldValue;
       return prev;
     }, {});
+  const householdDataUpdateIssueTypeExtras = {
+    household: values.selectedHousehold?.id,
+    householdData: { ...householdData, flexFields },
+  } as {
+    household: any;
+    householdData: any;
+    roles?: any;
+  };
+  console.log('values.roles', values.roles);
+  if (Array.isArray(values.roles) && values.roles.length > 0) {
+    householdDataUpdateIssueTypeExtras.householdData.roles = values.roles;
+  }
   return {
     variables: {
       input: {
@@ -383,10 +395,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
-            householdDataUpdateIssueTypeExtras: {
-              household: values.selectedHousehold?.id,
-              householdData: { ...householdData, flexFields },
-            },
+            householdDataUpdateIssueTypeExtras,
           },
         },
       },
