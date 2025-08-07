@@ -35,15 +35,15 @@ from flaky import flaky
 from freezegun import freeze_time
 from pytz import utc
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.celery_tasks import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import FileTemp
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -51,8 +51,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.program.models import Program, ProgramCycle
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -243,7 +243,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -292,7 +292,7 @@ class TestPaymentPlanServices(APITestCase):
         }
 
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
+            "hope.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
@@ -314,7 +314,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
@@ -343,7 +343,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
@@ -370,7 +370,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
         # create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
-        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES):
+        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
             payment.status = status
             payment.save()
 
@@ -390,7 +390,6 @@ class TestPaymentPlanServices(APITestCase):
 
         follow_up_pp.refresh_from_db()
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
-        # self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
         self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
         self.assertEqual(follow_up_pp.business_area, pp.business_area)
@@ -488,8 +487,8 @@ class TestPaymentPlanServices(APITestCase):
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
@@ -548,7 +547,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
 
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS"
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS"
         ) as max_chunks_patch:
             max_chunks_patch.__get__ = mock.Mock(return_value=2)
             with self.assertRaisesMessage(ValidationError, "Too many Payment Parts to split: 6, maximum is 2"):
@@ -603,7 +602,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_payment_items.count(), 12)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
@@ -633,7 +632,7 @@ class TestPaymentPlanServices(APITestCase):
         split.sent_to_payment_gateway = False
         split.save()
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
+            "hope.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
         ) as mock_send_to_payment_gateway_task:
             pps = PaymentPlanService(pp)
             pps.user = mock.MagicMock(pk="123")
@@ -694,7 +693,7 @@ class TestPaymentPlanServices(APITestCase):
         assert cycle.status == ProgramCycle.DRAFT
 
     @freeze_time("2022-12-12")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -728,7 +727,7 @@ class TestPaymentPlanServices(APITestCase):
             ],
         }
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
+            "hope.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(

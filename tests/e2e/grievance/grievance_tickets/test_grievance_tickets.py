@@ -30,16 +30,16 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.models import HOST, Household, Individual
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hope.apps.household.models import HOST, Household, Individual
+from hope.apps.payment.models import Payment
+from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -346,7 +346,7 @@ def create_grievance_referral(
 
     grievance_ticket = GrievanceTicket.objects.create(**ticket_data)
 
-    from hct_mis_api.apps.grievance.models import TicketReferralDetails
+    from hope.apps.grievance.models import TicketReferralDetails
 
     TicketReferralDetails.objects.create(
         ticket=grievance_ticket, individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first()
@@ -378,7 +378,7 @@ class TestSmokeGrievanceTickets:
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 2
         expected_labels = [
             "Ticket ID",
             "Status",
@@ -413,7 +413,7 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
@@ -1187,7 +1187,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getInputNewnote().send_keys("Test adding new note.")
         pageGrievanceDetailsPage.getButtonNewNote().click()
         user = pageGrievanceDetailsPage.getNoteName().text
-        assert 1 == len(pageGrievanceDetailsPage.getNoteRows())
+        assert len(pageGrievanceDetailsPage.getNoteRows()) == 1
         assert user in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
@@ -1362,7 +1362,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()
-        assert 3 == len(pageIndividuals.getIndividualTableRow())
+        assert len(pageIndividuals.getIndividualTableRow()) == 3
         for icon in pageIndividuals.getIndividualTableRow()[0].find_elements(By.TAG_NAME, "svg"):
             assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
             break

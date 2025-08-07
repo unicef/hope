@@ -25,7 +25,7 @@ from extras.test_utils.factories.sanction_list import SanctionListFactory
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
@@ -37,13 +37,13 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (
+from hope.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -256,7 +256,6 @@ class TestRdiMergeTask(TestCase):
         self.assertEqual(str(kobo_import_submission.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
         self.assertEqual(kobo_import_submission.kobo_asset_id, "123456123")
         self.assertEqual(str(kobo_import_submission.kobo_submission_time), "2022-02-22 12:22:22+00:00")
-        # self.assertEqual(kobo_import_submission.imported_household, None)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
@@ -323,7 +322,7 @@ class TestRdiMergeTask(TestCase):
         self.assertEqual(household_data, expected)
 
     @freeze_time("2022-01-01")
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -354,7 +353,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.reset_mock()
 
     @freeze_time("2022-01-01")
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -381,7 +380,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.assert_not_called()
 
     @freeze_time("2022-01-01")
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -509,10 +508,10 @@ class TestRdiMergeTask(TestCase):
         {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
     )
     def test_merge_biometric_deduplication_enabled(
         self,

@@ -18,18 +18,18 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
-from hct_mis_api.apps.dashboard.services import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.dashboard.serializers import DashboardBaseSerializer
+from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.household.models import Household
+from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.program.models import Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),

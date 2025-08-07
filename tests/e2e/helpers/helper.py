@@ -1,18 +1,34 @@
 import os
+import logging
 import time
 from time import sleep
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, Union, Tuple, Callable
 
 from django.conf import settings
 
 from selenium.common import NoSuchElementException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+import contextlib
+
+
+logger = logging.getLogger(__name__)
+
+
+def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable:
+    def _predicate(driver):
+        try:
+            actual = driver.find_element(*locator).text.strip()
+            return actual == expected
+        except (StaleElementReferenceException, NoSuchElementException):
+            return False
+
+    return _predicate
 
 
 class Common:
@@ -72,6 +88,26 @@ class Common:
             f"Element: {text} not found in {locator}. Displayed text:"
             f" {self.driver.find_element(element_type, locator).text}"
         )
+
+    def wait_for_text_to_be_exact(
+        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+    ) -> bool:
+        """
+        Wait until element text equals *exactly* ``text``.
+        Returns True on success, otherwise raises TimeoutException.
+        """
+        try:
+            WebDriverWait(self.driver, timeout).until(text_to_be_exact_in_element((element_type, locator), text))
+            return True  # success!
+        except TimeoutException:
+            actual = ""
+            with contextlib.suppress(Exception):
+                actual = self.driver.find_element(element_type, locator).text.strip()
+            raise TimeoutException(
+                f"Timed out after {timeout}s waiting for "
+                f"text '{text}' in element {locator}. "
+                f"Last seen text: '{actual}'."
+            )
 
     def wait_for_text_in_any_element(
         self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
@@ -208,9 +244,9 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                pass
+                logger.info(f"{ii.text}: {ii.get_attribute(attribute)}")
             except BaseException:
-                pass
+                logger.info(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)

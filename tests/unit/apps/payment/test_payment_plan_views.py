@@ -37,19 +37,19 @@ from openpyxl import Workbook
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FileTemp
+from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
+from hope.apps.payment.models import (
     Approval,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.apps.program.models import Program, ProgramCycle
+from hope.apps.steficon.models import Rule
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from test_utils.factories.household import create_household_and_individuals
 
 pytestmark = pytest.mark.django_db()
@@ -920,7 +920,7 @@ class TestTargetPopulationList:
         assert response_count.json()["count"] == 2
 
         self.tp.refresh_from_db()
-        tp = response_data[0]
+        tp = response_data[1]
         assert str(self.tp.id) == tp["id"]
         assert tp["name"] == "Test new TP"
         assert tp["status"] == self.tp.get_status_display().upper()
@@ -1142,8 +1142,8 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 2
-        assert response_data[0]["name"] == "PP_1"
-        assert response_data[1]["name"] == "PP_2"
+        assert response_data[0]["name"] == "PP_2"
+        assert response_data[1]["name"] == "PP_1"
 
         response = self.client.get(self.list_url, {"total_households_count__lte": 101})
         assert response.status_code == status.HTTP_200_OK
@@ -1731,8 +1731,8 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert "USD" == resp_data["currency"]
-            assert "OPEN" == resp_data["status"]
+            assert resp_data["currency"] == "USD"
+            assert resp_data["status"] == "OPEN"
 
     def test_create_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
@@ -1832,7 +1832,7 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "EXCLUDE_BENEFICIARIES" == resp_data["background_action_status"]
+            assert resp_data["background_action_status"] == "EXCLUDE_BENEFICIARIES"
 
     def test_exclude_beneficiaries_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1984,7 +1984,7 @@ class TestPaymentPlanActions:
         assert status.HTTP_400_BAD_REQUEST
         assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_pp_entitlement_import_xlsx(self, mock_exchange_rate: Any, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS], self.afghanistan, self.program_active
@@ -2203,7 +2203,7 @@ class TestPaymentPlanActions:
         )
 
         if expected_status == status.HTTP_200_OK:
-            assert status.HTTP_400_BAD_REQUEST == response.status_code
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
             )
@@ -2215,7 +2215,7 @@ class TestPaymentPlanActions:
                 self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
             )
 
-            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert response_2.status_code == status.HTTP_400_BAD_REQUEST
             assert "Export failed: Payment Plan already has created exported file." in response_2.data
 
             self.pp.export_file_per_fsp = None
@@ -2225,7 +2225,7 @@ class TestPaymentPlanActions:
                 self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
             )
 
-            assert status.HTTP_400_BAD_REQUEST == response_3.status_code
+            assert response_3.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
                 in response_3.data
@@ -2238,7 +2238,7 @@ class TestPaymentPlanActions:
                 self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
             )
 
-            assert status.HTTP_200_OK == response_ok.status_code
+            assert response_ok.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2275,18 +2275,18 @@ class TestPaymentPlanActions:
         response = self.client.get(self.url_reconciliation_export_xlsx)
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert status.HTTP_200_OK == response.status_code
+            assert response.status_code == status.HTTP_200_OK
             assert "id" in response.data
 
             self.pp.eligible_payments.delete()
             response_1 = self.client.get(self.url_reconciliation_export_xlsx)
-            assert status.HTTP_400_BAD_REQUEST == response_1.status_code
+            assert response_1.status_code == status.HTTP_400_BAD_REQUEST
             assert "Export failed: The Payment List is empty." in response_1.data
 
             self.pp.status = PaymentPlan.Status.IN_APPROVAL
             self.pp.save()
             response_2 = self.client.get(self.url_reconciliation_export_xlsx)
-            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert response_2.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
                 in response_2.data
@@ -2319,27 +2319,6 @@ class TestPaymentPlanActions:
             in response_2.data[0]
         )
 
-    # @pytest.mark.parametrize(
-    #     "permissions, expected_status",
-    #     [
-    #         ([Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION], status.HTTP_200_OK),
-    #         ([], status.HTTP_403_FORBIDDEN),
-    #     ],
-    # )
-    # def test_reconciliation_import_xlsx(
-    #         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
-    # ) -> None:
-    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-    # self.pp.status = PaymentPlan.Status.ACCEPTED
-    # self.pp.save()
-    # file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_one_record.xlsx").read_bytes())
-    #         file.name = "import_file_one_record.xlsx"
-    #         response = self.client.post(self.url_reconciliation_import_xlsx, {"file": file}, format="multipart")
-    # ToDo: add test for success import xlsx
-    # after upload all Payments info
-    # self.pp.refresh_from_db()
-    # assert self.pp.status == PaymentPlan.Status.FINISHED
-
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
@@ -2360,13 +2339,13 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_pp_split, data, format="json")
 
         if expected_status == status.HTTP_200_OK:
-            assert status.HTTP_400_BAD_REQUEST == response.status_code
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment plan is already sent to payment gateway" in response.data
 
             split.sent_to_payment_gateway = False
             split.save()
             response_2 = self.client.post(self.url_pp_split, data, format="json")
-            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert response_2.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment plan must be accepted to make a split" in response_2.data
 
             self.pp.status = PaymentPlan.Status.ACCEPTED
@@ -2375,7 +2354,7 @@ class TestPaymentPlanActions:
             response_3 = self.client.post(
                 self.url_pp_split, {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS}, format="json"
             )
-            assert status.HTTP_400_BAD_REQUEST == response_3.status_code
+            assert response_3.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment Number is required for split by records" in response_3.data
 
             fsp_api = FinancialServiceProviderFactory(
@@ -2385,7 +2364,7 @@ class TestPaymentPlanActions:
                 51, parent=self.pp, status=Payment.STATUS_PENDING, financial_service_provider=fsp_api
             )
             response_4 = self.client.post(self.url_pp_split, data, format="json")
-            assert status.HTTP_400_BAD_REQUEST == response_4.status_code
+            assert response_4.status_code == status.HTTP_400_BAD_REQUEST
             assert "Cannot split Payment Plan into more than 50 parts" in response_4.data
 
             # success
@@ -2394,7 +2373,7 @@ class TestPaymentPlanActions:
                 {"payments_no": 30, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
                 format="json",
             )
-            assert status.HTTP_200_OK == response_ok.status_code
+            assert response_ok.status_code == status.HTTP_200_OK
             assert "id" in response_ok.data
 
     @pytest.mark.parametrize(

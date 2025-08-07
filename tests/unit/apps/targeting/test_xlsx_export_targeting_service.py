@@ -13,9 +13,9 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.payment.models import AccountType, PaymentPlan
-from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.payment.models import AccountType, PaymentPlan
+from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
 
@@ -129,5 +129,6 @@ class TestXlsxExportTargetingService(APITestCase):
 
         self.assertEqual(
             service._accounts_info(individual),
-            "{'card_number': '123', 'card_expiry_date': '2022-01-01', 'name_of_cardholder': 'Marek', 'number': '123'}, {'provider': 'Provider', 'delivery_phone_number': '123456789', 'service_provider_code': 'ABC', 'number': '321'}",
+            "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
+            " 'name_of_cardholder': 'Marek', 'number': '123'}, {'provider': 'Provider', 'delivery_phone_number': '123456789', 'service_provider_code': 'ABC', 'number': '321'}",
         )

@@ -14,9 +14,9 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 
-from hct_mis_api.admin.account_mixins import get_valid_kobo_username
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.admin.account_mixins import get_valid_kobo_username
+from hope.apps.account.models import IncompatibleRoles, Role, User
+from hope.apps.core.models import BusinessArea
 
 
 class UserImportCSVTest(WebTest):
@@ -145,13 +145,15 @@ class UserKoboActionsTest(WebTest):
         responses.add(
             responses.GET,
             f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=1",
-            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
+            body=f'action-checkbox. value="111"></td>< field-username <a>'
+            f'{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
         responses.add(
             responses.GET,
             f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=2",
-            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
+            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}'
+            f'</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
 

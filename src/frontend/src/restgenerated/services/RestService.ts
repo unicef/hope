@@ -52,7 +52,6 @@ import type { PaginatedCollectorAttributeList } from '../models/PaginatedCollect
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
-import type { PaginatedFieldAttributeSimpleList } from '../models/PaginatedFieldAttributeSimpleList';
 import type { PaginatedFinancialInstitutionListList } from '../models/PaginatedFinancialInstitutionListList';
 import type { PaginatedFSPXlsxTemplateList } from '../models/PaginatedFSPXlsxTemplateList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
@@ -83,7 +82,6 @@ import type { PaginatedRuleList } from '../models/PaginatedRuleList';
 import type { PaginatedSanctionListIndividualList } from '../models/PaginatedSanctionListIndividualList';
 import type { PaginatedSurveyCategoryChoiceList } from '../models/PaginatedSurveyCategoryChoiceList';
 import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
-import type { PaginatedSurveyRapidProFlowList } from '../models/PaginatedSurveyRapidProFlowList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
 import type { PatchedFeedbackUpdate } from '../models/PatchedFeedbackUpdate';
@@ -134,6 +132,7 @@ import type { SampleSize } from '../models/SampleSize';
 import type { SanctionListIndividual } from '../models/SanctionListIndividual';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
+import type { SurveyRapidProFlow } from '../models/SurveyRapidProFlow';
 import type { SurveySampleSize } from '../models/SurveySampleSize';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
@@ -221,7 +220,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -246,7 +245,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -271,7 +270,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -320,7 +319,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -341,7 +340,7 @@ export class RestService {
         });
     }
     /**
-     * Api to link Households with selected RDI
+     * Api to link Households with selected RDI.
      * @returns any No response body
      * @throws ApiError
      */
@@ -386,7 +385,7 @@ export class RestService {
         });
     }
     /**
-     * Api to Create RDI for selected business area
+     * Api to Create RDI for selected business area.
      * @returns RDI
      * @throws ApiError
      */
@@ -9455,7 +9454,7 @@ export class RestService {
         });
     }
     /**
-     * return list of verification records
+     * Return list of verification records.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -9989,7 +9988,7 @@ export class RestService {
         id,
         programSlug,
         verificationPlanId,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
@@ -9998,7 +9997,7 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanImport,
+        formData: PaymentVerificationPlanImport,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -10009,8 +10008,8 @@ export class RestService {
                 'program_slug': programSlug,
                 'verification_plan_id': verificationPlanId,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -10417,11 +10416,11 @@ export class RestService {
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate({
         businessAreaSlug,
         programSlug,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        requestBody: PeriodicDataUpdateUpload,
+        formData: PeriodicDataUpdateUpload,
     }): CancelablePromise<PeriodicDataUpdateUpload> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -10430,8 +10429,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -10487,8 +10486,8 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsList({
         businessAreaSlug,
         programSlug,
-        importDate,
-        importDateRange,
+        importDateAfter,
+        importDateBefore,
         importedById,
         limit,
         name,
@@ -10497,15 +10496,18 @@ export class RestService {
         orderBy,
         ordering,
         search,
-        size,
+        sizeMax,
+        sizeMin,
         status,
         totalHouseholdsCountWithValidPhoneNoMax,
         totalHouseholdsCountWithValidPhoneNoMin,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        importDate?: string,
-        importDateRange?: string,
+        importDateAfter?: string,
+        importDateBefore?: string,
         importedById?: string,
         /**
          * Number of results to return per page.
@@ -10541,7 +10543,8 @@ export class RestService {
          */
         ordering?: string,
         search?: string,
-        size?: number,
+        sizeMax?: number,
+        sizeMin?: number,
         /**
          * * `LOADING` - Loading
          * * `DEDUPLICATION` - Deduplication
@@ -10559,6 +10562,8 @@ export class RestService {
         status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
         totalHouseholdsCountWithValidPhoneNoMax?: any,
         totalHouseholdsCountWithValidPhoneNoMin?: any,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedRegistrationDataImportListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10568,8 +10573,8 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'import_date': importDate,
-                'import_date_range': importDateRange,
+                'import_date_after': importDateAfter,
+                'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
                 'limit': limit,
                 'name': name,
@@ -10578,10 +10583,13 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'search': search,
-                'size': size,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'status': status,
                 'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
                 'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -10750,23 +10758,26 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsCountRetrieve({
         businessAreaSlug,
         programSlug,
-        importDate,
-        importDateRange,
+        importDateAfter,
+        importDateBefore,
         importedById,
         name,
         nameStartswith,
         orderBy,
         ordering,
         search,
-        size,
+        sizeMax,
+        sizeMin,
         status,
         totalHouseholdsCountWithValidPhoneNoMax,
         totalHouseholdsCountWithValidPhoneNoMin,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        importDate?: string,
-        importDateRange?: string,
+        importDateAfter?: string,
+        importDateBefore?: string,
         importedById?: string,
         name?: string,
         nameStartswith?: string,
@@ -10794,7 +10805,8 @@ export class RestService {
          */
         ordering?: string,
         search?: string,
-        size?: number,
+        sizeMax?: number,
+        sizeMin?: number,
         /**
          * * `LOADING` - Loading
          * * `DEDUPLICATION` - Deduplication
@@ -10812,6 +10824,8 @@ export class RestService {
         status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
         totalHouseholdsCountWithValidPhoneNoMax?: any,
         totalHouseholdsCountWithValidPhoneNoMin?: any,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10821,18 +10835,21 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'import_date': importDate,
-                'import_date_range': importDateRange,
+                'import_date_after': importDateAfter,
+                'import_date_before': importDateBefore,
                 'imported_by__id': importedById,
                 'name': name,
                 'name__startswith': nameStartswith,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'search': search,
-                'size': size,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'status': status,
                 'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
                 'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -11053,7 +11070,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedSurveyRapidProFlowList
+     * @returns SurveyRapidProFlow
      * @throws ApiError
      */
     public static restBusinessAreasProgramsSurveysAvailableFlowsList({
@@ -11062,8 +11079,6 @@ export class RestService {
         createdAtAfter,
         createdAtBefore,
         createdBy,
-        limit,
-        offset,
         orderBy,
         ordering,
         paymentPlan,
@@ -11075,14 +11090,6 @@ export class RestService {
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
         /**
          * Ordering
          *
@@ -11110,7 +11117,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
-    }): CancelablePromise<PaginatedSurveyRapidProFlowList> {
+    }): CancelablePromise<Array<SurveyRapidProFlow>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/available-flows/',
@@ -11122,8 +11129,6 @@ export class RestService {
                 'created_at_after': createdAtAfter,
                 'created_at_before': createdAtBefore,
                 'created_by': createdBy,
-                'limit': limit,
-                'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'payment_plan': paymentPlan,
@@ -12731,6 +12736,46 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllFieldsAttributesList({
+        slug,
+        limit,
+        offset,
+        ordering,
+        programId,
+    }: {
+        slug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{slug}/all-fields-attributes/',
+            path: {
+                'slug': slug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+            },
+        });
+    }
+    /**
      * All Kobo projects/assets.
      * @returns PaginatedKoboAssetObjectList
      * @throws ApiError
@@ -12797,38 +12842,6 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/all-collector-fields-attributes/',
-            query: {
-                'limit': limit,
-                'offset': offset,
-                'ordering': ordering,
-            },
-        });
-    }
-    /**
-     * @returns PaginatedFieldAttributeSimpleList
-     * @throws ApiError
-     */
-    public static restBusinessAreasAllFieldsAttributesList({
-        limit,
-        offset,
-        ordering,
-    }: {
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-    }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/all-fields-attributes/',
             query: {
                 'limit': limit,
                 'offset': offset,

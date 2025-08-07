@@ -9,9 +9,9 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -72,8 +72,8 @@ class TestPaymentViewSet:
             resp_data = response.json()
             assert len(resp_data["results"]) == 1
             payment = resp_data["results"][0]
-            assert "999.00" == payment["delivered_quantity"]
-            assert "Transaction Successful" == payment["status"]
+            assert payment["delivered_quantity"] == "999.00"
+            assert payment["status"] == "Transaction Successful"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -91,8 +91,8 @@ class TestPaymentViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "999.00" == resp_data["delivered_quantity"]
-            assert "Transaction Successful" == resp_data["status"]
+            assert resp_data["delivered_quantity"] == "999.00"
+            assert resp_data["status"] == "Transaction Successful"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -112,8 +112,8 @@ class TestPaymentViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "0.00" == resp_data["delivered_quantity"]
-            assert "Force failed" == resp_data["status"]
+            assert resp_data["delivered_quantity"] == "0.00"
+            assert resp_data["status"] == "Force failed"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -136,6 +136,6 @@ class TestPaymentViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "111.00" == resp_data["delivered_quantity"]
-            assert "Partially Distributed" == resp_data["status"]
-            assert "2024-01-01T00:00:00Z" == resp_data["delivery_date"]
+            assert resp_data["delivered_quantity"] == "111.00"
+            assert resp_data["status"] == "Partially Distributed"
+            assert resp_data["delivery_date"] == "2024-01-01T00:00:00Z"

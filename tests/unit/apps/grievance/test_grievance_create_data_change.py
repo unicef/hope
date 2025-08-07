@@ -17,13 +17,13 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (
+from hope.apps.account.models import Partner
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import (
     FEMALE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -34,8 +34,8 @@ from hct_mis_api.apps.household.models import (
     WIDOWED,
     DocumentType,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()
@@ -339,48 +339,6 @@ class TestGrievanceCreateDataChangeAction:
         response = self.api_client.post(self.list_url, input_data, format="json")
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data[0]
-
-    # def test_edit_payment_channel_for_individual(self, create_user_role_with_permissions: Any) -> None:
-    #     create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-    #     # bank_account = BankAccountInfoFactory(
-    #     #     id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
-    #     #     individual=self.individuals[0],
-    #     #     bank_name="privatbank",
-    #     #     bank_account_number=2356789789789789,
-    #     #     account_holder_name="Old Holder Name",
-    #     #     bank_branch_name="BranchSantander",
-    #     # )
-    #     input_data = {
-    #         "description": "Test",
-    #         "businessArea": "afghanistan",
-    #         "assigned_to": str(self.user.id),
-    #         "issue_type": 14,
-    #         "category": 2,
-    #         "consent": True,
-    #         "language": "PL",
-    #         "extras": {
-    #             "issue_type": {
-    #                 "individual_data_update_issue_type_extras": {
-    #                     "individual": str(self.individuals[0].id),
-    #                     "individual_data": {
-    #                         "paymentChannelsToEdit": [
-    #                             {
-    #                                 "id": str(bank_account.id),
-    #                                 "type": "BANK_TRANSFER",
-    #                                 "bankName": "privatbank",
-    #                                 "bankAccountNumber": 1111222233334444,
-    #                                 "accountHolderName": "Holder Name NEW 2",
-    #                                 "bankBranchName": "New Name NEW 2",
-    #                             },
-    #                         ],
-    #                     },
-    #                 }
-    #             }
-    #         },
-    #     }
-    #     response = self.api_client.post(self.list_url, input_data, format="json")
-    #     assert response.status_code == status.HTTP_201_CREATED
-    #     assert "id" in response.data[0]
 
     def test_grievance_delete_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)

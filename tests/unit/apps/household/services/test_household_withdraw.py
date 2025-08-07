@@ -8,8 +8,8 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.household.models import Document, Household, Individual
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.apps.household.models import Document, Household, Individual
+from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 
 class TestHouseholdWithdraw(TestCase):

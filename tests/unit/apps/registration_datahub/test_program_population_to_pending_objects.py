@@ -15,8 +15,8 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.household.models import (
     HEAD,
     MALE,
     ROLE_ALTERNATE,
@@ -27,11 +27,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
+from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
+from hope.apps.registration_datahub.tasks.import_program_population import (
     import_program_population,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 HOUSEHOLD_FIELDS = (
     "consent_sign",
@@ -810,10 +810,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             Document.pending_objects.filter(program=program_to_without_import_from_ids).count(),
             1,
         )
-        # self.assertEqual(
-        #     BankAccountInfo.pending_objects.filter(individual__program=program_to_without_import_from_ids).count(),
-        #     2,
-        # )
         self.assertEqual(
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_without_import_from_ids
@@ -907,9 +903,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individual=individuals_1[0],
             role=ROLE_ALTERNATE,
         )
-        # BankAccountInfoFactory(
-        #     individual=individuals_1[0],
-        # )
         household_2, individuals_2 = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.rdi_other,
@@ -1000,12 +993,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             Document.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
             1,
         )
-        # self.assertEqual(
-        #     BankAccountInfo.pending_objects.filter(
-        #         individual__program=program_to_without_exclude_external_collectors
-        #     ).count(),
-        #     2,
-        # )
         self.assertEqual(
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_without_exclude_external_collectors
@@ -1049,10 +1036,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             Document.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
             1,
         )
-        # self.assertEqual(
-        #     BankAccountInfo.pending_objects.filter(individual__program=program_to_exclude_external_collectors).count(),
-        #     2,
-        # )
         self.assertEqual(
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_exclude_external_collectors

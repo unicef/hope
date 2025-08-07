@@ -2,7 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -58,21 +58,14 @@ function RegistrationDataImportTable({
   const initialVariables = useMemo(
     () => ({
       search: filter.search,
-      importedBy: filter.importedBy || undefined,
+      importedById: filter.importedBy || undefined,
       status: filter.status !== '' ? filter.status : undefined,
       businessArea,
       program: programId,
-      importDateRange:
-        filter.importDateRangeMin || filter.importDateRangeMax
-          ? JSON.stringify({
-              min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
-              max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
-            })
-          : undefined,
-      size:
-        filter.sizeMin || filter.sizeMax
-          ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
-          : undefined,
+      importDateAfter: filter.importDateRangeMin,
+      importDateBefore: filter.importDateRangeMax,
+      sizeMin: filter.sizeMin,
+      sizeMax: filter.sizeMax,
     }),
     [
       filter.importDateRangeMax,

@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from hct_mis_api.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
+from hope.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
 
 
 class TestKoboAPI:

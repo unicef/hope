@@ -13,9 +13,9 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     DISABLED,
     FEMALE,
     GOVERNMENT_PARTNER,
@@ -28,8 +28,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.czech_republic_flex_registration_service import (
     CzechRepublicFlexRegistration,
 )
 
@@ -40,7 +40,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         call_command("init-geo-fixtures")
         document_types_to_create = []
 
-        DOCUMENT_MAPPING = {
+        document_mapping = {
             "birth_certificate": "Birth Certificate",
             "disability_card": "Disability Card",
             "national_id": "National ID",
@@ -50,7 +50,7 @@ class TestCzechRepublicRegistrationService(TestCase):
             "proof_legal_guardianship": "Proof of Legal Guardianship",
         }
 
-        for key, label in DOCUMENT_MAPPING.items():
+        for key, label in document_mapping.items():
             document_types_to_create.append(DocumentType(key=key, label=label))
 
         DocumentType.objects.bulk_create(document_types_to_create)

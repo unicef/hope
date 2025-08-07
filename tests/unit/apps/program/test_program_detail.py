@@ -17,10 +17,10 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import Partner
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -124,7 +124,8 @@ class TestProgramDetail:
             "id": self.program.data_collecting_type.id,
             "label": self.program.data_collecting_type.label,
             "code": self.program.data_collecting_type.code,
-            "type": self.program.data_collecting_type.get_type_display(),
+            "type": self.program.data_collecting_type.type,
+            "type_display": self.program.data_collecting_type.get_type_display(),
             "household_filters_available": self.program.data_collecting_type.household_filters_available,
             "individual_filters_available": self.program.data_collecting_type.individual_filters_available,
         }

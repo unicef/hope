@@ -25,11 +25,11 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+from hope.apps.geo.models import Area
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import Household
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
 
@@ -96,7 +96,7 @@ class TestFinishVerificationPlan(TestCase):
             EntitlementCardFactory(household=household)
         cls.verification = payment_plan.payment_verification_plans.first()
 
-    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
     def test_create_tickets_with_admin2_same_as_in_household(self, mocked_requests_post: Any) -> None:

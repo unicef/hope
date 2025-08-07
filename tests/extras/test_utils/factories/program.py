@@ -11,8 +11,8 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 fake = Faker()
 
@@ -111,7 +111,7 @@ class ProgramFactory(DjangoModelFactory):
     programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
-            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            master_detail=bool(o.data_collecting_type.type != DataCollectingType.Type.SOCIAL),
             name=(
                 factory.Faker("word") if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else "Household"
             ),
@@ -171,7 +171,7 @@ def generate_people_program() -> None:
         create_individual_document,
     )
 
-    from hct_mis_api.apps.household.models import HOST, SEEING
+    from hope.apps.household.models import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")
     people_program = ProgramFactory(

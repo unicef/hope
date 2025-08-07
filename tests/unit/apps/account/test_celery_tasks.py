@@ -15,13 +15,13 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.caches import get_user_permissions_version_key
-from hct_mis_api.apps.account.celery_tasks import (
+from hope.apps.account.caches import get_user_permissions_version_key
+from hope.apps.account.celery_tasks import (
     invalidate_permissions_cache_for_user_if_expired_role,
 )
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.account.signals import _invalidate_user_permissions_cache
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import User
+from hope.apps.account.signals import _invalidate_user_permissions_cache
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -63,7 +63,7 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         self.version_key_user1_before = self._get_cache_version(self.user1)
         self.version_key_user2_before = self._get_cache_version(self.user2)
 
-    @patch("hct_mis_api.apps.account.celery_tasks._invalidate_user_permissions_cache")
+    @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
     def test_invalidate_permissions_cache_role_on_user(self, mock_invalidate_cache: Any) -> None:
         mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
         invalidate_permissions_cache_for_user_if_expired_role()
@@ -90,7 +90,7 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         assert self._get_cache_version(self.user1) == version_key_user1_after_update + 1
         assert self._get_cache_version(self.user2) == self.version_key_user2_before
 
-    @patch("hct_mis_api.apps.account.celery_tasks._invalidate_user_permissions_cache")
+    @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
     def test_invalidate_permissions_cache_role_on_users(self, mock_invalidate_cache: Any) -> None:
         mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
         self.role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
@@ -119,7 +119,7 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         assert self._get_cache_version(self.user1) == version_key_user1_after_update + 1
         assert self._get_cache_version(self.user2) == version_key_user2_after_update + 1
 
-    @patch("hct_mis_api.apps.account.celery_tasks._invalidate_user_permissions_cache")
+    @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
     def test_invalidate_permissions_cache_role_on_partner(self, mock_invalidate_cache: Any) -> None:
         mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
         self.role_assignment_partner.expiry_date = (timezone.now() - timedelta(days=1)).date()
@@ -137,7 +137,7 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         assert self._get_cache_version(self.user1) == self.version_key_user1_before + 1
         assert self._get_cache_version(self.user2) == self.version_key_user2_before
 
-    @patch("hct_mis_api.apps.account.celery_tasks._invalidate_user_permissions_cache")
+    @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
     def test_invalidate_permissions_cache_role_on_users_and_partner(self, mock_invalidate_cache: Any) -> None:
         mock_invalidate_cache.side_effect = _invalidate_user_permissions_cache
         self.role_assignment_partner.expiry_date = (timezone.now() - timedelta(days=1)).date()

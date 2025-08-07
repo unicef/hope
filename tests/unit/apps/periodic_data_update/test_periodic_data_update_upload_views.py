@@ -2,7 +2,6 @@ import json
 from typing import Callable
 
 from django.core.cache import cache
-from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -31,12 +30,12 @@ from unit.apps.periodic_data_update.test_periodic_data_update_import_service imp
     add_pdu_data_to_xlsx,
 )
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import PeriodicFieldData
+from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 
 pytestmark = pytest.mark.django_db()
 
@@ -282,15 +281,12 @@ class TestPeriodicDataUpdateUploadViews:
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
 
-        file = File(tmp_file)
-        with open(file.name, "rb") as f:  # type: ignore
-            simple_file = SimpleUploadedFile(
-                "file.xlsx",
-                f.read(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+        simple_file = SimpleUploadedFile(
+            "file.xlsx",
+            tmp_file.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
         response = self.client.post(self.url_upload, {"file": simple_file}, format="multipart")
-        file.close()
 
         assert response.status_code == expected_status
 
@@ -351,15 +347,12 @@ class TestPeriodicDataUpdateUploadViews:
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
 
-        file = File(tmp_file)
-        with open(file.name, "rb") as f:  # type: ignore
-            simple_file = SimpleUploadedFile(
-                "file.xlsx",
-                f.read(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+        simple_file = SimpleUploadedFile(
+            "file.xlsx",
+            tmp_file.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
         response = self.client.post(self.url_upload, {"file": simple_file}, format="multipart")
-        file.close()
 
         assert response.status_code == status.HTTP_202_ACCEPTED
 

@@ -35,14 +35,14 @@ from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from selenium.common import NoSuchElementException
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import (
+from hope.apps.account.models import User
+from hope.apps.core.models import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     HEARING,
     HOST,
     REFUGEE,
@@ -51,18 +51,18 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.periodic_data_update.utils import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 
@@ -400,7 +400,6 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_targeting_page(
         self, create_programs: None, create_targeting: PaymentPlan, pageTargeting: Targeting
     ) -> None:
@@ -422,10 +421,9 @@ class TestSmokeTargeting:
             "Created by",
         ]
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
-        assert 2 == len(pageTargeting.getTargetPopulationsRows())
+        assert len(pageTargeting.getTargetPopulationsRows()) == 2
         pageTargeting.getButtonCreateNew().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_targeting_create_use_filters(
         self,
         create_programs: None,
@@ -444,7 +442,6 @@ class TestSmokeTargeting:
         pageTargetingCreate.getButtonIndividualRule().click()
         pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
@@ -464,7 +461,6 @@ class TestSmokeTargeting:
         pageTargetingCreate.getInputIncludedIndividualIds()
         pageTargetingCreate.getInputIndividualids()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_targeting_details_page(
         self,
         create_programs: None,
@@ -512,7 +508,6 @@ class TestSmokeTargeting:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestCreateTargeting:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_targeting_for_people(
         self,
         sw_program: Program,
@@ -554,7 +549,6 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual.unicef_id
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_targeting_for_normal_program(
         self,
         non_sw_program: Program,
@@ -597,7 +591,6 @@ class TestCreateTargeting:
         actions = ActionChains(pageTargetingDetails.driver)
         actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_targeting_with_pdu_string_criteria(
         self,
         program: Program,
@@ -647,7 +640,6 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
@@ -708,7 +700,7 @@ class TestCreateTargeting:
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-
+        pageTargetingCreate.getNoValidationFspAccept().click()
         assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
@@ -721,7 +713,6 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_with_pdu_decimal_criteria(
         self,
         program: Program,
@@ -755,12 +746,11 @@ class TestCreateTargeting:
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("4")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getNoValidationFspAccept().click()
-        expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
+        expected_criteria_text = "Test Decimal Attribute: 2 - 4\nRound 1 (Test Round Decimal 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU decimal"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
         pageTargetingDetails.getLockButton()
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
@@ -781,6 +771,7 @@ class TestCreateTargeting:
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
 
         assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
         pageTargetingCreate.getButtonSave().click()
@@ -801,7 +792,6 @@ class TestCreateTargeting:
             individual2.household.unicef_id,
         ]
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_targeting_with_pdu_date_criteria(
         self,
         program: Program,
@@ -853,7 +843,6 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_targeting_with_pdu_null_criteria(
         self,
         program: Program,
@@ -903,7 +892,6 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_targeting_for_people_with_pdu(
         self,
         sw_program: Program,
@@ -968,7 +956,6 @@ class TestCreateTargeting:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestTargeting:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_targeting_create_use_ids_hh(
         self,
         create_programs: None,
@@ -1049,7 +1036,6 @@ class TestTargeting:
         pageTargetingDetails.getStatusContainer()
         pageTargetingDetails.disappearStatusContainer()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_targeting_mark_ready(
         self,
         create_programs: None,
@@ -1136,7 +1122,6 @@ class TestTargeting:
         assert pageTargetingDetails.waitForTextTitlePage("New Test Data")
         assert "9" in pageTargetingDetails.getCriteriaContainer().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_delete_targeting(
         self,
         create_programs: None,
@@ -1154,7 +1139,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         old_list = pageTargeting.getTargetPopulationsRows()
-        assert 2 == len(old_list)
+        assert len(old_list) == 2
         assert "Copy TP" in old_list[0].text
 
         pageTargeting.chooseTargetPopulations(0).click()
@@ -1164,7 +1149,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
-        assert 1 == len(new_list)
+        assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
@@ -1204,7 +1189,6 @@ class TestTargeting:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_exclude_households_with_active_adjudication_ticket(
         self,
         test_data: dict,
@@ -1315,7 +1299,6 @@ class TestTargeting:
                 By.CSS_SELECTOR, pageTargetingDetails.iconSelected
             )
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_targeting_info_button(
         self,
         create_programs: None,
@@ -1327,7 +1310,6 @@ class TestTargeting:
         pageTargeting.getTabFieldList()
         pageTargeting.getTabTargetingDiagram().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_targeting_filters(
         self,
         create_programs: None,
@@ -1364,7 +1346,6 @@ class TestTargeting:
         pageTargeting.countTargetPopulations(2)
         filters.getButtonFiltersClear().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_targeting_and_labels(
         self,
         create_programs: None,
@@ -1418,7 +1399,6 @@ class TestTargeting:
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_targeting_parametrized_rules_filters(
         self,
         create_programs: None,

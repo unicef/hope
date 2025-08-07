@@ -34,15 +34,15 @@ from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from sorl.thumbnail.conf import settings
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.models import User
+from hope.apps.core.models import DataCollectingType
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 
@@ -346,7 +346,6 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
 
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentModule:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, pagePaymentModule: PaymentModule) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -374,7 +373,6 @@ class TestSmokePaymentModule:
         assert "ACCEPTED" in pagePaymentModule.getStatusContainer().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_new_payment_plan(
         self,
         create_test_program: Program,
@@ -397,7 +395,6 @@ class TestSmokePaymentModule:
         assert "Dispersion Start Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionStartDate).text
         assert "Dispersion End Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionEndDate).text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_details_payment_plan(
         self,
         create_payment_plan: PaymentPlan,
@@ -549,7 +546,6 @@ class TestSmokePaymentModule:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentPlans:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_edit(
         self,
         clear_downloaded_files: None,
@@ -563,7 +559,6 @@ class TestPaymentPlans:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_exclude_not_lock_error(
         self,
         create_payment_plan: PaymentPlan,
@@ -581,7 +576,6 @@ class TestPaymentPlans:
         with pytest.raises(Exception):
             pagePaymentModuleDetails.getButtonSaveExclusions().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_save_exclude_people(
         self,
         create_payment_plan_lock_social_worker: PaymentPlan,
@@ -619,7 +613,6 @@ class TestPaymentPlans:
         assert "1" in pagePaymentModuleDetails.getLabelMaleChildren().text
         assert "6" in pagePaymentModuleDetails.getLabelTotalNumberOfPeople().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_save_exclude(
         self,
         create_payment_plan_lock: PaymentPlan,
@@ -658,7 +651,6 @@ class TestPaymentPlans:
 
         assert "6" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_delete(
         self,
         create_payment_plan_open: PaymentPlan,
@@ -683,7 +675,6 @@ class TestPaymentPlans:
         assert payment_plan not in pagePaymentModule.getRow(0).text
         assert "LOCKED" in pagePaymentModule.getRow(0).text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_creation_error(
         self,
         create_targeting: None,
@@ -714,7 +705,6 @@ class TestPaymentPlans:
         assert "Dispersion End Date is required" in pageNewPaymentPlan.getInputEndDateError().text
         assert "Currency is required" in pageNewPaymentPlan.getInputCurrency().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_plan_supporting_documents(
         self,
         create_payment_plan_lock: PaymentPlan,

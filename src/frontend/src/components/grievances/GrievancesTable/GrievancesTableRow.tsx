@@ -76,7 +76,7 @@ export function GrievancesTableRow({
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
+       queryClient.invalidateQueries({
         queryKey: ['businessAreasProgramsGrievanceTickets'],
       });
       queryClient.invalidateQueries({

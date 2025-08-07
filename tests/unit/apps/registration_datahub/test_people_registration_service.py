@@ -16,8 +16,8 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.household.models import (
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,
@@ -25,8 +25,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.people_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.people_registration_service import (
     PeopleRegistrationService,
 )
 
@@ -108,7 +108,9 @@ class TestPeopleRegistrationService(TestCase):
         cls.files = {
             "individuals": [
                 {
-                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP////////////////////////////////////"
+                    "//////////////////////////////////////////////////wgALCAABAAEBAREA/"
+                    "8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }

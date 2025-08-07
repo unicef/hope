@@ -6,7 +6,7 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import (
+from hope.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
     DataCollectingType,
@@ -15,9 +15,9 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
     StorageFile,
 )
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
-from hct_mis_api.apps.program.models import Program
+from hope.apps.geo.models import Country
+from hope.apps.periodic_data_update.utils import field_label_to_field_name
+from hope.apps.program.models import Program
 
 faker = Faker()
 
@@ -383,7 +383,7 @@ def generate_data_collecting_types() -> None:
             code=data_dict["code"],
             business_areas=all_ba_id_list,
             type=data_dict["type"],
-            household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
+            household_filters_available=bool(data_dict["type"] == DataCollectingType.Type.STANDARD.value),
         )
 
 

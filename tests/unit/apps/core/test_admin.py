@@ -13,14 +13,14 @@ from extras.test_utils.factories.core import (
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.admin.business_area import (
+from hope.admin.business_area import (
     AcceptanceProcessThresholdFormset,
 )
-from hct_mis_api.admin.data_collecting_type import (
+from hope.admin.data_collecting_type import (
     DataCollectingTypeForm,
 )
-from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.account.models import RoleAssignment
+from hope.apps.core.models import DataCollectingType
 
 
 class TestAcceptanceProcessThreshold(TestCase):
@@ -98,7 +98,8 @@ class TestDataCollectingTypeForm(TestCase):
         )
         self.assertEqual(
             form.errors["compatible_types"][0],
-            f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
+            f"DCTs of different types cannot be compatible with each other."
+            f" Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
         )
 
     def test_cannot_add_compatible_dct_with_different_type(self) -> None:

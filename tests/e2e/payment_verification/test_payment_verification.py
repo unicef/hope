@@ -31,13 +31,13 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hct_mis_api.apps.payment.models import PaymentVerification as PV
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
+from hope.apps.payment.models import PaymentVerification as PV
+from hope.apps.payment.models import PaymentVerificationPlan
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
 
@@ -234,6 +234,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
+        delivery_type=dm_cash,
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
@@ -258,7 +259,6 @@ def clear_downloaded_files(download_path: str) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentVerification:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_payment_verification(
         self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
     ) -> None:
@@ -277,7 +277,6 @@ class TestSmokePaymentVerification:
         assert active_program.cycles.first().title == pagePaymentVerification.getCycleTitle().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentVerification.getTablePagination().text.replace("\n", " ")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_payment_verification_details(
         self,
         active_program: Program,
@@ -317,7 +316,6 @@ class TestSmokePaymentVerification:
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
         assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_happy_path_payment_verification(
         self,
         active_program: Program,
@@ -407,8 +405,7 @@ class TestSmokePaymentVerification:
         assert "100%" in pagePaymentVerificationDetails.getLabelSuccessful().text
 
         pagePaymentRecord.getArrowBack().click()
-
-        assert "FINISHED" in pagePaymentVerification.getCashPlanTableRow().text
+        pagePaymentVerification.wait_for_text("FINISHED", pagePaymentVerification.cashPlanTableRow)
 
 
 @pytest.mark.usefixtures("login")
@@ -417,11 +414,9 @@ class TestPaymentVerification:
         "channel",
         [
             "manual",
-            "rapidpro",
             "xlsx",
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_create_verification_plan_full_list(
         self,
         channel: str,
@@ -441,7 +436,6 @@ class TestPaymentVerification:
         assert channel.upper() in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_create_verification_plan_random_sampling_manual(
         self,
         active_program: Program,
@@ -457,6 +451,10 @@ class TestPaymentVerification:
         pagePaymentVerification.getInputAdmincheckbox().click()
         pagePaymentVerification.getInputAgecheckbox().click()
         pagePaymentVerification.getInputSexcheckbox().click()
+        pagePaymentVerificationDetails.getAgeMinInput().send_keys("1")
+        pagePaymentVerificationDetails.getAgeMaxInput().send_keys("100")
+        pagePaymentVerificationDetails.getSexSelect().click()
+        pagePaymentVerificationDetails.select_listbox_element("Female")
         pagePaymentVerification.getButtonSubmit().click()
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
@@ -481,7 +479,6 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_delete(
         self,
         active_program: Program,
@@ -499,14 +496,13 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
         pagePaymentVerificationDetails.checkAlert("Verification plan has been deleted.")
         for _ in range(50):
-            if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
+            if len(pagePaymentVerificationDetails.getVerificationPlanPrefix()) == 2:
                 break
             sleep(0.1)
         else:
             raise AssertionError("Verification Plan was not deleted")
         assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_edit(
         self,
         active_program: Program,
@@ -537,7 +533,6 @@ class TestPaymentVerification:
             assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_successful_received(
         self,
         active_program: Program,
@@ -552,7 +547,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
@@ -562,9 +557,8 @@ class TestPaymentVerification:
         pagePaymentRecord.getArrowBack().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_successful_not_received(
         self,
         active_program: Program,
@@ -579,7 +573,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         pagePaymentRecord.getButtonEdPlan().click()
@@ -589,7 +583,6 @@ class TestPaymentVerification:
 
         assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_partially_successful_received_and_grievance_ticket(
         self,
         active_program: Program,
@@ -607,7 +600,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = float(pagePaymentRecord.getLabelDeliveredQuantity().text) - 1
@@ -623,7 +616,7 @@ class TestPaymentVerification:
 
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getTicketListRow()[0].click()
         pageGrievanceDetailsPage.getButtonAssignToMe().click()
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
@@ -643,12 +636,10 @@ class TestPaymentVerification:
         pagePaymentVerification.getCashPlanTableRow().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
         pageGrievanceTickets.scroll(execute=2)
-        pageGrievanceTickets.screenshot("0", file_path="./")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_by_payment_related_complaint(
         self,
         active_program: Program,
@@ -703,7 +694,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED", timeout=60)
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_partially_successful(
@@ -723,7 +714,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
@@ -754,7 +745,6 @@ class TestPaymentVerification:
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED WITH ISSUES")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_xlsx_not_received(
         self,
         clear_downloaded_files: None,
@@ -797,7 +787,6 @@ class TestPaymentVerification:
 
         assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_discard(
         self,
         clear_downloaded_files: None,
@@ -836,7 +825,6 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.checkAlert("You cant discard if xlsx file was downloaded or imported")
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_xlsx_invalid(
         self,
         clear_downloaded_files: None,

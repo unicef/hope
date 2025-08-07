@@ -6,21 +6,21 @@ from django.test import TestCase
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 
-from hct_mis_api.admin.account_forms import (
+from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hct_mis_api.apps.account.models import (
+from hope.apps.account.models import (
     IncompatibleRoles,
     Role,
     RoleAssignment,
     User,
 )
-from hct_mis_api.apps.account.permissions import (
+from hope.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.apps.core.models import BusinessArea
 
 if TYPE_CHECKING:
     from django.forms.utils import ErrorList

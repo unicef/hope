@@ -14,11 +14,11 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -27,7 +27,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     FEMALE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -41,8 +41,8 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.program.models import Program
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

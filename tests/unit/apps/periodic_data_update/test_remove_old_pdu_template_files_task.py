@@ -11,11 +11,11 @@ from extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
 )
 
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.periodic_data_update.celery_tasks import (
+from hope.apps.core.models import FileTemp
+from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hope.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 
 pytestmark = pytest.mark.django_db
 
@@ -36,9 +36,9 @@ class TestRemoveOldPDUTemplateFilesTask:
     def _create_file(self, pdu_template: PeriodicDataUpdateTemplate, days_ago: int) -> None:
         filename = f"Test File {pdu_template.pk}.xlsx"
         file_content = b"Test content"
-        file_temp = NamedTemporaryFile(delete=False)
-        file_temp.write(file_content)
-        file_temp.flush()
+        with NamedTemporaryFile(delete=False) as file_temp:
+            file_temp.write(file_content)
+            file_temp.flush()
 
         creation_time = timezone.now() - timedelta(days=days_ago)
         file = FileTemp.objects.create(

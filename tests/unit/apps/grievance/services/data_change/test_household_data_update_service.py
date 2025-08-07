@@ -14,7 +14,7 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import create_household, IndividualFactory
 
-from hct_mis_api.apps.grievance.services.data_change.household_data_update_service import (
+from hope.apps.grievance.services.data_change.household_data_update_service import (
     HouseholdDataUpdateService,
 )
 

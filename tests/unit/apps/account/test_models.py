@@ -13,8 +13,8 @@ from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import RoleAssignment
+from hope.apps.program.models import Program
 
 
 class TestRoleAssignmentModel(TransactionTestCase):
@@ -193,7 +193,8 @@ class TestRoleAssignmentModel(TransactionTestCase):
             )
 
     def test_unique_partner_role_business_area_program_constraint(self) -> None:
-        # Creating a second role assignment with the same partner, role, business area, and program should raise an error
+        # Creating a second role assignment with the same partner, role, business area,
+        # and program should raise an error
         role_new = RoleFactory(name="Test Role Duplicate")
         RoleAssignment.objects.create(
             user=None,

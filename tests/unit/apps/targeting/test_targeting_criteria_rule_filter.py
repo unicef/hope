@@ -25,16 +25,16 @@ from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 from pytz import utc
 
-from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import PeriodicFieldData
+from hope.apps.household.models import (
     ROLE_PRIMARY,
     Household,
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.targeting.choices import FlexFieldClassification
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.payment.models import AccountType
+from hope.apps.targeting.choices import FlexFieldClassification
+from hope.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
@@ -42,7 +42,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):

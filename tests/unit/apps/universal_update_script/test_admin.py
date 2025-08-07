@@ -5,13 +5,13 @@ from django.urls import reverse
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
+from hope.apps.program.models import Program
+from hope.apps.universal_update_script.models import UniversalUpdate
 
 
 class UniversalUpdateAdminTest(TestCase):
     def setUp(self) -> None:
-        User = get_user_model()
+        User = get_user_model()  # noqa
         self.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
         self.client.login(username=self.admin_user.username, password="password")
         self.business_area = create_afghanistan()

@@ -8,12 +8,12 @@ from extras.test_utils.factories.accountability import SurveyFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentPlanFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.accountability.models import Survey
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.models import REFUGEE, Household
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import User
+from hope.apps.accountability.models import Survey
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.household.models import REFUGEE, Household
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -86,7 +86,7 @@ class TestSmokeAccountabilitySurveys:
         assert "Created by" in pageAccountabilitySurveys.getTableLabel()[4].text
         assert "Creation Date" in pageAccountabilitySurveys.getTableLabel()[5].text
         assert "10 1–1 of 1" in pageAccountabilitySurveys.getTablePagination().text.replace("\n", " ")
-        assert 1 == len(pageAccountabilitySurveys.getRows())
+        assert len(pageAccountabilitySurveys.getRows()) == 1
         assert "SUR-24-0005" in pageAccountabilitySurveys.getRows()[0].text
         assert "Test survey" in pageAccountabilitySurveys.getRows()[0].text
 
@@ -127,7 +127,7 @@ class TestSmokeAccountabilitySurveys:
         assert "Rows per page: 10 1–1 of 1" in pageAccountabilitySurveysDetails.getTablePagination().text.replace(
             "\n", " "
         )
-        assert 1 == len(pageAccountabilitySurveys.getRows())
+        assert len(pageAccountabilitySurveys.getRows()) == 1
         assert (
             add_accountability_surveys_message.recipients.all()[0].unicef_id
             in pageAccountabilitySurveys.getRows()[0].text
