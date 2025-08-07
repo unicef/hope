@@ -313,67 +313,20 @@ export const PAYMENT_PLAN_QUERY = gql`
         title
         file
       }
-      targetingCriteria {
+      flagExcludeIfActiveAdjudicationTicket
+      flagExcludeIfOnSanctionList
+      householdIds
+      individualIds
+      rules {
         __typename
         id
-        flagExcludeIfActiveAdjudicationTicket
-        flagExcludeIfOnSanctionList
         householdIds
         individualIds
-        rules {
+        individualsFiltersBlocks {
           __typename
-          id
-          householdIds
-          individualIds
-          individualsFiltersBlocks {
+          individualBlockFilters {
             __typename
-            individualBlockFilters {
-              __typename
 
-              id
-              fieldName
-              flexFieldClassification
-              roundNumber
-              arguments
-              comparisonMethod
-              fieldAttribute {
-                __typename
-                id
-                name
-                labelEn
-                type
-                choices {
-                  value
-                  labelEn
-                }
-                pduData {
-                  id
-                  subtype
-                  numberOfRounds
-                  roundsNames
-                }
-              }
-            }
-          }
-          collectorsFiltersBlocks {
-            __typename
-            id
-            createdAt
-            updatedAt
-            collectorBlockFilters {
-              __typename
-              id
-              createdAt
-              updatedAt
-              fieldName
-              comparisonMethod
-              flexFieldClassification
-              arguments
-              labelEn
-            }
-          }
-          householdsFiltersBlocks {
-            __typename
             id
             fieldName
             flexFieldClassification
@@ -396,6 +349,49 @@ export const PAYMENT_PLAN_QUERY = gql`
                 numberOfRounds
                 roundsNames
               }
+            }
+          }
+        }
+        collectorsFiltersBlocks {
+          __typename
+          id
+          createdAt
+          updatedAt
+          collectorBlockFilters {
+            __typename
+            id
+            createdAt
+            updatedAt
+            fieldName
+            comparisonMethod
+            flexFieldClassification
+            arguments
+            labelEn
+          }
+        }
+        householdsFiltersBlocks {
+          __typename
+          id
+          fieldName
+          flexFieldClassification
+          roundNumber
+          arguments
+          comparisonMethod
+          fieldAttribute {
+            __typename
+            id
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+            pduData {
+              id
+              subtype
+              numberOfRounds
+              roundsNames
             }
           }
         }

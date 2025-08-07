@@ -9,37 +9,39 @@ from django.utils import timezone
 
 from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
-from flaky import flaky
-from freezegun import freeze_time
-from graphql import GraphQLError
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
     create_household_with_individual_with_collectors,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
-)
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
     generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from flaky import flaky
+from freezegun import freeze_time
+from graphql import GraphQLError
+from pytz import utc
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.payment.celery_tasks import (
+    prepare_follow_up_payment_plan_task,
+    prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
@@ -50,12 +52,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -299,7 +296,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(15):
+            with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -309,7 +306,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(99):
+        with self.assertNumQueries(98):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -350,9 +347,7 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
-        tc = TargetingCriteriaFactory()
         pp = PaymentPlanFactory(
-            targeting_criteria=tc,
             total_households_count=1,
             created_by=self.user,
         )
@@ -390,7 +385,7 @@ class TestPaymentPlanServices(APITestCase):
         p_force_failed = payments[2]
         p_manually_cancelled = payments[3]
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -440,7 +435,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -741,7 +736,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(11):
+            with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -751,7 +746,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(72):
+        with self.assertNumQueries(71):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -1097,10 +1092,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(payment_plan.dispersion_end_date, timezone.now().date() + timedelta(days=3))
 
     def test_update_pp_dm_fsp(self) -> None:
+        # allow changing dm/dsp on a TP PP stage
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
             created_by=self.user,
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.TP_OPEN,
             currency="AMD",
             delivery_mechanism=None,
             financial_service_provider=None,
@@ -1109,6 +1105,30 @@ class TestPaymentPlanServices(APITestCase):
             {
                 "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
                 "delivery_mechanism_code": self.dm_transfer_to_account.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
+        # do not allow changing dm/dsp on a promoted PP stage
+        payment_plan.status = PaymentPlan.Status.OPEN
+        payment_plan.save()
+
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+                "delivery_mechanism_code": self.dm_transfer_to_digital_wallet.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": None,
+                "delivery_mechanism_code": None,
             }
         )
         payment_plan.refresh_from_db()
@@ -1133,17 +1153,16 @@ class TestPaymentPlanServices(APITestCase):
                 "program": self.program,
             },
         )
-        targeting_criteria = TargetingCriteriaFactory()
-        TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", targeting_criteria=targeting_criteria)
         payment_plan = PaymentPlanFactory(
             created_by=self.user,
             status=PaymentPlan.Status.PREPARING,
             business_area=self.business_area,
             program_cycle=self.cycle,
-            targeting_criteria=targeting_criteria,
             delivery_mechanism=self.dm_transfer_to_account,
             financial_service_provider=self.fsp,
         )
+        TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", payment_plan=payment_plan)
+
         PaymentFactory(
             parent=payment_plan,
             program_id=self.program.id,

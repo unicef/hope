@@ -3,12 +3,8 @@ import datetime
 from django.conf import settings
 from django.test import TestCase
 
-from rest_framework.test import APIClient
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -17,15 +13,19 @@ from hct_mis_api.apps.household.fixtures import (
     PendingIndividualFactory,
     create_household,
 )
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework.test import APIClient
+
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_NO_ROLE,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 # used for ease of assertions, so it imitates serializer's behaviour
@@ -93,7 +93,7 @@ class TestDetails(TestCase):
     def test_getting_non_existent_individual(self) -> None:
         response = self.api_client.get("/api/hh-status?tax_id=non-existent")
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["status"], "not found")
+        self.assertEqual(response.json()["detail"], "Document with given tax_id: non-existent not found")
 
     def test_getting_individual_with_status_imported(self) -> None:
         pending_household = PendingHouseholdFactory()
@@ -206,7 +206,7 @@ class TestDetails(TestCase):
     def test_getting_non_existent_household(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=non-existent")
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["status"], "not found")
+        self.assertEqual(response.json()["detail"], "Household with given detail_id: non-existent not found")
 
     def test_getting_household_with_status_imported(self) -> None:
         pending_household = PendingHouseholdFactory()
@@ -247,10 +247,10 @@ class TestDetails(TestCase):
 
     def test_query_params_validation(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=xxx&tax_id=yyy")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
         response = self.api_client.get("/api/hh-status")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     def test_households_count_gt_1(self) -> None:
         detail_id = "123"
@@ -258,9 +258,19 @@ class TestDetails(TestCase):
         PendingHouseholdFactory(detail_id=detail_id)
         PendingHouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
         HouseholdFactory(detail_id=detail_id)
         HouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
+
+    def test_documents_count_gt_1(self) -> None:
+        household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
+        individual = individuals[0]
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
+        PendingDocumentFactory(individual=individual, type=document_type, document_number="123")
+        PendingDocumentFactory(individual=individual, type=document_type, document_number="123")
+
+        response = self.api_client.get("/api/hh-status?tax_id=123")
+        self.assertEqual(response.status_code, 400)

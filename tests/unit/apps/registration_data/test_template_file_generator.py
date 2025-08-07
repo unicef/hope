@@ -1,11 +1,12 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
+from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
 )

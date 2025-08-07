@@ -120,14 +120,16 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
         if not parent.program.is_active():
             return False
 
-        is_still_processing = RegistrationDataImport.objects.filter(
-            program=parent.program,
-            deduplication_engine_status__in=[
-                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
-            ],
-        ).exists()
-        if is_still_processing:
-            return False
+        if parent.program.biometric_deduplication_enabled:
+            is_still_processing = RegistrationDataImport.objects.filter(
+                program=parent.program,
+                deduplication_engine_status__in=[
+                    RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+                ],
+            ).exists()
+            if is_still_processing:
+                return False
+
         return True
 
     @staticmethod

@@ -1,20 +1,20 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     PaymentVerificationSummaryFactory,
     create_payment_verification_plan_with_status,
 )
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     build_summary,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 class TestBuildSummary(TestCase):
@@ -30,7 +30,6 @@ class TestBuildSummary(TestCase):
             name="TEST",
             program_cycle=cls.program.cycles.first(),
             business_area=cls.business_area,
-            targeting_criteria=TargetingCriteriaFactory(),
             created_by=cls.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=cls.payment_plan)

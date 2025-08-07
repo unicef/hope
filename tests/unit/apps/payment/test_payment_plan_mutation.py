@@ -2,33 +2,32 @@ from typing import TYPE_CHECKING, Any, List, Tuple
 from unittest.mock import patch
 
 import pytest
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
@@ -282,42 +281,37 @@ class TestPaymentPlanMutation(APITestCase):
     )
     def test_copy_target_criteria_mutation(self, name: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        # create criteria
-        tc = TargetingCriteriaFactory()
-        tcr = TargetingCriteriaRule(household_ids="HH-001", individual_ids="IND-001")
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(
+            name="New PaymentPlan",
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=self.cycle,
+            created_by=self.user,
+        )
+
+        tcr = TargetingCriteriaRule.objects.create(
+            household_ids="HH-001", individual_ids="IND-001", payment_plan=payment_plan
+        )
         TargetingCriteriaRuleFilter.objects.create(
             targeting_criteria_rule=tcr,
             comparison_method="LESS_THAN",
             field_name="size",
             arguments=[1],
         )
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         TargetingIndividualBlockRuleFilter.objects.create(
             individuals_filters_block=individuals_filters_block,
             comparison_method="LESS_THAN",
             field_name="age",
             arguments=[40],
         )
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        col_block.save()
+        col_block = TargetingCollectorRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
         TargetingCollectorBlockRuleFilter.objects.create(
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
             arguments=[True],
-        )
-
-        payment_plan = PaymentPlanFactory(
-            name="New PaymentPlan",
-            status=PaymentPlan.Status.OPEN,
-            program_cycle=self.cycle,
-            created_by=self.user,
-            targeting_criteria=tc,
         )
 
         self.cycle.status = ProgramCycle.FINISHED

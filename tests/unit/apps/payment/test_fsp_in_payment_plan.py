@@ -1,28 +1,28 @@
 from typing import Any
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 def base_setup(cls: Any) -> None:
@@ -95,7 +95,6 @@ def base_setup(cls: Any) -> None:
 
 
 def payment_plan_setup(cls: Any) -> None:
-    targeting_criteria = TargetingCriteriaFactory()
     cls.santander_fsp = FinancialServiceProviderFactory(
         name="Santander",
         distribution_limit=None,
@@ -111,7 +110,6 @@ def payment_plan_setup(cls: Any) -> None:
 
     cls.payment_plan = PaymentPlanFactory(
         total_households_count=4,
-        targeting_criteria=targeting_criteria,
         status=PaymentPlan.Status.LOCKED,
         program_cycle=cls.program.cycles.first(),
         created_by=cls.user,

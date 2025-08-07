@@ -6,24 +6,24 @@ from django.db.models import Sum
 from django.utils import timezone
 
 import pytest
-from parameterized import parameterized
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.program import ProgramFactory
+from parameterized import parameterized
+from pytz import utc
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestDashboardQueries(APITestCase):

@@ -1,18 +1,21 @@
-from django.contrib.gis.geos import Point
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
+from extras.test_utils.factories.program import ProgramFactory
+
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
@@ -21,7 +24,6 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -124,7 +126,7 @@ class TestHousehold(TestCase):
 
     def test_geopoint(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.geopoint = Point(1.2, 0.5)  # type: ignore
+        household.geopoint = 1.2, 0.5  # type: ignore
         self.assertEqual(household.longitude, 1.2)
         self.assertEqual(household.latitude, 0.5)
         household.geopoint = None
@@ -379,3 +381,34 @@ class TestIndividualModel(TestCase):
         IndividualFactory(unicef_id="IND-000", program=self.program)
         with self.assertRaises(IntegrityError):
             IndividualFactory(unicef_id="IND-123", program=self.program)
+
+    def test_mark_as_distinct_raise_errors(self) -> None:
+        ind = IndividualFactory(unicef_id="IND-333", program=self.program)
+        doc_type = DocumentTypeFactory(key="registration_token")
+        country = CountryFactory()
+        DocumentFactory(
+            status=Document.STATUS_VALID,
+            program=self.program,
+            type=doc_type,
+            document_number="123456ABC",
+            individual=ind,
+            country=country,
+        )
+        doc_2 = DocumentFactory(
+            status=Document.STATUS_INVALID,
+            program=self.program,
+            type=doc_type,
+            document_number="aaa",
+            individual=ind,
+            country=country,
+        )
+        doc_2.document_number = "123456ABC"
+        doc_2.save()
+
+        with self.assertRaises(Exception) as error:
+            ind.mark_as_distinct()
+
+        self.assertEqual(
+            str(error.exception),
+            "IND-333: Valid Document already exists: 123456ABC.",
+        )

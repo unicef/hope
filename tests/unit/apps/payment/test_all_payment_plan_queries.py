@@ -7,20 +7,10 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
-from freezegun import freeze_time
-from parameterized import parameterized
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.activity_log.models import LogEntry
-from hct_mis_api.apps.activity_log.utils import create_diff
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -29,6 +19,18 @@ from hct_mis_api.apps.payment.fixtures import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
+from extras.test_utils.factories.program import ProgramCycleFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from freezegun import freeze_time
+from parameterized import parameterized
+from pytz import utc
+
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.activity_log.models import LogEntry
+from hct_mis_api.apps.activity_log.utils import create_diff
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
@@ -38,11 +40,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSupportingDocument,
     PaymentVerificationPlan,
-)
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
 )
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
@@ -312,12 +309,10 @@ class TestPaymentPlanQueries(APITestCase):
       paymentPlan(id: $id) {
         name
         status
-        targetingCriteria {
-          householdIds
-          individualIds
-          flagExcludeIfOnSanctionList
-          flagExcludeIfActiveAdjudicationTicket
-        }
+        householdIds
+        individualIds
+        flagExcludeIfOnSanctionList
+        flagExcludeIfActiveAdjudicationTicket
       }
     }
     """
@@ -1046,14 +1041,11 @@ class TestPaymentPlanQueries(APITestCase):
             created_by=self.user,
             currency="PLN",
         )
-        targeting_criteria = TargetingCriteriaFactory()
         TargetingCriteriaRuleFactory(
-            targeting_criteria=targeting_criteria,
+            payment_plan=payment_plan,
             household_ids="HH-1, HH-2",
             individual_ids="IND-01, IND-02",
         )
-        payment_plan.targeting_criteria = targeting_criteria
-        payment_plan.save()
 
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA,

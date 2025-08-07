@@ -17,7 +17,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
-from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 
@@ -30,17 +29,6 @@ class TargetingCriteriaQueryingBase:
     this mixin connects OR blocks
     """
 
-    def __init__(self, rules: Optional[List] = None, excluded_household_ids: Optional[List] = None) -> None:
-        if rules is None:
-            return
-        self.rules = rules
-        self.flag_exclude_if_active_adjudication_ticket = False
-        self.flag_exclude_if_on_sanction_list = False
-        if excluded_household_ids is None:
-            self._excluded_household_ids = []
-        else:
-            self._excluded_household_ids = excluded_household_ids
-
     def get_household_queryset(self) -> QuerySet:
         return Household.objects
 
@@ -48,10 +36,7 @@ class TargetingCriteriaQueryingBase:
         return Individual.objects
 
     def get_rules(self) -> Any:
-        return self.rules
-
-    def get_excluded_household_ids(self) -> List[Optional[str]]:
-        return self._excluded_household_ids
+        return self.rules.all()
 
     def get_criteria_string(self) -> str:
         rules = self.get_rules()
@@ -65,6 +50,8 @@ class TargetingCriteriaQueryingBase:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()
 
     def apply_flag_exclude_if_active_adjudication_ticket(self) -> Q:
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
         if not self.flag_exclude_if_active_adjudication_ticket:
             return Q()
         return ~Q(
@@ -418,7 +405,7 @@ class TargetingCriteriaFilterBase:
             targeting_criteria_rule = (
                 getattr(self, "targeting_criteria_rule", None) or self.individuals_filters_block.targeting_criteria_rule
             )
-            program = targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
+            program = targeting_criteria_rule.payment_plan.program_cycle.program
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
                 logger.warning(

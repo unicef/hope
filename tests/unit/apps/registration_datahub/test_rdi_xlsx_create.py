@@ -6,7 +6,6 @@ from typing import Any
 from unittest import mock
 
 from django.conf import settings
-from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -14,13 +13,20 @@ from django.utils.dateparse import parse_datetime
 
 import pytest
 from django_countries.fields import Country
-from PIL import Image
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
+from extras.test_utils.factories.household import (
+    IndividualFactory,
+    PendingIndividualFactory,
+)
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from PIL import Image
+
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -31,10 +37,6 @@ from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
 )
 from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.fixtures import (
-    IndividualFactory,
-    PendingIndividualFactory,
-)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
@@ -44,11 +46,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualIdentity,
 )
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -434,9 +433,9 @@ class TestRdiXlsxCreateTask(TestCase):
         task = self.RdiXlsxCreateTask()
 
         result = task._handle_geopoint_field(empty_geopoint)
-        self.assertEqual(result, "")
+        self.assertEqual(result, None)
 
-        expected = Point(x=51.107883, y=17.038538, srid=4326)
+        expected = 51.107883, 17.038538
         result = task._handle_geopoint_field(valid_geopoint)
         self.assertEqual(result, expected)
 

@@ -7,7 +7,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-
 snapshots['TestFSPRelatedSchema::test_query_all_financial_service_provider_xlsx_templates 1'] = {
     'data': {
         'allFinancialServiceProviderXlsxTemplates': {
@@ -42,7 +41,15 @@ snapshots['TestFSPRelatedSchema::test_query_all_financial_service_providers 1'] 
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': {'edges': [{'node': {'name': 'Cash'}}]},
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'name': 'FSP_1',
                         'visionVendorNumber': '149-69-3686'
                     }
@@ -50,7 +57,15 @@ snapshots['TestFSPRelatedSchema::test_query_all_financial_service_providers 1'] 
                 {
                     'node': {
                         'communicationChannel': 'API',
-                        'deliveryMechanisms': {'edges': [{'node': {'name': 'Voucher'}}]},
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Voucher'
+                                    }
+                                }
+                            ]
+                        },
                         'name': 'FSP_2',
                         'visionVendorNumber': '666-69-3686'
                     }
@@ -69,7 +84,6 @@ snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider 1'
         }
     }
 }
-
 
 snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider_xlsx_template 1'] = {
     'data': {

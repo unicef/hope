@@ -61,9 +61,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
 
     def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
-            field_attribute = get_field_by_name(
-                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
-            )
+            field_attribute = get_field_by_name(parent.field_name, parent.targeting_criteria_rule.payment_plan)
             return filter_choices(
                 field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
             )
@@ -88,7 +86,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 parent.field_name,
-                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.payment_plan,
+                parent.individuals_filters_block.targeting_criteria_rule.payment_plan,
             )
             return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
@@ -155,32 +153,6 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
         exclude_fields = [
             "filters",
         ]
-
-
-class TargetingCriteriaNode(DjangoObjectType):
-    rules = graphene.List(TargetingCriteriaRuleNode)
-    household_ids = graphene.String()
-    individual_ids = graphene.String()
-
-    def resolve_rules(parent, info: Any) -> "QuerySet":
-        return parent.rules.all()
-
-    def resolve_individual_ids(parent, info: Any) -> str:
-        ind_ids: set = set()
-        for rule in parent.rules.all():
-            if rule.individual_ids:
-                ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
-        return ", ".join(sorted(ind_ids))
-
-    def resolve_household_ids(parent, info: Any) -> str:
-        hh_ids: set = set()
-        for rule in parent.rules.all():
-            if rule.household_ids:
-                hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
-        return ", ".join(sorted(hh_ids))
-
-    class Meta:
-        model = target_models.TargetingCriteria
 
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
