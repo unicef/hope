@@ -20,9 +20,9 @@ class DataChangeValidator:
         # valid roles
         roles_data = approve_data.get("roles", [])
         for role in roles_data:
-            if "individual_id" not in role.keys():
+            if "individual_id" not in role:
                 log_and_raise("Can't find individual_id in role")
-            if "approve_status" not in role.keys():
+            if "approve_status" not in role:
                 log_and_raise("Can't find approve_status in role")
             if not isinstance(role["approve_status"], bool):
                 log_and_raise("Value for approve_status must be boolean")
