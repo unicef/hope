@@ -27,7 +27,7 @@ def populate_pdu_with_null_values(program: Program, current_flex_fields: dict | 
         "name", "pdu_data__number_of_rounds"
     )
     flex_fields_dict = {
-        pdu_field[0]: {str(value): {"value": None} for value in range(1, pdu_field[1] + 1)}
+        pdu_field[0]: {str(round_number): {"value": None} for round_number in range(1, pdu_field[1] + 1)}
         for pdu_field in periodic_data_fields
     }
 
