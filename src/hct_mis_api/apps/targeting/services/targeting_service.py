@@ -308,7 +308,7 @@ class TargetingCriteriaFilterBase:
         if typology == FlexibleAttribute.PDU:
             if arguments == [None]:
                 return arguments
-            typology = field_attr.pdu_data.subtypology
+            typology = field_attr.pdu_data.subtype
         if typology == TYPE_DECIMAL:
             return [float(arg) for arg in arguments]
         if typology == TYPE_INTEGER:

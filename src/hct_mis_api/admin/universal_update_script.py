@@ -68,7 +68,20 @@ class UniversalUpdateAdminForm(forms.ModelForm):
 
     class Meta:
         model = UniversalUpdate
-        fields = "__all__"
+        fields = (
+            "individual_fields",
+            "individual_flex_fields_fields",
+            "household_fields",
+            "household_flex_fields_fields",
+            "document_types",
+            "account_types",
+            "template_file",
+            "update_file",
+            "program",
+            "backup_snapshot",
+            "saved_logs",
+            "unicef_ids",
+        )
         widgets = {
             "document_types": FilteredSelectMultiple("Document Types", is_stacked=False),
             "account_types": FilteredSelectMultiple("Account Types", is_stacked=False),

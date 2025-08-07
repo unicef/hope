@@ -10,7 +10,12 @@ from hct_mis_api.apps.changelog.widget import HTMLEditor
 class ChangelogAdminForm(forms.ModelForm):
     class Meta:
         model = Changelog
-        fields = "__all__"
+        fields = (
+            "description",
+            "version",
+            "active",
+            "date",
+        )
 
 
 class ChangelogAdmin(HOPEModelAdminBase):
