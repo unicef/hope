@@ -8,17 +8,17 @@ from extras.test_utils.factories.core import create_afghanistan
 from faker.generator import random
 from flaky import flaky
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.constants import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_NOT_SET,
     URGENCY_NOT_SET,
     URGENCY_VERY_URGENT,
 )
-from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.grievance.documents import GrievanceTicketDocument
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.bulk_action_service import BulkActionService
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -15,17 +15,17 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     Registration2024,
     UkraineBaseRegistrationService,
 )

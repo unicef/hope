@@ -13,14 +13,14 @@ from extras.test_utils.factories.core import (
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.admin.business_area import (
+from hope.admin.business_area import (
     AcceptanceProcessThresholdFormset,
 )
-from hct_mis_api.admin.data_collecting_type import (
+from hope.admin.data_collecting_type import (
     DataCollectingTypeForm,
 )
-from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.account.models import RoleAssignment
+from hope.apps.core.models import DataCollectingType
 
 
 class TestAcceptanceProcessThreshold(TestCase):

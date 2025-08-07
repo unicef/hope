@@ -8,8 +8,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
-from hct_mis_api.apps.program.models import Program
+from hope.apps.core.models import BusinessArea, FlexibleAttribute
+from hope.apps.program.models import Program
 
 
 class TestFlexibleAttribute(TransactionTestCase):

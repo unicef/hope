@@ -9,11 +9,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.geo.models import Country
+from hope.apps.grievance.models import GrievanceTicket
 
 
 class TestGrievanceDashboardQuery(APITestCase):

@@ -27,15 +27,15 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import PaymentVerification
+from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
+from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 
@@ -351,7 +351,7 @@ class TestXlsxVerificationImport(APITestCase):
         ]
     )
     @patch(
-        "hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service.XlsxVerificationImportService._check_version",
+        "hope.apps.payment.xlsx.xlsx_verification_import_service.XlsxVerificationImportService._check_version",
         return_value=None,
     )
     def test_validation_of_unordered_columns(self, file_name: str, error_list: List, mock_check_version: Any) -> None:

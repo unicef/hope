@@ -22,9 +22,9 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
 
@@ -153,8 +153,8 @@ class TestPhoneNumberVerification(TestCase):
 
         post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
         ):
             try:
                 VerificationPlanStatusChangeServices(self.verification).activate()
@@ -215,8 +215,8 @@ class TestPhoneNumberVerification(TestCase):
         post_request_mock = MagicMock()
         post_request_mock.side_effect = [first_flow, create_flow_response()]
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
         ):
             VerificationPlanStatusChangeServices(self.verification).activate()
 

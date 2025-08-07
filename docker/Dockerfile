@@ -32,7 +32,7 @@ RUN apt-get update \
 
 
 ENV XDG_RUNTIME_DIR=/run/user/"${UID}"
-ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
+ENV DJANGO_SETTINGS_MODULE=hope.config.settings
 WORKDIR $APP_PATH
 
 # Dist builder image
@@ -89,7 +89,7 @@ RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 FROM uv as dist-builder
 WORKDIR $APP_PATH
 COPY ./src/ ./src/
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hct_mis_api/apps/web/static/web
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hope/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
         --no-editable --frozen

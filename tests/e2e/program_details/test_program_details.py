@@ -18,12 +18,12 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.household.models import Household
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
 

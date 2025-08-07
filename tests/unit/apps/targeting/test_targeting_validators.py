@@ -11,12 +11,12 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.choices import FlexFieldClassification
-from hct_mis_api.apps.targeting.validators import (
+from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hope.apps.core.models import DataCollectingType, FlexibleAttribute
+from hope.apps.household.models import Household, Individual
+from hope.apps.program.models import Program
+from hope.apps.targeting.choices import FlexFieldClassification
+from hope.apps.targeting.validators import (
     TargetingCriteriaInputValidator,
     TargetingCriteriaRuleFilterInputValidator,
 )

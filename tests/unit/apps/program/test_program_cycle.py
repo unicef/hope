@@ -11,8 +11,8 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from rest_framework.exceptions import ValidationError
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hope.apps.core.models import BusinessArea
+from hope.apps.program.models import Program, ProgramCycle
 
 
 class TestProgramCycleMethods(TestCase):

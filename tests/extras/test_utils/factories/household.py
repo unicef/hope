@@ -12,8 +12,8 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
@@ -40,7 +40,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 faker = Faker()
 

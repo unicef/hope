@@ -3,8 +3,8 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import (
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import (
     FEMALE,
     MALE,
     Document,
@@ -14,11 +14,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import Account, AccountType
-from hct_mis_api.apps.program.collision_detectors import (
+from hope.apps.payment.models import Account, AccountType
+from hope.apps.program.collision_detectors import (
     IdentificationKeyCollisionDetector,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -182,7 +182,7 @@ def test_update_individual_identities_with_fixture_households(
     source_individual = source_household[1]
     destination_individual = destination_household[1]
 
-    from hct_mis_api.apps.account.models import Partner
+    from hope.apps.account.models import Partner
 
     partner = Partner.objects.create(name="Test Partner")
 
