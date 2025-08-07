@@ -1,13 +1,16 @@
 import json
 
 from django.conf import settings
+from django.core.validators import MinLengthValidator, ProhibitNullCharactersValidator, MaxLengthValidator
 from django.db import models
+from django.db.models import UniqueConstraint
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.utils.models import CeleryEnabledModel, TimeStampedModel
+from hct_mis_api.apps.utils.validators import StartEndSpaceValidator, DoubleSpaceValidator
 
 
-class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
+class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         TO_EXPORT = "TO_EXPORT", "To export"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
@@ -16,6 +19,17 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         FAILED = "FAILED", "Failed"
         CANCELED = "CANCELED", "Canceled"
 
+    name = models.CharField(
+        max_length=255,
+        validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],
+        null=True,
+    )
     business_area = models.ForeignKey(
         "core.BusinessArea",
         on_delete=models.CASCADE,
@@ -116,7 +130,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         return f"{self.pk} - {self.status}"
 
 
-class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
+class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
@@ -126,7 +140,7 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
         CANCELED = "CANCELED", "Canceled"
 
     template = models.ForeignKey(
-        PeriodicDataUpdateTemplate,
+        PeriodicDataUpdateXlsxTemplate,
         on_delete=models.CASCADE,
         related_name="uploads",
     )
@@ -172,6 +186,86 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
             return self.Status.CANCELED
 
         return self.status
+
+    @property
+    def combined_status_display(self) -> str:
+        status_dict = {status.value: status.label for status in self.Status}
+        return status_dict[self.combined_status]
+
+
+class PeriodicDataUpdateOnline(TimeStampedModel, CeleryEnabledModel):
+    class Status(models.TextChoices):
+        NEW = "NEW", "New"
+        READY = "READY", "Ready"  # sent for approval
+        APPROVED = "APPROVED", "Approved"
+        NOT_SCHEDULED_MERGE = "NOT_SCHEDULED_MERGE", "Not scheduled merge"
+        MERGED = "MERGED", "Merged"
+
+        # tasks statuses
+        PENDING_CREATE = "PENDING_CREATE", "Pending create"
+        NOT_SCHEDULED_CREATE = "NOT_SCHEDULED_CREATE", "Not scheduled create"
+        CREATING = "CREATING", "Creating"
+        FAILED_CREATE = "FAILED_CREATE", "Failed create"
+        CANCELED_CREATE = "CANCELED_CREATE", "Canceled create"
+        PENDING_MERGE = "PENDING_MERGE", "Pending merge"
+        MERGING = "MERGING", "Processing"
+        FAILED_MERGE = "FAILED_MERGE", "Failed merge"
+        CANCELED_MERGE = "CANCELED_MERGE", "Canceled merge"
+
+
+    name = models.CharField(
+        max_length=255,
+        validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],
+        null=True,
+    )
+    business_area = models.ForeignKey(
+        "core.BusinessArea",
+        on_delete=models.CASCADE,
+        related_name="periodic_data_update_templates",
+    )
+    program = models.ForeignKey(
+        "program.Program",
+        on_delete=models.CASCADE,
+        related_name="periodic_data_update_templates",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="periodic_data_updates_created",
+        null=True,
+        blank=True,
+    )
+    number_of_records = models.PositiveIntegerField(null=True, blank=True)
+    authorized_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="authorized_periodic_data_updates",
+        blank=True,
+        help_text="Users who are authorized to perform actions on this periodic data update",
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program"],
+                name="name_unique_per_program",
+            ),
+        ]
+
+    @property
+    def combined_status(self) -> str:  # pragma: no cover
+        pass
+
 
     @property
     def combined_status_display(self) -> str:
