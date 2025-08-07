@@ -93,9 +93,17 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     """
     rounds_data = models.JSONField()
 
-    celery_task_name = (
-        "hct_mis_api.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
-    )
+    celery_task_names = {
+        "export": "hct_mis_api.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
+    }
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program"],
+                name="name_unique_per_program",
+            ),
+        ]
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
@@ -158,7 +166,9 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
     )
     file = models.FileField()
     error_message = models.TextField(null=True, blank=True)
-    celery_task_name = "hct_mis_api.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
+    celery_task_names = {
+        "import": "hct_mis_api.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
+    }
 
     @property
     def errors(self) -> dict | None:
@@ -253,6 +263,11 @@ class PeriodicDataUpdateOnline(TimeStampedModel, CeleryEnabledModel):
         blank=True,
         help_text="Users who are authorized to perform actions on this periodic data update",
     )
+
+    celery_task_names = {
+        "create/generate_json(TBA)": "hct_mis_api.apps.periodic_data_update.celery_tasks.TBA",
+        "merge": "hct_mis_api.apps.periodic_data_update.celery_tasks.TBA",
+    }
 
     class Meta:
         constraints = [

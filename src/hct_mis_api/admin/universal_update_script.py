@@ -13,10 +13,6 @@ from admin_extra_buttons.decorators import button
 
 from hct_mis_api.admin.utils import HOPEModelAdminBase
 from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.universal_update_script.celery_tasks import (
-    generate_universal_individual_update_template,
-    run_universal_individual_update,
-)
 from hct_mis_api.apps.universal_update_script.models import (
     DocumentType,
     UniversalUpdate,
@@ -186,8 +182,8 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     @button(label="Generate Excel Template", permision="universal_update_script.can_generate_universal_update_template")
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
-        universal_update.queue(generate_universal_individual_update_template)
-        self.message_user(request, "Gnerating Excel Template Task Scheduled")
+        universal_update.queue("generate_universal_individual_update_template")
+        self.message_user(request, "Generating Excel Template Task Scheduled")
 
     @button(
         label="Start Universal Update Task",
@@ -197,5 +193,5 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
-        universal_update.queue(run_universal_individual_update)
+        universal_update.queue("run_universal_individual_update")
         self.message_user(request, "Universal individual update task scheduled")
