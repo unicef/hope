@@ -1,7 +1,7 @@
 from django.core.cache import cache
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.utils import save_data_in_cache
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.utils import save_data_in_cache
 
 
 class TestCache(APITestCase):

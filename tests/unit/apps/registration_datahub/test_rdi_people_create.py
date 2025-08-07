@@ -20,19 +20,19 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
-from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType, PeriodicFieldData
+from hope.apps.geo.models import Country as GeoCountry
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import PendingAccount
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import ImportData
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -50,7 +50,7 @@ class TestRdiXlsxPeople(TestCase):
         parent = AreaFactory(p_code="AF11", name="Name")
         AreaFactory(p_code="AF1115", name="Name2", parent=parent)
 
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+        from hope.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,
         )
 

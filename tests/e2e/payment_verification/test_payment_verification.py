@@ -31,13 +31,13 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hct_mis_api.apps.payment.models import PaymentVerification as PV
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
+from hope.apps.payment.models import PaymentVerification as PV
+from hope.apps.payment.models import PaymentVerificationPlan
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
 

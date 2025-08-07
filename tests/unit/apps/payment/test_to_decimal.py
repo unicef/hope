@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from hct_mis_api.apps.payment.utils import to_decimal
+from hope.apps.payment.utils import to_decimal
 
 
 class TestToDecimal(TestCase):

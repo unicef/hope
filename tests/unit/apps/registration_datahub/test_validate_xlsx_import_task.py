@@ -9,9 +9,9 @@ from django.test import TestCase
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.registration_data.models import ImportData
+from hope.apps.registration_datahub.tasks.validate_xlsx_import import (
     ValidateXlsxImport,
 )
 
@@ -34,9 +34,7 @@ class TestValidateXlsxImportTask(TestCase):
             file=file,
         )
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
-    )
+    @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
     def test_people(self, validate_everything_mock: Mock) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx").read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
@@ -53,9 +51,7 @@ class TestValidateXlsxImportTask(TestCase):
         assert import_data.number_of_households == 0
         assert import_data.number_of_individuals == 4
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
-    )
+    @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
     def test_import_individuals_without_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = []
         ValidateXlsxImport().execute(self.import_data, self.program)
@@ -66,9 +62,7 @@ class TestValidateXlsxImportTask(TestCase):
         assert self.import_data.number_of_households == 3
         assert self.import_data.number_of_individuals == 7
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
-    )
+    @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
     def test_import_individuals_with_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [
             {
@@ -81,9 +75,7 @@ class TestValidateXlsxImportTask(TestCase):
         assert validate_everything_mock.call_count == 1
         assert self.import_data.status == ImportData.STATUS_VALIDATION_ERROR
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
-    )
+    @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
     def test_import_individuals_with_general_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [
             {

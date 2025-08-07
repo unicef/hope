@@ -7,8 +7,8 @@ from django.http import JsonResponse
 
 import pytest
 
-from hct_mis_api.api.endpoints.rdi.upload import RDINestedSerializer
-from hct_mis_api.api.utils import humanize_errors
+from hope.api.endpoints.rdi.upload import RDINestedSerializer
+from hope.api.utils import humanize_errors
 
 MEMBER = {
     "birth_date": "2000-01-01",

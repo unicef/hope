@@ -14,11 +14,11 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from flaky import flaky
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.models import Household, Individual
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,

@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import (
     update_fsps,
 )
 
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.core.models import DataCollectingType
 
 
 class TestFixtures(TestCase):

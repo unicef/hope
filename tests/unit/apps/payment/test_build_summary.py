@@ -9,8 +9,8 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.models import (
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     build_summary,

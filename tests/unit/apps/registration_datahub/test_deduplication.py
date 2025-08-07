@@ -7,9 +7,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from unit.conftest import disabled_locally_test
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.models import (
     DUPLICATE,
     FEMALE,
     HEAD,
@@ -21,17 +21,17 @@ from hct_mis_api.apps.household.models import (
     Individual,
     PendingIndividual,
 )
-from hct_mis_api.apps.registration_data.models import (
+from hope.apps.registration_data.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
     ImportData,
 )
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.utils.elasticsearch_utils import (
+from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     rebuild_search_index,
 )
-from hct_mis_api.apps.utils.querysets import evaluate_qs
+from hope.apps.utils.querysets import evaluate_qs
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

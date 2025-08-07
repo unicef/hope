@@ -7,11 +7,11 @@ from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from hct_mis_api.apps.core.models import PeriodicFieldData, FlexibleAttribute
+from hope.apps.core.models import PeriodicFieldData, FlexibleAttribute
 
-from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
-from hct_mis_api.apps.targeting.api.utils import filter_choices, get_field_by_name
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
+from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,

@@ -5,8 +5,8 @@ from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.program_log.payment_log import ProgramLog
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import User
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 

@@ -7,8 +7,8 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.models import Payment
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
 
 class TestUpdatePaymentsSignatureInBatch(TestCase):
