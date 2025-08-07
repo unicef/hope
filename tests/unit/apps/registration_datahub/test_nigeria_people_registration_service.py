@@ -14,10 +14,10 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.models import Area, AreaType
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.geo import models as geo_models
+from hope.apps.geo.models import Area, AreaType
+from hope.apps.household.models import (
     HEAD,
     MALE,
     DocumentType,
@@ -26,9 +26,9 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import (
+from hope.apps.payment.models import PendingAccount
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.nigeria_people_registration_service import (
     NigeriaPeopleRegistrationService,
 )
 

@@ -12,14 +12,14 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.admin.household import HouseholdWithdrawFromListMixin
-from hct_mis_api.apps.grievance.models import (
+from hope.admin.household import HouseholdWithdrawFromListMixin
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.apps.household.models import Document
+from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 
 class TestHouseholdWithdrawFromListMixin(TestCase):

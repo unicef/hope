@@ -15,8 +15,8 @@ from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
+from hope.apps.sanction_list.models import UploadedXLSXFile
+from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
 
@@ -28,8 +28,8 @@ class TestSanctionList(TestCase):
             associated_email="test_email@email.com",
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
-    @patch("hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     @freeze_time("2024-01-10 01:01:01")

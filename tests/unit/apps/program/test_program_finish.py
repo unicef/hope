@@ -9,9 +9,9 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 

@@ -10,9 +10,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.payment.utils import generate_cache_key
+from hope.apps.account.models import User
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.payment.utils import generate_cache_key
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):

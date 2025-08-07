@@ -7,10 +7,10 @@ from extras.test_utils.factories.household import (
     create_household_for_fixtures,
 )
 
-from hct_mis_api.apps.household.management.commands.fixdocumentsstatus import (
+from hope.apps.household.management.commands.fixdocumentsstatus import (
     fix_documents_statuses,
 )
-from hct_mis_api.apps.household.models import Document, Household, Individual
+from hope.apps.household.models import Document, Household, Individual
 
 
 class TestDocumentStatusFixer(TestCase):

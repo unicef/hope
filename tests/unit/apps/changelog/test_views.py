@@ -5,7 +5,7 @@ from django.urls import reverse
 from extras.test_utils.factories.account import UserFactory
 from rest_framework import status
 
-from hct_mis_api.apps.changelog.factory import ChangelogFactory
+from hope.apps.changelog.factory import ChangelogFactory
 
 User = get_user_model()
 

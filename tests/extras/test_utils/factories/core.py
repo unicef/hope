@@ -6,7 +6,7 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import (
+from hope.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
     DataCollectingType,
@@ -15,9 +15,9 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
     StorageFile,
 )
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
-from hct_mis_api.apps.program.models import Program
+from hope.apps.geo.models import Country
+from hope.apps.periodic_data_update.utils import field_label_to_field_name
+from hope.apps.program.models import Program
 
 faker = Faker()
 

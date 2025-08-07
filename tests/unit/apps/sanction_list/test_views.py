@@ -12,9 +12,9 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.registration_datahub.validators import XlsxException
-from hct_mis_api.apps.sanction_list.api.views import SanctionListIndividualViewSet
+from hope.apps.account.permissions import Permissions
+from hope.apps.registration_datahub.validators import XlsxException
+from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet
 
 pytestmark = pytest.mark.django_db
 

@@ -24,15 +24,15 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
-from hct_mis_api.apps.account.permissions import (
+from hope.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
+from hope.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
 )
-from hct_mis_api.apps.accountability.models import Message
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.program.models import Program
+from hope.apps.accountability.models import Message
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import to_choice_object
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

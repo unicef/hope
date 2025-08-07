@@ -17,7 +17,7 @@ from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
 
-from hct_mis_api.apps.account.models import Partner, Role
+from hope.apps.account.models import Partner, Role
 
 
 @pytest.fixture(autouse=True)
@@ -95,7 +95,7 @@ def pytest_configure(config: Config) -> None:
     settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
         }
     }
@@ -124,12 +124,12 @@ def pytest_configure(config: Config) -> None:
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+            "hope.apps.registration_datahub.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
