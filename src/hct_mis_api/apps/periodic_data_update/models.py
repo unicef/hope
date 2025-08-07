@@ -33,12 +33,12 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     business_area = models.ForeignKey(
         "core.BusinessArea",
         on_delete=models.CASCADE,
-        related_name="periodic_data_update_templates",
+        related_name="pdu_xlsx_templates",
     )
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,
-        related_name="periodic_data_update_templates",
+        related_name="pdu_xlsx_templates",
     )
     status = models.CharField(
         max_length=20,
@@ -48,7 +48,7 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="periodic_data_updates_created",
+        related_name="pdu_xlsx_templates_created",
         null=True,
         blank=True,
     )
@@ -101,7 +101,7 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
         constraints = [
             UniqueConstraint(
                 fields=["name", "program"],
-                name="name_unique_per_program",
+                name="pdu_xlsx_template_name_unique_per_program",
             ),
         ]
 
@@ -160,7 +160,7 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="periodic_data_update_uploads",
+        related_name="pdu_uploads",
         null=True,
         blank=True,
     )
@@ -203,7 +203,7 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
         return status_dict[self.combined_status]
 
 
-class PeriodicDataUpdateOnline(TimeStampedModel, CeleryEnabledModel):
+class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         NEW = "NEW", "New"
         READY = "READY", "Ready"  # sent for approval
@@ -237,12 +237,12 @@ class PeriodicDataUpdateOnline(TimeStampedModel, CeleryEnabledModel):
     business_area = models.ForeignKey(
         "core.BusinessArea",
         on_delete=models.CASCADE,
-        related_name="periodic_data_update_templates",
+        related_name="pdu_online_edits",
     )
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,
-        related_name="periodic_data_update_templates",
+        related_name="pdu_online_edits",
     )
     status = models.CharField(
         max_length=20,
@@ -252,14 +252,14 @@ class PeriodicDataUpdateOnline(TimeStampedModel, CeleryEnabledModel):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="periodic_data_updates_created",
+        related_name="pdu_online_edits_created",
         null=True,
         blank=True,
     )
     number_of_records = models.PositiveIntegerField(null=True, blank=True)
     authorized_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name="authorized_periodic_data_updates",
+        related_name="authorized_pdu_online_edits",
         blank=True,
         help_text="Users who are authorized to perform actions on this periodic data update",
     )
@@ -273,7 +273,7 @@ class PeriodicDataUpdateOnline(TimeStampedModel, CeleryEnabledModel):
         constraints = [
             UniqueConstraint(
                 fields=["name", "program"],
-                name="name_unique_per_program",
+                name="pdu_online_name_unique_per_program",
             ),
         ]
 
