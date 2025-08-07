@@ -49,7 +49,20 @@ class DataCollectingTypeForm(forms.ModelForm):
 
     class Meta:
         model = DataCollectingType
-        fields = "__all__"
+        fields = (
+            "code",
+            "label",
+            "type",
+            "description",
+            "active",
+            "deprecated",
+            "individual_filters_available",
+            "household_filters_available",
+            "recalculate_composition",
+            "weight",
+            "compatible_types",
+            "limit_to",
+        )
 
     def clean(self) -> None:
         household_filters_available = self.cleaned_data["household_filters_available"]

@@ -199,7 +199,18 @@ class RuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        exclude = ("updated_by", "created_by")
+        fields = (
+            "name",
+            "definition",
+            "description",
+            "enabled",
+            "deprecated",
+            "language",
+            "security",
+            "type",
+            "flags",
+            "allowed_business_areas",
+        )
 
     def clean(self) -> dict | None:
         if len(self.cleaned_data) == 1 and "allowed_business_areas" in self.cleaned_data:
@@ -229,4 +240,12 @@ class RuleCommitAdminForm(forms.ModelForm):
 
     class Meta:
         model = RuleCommit
-        exclude = ("updated_by", "created_by")
+        fields = (
+            "rule",
+            "definition",
+            "is_release",
+            "enabled",
+            "deprecated",
+            "language",
+            "affected_fields",
+        )

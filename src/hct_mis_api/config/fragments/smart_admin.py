@@ -43,7 +43,7 @@ SMART_ADMIN_SECTIONS = {
     ],
 }
 
-SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
+SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.admin_site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
