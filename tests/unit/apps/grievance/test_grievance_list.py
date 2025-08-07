@@ -18,12 +18,12 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 

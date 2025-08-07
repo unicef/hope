@@ -13,8 +13,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from unit.api.factories import APITokenFactory
 
-from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.api.models import APIToken, Grant
+from hope.apps.core.models import BusinessArea
 
 
 @contextlib.contextmanager

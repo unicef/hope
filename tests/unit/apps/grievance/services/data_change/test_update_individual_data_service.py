@@ -22,13 +22,13 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
+from hope.apps.geo.models import Country
+from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
-from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.household.models import Document
+from hope.apps.payment.models import AccountType
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

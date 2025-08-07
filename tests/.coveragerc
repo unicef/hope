@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = hct_mis_api
+source = hope
 concurrency=multiprocessing,thread
 
 omit =
@@ -12,11 +12,10 @@ omit =
         */admin.py
         */**/fixtures.py
         */**/migrations/*.py
-        hct_mis_api/one_time_scripts/*
-        hct_mis_api/libs/*
-        hct_mis_api/config/settings.py
-        hct_mis_api/apps/core/management/commands/*
-        hct_mis_api/apps/payment/models/cash_assist.py
+        hope/one_time_scripts/*
+        hope/libs/*
+        hope/config/settings.py
+        hope/apps/core/management/commands/*
 
 [report]
 # Regexes for lines to exclude from consideration

@@ -14,13 +14,13 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from pytz import utc
 
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
-from hct_mis_api.apps.payment.services.dashboard_service import (
+from hope.apps.geo.models import Area
+from hope.apps.household.models import Household
+from hope.apps.payment.models import DeliveryMechanism, Payment
+from hope.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 

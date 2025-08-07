@@ -10,9 +10,9 @@ from factory import fuzzy
 from flaky import flaky
 from webtest import Upload
 
-from hct_mis_api.admin.geo import AreaAdmin
-from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.geo.models import Area, AreaType
+from hope.admin.geo import AreaAdmin
+from hope.apps.account.models import Partner, User
+from hope.apps.geo.models import Area, AreaType
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

@@ -35,14 +35,14 @@ from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from selenium.common import NoSuchElementException
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import (
+from hope.apps.account.models import User
+from hope.apps.core.models import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     HEARING,
     HOST,
     REFUGEE,
@@ -51,18 +51,18 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.periodic_data_update.utils import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 

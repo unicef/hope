@@ -17,14 +17,14 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NOT_PROCESSED,
     UNIQUE,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
+from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
@@ -32,10 +32,10 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     IgnoredFilenamesPair,
     SimilarityPair,
 )
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 @pytest.fixture(autouse=True)
@@ -58,9 +58,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         cls.user = UserFactory.create()
         cls.program = ProgramFactory.create(biometric_deduplication_enabled=True)
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.create_deduplication_set"
-    )
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.create_deduplication_set")
     def test_create_deduplication_set(self, mock_create_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
 
@@ -78,7 +76,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             )
         )
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
     def test_get_deduplication_set_results(self, mock_get_duplicates: mock.Mock) -> None:
         service = BiometricDeduplicationService()
         deduplication_set_id = str(uuid.uuid4())
@@ -87,9 +85,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         mock_get_duplicates.assert_called_once_with(deduplication_set_id)
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set"
-    )
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")
     def test_get_deduplication_set(self, mock_get_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
         deduplication_set_id = str(uuid.uuid4())
@@ -101,7 +97,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         mock_get_deduplication_set.assert_called_once_with(deduplication_set_id)
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     def test_upload_individuals_success(self, mock_bulk_upload_images: mock.Mock) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.save()
@@ -128,7 +124,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     def test_upload_individuals_failure(self, mock_bulk_upload_images: mock.Mock) -> None:
         mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIException
         rdi = RegistrationDataImportFactory(
@@ -156,9 +152,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication"
-    )
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
     def test_process_deduplication_set(self, mock_process_deduplication: mock.Mock) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.save()
@@ -189,9 +183,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi.refresh_from_db()
         self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_ERROR)
 
-    @patch(
-        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.delete_deduplication_set"
-    )
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.delete_deduplication_set")
     def test_delete_deduplication_set(self, mock_delete_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
 
@@ -206,10 +198,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.refresh_from_db()
         self.assertIsNone(self.program.deduplication_set_id)
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
-    @patch(
-        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication"
-    )
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
     def test_upload_and_process_deduplication_set(
         self, mock_process_deduplication: mock.Mock, mock_bulk_upload_images: mock.Mock
     ) -> None:
@@ -574,7 +564,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         ]
 
     @patch(
-        "hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
+        "hope.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
     )
     def test_create_grievance_tickets_for_duplicates(
         self, create_needs_adjudication_tickets_for_biometrics_mock: mock.Mock
@@ -829,7 +819,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
     @patch(
-        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate"
+        "hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate"
     )
     def test_report_false_positive_duplicate(self, mock_report_false_positive_duplicate: mock.Mock) -> None:
         service = BiometricDeduplicationService()

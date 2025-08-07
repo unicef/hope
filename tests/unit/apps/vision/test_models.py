@@ -4,8 +4,8 @@ import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 
-from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
-from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.fixtures import FundsCommitmentFactory
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db
 

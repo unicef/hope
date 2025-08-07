@@ -11,11 +11,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.core.models import BusinessArea
+    from hope.apps.core.models import BusinessArea
 
 EXCLUDED_MODELS = []
 

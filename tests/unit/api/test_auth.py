@@ -13,8 +13,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
 
-from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
-from hct_mis_api.api.models import APIToken, Grant
+from hope.api.auth import HOPEAuthentication, HOPEPermission
+from hope.api.models import APIToken, Grant
 
 
 class HOPEPermissionTest(TestCase):

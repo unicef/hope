@@ -34,15 +34,15 @@ from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
 from sorl.thumbnail.conf import settings
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.models import User
+from hope.apps.core.models import DataCollectingType
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 

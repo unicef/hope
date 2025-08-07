@@ -5,10 +5,10 @@ from typing import Any, List, Optional, Union
 import factory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hope.apps.core.field_attributes.fields_types import Scope
+from hope.apps.household.models import RESIDENCE_STATUS_CHOICE
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )

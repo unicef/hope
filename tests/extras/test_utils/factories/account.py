@@ -10,14 +10,14 @@ import factory
 from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.account.models import (
+from hope.apps.account.models import (
     AdminAreaLimitedTo,
     Partner,
     Role,
     RoleAssignment,
     User,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.apps.core.models import BusinessArea
 
 
 class PartnerFactory(DjangoModelFactory):

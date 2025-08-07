@@ -1,0 +1,391 @@
+import csv
+import json
+import logging
+from io import StringIO
+from typing import Any, TYPE_CHECKING
+from uuid import UUID
+
+from django.contrib import messages
+from django.contrib.admin import register
+from django.db.models import QuerySet
+from django.db.transaction import atomic
+from django.forms import Form, ModelForm
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import view
+from admin_extra_buttons.utils import labelize
+from admin_sync.mixin import SyncMixin
+from adminactions.export import ForeignKeysCollector
+from adminfilters.autocomplete import AutoCompleteFilter
+from import_export import fields
+from import_export.admin import ImportExportMixin
+from import_export.resources import ModelResource
+from import_export.widgets import ForeignKeyWidget
+from jsoneditor.forms import JSONEditor
+from smart_admin.mixins import LinkedObjectsMixin
+
+from .steficon import TestRuleMixin
+from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.account.models import User
+from hope.apps.administration.widgets import JsonWidget
+from hope.apps.steficon.forms import (
+    RuleDownloadCSVFileProcessForm,
+    RuleFileProcessForm,
+    RuleForm,
+)
+from hope.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
+from hope.apps.utils.security import is_root
+
+if TYPE_CHECKING:
+    from django import forms
+
+logger = logging.getLogger(__name__)
+
+
+class RuleResource(ModelResource):
+    created_by = fields.Field(
+        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    updated_by = fields.Field(
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    class Meta:
+        model = Rule
+        fields = (
+            "name",
+            "version",
+            "definition",
+            "enabled",
+            "deprecated",
+            "language",
+            "security",
+            "created_by",
+            "updated_by",
+        )
+        import_id_fields = ("name",)
+
+
+@register(Rule)
+class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = (
+        "name",
+        "created_by",
+        "updated_by",
+        "type",
+        "stable",
+        "version",
+        "enabled",
+        "deprecated",
+        "language",
+        "security",
+    )
+    list_filter = (
+        ("created_by", AutoCompleteFilter),
+        ("updated_by", AutoCompleteFilter),
+        "type",
+        "enabled",
+        "deprecated",
+        "language",
+        "security",
+    )
+    search_fields = ("name",)
+    filter_horizontal = ("allowed_business_areas",)
+    form = RuleForm
+    readonly_fields = (
+        "created_by",
+        "created_at",
+        "updated_by",
+        "updated_at",
+        "version",
+    )
+    change_form_template = None
+    change_list_template = None
+    resource_class = RuleResource
+    date_hierarchy = "created_at"
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": (
+                    ("name", "type", "version"),
+                    ("enabled", "deprecated"),
+                )
+            },
+        ),
+        (
+            "code",
+            {
+                "classes": ("collapse", "open"),
+                "fields": (
+                    "language",
+                    "definition",
+                ),
+            },
+        ),
+        (
+            "Info",
+            {
+                "classes": ["collapse"],
+                "fields": ("description", "flags"),
+            },
+        ),
+        (
+            "Data",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("created_by", "created_at"),
+                    ("updated_by", "updated_at"),
+                ),
+            },
+        ),
+        ("Allowed business areas", {"classes": ("collapse",), "fields": ("allowed_business_areas",)}),
+    ]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("history")
+            .select_related(
+                "created_by",
+                "updated_by",
+            )
+        )
+
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
+        if db_field.name == "flags":
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
+        readonly_fields = list(super().get_readonly_fields(request, obj) or [])
+        # not editable for is_superuser
+        if not is_root(request):
+            readonly_fields.extend(
+                ["name", "type", "enabled", "deprecated", "language", "definition", "description", "flags"]
+            )
+        if not request.user.is_superuser:
+            readonly_fields.append("allowed_business_areas")
+        return readonly_fields
+
+    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return is_root(request)
+
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return is_root(request)
+
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return request.user.is_superuser
+
+    def get_ignored_linked_objects(self, request: HttpRequest) -> list[str]:
+        return ["history"]
+
+    def get_form(
+        self, request: HttpRequest, obj: Any | None = None, change: bool = False, **kwargs: Any
+    ) -> type["ModelForm[Any]"]:
+        return super().get_form(request, obj, change, **kwargs)
+
+    def stable(self, obj: Any) -> str | None:
+        try:
+            url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
+            return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
+        except (RuleCommit.DoesNotExist, AttributeError):
+            return None
+
+    def delete_view(
+        self, request: HttpRequest, object_id: str, extra_context: Any | None = None
+    ) -> HttpResponse | HttpResponse:
+        return super().delete_view(request, object_id, extra_context)
+
+    def render_delete_form(self, request: HttpRequest, context: dict) -> Form:
+        return super().render_delete_form(request, context)
+
+    def _get_csv_config(self, form: Form) -> dict:
+        return {
+            "quoting": int(form.cleaned_data["quoting"]),
+            "delimiter": form.cleaned_data["delimiter"],
+            "quotechar": form.cleaned_data["quotechar"],
+            "escapechar": form.cleaned_data["escapechar"],
+        }
+
+    @button(visible=lambda o, r: "/change/" in r.path, permission="steficon.process_file")
+    def process_file(self, request: HttpRequest, pk: UUID) -> HttpResponse:
+        context = self.get_common_context(
+            request,
+            pk,
+            step=1,
+            title="Process CSV file",
+            state_opts=RuleCommit._meta,
+        )
+        if request.method == "POST":
+            rule: Rule | None = self.get_object(request, str(pk))
+            form: forms.Form
+            if request.POST["step"] == "1":
+                form = RuleFileProcessForm(request.POST, request.FILES)
+                if form.is_valid():
+                    csv_config = self._get_csv_config(form)
+                    f = request.FILES["file"]
+                    input_file = f.read().decode("utf-8")
+                    data = csv.DictReader(StringIO(input_file), fieldnames=None, **csv_config)
+                    context["fields"] = data.fieldnames
+                    for attr in form.cleaned_data["results"]:
+                        context["fields"].append(labelize(attr))
+                    info_col = labelize(form.cleaned_data["results"][0])
+                    results = []
+                    for entry in data:
+                        try:
+                            result = rule.execute(entry, only_enabled=False, only_release=False)
+                            for attr in form.cleaned_data["results"]:
+                                entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
+                        except Exception as e:
+                            entry[info_col] = str(e)
+                        results.append(entry)
+                    context["results"] = results
+                    context["step"] = 2
+                    context["form"] = RuleDownloadCSVFileProcessForm(
+                        initial={
+                            "quoting": csv_config["quoting"],
+                            "delimiter": csv_config["delimiter"],
+                            "quotechar": csv_config["quotechar"],
+                            "escapechar": csv_config["escapechar"],
+                            "data": json.dumps(results),
+                            "fields": ",".join(context["fields"]),
+                            "filename": f.name,
+                        }
+                    )
+                else:
+                    context["form"] = form
+
+            elif request.POST["step"] == "2":
+                form = RuleDownloadCSVFileProcessForm(request.POST)
+                if form.is_valid():
+                    try:
+                        csv_config = self._get_csv_config(form)
+                        data = form.cleaned_data["data"]
+                        fields = form.cleaned_data["fields"]
+                        response = HttpResponse(
+                            content_type="text/csv",
+                            headers={
+                                "Content-Disposition": 'attachment; filename="{}"'.format(form.cleaned_data["filename"])
+                            },
+                        )
+
+                        writer = csv.DictWriter(response, fieldnames=fields, **csv_config)
+                        writer.writeheader()
+                        writer.writerows(data)
+                        return response
+                    except Exception:
+                        raise
+                else:
+                    context["form"] = form
+        else:
+            context["form"] = RuleFileProcessForm(initial={"results": "value"})
+
+        return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
+
+    @button(visible=lambda btn: "/changelog/" not in btn.request.path, permission="steficon.changelog")
+    def changelog(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+        context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
+        return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
+
+    @view(pattern=r"<int:pk>/rule_do_revert/<int:state>/")
+    def do_revert(self, request: HttpRequest, pk: UUID, state: bool) -> None:
+        pass
+
+    @view(pattern=r"<int:pk>/revert/<int:state>/")
+    def revert(self, request: HttpRequest, pk: UUID, state: bool) -> TemplateResponse | HttpResponseRedirect:
+        try:
+            context = self.get_common_context(
+                request,
+                pk,
+                action="Revert",
+                MONITORED_FIELDS=MONITORED_FIELDS,
+            )
+            state = self.object.history.get(pk=state)
+            if request.method == "GET":
+                context["state"] = state
+                return TemplateResponse(request, "admin/steficon/rule/revert.html", context)
+            with atomic():
+                if "_restore" in request.POST:
+                    state.revert()
+                else:
+                    state.revert(["definition"])
+            url = reverse("admin:steficon_rule_change", args=[self.object.id])
+            return HttpResponseRedirect(url)
+        except Exception as e:
+            logger.warning(e)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:index"))
+
+    @button(visible=lambda btn: "/change/" in btn.request.path, permission="steficon.check_diff")
+    def diff(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
+        try:
+            context = self.get_common_context(request, pk, action="Code history")
+            state_pk = request.GET.get("state_pk")
+            if state_pk:
+                state = self.object.history.get(pk=state_pk)
+            else:
+                state = self.object.history.first()
+
+            try:
+                context["prev"] = state.get_previous_by_timestamp()
+            except (RuleCommit.DoesNotExist, AttributeError):
+                context["prev"] = None
+
+            try:
+                context["next"] = state.get_next_by_timestamp()
+            except (RuleCommit.DoesNotExist, AttributeError):
+                context["next"] = None
+
+            context["state"] = state
+            context["title"] = (
+                f"Change #{state.version} on {state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
+            )
+            return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
+        except Exception as e:
+            logger.warning(e)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:index"))
+
+    def change_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Any | None = None
+    ) -> HttpResponse:
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def _changeform_view(
+        self, request: HttpRequest, object_id: str | None, form_url: str = "", extra_context: Any | None = None
+    ) -> HttpResponse:
+        if request.method == "POST" and "_release" in request.POST:
+            object_id = None
+        return super()._changeform_view(request, object_id, form_url, extra_context)
+
+    @atomic()
+    def save_model(self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Any | None = None) -> None:
+        if not obj.pk:
+            obj.created_by = request.user
+        obj.updated_by = request.user
+        obj.save()
+
+    def _get_data(self, record: Any) -> str:
+        roles = RuleCommit.objects.filter(rule=record)
+        collector = ForeignKeysCollector(None)
+        objs = []
+        for qs in [roles]:
+            objs.extend(qs)
+        objs.extend(Rule.objects.filter(pk=record.pk))
+        collector.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+        )

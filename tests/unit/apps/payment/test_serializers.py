@@ -16,11 +16,11 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.payment.api.serializers import (
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import to_choice_object
+from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
     PaymentPlanDetailSerializer,
@@ -28,13 +28,13 @@ from hct_mis_api.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     Approval,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.models.payment import (
+from hope.apps.payment.models.payment import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,

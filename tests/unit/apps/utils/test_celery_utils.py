@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.utils.celery_utils import format_tasks
+from hope.apps.utils.celery_utils import format_tasks
 
 
 class TestCeleryUtils(TestCase):
@@ -23,9 +23,9 @@ class TestCeleryUtils(TestCase):
                         "hostname": "celery@low-priority-hope-celery-worker-6b77cc79b8-9wp5h",
                         "id": "aa993de4-0353-44b9-a512-a700ced30a51",
                         "kwargs": {},
-                        "name": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
+                        "name": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                         "time_start": None,
-                        "type": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
+                        "type": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                         "worker_pid": None,
                     },
                 },
@@ -36,9 +36,9 @@ class TestCeleryUtils(TestCase):
                     "hostname": "celery@low-priority-hope-celery-worker-6b77cc79b8-9wp5h",
                     "id": "aa993de4-0353-44b9-a512-a700ced30a51",
                     "kwargs": {},
-                    "name": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
+                    "name": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                     "time_start": None,
-                    "type": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
+                    "type": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                     "worker_pid": None,
                 },
             ],
@@ -50,14 +50,14 @@ class TestCeleryUtils(TestCase):
         expected_payload = [
             {
                 "id": "aa993de4-0353-44b9-a512-a700ced30a51",
-                "name": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
+                "name": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                 "args": [],
                 "kwargs": {},
                 "status": "queued",
             },
             {
                 "id": "aa993de4-0353-44b9-a512-a700ced30a51",
-                "name": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
+                "name": "hope.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                 "args": [],
                 "kwargs": {},
                 "status": "queued",

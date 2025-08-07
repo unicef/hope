@@ -16,13 +16,13 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
-from hct_mis_api.apps.core.utils import get_fields_attr_generators
+from hope.apps.core.utils import get_fields_attr_generators
 
 pytestmark = pytest.mark.django_db
 
@@ -317,8 +317,8 @@ class TestKoboAssetList:
             whole_business_area_access=True,
         )
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_all_projects_data")
+    @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hope.apps.core.kobo.api.KoboAPI.get_all_projects_data")
     def test_get_kobo_asset_list(self, mock_get_all_projects_data: Any, mock_kobo_init: Any) -> None:
         mock_kobo_init.return_value = None
         mock_get_all_projects_data.return_value = [

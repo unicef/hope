@@ -13,9 +13,9 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.payment.models import AccountType, PaymentPlan
-from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.payment.models import AccountType, PaymentPlan
+from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
 
