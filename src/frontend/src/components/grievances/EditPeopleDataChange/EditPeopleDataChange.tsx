@@ -8,6 +8,7 @@ import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FieldArray } from 'formik';
+
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -17,9 +18,8 @@ import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividua
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
-
 const BoxWithBorders = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  border-bottom: 1px solid #d8d8d8;
   padding: 15px 0;
 `;
 
@@ -203,7 +203,12 @@ function EditPeopleDataChange({
             individual={fullIndividual.individual}
             addIndividualFieldsData={editPeopleFieldsData}
           />
-          {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={editPeopleFieldsData}/>}
+          {!isEditTicket && (
+            <NewAccountFieldArray
+              values={values}
+              addIndividualFieldsData={editPeopleFieldsData}
+            />
+          )}
         </Box>
       </BoxWithBorders> */}
     </>

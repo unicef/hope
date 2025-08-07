@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { HouseholdUpdateRoles } from './HouseholdUpdateRoles';
 export type HouseholdUpdateData = {
     adminAreaTitle?: string;
     status?: string;
@@ -45,5 +46,6 @@ export type HouseholdUpdateData = {
     currency?: string;
     unhcrId?: string;
     flexFields?: any;
+    roles?: Array<HouseholdUpdateRoles>;
 };
 
