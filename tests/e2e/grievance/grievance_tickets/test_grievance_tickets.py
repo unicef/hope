@@ -561,9 +561,7 @@ class TestGrievanceTicketsHappyPath:
         assert pageGrievanceNewTicket.waitForNoResults()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
-        sleep(10)
         pageGrievanceNewTicket.getButtonNext().click()
-        sleep(200)
         pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
         pageGrievanceNewTicket.getButtonNext().click()
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text

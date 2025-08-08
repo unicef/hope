@@ -204,6 +204,7 @@ export type { PatchedProgramCycleUpdate as PatchedProgramCycleUpdateCamelCase } 
 export type { PatchedRDI as PatchedRDICamelCase } from './models/PatchedRDI';
 export type { PatchedTargetPopulationCreate as PatchedTargetPopulationCreateCamelCase } from './models/PatchedTargetPopulationCreate';
 export type { PatchedUpdateGrievanceTicket as PatchedUpdateGrievanceTicketCamelCase } from './models/PatchedUpdateGrievanceTicket';
+export type { PaymentChoices as PaymentChoicesCamelCase } from './models/PaymentChoices';
 export type { PaymentDetail as PaymentDetailCamelCase } from './models/PaymentDetail';
 export type { PaymentList as PaymentListCamelCase } from './models/PaymentList';
 export type { PaymentPlan as PaymentPlanCamelCase } from './models/PaymentPlan';
