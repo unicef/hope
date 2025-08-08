@@ -43,19 +43,33 @@ export function LookUpPaymentRecordTable({
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
-      'businessAreasProgramsPaymentsList',
+      programId === 'all' || !programId ? 'businessAreasPaymentsList' : 'businessAreasProgramsPaymentsList',
       queryVariables,
       initialValues?.selectedHousehold?.id,
       businessArea,
       programId,
     ],
     queryFn: () => {
+      // Use global payments API when programId is 'all' or not available
+      if (programId === 'all' || !programId) {
+        return RestService.restBusinessAreasPaymentsList(
+          createApiParams(
+            {
+              householdId: initialValues?.selectedHousehold?.id,
+              businessAreaSlug: businessArea,
+            },
+            {},
+            { withPagination: true },
+          ),
+        );
+      }
+      // Use program-specific payments API when programId is available
       return RestService.restBusinessAreasProgramsPaymentsList(
         createApiParams(
           {
             householdId: initialValues?.selectedHousehold?.id,
             businessAreaSlug: businessArea,
-            slug: programId === 'all' ? null : programId,
+            slug: programId,
           },
           {},
           { withPagination: true },

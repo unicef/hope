@@ -93,7 +93,7 @@ export function EditDocumentRow({
       </Grid>
       <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={document.country} />
+          <LabelizedField label={t('Country')} value={document.country.name} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 3 }}>

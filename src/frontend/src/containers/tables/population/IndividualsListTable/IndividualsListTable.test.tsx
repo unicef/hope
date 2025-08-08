@@ -43,6 +43,7 @@ describe('IndividualsListTable', () => {
         biometricDeduplicationGoldenRecordResults: [],
         household: {
           id: 'household-1',
+          programSlug: "asd3",
           geopoint: 'POINT(85.324 27.7172)',
           unicefId: 'HH-001',
           admin1: { id: 'admin1-1', name: 'Province 1' },

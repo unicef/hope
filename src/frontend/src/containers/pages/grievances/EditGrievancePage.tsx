@@ -212,7 +212,7 @@ const EditGrievancePage = (): ReactElement => {
         ),
     });
   const individualFieldsDict = useArrayToDict(
-    allAddIndividualFieldsData?.results,
+    allAddIndividualFieldsData,
     'name',
     '*',
   );
@@ -366,7 +366,7 @@ const EditGrievancePage = (): ReactElement => {
       validate={(values) =>
         validate(
           values,
-          allAddIndividualFieldsData?.results || null,
+          allAddIndividualFieldsData || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           beneficiaryGroup,

@@ -333,6 +333,7 @@ class GrievanceTicketGlobalViewSet(
                 )
             )
             .annotate(total_days=F("total__day"))
+            .distinct()
             .order_by("-created_at")
         )
 
@@ -1070,7 +1071,7 @@ class GrievanceTicketGlobalViewSet(
     @extend_schema(
         responses={200: FieldAttributeSerializer(many=True)},
     )
-    @action(detail=False, methods=["get"], url_path="all-add-individuals-fields-attributes")
+    @action(detail=False, methods=["get"], url_path="all-add-individuals-fields-attributes", pagination_class=None)
     def all_add_individuals_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         fields = (
             FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)

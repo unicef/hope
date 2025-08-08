@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 
+from django.core.files.base import ContentFile
 from django.utils import timezone
 
 import pytest
@@ -815,6 +816,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -956,6 +958,7 @@ class TestGrievanceTicketDetail:
             individual=golden_records_individual,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc_aaa.png"),
         )
 
         dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
@@ -1112,6 +1115,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -1518,6 +1522,7 @@ class TestGrievanceTicketDetail:
                             "iso_code3": document.country.iso_code3,
                         },
                         "document_number": document.document_number,
+                        "photo": document.photo.url if document.photo else None,
                     }
                     for document in individual.documents.all()
                 ],

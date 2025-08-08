@@ -147,7 +147,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -173,8 +173,8 @@ function CreateFeedbackPage(): ReactElement {
     area: null,
     language: null,
     consent: false,
-    programId: isAllPrograms ? '' : programId,
     verificationRequired: false,
+    programId: null,
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({

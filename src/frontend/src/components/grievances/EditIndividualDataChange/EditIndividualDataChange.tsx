@@ -81,20 +81,16 @@ function EditIndividualDataChange({
   });
 
   const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
-    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
+    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id,individual.program.slug],
     queryFn: () => {
       if (!individual?.id) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug,
+        programSlug: individual.program.slug,
         id: individual.id,
       });
     },
-    enabled:
-      !!individual?.id &&
-      !!businessAreaSlug &&
-      !!programSlug &&
-      programSlug !== 'all',
+    enabled: !!individual?.id && !!businessAreaSlug,
   });
 
   useEffect(() => {
@@ -124,7 +120,11 @@ function EditIndividualDataChange({
     !fullIndividual ||
     !addIndividualFieldsData
   ) {
-    return <LoadingComponent />;
+    return (
+      <div>
+        <LoadingComponent />
+      </div>
+    );
   }
 
   const combinedData = {

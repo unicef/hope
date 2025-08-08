@@ -126,6 +126,21 @@ export function processFormData(
     parentKey?: string,
 ): FormData {
   const formData = form || new FormData();
+
+  // Handle primitive values directly
+  if (typeof obj !== 'object' || obj === null || obj instanceof File) {
+    if (parentKey) {
+      if (obj instanceof File) {
+        formData.append(parentKey, obj);
+      } else if (typeof obj === 'boolean') {
+        formData.append(parentKey, obj ? 'true' : 'false');
+      } else if (obj !== null && obj !== undefined) {
+        formData.append(parentKey, obj);
+      }
+    }
+    return formData;
+  }
+
   for (const key in obj) {
     if (obj[key] === undefined || obj[key] === null) continue;
     const value = obj[key];

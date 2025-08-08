@@ -102,6 +102,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     delivered_quantities = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Household
@@ -126,6 +127,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "village",
             "geopoint",
             "import_id",
+            "program_slug",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))

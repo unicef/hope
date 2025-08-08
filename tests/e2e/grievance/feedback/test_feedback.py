@@ -451,13 +451,13 @@ class TestFeedback:
         assert "English" in pageFeedbackDetails.getLanguagesSpoken().text
         assert "Shakardara" in pageFeedbackDetails.getAdministrativeLevel2().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete - Jan to fix the grievance payload")
     def test_create_linked_ticket(
         self,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
         pageFeedback: Feedback,
         pageFeedbackDetails: FeedbackDetailsPage,
+        create_programs: None,
         add_feedbacks: None,
     ) -> None:
         # Go to Feedback

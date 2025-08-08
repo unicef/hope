@@ -9,6 +9,7 @@ from hope.apps.payment.api.views import (
     PaymentPlanViewSet,
     PaymentVerificationRecordViewSet,
     PaymentVerificationViewSet,
+    PaymentGlobalViewSet,
     PaymentViewSet,
     TargetPopulationViewSet,
     available_fsps_for_delivery_mechanisms,
@@ -21,6 +22,7 @@ business_area_nested_router = get_business_area_nested_router()
 business_area_nested_router.register(
     r"payments/payment-plans-managerial", PaymentPlanManagerialViewSet, basename="payment-plans-managerial"
 )
+business_area_nested_router.register(r"payments", PaymentGlobalViewSet, basename="payments-global")
 
 program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(

@@ -236,7 +236,11 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.buttonSendForApproval)
 
     def getButtonApproval(self) -> WebElement:
-        return self.wait_for(self.buttonApproval)
+        button = self.wait_for(self.buttonApproval)
+        # Force click using JavaScript if regular click might not work
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
+        sleep(1)
+        return button
 
     def getButtonSetInProgress(self) -> WebElement:
         return self.wait_for(self.buttonSetInProgress)
