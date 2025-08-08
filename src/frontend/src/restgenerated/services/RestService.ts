@@ -93,6 +93,7 @@ import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpd
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
 import type { PatchedUpdateGrievanceTicket } from '../models/PatchedUpdateGrievanceTicket';
+import type { PaymentChoices } from '../models/PaymentChoices';
 import type { PaymentDetail } from '../models/PaymentDetail';
 import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
@@ -4472,6 +4473,85 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPaymentListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentsList({
+        businessAreaSlug,
+        limit,
+        offset,
+        ordering,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedPaymentListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns PaymentChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentsChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<PaymentChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payments/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentsCountRetrieve({
+        businessAreaSlug,
+        ordering,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'ordering': ordering,
             },
         });
     }

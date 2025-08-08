@@ -54,6 +54,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
     PaymentDetailSerializer,
+    PaymentChoicesSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanCreateFollowUpSerializer,
@@ -1714,6 +1715,44 @@ class PaymentViewSet(
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
         )
+
+
+class PaymentGlobalViewSet(
+    BusinessAreaProgramsAccessMixin,
+    SerializerActionMixin,
+    CountActionMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Payment.objects.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).all()
+    serializer_classes_by_action = {
+        "list": PaymentListSerializer,
+        "choices": PaymentChoicesSerializer,
+    }
+    PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
+    filter_backends = (OrderingFilter,)
+    program_model_field = "program"
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "household",
+                "household__admin1",
+                "household__admin2",
+                "head_of_household",
+                "collector",
+                "parent",
+                "financial_service_provider",
+                "program",
+            )
+            .order_by("created_at")
+        )
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore
