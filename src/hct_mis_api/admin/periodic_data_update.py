@@ -33,11 +33,22 @@ class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
     )
+    readonly_fields = (
+        "task_status",
+        "celery_task_result_id",
+    )
+    exclude = ("celery_tasks_results_ids",)
     raw_id_fields = ("file", "program", "business_area", "created_by")
     inlines = [PeriodicDataUpdateUploadInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
+
+    def task_status(self, obj: PeriodicDataUpdateXlsxTemplate) -> str:
+        return obj.celery_statuses.get("export")
+
+    def celery_task_result_id(self, obj: PeriodicDataUpdateXlsxTemplate) -> str:
+        return obj.celery_tasks_results_ids.get("export")
 
 
 @admin.register(PeriodicDataUpdateXlsxUpload)
@@ -47,6 +58,11 @@ class PeriodicDataUpdateUploadAdmin(HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
     )
+    readonly_fields = (
+        "task_status",
+        "celery_task_result_id",
+    )
+    exclude = ("celery_tasks_results_ids",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -57,3 +73,9 @@ class PeriodicDataUpdateUploadAdmin(HOPEModelAdminBase):
                 "template",
             )
         )
+
+    def task_status(self, obj: PeriodicDataUpdateXlsxTemplate) -> str:
+        return obj.celery_statuses.get("import")
+
+    def celery_task_result_id(self, obj: PeriodicDataUpdateXlsxTemplate) -> str:
+        return obj.celery_tasks_results_ids.get("import")
