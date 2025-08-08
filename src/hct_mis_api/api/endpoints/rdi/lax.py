@@ -1,6 +1,7 @@
 from functools import cached_property
 from typing import TYPE_CHECKING
 
+from django.db.transaction import atomic
 from django.http import Http404
 from django.utils import timezone
 
@@ -137,12 +138,13 @@ class CreateLaxIndividuals(CreateLaxBaseView, DocumentMixin, AccountMixin, Photo
     """API to import individuals with selected RDI."""
 
     @extend_schema(request=IndividualSerializer(many=True))
+    @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         individual_id_mapping = {}
         total_individuals = 0
         total_errors = 0
         total_accepted = 0
-        errs = []
+        results = []
 
         serializer_context = {
             "rdi": self.selected_rdi,
@@ -155,6 +157,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, DocumentMixin, AccountMixin, Photo
             if serializer.is_valid():
                 documents_data = serializer.validated_data.pop("documents", [])
                 accounts_data = serializer.validated_data.pop("accounts", [])
+                individual_external_id = serializer.validated_data.pop("individual_id", None)
                 individual = serializer.save()
 
                 for document_data in documents_data:
@@ -164,11 +167,11 @@ class CreateLaxIndividuals(CreateLaxBaseView, DocumentMixin, AccountMixin, Photo
                 for account_data in accounts_data:
                     self.save_account(individual, account_data)
 
-                individual_id_mapping[individual.individual_id] = individual.unicef_id
-                errs.append({"pk": individual.pk})
+                individual_id_mapping[individual_external_id] = individual.unicef_id
+                results.append({"pk": individual.pk})
                 total_accepted += 1
             else:
-                errs.append(serializer.errors)
+                results.append(serializer.errors)
                 total_errors += 1
 
         return Response(
@@ -178,7 +181,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, DocumentMixin, AccountMixin, Photo
                 "accepted": total_accepted,
                 "errors": total_errors,
                 "individual_id_mapping": individual_id_mapping,
-                "results": errs,
+                "results": results,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -274,11 +277,12 @@ class CreateLaxHouseholds(CreateLaxBaseView):
     """API to import households with selected RDI."""
 
     @extend_schema(request=HouseholdSerializer(many=True))
+    @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         total_households = 0
         total_errors = 0
         total_accepted = 0
-        errs = []
+        results = []
 
         serializer_context = {
             "rdi": self.selected_rdi,
@@ -294,15 +298,20 @@ class CreateLaxHouseholds(CreateLaxBaseView):
                 alternate_collector = serializer.validated_data.pop("alternate_collector", None)
                 household = serializer.save()
 
-                PendingIndividual.objects.filter(unicef_id__in=members).update(household=household)
+                PendingIndividual.objects.filter(
+                    registration_data_import=self.selected_rdi,
+                    program=self.selected_rdi.program,
+                    unicef_id__in=members,
+                ).update(household=household)
+
                 household.individuals_and_roles.create(individual=primary_collector, role=ROLE_PRIMARY)
                 if alternate_collector:
                     household.individuals_and_roles.create(individual=alternate_collector, role=ROLE_ALTERNATE)
 
-                errs.append({"pk": household.pk})
+                results.append({"pk": household.pk})
                 total_accepted += 1
             else:
-                errs.append(serializer.errors)
+                results.append(serializer.errors)
                 total_errors += 1
 
         return Response(
@@ -311,7 +320,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
                 "processed": total_households,
                 "accepted": total_accepted,
                 "errors": total_errors,
-                "results": errs,
+                "results": results,
             },
             status=status.HTTP_201_CREATED,
         )
