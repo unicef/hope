@@ -9,10 +9,10 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import MALE, Household, Individual
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import MALE, Household, Individual
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch, pytest.mark.django_db]
 
@@ -192,11 +192,11 @@ def test_merge_rdi_with_collision(
     5. Merged individual should be updated with the pending individual data
     5. Merged household should have added in_review_rdi to extra_rdis m2m
     """
-    from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+    from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
     # Enable collision detection in the program
     program.collision_detection_enabled = True
-    from hct_mis_api.apps.program.collision_detectors import (
+    from hope.apps.program.collision_detectors import (
         IdentificationKeyCollisionDetector,
     )
 

@@ -41,19 +41,19 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import (
     DUPLICATE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hct_mis_api.apps.sanction_list.models import (
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from hope.apps.sanction_list.models import (
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
 )

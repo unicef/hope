@@ -14,17 +14,17 @@ from extras.test_utils.factories.payment import (
 )
 from freezegun import freeze_time
 
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.models import (
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
 )
-from hct_mis_api.apps.payment.services import payment_household_snapshot_service
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services import payment_household_snapshot_service
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestBuildSnapshot(TestCase):

@@ -10,9 +10,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.models import Grant
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
@@ -22,8 +22,8 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class PushLaxToRDITests(HOPEApiTestCase):

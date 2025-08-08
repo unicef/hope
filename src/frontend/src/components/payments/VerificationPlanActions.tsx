@@ -8,7 +8,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { ActivateVerificationPlan } from './ActivateVerificationPlan';
@@ -19,7 +19,6 @@ import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
-import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { showApiErrorMessages } from '@utils/utils';
 
 const StyledLink = styled.a`
@@ -28,28 +27,38 @@ const StyledLink = styled.a`
 
 interface VerificationPlanActionsProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  planNode: PaymentVerificationPlan;
+  paymentPlanNode: PaymentVerificationPlanDetails;
 }
 
 export function VerificationPlanActions({
   verificationPlan,
-  planNode,
+  paymentPlanNode,
 }: VerificationPlanActionsProps): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { businessArea, programId: programSlug } = useBaseUrl();
-
+  const { businessArea, programSlug } = useBaseUrl();
+  const queryClient = useQueryClient();
   const exportXlsxMutation = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsExportXlsxCreate(
         {
           businessAreaSlug: businessArea,
-          id: planNode.id,
+          id: paymentPlanNode.id,
           programSlug: programSlug,
           verificationPlanId: verificationPlan.id,
         },
       ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          paymentPlanNode.id,
+          programSlug,
+        ],
+      });
+    },
   });
 
   const invalidVerificationPlanMutation = useMutation({
@@ -57,11 +66,22 @@ export function VerificationPlanActions({
       RestService.restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: planNode.id,
+          id: paymentPlanNode.id,
           programSlug: programSlug,
           verificationPlanId: verificationPlan.id,
         },
       ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          paymentPlanNode.id,
+          programSlug,
+        ],
+      });
+    },
   });
 
   if (!verificationPlan || !permissions) return null;
@@ -117,7 +137,7 @@ export function VerificationPlanActions({
             <Box mr={2}>
               {canDelete && (
                 <DeleteVerificationPlan
-                  cashOrPaymentPlanId={planNode.id}
+                  cashOrPaymentPlanId={paymentPlanNode.id}
                   paymentVerificationPlanId={verificationPlan.id}
                 />
               )}
@@ -125,14 +145,14 @@ export function VerificationPlanActions({
             {canEdit && (
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
-                cashOrPaymentPlanId={planNode.id}
+                cashOrPaymentPlanId={paymentPlanNode.id}
               />
             )}
             {canActivate && (
               <Box alignItems="center" display="flex">
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
-                  cashOrPaymentPlanId={planNode.id}
+                  cashOrPaymentPlanId={paymentPlanNode.id}
                 />
               </Box>
             )}
@@ -196,7 +216,7 @@ export function VerificationPlanActions({
                   <Box p={2} data-cy="import-xlsx">
                     <ImportXlsx
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={planNode.id}
+                      cashOrPaymentPlanId={paymentPlanNode.id}
                     />
                   </Box>
                 )}
@@ -204,7 +224,7 @@ export function VerificationPlanActions({
                 {canFinish && verificationPlan.xlsxFileImported && (
                   <FinishVerificationPlan
                     verificationPlan={verificationPlan}
-                    cashOrPaymentPlanId={planNode.id}
+                    cashOrPaymentPlanId={paymentPlanNode.id}
                   />
                 )}
                 {canDiscard &&
@@ -212,7 +232,7 @@ export function VerificationPlanActions({
                   !verificationPlan.xlsxFileImported && (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={planNode.id}
+                      cashOrPaymentPlanId={paymentPlanNode.id}
                     />
                   )}
                 {canMarkInvalid && (
@@ -245,13 +265,13 @@ export function VerificationPlanActions({
                 {canFinish && (
                   <FinishVerificationPlan
                     verificationPlan={verificationPlan}
-                    cashOrPaymentPlanId={planNode.id}
+                    cashOrPaymentPlanId={paymentPlanNode.id}
                   />
                 )}
                 {canDiscard && (
                   <DiscardVerificationPlan
                     paymentVerificationPlanId={verificationPlan.id}
-                    cashOrPaymentPlanId={planNode.id}
+                    cashOrPaymentPlanId={paymentPlanNode.id}
                   />
                 )}
               </>

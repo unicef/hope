@@ -21,13 +21,13 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.celery_tasks import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.models import ROLE_PRIMARY
+from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
     FinancialInstitution,
@@ -39,7 +39,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.services.payment_gateway import (
+from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
     AddRecordsResponseData,
     DeliveryMechanismData,
@@ -50,7 +50,7 @@ from hct_mis_api.apps.payment.services.payment_gateway import (
     PaymentInstructionStatus,
     PaymentRecordData,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 
@@ -158,14 +158,12 @@ class TestPaymentGatewayService(APITestCase):
         create_payment_plan_snapshot_data(cls.pp)
 
     @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
-    )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
     def test_sync_records_for_split(
         self,
         get_quantity_in_usd_mock: Any,
@@ -237,14 +235,12 @@ class TestPaymentGatewayService(APITestCase):
         assert self.pp.status == PaymentPlan.Status.FINISHED
 
     @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
-    )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
     def test_sync_records_error_messages(
         self,
         get_quantity_in_usd_mock: Any,
@@ -347,14 +343,12 @@ class TestPaymentGatewayService(APITestCase):
         assert change_payment_instruction_status_mock.call_count == 2
 
     @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
-    )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
     def test_sync_payment_plan(
         self,
         get_quantity_in_usd_mock: Any,
@@ -424,9 +418,9 @@ class TestPaymentGatewayService(APITestCase):
         self.pp.refresh_from_db()
         assert self.pp.status == PaymentPlan.Status.FINISHED
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
     def test_sync_record(
         self,
         get_quantity_in_usd_mock: Any,
@@ -485,10 +479,8 @@ class TestPaymentGatewayService(APITestCase):
         p.status = "NOT EXISTING STATUS"
         self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_ERROR)
 
-    @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
-    )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_records_to_payment_instructions_for_split(
         self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
     ) -> None:
@@ -526,10 +518,8 @@ class TestPaymentGatewayService(APITestCase):
         self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
         self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)
 
-    @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
-    )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_records_to_payment_instructions_for_split_error(
         self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
     ) -> None:
@@ -566,7 +556,7 @@ class TestPaymentGatewayService(APITestCase):
         self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")
         self.assertEqual(self.payments[1].reason_for_unsuccessful_payment, "Error")
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
         post_mock.return_value = (
             {
@@ -605,7 +595,7 @@ class TestPaymentGatewayService(APITestCase):
             validate_response=True,
         )
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration_mobile(self, post_mock: Any) -> None:
         post_mock.return_value = (
             {
@@ -672,7 +662,7 @@ class TestPaymentGatewayService(APITestCase):
             validate_response=True,
         )
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration_bank(self, post_mock: Any) -> None:
         uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
 
@@ -793,7 +783,7 @@ class TestPaymentGatewayService(APITestCase):
         assert actual_kwargs["validate_response"] is True
         post_mock.reset_mock()
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_validation_error(self, post_mock: Any) -> None:
         payment = self.payments[0]
         payment.entitlement_quantity = None
@@ -806,7 +796,7 @@ class TestPaymentGatewayService(APITestCase):
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_no_snapshot(self, post_mock: Any) -> None:
         payment = self.payments[0]
         payment.household_snapshot.delete()
@@ -829,7 +819,7 @@ class TestPaymentGatewayService(APITestCase):
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_fsps(self, get_mock: Any) -> None:
         get_mock.return_value = (
             [
@@ -856,7 +846,7 @@ class TestPaymentGatewayService(APITestCase):
         response_data = PaymentGatewayAPI().get_fsps()
         assert isinstance(response_data[0], FspData)
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_account_types(self, get_mock: Any) -> None:
         get_mock.return_value = (
             [
@@ -873,7 +863,7 @@ class TestPaymentGatewayService(APITestCase):
         response_data = PaymentGatewayAPI().get_account_types()
         assert isinstance(response_data[0], AccountTypeData)
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_create_payment_instruction(self, post_mock: Any) -> None:
         post_mock.return_value = (
             {
@@ -890,7 +880,7 @@ class TestPaymentGatewayService(APITestCase):
         response_data = PaymentGatewayAPI().create_payment_instruction({})
         assert isinstance(response_data, PaymentInstructionData)
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_record(self, get_mock: Any) -> None:
         get_mock.return_value = (
             [
@@ -912,7 +902,7 @@ class TestPaymentGatewayService(APITestCase):
         response_data = PaymentGatewayAPI().get_record("123")
         assert isinstance(response_data, PaymentRecordData)
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_change_payment_instruction_status(self, post_mock: Any) -> None:
         s = Mock()
         bad_status = "bad_status"
@@ -933,7 +923,7 @@ class TestPaymentGatewayService(APITestCase):
         )
         assert response == "ABORTED"
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
     def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
         assert DeliveryMechanism.objects.all().count() == 14
 
@@ -959,7 +949,7 @@ class TestPaymentGatewayService(APITestCase):
         assert dm_new.is_active
         assert dm_new.payment_gateway_id == "33"
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
     def test_sync_fsps(self, get_fsps_mock: Any) -> None:
         assert self.pg_fsp.name == "Western Union"
         assert self.pg_fsp.payment_gateway_id == "123"
@@ -1033,7 +1023,7 @@ class TestPaymentGatewayService(APITestCase):
         assert fsp_name_mapping.hope_name == "field1"
         assert fsp_name_mapping.source == FspNameMapping.SourceModel.ACCOUNT
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
     def test_periodic_sync_payment_gateway_delivery_mechanisms(self, sync_delivery_mechanisms_mock: Any) -> None:
         periodic_sync_payment_gateway_delivery_mechanisms()
         assert sync_delivery_mechanisms_mock.call_count == 1

@@ -75,6 +75,7 @@ export const UniversalRestTable = <T, K>({
 
   const filteredQueryVariables = useMemo(() => {
     const filtered = filterEmptyParams(queryVariables);
+
     return {
       ...filtered,
       businessAreaSlug: queryVariables.businessAreaSlug,
@@ -139,7 +140,7 @@ export const UniversalRestTable = <T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={itemsCount ?? 0}
+      itemsCount={itemsCount}
       handleChangePage={(_event, newPage) => {
         setPage(newPage);
       }}

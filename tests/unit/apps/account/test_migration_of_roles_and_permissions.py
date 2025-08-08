@@ -13,16 +13,16 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import (
+from hope.apps.account.models import (
     AdminAreaLimitedTo,
     Partner,
     Role,
     RoleAssignment,
 )
-from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
-from hct_mis_api.apps.program.models import ProgramPartnerThrough
+from hope.apps.core.models import BusinessAreaPartnerThrough
+from hope.apps.program.models import ProgramPartnerThrough
 
-data_migration = import_module("hct_mis_api.apps.account.migrations.0011_migration")
+data_migration = import_module("hope.apps.account.migrations.0011_migration")
 
 
 # TODO: remove this file after removal of BusinessAreaPartnerThrough and ProgramPartnerThrough - see the comment below

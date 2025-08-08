@@ -3,16 +3,16 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import MALE, Document, DocumentType, Individual
-from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.celery_tasks import (
+from hope.apps.core.models import FlexibleAttribute
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import MALE, Document, DocumentType, Individual
+from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
+from hope.apps.program.models import Program
+from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
+from hope.apps.universal_update_script.models import UniversalUpdate
 
 pytestmark = pytest.mark.django_db()
 

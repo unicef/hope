@@ -8,9 +8,9 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.account.permissions import Permissions
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 

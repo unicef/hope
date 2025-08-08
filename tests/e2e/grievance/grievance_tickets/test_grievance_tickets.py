@@ -30,16 +30,16 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import (
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.models import HOST, Household, Individual
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hope.apps.household.models import HOST, Household, Individual
+from hope.apps.payment.models import Payment
+from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -360,7 +360,7 @@ def create_grievance_referral(
 
     grievance_ticket = GrievanceTicket.objects.create(**ticket_data)
 
-    from hct_mis_api.apps.grievance.models import TicketReferralDetails
+    from hope.apps.grievance.models import TicketReferralDetails
 
     TicketReferralDetails.objects.create(
         ticket=grievance_ticket, individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first()

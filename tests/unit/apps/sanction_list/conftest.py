@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, Any, Generator
 import pytest
 from responses import RequestsMock
 
-from hct_mis_api.apps.core.celery import app
+from hope.apps.core.celery import app
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.sanction_list.models import SanctionList
+    from hope.apps.sanction_list.models import SanctionList
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def sanction_list(db: Any) -> "SanctionList":
 
     return SanctionListFactory(
         name="EU",
-        strategy="hct_mis_api.apps.sanction_list.strategies.eu.EUSanctionList",
+        strategy="hope.apps.sanction_list.strategies.eu.EUSanctionList",
         config={
             "url": "http://example.com/sl.xml",
         },

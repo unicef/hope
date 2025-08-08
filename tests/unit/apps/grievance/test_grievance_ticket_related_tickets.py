@@ -11,11 +11,11 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,

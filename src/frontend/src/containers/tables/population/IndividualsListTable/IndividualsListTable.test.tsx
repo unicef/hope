@@ -8,6 +8,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { SexEnum } from '@restgenerated/models/SexEnum';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -16,7 +18,7 @@ describe('IndividualsListTable', () => {
   let queryClient: QueryClient;
 
   // Mock data
-  const mockIndividualsData = {
+  const mockIndividualsData :PaginatedIndividualListList = {
     next: null,
     previous: null,
     results: [
@@ -30,7 +32,6 @@ describe('IndividualsListTable', () => {
         relationship: RelationshipEnum.HEAD,
         status: 'ACTIVE',
         role: 'PRIMARY',
-        residentStatus: '',
         relationshipDisplay: 'Head of household (self)',
         deduplicationBatchStatusDisplay: 'Unique in batch',
         biometricDeduplicationBatchStatusDisplay: 'Not processed',
@@ -54,7 +55,7 @@ describe('IndividualsListTable', () => {
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
           importId: 'import-1',
-          residenceStatus: '',
+          residenceStatus: ResidenceStatusEnum.REFUGEE,
         },
         program: {
           id: 'test-program',
@@ -66,7 +67,6 @@ describe('IndividualsListTable', () => {
         lastRegistrationDate: '2023-01-15T10:30:00Z',
       },
     ],
-    count: 1,
   };
 
   const mockChoicesData = {

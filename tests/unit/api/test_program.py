@@ -8,9 +8,9 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program
+from hope.api.models import Grant
+from hope.apps.core.models import BusinessArea
+from hope.apps.program.models import Program
 
 
 class APIProgramTests(HOPEApiTestCase):

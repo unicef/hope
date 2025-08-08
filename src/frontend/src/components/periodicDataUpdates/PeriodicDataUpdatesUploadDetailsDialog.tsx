@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { snakeCase } from 'lodash';
 
 interface PeriodicDataUpdatesUploadDetailsDialogProps {
   open: boolean;
@@ -32,7 +31,7 @@ const FormErrorDisplay = ({ formErrors }) => {
           <ul>
             {Object.entries(error.errors).map(([field, fieldErrors], idx) => (
               <li key={idx}>
-                <strong>{snakeCase(field)}</strong>
+                <strong>{field}</strong>
                 {/*@ts-ignore*/}
                 {fieldErrors.map((err, errIdx) => (
                   <div key={errIdx} style={{ color: 'red' }}>

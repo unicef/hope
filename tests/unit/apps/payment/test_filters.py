@@ -9,8 +9,8 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -66,7 +66,7 @@ class TestFinancialServiceProviderXlsxTemplateFilter(TestCase):
         )
 
     def test_xlsx_template_business_area_filter_distinct(self) -> None:
-        from hct_mis_api.apps.payment.filters import (
+        from hope.apps.payment.filters import (
             FinancialServiceProviderXlsxTemplateFilter,
         )
 

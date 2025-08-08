@@ -29,11 +29,11 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.data_change.utils import (
+from hope.apps.account.models import AdminAreaLimitedTo
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
     handle_add_document,
@@ -41,28 +41,28 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     to_phone_number_str,
     verify_flex_fields,
 )
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     close_needs_adjudication_ticket_service,
     create_grievance_ticket_with_details,
 )
-from hct_mis_api.apps.grievance.utils import (
+from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from hope.apps.utils.models import MergeStatusModel
 
 
 class FlexibleAttribute:
     class objects:
         @staticmethod
-        def filter(type: Any) -> Any:
+        def filter(field_type: Any) -> Any:
             return MagicMock()
 
 
@@ -83,7 +83,7 @@ class TestGrievanceUtils(TestCase):
         to_phone_number_str(data, "other_field_name")
         self.assertEqual(data["phone_number"], 123456789)
 
-    @patch("hct_mis_api.apps.core.models.FlexibleAttribute.objects.filter")
+    @patch("hope.apps.core.models.FlexibleAttribute.objects.filter")
     def test_cast_flex_fields(self, mock_filter: Any) -> None:
         mock_filter.side_effect = [
             MagicMock(values_list=MagicMock(return_value=["decimal_field"])),
@@ -531,7 +531,7 @@ class TestGrievanceUtils(TestCase):
         },
     )
     @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
     )
     def test_close_needs_adjudication_ticket_service_for_biometrics(
         self, report_false_positive_duplicate_mock: MagicMock
