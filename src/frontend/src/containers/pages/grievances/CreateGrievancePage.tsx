@@ -422,7 +422,7 @@ const CreateGrievancePage = (): ReactElement => {
       validate={(values) =>
         validateUsingSteps(
           values,
-          allAddIndividualFieldsData?.results || null,
+          allAddIndividualFieldsData || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           activeStep,

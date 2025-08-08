@@ -643,7 +643,6 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_tickets_social_program(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -673,7 +672,6 @@ class TestGrievanceTickets:
             sleep(0.5)
             assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -746,7 +744,6 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -812,7 +809,6 @@ class TestGrievanceTickets:
             pytest.param({"category": "Data Change", "type": "Group Data Update"}, id="Data Change Group Data Update"),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_hh_grievance_tickets_create_new_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,

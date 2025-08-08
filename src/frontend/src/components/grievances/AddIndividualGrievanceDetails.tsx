@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
-  getFlexFieldTextValue,
+    camelToUnderscore,
+    getFlexFieldTextValue,
   renderBoolean,
   showApiErrorMessages,
 } from '@utils/utils';
@@ -20,6 +21,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import camelCase from 'lodash/camelCase';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -76,10 +78,10 @@ function AddIndividualGrievanceDetails({
     return null;
   }
   const fieldsDict =
-    data?.results?.reduce(
+    data?.reduce(
       (previousValue, currentValue) => ({
         ...previousValue,
-        [currentValue?.name]: currentValue,
+        [camelCase(currentValue?.name)]: currentValue,
       }),
       {},
     ) || {};
@@ -98,8 +100,8 @@ function AddIndividualGrievanceDetails({
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
-
       const fieldAttribute = fieldsDict[key];
+      console.log(fieldsDict,fieldAttribute,key)
       if (fieldAttribute.type === 'BOOL') {
         textValue = renderBoolean(value as boolean);
       }
@@ -114,7 +116,7 @@ function AddIndividualGrievanceDetails({
       return (
         <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField
-            label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
+            label={key === 'sex' ? t('GENDER') : camelToUnderscore(key).replace(/_/g, ' ')}
             value={<span>{textValue as ReactNode}</span>}
           />
         </Grid>

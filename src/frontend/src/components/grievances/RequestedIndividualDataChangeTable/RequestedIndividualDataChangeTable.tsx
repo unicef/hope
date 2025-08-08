@@ -69,7 +69,7 @@ export function RequestedIndividualDataChangeTable({
         });
       },
     });
-  
+
 
   const individualData = {
     ...ticket.ticketDetails.individualData,

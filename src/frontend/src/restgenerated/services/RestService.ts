@@ -21,6 +21,7 @@ import type { FeedbackDetail } from '../models/FeedbackDetail';
 import type { FeedbackMessage } from '../models/FeedbackMessage';
 import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
+import type { FieldAttribute } from '../models/FieldAttribute';
 import type { FspChoices } from '../models/FspChoices';
 import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
@@ -1912,7 +1913,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedFieldAttributeList
+     * @returns FieldAttribute
      * @throws ApiError
      */
     public static restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList({
@@ -1940,8 +1941,6 @@ export class RestService {
         isActiveProgram,
         isCrossArea,
         issueType,
-        limit,
-        offset,
         orderBy,
         ordering,
         paymentRecordIds,
@@ -2018,14 +2017,6 @@ export class RestService {
          */
         issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
          * Ordering
          *
          * * `unicef_id` - Unicef id
@@ -2093,7 +2084,7 @@ export class RestService {
          * * `3` - Not urgent
          */
         urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedFieldAttributeList> {
+    }): CancelablePromise<Array<FieldAttribute>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-add-individuals-fields-attributes/',
@@ -2124,8 +2115,6 @@ export class RestService {
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'payment_record_ids': paymentRecordIds,

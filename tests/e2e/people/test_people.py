@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 from typing import List
 
 from django.db import transaction
@@ -316,8 +315,8 @@ class TestPeople:
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
-        sleep(0.2)
         pageGrievanceDetailsPage.getButtonApproval().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()
         assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
