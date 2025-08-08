@@ -790,6 +790,17 @@ class PaymentPlan(
         return self.is_payment_gateway and all_sent_to_fsp
 
     @property
+    def can_regenerate_export_file_per_fsp(self) -> bool:
+        """
+        can regenerate export_file_per_fsp
+        """
+        return (
+            self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
+            and self.export_file_per_fsp
+            and self.background_action_status is None
+        )
+
+    @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False

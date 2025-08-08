@@ -194,6 +194,9 @@ export function AcceptedPaymentPlanHeaderButtons({
                 disabled={shouldDisableDownloadXlsx}
               >
                 {t('Download XLSX')}
+              {/*REGENERATE XLSX*/}
+              {/*  shouldDisableExportXlsx */}
+              {/*   add new action here if PP.canDownloadXlsx & PP.canRegenerateExportFilePerFsp */}
               </Button>
             </Box>
             {paymentPlan.canSendXlsxPassword && (

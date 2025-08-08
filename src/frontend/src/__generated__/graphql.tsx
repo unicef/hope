@@ -2719,6 +2719,7 @@ export type IndividualNode = Node & {
   household?: Maybe<HouseholdNode>;
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>;
   id: Scalars['ID']['output'];
+  identificationKey?: Maybe<Scalars['String']['output']>;
   identities?: Maybe<IndividualIdentityNodeConnection>;
   importId?: Maybe<Scalars['String']['output']>;
   importedIndividualId?: Maybe<Scalars['UUID']['output']>;
@@ -4321,6 +4322,7 @@ export type PaymentPlanNode = Node & {
   canCreateXlsxWithFspAuthCode?: Maybe<Scalars['Boolean']['output']>;
   canDownloadXlsx?: Maybe<Scalars['Boolean']['output']>;
   canExportXlsx?: Maybe<Scalars['Boolean']['output']>;
+  canRegenerateExportFilePerFsp?: Maybe<Scalars['Boolean']['output']>;
   canSendToPaymentGateway?: Maybe<Scalars['Boolean']['output']>;
   canSendXlsxPassword?: Maybe<Scalars['Boolean']['output']>;
   canSplit?: Maybe<Scalars['Boolean']['output']>;
@@ -23945,6 +23947,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>;
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identificationKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   identities?: Resolver<Maybe<ResolversTypes['IndividualIdentityNodeConnection']>, ParentType, ContextType, Partial<IndividualNodeIdentitiesArgs>>;
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
@@ -24445,6 +24448,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   canCreateXlsxWithFspAuthCode?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canDownloadXlsx?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canExportXlsx?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  canRegenerateExportFilePerFsp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSendToPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSendXlsxPassword?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSplit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
