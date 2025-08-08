@@ -144,3 +144,30 @@ class SyncWithPaymentGatewayTest(TestCase):
             reverse("admin:payment_deliverymechanismconfig_changelist"),
             response["Location"],
         )
+
+    @patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.add_missing_records_to_payment_instructions"
+    )
+    @patch("hct_mis_api.apps.payment.admin.has_payment_plan_pg_sync_permission", return_value=True)
+    def test_payment_post_sync_missing_records_with_payment_gateway(self: Any, mock_perm: Any, mock_sync: Any) -> None:
+        url = reverse(
+            "admin:payment_paymentplan_sync_missing_records_with_payment_gateway", args=[self.payment_plan.pk]
+        )
+        response = self.client.post(url)
+
+        mock_sync.assert_called_once_with(self.payment_plan)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(
+            reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]),
+            response["Location"],
+        )
+
+    @patch("hct_mis_api.apps.payment.admin.has_payment_plan_pg_sync_permission", return_value=True)
+    def test_payment_get_sync_missing_records_with_payment_gateway(self: Any, mock_perm: Any) -> None:
+        url = reverse(
+            "admin:payment_paymentplan_sync_missing_records_with_payment_gateway", args=[self.payment_plan.pk]
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Do you confirm to Sync with Payment Gateway missing Records?")
