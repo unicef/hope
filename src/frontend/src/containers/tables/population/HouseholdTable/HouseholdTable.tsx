@@ -211,6 +211,7 @@ export const HouseholdTable = ({
         title={`${beneficiaryGroup?.groupLabelPlural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
+        initialRowsPerPage={5}
         data={data}
         error={error}
         isLoading={isLoading}

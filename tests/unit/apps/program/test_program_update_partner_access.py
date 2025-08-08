@@ -14,9 +14,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo, RoleAssignment
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import AdminAreaLimitedTo, RoleAssignment
+from hope.apps.account.permissions import Permissions
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

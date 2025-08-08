@@ -33,12 +33,12 @@ from extras.test_utils.factories.targeting import (
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.models import User
+from hope.apps.core.currencies import CURRENCY_CHOICES
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
+from hope.apps.payment.models import (
     Account,
     AccountType,
     Approval,
@@ -56,14 +56,14 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import to_decimal
+from hope.apps.program.models import Program
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:

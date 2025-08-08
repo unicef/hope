@@ -1,6 +1,9 @@
 import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
+
+from hope.apps.core.services.rapid_pro.api import TokenNotProvided
+
 from urllib.parse import urlencode
 
 from django.urls import reverse
@@ -25,10 +28,10 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.models import Survey
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.permissions import Permissions
+from hope.apps.accountability.models import Survey
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -1175,8 +1178,8 @@ class TestMessageViewSet:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1208,8 +1211,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1235,8 +1238,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1268,8 +1271,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1295,8 +1298,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1777,9 +1780,9 @@ class TestSurveyViewSet:
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
         )
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
             patch(
-                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
                 MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
             ),
         ):
@@ -1886,3 +1889,17 @@ class TestSurveyViewSet:
         results_ids = [survey["id"] for survey in results]
         assert str(self.srv.id) in results_ids
         assert str(self.srv_2.id) in results_ids
+
+    def test_get_available_flows_no_token(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        with (
+            patch(
+                "hope.apps.accountability.api.views.RapidProAPI.__init__",
+                MagicMock(side_effect=TokenNotProvided),
+            ),
+        ):
+            response = self.client.get(self.url_flows)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == ["Token is not provided."]

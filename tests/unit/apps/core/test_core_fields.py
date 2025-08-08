@@ -1,11 +1,11 @@
 from unittest.mock import patch
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
+from hope.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
 
 
 class TestCoreFields(APITestCase):
@@ -18,7 +18,7 @@ class TestCoreFields(APITestCase):
             self.assertTrue(field.get("lookup"), f"{field.get('name')} does not have a lookup")
 
     @patch(
-        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+        "hope.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
         lambda: [
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
@@ -66,7 +66,7 @@ class TestCoreFields(APITestCase):
         self.assertEqual(len(factory_result), 2)
 
     @patch(
-        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+        "hope.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
         lambda: [
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",

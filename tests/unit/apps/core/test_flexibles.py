@@ -6,8 +6,8 @@ from django.test import TestCase
 
 from xlrd import XLRDError
 
-from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hct_mis_api.apps.core.models import (
+from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
+from hope.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,

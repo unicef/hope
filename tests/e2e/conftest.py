@@ -77,12 +77,12 @@ from pytest_html_reporter import attach
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.config.env import env
+from hope.apps.account.models import Partner, Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Country
+from hope.apps.household.models import DocumentType
+from hope.config.env import env
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -172,12 +172,12 @@ def pytest_configure(config) -> None:  # type: ignore
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+            "hope.apps.registration_datahub.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,

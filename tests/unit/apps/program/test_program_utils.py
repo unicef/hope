@@ -19,8 +19,8 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
@@ -29,11 +29,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.utils import (
+from hope.apps.program.utils import (
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class TestEnrolHouseholdToProgram(TestCase):
@@ -305,7 +305,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.assertEqual(hh_count + 1, Household.objects.count())
         self.assertEqual(ind_count + 2, Individual.objects.count())
 
-    @patch("hct_mis_api.apps.program.utils.randint")
+    @patch("hope.apps.program.utils.randint")
     def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
         mock_randint.side_effect = [1111, 5555]
         RegistrationDataImportFactory(
@@ -315,7 +315,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         expected_name = "RDI for enroll households to Programme: Program 1 (1111)"
         self.assertEqual(result, expected_name)
 
-    @patch("hct_mis_api.apps.program.utils.randint")
+    @patch("hope.apps.program.utils.randint")
     def test_generate_rdi_unique_name_no_conflicts(self, mock_randint: Any) -> None:
         mock_randint.return_value = 3333
         result = generate_rdi_unique_name(self.program1)

@@ -35,10 +35,10 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.household.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hope.apps.core.utils import to_choice_object
+from hope.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -70,11 +70,11 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import AccountType, FinancialInstitution
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import AccountType, FinancialInstitution
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

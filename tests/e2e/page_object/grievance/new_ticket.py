@@ -475,8 +475,8 @@ class NewTicket(BaseComponents):
         field = self.wait_for(self.selectHouseholddataupdatefieldsFieldname.format(index))
         return field.find_element(By.XPATH, "./..")
 
-    def getInputIndividualData(self, type: str) -> WebElement:
-        return self.wait_for(self.inputIndividualData.format(type))
+    def getInputIndividualData(self, typology: str) -> WebElement:
+        return self.wait_for(self.inputIndividualData.format(typology))
 
     def getCheckboxSelectAll(self) -> WebElement:
         return self.wait_for(self.checkboxSelectAll)

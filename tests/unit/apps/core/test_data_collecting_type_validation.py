@@ -4,7 +4,7 @@ from django.test import TestCase
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.core.models import DataCollectingType
 
 
 class TestDCTValidation(TestCase):

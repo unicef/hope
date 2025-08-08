@@ -18,9 +18,9 @@ from extras.test_utils.factories.registration_data import (
 )
 from freezegun import freeze_time
 
-from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.household.models import Household, Individual, IndividualIdentity
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):

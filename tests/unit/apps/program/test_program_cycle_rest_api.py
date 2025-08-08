@@ -19,15 +19,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.api.serializers import (
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
     ProgramCycleUpdateSerializer,
 )
-from hct_mis_api.apps.program.api.views import ProgramCycleViewSet
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hope.apps.program.api.views import ProgramCycleViewSet
+from hope.apps.program.models import Program, ProgramCycle
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):

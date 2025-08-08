@@ -11,11 +11,11 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from openpyxl import Workbook
 
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import MALE, Individual
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import MALE, Individual
+from hope.apps.program.models import Program
+from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
     create_snapshot_content,
 )
@@ -130,7 +130,7 @@ def test_snapshot_json_generation_with_mocking(monkeypatch: MonkeyPatch, program
         return '{"dummy": "snapshot"}'
 
     monkeypatch.setattr(
-        "hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
+        "hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
         dummy_create_snapshot_content,
     )
     create_and_save_snapshot_chunked(uu)
@@ -166,7 +166,7 @@ def test_snapshot_json_generation_no_unicef_id(monkeypatch: MonkeyPatch, program
         return '{"dummy": "snapshot"}'
 
     monkeypatch.setattr(
-        "hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
+        "hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
         dummy_create_snapshot_content,
     )
 
