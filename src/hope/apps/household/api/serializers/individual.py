@@ -132,6 +132,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
     roles_in_households = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Individual
@@ -144,6 +145,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
             "relationship",
             "role",
             "documents",
+            "program_slug",
         )
 
     def get_roles_in_households(self, obj: Individual) -> dict:
@@ -427,6 +429,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     deduplication_golden_record_results = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Individual
@@ -441,6 +444,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
             "deduplication_golden_record_results",
             "duplicate",
             "documents",
+            "program_slug",
         )
 
     @extend_schema_field(DeduplicationResultSerializer(many=True))

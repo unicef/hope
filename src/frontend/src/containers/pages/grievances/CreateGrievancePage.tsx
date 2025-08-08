@@ -295,13 +295,23 @@ const CreateGrievancePage = (): ReactElement => {
     values.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
     values.category?.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
+  console.log(
+    choicesLoading,
+    allAddIndividualFieldsDataLoading,
+    householdFieldsLoading,
+    programsDataLoading,
+    allEditPeopleFieldsLoading,
+    fetchedIndividualLoading,
+    fetchedHouseholdLoading,
+    shouldFetchIndividual,
+  );
   if (
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
     programsDataLoading ||
     allEditPeopleFieldsLoading ||
-    fetchedIndividualLoading ||
+    (fetchedIndividualLoading && shouldFetchIndividual) ||
     fetchedHouseholdLoading
   )
     return <LoadingComponent />;
