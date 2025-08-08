@@ -11,6 +11,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeopleListTableProps {
   filter;
@@ -67,6 +68,22 @@ export const PeopleListTable = ({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+  });
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
@@ -98,6 +115,7 @@ export const PeopleListTable = ({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
+        itemsCount={countData?.count}
         renderRow={(row: IndividualList) => (
           <PeopleListTableRow
             key={row.id}

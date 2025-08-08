@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 from typing import List
 
 from django.db import transaction
@@ -113,7 +114,6 @@ def get_social_program_with_dct_type_and_name(
 
 @pytest.mark.usefixtures("login")
 class TestSmokePeople:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete - count not called for People")
     def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
@@ -260,7 +260,6 @@ class TestPeople:
             )
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_check_people_data_after_grievance_ticket_processed(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -310,7 +309,6 @@ class TestPeople:
         row1 = pageGrievanceDetailsPage.getRows()[1].text.split(" ")
         assert "Preferred Language" in f"{row1[0]} {row1[1]}"
         assert "English" in row1[-1]
-
         pageGrievanceDetailsPage.getButtonAssignToMe().click()
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
         pageGrievanceDetailsPage.getButtonSendForApproval().click()
@@ -318,6 +316,7 @@ class TestPeople:
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
+        sleep(0.2)
         pageGrievanceDetailsPage.getButtonApproval().click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()

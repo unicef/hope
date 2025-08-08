@@ -57,11 +57,19 @@ export function RequestedIndividualDataChangeTable({
   });
 
   const { data: individual, isLoading: individualLoading } =
-    useHopeDetailsQuery<IndividualDetail>(
-      ticket.individual.id,
-      RestService.restBusinessAreasProgramsIndividualsRetrieve,
-      {},
-    );
+
+    useQuery({
+      queryKey: ['individualChoices', businessAreaSlug, ticket.individual.id,ticket.individual.programSlug],
+      queryFn: () => {
+        if (!ticket.individual.id) return null;
+        return RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug,
+          programSlug: ticket.individual.programSlug,
+          id: ticket.individual.id,
+        });
+      },
+    });
+  
 
   const individualData = {
     ...ticket.ticketDetails.individualData,
