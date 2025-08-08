@@ -333,6 +333,7 @@ class GrievanceTicketGlobalViewSet(
                 )
             )
             .annotate(total_days=F("total__day"))
+            .distinct()
             .order_by("-created_at")
         )
 
