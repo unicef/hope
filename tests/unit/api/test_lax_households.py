@@ -24,16 +24,6 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
 
-        cls.program = ProgramFactory(status=Program.DRAFT, business_area=cls.business_area)
-
-        cls.rdi: RegistrationDataImport = RegistrationDataImportFactory(
-            business_area=cls.business_area,
-            number_of_individuals=0,
-            number_of_households=0,
-            status=RegistrationDataImport.LOADING,
-            program=cls.program,
-        )
-
         country = CountryFactory()
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
@@ -45,10 +35,18 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         cls.admin3 = AreaFactory(parent=cls.admin2, p_code="AF010101", area_type=admin_type_3)
         cls.admin4 = AreaFactory(parent=cls.admin3, p_code="AF01010101", area_type=admin_type_4)
 
-        cls.url = reverse("api:rdi-push-lax-households", args=[cls.business_area.slug, str(cls.rdi.id)])
-
     def setUp(self) -> None:
         super().setUp()
+        self.program = ProgramFactory(status=Program.DRAFT, business_area=self.business_area)
+
+        self.rdi: RegistrationDataImport = RegistrationDataImportFactory(
+            business_area=self.business_area,
+            number_of_individuals=0,
+            number_of_households=0,
+            status=RegistrationDataImport.LOADING,
+            program=self.program,
+        )
+        self.url = reverse("api:rdi-push-lax-households", args=[self.business_area.slug, str(self.rdi.id)])
         self.head_of_household = PendingIndividualFactory(
             individual_id="IND001",
             registration_data_import=self.rdi,
@@ -134,7 +132,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         ]
 
         response = self.client.post(self.url, households_data, format="json")
-
+        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         self.assertEqual(response.data["processed"], 2)
         self.assertEqual(response.data["accepted"], 2)

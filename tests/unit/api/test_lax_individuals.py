@@ -96,7 +96,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         self.assertEqual(response.data["errors"], 0)
         self.assertIn("IND001", response.data["individual_id_mapping"])
 
-        individual = PendingIndividual.objects.get(individual_id="IND001")
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         self.assertEqual(individual.full_name, "John Doe")
         self.assertEqual(individual.given_name, "John")
         self.assertEqual(individual.family_name, "Doe")
@@ -255,7 +255,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         self.assertEqual(response.data["accepted"], 1)
         self.assertEqual(response.data["errors"], 0)
 
-        individual = PendingIndividual.objects.get(individual_id="IND001")
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         self.assertIsNotNone(individual.photo)
         self.assertTrue(individual.photo.name.startswith("photo"))
         self.assertTrue(individual.photo.name.endswith(".png"))
@@ -283,13 +283,12 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         }
 
         response = self.client.post(self.url, [individual_data], format="json")
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         self.assertEqual(response.data["processed"], 1)
         self.assertEqual(response.data["accepted"], 1)
         self.assertEqual(response.data["errors"], 0)
 
-        individual = PendingIndividual.objects.get(individual_id="IND001")
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         document = PendingDocument.objects.get(individual=individual)
         self.assertIsNotNone(document.photo)
         self.assertTrue(document.photo.name.startswith("photo"))
