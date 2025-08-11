@@ -13,7 +13,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 
 
 @receiver(post_save, sender=PeriodicDataUpdateXlsxTemplate)
-@receiver(pre_delete, sender=PeriodicDataUpdateXlsxUpload)
+@receiver(pre_delete, sender=PeriodicDataUpdateXlsxTemplate)
 def increment_periodic_data_update_template_version_cache(
     sender: Any, instance: PeriodicDataUpdateXlsxTemplate, **kwargs: dict
 ) -> None:

@@ -419,9 +419,21 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     class Meta:
         abstract = True
 
-    def get_celery_queue_position(self, task_name: str) -> int:
+    def _get_task_name(self, task_name: str | None = None) -> str:
+        if task_name:
+            if task_name not in self.celery_task_names:
+                raise ValueError(f"Task '{task_name}' is not defined in celery_task_names.")
+            return task_name
+
+        if len(self.celery_task_names) == 1:
+            return next(iter(self.celery_task_names))
+
+        raise ValueError("Multiple tasks defined in celery_task_names. Please specify which task to use.")
+
+    def get_celery_queue_position(self, task_name: str | None = None) -> int:
         from hct_mis_api.apps.core.celery import app
 
+        task_name = self._get_task_name(task_name)
         task_id = self.celery_tasks_results_ids.get(task_name)
         if not task_id:
             return 0
@@ -451,13 +463,15 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
                     conn.default_channel.client.srem(settings.CELERY_TASK_REVOKED_QUEUE, rem)
             return {"size": len(tasks), "pending": pending, "canceled": canceled, "revoked": len(revoked)}
 
-    def get_async_result(self, task_name: str) -> "AbortableAsyncResult|None":
+    def get_async_result(self, task_name: str | None = None) -> "AbortableAsyncResult|None":
+        task_name = self._get_task_name(task_name)
         task_id = self.celery_tasks_results_ids.get(task_name)
         if task_id:
             return AbortableAsyncResult(task_id, app=celery.current_app)
         return None
 
-    def get_queue_info(self, task_name: str) -> "dict[str, Any]":
+    def get_queue_info(self, task_name: str | None = None) -> "dict[str, Any]":
+        task_name = self._get_task_name(task_name)
         async_result = self.get_async_result(task_name)
         if not async_result:
             return {"id": "NotFound"}
@@ -472,7 +486,8 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
                 return j
         return {"id": "NotFound"}
 
-    def get_task_info(self, task_name: str) -> dict[str, Any] | None:
+    def get_task_info(self, task_name: str | None = None) -> dict[str, Any] | None:
+        task_name = self._get_task_name(task_name)
         async_result = self.get_async_result(task_name)
         if async_result:
             info = async_result._get_task_meta()
@@ -514,9 +529,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             handlers[name] = getattr(module, func_name)
         return handlers
 
-    def is_queued(self, task_name: str) -> bool:
+    def is_queued(self, task_name: str | None = None) -> bool:
         from hct_mis_api.apps.core.celery import app
 
+        task_name = self._get_task_name(task_name)
         task_id = self.celery_tasks_results_ids.get(task_name)
         if not task_id:
             return False
@@ -529,15 +545,17 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
                 return True
         return False
 
-    def is_canceled(self, task_name: str) -> bool:
+    def is_canceled(self, task_name: str | None = None) -> bool:
+        task_name = self._get_task_name(task_name)
         task_id = self.celery_tasks_results_ids.get(task_name)
         if not task_id:
             return False
         with app.pool.acquire(block=True) as conn:
             return conn.default_channel.client.sismember(settings.CELERY_TASK_REVOKED_QUEUE, task_id)
 
-    def get_celery_status(self, task_name: str) -> str:
+    def get_celery_status(self, task_name: str | None = None) -> str:
         try:
+            task_name = self._get_task_name(task_name)
             task_id = self.celery_tasks_results_ids.get(task_name)
             if task_id:
                 if self.is_canceled(task_name):
@@ -556,7 +574,8 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         except Exception as e:
             return str(e)
 
-    def queue(self, task_name: str) -> str | None:
+    def queue(self, task_name: str | None = None) -> str | None:
+        task_name = self._get_task_name(task_name)
         if self.get_celery_status(task_name) not in self.CELERY_STATUS_SCHEDULED:
             res = self.task_handlers[task_name].delay(self.pk)
             self.celery_tasks_results_ids[task_name] = res.id
@@ -564,7 +583,8 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             return res
         return None
 
-    def terminate(self, task_name: str) -> None:
+    def terminate(self, task_name: str | None = None) -> None:
+        task_name = self._get_task_name(task_name)
         task_id = self.celery_tasks_results_ids.get(task_name)
         if not task_id:
             return
