@@ -75,12 +75,12 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         data = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
-        self.assertEqual(rdi.program, self.program)
-        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_PENDING)
+        assert rdi.program == self.program
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(hh)
@@ -88,10 +88,10 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
 
-        self.assertEqual(hh.head_of_household.full_name, "John Doe")
-        self.assertEqual(hh.head_of_household.sex, MALE)
-        self.assertEqual(data["households"], 1)
-        self.assertEqual(data["individuals"], 2)
+        assert hh.head_of_household.full_name == "John Doe"
+        assert hh.head_of_household.sex == MALE
+        assert data["households"] == 1
+        assert data["individuals"] == 2
 
     def test_upload_external_collector(self) -> None:
         data = {
@@ -124,7 +124,7 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, data)
+        assert response.status_code == status.HTTP_201_CREATED, data
 
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
@@ -135,10 +135,10 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
 
-        self.assertEqual(hh.head_of_household.full_name, "John Doe")
-        self.assertEqual(hh.head_of_household.sex, MALE)
-        self.assertEqual(data["households"], 1)
-        self.assertEqual(data["individuals"], 2)
+        assert hh.head_of_household.full_name == "John Doe"
+        assert hh.head_of_household.sex == MALE
+        assert data["households"] == 1
+        assert data["individuals"] == 2
 
     def test_upload_with_documents(self) -> None:
         data = {
@@ -178,18 +178,18 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         hoh = PendingIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
         hh = hoh.pending_household
-        self.assertEqual(hh.village, "village1")
+        assert hh.village == "village1"
 
         # check collectors
         self.assertNotEqual(hh.primary_collector, hoh)
         self.assertIsNone(hh.alternate_collector)
         members = hh.individuals.all()
-        self.assertEqual(len(members), 1)
+        assert len(members) == 1
 
         self.assertTrue(hoh.documents.exists())
 
@@ -234,7 +234,7 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         data = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
@@ -245,10 +245,10 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
 
-        self.assertEqual(hh.head_of_household.full_name, "John Doe")
-        self.assertEqual(hh.head_of_household.sex, MALE)
-        self.assertEqual(data["households"], 1)
-        self.assertEqual(data["individuals"], 2)
+        assert hh.head_of_household.full_name == "John Doe"
+        assert hh.head_of_household.sex == MALE
+        assert data["households"] == 1
+        assert data["individuals"] == 2
 
     def test_upload_with_multiple_households(self) -> None:
         image = Path(__file__).parent / "logo.png"
@@ -364,7 +364,7 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         data = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
@@ -375,11 +375,11 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNotNone(hh.alternate_collector)
 
-        self.assertEqual(hh.primary_collector.full_name, "Jhon Primary #1")
-        self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+        assert hh.primary_collector.full_name == "Jhon Primary #1"
+        assert hh.head_of_household.full_name == "James Head #1"
 
-        self.assertEqual(data["households"], 3)
-        self.assertEqual(data["individuals"], 8)
+        assert data["households"] == 3
+        assert data["individuals"] == 8
 
     def test_upload_error_too_many_hoh(self) -> None:
         data = {
@@ -411,15 +411,13 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(
-            response.json(),
-            {"households": [{"Household #1": [{"head_of_household": ["Only one HoH allowed"]}]}]},
-            f"""
+        assert response.json() == {
+            "households": [{"Household #1": [{"head_of_household": ["Only one HoH allowed"]}]}]
+        }, f"""
 ==== RESULT ====
 {str(response.json())}
-================""",
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
+================"""
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
 
     def test_upload_error_missing_primary(self) -> None:
         data = {
@@ -494,16 +492,14 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(
-            response.json(),
-            {"households": [{"Household #2": [{"primary_collector": ["Missing Primary Collector"]}]}]},
-            f"""
+        assert response.json() == {
+            "households": [{"Household #2": [{"primary_collector": ["Missing Primary Collector"]}]}]
+        }, f"""
 ==== RESULT ====
 {str(response.json())}
 ================
-""",
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
+"""
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
 
     def test_upload_multiple_errors(self) -> None:
         data = {
@@ -577,34 +573,30 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(
-            response.json(),
-            {
-                "households": [
-                    {
-                        "Household #1": [
-                            {
-                                "alternate_collector": ["Only one Alternate Collector allowed"],
-                                "head_of_household": ["Missing Head Of Household"],
-                                "primary_collector": ["Missing Primary Collector"],
-                            }
-                        ]
-                    },
-                    {
-                        "Household #2": [
-                            {
-                                "head_of_household": ["Only one HoH allowed"],
-                                "primary_collector": ["Missing Primary Collector"],
-                            }
-                        ]
-                    },
-                ],
-                "program": ["This field is required."],
-            },
-            f"""
+        assert response.json() == {
+            "households": [
+                {
+                    "Household #1": [
+                        {
+                            "alternate_collector": ["Only one Alternate Collector allowed"],
+                            "head_of_household": ["Missing Head Of Household"],
+                            "primary_collector": ["Missing Primary Collector"],
+                        }
+                    ]
+                },
+                {
+                    "Household #2": [
+                        {
+                            "head_of_household": ["Only one HoH allowed"],
+                            "primary_collector": ["Missing Primary Collector"],
+                        }
+                    ]
+                },
+            ],
+            "program": ["This field is required."],
+        }, f"""
 ==== RESULT ====
 {str(response.json())}
 ================
-""",
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
+"""
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())

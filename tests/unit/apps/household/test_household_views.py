@@ -155,7 +155,7 @@ class TestHouseholdList:
             )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -741,7 +741,7 @@ class TestHouseholdMembers:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], status.HTTP_200_OK),
             ([Permissions.RDI_VIEW_DETAILS], status.HTTP_200_OK),
@@ -1360,7 +1360,7 @@ class TestHouseholdFilter:
         )
 
     @pytest.mark.parametrize(
-        "program_status,filter_value,expected_results",
+        ("program_status", "filter_value", "expected_results"),
         [
             (Program.ACTIVE, True, 2),
             (Program.FINISHED, True, 0),
@@ -1432,7 +1432,7 @@ class TestHouseholdFilter:
 
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
     @pytest.mark.parametrize(
-        "filters,household1_data,household2_data,hoh_1_data,hoh_2_data",
+        ("filters", "household1_data", "household2_data", "hoh_1_data", "hoh_2_data"),
         [
             ({"search": "HH-123"}, {"unicef_id": "HH-123"}, {"unicef_id": "HH-321"}, {}, {}),
             ({"search": "John"}, {}, {}, {"full_name": "John Doe"}, {"full_name": "Jane Doe"}),

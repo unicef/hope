@@ -212,3 +212,9 @@ django_settings_module = "hope.settings"
 
 [tool.uv]
 package = true
+
+[tool.nitpick]
+style = [
+  "github://unicef/hope-code-conventions@main/django/django.toml",
+]
+cache = "1 day"

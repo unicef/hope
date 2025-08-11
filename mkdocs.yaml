@@ -1,0 +1,6 @@
+copyright: Copyright &copy; 2020-2025 UNICEF.
+site_author: HOPE Team
+markdown_extensions:
+  - admonition
+  - ymdownx.magiclink
+  - pymdownx.superfences

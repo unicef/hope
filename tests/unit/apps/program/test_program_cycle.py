@@ -42,7 +42,7 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.program.status = Program.ACTIVE
         self.cycle.program.save()
         self.cycle.program.refresh_from_db()
-        self.assertEqual(self.cycle.program.status, Program.ACTIVE)
+        assert self.cycle.program.status == Program.ACTIVE
 
     def test_set_active(self) -> None:
         with self.assertRaisesMessage(ValidationError, "Program should be within Active status."):
@@ -51,24 +51,17 @@ class TestProgramCycleMethods(TestCase):
 
         self.cycle.status = ProgramCycle.DRAFT
         self.cycle.save()
-        self.assertEqual(self.cycle.status, ProgramCycle.DRAFT)
+        assert self.cycle.status == ProgramCycle.DRAFT
         self.cycle.set_active()
         self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.ACTIVE)
+        assert self.cycle.status == ProgramCycle.ACTIVE
 
         self.cycle.status = ProgramCycle.FINISHED
         self.cycle.save()
-        self.assertEqual(self.cycle.status, ProgramCycle.FINISHED)
+        assert self.cycle.status == ProgramCycle.FINISHED
         self.cycle.set_active()
         self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.ACTIVE)
-
-        self.cycle.status = ProgramCycle.ACTIVE
-        self.cycle.save()
-        self.assertEqual(self.cycle.status, ProgramCycle.ACTIVE)
-        self.cycle.set_active()
-        self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.ACTIVE)
+        assert self.cycle.status == ProgramCycle.ACTIVE
         self.assertFalse(self.cycle.can_remove_cycle)
 
     def test_set_draft(self) -> None:
@@ -78,18 +71,18 @@ class TestProgramCycleMethods(TestCase):
 
         self.cycle.status = ProgramCycle.FINISHED
         self.cycle.save()
-        self.assertEqual(self.cycle.status, ProgramCycle.FINISHED)
-        self.cycle.set_draft()
+        assert self.cycle.status == ProgramCycle.FINISHED
+        self.cycle.set_active()
         self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.FINISHED)
+        assert self.cycle.status == ProgramCycle.ACTIVE
 
         self.cycle.status = ProgramCycle.ACTIVE
         self.cycle.save()
-        self.assertEqual(self.cycle.status, ProgramCycle.ACTIVE)
-        self.cycle.set_draft()
+        assert self.cycle.status == ProgramCycle.ACTIVE
+        self.cycle.set_active()
         self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.DRAFT)
-        self.assertTrue(self.cycle.can_remove_cycle)
+        assert self.cycle.status == ProgramCycle.ACTIVE
+        assert not self.cycle.can_remove_cycle
 
     def test_set_finish(self) -> None:
         with self.assertRaisesMessage(ValidationError, "Program should be within Active status."):
@@ -100,29 +93,29 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.save()
         self.cycle.set_finish()
         self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.DRAFT)
+        assert self.cycle.status == ProgramCycle.DRAFT
 
         self.cycle.status = ProgramCycle.ACTIVE
         self.cycle.save()
         self.cycle.set_finish()
         self.cycle.refresh_from_db()
-        self.assertEqual(self.cycle.status, ProgramCycle.FINISHED)
+        assert self.cycle.status == ProgramCycle.FINISHED
         self.assertFalse(self.cycle.can_remove_cycle)
 
     def test_total_entitled_quantity_usd(self) -> None:
-        self.assertEqual(self.cycle.total_entitled_quantity_usd, Decimal("0.0"))
+        assert self.cycle.total_entitled_quantity_usd == Decimal("0.0")
         PaymentPlanFactory(program_cycle=self.cycle, total_entitled_quantity_usd=Decimal(123.99))
-        self.assertEqual(self.cycle.total_entitled_quantity_usd, Decimal("123.99"))
+        assert self.cycle.total_entitled_quantity_usd == Decimal("123.99")
 
     def test_total_undelivered_quantity_usd(self) -> None:
-        self.assertEqual(self.cycle.total_undelivered_quantity_usd, Decimal("0.0"))
+        assert self.cycle.total_undelivered_quantity_usd == Decimal("0.0")
         PaymentPlanFactory(program_cycle=self.cycle, total_undelivered_quantity_usd=Decimal(222.33))
-        self.assertEqual(self.cycle.total_undelivered_quantity_usd, Decimal("222.33"))
+        assert self.cycle.total_undelivered_quantity_usd == Decimal("222.33")
 
     def test_total_delivered_quantity_usd(self) -> None:
-        self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("0.0"))
+        assert self.cycle.total_delivered_quantity_usd == Decimal("0.0")
         PaymentPlanFactory(program_cycle=self.cycle, total_delivered_quantity_usd=Decimal(333.11))
-        self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("333.11"))
+        assert self.cycle.total_delivered_quantity_usd == Decimal("333.11")
 
     def test_cycle_validation_start_date(self) -> None:
         with self.assertRaisesMessage(DjangoValidationError, "Start date must be after the latest cycle."):

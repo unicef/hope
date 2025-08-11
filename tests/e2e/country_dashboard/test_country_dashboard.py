@@ -58,7 +58,7 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
 
 
 @pytest.mark.xfail(reason="UNSTABLE")
-@pytest.mark.django_db()
+@pytest.mark.django_db
 @pytest.mark.usefixtures("login", "setup_household_and_payments")
 class TestSmokeCountryDashboard:
     def test_smoke_country_dashboard(self, pageCountryDashboard: CountryDashboard, business_area: Callable) -> None:

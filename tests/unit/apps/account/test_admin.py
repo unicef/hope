@@ -29,12 +29,12 @@ from hope.apps.account.models import Partner, Role, RoleAssignment, User
 pytestmark = pytest.mark.django_db()
 
 
-@pytest.fixture()
+@pytest.fixture
 def superuser(request: pytest.FixtureRequest, partner_unicef: Partner) -> User:
     return UserFactory(is_superuser=True, is_staff=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def role(request: pytest.FixtureRequest) -> Role:
     return RoleFactory(name="Role")
 
@@ -197,24 +197,24 @@ class PartnerAdminTest(TestCase):
 
     def test_get_inline_instances(self) -> None:
         inline_instances = self.admin.get_inline_instances(self.request)
-        self.assertEqual(inline_instances, [])
+        assert inline_instances == []
 
         inline_instances = self.admin.get_inline_instances(self.request, self.partner)
-        self.assertEqual(len(inline_instances), 1)
+        assert len(inline_instances) == 1
         self.assertIsInstance(inline_instances[0], RoleAssignmentInline)
 
     def test_get_readonly_fields(self) -> None:
         readonly_fields = self.admin.get_readonly_fields(self.request)
-        self.assertEqual(readonly_fields, ["sub_partners"])
+        assert readonly_fields == ["sub_partners"]
 
         readonly_fields = self.admin.get_readonly_fields(self.request, self.partner)
-        self.assertEqual(readonly_fields, ["sub_partners"])
+        assert readonly_fields == ["sub_partners"]
 
         readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef)
-        self.assertEqual(readonly_fields, ["sub_partners", "name", "parent"])
+        assert readonly_fields == ["sub_partners", "name", "parent"]
 
         readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef_subpartner)
-        self.assertEqual(readonly_fields, ["sub_partners", "name", "parent"])
+        assert readonly_fields == ["sub_partners", "name", "parent"]
 
     def test_get_form_no_obj(self) -> None:
         form = self.admin.get_form(self.request)

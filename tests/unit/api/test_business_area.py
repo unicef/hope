@@ -39,8 +39,8 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             self.client.force_authenticate(self.user)
             response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()["results"]), 3)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 3
         self.assertIn(
             {
                 "id": str(self.business_area.id),

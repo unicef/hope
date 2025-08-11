@@ -404,7 +404,8 @@ class PaymentGatewayService:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
                 data = PaymentInstructionFromSplitSerializer(split, context={"user_email": user_email}).data
                 response = self.api.create_payment_instruction(data)
-                assert response.remote_id == str(split.id), f"{response}, _object_id: {split.id}"
+                if response.remote_id != str(split.id):
+                    raise ValueError(f"Mismatch with remote object: {response}, _object_id: {split.id}")
                 status = response.status
                 if status == PaymentInstructionStatus.DRAFT.value:
                     self.api.change_payment_instruction_status(
@@ -422,8 +423,8 @@ class PaymentGatewayService:
             response_status = self.api.change_payment_instruction_status(
                 new_status, obj.id, validate_response=validate_response
             )
-            if validate_response:
-                assert new_status.value == response_status, f"{new_status.value} != {response_status}"
+            if validate_response and new_status.value != response_status:
+                raise ValueError(f"Mismatch with: {new_status.value} != {response_status}")
             return response_status
         return None  # pragma: no cover
 
