@@ -15,17 +15,17 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import (
     AUNT_UNCLE,
     BROTHER_SISTER,
     HEAD,
     Individual,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()

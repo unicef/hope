@@ -30,12 +30,12 @@ from unit.apps.periodic_data_update.test_periodic_data_update_import_service imp
     add_pdu_data_to_xlsx,
 )
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import PeriodicFieldData
+from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 
 pytestmark = pytest.mark.django_db()
 

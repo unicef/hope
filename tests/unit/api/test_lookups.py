@@ -10,10 +10,10 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.payment.models import FinancialInstitution
-from hct_mis_api.apps.program.models import Program
+from hope.api.models import Grant
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.payment.models import FinancialInstitution
+from hope.apps.program.models import Program
 
 
 class APIProgramStatuesTests(HOPEApiTestCase):

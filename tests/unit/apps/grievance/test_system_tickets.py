@@ -7,12 +7,12 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.system_ticket_service import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.system_ticket_service import (
     close_system_flagging_ticket_service,
 )
-from hct_mis_api.apps.household.models import Individual
+from hope.apps.household.models import Individual
 
 
 class TestSystemTickets(APITestCase):

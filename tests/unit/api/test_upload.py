@@ -8,9 +8,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.models import Grant
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
@@ -22,8 +22,8 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class UploadRDITests(HOPEApiTestCase):

@@ -24,9 +24,9 @@ from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FileTemp
+from hope.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
 
 pytestmark = pytest.mark.django_db
 

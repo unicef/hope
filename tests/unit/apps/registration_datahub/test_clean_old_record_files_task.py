@@ -2,8 +2,8 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.contrib.aurora.models import Record
+from hope.apps.core.base_test_case import APITestCase
+from hope.contrib.aurora.models import Record
 
 
 class TestClearRecordFilesTask(APITestCase):
@@ -48,7 +48,7 @@ class TestClearRecordFilesTask(APITestCase):
         )
 
     def test_clean_old_record_files_task(self) -> None:
-        from hct_mis_api.contrib.aurora.celery_tasks import clean_old_record_files_task
+        from hope.contrib.aurora.celery_tasks import clean_old_record_files_task
 
         clean_old_record_files_task()
         assert Record.objects.count() == 3

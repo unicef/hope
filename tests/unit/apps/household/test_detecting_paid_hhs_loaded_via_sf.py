@@ -8,8 +8,8 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.management.commands.detect_paid_households import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )
 

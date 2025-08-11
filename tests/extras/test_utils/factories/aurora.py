@@ -6,8 +6,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
+from hope.apps.program.models import Program
+from hope.contrib.aurora.models import Organization, Project, Registration
 
 faker = Faker()
 

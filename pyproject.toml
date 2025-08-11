@@ -208,7 +208,7 @@ package-dir = { "" = "src" }
 where = [ "src" ]
 
 [tool.django-stubs]
-django_settings_module = "hct_mis_api.settings"
+django_settings_module = "hope.settings"
 
 [tool.uv]
 package = true

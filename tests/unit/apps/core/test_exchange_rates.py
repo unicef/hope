@@ -9,8 +9,8 @@ from django.utils import timezone
 import requests_mock
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
-from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
+from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
+from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     "ROWSET": {

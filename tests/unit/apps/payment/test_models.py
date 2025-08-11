@@ -42,15 +42,15 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
-from hct_mis_api.apps.core.currencies import USDC
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.currencies import USDC
+from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
+from hope.apps.household.models import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
+from hope.apps.payment.models import (
     Account,
     AccountType,
     Approval,
@@ -63,11 +63,11 @@ from hct_mis_api.apps.payment.models import (
     PaymentDataCollector,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.models import ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.program.models import ProgramCycle
+from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 

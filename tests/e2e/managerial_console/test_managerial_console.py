@@ -15,10 +15,10 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 
-from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hope.apps.account.models import Partner, User
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

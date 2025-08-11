@@ -13,8 +13,8 @@ from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.models import RoleAssignment
+from hope.apps.program.models import Program
 
 
 class TestRoleAssignmentModel(TransactionTestCase):

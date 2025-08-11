@@ -9,8 +9,8 @@ from e2e.page_object.programme_management.programme_management import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hope.apps.core.models import DataCollectingType
+from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 
