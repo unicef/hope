@@ -107,27 +107,27 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        if self.status == self.Status.EXPORTED or self.celery_status == self.CELERY_STATUS_SUCCESS:
+        if self.status == self.Status.EXPORTED or self.get_celery_status() == self.CELERY_STATUS_SUCCESS:
             return self.status
         if self.status == self.Status.FAILED:
             return self.status
-        if self.celery_status == self.CELERY_STATUS_STARTED:
+        if self.get_celery_status() == self.CELERY_STATUS_STARTED:
             return self.Status.EXPORTING
-        if self.celery_status == self.CELERY_STATUS_FAILURE:
+        if self.get_celery_status() == self.CELERY_STATUS_FAILURE:
             return self.Status.FAILED
-        if self.celery_status == self.CELERY_STATUS_NOT_SCHEDULED:
+        if self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED:
             return self.Status.NOT_SCHEDULED
-        if self.celery_status == self.CELERY_STATUS_RECEIVED:
+        if self.get_celery_status() == self.CELERY_STATUS_RECEIVED:
             return self.Status.TO_EXPORT
-        if self.celery_status == self.CELERY_STATUS_RETRY:
+        if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.TO_EXPORT
-        if self.celery_status == self.CELERY_STATUS_REVOKED or self.celery_status == self.CELERY_STATUS_CANCELED:
+        if self.get_celery_status() == self.CELERY_STATUS_REVOKED or self.get_celery_status() == self.CELERY_STATUS_CANCELED:
             return self.Status.CANCELED
         return self.status
 
     @property
     def can_export(self) -> bool:
-        return self.status == self.Status.TO_EXPORT and self.celery_status == self.CELERY_STATUS_NOT_SCHEDULED
+        return self.status == self.Status.TO_EXPORT and self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED
 
     @property
     def combined_status_display(self) -> str:
@@ -178,21 +178,21 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        if self.status == self.Status.SUCCESSFUL or self.celery_status == self.CELERY_STATUS_SUCCESS:
+        if self.status == self.Status.SUCCESSFUL or self.get_celery_status() == self.CELERY_STATUS_SUCCESS:
             return self.status
         if self.status == self.Status.FAILED:
             return self.status
-        if self.celery_status == self.CELERY_STATUS_STARTED:
+        if self.get_celery_status() == self.CELERY_STATUS_STARTED:
             return self.Status.PROCESSING
-        if self.celery_status == self.CELERY_STATUS_FAILURE:
+        if self.get_celery_status() == self.CELERY_STATUS_FAILURE:
             return self.Status.FAILED
-        if self.celery_status == self.CELERY_STATUS_NOT_SCHEDULED:
+        if self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED:
             return self.Status.NOT_SCHEDULED
-        if self.celery_status == self.CELERY_STATUS_RECEIVED:
+        if self.get_celery_status() == self.CELERY_STATUS_RECEIVED:
             return self.Status.PENDING
-        if self.celery_status == self.CELERY_STATUS_RETRY:
+        if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.PENDING
-        if self.celery_status == self.CELERY_STATUS_REVOKED or self.celery_status == self.CELERY_STATUS_CANCELED:
+        if self.get_celery_status() == self.CELERY_STATUS_REVOKED or self.get_celery_status() == self.CELERY_STATUS_CANCELED:
             return self.Status.CANCELED
 
         return self.status
