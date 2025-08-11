@@ -1018,10 +1018,7 @@ class TestAccountModel(TestCase):
         )
 
     def test_validate(self) -> None:
-        self.assertEqual(
-            PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind),
-            True
-        )
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind), True)
 
         AccountFactory(
             data={
