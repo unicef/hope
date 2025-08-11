@@ -1,8 +1,8 @@
 from django.urls import include, path
 
 from hct_mis_api.apps.periodic_data_update.api.views import (
-    PeriodicDataUpdateTemplateViewSet,
-    PeriodicDataUpdateUploadViewSet,
+    PeriodicDataUpdateXlsxTemplateViewSet,
+    PeriodicDataUpdateXlsxUploadViewSet,
     PeriodicFieldViewSet,
 )
 from hct_mis_api.apps.program.api.urls import program_base_router
@@ -13,12 +13,12 @@ program_nested_router = program_base_router.program_nested_router
 
 program_nested_router.register(
     "periodic-data-update-templates",
-    PeriodicDataUpdateTemplateViewSet,
+    PeriodicDataUpdateXlsxTemplateViewSet,
     basename="periodic-data-update-templates",
 )
 program_nested_router.register(
     "periodic-data-update-uploads",
-    PeriodicDataUpdateUploadViewSet,
+    PeriodicDataUpdateXlsxUploadViewSet,
     basename="periodic-data-update-uploads",
 )
 program_nested_router.register(

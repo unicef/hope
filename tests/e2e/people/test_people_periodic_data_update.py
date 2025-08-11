@@ -8,10 +8,10 @@ from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
+    PeriodicDataUpdateXlsxTemplates,
 )
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
+    PeriodicDataUpdateXlsxUploads,
 )
 from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
 from extras.test_utils.factories.core import (
@@ -21,8 +21,8 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-    PeriodicDataUpdateUploadFactory,
+    PeriodicDataUpdateXlsxTemplateFactory,
+    PeriodicDataUpdateXlsxUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
@@ -162,7 +162,7 @@ def string_attribute() -> FlexibleAttribute:
 
 
 @pytest.mark.usefixtures("login")
-class TestPeoplePeriodicDataUpdateUpload:
+class TestPeoplePeriodicDataUpdateXlsxUpload:
     def test_people_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
@@ -262,12 +262,12 @@ class TestPeoplePeriodicDataUpdateUpload:
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
-        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
-        pagePeriodicDataUploads: PeriodicDataUpdateUploads,
+        pagePeriodicDataUpdateXlsxTemplates: PeriodicDataUpdateXlsxTemplates,
+        pagePeriodicDataUpdateXlsxUploads: PeriodicDataUpdateXlsxUploads,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
     ) -> None:
-        periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplateFactory(
             program=program,
             business_area=program.business_area,
             status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
@@ -281,17 +281,17 @@ class TestPeoplePeriodicDataUpdateUpload:
                 }
             ],
         )
-        pdu_upload = PeriodicDataUpdateUploadFactory(
+        pdu_upload = PeriodicDataUpdateXlsxUploadFactory(
             template=periodic_data_update_template,
             status=PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL,
         )
         pagePeople.selectGlobalProgramFilter(program.name)
         pagePeople.getNavPeople().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
-        pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
+        pagePeriodicDataUpdateXlsxTemplates.getPduUpdatesBtn().click()
         index = pdu_upload.id
-        assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
-        assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
-        assert f"{pdu_upload.created_at:%-d %b %Y}" in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
-        assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
-        assert "SUCCESSFUL" in pagePeriodicDataUploads.getUpdateStatus(index).text
+        assert str(index) in pagePeriodicDataUpdateXlsxUploads.getUpdateId(index).text
+        assert str(pdu_upload.template.id) in pagePeriodicDataUpdateXlsxUploads.getUpdateTemplate(index).text
+        assert f"{pdu_upload.created_at:%-d %b %Y}" in pagePeriodicDataUpdateXlsxUploads.getUpdateCreatedAt(index).text
+        assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUpdateXlsxUploads.getUpdateCreatedBy(index).text
+        assert "SUCCESSFUL" in pagePeriodicDataUpdateXlsxUploads.getUpdateStatus(index).text

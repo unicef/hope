@@ -17,7 +17,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateXlsxTemplateFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
@@ -32,7 +32,7 @@ pytestmark = pytest.mark.django_db
 
 
 @freezegun.freeze_time("2022-01-01")
-class TestPeriodicDataUpdateTemplateViews:
+class TestPeriodicDataUpdateXlsxTemplateViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
@@ -41,10 +41,10 @@ class TestPeriodicDataUpdateTemplateViews:
         self.program1 = ProgramFactory(business_area=self.afghanistan, name="Program1")
         self.program2 = ProgramFactory(business_area=self.afghanistan, name="Program2")
 
-        self.pdu_template1 = PeriodicDataUpdateTemplateFactory(program=self.program1, created_by=self.user)
-        self.pdu_template2 = PeriodicDataUpdateTemplateFactory(program=self.program1, created_by=self.user)
-        self.pdu_template3 = PeriodicDataUpdateTemplateFactory(program=self.program1, created_by=self.user)
-        self.pdu_template_program2 = PeriodicDataUpdateTemplateFactory(program=self.program2)
+        self.pdu_template1 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1, created_by=self.user)
+        self.pdu_template2 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1, created_by=self.user)
+        self.pdu_template3 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1, created_by=self.user)
+        self.pdu_template_program2 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program2)
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-templates-list",
             kwargs={

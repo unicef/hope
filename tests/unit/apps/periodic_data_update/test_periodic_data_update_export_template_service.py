@@ -7,7 +7,7 @@ from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateXlsxTemplateFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
@@ -64,7 +64,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
                 },
             ],
         )
-        cls.periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+        cls.periodic_data_update_template = PeriodicDataUpdateXlsxTemplateFactory(
             program=cls.program,
             business_area=cls.business_area,
             rounds_data=[

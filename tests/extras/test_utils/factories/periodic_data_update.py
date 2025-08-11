@@ -13,7 +13,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 fake = Faker()
 
 
-class PeriodicDataUpdateTemplateFactory(DjangoModelFactory):
+class PeriodicDataUpdateXlsxTemplateFactory(DjangoModelFactory):
     class Meta:
         model = PeriodicDataUpdateXlsxTemplate
 
@@ -36,10 +36,10 @@ class PeriodicDataUpdateTemplateFactory(DjangoModelFactory):
     filters = {}
 
 
-class PeriodicDataUpdateUploadFactory(DjangoModelFactory):
+class PeriodicDataUpdateXlsxUploadFactory(DjangoModelFactory):
     class Meta:
         model = PeriodicDataUpdateXlsxUpload
 
     created_by = factory.SubFactory(UserFactory)
     status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PeriodicDataUpdateXlsxUpload.Status.choices])
-    template = factory.SubFactory(PeriodicDataUpdateTemplateFactory)
+    template = factory.SubFactory(PeriodicDataUpdateXlsxTemplateFactory)
