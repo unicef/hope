@@ -93,9 +93,8 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     """
     rounds_data = models.JSONField()
 
-<<<<<<< HEAD:src/hct_mis_api/apps/periodic_data_update/models.py
     celery_task_names = {
-        "export": "hct_mis_api.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
+        "export": "hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
     }
 
     class Meta:
@@ -105,9 +104,6 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
                 name="pdu_xlsx_template_name_unique_per_program",
             ),
         ]
-=======
-    celery_task_name = "hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
->>>>>>> develop:src/hope/apps/periodic_data_update/models.py
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
@@ -170,13 +166,9 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
     )
     file = models.FileField()
     error_message = models.TextField(null=True, blank=True)
-<<<<<<< HEAD:src/hct_mis_api/apps/periodic_data_update/models.py
     celery_task_names = {
-        "import": "hct_mis_api.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
+        "import": "hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
     }
-=======
-    celery_task_name = "hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
->>>>>>> develop:src/hope/apps/periodic_data_update/models.py
 
     @property
     def errors(self) -> dict | None:

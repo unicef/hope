@@ -10,6 +10,7 @@ from hope.apps.periodic_data_update.models import (
     PeriodicDataUpdateXlsxTemplate,
     PeriodicDataUpdateXlsxUpload,
     PeriodicDataUpdateOnlineEdit,
+)
 
 
 class PeriodicDataUpdateXlsxUploadInline(admin.TabularInline):
@@ -100,5 +101,5 @@ class PeriodicDataUpdateOnlineEditAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
 
-    def task_statuses(self, obj: PeriodicDataUpdateOnlineEdit) -> str:
+    def task_statuses(self, obj: PeriodicDataUpdateOnlineEdit) -> dict:
         return obj.celery_statuses
