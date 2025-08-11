@@ -47,7 +47,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismConfig,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -512,17 +511,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             self.assertEqual(value, "")
 
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
-        required_fields = ["name", "number", "uba_code", "holder_name"]
-        # add config for FSP and delivery_mechanism with required_fields
-        DeliveryMechanismConfig.objects.get_or_create(
-            fsp=self.fsp_1,
-            delivery_mechanism=self.dm_transfer,
-            required_fields=required_fields,
-        )
-        self.fsp_1.delivery_mechanisms.add(self.dm_transfer)
-        self.payment_plan.delivery_mechanism = self.dm_transfer
-        self.payment_plan.save()
-        # remove all Roles
+        required_fields_for_account = ["name", "number", "uba_code", "holder_name"]
+        # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
         # add Accounts for collectors
         for payment in self.payment_plan.eligible_payments:
@@ -558,7 +548,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=[], flex_fields=[])
 
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
-        assert headers[-4:] == required_fields
+        assert headers[-4:] == required_fields_for_account
 
         for payment in self.payment_plan.eligible_payments:
             # check payment row

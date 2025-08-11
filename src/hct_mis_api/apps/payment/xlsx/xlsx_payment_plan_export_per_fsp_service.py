@@ -20,7 +20,6 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismConfig,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -73,11 +72,15 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         }
         self.export_fsp_auth_code = bool(fsp_xlsx_template_id)
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
-        # add Account fields for FSP from PP
-        dm_config = DeliveryMechanismConfig.objects.filter(
-            fsp=payment_plan.financial_service_provider, delivery_mechanism=payment_plan.delivery_mechanism
-        ).first()
-        self.accounts_fields = dm_config.required_fields if dm_config else []
+        # get Account headers from first payment
+        first_payment = self.payment_plan.eligible_payments.first()
+        snapshot = getattr(first_payment, "household_snapshot", None)
+        snapshot_data = snapshot.snapshot_data if snapshot else dict()
+        collector_data = (
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+        )
+        account_data = collector_data.get("account_data", {})
+        self.account_fields_headers = list(account_data.keys()) if first_payment and snapshot else []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
@@ -151,7 +154,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # add headers for Account from FSP in PaymentPlan
         if "account_data" in column_list:
             column_list.remove("account_data")
-            column_list.extend(self.accounts_fields)
+            column_list.extend(self.account_fields_headers)
         return column_list
 
     def add_rows(
@@ -203,7 +206,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
         accounts_row = [
             FinancialServiceProviderXlsxTemplate.get_account_value_from_payment(payment, account_key)
-            for account_key in self.accounts_fields
+            for account_key in self.account_fields_headers
         ]
         payment_row.extend(accounts_row)
 
