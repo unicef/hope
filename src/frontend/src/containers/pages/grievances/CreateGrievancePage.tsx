@@ -200,7 +200,6 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { mutateAsync, isPending: loading } = useMutation({
     mutationFn: (requestData: CreateGrievanceTicket) => {
-      console.log(requestData);
       return RestService.restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug: businessArea,
         formData: requestData as any,
@@ -294,17 +293,6 @@ const CreateGrievancePage = (): ReactElement => {
     values.category?.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     values.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
     values.category?.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
-
-  console.log(
-    choicesLoading,
-    allAddIndividualFieldsDataLoading,
-    householdFieldsLoading,
-    programsDataLoading,
-    allEditPeopleFieldsLoading,
-    fetchedIndividualLoading,
-    fetchedHouseholdLoading,
-    shouldFetchIndividual,
-  );
   if (
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||

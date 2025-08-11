@@ -14,7 +14,6 @@ export function ExistingPaymentChannelFieldArray({
   individual,
 }: ExistingPaymentChannelFieldArrayProps): ReactElement {
   //TODO: Uncomment and implement the logic for rendering payment channels
-  console.log(setFieldValue, values, individual);
 
   // const location = useLocation();
   // const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
