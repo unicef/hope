@@ -2,7 +2,7 @@ import re
 
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.models import Individual
 from hope.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate, PeriodicDataUpdateOnlineEdit
 from hope.apps.program.models import Program
@@ -66,6 +66,8 @@ def update_rounds_covered_for_template(
         new_round = field_to_round_map.get(field.name)
         pdu_data = field.pdu_data
         if new_round <= pdu_data.rounds_covered:
-            raise ValidationError(f"Template for round {new_round} of field '{field.name}' has already been created.")
+            raise ValidationError(
+                f"Template for round {new_round} of field '{(field.label.get("English(EN)") or field.name)}' has already been created."
+            )
         pdu_data.rounds_covered = new_round
         pdu_data.save(update_fields=["rounds_covered"])
