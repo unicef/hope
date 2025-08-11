@@ -18,6 +18,7 @@ from django.db import models
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
 
 import celery

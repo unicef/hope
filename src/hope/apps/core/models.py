@@ -353,14 +353,14 @@ class PeriodicFieldData(models.Model):
     def __str__(self) -> str:
         return f"Periodic Field Data: {self.pk}"
 
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def clean(self) -> None:
         if self.rounds_covered > self.number_of_rounds:
             raise ValidationError({"rounds_covered": "Used rounds cannot exceed the total number of rounds."})
         super().clean()
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        self.full_clean()
-        super().save(*args, **kwargs)
 
 
 class XLSXKoboTemplateManager(models.Manager):

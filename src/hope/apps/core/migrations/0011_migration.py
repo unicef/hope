@@ -52,20 +52,20 @@ def populate_rounds_covered(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0010_migration'),
+        ("core", "0010_migration"),
         ("periodic_data_update", "0002_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='periodicfielddata',
-            name='rounds_names',
+            model_name="periodicfielddata",
+            name="rounds_names",
             field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=255), default=list, size=None),
         ),
         migrations.AddField(
-            model_name='periodicfielddata',
-            name='rounds_covered',
-            field=models.PositiveSmallIntegerField(blank=True, default=0, help_text='Number of rounds already used in templates and cannot be used again in template creation again.'),
+            model_name="periodicfielddata",
+            name="rounds_covered",
+            field=models.PositiveSmallIntegerField(blank=True, default=0, help_text="Number of rounds already used in templates and cannot be used again in template creation again."),
         ),
         migrations.RunPython(populate_rounds_covered, reverse_code=migrations.RunPython.noop),
     ]

@@ -68,6 +68,13 @@ class TestPeriodicDataUpdateXlsxUploadViews:
                 "program_slug": self.program1.slug,
             },
         )
+        self.url_count = reverse(
+            "api:periodic-data-update:periodic-data-update-uploads-count",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
+            },
+        )
         self.url_upload = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-upload",
             kwargs={
@@ -197,6 +204,23 @@ class TestPeriodicDataUpdateXlsxUploadViews:
             assert len(ctx.captured_queries) == 5
 
             assert etag_second_call == etag
+
+    def test_count_periodic_data_update_uploads(
+            self,
+            api_client: Callable,
+            afghanistan: BusinessAreaFactory,
+            create_user_role_with_permissions: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url_count)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["count"] == 2
 
     @pytest.mark.parametrize(
         "permissions, partner_permissions, access_to_program, expected_status",
