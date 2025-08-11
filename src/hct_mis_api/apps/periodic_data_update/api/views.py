@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     ProgramMixin,
-    SerializerActionMixin,
+    SerializerActionMixin, CountActionMixin,
 )
 from hct_mis_api.apps.core.api.parsers import DictDrfNestedParser
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -50,6 +50,7 @@ logger = logging.getLogger(__name__)
 class PeriodicDataUpdateTemplateViewSet(
     SerializerActionMixin,
     ProgramMixin,
+    CountActionMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
@@ -118,6 +119,7 @@ class PeriodicDataUpdateTemplateViewSet(
 class PeriodicDataUpdateUploadViewSet(
     SerializerActionMixin,
     ProgramMixin,
+    CountActionMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
