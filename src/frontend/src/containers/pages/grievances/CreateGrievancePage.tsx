@@ -23,7 +23,6 @@ import {
   getGrievanceDetailsPath,
   prepareRestVariables,
   selectedIssueType,
-  grievanceRequestToFormData,
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
@@ -35,7 +34,7 @@ import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
@@ -51,9 +50,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
-  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
+  PERMISSIONS,
 } from '../../../config/permissions';
 
 const InnerBoxPadding = styled.div`

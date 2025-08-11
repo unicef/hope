@@ -69,7 +69,7 @@ export function EntriesTable({
     'documentsToRemove',
     'previousIdentities',
     'identitiesToRemove',
-    'flexFields'
+    'flexFields',
   ];
   const biodataFields = entries.filter((item) => !wrongFields.includes(item[0]));
   return (
