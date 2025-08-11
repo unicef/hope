@@ -9,9 +9,9 @@ export interface ExistingPaymentChannelFieldArrayProps {
 }
 
 export function ExistingPaymentChannelFieldArray({
-  setFieldValue, // eslint-disable-line @typescript-eslint/no-unused-vars
-  values, // eslint-disable-line @typescript-eslint/no-unused-vars
-  individual, // eslint-disable-line @typescript-eslint/no-unused-vars
+  setFieldValue, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+  values, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+  individual, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
 }: ExistingPaymentChannelFieldArrayProps): ReactElement {
   //TODO: Uncomment and implement the logic for rendering payment channels
 
