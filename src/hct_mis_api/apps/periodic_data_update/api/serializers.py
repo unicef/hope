@@ -17,7 +17,7 @@ from hct_mis_api.apps.periodic_data_update.utils import update_rounds_covered_fo
 from hct_mis_api.apps.program.models import Program
 
 
-class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
+class PeriodicDataUpdateXlsxTemplateListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -36,7 +36,7 @@ class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
+class PeriodicDataUpdateXlsxTemplateCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicDataUpdateXlsxTemplate
         fields = (
@@ -65,7 +65,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
         return pdu_template
 
 
-class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
+class PeriodicDataUpdateXlsxTemplateDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicDataUpdateXlsxTemplate
         fields = (
@@ -74,7 +74,7 @@ class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
+class PeriodicDataUpdateXlsxUploadListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -91,7 +91,7 @@ class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
+class PeriodicDataUpdateXlsxUploadDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -110,7 +110,7 @@ class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateUploadSerializer(serializers.ModelSerializer):
+class PeriodicDataUpdateXlsxUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicDataUpdateXlsxUpload
         fields = ("file",)

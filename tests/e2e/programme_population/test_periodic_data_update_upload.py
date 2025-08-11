@@ -6,10 +6,10 @@ import openpyxl
 import pytest
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
+    PeriodicDataUpdateXlsxTemplates,
 )
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
+    PeriodicDataUpdateXlsxUploads,
 )
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -17,8 +17,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-    PeriodicDataUpdateUploadFactory,
+    PeriodicDataUpdateXlsxTemplateFactory,
+    PeriodicDataUpdateXlsxUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
@@ -159,7 +159,7 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
 
 
 @pytest.mark.usefixtures("login")
-class TestPeriodicDataUpdateUpload:
+class TestPeriodicDataUpdateXlsxUpload:
     @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_update_upload_success(
         self,
@@ -302,10 +302,10 @@ class TestPeriodicDataUpdateUpload:
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
-        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
-        pagePeriodicDataUploads: PeriodicDataUpdateUploads,
+        pagePeriodicDataUpdateXlsxTemplates: PeriodicDataUpdateXlsxTemplates,
+        pagePeriodicDataUpdateXlsxUploads: PeriodicDataUpdateXlsxUploads,
     ) -> None:
-        periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+        periodic_data_update_template = PeriodicDataUpdateXlsxTemplateFactory(
             program=program,
             business_area=program.business_area,
             status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
@@ -319,7 +319,7 @@ class TestPeriodicDataUpdateUpload:
                 }
             ],
         )
-        pdu_upload = PeriodicDataUpdateUploadFactory(
+        pdu_upload = PeriodicDataUpdateXlsxUploadFactory(
             template=periodic_data_update_template,
             status=PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL,
         )
@@ -331,11 +331,11 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getNavProgrammePopulation().click()
             pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
-        pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
+        pagePeriodicDataUpdateXlsxTemplates.getPduUpdatesBtn().click()
 
         index = pdu_upload.id
-        assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
-        assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
-        assert f"{pdu_upload.created_at:%-d %b %Y}" in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
-        assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
-        assert "SUCCESSFUL" in pagePeriodicDataUploads.getUpdateStatus(index).text
+        assert str(index) in pagePeriodicDataUpdateXlsxUploads.getUpdateId(index).text
+        assert str(pdu_upload.template.id) in pagePeriodicDataUpdateXlsxUploads.getUpdateTemplate(index).text
+        assert f"{pdu_upload.created_at:%-d %b %Y}" in pagePeriodicDataUpdateXlsxUploads.getUpdateCreatedAt(index).text
+        assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUpdateXlsxUploads.getUpdateCreatedBy(index).text
+        assert "SUCCESSFUL" in pagePeriodicDataUpdateXlsxUploads.getUpdateStatus(index).text

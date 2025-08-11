@@ -8,7 +8,7 @@ from django.utils import timezone
 import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateXlsxTemplateFactory,
 )
 
 from hct_mis_api.apps.core.models import FileTemp
@@ -23,10 +23,10 @@ pytestmark = pytest.mark.django_db
 class TestRemoveOldPDUTemplateFilesTask:
     def set_up(self, afghanistan: BusinessAreaFactory) -> None:
         self.afghanistan = afghanistan
-        self.pdu_template1 = PeriodicDataUpdateTemplateFactory()
+        self.pdu_template1 = PeriodicDataUpdateXlsxTemplateFactory()
         self.pdu_template1.refresh_from_db()
-        self.pdu_template2 = PeriodicDataUpdateTemplateFactory()
-        self.pdu_template3 = PeriodicDataUpdateTemplateFactory()
+        self.pdu_template2 = PeriodicDataUpdateXlsxTemplateFactory()
+        self.pdu_template3 = PeriodicDataUpdateXlsxTemplateFactory()
 
         # Save files with different creation dates
         self._create_file(self.pdu_template1, days_ago=10)  # Recent file

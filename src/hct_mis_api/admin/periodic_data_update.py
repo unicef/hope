@@ -13,7 +13,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 )
 
 
-class PeriodicDataUpdateUploadInline(admin.TabularInline):
+class PeriodicDataUpdateXlsxUploadInline(admin.TabularInline):
     model = PeriodicDataUpdateXlsxUpload
     extra = 0
     show_change_link = True
@@ -26,7 +26,7 @@ class PeriodicDataUpdateUploadInline(admin.TabularInline):
 
 
 @admin.register(PeriodicDataUpdateXlsxTemplate)
-class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
+class PeriodicDataUpdateXlsxTemplateAdmin(HOPEModelAdminBase):
     list_display = ("id", "status", "business_area", "program", "created_by", "created_at")
     list_filter = (
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
@@ -40,7 +40,7 @@ class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
     )
     exclude = ("celery_tasks_results_ids",)
     raw_id_fields = ("file", "program", "business_area", "created_by")
-    inlines = [PeriodicDataUpdateUploadInline]
+    inlines = [PeriodicDataUpdateXlsxUploadInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("created_by", "program", "business_area")
@@ -53,7 +53,7 @@ class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
 
 
 @admin.register(PeriodicDataUpdateXlsxUpload)
-class PeriodicDataUpdateUploadAdmin(HOPEModelAdminBase):
+class PeriodicDataUpdateXlsxUploadAdmin(HOPEModelAdminBase):
     list_display = ("id", "status", "template", "created_by", "created_at")
     list_filter = (
         ("status", ChoicesFieldComboFilter),

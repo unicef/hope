@@ -28,12 +28,12 @@ from hct_mis_api.apps.core.api.parsers import DictDrfNestedParser
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
-    PeriodicDataUpdateTemplateCreateSerializer,
-    PeriodicDataUpdateTemplateDetailSerializer,
-    PeriodicDataUpdateTemplateListSerializer,
-    PeriodicDataUpdateUploadDetailSerializer,
-    PeriodicDataUpdateUploadListSerializer,
-    PeriodicDataUpdateUploadSerializer,
+    PeriodicDataUpdateXlsxTemplateCreateSerializer,
+    PeriodicDataUpdateXlsxTemplateDetailSerializer,
+    PeriodicDataUpdateXlsxTemplateListSerializer,
+    PeriodicDataUpdateXlsxUploadDetailSerializer,
+    PeriodicDataUpdateXlsxUploadListSerializer,
+    PeriodicDataUpdateXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
@@ -47,7 +47,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_s
 logger = logging.getLogger(__name__)
 
 
-class PeriodicDataUpdateTemplateViewSet(
+class PeriodicDataUpdateXlsxTemplateViewSet(
     SerializerActionMixin,
     ProgramMixin,
     CountActionMixin,
@@ -58,9 +58,9 @@ class PeriodicDataUpdateTemplateViewSet(
 ):
     queryset = PeriodicDataUpdateXlsxTemplate.objects.all()
     serializer_classes_by_action = {
-        "list": PeriodicDataUpdateTemplateListSerializer,
-        "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
-        "create": PeriodicDataUpdateTemplateCreateSerializer,
+        "list": PeriodicDataUpdateXlsxTemplateListSerializer,
+        "retrieve": PeriodicDataUpdateXlsxTemplateDetailSerializer,
+        "create": PeriodicDataUpdateXlsxTemplateCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -116,7 +116,7 @@ class PeriodicDataUpdateTemplateViewSet(
         )
 
 
-class PeriodicDataUpdateUploadViewSet(
+class PeriodicDataUpdateXlsxUploadViewSet(
     SerializerActionMixin,
     ProgramMixin,
     CountActionMixin,
@@ -127,9 +127,9 @@ class PeriodicDataUpdateUploadViewSet(
     queryset = PeriodicDataUpdateXlsxUpload.objects.all()
     program_model_field = "template__program"
     serializer_classes_by_action = {
-        "list": PeriodicDataUpdateUploadListSerializer,
-        "upload": PeriodicDataUpdateUploadSerializer,
-        "retrieve": PeriodicDataUpdateUploadDetailSerializer,
+        "list": PeriodicDataUpdateXlsxUploadListSerializer,
+        "upload": PeriodicDataUpdateXlsxUploadSerializer,
+        "retrieve": PeriodicDataUpdateXlsxUploadDetailSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],

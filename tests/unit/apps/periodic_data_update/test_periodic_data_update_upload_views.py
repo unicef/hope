@@ -19,8 +19,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-    PeriodicDataUpdateUploadFactory,
+    PeriodicDataUpdateXlsxTemplateFactory,
+    PeriodicDataUpdateXlsxUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
@@ -41,7 +41,7 @@ pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
-class TestPeriodicDataUpdateUploadViews:
+class TestPeriodicDataUpdateXlsxUploadViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
@@ -50,17 +50,17 @@ class TestPeriodicDataUpdateUploadViews:
         self.program1 = ProgramFactory(business_area=self.afghanistan, name="Program1")
         self.program2 = ProgramFactory(business_area=self.afghanistan, name="Program2")
 
-        pdu_template1_program1 = PeriodicDataUpdateTemplateFactory(program=self.program1)
-        pdu_template2_program1 = PeriodicDataUpdateTemplateFactory(program=self.program1)
-        pdu_template_program2 = PeriodicDataUpdateTemplateFactory(program=self.program2)
+        pdu_template1_program1 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1)
+        pdu_template2_program1 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1)
+        pdu_template_program2 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program2)
 
-        self.pdu_upload1_program1 = PeriodicDataUpdateUploadFactory(
+        self.pdu_upload1_program1 = PeriodicDataUpdateXlsxUploadFactory(
             template=pdu_template1_program1, created_by=self.user
         )
-        self.pdu_upload2_program1 = PeriodicDataUpdateUploadFactory(
+        self.pdu_upload2_program1 = PeriodicDataUpdateXlsxUploadFactory(
             template=pdu_template2_program1, created_by=self.user
         )
-        self.pdu_upload_program2 = PeriodicDataUpdateUploadFactory(template=pdu_template_program2, created_by=self.user)
+        self.pdu_upload_program2 = PeriodicDataUpdateXlsxUploadFactory(template=pdu_template_program2, created_by=self.user)
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
             kwargs={
@@ -263,7 +263,7 @@ class TestPeriodicDataUpdateUploadViews:
             label="PDU Field",
             pdu_data=pdu_data,
         )
-        pdu_template = PeriodicDataUpdateTemplateFactory(
+        pdu_template = PeriodicDataUpdateXlsxTemplateFactory(
             program=self.program1,
             rounds_data=[
                 {
@@ -329,7 +329,7 @@ class TestPeriodicDataUpdateUploadViews:
         )
         populate_pdu_with_null_values(self.program1, individual.flex_fields)
         individual.save()
-        pdu_template = PeriodicDataUpdateTemplateFactory(
+        pdu_template = PeriodicDataUpdateXlsxTemplateFactory(
             program=self.program1,
             rounds_data=[
                 {

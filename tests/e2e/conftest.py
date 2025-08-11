@@ -52,11 +52,11 @@ from e2e.page_object.programme_population.households_details import HouseholdsDe
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
+    PeriodicDataUpdateXlsxTemplates,
+    PeriodicDataUpdateXlsxTemplatesDetails,
 )
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
+    PeriodicDataUpdateXlsxUploads,
 )
 from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
@@ -368,21 +368,21 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
-def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
-    yield PeriodicDatUpdateTemplates(browser)
+def pagePeriodicDataUpdateXlsxTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateXlsxTemplates:
+    yield PeriodicDataUpdateXlsxTemplates(browser)
 
 
 @pytest.fixture
-def pagePeriodicDataUpdateTemplatesDetails(
+def pagePeriodicDataUpdateXlsxTemplatesDetails(
     request: FixtureRequest,
     browser: Chrome,
-) -> PeriodicDatUpdateTemplatesDetails:
-    yield PeriodicDatUpdateTemplatesDetails(browser)
+) -> PeriodicDataUpdateXlsxTemplatesDetails:
+    yield PeriodicDataUpdateXlsxTemplatesDetails(browser)
 
 
 @pytest.fixture
-def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
-    yield PeriodicDataUpdateUploads(browser)
+def pagePeriodicDataUpdateXlsxUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateXlsxUploads:
+    yield PeriodicDataUpdateXlsxUploads(browser)
 
 
 @pytest.fixture
