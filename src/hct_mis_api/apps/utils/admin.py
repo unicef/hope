@@ -23,7 +23,7 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery import app as celery_app
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.utils.celery_utils import get_task_in_queue_or_running
@@ -366,7 +366,9 @@ class PaymentPlanCeleryTasksMixin:
             pp = PaymentPlan.objects.get(pk=pk)
             file = pp.reconciliation_import_file
             if not file:
-                messages.add_message(request, messages.ERROR, f"There is no reconciliation_import_file for this payment plan")
+                messages.add_message(
+                    request, messages.ERROR, "There is no reconciliation_import_file for this payment plan"
+                )
                 return redirect(reverse(self.url, args=[pk]))
 
             args = [uuid.UUID(pk), file.pk]
