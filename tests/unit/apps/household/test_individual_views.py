@@ -253,6 +253,7 @@ class TestIndividualList:
                 "village": individual.household.village,
                 "geopoint": None,
                 "import_id": individual.household.unicef_id,
+                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
@@ -347,7 +348,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 32
+            assert len(ctx.captured_queries) == 36
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -366,7 +367,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 31
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -376,7 +377,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 31
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -386,7 +387,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 24
+            assert len(ctx.captured_queries) == 27
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -762,6 +763,7 @@ class TestIndividualDetail:
             "village": self.individual1.household.village,
             "geopoint": None,
             "import_id": self.individual1.household.unicef_id,
+            "program_slug": self.program.slug,
         }
         assert data["role"] == ROLE_PRIMARY
         assert data["relationship"] == self.individual1.relationship
@@ -820,6 +822,7 @@ class TestIndividualDetail:
                     "village": self.household.village,
                     "geopoint": None,
                     "import_id": self.household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "role": ROLE_PRIMARY,
             },
@@ -846,6 +849,7 @@ class TestIndividualDetail:
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "role": ROLE_ALTERNATE,
             },
@@ -1223,6 +1227,7 @@ class TestIndividualGlobalViewSet:
                 "village": individual.household.village,
                 "geopoint": None,
                 "import_id": individual.household.unicef_id,
+                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),

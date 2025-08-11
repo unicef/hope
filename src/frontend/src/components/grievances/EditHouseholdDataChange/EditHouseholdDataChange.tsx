@@ -13,8 +13,6 @@ import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { HouseholdSmall } from '@restgenerated/models/HouseholdSmall';
-import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
 import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 export interface EditHouseholdDataChangeProps {
