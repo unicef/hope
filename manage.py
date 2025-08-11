@@ -22,12 +22,12 @@ def run_dev() -> None:
         processes.append(start(f"{sys.executable} manage.py runserver 127.0.0.1:8080"))
         processes.append(
             start(
-                f"{sys.executable} -m celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler"
+                f"{sys.executable} -m celery -A hope.apps.core.celery beat -l INFO --scheduler hope.apps.core.models:CustomDatabaseScheduler"
             )
         )
         processes.append(
             start(
-                f"watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- {sys.executable} -m celery -A hct_mis_api.apps.core.celery worker -E -l info --max-tasks-per-child=4 --concurrency=4"
+                f"watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- {sys.executable} -m celery -A hope.apps.core.celery worker -E -l info --max-tasks-per-child=4 --concurrency=4"
             )
         )
     except subprocess.CalledProcessError as exc:
@@ -60,7 +60,7 @@ def main() -> None:
         sys.argv.pop(1)
         run_dev()
         return
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.config.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hope.config.settings")
     from django.core.management import execute_from_command_line
 
     execute_from_command_line(sys.argv)

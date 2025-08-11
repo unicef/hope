@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build-for-backend": "yarn build --outDir '../hct_mis_api/apps/web/static/web' --emptyOutDir",
+    "build-for-backend": "yarn build --outDir '../hope/apps/web/static/web' --emptyOutDir",
     "build-and-watch": "yarn build-for-backend --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest",

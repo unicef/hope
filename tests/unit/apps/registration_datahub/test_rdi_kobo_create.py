@@ -20,20 +20,20 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import PendingAccount
+from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -49,7 +49,7 @@ class TestRdiKoboCreateTask(TestCase):
         super().setUpTestData()
         call_command("init-geo-fixtures")
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+        from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
@@ -103,7 +103,7 @@ class TestRdiKoboCreateTask(TestCase):
         generate_delivery_mechanisms()
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self) -> None:
@@ -175,7 +175,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(dmd.individual.full_name, "Tesa Testowski")
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self) -> None:
@@ -221,7 +221,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self) -> None:
@@ -322,7 +322,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(result, False)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self) -> None:

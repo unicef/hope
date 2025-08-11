@@ -17,7 +17,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     HEAD,
     MALE,
     ROLE_PRIMARY,
@@ -27,11 +27,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -215,7 +215,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             RegistrationDataImport.IN_REVIEW,
         )
 
-    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache")
+    @patch("hope.apps.registration_datahub.celery_tasks.locked_cache")
     def test_registration_program_population_import_locked_cache(self, mocked_locked_cache: Any) -> None:
         mocked_locked_cache.return_value.__enter__.return_value = False
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED

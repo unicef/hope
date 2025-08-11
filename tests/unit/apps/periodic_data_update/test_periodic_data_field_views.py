@@ -20,8 +20,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import PeriodicFieldData
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import PeriodicFieldData
 
 pytestmark = pytest.mark.django_db()
 

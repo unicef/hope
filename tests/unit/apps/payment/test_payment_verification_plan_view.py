@@ -20,8 +20,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from openpyxl import Workbook
 from rest_framework import status
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -29,7 +29,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     build_summary,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

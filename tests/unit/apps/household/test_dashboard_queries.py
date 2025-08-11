@@ -8,9 +8,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
 
 
 class TestDashboardQueries(APITestCase):

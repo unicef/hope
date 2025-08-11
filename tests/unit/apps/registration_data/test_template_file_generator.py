@@ -6,8 +6,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
 
-from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.registration_data.services.template_generator_service import (
+from hope.apps.core.models import PeriodicFieldData
+from hope.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
 )
 

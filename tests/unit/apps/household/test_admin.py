@@ -9,7 +9,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
+    from hope.apps.account.models import User
 
 
 class BaseTest(WebTest):

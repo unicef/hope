@@ -13,8 +13,8 @@ from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.dashboard.services import DashboardDataCache
-from hct_mis_api.apps.program.models import BeneficiaryGroup
+from hope.apps.dashboard.services import DashboardDataCache
+from hope.apps.program.models import BeneficiaryGroup
 
 
 class ModifiedPaymentFactory(PaymentFactory):

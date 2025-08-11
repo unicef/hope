@@ -3,7 +3,7 @@ from threading import Thread
 
 from django.test import TestCase
 
-from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
+from hope.apps.registration_datahub.celery_tasks import locked_cache
 
 
 class DummyClass:
