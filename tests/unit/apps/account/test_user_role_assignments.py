@@ -95,7 +95,7 @@ class RoleAssignmentsTest(TestCase):
         )
         formset = RoleAssignmentFormSet(instance=self.user, data=data)
         self.assertFalse(formset.is_valid())
-        self.assertEqual(len(formset.errors), 2)
+        assert len(formset.errors) == 2
 
         errors: List[ErrorList] = formset.errors
         role = errors[0]["role"]  # type: ignore # mypy doesn't see that you can call __getitem__ with str on ErrorList
@@ -136,13 +136,10 @@ class RoleAssignmentsTest(TestCase):
         user_role_1.expiry_date = "2024-02-02"
         user_role_1.save()
         user_role_1.refresh_from_db()
-        self.assertEqual(str(user_role_1.expiry_date), "2024-02-02")
-        self.assertEqual(str(user_role_2.expiry_date), "2024-02-16")
+        assert str(user_role_1.expiry_date) == "2024-02-02"
+        assert str(user_role_2.expiry_date) == "2024-02-16"
         # empty list
-        self.assertEqual(
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
-            set(),
-        )
+        assert user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug) == set()
         self.assertNotIn(
             Permissions.RDI_VIEW_LIST.value,
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),

@@ -37,12 +37,8 @@ class TestHandleRole(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        self.assertEqual(
-            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 1
-        )
+        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
 
         handle_role(ROLE_NO_ROLE, household, individual)
 
-        self.assertEqual(
-            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 0
-        )
+        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 0

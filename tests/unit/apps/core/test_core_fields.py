@@ -63,7 +63,7 @@ class TestCoreFields(APITestCase):
     )
     def test_xlsx_people_scope_filtering(self) -> None:
         factory_result = FieldFactory.from_only_scopes(self.scopes)
-        self.assertEqual(len(factory_result), 2)
+        assert len(factory_result) == 2
 
     @patch(
         "hope.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
@@ -85,8 +85,8 @@ class TestCoreFields(APITestCase):
     )
     def test_xlsx_people_scope_modification(self) -> None:
         factory_result = FieldFactory.from_only_scopes(self.scopes)
-        self.assertEqual(factory_result[0]["xlsx_field"], "pp_given_name_i_c")
+        assert factory_result[0]["xlsx_field"] == "pp_given_name_i_c"
 
     def test_get_all_core_fields_choices(self) -> None:
         choices = FieldFactory.get_all_core_fields_choices()
-        self.assertEqual(choices[0], ("age", "Age (calculated)"))
+        assert choices[0] == ("age", "Age (calculated)")

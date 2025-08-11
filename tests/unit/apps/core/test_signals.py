@@ -20,19 +20,19 @@ class TestSignalCreateBusinessArea(TestCase):
     def test_signal_add_partner_role(self) -> None:
         partner_count = Partner.objects.count()
         new_ba = BusinessArea.objects.create(name="Test Business Area", code="TBA", active=True)
-        self.assertEqual(Partner.objects.count(), partner_count + 1)
+        assert Partner.objects.count() == partner_count + 1
 
         new_partner = Partner.objects.filter(name=f"UNICEF Partner for {new_ba.slug}").first()
         self.assertIsNotNone(new_partner)
-        self.assertEqual(new_partner.allowed_business_areas.count(), 1)
-        self.assertEqual(new_partner.allowed_business_areas.first().name, "Test Business Area")
-        self.assertEqual(new_partner.role_assignments.count(), 1)
-        self.assertEqual(new_partner.role_assignments.first().business_area.name, "Test Business Area")
-        self.assertEqual(new_partner.role_assignments.first().role.name, "Role for UNICEF Partners")
+        assert new_partner.allowed_business_areas.count() == 1
+        assert new_partner.allowed_business_areas.first().name == "Test Business Area"
+        assert new_partner.role_assignments.count() == 1
+        assert new_partner.role_assignments.first().business_area.name == "Test Business Area"
+        assert new_partner.role_assignments.first().role.name == "Role for UNICEF Partners"
 
         # UNICEF HQ is granted role "Role with all permissions" in the new business area
-        self.assertEqual(self.unicef_hq.allowed_business_areas.count(), 1)
-        self.assertEqual(self.unicef_hq.allowed_business_areas.first().name, "Test Business Area")
-        self.assertEqual(self.unicef_hq.role_assignments.count(), 1)
-        self.assertEqual(self.unicef_hq.role_assignments.first().business_area.name, "Test Business Area")
-        self.assertEqual(self.unicef_hq.role_assignments.first().role.name, "Role with all permissions")
+        assert self.unicef_hq.allowed_business_areas.count() == 1
+        assert self.unicef_hq.allowed_business_areas.first().name == "Test Business Area"
+        assert self.unicef_hq.role_assignments.count() == 1
+        assert self.unicef_hq.role_assignments.first().business_area.name == "Test Business Area"
+        assert self.unicef_hq.role_assignments.first().role.name == "Role with all permissions"

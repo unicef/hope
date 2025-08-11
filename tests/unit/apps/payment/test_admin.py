@@ -52,7 +52,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         response = self.client.post(url)
 
         mock_sync.assert_called_once_with(self.payment_plan)
-        self.assertEqual(response.status_code, 302)
+        assert response.status_code == 302
         self.assertIn(
             reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]),
             response["Location"],
@@ -63,7 +63,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         url = reverse("admin:payment_paymentplan_sync_with_payment_gateway", args=[self.payment_plan.pk])
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway?")
 
     @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_record")
@@ -73,7 +73,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         response = self.client.post(url)
 
         mock_sync.assert_called_once_with(self.payment)
-        self.assertEqual(response.status_code, 302)
+        assert response.status_code == 302
         self.assertIn(
             reverse("admin:payment_payment_change", args=[self.payment.pk]),
             response["Location"],
@@ -84,13 +84,13 @@ class SyncWithPaymentGatewayTest(TestCase):
         url = reverse("admin:payment_payment_sync_with_payment_gateway", args=[self.payment.pk])
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway?")
 
     def test_payment_plan_related_configs_button(self: Any) -> None:
         url = reverse("admin:payment_paymentplan_related_configs", args=[self.payment_plan.pk])
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
+        assert response.status_code == 302
         self.assertIn(
             reverse("admin:payment_deliverymechanismconfig_changelist"),
             response["Location"],
@@ -107,7 +107,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         response = self.client.post(url)
 
         mock_sync.assert_called_once_with(self.payment_plan)
-        self.assertEqual(response.status_code, 302)
+        assert response.status_code == 302
         self.assertIn(
             reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]),
             response["Location"],
@@ -120,5 +120,5 @@ class SyncWithPaymentGatewayTest(TestCase):
         )
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway missing Records?")

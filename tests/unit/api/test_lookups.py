@@ -24,8 +24,8 @@ class APIProgramStatuesTests(HOPEApiTestCase):
         url = reverse("api:program-statuses-list")
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), dict(Program.STATUS_CHOICE))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == dict(Program.STATUS_CHOICE)
 
 
 class APICountriesTests(HOPEApiTestCase):
@@ -74,14 +74,11 @@ class APICountriesTests(HOPEApiTestCase):
     def test_get_countries(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json()["results"],
-            [
-                self.get_response(self.country_afghanistan),
-                self.get_response(self.country_poland),
-            ],
-        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["results"] == [
+            self.get_response(self.country_afghanistan),
+            self.get_response(self.country_poland),
+        ]
         self.assertIn("next", response.json())
         self.assertIn("previous", response.json())
 
@@ -94,8 +91,8 @@ class APICountriesTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), len(expected_result), filter_data)
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == len(expected_result), filter_data
             for result in expected_result:
                 self.assertIn(
                     self.get_response(result),
@@ -113,8 +110,8 @@ class APICountriesTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, {"search": filter_data})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), 1, filter_data)
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == 1, filter_data
             self.assertIn(
                 self.get_response(expected_result),
                 response.json()["results"],
@@ -174,7 +171,7 @@ class AreaListTests(HOPEApiTestCase):
     def test_get_area_list(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         for area in [self.area1, self.area2]:
             expected_result = self.get_result(area)
             self.assertIn(
@@ -201,8 +198,8 @@ class AreaListTests(HOPEApiTestCase):
         ):
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)  # type: ignore
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.json()["results"]), len(expected_results), filter_data)
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.json()["results"]) == len(expected_results), filter_data
             for area in expected_results:
                 self.assertIn(
                     self.get_result(area),
@@ -219,8 +216,8 @@ class AreaListTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, {"search": filter_data})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), 1, filter_data)
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == 1, filter_data
             self.assertIn(
                 self.get_result(area),
                 response.json()["results"],
@@ -272,7 +269,7 @@ class AreaTypeListTests(HOPEApiTestCase):
     def test_get_area_type_list(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         for area_type in [self.area_type1, self.area_type2]:
             expected_result = self.get_result(area_type)
             self.assertIn(
@@ -293,8 +290,8 @@ class AreaTypeListTests(HOPEApiTestCase):
         ):
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)  # type: ignore
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.json()["results"]), len(expected_results), filter_data)
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.json()["results"]) == len(expected_results), filter_data
             for area_type in expected_results:
                 expected_result = self.get_result(area_type)
                 self.assertIn(
@@ -309,8 +306,8 @@ class AreaTypeListTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, {"search": filter_data})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), 1, filter_data)
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == 1, filter_data
             self.assertIn(
                 self.get_result(area_type),
                 response.json()["results"],
@@ -362,7 +359,7 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
     def test_get_financial_institution_list(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         for fi in [self.fi_bank, self.fi_telco, self.fi_other]:
             expected_result = self.get_result(fi)
             self.assertIn(
@@ -373,17 +370,17 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
     def test_get_financial_institution_list_ordering(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         results = response.json()["results"]
         names = [result["name"] for result in results]
 
-        self.assertEqual(names, sorted(names))
+        assert names == sorted(names)
 
     def test_get_financial_institution_list_pagination(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         response_data = response.json()
         self.assertIn("next", response_data)
@@ -400,8 +397,8 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
     def test_get_financial_institution_list_filter_by_type(self, institution_type: str, expected_count: int) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"type": institution_type})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()["results"]), expected_count)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == expected_count
         self.assertLess(
             expected_count, 3, f"Filtering by type '{institution_type}' should return fewer results than total"
         )
@@ -430,8 +427,8 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, filter_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()["results"]), expected_count)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == expected_count
 
     @parameterized.expand(
         [
@@ -445,27 +442,27 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
     ) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"type": institution_type})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["name"], expected_name)
-        self.assertEqual(results[0]["type"], institution_type)
+        assert len(results) == 1
+        assert results[0]["name"] == expected_name
+        assert results[0]["type"] == institution_type
 
     def test_get_financial_institution_list_filter_by_invalid_type_returns_empty(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"type": "invalid_type"})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_get_financial_institution_list_filter_by_future_date_returns_empty(self) -> None:
         future_date = timezone.now() + timedelta(days=365)
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"updated_at_after": future_date.strftime("%Y-%m-%d")})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()["results"]), 0)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 0
 
     def test_get_financial_institution_list_filter_by_past_date_returns_all(self) -> None:
         past_date = timezone.now() - timedelta(days=365)
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"updated_at_before": past_date.strftime("%Y-%m-%d")})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()["results"]), 0)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 0

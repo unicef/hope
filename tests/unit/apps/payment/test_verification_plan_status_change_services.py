@@ -138,9 +138,9 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_verification = other_payment_plan.payment_verification_plans.first()
 
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self) -> None:
-        self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
+        assert self.verification.status == PaymentVerification.STATUS_PENDING
         self.assertIsNone(self.verification.error)
-        self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
+        assert self.verification.payment_record_verifications.count() == self.payment_record_amount
 
         def create_flow_response() -> Dict:
             return {
@@ -164,52 +164,52 @@ class TestPhoneNumberVerification(TestCase):
                 self.fail("Should have raised HTTPError")
 
         self.verification.refresh_from_db()
-        self.assertEqual(self.verification.status, PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR)
+        assert self.verification.status == PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
         self.assertIsNotNone(self.verification.error)
 
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            100,
+            ).count()
+            == 100
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            10,
+            ).count()
+            == 10
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
 
         post_request_mock = MagicMock()
@@ -221,50 +221,50 @@ class TestPhoneNumberVerification(TestCase):
             VerificationPlanStatusChangeServices(self.verification).activate()
 
         self.verification.refresh_from_db()
-        self.assertEqual(self.verification.status, PaymentVerificationPlan.STATUS_ACTIVE)
+        assert self.verification.status == PaymentVerificationPlan.STATUS_ACTIVE
         self.assertIsNone(self.verification.error)
 
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )

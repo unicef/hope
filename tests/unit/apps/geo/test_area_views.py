@@ -89,7 +89,7 @@ class TestAreaViews:
         )
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, expected_status",
+        ("permissions", "partner_permissions", "expected_status"),
         [
             ([], [], status.HTTP_403_FORBIDDEN),
             ([Permissions.GEO_VIEW_LIST], [], status.HTTP_200_OK),

@@ -506,7 +506,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_required_validator(self) -> None:
         with mock.patch(
             "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
-            lambda *args: {"test": {"required": True}},
+            return_value={"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result = upload_xlsx_instance_validator.required_validator(value="tak", header="test")
@@ -514,7 +514,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with mock.patch(
             "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
-            lambda *args: {"test": {"required": True}},
+            return_value={"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")
@@ -522,7 +522,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with mock.patch(
             "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
-            lambda *args: {"test": {"required": False}},
+            return_value={"test": {"required": False}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")

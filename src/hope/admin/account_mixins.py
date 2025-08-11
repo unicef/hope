@@ -186,6 +186,7 @@ class KoboAccessMixin:
                 "last_name": user.last_name,
                 "first_name": user.first_name,
             },
+            timeout=60,
         )
         if res.status_code != 201:
             raise Exception(res.content)

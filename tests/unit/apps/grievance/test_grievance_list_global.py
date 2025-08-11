@@ -544,7 +544,7 @@ class TestGrievanceTicketGlobalList:
         assert str(self.grievance_tickets[8].id) in result_ids
 
     @pytest.mark.parametrize(
-        "permissions, program, area_limit, expected_tickets",
+        ("permissions", "program", "area_limit", "expected_tickets"),
         [
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], 1, False, [0, 2, 6, 8]),
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], 1, False, [0, 6, 8]),

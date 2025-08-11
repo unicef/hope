@@ -71,7 +71,7 @@ class APIProgramTests(HOPEApiTestCase):
             },
         )
 
-        self.assertEqual(program.business_area, self.business_area)
+        assert program.business_area == self.business_area
 
     def test_list_program(self) -> None:
         program1: Program = ProgramFactory(
@@ -109,8 +109,8 @@ class APIProgramTests(HOPEApiTestCase):
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 2)
+        assert response.status_code == 200
+        assert len(response.json()) == 2
         self.assertIn(
             {
                 "budget": str(program1.budget),
@@ -222,8 +222,8 @@ class APIGlobalProgramTests(HOPEApiTestCase):
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 3)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 3
         self.assertIn(
             self.program1_expected_response,
             response.json()["results"],
@@ -240,8 +240,8 @@ class APIGlobalProgramTests(HOPEApiTestCase):
     def test_list_program_filter_business_area(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"business_area": "afghanistan"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 2)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 2
         self.assertNotIn(
             self.program_from_another_ba_expected_response,
             response.json()["results"],
@@ -250,8 +250,8 @@ class APIGlobalProgramTests(HOPEApiTestCase):
     def test_list_program_filter_active(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"active": "true"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 2)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 2
         self.assertNotIn(
             self.program2_expected_response,
             response.json()["results"],
@@ -260,8 +260,8 @@ class APIGlobalProgramTests(HOPEApiTestCase):
     def test_list_program_filter_not_active(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"active": "false"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 1)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 1
         self.assertIn(
             self.program2_expected_response,
             response.json()["results"],
@@ -270,8 +270,8 @@ class APIGlobalProgramTests(HOPEApiTestCase):
     def test_list_program_filter_status(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"status": Program.DRAFT})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 1)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 1
         self.assertIn(
             self.program2_expected_response,
             response.json()["results"],
@@ -284,20 +284,20 @@ class APIGlobalProgramTests(HOPEApiTestCase):
         yesterday_str = yesterday.strftime("%Y-%m-%d")
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_before": tomorrow_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 3)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 3
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_after": tomorrow_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 0)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 0
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_before": yesterday_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 0)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 0
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_after": yesterday_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 3)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 3

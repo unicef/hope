@@ -12,7 +12,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.models import Household
 
 
-@pytest.fixture()
+@pytest.fixture
 @pytest.mark.django_db(databases=["default", "read_only"])
 def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]], Household]:
     """

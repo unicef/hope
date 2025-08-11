@@ -107,4 +107,5 @@ class TestSanctionList(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )

@@ -32,7 +32,7 @@ class TestTemplateFileGenerator(TestCase):
         expected_sheet_names = ["Households", "Individuals", "Import helper", "People"].sort()
         result_sheet_names = wb.sheetnames.sort()
 
-        self.assertEqual(expected_sheet_names, result_sheet_names)
+        assert expected_sheet_names == result_sheet_names
 
     def test_handle_name_and_label_row(self) -> None:
         fields = {
@@ -50,42 +50,42 @@ class TestTemplateFileGenerator(TestCase):
             ["test", "test_h_f"],
             ["My Test Label - STRING - required", "Flex Test Label - STRING"],
         )
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_add_template_columns(self) -> None:
         result_wb = TemplateFileGeneratorService(self.program).create_workbook()
 
         households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
 
-        self.assertEqual("residence_status_h_c", households_rows[0][0])
-        self.assertEqual("Residence status - SELECT_ONE", households_rows[1][0])
+        assert households_rows[0][0] == "residence_status_h_c"
+        assert households_rows[1][0] == "Residence status - SELECT_ONE"
 
         individuals_rows = tuple(result_wb["Individuals"].iter_rows(values_only=True))
 
         self.assertIn("pdu_flex_attribute_round_1_value", individuals_rows[0])
         self.assertIn("pdu_flex_attribute_round_1_collection_date", individuals_rows[0])
 
-        self.assertEqual("age", individuals_rows[0][0])
-        self.assertEqual("Age (calculated) - INTEGER", individuals_rows[1][0])
+        assert individuals_rows[0][0] == "age"
+        assert individuals_rows[1][0] == "Age (calculated) - INTEGER"
 
         people_rows = tuple(result_wb["People"].iter_rows(values_only=True))
 
-        self.assertEqual("pp_age", people_rows[0][0])
-        self.assertEqual("Age (calculated) - INTEGER", people_rows[1][0])
+        assert people_rows[0][0] == "pp_age"
+        assert people_rows[1][0] == "Age (calculated) - INTEGER"
 
-        self.assertEqual("pp_admin3_i_c", people_rows[0][10])
-        self.assertEqual("Social Worker resides in which admin3? - SELECT_ONE", people_rows[1][10])
+        assert people_rows[0][10] == "pp_admin3_i_c"
+        assert people_rows[1][10] == "Social Worker resides in which admin3? - SELECT_ONE"
 
-        self.assertEqual("pp_middle_name_i_c", people_rows[0][19])
-        self.assertEqual("Middle name(s) - STRING", people_rows[1][19])
+        assert people_rows[0][19] == "pp_middle_name_i_c"
+        assert people_rows[1][19] == "Middle name(s) - STRING"
 
-        self.assertEqual("pp_drivers_license_issuer_i_c", people_rows[0][39])
-        self.assertEqual("Issuing country of driver's license - SELECT_ONE", people_rows[1][39])
+        assert people_rows[0][39] == "pp_drivers_license_issuer_i_c"
+        assert people_rows[1][39] == "Issuing country of driver's license - SELECT_ONE"
 
-        self.assertEqual("pp_village_i_c", people_rows[0][69])
-        self.assertEqual("Village - STRING", people_rows[1][69])
+        assert people_rows[0][69] == "pp_village_i_c"
+        assert people_rows[1][69] == "Village - STRING"
 
-        self.assertEqual("pdu_flex_attribute_round_1_collection_date", people_rows[0][87])
+        assert people_rows[0][87] == "pdu_flex_attribute_round_1_collection_date"
 
-        self.assertEqual("pp_index_id", people_rows[0][83])
-        self.assertEqual("Index ID - INTEGER - required", people_rows[1][83])
+        assert people_rows[0][83] == "pp_index_id"
+        assert people_rows[1][83] == "Index ID - INTEGER - required"

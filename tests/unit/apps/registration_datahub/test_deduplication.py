@@ -247,8 +247,8 @@ class TestBatchDeduplication(TestCase):
             deduplication_batch_status=UNIQUE_IN_BATCH
         )
 
-        self.assertEqual(duplicate_in_batch.count(), 4)
-        self.assertEqual(unique_in_batch.count(), 3)
+        assert duplicate_in_batch.count() == 4
+        assert unique_in_batch.count() == 3
 
         expected_duplicates = (
             "Tessta Testowski",
@@ -261,14 +261,8 @@ class TestBatchDeduplication(TestCase):
             "Tescik Testowski",
             "Test Example",
         )
-        self.assertEqual(
-            tuple(duplicate_in_batch.values_list("full_name", flat=True)),
-            expected_duplicates,
-        )
-        self.assertEqual(
-            tuple(unique_in_batch.values_list("full_name", flat=True)),
-            expected_uniques,
-        )
+        assert tuple(duplicate_in_batch.values_list("full_name", flat=True)) == expected_duplicates
+        assert tuple(unique_in_batch.values_list("full_name", flat=True)) == expected_uniques
 
         duplicate_in_golden_record = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_golden_record_status=DUPLICATE
@@ -280,9 +274,9 @@ class TestBatchDeduplication(TestCase):
             deduplication_golden_record_status=UNIQUE
         )
 
-        self.assertEqual(duplicate_in_golden_record.count(), 5)
-        self.assertEqual(unique_in_golden_record.count(), 1)
-        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
+        assert duplicate_in_golden_record.count() == 5
+        assert unique_in_golden_record.count() == 1
+        assert needs_adjudication_in_golden_record.count() == 1
 
         expected_duplicates_gr = (
             "Tessta Testowski",
@@ -294,14 +288,8 @@ class TestBatchDeduplication(TestCase):
 
         expected_uniques_gr = ("Tesa Testowski",)
 
-        self.assertEqual(
-            tuple(duplicate_in_golden_record.values_list("full_name", flat=True)),
-            expected_duplicates_gr,
-        )
-        self.assertEqual(
-            tuple(unique_in_golden_record.values_list("full_name", flat=True)),
-            expected_uniques_gr,
-        )
+        assert tuple(duplicate_in_golden_record.values_list("full_name", flat=True)) == expected_duplicates_gr
+        assert tuple(unique_in_golden_record.values_list("full_name", flat=True)) == expected_uniques_gr
 
 
 @pytest.mark.elasticsearch
@@ -432,8 +420,8 @@ class TestGoldenRecordDeduplication(TestCase):
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
-        self.assertEqual(needs_adjudication.count(), 0)
-        self.assertEqual(duplicate.count(), 4)
+        assert needs_adjudication.count() == 0
+        assert duplicate.count() == 4
 
     def test_deduplicate_individuals_from_other_source(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
@@ -449,5 +437,5 @@ class TestGoldenRecordDeduplication(TestCase):
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
-        self.assertEqual(needs_adjudication.count(), 0)
-        self.assertEqual(duplicate.count(), 2)
+        assert needs_adjudication.count() == 0
+        assert duplicate.count() == 2

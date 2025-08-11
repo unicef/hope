@@ -186,8 +186,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             status, value = service._get_delivered_quantity_status_and_value(
                 delivered_quantity, entitlement_quantity, "xx"
             )
-            self.assertEqual(status, expected_status)
-            self.assertEqual(value, expected_delivered_quantity)
+            assert status == expected_status
+            assert value == expected_delivered_quantity
 
     def test_xlsx_payment_plan_import_per_fsp_service_import_row(self) -> None:
         pp = PaymentPlanFactory(
@@ -297,17 +297,17 @@ class TestPaymentPlanReconciliation(APITestCase):
         verification_2.refresh_from_db()
         verification_3.refresh_from_db()
 
-        self.assertEqual(payment_1.delivered_quantity, 999)
-        self.assertEqual(verification_1.received_amount, 999)
-        self.assertEqual(verification_1.status, PaymentVerification.STATUS_RECEIVED)
+        assert payment_1.delivered_quantity == 999
+        assert verification_1.received_amount == 999
+        assert verification_1.status == PaymentVerification.STATUS_RECEIVED
 
-        self.assertEqual(payment_2.delivered_quantity, 100)
-        self.assertEqual(verification_2.received_amount, 500)
-        self.assertEqual(verification_2.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+        assert payment_2.delivered_quantity == 100
+        assert verification_2.received_amount == 500
+        assert verification_2.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
 
-        self.assertEqual(payment_3.delivered_quantity, 2999)
-        self.assertEqual(verification_3.received_amount, None)
-        self.assertEqual(verification_3.status, PaymentVerification.STATUS_PENDING)
+        assert payment_3.delivered_quantity == 2999
+        assert verification_3.received_amount is None
+        assert verification_3.status == PaymentVerification.STATUS_PENDING
 
     def test_payment_plan_is_fully_delivered(self) -> None:
         payment_plan = PaymentPlanFactory(

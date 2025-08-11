@@ -81,22 +81,22 @@ class TestReassignRolesOnUpdate(APITestCase):
             },
         }
         reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
-        self.assertEqual(
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 household=self.household, individual=self.no_role_individual, role=ROLE_PRIMARY
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
-        self.assertEqual(
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 household=self.household, individual=self.primary_collector_individual, role=ROLE_PRIMARY
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
         self.household.refresh_from_db()
-        self.assertEqual(self.household.head_of_household, self.no_role_individual)
+        assert self.household.head_of_household == self.no_role_individual
         for individual in self.household.individuals.exclude(id=self.no_role_individual.id):
-            self.assertEqual(individual.relationship, RELATIONSHIP_UNKNOWN)
+            assert individual.relationship == RELATIONSHIP_UNKNOWN
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(self) -> None:
         program_two = ProgramFactory(name="Test program TWO", business_area=self.business_area)
@@ -121,10 +121,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            "Cannot reassign role to individual from different program",
-        )
+        assert str(error.exception.messages[0]) == "Cannot reassign role to individual from different program"
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(self) -> None:
         duplicated_individuals = Individual.objects.none()
@@ -147,9 +144,9 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            f"Individual ({self.primary_collector_individual.unicef_id}) was not marked as duplicated",
+        assert (
+            str(error.exception.messages[0])
+            == f"Individual ({self.primary_collector_individual.unicef_id}) was not marked as duplicated"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_individual_is_duplicate(
@@ -177,9 +174,9 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            f"Individual({self.no_role_individual.unicef_id}) which get role PRIMARY was marked as duplicated",
+        assert (
+            str(error.exception.messages[0])
+            == f"Individual({self.no_role_individual.unicef_id}) which get role PRIMARY was marked as duplicated"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_alternate_to_primary(
@@ -202,17 +199,17 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
-        self.assertEqual(
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 household=self.household, individual=self.alternate_collector_individual, role=ROLE_PRIMARY
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
-        self.assertEqual(
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 household=self.household, individual=self.alternate_collector_individual
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_primary_to_alternate(
@@ -238,9 +235,9 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            "Cannot reassign the role. Selected individual has primary collector role.",
+        assert (
+            str(error.exception.messages[0])
+            == "Cannot reassign the role. Selected individual has primary collector role."
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wrong_role(
@@ -265,10 +262,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            "Invalid role name",
-        )
+        assert str(error.exception.messages[0]) == "Invalid role name"
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_wrong_person(
         self,
@@ -292,9 +286,9 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY in household with unicef_id {self.household.unicef_id}",
+        assert (
+            str(error.exception.messages[0])
+            == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY in household with unicef_id {self.household.unicef_id}"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_not_reassigned(
@@ -313,10 +307,9 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            ""
-            f"Role for head of household in household with unicef_id {self.household.unicef_id} was not reassigned, when individual ({self.primary_collector_individual.unicef_id}) was marked as duplicated",
+        assert (
+            str(error.exception.messages[0]) == ""
+            f"Role for head of household in household with unicef_id {self.household.unicef_id} was not reassigned, when individual ({self.primary_collector_individual.unicef_id}) was marked as duplicated"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
@@ -335,7 +328,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated individual({self.primary_collector_individual.unicef_id})",
+        assert (
+            str(error.exception.messages[0])
+            == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated individual({self.primary_collector_individual.unicef_id})"
         )

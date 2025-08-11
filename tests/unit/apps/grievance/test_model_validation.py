@@ -60,8 +60,8 @@ class TestGrievanceModelValidation(TestCase):
         grievance_ticket_1.save()
         grievance_ticket_2.save()
 
-        self.assertEqual(self.valid_model_data["issue_type"], grievance_ticket_1.issue_type)
-        self.assertEqual(self.valid_model_2_data["issue_type"], grievance_ticket_2.issue_type)
+        assert self.valid_model_data["issue_type"] == grievance_ticket_1.issue_type
+        assert self.valid_model_2_data["issue_type"] == grievance_ticket_2.issue_type
 
     def test_invalid_issue_types(self) -> None:
         grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.invalid_model_data)

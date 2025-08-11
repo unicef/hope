@@ -43,7 +43,7 @@ class TestProgramFinish:
             cycle.save()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PROGRAMME_FINISH], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),

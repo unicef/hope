@@ -98,5 +98,5 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         ticket1.linked_tickets.set(self.grievance_tickets)
         ticket2.linked_tickets.set(list(self.grievance_tickets) + [ticket1])
 
-        self.assertEqual(ticket1.linked_tickets.count(), 6)
-        self.assertEqual(ticket2.linked_tickets.count(), 6)
+        assert ticket1.linked_tickets.count() == 6
+        assert ticket2.linked_tickets.count() == 6

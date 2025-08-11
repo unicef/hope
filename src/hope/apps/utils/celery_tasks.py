@@ -14,6 +14,7 @@ def send_email_task(data_json: str) -> None:
         "https://api.mailjet.com/v3.1/send",
         auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
         data=data_json,
+        timeout=30,
     )
     if res.status_code != 200:
         raise Exception(f"Failed to send email: {res.json()}. Data: {data_json}")

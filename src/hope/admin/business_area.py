@@ -18,7 +18,6 @@ from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
@@ -373,10 +372,8 @@ class BusinessAreaAdmin(
             self,
             request,
             self.mark_submissions,
-            mark_safe(
-                """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
-                <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
-                """
-            ),
+            """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+            <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
+            """,
             "Successfully executed",
         )

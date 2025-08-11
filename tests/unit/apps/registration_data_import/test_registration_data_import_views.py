@@ -76,7 +76,7 @@ class TestRegistrationDataImportViews:
         )
 
     @pytest.mark.parametrize(
-        "user_permissions, partner_permissions, is_permission_in_correct_program, expected_status",
+        ("user_permissions", "partner_permissions", "is_permission_in_correct_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.RDI_VIEW_LIST], [], True, status.HTTP_200_OK),

@@ -156,9 +156,9 @@ class UserPartnerTest(TestCase):
         role_unicef = User.permissions_in_business_area(self.unicef_user, business_area_slug=self.business_area.slug)
         for role in ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]:
             self.assertTrue(role in role_unicef)
-        self.assertEqual(self.unicef_user.partner.role_assignments.count(), 1)
-        self.assertEqual(
-            self.unicef_user.partner.role_assignments.first().role, Role.objects.get(name="Role with all permissions")
+        assert self.unicef_user.partner.role_assignments.count() == 1
+        assert self.unicef_user.partner.role_assignments.first().role == Role.objects.get(
+            name="Role with all permissions"
         )
 
         role_unicef_program = User.permissions_in_business_area(
