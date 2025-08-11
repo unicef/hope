@@ -598,9 +598,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:
-        return parent.payment_items.filter(
-            status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        ).count()
+        return parent.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
 
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
@@ -929,7 +927,7 @@ class GenericPaymentPlanNode(graphene.ObjectType):
         return self.__class__.__name__
 
     def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
-        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
+        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
 
     def resolve_verification_plans(self, info: Any, **kwargs: Any) -> DjangoPermissionFilterConnectionField:
         return self.payment_verification_plans.all()
