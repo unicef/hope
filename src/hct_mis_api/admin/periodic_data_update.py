@@ -9,6 +9,7 @@ from hct_mis_api.admin.utils import HOPEModelAdminBase
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateXlsxTemplate,
     PeriodicDataUpdateXlsxUpload,
+    PeriodicDataUpdateOnlineEdit,
 )
 
 
@@ -79,3 +80,26 @@ class PeriodicDataUpdateUploadAdmin(HOPEModelAdminBase):
 
     def celery_task_result_id(self, obj: PeriodicDataUpdateXlsxTemplate) -> str:
         return obj.celery_tasks_results_ids.get("import")
+
+
+@admin.register(PeriodicDataUpdateOnlineEdit)
+class PeriodicDataUpdateOnlineEditAdmin(HOPEModelAdminBase):
+    list_display = ("id", "status", "business_area", "program", "created_by", "created_at")
+    filter_horizontal = ("authorized_users",)
+    list_filter = (
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("status", ChoicesFieldComboFilter),
+        ("created_by", AutoCompleteFilter),
+    )
+    readonly_fields = (
+        "task_statuses",
+        "celery_tasks_results_ids",
+    )
+    raw_id_fields = ("program", "business_area", "created_by")
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).select_related("created_by", "program", "business_area")
+
+    def task_statuses(self, obj: PeriodicDataUpdateOnlineEdit) -> str:
+        return obj.celery_statuses
