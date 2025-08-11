@@ -10270,7 +10270,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update template.
+         * A unique integer value identifying this periodic data update xlsx template.
          */
         id: number,
         programSlug: string,
@@ -10296,7 +10296,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update template.
+         * A unique integer value identifying this periodic data update xlsx template.
          */
         id: number,
         programSlug: string,
@@ -10322,7 +10322,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update template.
+         * A unique integer value identifying this periodic data update xlsx template.
          */
         id: number,
         programSlug: string,
@@ -10394,7 +10394,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update upload.
+         * A unique integer value identifying this periodic data update xlsx upload.
          */
         id: number,
         programSlug: string,
