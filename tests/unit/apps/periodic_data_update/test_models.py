@@ -46,7 +46,7 @@ class TestFlexibleAttribute(TransactionTestCase):
             program=self.program2,
             label="PDU Field 1",
         )
-        self.assertEqual(FlexibleAttribute.objects.filter(name=pdu_field2.name).count(), 2)
+        assert FlexibleAttribute.objects.filter(name=pdu_field2.name).count() == 2
 
         # Not possible to have flex fields with the same name in the same program
         with self.assertRaises(IntegrityError) as ie_context:

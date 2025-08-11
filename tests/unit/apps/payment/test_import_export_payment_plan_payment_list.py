@@ -163,7 +163,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         wb.active["A3"].value = str(self.payment_plan.eligible_payments[1].unicef_id)
 
         service.validate()
-        self.assertEqual(service.errors, error_msg)
+        assert service.errors == error_msg
 
     def test_import_invalid_file_with_unexpected_column(self) -> None:
         error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="N3", message="Unexpected value")
@@ -194,7 +194,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         wb.active["A3"].value = payment_id_2
 
         service.validate()
-        self.assertEqual(service.errors, [])
+        assert service.errors == []
 
         with patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
             mock.return_value = {}
@@ -202,8 +202,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        self.assertEqual(to_decimal(wb.active["J2"].value), payment_1.entitlement_quantity)
-        self.assertEqual(to_decimal(wb.active["J3"].value), payment_2.entitlement_quantity)
+        assert to_decimal(wb.active["J2"].value) == payment_1.entitlement_quantity
+        assert to_decimal(wb.active["J3"].value) == payment_2.entitlement_quantity
 
     def test_export_payment_plan_payment_list(self) -> None:
         payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
@@ -217,7 +217,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         )
         # remove old and create new snapshot with national_id document
         PaymentHouseholdSnapshot.objects.all().delete()
-        self.assertEqual(payment.collector.documents.all().count(), 1)
+        assert payment.collector.documents.all().count() == 1
         create_payment_plan_snapshot_data(self.payment_plan)
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
@@ -226,12 +226,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
         wb = export_service.generate_workbook()
 
-        self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
-        self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity)
-        self.assertEqual(wb.active["K2"].value, payment.entitlement_quantity_usd)
-        self.assertEqual(wb.active["E2"].value, "TEST_VILLAGE")
-        self.assertEqual(wb.active["M1"].value, "national_id")
-        self.assertEqual(wb.active["M2"].value, "Test_Number_National_Id_123")
+        assert wb.active["A2"].value == str(payment.unicef_id)
+        assert wb.active["J2"].value == payment.entitlement_quantity
+        assert wb.active["K2"].value == payment.entitlement_quantity_usd
+        assert wb.active["E2"].value == "TEST_VILLAGE"
+        assert wb.active["M1"].value == "national_id"
+        assert wb.active["M2"].value == "Test_Number_National_Id_123"
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory()
@@ -244,15 +244,15 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.payment_plan.save()
 
         payment = self.payment_plan.eligible_payments.first()
-        self.assertEqual(payment.token_number, None)
-        self.assertEqual(payment.order_number, None)
+        assert payment.token_number is None
+        assert payment.order_number is None
 
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
         payment.refresh_from_db(fields=["token_number", "order_number"])
-        self.assertEqual(len(str(payment.token_number)), 7)
-        self.assertEqual(len(str(payment.order_number)), 9)
+        assert len(str(payment.token_number)) == 7
+        assert len(str(payment.order_number)) == 9
 
         self.assertTrue(self.payment_plan.has_export_file)
         self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
@@ -285,7 +285,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.payment_plan.save()
 
         payments = self.payment_plan.eligible_payments.all()
-        self.assertEqual(payments.count(), 3)
+        assert payments.count() == 3
 
         pp_service = PaymentPlanService(self.payment_plan)
         pp_service.split(PaymentPlanSplit.SplitType.BY_RECORDS, 2)
@@ -301,10 +301,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             )
         )
         splits_count = self.payment_plan.splits.count()
-        self.assertEqual(splits_count, 2)
+        assert splits_count == 2
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
-            self.assertEqual(splits_count, len(file_list))
+            assert splits_count == len(file_list)
 
         # reexport
         pp_service.split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
@@ -320,10 +320,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             )
         )
         splits_count = self.payment_plan.splits.count()
-        self.assertEqual(splits_count, 3)
+        assert splits_count == 3
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
-            self.assertEqual(splits_count, len(file_list))
+            assert splits_count == len(file_list)
 
     def test_payment_row_flex_fields(self) -> None:
         core_fields = [
@@ -378,8 +378,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         create_payment_plan_snapshot_data(self.payment_plan)
 
         payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
-        self.assertEqual(payment_row[decimal_flexible_attribute_index], 123.45)
-        self.assertEqual(payment_row[date_flexible_attribute_index], "2021-01-01")
+        assert payment_row[decimal_flexible_attribute_index] == 123.45
+        assert payment_row[date_flexible_attribute_index] == "2021-01-01"
 
     def test_export_payment_plan_per_fsp_with_people_program(self) -> None:
         # check with default program
@@ -394,10 +394,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
-        self.assertEqual(
-            len(template_column_list),
-            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 3,
-            template_column_list,
+        assert len(template_column_list) == len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 3, (
+            template_column_list
         )  # - ind_id - fsp_auth_code
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
@@ -427,8 +425,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
-        self.assertEqual(
-            len(template_column_list), 30
+        assert (
+            len(template_column_list) == 30
         )  # DEFAULT_COLUMNS -hh_id and -hh_size -account_data +ind_id +3 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
@@ -443,12 +441,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertIn("individual_unicef_id", template_column_list)
 
         # get_template error
-        self.assertEqual(
+        assert (
             FspXlsxTemplatePerDeliveryMechanism.objects.filter(
                 delivery_mechanism=self.dm_atm_card,
                 financial_service_provider=self.fsp_1,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         with self.assertRaises(ValidationError) as e:
@@ -484,7 +482,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         instance.save()
         url = reverse("admin:payment_financialserviceproviderxlsxtemplate_change", args=[instance.pk])
         response: Any = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertIn("flex_fields", response.context["adminform"].form.fields)
         self.assertIn(
             "flex_decimal_i_f",
@@ -508,7 +506,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         payment = PaymentFactory(parent=self.payment_plan)
         empty_payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
         for value in empty_payment_row:
-            self.assertEqual(value, "")
+            assert value == ""
 
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
         required_fields_for_account = ["name", "number", "uba_code", "holder_name"]

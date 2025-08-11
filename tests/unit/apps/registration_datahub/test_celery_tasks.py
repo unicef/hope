@@ -875,23 +875,23 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
             rdi_merge_status=MergeStatusModel.PENDING,
         )
 
-        self.assertEqual(PendingHousehold.objects.count(), 3)
-        self.assertEqual(PendingIndividual.objects.count(), 3)
-        self.assertEqual(PendingDocument.objects.count(), 3)
+        assert PendingHousehold.objects.count() == 3
+        assert PendingIndividual.objects.count() == 3
+        assert PendingDocument.objects.count() == 3
 
         remove_old_rdi_links_task.__wrapped__()
 
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.count(), 1)
+        assert PendingHousehold.objects.count() == 1
+        assert PendingIndividual.objects.count() == 1
+        assert PendingDocument.objects.count() == 1
 
         self.rdi_1.refresh_from_db()
         self.rdi_2.refresh_from_db()
         self.rdi_3.refresh_from_db()
 
-        self.assertEqual(self.rdi_1.erased, True)
-        self.assertEqual(self.rdi_2.erased, True)
-        self.assertEqual(self.rdi_3.erased, False)
+        assert self.rdi_1.erased is True
+        assert self.rdi_2.erased is True
+        assert self.rdi_3.erased is False
 
 
 class TestRegistrationImportCeleryTasks(APITestCase):
@@ -960,10 +960,10 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     ) -> None:
         mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
         mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.MERGE_ERROR)
+        assert self.registration_data_import.status == RegistrationDataImport.MERGE_ERROR
 
     @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(
@@ -971,7 +971,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         MockRdiMergeTask: Mock,
     ) -> None:
         mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         mock_rdi_merge_task_instance.execute.assert_called_once()
 
@@ -982,10 +982,10 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     ) -> None:
         mock_deduplicate_task_task_instance = MockDeduplicateTask.return_value
         mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IMPORT_ERROR)
+        assert self.registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
 
     @patch("hope.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
     def test_pull_kobo_submissions_task(
@@ -1015,7 +1015,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics, self.program)
-        self.assertEqual(str(resp_1["kobo_import_data_id"]), str(kobo_import_data_with_pics.id))
+        assert str(resp_1["kobo_import_data_id"]) == str(kobo_import_data_with_pics.id)
 
         kobo_import_data_without_pics = KoboImportData.objects.create(
             kobo_asset_id="2222",
@@ -1024,7 +1024,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics, self.program)
-        self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))
+        assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
 
 
 class DeduplicationEngineCeleryTasksTests(TestCase):
@@ -1051,7 +1051,7 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         self,
         mock_upload_and_process: Mock,
     ) -> None:
-        self.assertIsNone(self.program.deduplication_set_id)
+        assert self.program.deduplication_set_id is None
         deduplication_engine_process(str(self.program.id))
 
         mock_upload_and_process.assert_called_once_with(self.program)

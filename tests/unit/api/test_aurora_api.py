@@ -66,19 +66,19 @@ class ProjectListViewTests(HOPEApiTestCase):
     # Organization
     def test_organization_list_no_permission(self) -> None:
         response = self.client.get(self.url_organization)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_organization_list_all(self) -> None:
         cache.clear()
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             with CaptureQueriesContext(connection) as queries:
                 response = self.client.get(self.url_organization)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
         org = response.data["results"][0]
-        self.assertEqual(org["name"], "Test Organization")
-        self.assertEqual(org["hope_id"], str(self.business_area.pk))
-        self.assertEqual(org["aurora_id"], 777)
+        assert org["name"] == "Test Organization"
+        assert org["hope_id"] == str(self.business_area.pk)
+        assert org["aurora_id"] == 777
 
         cache_key = f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}"
         self.assertIsNotNone(cache.get(cache_key))
@@ -86,27 +86,27 @@ class ProjectListViewTests(HOPEApiTestCase):
         # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_organization)
-        self.assertEqual(resp_2.status_code, 200)
+        assert resp_2.status_code == 200
         self.assertLess(len(queries2), len(queries))
 
     # Project
     def test_project_list_no_permission(self) -> None:
         response = self.client.get(self.url_project)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_project_list_all(self) -> None:
         cache.clear()
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             with CaptureQueriesContext(connection) as queries:
                 response = self.client.get(self.url_project)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
         # check first
         project = response.data["results"][0]
-        self.assertEqual(project["name"], "Test Project 1")
-        self.assertEqual(project["aurora_id"], 111)
-        self.assertEqual(project["hope_id"], str(self.program.pk))
-        self.assertEqual(project["organization"], "test_organization")
+        assert project["name"] == "Test Project 1"
+        assert project["aurora_id"] == 111
+        assert project["hope_id"] == str(self.program.pk)
+        assert project["organization"] == "test_organization"
 
         cache_key = f"{ProjectListVersionsKeyBit.specific_view_cache_key}:{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}"
         self.assertIsNotNone(cache.get(cache_key))
@@ -114,43 +114,43 @@ class ProjectListViewTests(HOPEApiTestCase):
         # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_project)
-        self.assertEqual(resp_2.status_code, 200)
+        assert resp_2.status_code == 200
         self.assertLess(len(queries2), len(queries))
 
     def test_project_list_filter_by_org_slug(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url_project, {"org_slug": "slug123"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
         project = response.data["results"][0]
-        self.assertEqual(project["name"], self.prj_2.name)
-        self.assertEqual(project["aurora_id"], 222)
-        self.assertEqual(project["hope_id"], str(self.other_program.pk))
-        self.assertEqual(project["organization"], self.organization_2.slug)
+        assert project["name"] == self.prj_2.name
+        assert project["aurora_id"] == 222
+        assert project["hope_id"] == str(self.other_program.pk)
+        assert project["organization"] == self.organization_2.slug
 
     def test_project_list_filter_by_org_pk(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url_project, {"org_pk": str(self.organization_2.pk)})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
         project = response.data["results"][0]
-        self.assertEqual(project["name"], self.prj_2.name)
-        self.assertEqual(project["aurora_id"], 222)
-        self.assertEqual(project["hope_id"], str(self.other_program.pk))
-        self.assertEqual(project["organization"], self.organization_2.slug)
+        assert project["name"] == self.prj_2.name
+        assert project["aurora_id"] == 222
+        assert project["hope_id"] == str(self.other_program.pk)
+        assert project["organization"] == self.organization_2.slug
 
     # Registration
     def test_registration_list_no_permission(self) -> None:
         response = self.client.get(self.url_registration)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_registration_list_all(self) -> None:
         cache.clear()
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             with CaptureQueriesContext(connection) as queries:
                 response = self.client.get(self.url_registration)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 3)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 3
 
         cache_key = (
             f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:"
@@ -161,38 +161,38 @@ class ProjectListViewTests(HOPEApiTestCase):
         # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_registration)
-        self.assertEqual(resp_2.status_code, 200)
+        assert resp_2.status_code == 200
         self.assertLess(len(queries2), len(queries))
 
     def test_registration_list_filter_by_org_slug(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url_registration, {"org_slug": "slug123"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
         reg = response.data["results"][0]
-        self.assertEqual(reg["name"], self.registration_3.name)
-        self.assertEqual(reg["aurora_id"], self.registration_3.source_id)
-        self.assertEqual(reg["project"], str(self.prj_2.pk))
-        self.assertEqual(reg["organization"], "slug123")
+        assert reg["name"] == self.registration_3.name
+        assert reg["aurora_id"] == self.registration_3.source_id
+        assert reg["project"] == str(self.prj_2.pk)
+        assert reg["organization"] == "slug123"
 
     def test_registration_list_filter_by_org_pk(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url_registration, {"org_pk": str(self.organization_2.pk)})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
         reg = response.data["results"][0]
-        self.assertEqual(reg["name"], self.registration_3.name)
-        self.assertEqual(reg["aurora_id"], self.registration_3.source_id)
-        self.assertEqual(reg["project"], str(self.prj_2.pk))
-        self.assertEqual(reg["organization"], self.organization_2.slug)
+        assert reg["name"] == self.registration_3.name
+        assert reg["aurora_id"] == self.registration_3.source_id
+        assert reg["project"] == str(self.prj_2.pk)
+        assert reg["organization"] == self.organization_2.slug
 
     def test_registration_list_filter_by_programme_pk(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             resp = self.client.get(self.url_registration, {"programme_pk": str(self.other_program.pk)})
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(resp.data["results"]), 1)
+        assert resp.status_code == status.HTTP_200_OK
+        assert len(resp.data["results"]) == 1
         reg = resp.data["results"][0]
-        self.assertEqual(reg["name"], self.registration_3.name)
-        self.assertEqual(reg["aurora_id"], self.registration_3.source_id)
-        self.assertEqual(reg["project"], str(self.prj_2.pk))
-        self.assertEqual(reg["organization"], self.organization_2.slug)
+        assert reg["name"] == self.registration_3.name
+        assert reg["aurora_id"] == self.registration_3.source_id
+        assert reg["project"] == str(self.prj_2.pk)
+        assert reg["organization"] == self.organization_2.slug

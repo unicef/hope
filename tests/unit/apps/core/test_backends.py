@@ -58,7 +58,7 @@ class TestPermissionsBackend(TestCase):
         with self.assertNumQueries(0):
             cached_permissions = self.backend.get_all_permissions(self.user, self.business_area)
 
-        self.assertEqual(permissions, cached_permissions)
+        assert permissions == cached_permissions
 
     @patch("hope.apps.core.backends.cache.get")
     def test_cache_get(self, mock_cache_get: Any) -> None:
@@ -157,7 +157,7 @@ class TestPermissionsBackend(TestCase):
             status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area
         )
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
-        self.assertEqual(set(), permissions_in_program_other)
+        assert set() == permissions_in_program_other
 
         # permissions from user's RoleAssignment in program_empty
         permissions_in_program_empty = self.backend.get_all_permissions(self.user, program_empty)
@@ -169,7 +169,7 @@ class TestPermissionsBackend(TestCase):
         self.role_assignment_partner.program = program_other
         self.role_assignment_partner.save()
         permissions_in_program = self.backend.get_all_permissions(self.user, self.program)
-        self.assertEqual(set(), permissions_in_program)
+        assert set() == permissions_in_program
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
         self.assertIn("PROGRAMME_FINISH", permissions_in_program_other)
         self.assertNotIn("PROGRAMME_CREATE", permissions_in_program_other)
@@ -251,7 +251,7 @@ class TestPermissionsBackend(TestCase):
 
         # outside-BA permissions (only from user's group)
         permissions = self.backend.get_all_permissions(self.user)
-        self.assertEqual({self._get_permission_name_combined(permission1)}, permissions)
+        assert {self._get_permission_name_combined(permission1)} == permissions
 
         # permissions for BA
         permissions = self.backend.get_all_permissions(self.user, self.business_area)
@@ -264,7 +264,7 @@ class TestPermissionsBackend(TestCase):
         # permissions for other BA - empty
         business_area_other = create_ukraine()
         permissions = self.backend.get_all_permissions(self.user, business_area_other)
-        self.assertEqual(set(), permissions)
+        assert set() == permissions
 
         # permissions for program
         # only RoleAssignment for partner is connected to this Program
@@ -288,7 +288,7 @@ class TestPermissionsBackend(TestCase):
             status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area
         )
         permissions = self.backend.get_all_permissions(self.user, program_other)
-        self.assertEqual(set(), permissions)
+        assert set() == permissions
 
     def _get_permission_name_combined(self, permission: Permission) -> str:
         return f"{self.content_type.app_label}.{permission.codename}"

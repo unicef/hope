@@ -41,7 +41,7 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         document_data = {"file": self.file, "title": "test"}
         serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=self.context)
         serializer.is_valid()
-        self.assertEqual(serializer.errors, {})
+        assert serializer.errors == {}
 
     def test_validate_file_size_failure(self) -> None:
         # just mock file size over limit
@@ -50,7 +50,7 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=self.context)
         self.assertFalse(serializer.is_valid())
         self.assertIn("file", serializer.errors)
-        self.assertEqual(serializer.errors["file"][0], "File size must be ≤ 10MB.")
+        assert serializer.errors["file"][0] == "File size must be ≤ 10MB."
 
     def test_validate_file_extension_success(self) -> None:
         valid_file = SimpleUploadedFile("test.jpg", b"abc", content_type="image/jpeg")
@@ -64,7 +64,7 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=self.context)
         self.assertFalse(serializer.is_valid())
         self.assertIn("file", serializer.errors)
-        self.assertEqual(serializer.errors["file"][0], "Unsupported file type.")
+        assert serializer.errors["file"][0] == "Unsupported file type."
 
     def test_validate_payment_plan_status_failure(self) -> None:
         self.payment_plan.status = PaymentPlan.Status.FINISHED
@@ -74,7 +74,7 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("non_field_errors", serializer.errors)
-        self.assertEqual(serializer.errors["non_field_errors"][0], "Payment plan must be within status OPEN or LOCKED.")
+        assert serializer.errors["non_field_errors"][0] == "Payment plan must be within status OPEN or LOCKED."
 
     def test_validate_file_limit_failure(self) -> None:
         # create 10 documents
@@ -97,9 +97,9 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("non_field_errors", serializer.errors)
-        self.assertEqual(
-            serializer.errors["non_field_errors"][0],
-            f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents.",
+        assert (
+            serializer.errors["non_field_errors"][0]
+            == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
         )
 
 
@@ -134,24 +134,24 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
 
     def test_post_successful_upload(self) -> None:
         self.client.force_authenticate(user=self.user)
-        self.assertEqual(PaymentPlanSupportingDocument.objects.count(), 0)
+        assert PaymentPlanSupportingDocument.objects.count() == 0
         data = {"file": self.file, "title": "Test Document"}
         response = self.client.post(self.url, data, format="multipart")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(PaymentPlanSupportingDocument.objects.count(), 1)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert PaymentPlanSupportingDocument.objects.count() == 1
         self.assertIn("id", response.data)
         self.assertIn("uploaded_at", response.data)
-        self.assertEqual(response.data["file"], "test_file.pdf")
-        self.assertEqual(response.data["title"], "Test Document")
-        self.assertEqual(response.data["created_by"], self.user.pk)
+        assert response.data["file"] == "test_file.pdf"
+        assert response.data["title"] == "Test Document"
+        assert response.data["created_by"] == self.user.pk
 
     def test_post_invalid_upload(self) -> None:
         self.client.force_authenticate(user=self.user)
         invalid_file = SimpleUploadedFile("test.exe", b"bbb", content_type="application/octet-stream")
         data = {"file": invalid_file, "title": "Test Document"}
         response = self.client.post(self.url, data, format="multipart")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         self.assertIn("file", response.data)
 
 
@@ -190,7 +190,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
     def test_delete_document_success(self) -> None:
         self.client.force_authenticate(user=self.user)
         response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_get_document_success(self) -> None:
         url = reverse(
@@ -206,6 +206,6 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         self.assertIsInstance(response, FileResponse)
-        self.assertEqual(response["Content-Disposition"], f"attachment; filename={self.document.file.name}")
+        assert response["Content-Disposition"] == f"attachment; filename={self.document.file.name}"

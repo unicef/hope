@@ -31,13 +31,13 @@ class TestHouseholdWithdraw(TestCase):
             DocumentFactory.create_batch(2, individual=individual, status=Document.STATUS_VALID)
             DocumentFactory.create_batch(3, individual=individual, status=Document.STATUS_NEED_INVESTIGATION)
 
-        self.assertEqual(Household.objects.filter(withdrawn=True).count(), 0)
-        self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 0)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count(), 30)
+        assert Household.objects.filter(withdrawn=True).count() == 0
+        assert Individual.objects.filter(withdrawn=True).count() == 0
+        assert Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count() == 30
 
         service = HouseholdWithdraw(household)
         service.withdraw()
 
-        self.assertEqual(Household.objects.filter(withdrawn=True).count(), 1)
-        self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 5)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_INVALID).count(), 25)
+        assert Household.objects.filter(withdrawn=True).count() == 1
+        assert Individual.objects.filter(withdrawn=True).count() == 5
+        assert Document.objects.filter(status=Document.STATUS_INVALID).count() == 25

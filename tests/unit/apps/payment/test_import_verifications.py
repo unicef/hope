@@ -101,7 +101,7 @@ class TestXlsxVerificationImport(APITestCase):
         export_service = XlsxVerificationExportService(self.verification)
 
         wb = export_service.generate_workbook()
-        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, result)
+        assert wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value == result
 
     def test_validation_valid_not_changed_file(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -113,7 +113,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
 
-        self.assertEqual(import_service.errors, [])
+        assert import_service.errors == []
 
     def test_validation_valid_status_changed_for_people(self) -> None:
         dct = self.verification.payment_plan.program_cycle.program.data_collecting_type
@@ -130,7 +130,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(import_service.errors, [])
+        assert import_service.errors == []
 
     def test_validation_valid_status_changed(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -143,7 +143,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(import_service.errors, [])
+        assert import_service.errors == []
 
     def test_validation_invalid_received_changed(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -271,7 +271,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
-        self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
+        assert payment_verification.status == PaymentVerification.STATUS_PENDING
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
@@ -280,17 +280,17 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         import_service.import_verifications()
-        self.assertEqual(import_service.errors, [])
+        assert import_service.errors == []
 
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
-        self.assertEqual(payment_verification.status, PaymentVerification.STATUS_NOT_RECEIVED)
+        assert payment_verification.status == PaymentVerification.STATUS_NOT_RECEIVED
 
     def test_import_valid_status_changed_received_yes_not_full(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
-        self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
+        assert payment_verification.status == PaymentVerification.STATUS_PENDING
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
             payment_verification.payment.delivered_quantity - 1
@@ -302,24 +302,18 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         import_service.import_verifications()
-        self.assertEqual(import_service.errors, [])
+        assert import_service.errors == []
 
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
-        self.assertEqual(
-            payment_verification.status,
-            PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
-        )
-        self.assertEqual(
-            payment_verification.received_amount,
-            payment_verification.payment.delivered_quantity - 1,
-        )
+        assert payment_verification.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        assert payment_verification.received_amount == payment_verification.payment.delivered_quantity - 1
 
     def test_import_valid_status_changed_received_yes_full(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
-        self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
+        assert payment_verification.status == PaymentVerification.STATUS_PENDING
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
             payment_verification.payment.delivered_quantity
@@ -331,17 +325,11 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         import_service.import_verifications()
-        self.assertEqual(import_service.errors, [])
+        assert import_service.errors == []
 
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
-        self.assertEqual(
-            payment_verification.status,
-            PaymentVerification.STATUS_RECEIVED,
-        )
-        self.assertEqual(
-            payment_verification.received_amount,
-            payment_verification.payment.delivered_quantity,
-        )
+        assert payment_verification.status == PaymentVerification.STATUS_RECEIVED
+        assert payment_verification.received_amount == payment_verification.payment.delivered_quantity
 
     @parameterized.expand(
         [
@@ -403,4 +391,4 @@ class TestXlsxVerificationImport(APITestCase):
         xlsx_verification_import_service.open_workbook()
         xlsx_verification_import_service.validate()
 
-        self.assertEqual(xlsx_verification_import_service.errors, error_list)
+        assert xlsx_verification_import_service.errors == error_list
