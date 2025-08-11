@@ -9,21 +9,27 @@ import django.db.models.deletion
 def migrate_celery_task_results_ids(apps, schema_editor):
     """
     Migrate from curr_async_result_id to celery_tasks_results_ids,
-    using the specific task name for each model.
+    using the specific task name for each model in bulk.
     """
     # Migrate PeriodicDataUpdateXlsxTemplate
     PeriodicDataUpdateXlsxTemplate = apps.get_model("periodic_data_update", "PeriodicDataUpdateXlsxTemplate")
+    templates_to_update = []
     for obj in PeriodicDataUpdateXlsxTemplate.objects.filter(curr_async_result_id__isnull=False):
         if obj.curr_async_result_id:
             obj.celery_tasks_results_ids = {"export": obj.curr_async_result_id}
-            obj.save(update_fields=["celery_tasks_results_ids"])
+            templates_to_update.append(obj)
+    if templates_to_update:
+        PeriodicDataUpdateXlsxTemplate.objects.bulk_update(templates_to_update, ["celery_tasks_results_ids"])
 
     # Migrate PeriodicDataUpdateXlsxUpload
     PeriodicDataUpdateXlsxUpload = apps.get_model("periodic_data_update", "PeriodicDataUpdateXlsxUpload")
+    uploads_to_update = []
     for obj in PeriodicDataUpdateXlsxUpload.objects.filter(curr_async_result_id__isnull=False):
         if obj.curr_async_result_id:
             obj.celery_tasks_results_ids = {"import": obj.curr_async_result_id}
-            obj.save(update_fields=["celery_tasks_results_ids"])
+            uploads_to_update.append(obj)
+    if uploads_to_update:
+        PeriodicDataUpdateXlsxUpload.objects.bulk_update(uploads_to_update, ["celery_tasks_results_ids"])
 
 
 class Migration(migrations.Migration):
@@ -117,3 +123,4 @@ class Migration(migrations.Migration):
                                     related_name="pdu_uploads", to=settings.AUTH_USER_MODEL),
         ),
     ]
+
