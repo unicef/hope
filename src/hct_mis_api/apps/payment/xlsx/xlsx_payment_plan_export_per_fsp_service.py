@@ -72,6 +72,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         }
         self.export_fsp_auth_code = bool(fsp_xlsx_template_id)
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
+        self.account_fields_headers = self.get_account_fields_headers()
+
+    def get_account_fields_headers(self) -> List[str]:
         # get Account headers from first payment
         first_payment = self.payment_plan.eligible_payments.first()
         snapshot = getattr(first_payment, "household_snapshot", None)
@@ -80,7 +83,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
         )
         account_data = collector_data.get("account_data", {})
-        self.account_fields_headers = list(account_data.keys()) if first_payment and snapshot else []
+        return list(account_data.keys()) if first_payment and snapshot else []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
