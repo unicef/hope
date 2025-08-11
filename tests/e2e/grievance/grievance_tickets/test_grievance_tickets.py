@@ -852,7 +852,6 @@ class TestGrievanceTickets:
             )
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
