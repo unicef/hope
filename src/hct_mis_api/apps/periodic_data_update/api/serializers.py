@@ -13,6 +13,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateXlsxTemplate,
     PeriodicDataUpdateXlsxUpload,
 )
+from hct_mis_api.apps.periodic_data_update.utils import update_rounds_covered_for_template
 from hct_mis_api.apps.program.models import Program
 
 
@@ -59,7 +60,9 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         validated_data["business_area"] = business_area
         validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-        return super().create(validated_data)
+        pdu_template = super().create(validated_data)
+        update_rounds_covered_for_template(pdu_template, validated_data["rounds_data"])
+        return pdu_template
 
 
 class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
@@ -116,7 +119,7 @@ class PeriodicDataUpdateUploadSerializer(serializers.ModelSerializer):
 class PeriodicFieldDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicFieldData
-        fields = ("subtype", "number_of_rounds", "rounds_names")
+        fields = ("subtype", "number_of_rounds", "rounds_names", "rounds_covered")
 
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):
