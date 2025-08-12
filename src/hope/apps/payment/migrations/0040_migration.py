@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payment", "0039_migration"),
     ]
@@ -13,6 +12,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="exchange_rate",
-            field=models.DecimalField(blank=True, decimal_places=8, help_text="Exchange Rate [sys]", max_digits=15, null=True),
+            field=models.DecimalField(
+                blank=True, decimal_places=8, help_text="Exchange Rate [sys]", max_digits=15, null=True
+            ),
         ),
     ]
