@@ -86,11 +86,10 @@ class DeduplicationEngineAPI(BaseAPI):
         # empty dict means we got a JSON parsing error
         if isinstance(response_data, dict):
             return []
-        return cast(list, response_data)
+        return cast("list", response_data)
 
     def bulk_upload_images(self, deduplication_set_id: str, images: list[DeduplicationImage]) -> list:
-        response_data = [self._bulk_upload_image_batch(deduplication_set_id, batch)
-                         for batch in batched(images, 5000)]
+        response_data = [self._bulk_upload_image_batch(deduplication_set_id, batch) for batch in batched(images, 5000)]
         return reduce(add, response_data, [])
 
     def bulk_delete_images(self, deduplication_set_id: str) -> dict:
