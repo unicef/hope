@@ -93,6 +93,8 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     """
     rounds_data = models.JSONField()
 
+    ordering = ["-created_at"]
+
     celery_task_names = {
         "export": "hope.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
     }
@@ -166,6 +168,9 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
     )
     file = models.FileField()
     error_message = models.TextField(null=True, blank=True)
+
+    ordering = ["-created_at"]
+
     celery_task_names = {
         "import": "hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
     }
@@ -256,6 +261,15 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         null=True,
         blank=True,
     )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="pdu_online_edits_approved",
+        null=True,
+        blank=True,
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    edit_data = models.JSONField(default=dict, blank=True)
     number_of_records = models.PositiveIntegerField(null=True, blank=True)
     authorized_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -264,9 +278,11 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         help_text="Users who are authorized to perform actions on this periodic data update",
     )
 
+    ordering = ["-created_at"]
+
     celery_task_names = {
-        "create/generate_json(TBA)": "hct_mis_api.apps.periodic_data_update.celery_tasks.TBA",
-        "merge": "hct_mis_api.apps.periodic_data_update.celery_tasks.TBA",
+        "generate_edit_data": "hope.apps.periodic_data_update.celery_tasks.generate_edit_data",
+        "merge": "hope.apps.periodic_data_update.celery_tasks.merge",
     }
 
     class Meta:
@@ -286,3 +302,21 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
     def combined_status_display(self) -> str:
         status_dict = {status.value: status.label for status in self.Status}
         return status_dict[self.combined_status]
+
+
+class PeriodicDataUpdateOnlineEditSentBackComment(TimeStampedModel):
+    pdu_online_edit = models.OneToOneField(
+        PeriodicDataUpdateOnlineEdit,
+        on_delete=models.CASCADE,
+        related_name="sent_back_comment",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="sent_back_comments",
+        null=True,
+    )
+    comment = models.TextField()
+
+    class Meta:
+        ordering = ["-created_at"]

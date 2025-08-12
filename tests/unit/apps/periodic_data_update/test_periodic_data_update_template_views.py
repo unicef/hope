@@ -209,6 +209,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
         assert len(response_json) == 3
         assert {
             "id": self.pdu_template1.id,
+            "name": self.pdu_template1.name,
             "status_display": self.pdu_template1.combined_status_display,
             "status": self.pdu_template1.combined_status,
             "number_of_records": self.pdu_template1.number_of_records,
@@ -218,6 +219,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
         } in response_json
         assert {
             "id": self.pdu_template2.id,
+            "name": self.pdu_template2.name,
             "status_display": self.pdu_template2.combined_status_display,
             "status": self.pdu_template2.combined_status,
             "number_of_records": self.pdu_template2.number_of_records,
@@ -227,6 +229,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
         } in response_json
         assert {
             "id": self.pdu_template3.id,
+            "name": self.pdu_template3.name,
             "status_display": self.pdu_template3.combined_status_display,
             "status": self.pdu_template3.combined_status,
             "number_of_records": self.pdu_template3.number_of_records,
@@ -236,6 +239,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
         } in response_json
         assert {
             "id": self.pdu_template_program2.id,
+            "name": self.pdu_template_program2.name,
             "status_display": self.pdu_template_program2.combined_status_display,
             "status": self.pdu_template_program2.combined_status,
             "number_of_records": self.pdu_template_program2.number_of_records,
@@ -330,6 +334,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
         response_json = response.json()
         assert {
             "id": self.pdu_template_program2.id,
+            "name": self.pdu_template_program2.name,
             "rounds_data": self.pdu_template_program2.rounds_data,
         } == response_json
 
@@ -447,6 +452,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
             self.program1,
         )
         data = {
+            "name": "Test Template",
             "rounds_data": [
                 {
                     "field": "vaccination_records_update",
@@ -479,6 +485,7 @@ class TestPeriodicDataUpdateXlsxTemplateViews:
         assert PeriodicDataUpdateXlsxTemplate.objects.filter(id=response_json["id"]).exists()
         template = PeriodicDataUpdateXlsxTemplate.objects.get(id=response_json["id"])
         assert template.program == self.program1
+        assert template.name == data["name"]
         assert template.business_area == self.afghanistan
         assert template.rounds_data == expected_result
         assert template.filters == data["filters"]
