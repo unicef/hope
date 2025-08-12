@@ -347,6 +347,7 @@ class TestGrievanceTicketGlobalList:
                     "village": household.village,
                     "geopoint": None,
                     "import_id": household.unicef_id,
+                    "program_slug": household.program.slug,
                 }
                 if household
                 else None

@@ -61,7 +61,17 @@ export function EntriesTable({
       setFieldValue,
     );
   };
-
+  const wrongFields = [
+    'documentsToEdit',
+    'accountsToEdit',
+    'identitiesToEdit',
+    'previousDocuments',
+    'documentsToRemove',
+    'previousIdentities',
+    'identitiesToRemove',
+    'flexFields',
+  ];
+  const biodataFields = entries.filter((item) => !wrongFields.includes(item[0]));
   return (
     <StyledTable>
       <TableHead>
@@ -82,7 +92,7 @@ export function EntriesTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries?.map((row, index) =>
+        {biodataFields?.map((row, index) =>
           individualDataRow(
             row,
             isSelected,

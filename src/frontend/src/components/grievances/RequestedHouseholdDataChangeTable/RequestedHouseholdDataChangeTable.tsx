@@ -17,8 +17,6 @@ import styled from 'styled-components';
 import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
 import { snakeCase } from 'lodash';
-import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -54,13 +52,20 @@ function RequestedHouseholdDataChangeTable({
     queryKey: ['countriesList'],
     queryFn: () => RestService.restChoicesCountriesList(),
   });
-
-  const { data: household, isLoading: householdLoading } =
-    useHopeDetailsQuery<HouseholdDetail>(
+  const { data: household, isLoading: householdLoading } = useQuery({
+    queryKey: [
+      'householdFieldsAttributes',
+      businessAreaSlug,
+      ticket.household.programSlug,
       ticket.household.id,
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
-      {},
-    );
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        id: ticket.household.id,
+        businessAreaSlug,
+        programSlug: ticket.household.programSlug,
+      }),
+  });
 
   // Convert selectedBioData to snake_case
   const selectedBioData = values.selected.map((name) => snakeCase(name));
@@ -68,8 +73,8 @@ function RequestedHouseholdDataChangeTable({
   const householdData = {
     ...ticket.ticketDetails.householdData,
   };
-  const flexFields = householdData.flexFields || {};
-  delete householdData.flexFields;
+  const flexFields = householdData.flex_fields || {};
+  delete householdData.flex_fields;
   const entriesHouseholdData = Object.entries(householdData);
   const entriesHouseholdDataFlexFields = Object.entries(flexFields);
   //@ts-ignore

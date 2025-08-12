@@ -829,6 +829,7 @@ class TestHouseholdMembers:
                     "village": self.household1.village,
                     "geopoint": None,
                     "import_id": self.household1.unicef_id,
+                    "program_slug": self.program.slug,
                 },
             },
             {
@@ -861,6 +862,7 @@ class TestHouseholdMembers:
                     "village": self.household1.village,
                     "geopoint": None,
                     "import_id": self.household1.unicef_id,
+                    "program_slug": self.program.slug,
                 },
             },
             {
@@ -893,6 +895,7 @@ class TestHouseholdMembers:
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
+                    "program_slug": self.program.slug,
                 },
             },
         ]

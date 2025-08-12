@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const DefaultRoute = (): ReactElement | null => {
   const { businessAreaSlug, programSlug } = useBaseUrl();
-  const { data: meData } = useQuery({
+  const { data: meData, error } = useQuery({
     queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
@@ -16,9 +16,17 @@ export const DefaultRoute = (): ReactElement | null => {
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
-    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus,
+    retry: false,
   });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const realError: any = error;
+    if (realError && realError.status === 403) {
+      navigate('/login');
+    }
+  }, [error, navigate]);
 
   useEffect(() => {
     if (meData) {

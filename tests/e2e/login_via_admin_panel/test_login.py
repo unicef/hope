@@ -67,7 +67,7 @@ class TestAdminPanel:
             "case-sensitive."
         ) in pageAdminPanel.getErrorLogin().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
+    # @pytest.mark.skip(reason="Unskip after REST refactoring is complete >>> FE Fix Needed <<<")
     def test_not_logged_main_page(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         browser.get(f"{browser.live_server.url}/")
         assert "Login via Active Directory" in pageAdminPanel.wait_for('//*[@id="root"]/div/div', By.XPATH).text
