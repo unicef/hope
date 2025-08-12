@@ -5,7 +5,7 @@ import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
@@ -35,7 +35,8 @@ export function IndividualsListTable({
     () => ({
       businessAreaSlug: businessArea,
       programSlug: programId,
-      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      ageMax: filter.ageMax,
+      ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -43,10 +44,8 @@ export function IndividualsListTable({
       admin2: filter.admin2,
       flags: filter.flags,
       status: filter.status,
-      lastRegistrationDate: JSON.stringify({
-        min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
-        max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
-      }),
+      lastRegistrationDateBefore: filter.lastRegistrationDateMin,
+      lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
     }),
     [
