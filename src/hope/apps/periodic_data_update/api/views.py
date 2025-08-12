@@ -2,7 +2,9 @@ import logging
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import transaction
 from django.http import FileResponse
+from django.utils import timezone
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -27,6 +29,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
+from hope.apps.periodic_data_update.api.mixins import PeriodicDataUpdateOnlineEditAuthorizedUserMixin
 from hope.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateXlsxTemplateCreateSerializer,
     PeriodicDataUpdateXlsxTemplateDetailSerializer,
@@ -35,12 +38,12 @@ from hope.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateXlsxUploadListSerializer,
     PeriodicDataUpdateXlsxUploadSerializer,
     PeriodicFieldSerializer, PeriodicDataUpdateOnlineEditListSerializer, PeriodicDataUpdateOnlineEditDetailSerializer,
-    PeriodicDataUpdateOnlineEditCreateSerializer, PeriodicDataUpdateOnlineEditSendDataSerializer,
-    PeriodicDataUpdateOnlineSendBackSerializer, BulkSerializer,
+    PeriodicDataUpdateOnlineEditCreateSerializer, PeriodicDataUpdateOnlineEditSaveDataSerializer,
+    PeriodicDataUpdateOnlineEditSendBackSerializer, BulkSerializer,
 )
 from hope.apps.periodic_data_update.models import (
     PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload, PeriodicDataUpdateOnlineEdit,
+    PeriodicDataUpdateXlsxUpload, PeriodicDataUpdateOnlineEdit, PeriodicDataUpdateOnlineEditSentBackComment,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PeriodicDataUpdateImportService
 
@@ -176,6 +179,7 @@ class PeriodicDataUpdateXlsxUploadViewSet(
 
 
 class PeriodicDataUpdateOnlineEditViewSet(
+    PeriodicDataUpdateOnlineEditAuthorizedUserMixin,
     SerializerActionMixin,
     ProgramMixin,
     CountActionMixin,
@@ -190,34 +194,100 @@ class PeriodicDataUpdateOnlineEditViewSet(
         "list": PeriodicDataUpdateOnlineEditListSerializer,
         "retrieve": PeriodicDataUpdateOnlineEditDetailSerializer,
         "create": PeriodicDataUpdateOnlineEditCreateSerializer,
-        "send_data": PeriodicDataUpdateOnlineEditSendDataSerializer,
-        "send_back": PeriodicDataUpdateOnlineSendBackSerializer,
+        "save_data": PeriodicDataUpdateOnlineEditSaveDataSerializer,
+        "send_back": PeriodicDataUpdateOnlineEditSendBackSerializer,
         "bulk_approve": BulkSerializer,
         "bulk_merge": BulkSerializer,
     }
-    permissions_by_action = {  # TODO: PDU - add specific permissions
-        "list": [IsAuthenticated],
-        "retrieve": [IsAuthenticated],
-        "create": [IsAuthenticated],
-        "send_data": [IsAuthenticated],
-        "send_for_approval": [IsAuthenticated],
-        "send_back": [IsAuthenticated],
-        "bulk_approve": [IsAuthenticated],
-        "bulk_merge": [IsAuthenticated],
+    permissions_by_action = {
+        "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "create": [Permissions.PDU_TEMPLATE_CREATE],
+        "save_data": [Permissions.PDU_ONLINE_SAVE_DATA],
+        "send_for_approval": [Permissions.PDU_ONLINE_SAVE_DATA],
+        "send_back": [Permissions.PDU_ONLINE_APPROVE],
+        "bulk_approve": [Permissions.PDU_ONLINE_APPROVE],
+        "bulk_merge": [Permissions.PDU_ONLINE_MERGE],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter # TODO: PDU - add custom filter for status
 
     @action(detail=True, methods=["post"])
     def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        self.check_user_authorization(request)
         instance = self.get_object()
         if instance.status != PeriodicDataUpdateOnlineEdit.Status.NEW:
             raise ValidationError("Only new edits can be sent for approval.")
-        if hasattr(instance, "sent_back_comment"):
+        if hasattr(instance, "sent_back_comment"):  # clean up any previous sent back comment
             instance.sent_back_comment.delete()
         instance.status = PeriodicDataUpdateOnlineEdit.Status.READY
         instance.save()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
+
+    @transaction.atomic
+    @action(detail=True, methods=["post"])
+    def send_back(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        self.check_user_authorization(request)
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if instance.status != PeriodicDataUpdateOnlineEdit.Status.READY:
+            raise ValidationError("PDU Online Edit is not in the 'Ready' status and cannot be sent back.")
+
+        instance.status = PeriodicDataUpdateOnlineEdit.Status.NEW
+        instance.save()
+
+        PeriodicDataUpdateOnlineEditSentBackComment.objects.create(
+            comment=serializer.validated_data["sent_back_comment"],
+            created_by=request.user,
+            pdu_online_edit=instance,
+        )
+
+        return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
+
+
+    @action(detail=False, methods=["post"])
+    def bulk_approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        self.check_user_authorization(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        pdu_edits = self.get_queryset().filter(pk__in=serializer.validated_data["ids"])
+
+        if pdu_edits.exclude(status=PeriodicDataUpdateOnlineEdit.Status.READY).exists():
+            raise ValidationError("PDU Online Edit is not in the 'Ready' status and cannot be approved.")
+
+        approved_count = pdu_edits.update(
+            status=PeriodicDataUpdateOnlineEdit.Status.APPROVED,
+            approved_by=request.user,
+            approved_at=timezone.now(),
+        )
+
+        return Response(
+            status=status.HTTP_200_OK, data={"message": f"{approved_count} PDU Online Edits approved successfully."}
+        )
+
+    @action(detail=False, methods=["post"])
+    def bulk_merge(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        self.check_user_authorization(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        pdu_edits = self.get_queryset().filter(pk__in=serializer.validated_data["ids"])
+
+        if pdu_edits.exclude(status=PeriodicDataUpdateOnlineEdit.Status.APPROVED).exists():
+            raise ValidationError(
+                "PDU Online Edit is not in the 'Approved' status and cannot be merged."
+            )
+
+        merged_count = pdu_edits.update(
+            status=PeriodicDataUpdateOnlineEdit.Status.MERGED,
+        )
+
+        return Response(
+            status=status.HTTP_200_OK, data={"message": f"{merged_count} PDU Online Edits merged successfully."}
+        )
 
 
 class PeriodicFieldViewSet(
