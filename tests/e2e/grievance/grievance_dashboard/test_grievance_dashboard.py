@@ -132,7 +132,6 @@ def generate_grievance(
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceDashboard:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_grievance_dashboard(
         self,
         active_program: Program,
@@ -159,7 +158,6 @@ class TestSmokeGrievanceDashboard:
         )
         GrievanceTicket._meta.get_field("updated_at").auto_now = True
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_dashboard_happy_path(
         self,
         active_program: Program,

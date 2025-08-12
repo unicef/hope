@@ -289,11 +289,18 @@ def add_grievance_tickets() -> GrievanceTicket:
 
 @pytest.fixture
 def create_four_grievance_tickets() -> [GrievanceTicket]:
+    afghanistan = BusinessArea.objects.filter(slug="afghanistan").first()
+    program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="Test Program",
+    )
+
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
     grievance = []
     for _ in range(4):
-        grievance.append(create_grievance_referral(assigned_to=""))
+        grievance.append(create_grievance_referral(assigned_to="", business_area=afghanistan, program=program))
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
     yield grievance
@@ -314,6 +321,7 @@ def create_grievance_referral(
     created_by: User | None = None,
     assigned_to: User | None | str = None,
     business_area: BusinessArea | None = None,
+    program: Program | None = None,
     priority: int = 1,
     urgency: int = 1,
     household_unicef_id: str = "HH-20-0000.0001",
@@ -322,6 +330,12 @@ def create_grievance_referral(
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
+    if not program:
+        program = ProgramFactory(
+            business_area=business_area,
+            status=Program.ACTIVE,
+            name="Test Program E2E",
+        )
 
     ticket_data = {
         "business_area": business_area,
@@ -351,13 +365,14 @@ def create_grievance_referral(
     TicketReferralDetails.objects.create(
         ticket=grievance_ticket, individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first()
     )
-
+    # assign Program
+    grievance_ticket.programs.add(program)
+    grievance_ticket.save()
     return grievance_ticket
 
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_check_grievance_tickets_user_generated_page(
         self,
         create_programs: None,
@@ -500,7 +515,6 @@ class TestSmokeGrievanceTickets:
         assert "" in pageGrievanceDetailsPage.getNewNoteField().text
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_check_grievance_tickets_details_page_social_worker_program(
         self,
         household_social_worker: Household,
@@ -531,12 +545,12 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket_referral(
         self,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
+        social_worker_program: Program,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -629,7 +643,6 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_tickets_social_program(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -659,7 +672,6 @@ class TestGrievanceTickets:
             sleep(0.5)
             assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -732,7 +744,6 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -798,7 +809,6 @@ class TestGrievanceTickets:
             pytest.param({"category": "Data Change", "type": "Group Data Update"}, id="Data Change Group Data Update"),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_hh_grievance_tickets_create_new_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -842,7 +852,6 @@ class TestGrievanceTickets:
             )
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -891,7 +900,6 @@ class TestGrievanceTickets:
         assert "Preferred Language" in f"{row1[0]} {row1[1]}"
         assert "English" in row1[-1]
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -919,7 +927,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert "UNICEF HQ" in pageGrievanceDetailsPage.getLabelPartner().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -951,7 +958,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert payment_id in pageGrievanceDetailsPage.getTicketPaymentLabel().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_look_up_linked_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -988,7 +994,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert linked_ticket in pageGrievanceDetailsPage.getLabelTickets().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_add_documentation(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -1017,7 +1022,6 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getButtonCancel().click()
         assert "example" in pageGrievanceDetailsPage.getLinkShowPhoto().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_check_identity_verification(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -1081,7 +1085,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_edit_tickets_from_main_grievance_page(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -1210,7 +1213,6 @@ class TestGrievanceTickets:
         assert "Assigned" in pageGrievanceDetailsPage.getLogRow()[0].text
         assert "In Progress" in pageGrievanceDetailsPage.getLogRow()[0].text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_grievance_tickets_go_to_admin_panel_button(
         self,
         pageGrievanceTickets: GrievanceTickets,

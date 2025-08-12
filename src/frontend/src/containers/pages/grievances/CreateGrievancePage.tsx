@@ -23,7 +23,6 @@ import {
   getGrievanceDetailsPath,
   prepareRestVariables,
   selectedIssueType,
-  grievanceRequestToFormData,
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
@@ -35,7 +34,7 @@ import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
@@ -51,9 +50,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
-  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
+  PERMISSIONS,
 } from '../../../config/permissions';
 
 const InnerBoxPadding = styled.div`
@@ -71,9 +70,11 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
+
 function EmptyComponent(): ReactElement {
   return null;
 }
+
 function FormikSelectedEntitiesSync({
   fetchedHousehold,
   fetchedIndividual,
@@ -123,43 +124,40 @@ const CreateGrievancePage = (): ReactElement => {
   const selectedHousehold = location.state?.selectedHousehold;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
-  const shouldFetchHousehold =
+  const shouldFetchHousehold = Boolean(
     selectedHousehold &&
-    (typeof selectedHousehold === 'string' ||
-      typeof selectedHousehold === 'number');
-
+      (typeof selectedHousehold === 'string' ||
+        typeof selectedHousehold === 'number'),
+  );
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
       queryKey: ['household', businessArea, programId, selectedHousehold],
-      queryFn: shouldFetchHousehold
-        ? () =>
-            RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-              businessAreaSlug: businessArea,
-              programSlug: programId,
-              id: String(selectedHousehold),
-            })
-        : undefined,
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: String(selectedHousehold),
+        }),
       enabled: shouldFetchHousehold,
     });
   const selectedIndividual = location.state?.selectedIndividual;
 
   // Fetch full individual object if selectedIndividual is an ID (string/number)
-  const shouldFetchIndividual =
+  const shouldFetchIndividual = Boolean(
     selectedIndividual &&
-    (typeof selectedIndividual === 'string' ||
-      typeof selectedIndividual === 'number');
+      (typeof selectedIndividual === 'string' ||
+        typeof selectedIndividual === 'number'),
+  );
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
     useQuery({
       queryKey: ['individual', businessArea, programId, selectedIndividual],
-      queryFn: shouldFetchIndividual
-        ? () =>
-            RestService.restBusinessAreasProgramsIndividualsRetrieve({
-              businessAreaSlug: businessArea,
-              programSlug: programId,
-              id: String(selectedIndividual),
-            })
-        : undefined,
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: String(selectedIndividual),
+        }),
       enabled: shouldFetchIndividual,
     });
   const category = location.state?.category;
@@ -201,21 +199,9 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { mutateAsync, isPending: loading } = useMutation({
     mutationFn: (requestData: CreateGrievanceTicket) => {
-      // Check for files in requestData
-      const hasFile = (obj: any): boolean => {
-        if (obj instanceof File) return true;
-        if (Array.isArray(obj)) return obj.some(hasFile);
-        if (obj && typeof obj === 'object')
-          return Object.values(obj).some(hasFile);
-        return false;
-      };
-      const payload = hasFile(requestData)
-        ? grievanceRequestToFormData(requestData)
-        : requestData;
-
       return RestService.restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug: businessArea,
-        formData: payload as any,
+        formData: requestData as any,
       });
     },
   });
@@ -306,14 +292,13 @@ const CreateGrievancePage = (): ReactElement => {
     values.category?.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     values.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
     values.category?.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
-
   if (
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
     programsDataLoading ||
     allEditPeopleFieldsLoading ||
-    fetchedIndividualLoading ||
+    (fetchedIndividualLoading && shouldFetchIndividual) ||
     fetchedHouseholdLoading
   )
     return <LoadingComponent />;
@@ -424,7 +409,7 @@ const CreateGrievancePage = (): ReactElement => {
       validate={(values) =>
         validateUsingSteps(
           values,
-          allAddIndividualFieldsData?.results || null,
+          allAddIndividualFieldsData || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           activeStep,

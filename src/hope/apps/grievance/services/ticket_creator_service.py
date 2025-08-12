@@ -87,8 +87,10 @@ class TicketCreatorService:
         documents = input_data.pop("documentation", None)
         extras = input_data.pop("extras", {})
         linked_tickets = input_data.pop("linked_tickets", [])
-        linked_feedback_id = input_data.pop("linked_feedback_id", None)
-
+        linked_feedback = input_data.pop("linked_feedback_id", None)
+        linked_feedback_id = None
+        if linked_feedback:
+            linked_feedback_id = linked_feedback.id
         grievance_ticket = self._create_ticket(business_area, input_data, user)
 
         self._assign_to_feedback(grievance_ticket, linked_feedback_id)
