@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -11,8 +13,10 @@ from parameterized import parameterized
 from rest_framework import status
 
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.utils import generate_cache_key
+from hct_mis_api.apps.utils.admin import PaymentPlanCeleryTasksMixin
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):
@@ -144,4 +148,45 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.assertEqual(
             list(messages.get_messages(response.wsgi_request))[0].message,
             f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
+        )
+
+    @override_settings(ROOT_TOKEN="test-token123")
+    def test_restart_importing_reconciliation_xlsx_file(self) -> None:
+        self.client.login(username=self.user.username, password=self.password)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+        )
+        response = self.client.post(
+            reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
+            HTTP_X_ROOT_TOKEN="test-token123",
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.assertEqual(
+            list(messages.get_messages(response.wsgi_request))[-1].message,
+            "There is no reconciliation_import_file for this payment plan",
+        )
+
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created_by=self.user,
+            file=ContentFile(b"abc", "Test_123.xlsx"),
+        )
+        payment_plan.reconciliation_import_file = file_temp
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+        print("pp.reconciliation_import_file", payment_plan.reconciliation_import_file)
+
+        response = self.client.post(
+            reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
+            HTTP_X_ROOT_TOKEN="test-token123",
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(
+            list(messages.get_messages(response.wsgi_request))[-1].message,
+            f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx} for this payment plan",
         )
