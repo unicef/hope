@@ -1,5 +1,8 @@
 import dataclasses
-from typing import List, Optional, Tuple
+from functools import reduce
+from itertools import batched
+from operator import add
+from typing import Optional, Tuple, cast
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
@@ -74,12 +77,21 @@ class DeduplicationEngineAPI(BaseAPI):
         response_data, _ = self._get(self.Endpoints.GET_DEDUPLICATION_SET.format(pk=deduplication_set_id))
         return response_data
 
-    def bulk_upload_images(self, deduplication_set_id: str, images: List[DeduplicationImage]) -> dict:
+    def _bulk_upload_image_batch(self, deduplication_set_id: str, images: tuple[DeduplicationImage, ...]) -> list:
         response_data, _ = self._post(
             self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id),
             [dataclasses.asdict(image) for image in images],
         )
-        return response_data
+        # API returns a list of objects
+        # empty dict means we got a JSON parsing error
+        if isinstance(response_data, dict):
+            return []
+        return cast(list, response_data)
+
+    def bulk_upload_images(self, deduplication_set_id: str, images: list[DeduplicationImage]) -> list:
+        response_data = [self._bulk_upload_image_batch(deduplication_set_id, batch)
+                         for batch in batched(images, 5000)]
+        return reduce(add, response_data, [])
 
     def bulk_delete_images(self, deduplication_set_id: str) -> dict:
         response_data, _ = self._delete(
