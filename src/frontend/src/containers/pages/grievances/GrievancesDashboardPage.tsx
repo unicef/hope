@@ -10,7 +10,8 @@ import { TicketsByLocationAndCategorySection } from '@components/grievances/Grie
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -19,9 +20,12 @@ function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
-  const { data, loading } = useAllGrievanceDashboardChartsQuery({
-    variables: { businessAreaSlug: businessArea },
-    fetchPolicy: 'network-only',
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['grievanceDashboard', businessArea],
+    queryFn: () => RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve({
+      businessAreaSlug: businessArea,
+    }),
+    refetchOnMount: 'always',
   });
 
   if (!data || permissions === null) return null;

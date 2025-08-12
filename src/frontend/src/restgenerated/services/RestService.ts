@@ -26,6 +26,7 @@ import type { FspChoices } from '../models/FspChoices';
 import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
+import type { GrievanceDashboard } from '../models/GrievanceDashboard';
 import type { GrievanceDeleteHouseholdApproveStatus } from '../models/GrievanceDeleteHouseholdApproveStatus';
 import type { GrievanceHouseholdDataChangeApprove } from '../models/GrievanceHouseholdDataChangeApprove';
 import type { GrievanceIndividualDataChangeApprove } from '../models/GrievanceIndividualDataChangeApprove';
@@ -3758,6 +3759,24 @@ export class RestService {
                 'search': search,
                 'status': status,
                 'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * Get grievance dashboard data
+     * @returns GrievanceDashboard
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsDashboardRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<GrievanceDashboard> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/dashboard/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
