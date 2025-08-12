@@ -213,7 +213,6 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         NEW = "NEW", "New"
         READY = "READY", "Ready"  # sent for approval
         APPROVED = "APPROVED", "Approved"
-        NOT_SCHEDULED_MERGE = "NOT_SCHEDULED_MERGE", "Not scheduled merge"
         MERGED = "MERGED", "Merged"
 
         # tasks statuses
@@ -223,6 +222,7 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         FAILED_CREATE = "FAILED_CREATE", "Failed create"
         CANCELED_CREATE = "CANCELED_CREATE", "Canceled create"
         PENDING_MERGE = "PENDING_MERGE", "Pending merge"
+        NOT_SCHEDULED_MERGE = "NOT_SCHEDULED_MERGE", "Not scheduled merge"
         MERGING = "MERGING", "Processing"
         FAILED_MERGE = "FAILED_MERGE", "Failed merge"
         CANCELED_MERGE = "CANCELED_MERGE", "Canceled merge"
