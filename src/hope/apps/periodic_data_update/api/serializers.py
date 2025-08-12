@@ -170,6 +170,7 @@ class PeriodicDataUpdateOnlineEditListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
+    is_authorized = serializers.SerializerMethodField()
 
     class Meta:
         model = PeriodicDataUpdateOnlineEdit
@@ -183,26 +184,21 @@ class PeriodicDataUpdateOnlineEditListSerializer(serializers.ModelSerializer):
             "status_display",
         )
 
+    def get_is_authorized(self, obj: PeriodicDataUpdateOnlineEdit) -> bool:
+        request = self.context.get("request")
+        user = request.user
+        return user in obj.authorized_users.all()
 
-class PeriodicDataUpdateOnlineEditDetailSerializer(serializers.ModelSerializer):
-    status_display = serializers.CharField(source="combined_status_display")
-    status = serializers.CharField(source="combined_status")
-    created_by = serializers.CharField(source="created_by.get_full_name", default="")
+
+class PeriodicDataUpdateOnlineEditDetailSerializer(PeriodicDataUpdateOnlineEditListSerializer):
     sent_back_comment = PeriodicDataUpdateOnlineEditSentBackCommentSerializer()
     authorized_users = AuthorizedUserSerializer(many=True)
 
     class Meta:
         model = PeriodicDataUpdateOnlineEdit
-        fields = (
-            "id",
-            "name",
-            "number_of_records",
-            "created_at",
-            "created_by",
+        fields = PeriodicDataUpdateOnlineEditListSerializer.Meta.fields + (  # type: ignore
             "approved_by",
             "approved_at",
-            "status",
-            "status_display",
             "sent_back_comment",
             "edit_data",
             "authorized_users",
@@ -258,11 +254,11 @@ class PeriodicDataUpdateOnlineEditCreateSerializer(serializers.ModelSerializer):
         return pdu_online_edit
 
 
-class PeriodicDataUpdateOnlineEditSendDataSerializer(serializers.Serializer):
+class PeriodicDataUpdateOnlineEditSaveDataSerializer(serializers.Serializer):
     individual_edit_data = serializers.JSONField()
 
 
-class PeriodicDataUpdateOnlineSendBackSerializer(serializers.Serializer):
+class PeriodicDataUpdateOnlineEditSendBackSerializer(serializers.Serializer):
     comment = serializers.CharField(allow_blank=False, trim_whitespace=True)
 
 
