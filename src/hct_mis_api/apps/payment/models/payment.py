@@ -2117,6 +2117,10 @@ class PaymentDataCollector(Account):
         delivery_mechanism: "DeliveryMechanism",
         collector: Individual,
     ) -> bool:
+        if not delivery_mechanism.account_type:
+            # ex. "cash" - doesn't need any validation
+            return True
+
         account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
