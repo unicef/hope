@@ -33,6 +33,8 @@ export type { BulkUpdateGrievanceTicketsUrgency as BulkUpdateGrievanceTicketsUrg
 export type { BusinessArea as BusinessAreaCamelCase } from './models/BusinessArea';
 export { CategoryB41Enum as CategoryB41EnumCamelCase } from './models/CategoryB41Enum';
 export type { CategoryExtras as CategoryExtrasCamelCase } from './models/CategoryExtras';
+export type { ChartData as ChartDataCamelCase } from './models/ChartData';
+export type { ChartDataset as ChartDatasetCamelCase } from './models/ChartDataset';
 export type { CheckAgainstSanctionList as CheckAgainstSanctionListCamelCase } from './models/CheckAgainstSanctionList';
 export type { CheckAgainstSanctionListCreate as CheckAgainstSanctionListCreateCamelCase } from './models/CheckAgainstSanctionListCreate';
 export type { Choice as ChoiceCamelCase } from './models/Choice';
@@ -68,6 +70,8 @@ export type { DeliveredQuantity as DeliveredQuantityCamelCase } from './models/D
 export type { DeliveryMechanism as DeliveryMechanismCamelCase } from './models/DeliveryMechanism';
 export type { DeliveryMechanismChoice as DeliveryMechanismChoiceCamelCase } from './models/DeliveryMechanismChoice';
 export type { DeliveryMechanismPerPaymentPlan as DeliveryMechanismPerPaymentPlanCamelCase } from './models/DeliveryMechanismPerPaymentPlan';
+export type { DetailedChartData as DetailedChartDataCamelCase } from './models/DetailedChartData';
+export type { DetailedChartDataset as DetailedChartDatasetCamelCase } from './models/DetailedChartDataset';
 export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEnum';
 export type { Document as DocumentCamelCase } from './models/Document';
 export type { DocumentPhoto as DocumentPhotoCamelCase } from './models/DocumentPhoto';
@@ -97,6 +101,7 @@ export type { GetKoboAssetList as GetKoboAssetListCamelCase } from './models/Get
 export type { GrievanceChoices as GrievanceChoicesCamelCase } from './models/GrievanceChoices';
 export type { GrievanceComplaintTicketExtras as GrievanceComplaintTicketExtrasCamelCase } from './models/GrievanceComplaintTicketExtras';
 export type { GrievanceCreateNote as GrievanceCreateNoteCamelCase } from './models/GrievanceCreateNote';
+export type { GrievanceDashboard as GrievanceDashboardCamelCase } from './models/GrievanceDashboard';
 export type { GrievanceDeleteHouseholdApproveStatus as GrievanceDeleteHouseholdApproveStatusCamelCase } from './models/GrievanceDeleteHouseholdApproveStatus';
 export type { GrievanceDocumentCreate as GrievanceDocumentCreateCamelCase } from './models/GrievanceDocumentCreate';
 export type { GrievanceHouseholdDataChangeApprove as GrievanceHouseholdDataChangeApproveCamelCase } from './models/GrievanceHouseholdDataChangeApprove';
@@ -322,6 +327,7 @@ export type { TargetPopulationDetail as TargetPopulationDetailCamelCase } from '
 export type { TargetPopulationList as TargetPopulationListCamelCase } from './models/TargetPopulationList';
 export type { TicketNote as TicketNoteCamelCase } from './models/TicketNote';
 export type { TicketPaymentVerificationDetailsExtras as TicketPaymentVerificationDetailsExtrasCamelCase } from './models/TicketPaymentVerificationDetailsExtras';
+export type { TicketsByType as TicketsByTypeCamelCase } from './models/TicketsByType';
 export { TransferTypeEnum as TransferTypeEnumCamelCase } from './models/TransferTypeEnum';
 export type { UpdateAddIndividualIssueTypeExtras as UpdateAddIndividualIssueTypeExtrasCamelCase } from './models/UpdateAddIndividualIssueTypeExtras';
 export type { UpdateGrievanceDocument as UpdateGrievanceDocumentCamelCase } from './models/UpdateGrievanceDocument';
