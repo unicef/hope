@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.contrib import messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
@@ -179,14 +181,14 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         payment_plan.reconciliation_import_file = file_temp
         payment_plan.save()
         payment_plan.refresh_from_db()
-        print("pp.reconciliation_import_file", payment_plan.reconciliation_import_file)
 
-        response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-            HTTP_X_ROOT_TOKEN="test-token123",
-        )
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(
-            list(messages.get_messages(response.wsgi_request))[-1].message,
-            f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx} for this payment plan",
-        )
+        with mock.patch("hct_mis_api.apps.utils.admin.get_task_in_queue_or_running", return_value=None):
+            response = self.client.post(
+                reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
+                HTTP_X_ROOT_TOKEN="test-token123",
+            )
+            self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+            self.assertEqual(
+                list(messages.get_messages(response.wsgi_request))[-1].message,
+                f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx} for this payment plan",
+            )
