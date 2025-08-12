@@ -5,7 +5,6 @@ import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
-import { dateToIsoString } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
@@ -29,17 +28,17 @@ function PaymentVerificationTable({
       programSlug: programId,
       businessAreaSlug: businessArea,
       search: filter.search,
-      verificationStatus: filter.verificationStatus,
-      serviceProvider: filter.serviceProvider,
-      deliveryTypes: filter.deliveryTypes,
-      startDate: dateToIsoString(filter.startDate, 'startOfDay'),
-      endDate: dateToIsoString(filter.endDate, 'endOfDay'),
+      paymentVerificationSummaryStatus: filter.paymentVerificationSummaryStatus,
+      fsp: filter.serviceProvider,
+      deliveryMechanism: filter.deliveryTypes,
+      startDate: filter.startDate,
+      endDate: filter.endDate,
     }),
     [
       programId,
       businessArea,
       filter.search,
-      filter.verificationStatus,
+      filter.paymentVerificationSummaryStatus,
       filter.serviceProvider,
       filter.deliveryTypes,
       filter.startDate,

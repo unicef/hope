@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { dateToIsoString } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -31,7 +30,8 @@ export const PeopleListTable = ({
     () => ({
       businessAreaSlug: businessArea,
       programSlug: programId,
-      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      ageMax: filter.ageMax,
+      ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -40,10 +40,8 @@ export const PeopleListTable = ({
       admin2: [filter.admin2],
       flags: filter.flags,
       status: filter.status,
-      lastRegistrationDate: JSON.stringify({
-        min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
-        max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
-      }),
+      lastRegistrationDateBefore: filter.lastRegistrationDateMin,
+      lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
     }),
     [
