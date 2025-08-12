@@ -428,7 +428,7 @@ class PaymentGatewayService:
         return None  # pragma: no cover
 
     def add_records_to_payment_instructions(
-        self, payment_plan: PaymentPlan, id_filters: None|[list[str]] = None
+        self, payment_plan: PaymentPlan, id_filters: None | [list[str]] = None
     ) -> None:
         if id_filters is None:
             id_filters = []
