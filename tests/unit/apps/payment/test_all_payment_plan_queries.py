@@ -416,7 +416,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
             PaymentFactory(
                 parent=cls.pp_conflicted,
-                conflicted=True,
+                conflicted=False,
                 entitlement_quantity=00.00,
                 entitlement_quantity_usd=00.00,
                 delivered_quantity=00.00,
