@@ -893,6 +893,7 @@ class TestAccountModel(TestCase):
         cls.fsp = FinancialServiceProviderFactory()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.financial_institution = FinancialInstitution.objects.create(
             name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
         )
@@ -1027,6 +1028,8 @@ class TestAccountModel(TestCase):
         )
 
     def test_validate(self) -> None:
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind), True)
+
         AccountFactory(
             data={
                 "number": "test",

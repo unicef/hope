@@ -71,6 +71,18 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         }
         self.export_fsp_auth_code = bool(fsp_xlsx_template_id)
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
+        self.account_fields_headers = self.get_account_fields_headers()
+
+    def get_account_fields_headers(self) -> list[str]:
+        # get Account headers from first payment
+        first_payment = self.payment_plan.eligible_payments.first()
+        snapshot = getattr(first_payment, "household_snapshot", None)
+        snapshot_data = snapshot.snapshot_data if snapshot else {}
+        collector_data = (
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
+        )
+        account_data = collector_data.get("account_data", {})
+        return list(account_data.keys()) if first_payment and snapshot else []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
@@ -139,7 +151,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             column_list.append(document_field)
 
         column_list = self._remove_column_for_people(column_list)
-        return self._remove_core_fields_for_people(column_list)
+        column_list = self._remove_core_fields_for_people(column_list)
+
+        # add headers for Account from FSP in PaymentPlan
+        if "account_data" in column_list:
+            column_list.remove("account_data")
+            column_list.extend(self.account_fields_headers)
+        return column_list
 
     def add_rows(
         self,
@@ -161,6 +179,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             fsp_template_columns.remove("fsp_auth_code")
         fsp_template_core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
         fsp_template_document_fields = fsp_xlsx_template.document_types
+
+        if "account_data" in fsp_template_columns:
+            fsp_template_columns.remove("account_data")
 
         if self.payment_generate_token_and_order_numbers:
             payment = generate_token_and_order_numbers(payment)
@@ -184,6 +205,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for doc_type_key in fsp_template_document_fields
         ]
         payment_row.extend(documents_row)
+
+        accounts_row = [
+            FinancialServiceProviderXlsxTemplate.get_account_value_from_payment(payment, account_key)
+            for account_key in self.account_fields_headers
+        ]
+        payment_row.extend(accounts_row)
 
         return list(map(self.right_format_for_xlsx, payment_row))
 
