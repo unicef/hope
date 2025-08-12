@@ -597,8 +597,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return [parent]
 
     @staticmethod
-    def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:
-        return parent.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
+    def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> int:
+        return parent.eligible_payments.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
 
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:

@@ -99,7 +99,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 1
                         },
-                        'availablePaymentRecordsCount': 0,
+                        'availablePaymentRecordsCount': 2,
                         'canCreateFollowUp': False,
                         'canCreateXlsxWithFspAuthCode': False,
                         'canDownloadXlsx': False,
@@ -190,7 +190,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 0
                         },
-                        'availablePaymentRecordsCount': 0,
+                        'availablePaymentRecordsCount': 2,
                         'canCreateFollowUp': False,
                         'canCreateXlsxWithFspAuthCode': False,
                         'canDownloadXlsx': False,

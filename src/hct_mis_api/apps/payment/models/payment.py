@@ -741,14 +741,13 @@ class PaymentPlan(
         else:
             params &= Q(payment_verifications__isnull=True)
 
-        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
+        payment_records = self.eligible_payments.select_related("head_of_household").filter(params).distinct()
 
         if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+            payment_records_ids = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+            payment_records = Payment.objects.filter(pk__in=payment_records_ids)
 
-        qs = Payment.objects.filter(pk__in=payment_records)
-
-        return qs
+        return payment_records
 
     @property
     def program(self) -> "Program":
@@ -805,11 +804,11 @@ class PaymentPlan(
 
     @property
     def bank_reconciliation_success(self) -> int:
-        return self.payment_items.filter(status__in=Payment.DELIVERED_STATUSES).count()
+        return self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).count()
 
     @property
     def bank_reconciliation_error(self) -> int:
-        return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
+        return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
     def excluded_household_ids_targeting_level(self) -> List:
