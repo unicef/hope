@@ -229,6 +229,11 @@ class Permissions(Enum):
     PDU_TEMPLATE_DOWNLOAD = auto()
     PDU_UPLOAD = auto()
 
+    # Periodic Data Update specific for Online Edit
+    PDU_ONLINE_SAVE_DATA = auto()
+    PDU_ONLINE_APPROVE = auto()
+    PDU_ONLINE_MERGE = auto()
+
     # All
     ALL_VIEW_PII_DATA_ON_LISTS = auto()
 
