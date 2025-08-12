@@ -34,11 +34,13 @@ from hope.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateXlsxUploadDetailSerializer,
     PeriodicDataUpdateXlsxUploadListSerializer,
     PeriodicDataUpdateXlsxUploadSerializer,
-    PeriodicFieldSerializer,
+    PeriodicFieldSerializer, PeriodicDataUpdateOnlineEditListSerializer, PeriodicDataUpdateOnlineEditDetailSerializer,
+    PeriodicDataUpdateOnlineEditCreateSerializer, PeriodicDataUpdateOnlineEditSendDataSerializer,
+    PeriodicDataUpdateOnlineSendBackSerializer, BulkSerializer,
 )
 from hope.apps.periodic_data_update.models import (
     PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload,
+    PeriodicDataUpdateXlsxUpload, PeriodicDataUpdateOnlineEdit,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PeriodicDataUpdateImportService
 
@@ -171,6 +173,51 @@ class PeriodicDataUpdateXlsxUploadViewSet(
                 status=status.HTTP_202_ACCEPTED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # pragma: no cover
+
+
+class PeriodicDataUpdateOnlineEditViewSet(
+    SerializerActionMixin,
+    ProgramMixin,
+    CountActionMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PeriodicDataUpdateOnlineEdit.objects.all()
+    serializer_classes_by_action = {
+        "list": PeriodicDataUpdateOnlineEditListSerializer,
+        "retrieve": PeriodicDataUpdateOnlineEditDetailSerializer,
+        "create": PeriodicDataUpdateOnlineEditCreateSerializer,
+        "send_data": PeriodicDataUpdateOnlineEditSendDataSerializer,
+        "send_back": PeriodicDataUpdateOnlineSendBackSerializer,
+        "bulk_approve": BulkSerializer,
+        "bulk_merge": BulkSerializer,
+    }
+    permissions_by_action = {  # TODO: PDU - add specific permissions
+        "list": [IsAuthenticated],
+        "retrieve": [IsAuthenticated],
+        "create": [IsAuthenticated],
+        "send_data": [IsAuthenticated],
+        "send_for_approval": [IsAuthenticated],
+        "send_back": [IsAuthenticated],
+        "bulk_approve": [IsAuthenticated],
+        "bulk_merge": [IsAuthenticated],
+    }
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter # TODO: PDU - add custom filter for status
+
+    @action(detail=True, methods=["post"])
+    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instance = self.get_object()
+        if instance.status != PeriodicDataUpdateOnlineEdit.Status.NEW:
+            raise ValidationError("Only new edits can be sent for approval.")
+        if hasattr(instance, "sent_back_comment"):
+            instance.sent_back_comment.delete()
+        instance.status = PeriodicDataUpdateOnlineEdit.Status.READY
+        instance.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class PeriodicFieldViewSet(

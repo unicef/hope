@@ -62,8 +62,8 @@ class UniversalUpdate(
     unicef_ids = models.TextField(blank=True, null=True, help_text="Unicef IDs used only to generate template file")
 
     celery_task_names = {
-        "generate_universal_individual_update_template": "hct_mis_api.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template",
-        "run_universal_individual_update": "hct_mis_api.apps.universal_update_script.celery_tasks.run_universal_individual_update",
+        "generate_universal_individual_update_template": "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template",
+        "run_universal_individual_update": "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update",
     }
 
     class Meta:
