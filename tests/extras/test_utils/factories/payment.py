@@ -785,7 +785,7 @@ def generate_delivery_mechanisms() -> None:
             "code": "cash_over_the_counter",
             "name": "Cash over the counter",
             "transfer_type": "CASH",
-            "account_type": account_types["bank"],
+            "account_type": None,
         },
         {
             "code": "atm_card",
