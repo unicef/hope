@@ -17,8 +17,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 const initialFilter = {
   search: '',
   status: '',
-  total_entitled_quantity_usd_from: '',
-  total_entitled_quantity_usd_to: '',
+  totalEntitledQuantityUsdFrom: '',
+  totalEntitledQuantityUsdTo: '',
   startDate: '',
   end_date: '',
 };
