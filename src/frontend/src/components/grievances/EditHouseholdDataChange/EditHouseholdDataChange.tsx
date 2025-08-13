@@ -50,14 +50,20 @@ function EditHouseholdDataChange({
     isLoading: fullHouseholdLoading,
     refetch: refetchHousehold,
   } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, household.id, programId],
+    queryKey: [
+      'household',
+      businessArea,
+      household.id,
+      programId,
+      household.program.slug,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
-        programSlug: programId,
+        programSlug: household.program.slug,
       }),
-    enabled: Boolean(programId && businessArea),
+    enabled: Boolean(household && businessArea),
   });
 
   useEffect(() => {
@@ -80,10 +86,7 @@ function EditHouseholdDataChange({
   }, []);
 
   useEffect(() => {
-    if (
-      fullHousehold &&
-      (!values.roles || values.roles.length === 0)
-    ) {
+    if (fullHousehold && (!values.roles || values.roles.length === 0)) {
       setFieldValue(
         'roles',
         fullHousehold.individualsAndRoles.map((roleItem) => ({

@@ -5,6 +5,6 @@
 export type GrievanceComplaintTicketExtras = {
     household?: string | null;
     individual?: string | null;
-    paymentRecord: Array<string>;
+    paymentRecord?: Array<string>;
 };
 
