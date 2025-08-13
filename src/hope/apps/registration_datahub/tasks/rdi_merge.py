@@ -195,7 +195,11 @@ class RdiMergeTask:
                     if obj_hct.should_check_against_sanction_list() and obj_hct.program.sanction_lists.exists():
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
                         check_against_sanction_list_pre_merge(
-                            program_id=obj_hct.program.id, registration_data_import=obj_hct
+                            program_id=obj_hct.program.id,
+                            registration_data_import=obj_hct,
+                            individuals_ids=Individual.objects.filter(registration_data_import=obj_hct).values_list(
+                                "id", flat=True
+                            ),
                         )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 

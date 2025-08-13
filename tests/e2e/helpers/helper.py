@@ -137,8 +137,8 @@ class Common:
         name: str,
         listbox: str = 'ul[role="listbox"]',
         tag_name: str = "li",
-        delay_before: int = 0.1,
-        delay_between_checks: float = 0.1,
+        delay_before: int = 2,
+        delay_between_checks: float = 0.5,
     ) -> None:
         sleep(delay_before)
         select_element = self.wait_for(listbox)
