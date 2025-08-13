@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
+import { snakeCase } from 'lodash';
 
 const GreenIcon = styled.div`
   color: #28cb15;

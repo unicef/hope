@@ -11,6 +11,10 @@ import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldR
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DarkGrey } from '@components/grievances/LookUps/LookUpStyles';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/index';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { useQuery } from '@tanstack/react-query';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -65,12 +69,12 @@ function EditHouseholdDataChange({
 
   useEffect(() => {
     if (
-      fullHousehold?.household?.individualsAndRoles &&
+      fullHousehold?.individualsAndRoles &&
       (!values.roles || values.roles.length === 0)
     ) {
       setFieldValue(
         'roles',
-        fullHousehold.household.individualsAndRoles.map((roleItem) => ({
+        fullHousehold.individualsAndRoles.map((roleItem) => ({
           individual: roleItem.individual.id,
           newRole: '',
         })),

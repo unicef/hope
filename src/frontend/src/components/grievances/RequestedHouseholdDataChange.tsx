@@ -164,9 +164,7 @@ export function RequestedHouseholdDataChange({
             (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
           )
           .map((row) => row[0]),
-        selectedRoles: (
-          ticket.householdDataUpdateTicketDetails.householdData.roles || []
-        )
+        selectedRoles: (ticket.ticketDetails.householdData.roles || [])
           .filter((role) => role.approve_status)
           .map((role) => role.individual_id),
       }}
@@ -188,8 +186,7 @@ export function RequestedHouseholdDataChange({
           }
         });
         // Roles
-        const allRoles =
-          ticket.householdDataUpdateTicketDetails.householdData.roles || [];
+        const allRoles = ticket.ticketDetails.householdData.roles || [];
         householdApproveData.roles = allRoles.map((role) => ({
           individual_id: role.individual_id,
           approve_status: values.selectedRoles.includes(role.individual_id),
