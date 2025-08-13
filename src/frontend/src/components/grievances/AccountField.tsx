@@ -148,8 +148,8 @@ export function AccountField({
                   value={String(value)}
                 />
               </Grid>
-              <Grid size={{xs: 3}}>
-                {key == "financial_institution" ? (
+              <Grid size={{ xs: 3 }}>
+                {key == 'financial_institution' ? (
                   <Field
                     name={`${accountFieldName}.${key}`}
                     variant="outlined"
