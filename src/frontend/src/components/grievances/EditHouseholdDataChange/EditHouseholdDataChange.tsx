@@ -33,6 +33,18 @@ function EditHouseholdDataChange({
   const isEditTicket = location.pathname.includes('edit-ticket');
   const household: HouseholdDetail = values.selectedHousehold;
 
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFields', businessArea, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+          },
+        ),
+      enabled: Boolean(businessArea),
+    });
+
   const {
     data: fullHousehold,
     isLoading: fullHouseholdLoading,
@@ -69,7 +81,7 @@ function EditHouseholdDataChange({
 
   useEffect(() => {
     if (
-      fullHousehold?.individualsAndRoles &&
+      fullHousehold &&
       (!values.roles || values.roles.length === 0)
     ) {
       setFieldValue(
@@ -89,12 +101,7 @@ function EditHouseholdDataChange({
       <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
     );
   }
-  if (
-    fullHouseholdLoading ||
-    householdFieldsLoading ||
-    !fullHousehold ||
-    householdsChoicesLoading
-  ) {
+  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
