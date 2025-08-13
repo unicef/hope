@@ -395,10 +395,9 @@ class LinkedObjectsManagerMixin:
         opts = self.model._meta
         app_label = opts.app_label
         context = self.get_common_context(request, pk, title="linked objects")
-        reverse = []
-        for f in self.model._meta.get_fields():
-            if f.auto_created and not f.concrete and f.name not in ignored:
-                reverse.append(f)
+        reverse = [
+            f for f in self.model._meta.get_fields() if f.auto_created and not f.concrete and f.name not in ignored
+        ]
         linked = []
         empty = []
         for f in reverse:

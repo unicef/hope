@@ -210,9 +210,9 @@ class GenericRegistrationService(BaseRegistrationService):
                         my_dict[ACCOUNT_FIELD][field] = retrieved_value
                     if model == EXTRA_FIELD:
                         my_dict["extra"][field] = retrieved_value
-                    for kk, vv in item.items():
-                        if kk not in mapping_dict:
-                            flex_fields[kk] = vv
+                    dict_value = {kk: vv for kk, vv in item.items() if kk not in mapping_dict}
+                    flex_fields.update(dict_value)
+
                 my_dict["flex_fields"] = flex_fields
             if not bool(my_dict["flex_fields"]):
                 my_dict.pop("flex_fields")

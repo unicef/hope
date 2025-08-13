@@ -170,14 +170,13 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
 
         if request.method == "GET" or not is_editable:
-            partner_area_data = []
-            for area_limits in program.admin_area_limits.all():
-                partner_area_data.append(
-                    {
-                        "partner": area_limits.partner,
-                        "areas": [str(area_id) for area_id in area_limits.areas.values_list("id", flat=True)],
-                    }
-                )
+            partner_area_data = [
+                {
+                    "partner": area_limits.partner,
+                    "areas": [str(area_id) for area_id in area_limits.areas.values_list("id", flat=True)],
+                }
+                for area_limits in program.admin_area_limits.all()
+            ]
             partner_area_form_set = PartnerAreaLimitFormSet(initial=partner_area_data, prefix="program_areas")
         elif request.method == "POST":
             partner_area_form_set = PartnerAreaLimitFormSet(request.POST or None, prefix="program_areas")
