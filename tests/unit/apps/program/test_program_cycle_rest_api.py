@@ -248,6 +248,19 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(str(response.data["results"][0]["total_delivered_quantity_usd"]), "1500.00")
 
+    def test_filter_total_entitled_quantity_usd(self) -> None:
+        self.client.force_authenticate(user=self.user)
+        PaymentPlanFactory(program_cycle=self.cycle1, total_entitled_quantity_usd=Decimal("750.00"))
+        PaymentPlanFactory(program_cycle=self.cycle2, total_entitled_quantity_usd=Decimal("2000.00"))
+        self.cycle2.refresh_from_db()
+        self.assertEqual(self.cycle2.total_entitled_quantity_usd, 2000)
+        response = self.client.get(
+            self.list_url, {"total_entitled_quantity_usd_from": "1000", "total_entitled_quantity_usd_to": "2500"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(str(response.data["results"][0]["total_entitled_quantity_usd"]), "2000.00")
+
     def test_reactivate_program_cycle(self) -> None:
         self.client.force_authenticate(user=self.user)
         self.cycle1.status = ProgramCycle.FINISHED
