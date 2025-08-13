@@ -3,12 +3,12 @@ import os
 import uuid
 from itertools import batched, repeat
 from unittest import mock
-from unittest.mock import patch, call
-from constance.test import override_config
+from unittest.mock import call, patch
 
 from django.test import TestCase
 
 import pytest
+from constance.test import override_config
 
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
@@ -93,7 +93,7 @@ class DeduplicationEngineApiTest(TestCase):
             ]
         )
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images_json_parsing_error(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
