@@ -18,13 +18,32 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
+
+  // Use program-specific dashboard if we're in a specific program context,
+  // otherwise use global dashboard
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['grievanceDashboard', businessArea],
-    queryFn: () => RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve({
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: [
+      'grievanceDashboard',
+      businessAreaSlug,
+      programSlug,
+      isAllPrograms,
+    ],
+    queryFn: () => {
+      if (isAllPrograms) {
+        return RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve({
+          businessAreaSlug,
+        });
+      } else {
+        return RestService.restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve(
+          {
+            businessAreaSlug,
+            programSlug,
+          },
+        );
+      }
+    },
     refetchOnMount: 'always',
   });
 
@@ -99,7 +118,7 @@ function GrievancesDashboardPage(): ReactElement {
               <TicketsByStatusSection data={ticketsByStatus} />
             </Box>
           </Grid>
-          <Grid size={{ xs:8 }}>
+          <Grid size={{ xs: 8 }}>
             <Box ml={3}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
