@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from django.conf import settings
@@ -5,10 +6,8 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.base import ContentFile
 
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.core.services.ftp_client import FTPClient
-
-import os
+from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class WesternUnionFTPClient(FTPClient):
@@ -28,20 +27,14 @@ class WesternUnionFTPClient(FTPClient):
             )
 
     def process_files_since(self, date_from: datetime) -> None:
-        files = [
-            f
-            for f in self.list_files_w_attrs()
-            if datetime.fromtimestamp(f.st_mtime) >= date_from
-        ]
+        files = [f for f in self.list_files_w_attrs() if datetime.fromtimestamp(f.st_mtime) >= date_from]
         # filter by some name pattern?
         for f in files:
             file_like = self.download(f.filename)
             content_file = ContentFile(file_like.read(), name=f.filename)
             self.process_file_for_payment_plan(content_file, f.filename)
 
-    def process_file_for_payment_plan(
-        self, content_file: ContentFile, filename: str
-    ) -> None:
+    def process_file_for_payment_plan(self, content_file: ContentFile, filename: str) -> None:
         # decode payment plan unicef id
         # get payment plan instance
         # check if PP already doesn't have an invoice file (can it have more than one file?)

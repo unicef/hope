@@ -2,6 +2,7 @@
 
 import io
 import logging
+
 import paramiko
 
 logger = logging.getLogger(__name__)
@@ -15,9 +16,7 @@ class FTPClient:
 
     def __init__(self) -> None:
         if not all([self.HOST, self.PORT, self.USERNAME, self.PASSWORD]):
-            raise ValueError(
-                "FTP credentials (HOST, PORT, USERNAME, PASSWORD) must be defined on the class"
-            )
+            raise ValueError("FTP credentials (HOST, PORT, USERNAME, PASSWORD) must be defined on the class")
 
         self._transport = paramiko.Transport((self.HOST, self.PORT))
         self._transport.connect(username=self.USERNAME, password=self.PASSWORD)
