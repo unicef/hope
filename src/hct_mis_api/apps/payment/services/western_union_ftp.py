@@ -32,11 +32,11 @@ class WesternUnionFTPClient(FTPClient):
         for f in files:
             file_like = self.download(f.filename)
             content_file = ContentFile(file_like.read(), name=f.filename)
-            self.process_file_for_payment_plan(content_file, f.filename)
+            self.process_file(content_file, f.filename)
 
-    def process_file_for_payment_plan(self, content_file: ContentFile, filename: str) -> None:
-        # decode payment plan unicef id
-        # get payment plan instance
+    def process_file(self, content_file: ContentFile, filename: str) -> None:
+        # iterate over each line and get payment unicef id
+        # get payment plan instance from payment
         # check if PP already doesn't have an invoice file (can it have more than one file?)
 
         file_temp = FileTemp.objects.create(
@@ -48,5 +48,4 @@ class WesternUnionFTPClient(FTPClient):
 
         # payment_plan.ftp_invoice_file = file_temp
         # obj.save()
-
-        # process records data
+        # process records data (amount, fee)
