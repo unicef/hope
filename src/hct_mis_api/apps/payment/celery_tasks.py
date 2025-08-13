@@ -56,10 +56,14 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
+def create_payment_verification_plan_xlsx(
+    self: Any, payment_verification_plan_id: str, user_id: str
+) -> None:
     try:
         user = get_user_model().objects.get(pk=user_id)
-        payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
+        payment_verification_plan = PaymentVerificationPlan.objects.get(
+            id=payment_verification_plan_id
+        )
 
         set_sentry_business_area_tag(payment_verification_plan.business_area.name)
 
@@ -82,18 +86,24 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
+def remove_old_cash_plan_payment_verification_xls(
+    self: Any, past_days: int = 30
+) -> None:
     """Remove old Payment Verification report XLSX files"""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
+        ct = ContentType.objects.get(
+            app_label="payment", model="paymentverificationplan"
+        )
         files_qs = FileTemp.objects.filter(content_type=ct, created__lte=days)
         if files_qs:
             for obj in files_qs:
                 obj.file.delete(save=False)
                 obj.delete()
 
-            logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {files_qs.count()}")
+            logger.info(
+                f"Removed old xlsx files for PaymentVerificationPlan: {files_qs.count()}"
+            )
 
     except Exception as e:
         logger.exception(e)
@@ -103,7 +113,9 @@ def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
+def create_payment_plan_payment_list_xlsx(
+    self: Any, payment_plan_id: str, user_id: str
+) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
@@ -139,7 +151,10 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 @log_start_and_end
 @sentry_tags
 def create_payment_plan_payment_list_xlsx_per_fsp(
-    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: Optional[str] = None
+    self: Any,
+    payment_plan_id: str,
+    user_id: str,
+    fsp_xlsx_template_id: Optional[str] = None,
 ) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -153,7 +168,9 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
         try:
             with transaction.atomic():
                 # regenerate always xlsx
-                service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
+                service = XlsxPaymentPlanExportPerFspService(
+                    payment_plan, fsp_xlsx_template_id
+                )
                 service.export_per_fsp(user)
                 payment_plan.background_action_status_none()
                 payment_plan.save()
@@ -216,7 +233,9 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
                 f"Error import from xlsx, file does not exist for Payment Plan ID {payment_plan.unicef_id}."
             )
 
-        service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_file.file)
+        service = XlsxPaymentPlanImportService(
+            payment_plan, payment_plan.imported_file.file
+        )
         service.open_workbook()
         try:
             with transaction.atomic():
@@ -240,7 +259,9 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(
+    self: Any, payment_plan_id: str
+) -> bool:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.services.payment_plan_services import (
@@ -264,7 +285,9 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 
                 payment_plan.save()
 
-                logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
+                logger.info(
+                    f"Scheduled update payments signature for payment plan {payment_plan_id}"
+                )
 
                 # started update signature for payments sync because we want to be sure that this is atomic
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
@@ -284,7 +307,9 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
+def payment_plan_apply_engine_rule(
+    self: Any, payment_plan_id: str, engine_rule_id: str
+) -> None:
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
@@ -301,7 +326,9 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
         with transaction.atomic():
             payment: Payment
             for payment in payment_plan.eligible_payments:
-                result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
+                result = rule.execute(
+                    {"household": payment.household, "payment_plan": payment_plan}
+                )
                 payment.entitlement_quantity = result.value
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=result.value,
@@ -312,7 +339,12 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment.entitlement_date = timezone.now()
                 updates.append(payment)
             Payment.signature_manager.bulk_update_with_signature(
-                updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
+                updates,
+                [
+                    "entitlement_quantity",
+                    "entitlement_date",
+                    "entitlement_quantity_usd",
+                ],
             )
 
             payment_plan.steficon_applied_date = timezone.now()
@@ -340,7 +372,9 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
+        file_qs = FileTemp.objects.filter(
+            content_type=get_content_type_for_model(PaymentPlan), created__lte=days
+        )
         if file_qs:
             for xlsx_obj in file_qs:
                 xlsx_obj.file.delete(save=False)
@@ -369,7 +403,9 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         }
     )
     if cache.get(cache_key):
-        logger.info(f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running.")
+        logger.info(
+            f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running."
+        )
         return False
 
     # 10 hours timeout
@@ -379,7 +415,9 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
         # double check Payment Plan status
         if payment_plan.status != PaymentPlan.Status.TP_OPEN:
-            logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
+            logger.info(
+                f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}."
+            )
             return False
         with transaction.atomic():
             payment_plan.build_status_building()
@@ -430,39 +468,58 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluding_hh_or_ind_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
+    self: Any,
+    payment_plan_id: str,
+    excluding_hh_or_ind_ids: List[Optional[str]],
+    exclusion_reason: Optional[str] = "",
 ) -> None:
     try:
         from django.db.models import Q
 
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
-        payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=payment_plan_id)
+        payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(
+            id=payment_plan_id
+        )
         # for social worker program exclude Individual unicef_id
-        is_social_worker_program = payment_plan.program_cycle.program.is_social_worker_program
+        is_social_worker_program = (
+            payment_plan.program_cycle.program.is_social_worker_program
+        )
         set_sentry_business_area_tag(payment_plan.business_area.name)
         pp_payment_items = payment_plan.payment_items.select_related("household")
-        payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
+        payment_plan_title = (
+            "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
+        )
         error_msg, info_msg = [], []
-        filter_key = "household__individuals__unicef_id" if is_social_worker_program else "household__unicef_id"
+        filter_key = (
+            "household__individuals__unicef_id"
+            if is_social_worker_program
+            else "household__unicef_id"
+        )
 
         try:
             for unicef_id in excluding_hh_or_ind_ids:
                 if not pp_payment_items.filter(**{f"{filter_key}": unicef_id}).exists():
                     # add only notice for user and ignore this id
-                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this {payment_plan_title}.")
+                    info_msg.append(
+                        f"Beneficiary with ID {unicef_id} is not part of this {payment_plan_title}."
+                    )
                     # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_or_ind_ids.remove(unicef_id)
 
             if payment_plan.status == PaymentPlan.Status.LOCKED:
                 # for Locked PaymentPlan we check if all HHs are not removed from PP
                 if len(excluding_hh_or_ind_ids) >= pp_payment_items.count():
-                    error_msg.append(f"Households cannot be entirely excluded from the {payment_plan_title}.")
+                    error_msg.append(
+                        f"Households cannot be entirely excluded from the {payment_plan_title}."
+                    )
 
             payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
                 **{f"{filter_key}__in": excluding_hh_or_ind_ids}
             )
-            undo_exclude_hh_ids = payments_for_undo_exclude.values_list(filter_key, flat=True)
+            undo_exclude_hh_ids = payments_for_undo_exclude.values_list(
+                filter_key, flat=True
+            )
 
             # check if hard conflicts exists in other Payments for undo exclude HH
             for unicef_id in undo_exclude_hh_ids:
@@ -472,8 +529,12 @@ def payment_plan_exclude_beneficiaries(
                         parent__program_cycle_id=payment_plan.program_cycle_id
                     )  # check only Payments in the same program cycle
                     .filter(
-                        Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
-                        & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
+                        Q(
+                            parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date
+                        )
+                        & Q(
+                            parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date
+                        ),
                         ~Q(parent__status=PaymentPlan.Status.OPEN),
                         Q(**{filter_key: unicef_id}) & Q(conflicted=False),
                     )
@@ -489,9 +550,15 @@ def payment_plan_exclude_beneficiaries(
                 payment_plan.background_action_status_exclude_beneficiaries_error()
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
                 payment_plan.save(
-                    update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
+                    update_fields=[
+                        "exclusion_reason",
+                        "exclude_household_error",
+                        "background_action_status",
+                    ]
                 )
-                raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
+                raise ValidationError(
+                    "Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List"
+                )
 
             payments_for_exclude = payment_plan.eligible_payments.filter(
                 **{f"{filter_key}__in": excluding_hh_or_ind_ids}
@@ -505,24 +572,43 @@ def payment_plan_exclude_beneficiaries(
 
             payment_plan.background_action_status_none()
             payment_plan.exclude_household_error = str(info_msg or "")
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+            payment_plan.save(
+                update_fields=[
+                    "exclusion_reason",
+                    "background_action_status",
+                    "exclude_household_error",
+                ]
+            )
         except Exception as e:
-            logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
+            logger.exception(
+                "Payment Plan Exclude Beneficiaries Error with excluding method. \n"
+                + str(e)
+            )
             payment_plan.background_action_status_exclude_beneficiaries_error()
 
             if error_msg:
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+            payment_plan.save(
+                update_fields=[
+                    "exclusion_reason",
+                    "background_action_status",
+                    "exclude_household_error",
+                ]
+            )
 
     except Exception as e:
-        logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
+        logger.exception(
+            "Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e)
+        )
         raise self.retry(exc=e)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
+def export_pdf_payment_plan_summary(
+    self: Any, payment_plan_id: str, user_id: str
+) -> None:
     """create PDF file with summary and sent an enail to request user"""
     try:
         from hct_mis_api.apps.core.models import FileTemp
@@ -648,7 +734,11 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_payment_notification_emails(
-    self: Any, payment_plan_id: str, action: str, action_user_id: str, action_date_formatted: str
+    self: Any,
+    payment_plan_id: str,
+    action: str,
+    action_user_id: str,
+    action_date_formatted: str,
 ) -> None:
     from hct_mis_api.apps.payment.notifications import PaymentNotification
 
@@ -656,7 +746,9 @@ def send_payment_notification_emails(
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         action_user = User.objects.get(id=action_user_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
+        PaymentNotification(
+            payment_plan, action, action_user, action_date_formatted
+        ).send_email_notification()
     except Exception as e:
         logger.exception(e)
 
@@ -683,7 +775,9 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
+def payment_plan_apply_steficon_hh_selection(
+    self: Any, payment_plan_id: str, engine_rule_id: str
+) -> None:
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
@@ -714,7 +808,9 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
         payment_plan.steficon_targeting_applied_date = timezone.now()
         with disable_concurrency(payment_plan):
-            payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+            payment_plan.save(
+                update_fields=["status", "steficon_targeting_applied_date"]
+            )
     except Exception as e:
         logger.exception(e)
         payment_plan.steficon_targeting_applied_date = timezone.now()
@@ -774,3 +870,21 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
             payment_plan.build_status_failed()
             payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.western_union_ftp import (
+        WesternUnionFTPClient,
+    )
+    from datetime import datetime, timedelta
+
+    try:
+        ftp = WesternUnionFTPClient()
+        ftp.process_files_since(datetime.now() - timedelta(hours=24))
+
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
