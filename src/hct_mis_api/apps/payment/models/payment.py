@@ -731,6 +731,8 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
+        from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+
         params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
 
         if payment_verification_plan:
@@ -739,7 +741,16 @@ class PaymentPlan(
                 | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
             )
         else:
-            params &= Q(payment_verifications__isnull=True)
+            # exclude PaymentVerificationPlan with in statuses Error or Invalid
+            params &= Q(
+                Q(payment_verifications__isnull=True)
+                | Q(
+                    payment_verifications__payment_verification_plan__status__in=[
+                        PaymentVerificationPlan.STATUS_INVALID,
+                        PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
+                    ]
+                )
+            )
 
         payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
 
