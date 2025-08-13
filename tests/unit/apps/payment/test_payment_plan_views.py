@@ -818,15 +818,13 @@ class TestPaymentPlanFilter:
             dispersion_start_date="2022-01-01",
             dispersion_end_date="2022-01-17",
         )
-        response = self.client.get(
-            self.list_url, {"dispersion_start_date__gte": "2022-02-23", "dispersion_end_date__lte": "2022-03-04"}
-        )
+        response = self.client.get(self.list_url, {"start_date": "2022-02-23", "end_date": "2022-03-04"})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "PP_abc"
 
-        response = self.client.get(self.list_url, {"dispersion_end_date__lte": "2022-01-18"})
+        response = self.client.get(self.list_url, {"end_date": "2022-01-18"})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
