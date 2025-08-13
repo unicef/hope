@@ -673,7 +673,7 @@ class PaymentGatewayService:
 
     def add_missing_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         record_ids: List[str] = []
-        for payment in payment_plan.payment_items.all():
+        for payment in payment_plan.eligible_payments.all():
             pg_payment_record = self.api.get_record(payment.id)
             if not pg_payment_record:
                 record_ids.append(str(payment.pk))

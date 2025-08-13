@@ -731,7 +731,7 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION)
 
         if payment_verification_plan:
             params &= Q(
@@ -741,14 +741,13 @@ class PaymentPlan(
         else:
             params &= Q(payment_verifications__isnull=True)
 
-        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
+        payment_records = self.eligible_payments.select_related("head_of_household").filter(params).distinct()
 
         if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+            payment_records_ids = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+            payment_records = Payment.objects.filter(pk__in=payment_records_ids)
 
-        qs = Payment.objects.filter(pk__in=payment_records)
-
-        return qs
+        return payment_records
 
     @property
     def program(self) -> "Program":
@@ -816,11 +815,11 @@ class PaymentPlan(
 
     @property
     def bank_reconciliation_success(self) -> int:
-        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
+        return self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).count()
 
     @property
     def bank_reconciliation_error(self) -> int:
-        return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
+        return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
     def excluded_household_ids_targeting_level(self) -> List:
@@ -1501,7 +1500,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 "transaction_status_blockchain_link",
             ),
             "fsp_auth_code": (payment, "fsp_auth_code"),
-            "account_data": (collector_data, "account_data"),
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
@@ -1527,6 +1525,20 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return obj.get(nested_field, "")
         # return if obj is model
         return getattr(obj, nested_field, None) or ""
+
+    @classmethod
+    def get_account_value_from_payment(cls, payment: "Payment", key_name: str) -> Union[str, float, list, None]:
+        """get Account values from Collector's Account.data"""
+        snapshot = getattr(payment, "household_snapshot", None)
+        if not snapshot:
+            logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
+            return None
+        snapshot_data = snapshot.snapshot_data
+        collector_data = (
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+        )
+        account_data = collector_data.get("account_data", {})
+        return account_data.get(key_name, "")
 
     @staticmethod
     def get_document_number_by_doc_type_key(snapshot_data: Dict[str, Any], document_type_key: str) -> str:
@@ -1702,15 +1714,12 @@ class Payment(
         (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
-    ALLOW_CREATE_VERIFICATION = (
-        STATUS_SUCCESS,
-        STATUS_DISTRIBUTION_SUCCESS,
-        STATUS_DISTRIBUTION_PARTIAL,
-        STATUS_NOT_DISTRIBUTED,
-    )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
     DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    NOT_DELIVERED_STATUSES = (STATUS_NOT_DISTRIBUTED,)
     FAILED_STATUSES = (STATUS_FORCE_FAILED, STATUS_ERROR, STATUS_MANUALLY_CANCELLED, STATUS_NOT_DISTRIBUTED)
+
+    ALLOW_CREATE_VERIFICATION = PENDING_STATUSES + DELIVERED_STATUSES + NOT_DELIVERED_STATUSES
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -2132,6 +2141,10 @@ class PaymentDataCollector(Account):
         delivery_mechanism: "DeliveryMechanism",
         collector: Individual,
     ) -> bool:
+        if not delivery_mechanism.account_type:
+            # ex. "cash" - doesn't need any validation
+            return True
+
         account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
