@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <form method="post">{% csrf_token %}
+    <div>
+      {{ form.as_p }}
+    </div>
+    <input type="submit" value="Regenerate Export" class="default">
+    <a href="{% url 'admin:payment_paymentplan_change' payment_plan.id %}">Cancel</a>
+  </form>
+{% endblock %}
