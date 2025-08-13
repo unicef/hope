@@ -227,7 +227,6 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         FAILED_MERGE = "FAILED_MERGE", "Failed merge"
         CANCELED_MERGE = "CANCELED_MERGE", "Canceled merge"
 
-
     name = models.CharField(
         max_length=255,
         validators=[

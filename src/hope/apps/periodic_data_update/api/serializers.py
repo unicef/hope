@@ -1,10 +1,13 @@
 from typing import Any
 
-from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from rest_framework import serializers
 
+from hope.apps.account.models import RoleAssignment, User
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -19,6 +22,11 @@ from hope.apps.periodic_data_update.models import (
 from hope.apps.periodic_data_update.utils import update_rounds_covered_for_template
 from hope.apps.program.models import Program
 
+PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
+    Permissions.PDU_ONLINE_SAVE_DATA,
+    Permissions.PDU_ONLINE_APPROVE,
+    Permissions.PDU_ONLINE_MERGE,
+]
 
 class PeriodicDataUpdateXlsxTemplateListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
@@ -149,13 +157,34 @@ class PeriodicFieldSerializer(serializers.ModelSerializer):
 
 
 class AuthorizedUserSerializer(serializers.ModelSerializer):
-    pdu_roles = serializers.SerializerMethodField()
-    class Meta:
-        model = get_user_model()
-        fields = ("id", "first_name", "last_name", "username")
+    pdu_permissions = serializers.SerializerMethodField()
 
-    def get_pdu_roles(self, obj: get_user_model()) -> list[str]:
-        pass # TODO: PDU - add logic to retrieve PDU roles for the user
+    class Meta:
+        model = User
+        fields = ("id", "first_name", "last_name", "username", "email", "pdu_permissions")
+
+    def get_pdu_permissions(self, user: User) -> list[str]:
+        # use cached role assignments if available - when used in "users_available" action
+        cached_user_roles = getattr(user, 'cached_relevant_role_assignments', [])
+        cached_partner_roles = getattr(user.partner, 'cached_relevant_role_assignments_partner', [])
+        cached_roles = list(cached_user_roles) + list(cached_partner_roles)
+        if cached_roles:
+            perms = set()
+            for ra in cached_roles:
+                perms.update(p for p in ra.role.permissions if p in [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS])
+            return sorted(perms)
+
+        permissions_from_roles = RoleAssignment.objects.filter(
+            Q(user=user) | Q(partner=user.partner),
+            business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"],
+            program__slug=self.context["request"].parser_context["kwargs"]["program_slug"],
+            role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS],
+        ).exclude(expiry_date__lt=timezone.now()).values_list("role__permissions", flat=True)
+
+        pdu_online_related_permissions = {
+            permission for permission_list in permissions_from_roles for permission in permission_list if permission in [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
+        }
+        return sorted(pdu_online_related_permissions)
 
 
 class PeriodicDataUpdateOnlineEditSentBackCommentSerializer(serializers.ModelSerializer):
@@ -209,7 +238,7 @@ class PeriodicDataUpdateOnlineEditCreateSerializer(serializers.ModelSerializer):
     filters = serializers.JSONField(write_only=True)
     rounds_data = serializers.ListField(child=serializers.DictField(), write_only=True)
     authorized_users = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=get_user_model().objects.all(), required=False
+        many=True, queryset=User.objects.all(), required=False
     )
 
     class Meta:
@@ -254,6 +283,12 @@ class PeriodicDataUpdateOnlineEditCreateSerializer(serializers.ModelSerializer):
         return pdu_online_edit
 
 
+class PeriodicDataUpdateOnlineEditUpdateAuthorizedUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PeriodicDataUpdateOnlineEdit
+        fields = ("authorized_users",)
+
+
 class PeriodicDataUpdateOnlineEditSaveDataSerializer(serializers.Serializer):
     individual_edit_data = serializers.JSONField()
 
@@ -263,4 +298,5 @@ class PeriodicDataUpdateOnlineEditSendBackSerializer(serializers.Serializer):
 
 
 class BulkSerializer(serializers.Serializer):
+
     ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=False)
