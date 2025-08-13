@@ -227,7 +227,7 @@ def register_custom_sql_signal() -> None:
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
                 for stmt in sql_statements:
-                    all_sqls.append(stmt)
+                    all_sqls.append(stmt)  # noqa
 
     def pre_migration_custom_sql(
         sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
