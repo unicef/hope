@@ -7,6 +7,9 @@ from typing import Optional, Tuple, cast
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
 
+IMAGE_BATCH_SIZE = 5000
+
+
 @dataclasses.dataclass
 class SimilarityPair:
     score: float
@@ -89,7 +92,9 @@ class DeduplicationEngineAPI(BaseAPI):
         return cast("list", response_data)
 
     def bulk_upload_images(self, deduplication_set_id: str, images: list[DeduplicationImage]) -> list:
-        response_data = [self._bulk_upload_image_batch(deduplication_set_id, batch) for batch in batched(images, 5000)]
+        response_data = [
+            self._bulk_upload_image_batch(deduplication_set_id, batch) for batch in batched(images, IMAGE_BATCH_SIZE)
+        ]
         return reduce(add, response_data, [])
 
     def bulk_delete_images(self, deduplication_set_id: str) -> dict:
