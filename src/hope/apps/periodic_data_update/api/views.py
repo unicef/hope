@@ -3,11 +3,13 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from django.db.models import Q, Prefetch
 from django.http import FileResponse
 from django.utils import timezone
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -19,6 +21,7 @@ from rest_framework.serializers import BaseSerializer
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
+from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
@@ -40,6 +43,8 @@ from hope.apps.periodic_data_update.api.serializers import (
     PeriodicFieldSerializer, PeriodicDataUpdateOnlineEditListSerializer, PeriodicDataUpdateOnlineEditDetailSerializer,
     PeriodicDataUpdateOnlineEditCreateSerializer, PeriodicDataUpdateOnlineEditSaveDataSerializer,
     PeriodicDataUpdateOnlineEditSendBackSerializer, BulkSerializer,
+    PeriodicDataUpdateOnlineEditUpdateAuthorizedUsersSerializer, AuthorizedUserSerializer,
+    PDU_ONLINE_EDIT_RELATED_PERMISSIONS,
 )
 from hope.apps.periodic_data_update.models import (
     PeriodicDataUpdateXlsxTemplate,
@@ -193,24 +198,40 @@ class PeriodicDataUpdateOnlineEditViewSet(
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateOnlineEditListSerializer,
         "retrieve": PeriodicDataUpdateOnlineEditDetailSerializer,
-        "create": PeriodicDataUpdateOnlineEditCreateSerializer,
-        "save_data": PeriodicDataUpdateOnlineEditSaveDataSerializer,
+        "create": PeriodicDataUpdateOnlineEditCreateSerializer,  # TODO: PDU - task
+        "update_authorized_users": PeriodicDataUpdateOnlineEditUpdateAuthorizedUsersSerializer,
+        "save_data": PeriodicDataUpdateOnlineEditSaveDataSerializer, # TODO: PDU - handle the update of edit_data
         "send_back": PeriodicDataUpdateOnlineEditSendBackSerializer,
         "bulk_approve": BulkSerializer,
-        "bulk_merge": BulkSerializer,
+        "bulk_merge": BulkSerializer,  # TODO: PDU - task
+        "users_available": AuthorizedUserSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
         "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
         "create": [Permissions.PDU_TEMPLATE_CREATE],
+        "update_authorized_users": [Permissions.PDU_TEMPLATE_CREATE],
         "save_data": [Permissions.PDU_ONLINE_SAVE_DATA],
         "send_for_approval": [Permissions.PDU_ONLINE_SAVE_DATA],
         "send_back": [Permissions.PDU_ONLINE_APPROVE],
         "bulk_approve": [Permissions.PDU_ONLINE_APPROVE],
         "bulk_merge": [Permissions.PDU_ONLINE_MERGE],
+        "users_available": [Permissions.PDU_TEMPLATE_CREATE],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter # TODO: PDU - add custom filter for status
+
+    @action(detail=True, methods=["post"])
+    def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if self.request.user != instance.created_by:
+            raise ValidationError("Only the creator of the PDU Online Edit can update authorized users.")
+
+        serializer.save()
+        return Response(status=status.HTTP_200_OK, data={"message": "Authorized users updated successfully."})
 
     @action(detail=True, methods=["post"])
     def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -284,10 +305,64 @@ class PeriodicDataUpdateOnlineEditViewSet(
         merged_count = pdu_edits.update(
             status=PeriodicDataUpdateOnlineEdit.Status.MERGED,
         )
+        # TODO: PDU - handle the merging of edit_data; update status in the task instead of here
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{merged_count} PDU Online Edits merged successfully."}
         )
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="permission",
+                type=str,
+                description="Filter by permission",
+                required=False,
+                enum=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS],
+            )
+        ],
+        responses={200: AuthorizedUserSerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"])
+    def users_available(self, request: Request, *args: Any, **kwargs: Any
+    ) -> Response:
+        business_area_slug = self.kwargs.get("business_area_slug")
+        program_slug = self.kwargs.get("program_slug")
+        permissions_to_check = [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
+
+        # possible to filter by specific pdu permission
+        permission_filter = self.request.query_params.get("permission")
+        if permission_filter:
+            if permission_filter not in permissions_to_check:
+                raise ValidationError(f"Invalid permission. Choose from {', '.join(permissions_to_check)}")
+            permissions_to_check = [permission_filter]
+
+        role_assignments_with_pdu_online_edit_related_permissions = RoleAssignment.objects.filter(
+            role__permissions__overlap=permissions_to_check,
+            business_area__slug=business_area_slug,
+            program__slug=program_slug,
+        ).exclude(expiry_date__lt=timezone.now())
+        users_available = User.objects.filter(
+            Q(role_assignments__in=role_assignments_with_pdu_online_edit_related_permissions) |
+            Q(partner__role_assignments__in=role_assignments_with_pdu_online_edit_related_permissions)
+        ).distinct().order_by("first_name", "last_name", "username")
+
+        # Prefetch role_assignments with relevant permissions for user and partner to avoid extra queries in serializer
+        users_available = users_available.prefetch_related(
+            Prefetch(
+                'role_assignments',
+                queryset=role_assignments_with_pdu_online_edit_related_permissions,
+                to_attr='cached_relevant_role_assignments'
+            ),
+            Prefetch(
+                'partner__role_assignments',
+                queryset=role_assignments_with_pdu_online_edit_related_permissions,
+                to_attr='cached_relevant_role_assignments_partner'
+            )
+        )
+
+        serializer = self.get_serializer(users_available, many=True)
+        return Response(serializer.data)
 
 
 class PeriodicFieldViewSet(
