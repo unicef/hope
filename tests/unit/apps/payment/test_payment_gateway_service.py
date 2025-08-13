@@ -1028,11 +1028,9 @@ class TestPaymentGatewayService(APITestCase):
         periodic_sync_payment_gateway_delivery_mechanisms()
         assert sync_delivery_mechanisms_mock.call_count == 1
 
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
-    @mock.patch(
-        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
-    )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_missing_records_to_payment_instructions(
         self,
         get_record_mock: Any,
