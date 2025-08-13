@@ -2016,10 +2016,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     @property
     def account_data(self) -> dict:
         data = self.data.copy()
-        if self.number:
-            data["number"] = self.number
-        if self.financial_institution:
-            data["financial_institution"] = str(self.financial_institution.id)
+        data["number"] = self.number or data.get("number", "")
+        data["financial_institution"] = str(self.financial_institution.id) if self.financial_institution else ""
         return data
 
     @account_data.setter
