@@ -29,8 +29,7 @@ exec(execCode)
 for k, v in DEFAULTS.items():
     TERMS[k] = MASK.format(name=k, type=v[0], default=v[1])
 
-for term in sorted(TERMS.keys()):
-    TABLE.append(TERMS[term])
+TABLE += [TERMS[term] for term in sorted(TERMS.keys())]
 
 
 with mkdocs_gen_files.open(index, "w") as f:

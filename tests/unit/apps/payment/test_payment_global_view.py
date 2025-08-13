@@ -180,10 +180,7 @@ class TestPaymentGlobalViewSet:
         )
 
         # Create multiple payments
-        payments = []
-        for i in range(3):
-            payments.append(PaymentFactory(parent=self.pp))
-
+        payments = [PaymentFactory(parent=self.pp) for i in range(3)]
         response = self.client.get(self.url_list_global)
         results = response.json()["results"]
         assert len(results) == 4  # 1 original + 3 new
