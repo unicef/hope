@@ -1,0 +1,14 @@
+--- a/tests/e2e/targeting/test_targeting.py
++++ b/tests/e2e/targeting/test_targeting.py
+@@ -780,6 +780,11 @@ class TestCreateTargeting:
+         pageTargetingDetails.wait_for_text(
+             individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+         )
++        # Wait for the second household row to appear as well
++        pageTargetingDetails.wait_for_text(
++            individual2.household.unicef_id, pageTargetingDetails.household_table_cell.format(2, 1)
++        )
++
+         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
+         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
+         assert len(pageTargetingDetails.getHouseholdTableRows()) == 2

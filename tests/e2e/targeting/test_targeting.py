@@ -777,9 +777,24 @@ class TestCreateTargeting:
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
         pageTargetingDetails.disappearStatusContainer()
+        # Wait for at least one household to appear first
         pageTargetingDetails.wait_for_text(
             individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
         )
+
+        # Wait for the expected number of household rows to be rendered
+        from time import sleep
+
+        for _ in range(10):  # Try for up to 10 seconds
+            household_rows = pageTargetingDetails.getHouseholdTableRows()
+            if len(household_rows) == 2:
+                break
+            sleep(1)
+        else:
+            # If we still don't have 2 rows, get the actual count for better error message
+            actual_count = len(pageTargetingDetails.getHouseholdTableRows())
+            assert False, f"Expected 2 household rows but found {actual_count} after waiting"
+
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
