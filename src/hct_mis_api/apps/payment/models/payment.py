@@ -55,6 +55,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
@@ -80,10 +81,7 @@ from hct_mis_api.apps.utils.validators import (
 if TYPE_CHECKING:  # pragma: no cover
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
-    from hct_mis_api.apps.payment.models import (
-        AcceptanceProcessThreshold,
-        PaymentVerificationPlan,
-    )
+    from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
     from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -728,7 +726,7 @@ class PaymentPlan(
 
     def available_payment_records(
         self,
-        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
+        payment_verification_plan: Optional[PaymentVerificationPlan] = None,
         extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
         params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
@@ -739,7 +737,16 @@ class PaymentPlan(
                 | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
             )
         else:
-            params &= Q(payment_verifications__isnull=True)
+            # exclude PaymentVerificationPlan with in statuses Error or Invalid
+            params &= Q(
+                Q(payment_verifications__isnull=True)
+                | Q(
+                    payment_verifications__payment_verification_plan__status__in=[
+                        PaymentVerificationPlan.STATUS_INVALID,
+                        PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
+                    ]
+                )
+            )
 
         payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
 
