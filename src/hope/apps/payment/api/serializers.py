@@ -971,6 +971,13 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
         )
 
 
+class PaymentChoicesSerializer(serializers.Serializer):
+    status_choices = serializers.SerializerMethodField()
+
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        return [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
+
+
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     household_id = serializers.UUIDField(read_only=True)

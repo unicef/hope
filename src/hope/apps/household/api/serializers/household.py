@@ -103,6 +103,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     delivered_quantities = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Household
@@ -127,6 +128,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "village",
             "geopoint",
             "import_id",
+            "program_slug",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))
@@ -350,6 +352,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
     active_individuals_count = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Household
@@ -368,6 +371,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
             "residence_status",
             "size",
             "active_individuals_count",
+            "program_slug",
         )
 
     def get_active_individuals_count(self, obj: Household) -> int:

@@ -21,6 +21,7 @@ import type { FeedbackDetail } from '../models/FeedbackDetail';
 import type { FeedbackMessage } from '../models/FeedbackMessage';
 import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
+import type { FieldAttribute } from '../models/FieldAttribute';
 import type { FspChoices } from '../models/FspChoices';
 import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
@@ -92,6 +93,7 @@ import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpd
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
 import type { PatchedUpdateGrievanceTicket } from '../models/PatchedUpdateGrievanceTicket';
+import type { PaymentChoices } from '../models/PaymentChoices';
 import type { PaymentDetail } from '../models/PaymentDetail';
 import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
@@ -1911,7 +1913,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedFieldAttributeList
+     * @returns FieldAttribute
      * @throws ApiError
      */
     public static restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList({
@@ -1939,8 +1941,6 @@ export class RestService {
         isActiveProgram,
         isCrossArea,
         issueType,
-        limit,
-        offset,
         orderBy,
         ordering,
         paymentRecordIds,
@@ -2017,14 +2017,6 @@ export class RestService {
          */
         issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
         /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
          * Ordering
          *
          * * `unicef_id` - Unicef id
@@ -2092,7 +2084,7 @@ export class RestService {
          * * `3` - Not urgent
          */
         urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedFieldAttributeList> {
+    }): CancelablePromise<Array<FieldAttribute>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-add-individuals-fields-attributes/',
@@ -2123,8 +2115,6 @@ export class RestService {
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'payment_record_ids': paymentRecordIds,
@@ -4476,14 +4466,92 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedPaymentListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentsList({
+        businessAreaSlug,
+        limit,
+        offset,
+        ordering,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedPaymentListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns PaymentChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentsChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<PaymentChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payments/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentsCountRetrieve({
+        businessAreaSlug,
+        ordering,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
      * @returns PaginatedPaymentPlanList
      * @throws ApiError
      */
     public static restBusinessAreasPaymentsPaymentPlansManagerialList({
         businessAreaSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         limit,
@@ -4496,16 +4564,18 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
         businessAreaSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         /**
@@ -4526,7 +4596,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -4538,6 +4608,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -4562,6 +4633,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentPlanList> {
@@ -4573,8 +4646,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
@@ -4587,9 +4659,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -4968,6 +5043,8 @@ export class RestService {
         title,
         totalDeliveredQuantityUsdFrom,
         totalDeliveredQuantityUsdTo,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtAfter,
         updatedAtBefore,
     }: {
@@ -4998,6 +5075,8 @@ export class RestService {
         title?: string,
         totalDeliveredQuantityUsdFrom?: any,
         totalDeliveredQuantityUsdTo?: any,
+        totalEntitledQuantityUsdFrom?: any,
+        totalEntitledQuantityUsdTo?: any,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
     }): CancelablePromise<PaginatedProgramCycleListList> {
@@ -5020,6 +5099,8 @@ export class RestService {
                 'title': title,
                 'total_delivered_quantity_usd_from': totalDeliveredQuantityUsdFrom,
                 'total_delivered_quantity_usd_to': totalDeliveredQuantityUsdTo,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
@@ -5229,6 +5310,8 @@ export class RestService {
         title,
         totalDeliveredQuantityUsdFrom,
         totalDeliveredQuantityUsdTo,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtAfter,
         updatedAtBefore,
     }: {
@@ -5251,6 +5334,8 @@ export class RestService {
         title?: string,
         totalDeliveredQuantityUsdFrom?: any,
         totalDeliveredQuantityUsdTo?: any,
+        totalEntitledQuantityUsdFrom?: any,
+        totalEntitledQuantityUsdTo?: any,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
     }): CancelablePromise<CountResponse> {
@@ -5271,6 +5356,8 @@ export class RestService {
                 'title': title,
                 'total_delivered_quantity_usd_from': totalDeliveredQuantityUsdFrom,
                 'total_delivered_quantity_usd_to': totalDeliveredQuantityUsdTo,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
@@ -8034,8 +8121,7 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         limit,
@@ -8048,17 +8134,19 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         /**
@@ -8079,7 +8167,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -8091,6 +8179,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -8115,6 +8204,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentPlanListList> {
@@ -8127,8 +8218,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
@@ -8141,9 +8231,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -9104,8 +9197,7 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         name,
@@ -9116,17 +9208,19 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         name?: string,
@@ -9139,7 +9233,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -9151,6 +9245,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -9175,6 +9270,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
@@ -9187,8 +9284,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'name': name,
@@ -9199,9 +9295,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -9215,8 +9314,7 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         limit,
@@ -9229,17 +9327,19 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         /**
@@ -9260,7 +9360,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -9272,6 +9372,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -9296,6 +9397,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<PaginatedFSPXlsxTemplateList> {
@@ -9308,8 +9411,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
@@ -9322,9 +9424,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -9338,8 +9443,7 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         limit,
@@ -9352,17 +9456,19 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         /**
@@ -9383,7 +9489,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -9395,6 +9501,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -9419,6 +9526,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentVerificationPlanListList> {
@@ -9431,8 +9540,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
@@ -9445,9 +9553,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -9463,8 +9574,7 @@ export class RestService {
         paymentVerificationPk,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         limit,
@@ -9477,9 +9587,12 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
@@ -9487,8 +9600,7 @@ export class RestService {
         paymentVerificationPk: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         /**
@@ -9509,7 +9621,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -9521,6 +9633,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -9545,6 +9658,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentListList> {
@@ -9558,8 +9673,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
@@ -9572,9 +9686,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -9652,8 +9769,7 @@ export class RestService {
         paymentVerificationPk,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         name,
@@ -9664,9 +9780,12 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
@@ -9674,8 +9793,7 @@ export class RestService {
         paymentVerificationPk: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         name?: string,
@@ -9688,7 +9806,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -9700,6 +9818,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -9724,6 +9843,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
@@ -9737,8 +9858,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'name': name,
@@ -9749,9 +9869,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -10086,8 +10209,7 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
+        endDate,
         fsp,
         isFollowUp,
         name,
@@ -10098,17 +10220,19 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         updatedAtGte,
         updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
         deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
+        endDate?: string,
         fsp?: string,
         isFollowUp?: boolean,
         name?: string,
@@ -10121,7 +10245,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -10133,6 +10257,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * Status [sys]
          *
@@ -10157,6 +10282,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         updatedAtGte?: string,
         updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
@@ -10169,8 +10296,7 @@ export class RestService {
             },
             query: {
                 'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
+                'end_date': endDate,
                 'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'name': name,
@@ -10181,9 +10307,12 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'updated_at__gte': updatedAtGte,
                 'updated_at__lte': updatedAtLte,
             },
@@ -11319,6 +11448,7 @@ export class RestService {
         createdAtGte,
         createdAtLte,
         deliveryMechanism,
+        endDate,
         fsp,
         limit,
         name,
@@ -11330,7 +11460,10 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         totalHouseholdsCountGte,
         totalHouseholdsCountLte,
         totalIndividualsCountGte,
@@ -11343,6 +11476,7 @@ export class RestService {
         createdAtGte?: string,
         createdAtLte?: string,
         deliveryMechanism?: Array<string>,
+        endDate?: string,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -11362,7 +11496,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -11374,6 +11508,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * * `TP_OPEN` - Open
          * * `TP_LOCKED` - Locked
@@ -11395,6 +11530,8 @@ export class RestService {
          * * `ASSIGNED` - Assigned
          */
         status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,
         totalHouseholdsCountLte?: number,
         totalIndividualsCountGte?: number,
@@ -11413,6 +11550,7 @@ export class RestService {
                 'created_at__gte': createdAtGte,
                 'created_at__lte': createdAtLte,
                 'delivery_mechanism': deliveryMechanism,
+                'end_date': endDate,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -11424,7 +11562,10 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'total_households_count__gte': totalHouseholdsCountGte,
                 'total_households_count__lte': totalHouseholdsCountLte,
                 'total_individuals_count__gte': totalIndividualsCountGte,
@@ -11754,6 +11895,7 @@ export class RestService {
         createdAtGte,
         createdAtLte,
         deliveryMechanism,
+        endDate,
         fsp,
         name,
         ordering,
@@ -11763,7 +11905,10 @@ export class RestService {
         programCycleEndDate,
         programCycleStartDate,
         search,
+        startDate,
         status,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
         totalHouseholdsCountGte,
         totalHouseholdsCountLte,
         totalIndividualsCountGte,
@@ -11776,6 +11921,7 @@ export class RestService {
         createdAtGte?: string,
         createdAtLte?: string,
         deliveryMechanism?: Array<string>,
+        endDate?: string,
         fsp?: string,
         name?: string,
         /**
@@ -11787,7 +11933,7 @@ export class RestService {
          * * `FINISHED` - Finished
          * * `PENDING` - Pending
          */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
         /**
          * Filter by program slug
          */
@@ -11799,6 +11945,7 @@ export class RestService {
          * A search term.
          */
         search?: string,
+        startDate?: string,
         /**
          * * `TP_OPEN` - Open
          * * `TP_LOCKED` - Locked
@@ -11820,6 +11967,8 @@ export class RestService {
          * * `ASSIGNED` - Assigned
          */
         status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,
         totalHouseholdsCountLte?: number,
         totalIndividualsCountGte?: number,
@@ -11838,6 +11987,7 @@ export class RestService {
                 'created_at__gte': createdAtGte,
                 'created_at__lte': createdAtLte,
                 'delivery_mechanism': deliveryMechanism,
+                'end_date': endDate,
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
@@ -11847,7 +11997,10 @@ export class RestService {
                 'program_cycle_end_date': programCycleEndDate,
                 'program_cycle_start_date': programCycleStartDate,
                 'search': search,
+                'start_date': startDate,
                 'status': status,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
                 'total_households_count__gte': totalHouseholdsCountGte,
                 'total_households_count__lte': totalHouseholdsCountLte,
                 'total_individuals_count__gte': totalIndividualsCountGte,

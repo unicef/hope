@@ -14,8 +14,6 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -56,12 +54,22 @@ export function RequestedIndividualDataChangeTable({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const { data: individual, isLoading: individualLoading } =
-    useHopeDetailsQuery<IndividualDetail>(
+  const { data: individual, isLoading: individualLoading } = useQuery({
+    queryKey: [
+      'individualChoices',
+      businessAreaSlug,
       ticket.individual.id,
-      RestService.restBusinessAreasProgramsIndividualsRetrieve,
-      {},
-    );
+      ticket.individual.programSlug,
+    ],
+    queryFn: () => {
+      if (!ticket.individual.id) return null;
+      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        programSlug: ticket.individual.programSlug,
+        id: ticket.individual.id,
+      });
+    },
+  });
 
   const individualData = {
     ...ticket.ticketDetails.individualData,

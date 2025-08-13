@@ -112,7 +112,8 @@ function EditPeopleDataChange({
     !fullIndividual ||
     !editPeopleFieldsData
   ) {
-    return <LoadingComponent />;
+
+    return <div><LoadingComponent /></div>;
   }
 
   const combinedData = {

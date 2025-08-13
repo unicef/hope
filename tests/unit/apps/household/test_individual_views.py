@@ -253,6 +253,7 @@ class TestIndividualList:
                 "village": individual.household.village,
                 "geopoint": None,
                 "import_id": individual.household.unicef_id,
+                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
@@ -347,7 +348,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 32
+            assert len(ctx.captured_queries) == 36
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -366,7 +367,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 31
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -376,7 +377,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 31
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -386,7 +387,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 24
+            assert len(ctx.captured_queries) == 27
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -599,6 +600,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc2.png"),
         )
 
         self.birth_certificate = DocumentFactory(
@@ -607,6 +609,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc3.png"),
         )
 
         self.disability_card = DocumentFactory(
@@ -615,6 +618,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc4.png"),
         )
 
         self.drivers_license = DocumentFactory(
@@ -622,6 +626,7 @@ class TestIndividualDetail:
             type=DocumentType.objects.get(key="drivers_license"),
             individual=self.individual1,
             program=self.program,
+            photo=ContentFile(b"abc", name="doc5.png"),
         )
 
         self.tax_id = DocumentFactory(
@@ -630,6 +635,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc6.png"),
         )
 
         self.identity = IndividualIdentityFactory(
@@ -757,6 +763,7 @@ class TestIndividualDetail:
             "village": self.individual1.household.village,
             "geopoint": None,
             "import_id": self.individual1.household.unicef_id,
+            "program_slug": self.program.slug,
         }
         assert data["role"] == ROLE_PRIMARY
         assert data["relationship"] == self.individual1.relationship
@@ -815,6 +822,7 @@ class TestIndividualDetail:
                     "village": self.household.village,
                     "geopoint": None,
                     "import_id": self.household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "role": ROLE_PRIMARY,
             },
@@ -841,6 +849,7 @@ class TestIndividualDetail:
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "role": ROLE_ALTERNATE,
             },
@@ -886,6 +895,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.national_id.document_number,
+                "photo": self.national_id.photo.url,
             },
             {
                 "id": str(self.national_passport.id),
@@ -900,6 +910,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.national_passport.document_number,
+                "photo": self.national_passport.photo.url,
             },
             {
                 "id": str(self.birth_certificate.id),
@@ -914,6 +925,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.birth_certificate.document_number,
+                "photo": self.birth_certificate.photo.url,
             },
             {
                 "id": str(self.disability_card.id),
@@ -928,6 +940,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.disability_card.document_number,
+                "photo": self.disability_card.photo.url,
             },
             {
                 "id": str(self.drivers_license.id),
@@ -942,6 +955,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.drivers_license.document_number,
+                "photo": self.drivers_license.photo.url,
             },
             {
                 "id": str(self.tax_id.id),
@@ -956,6 +970,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.tax_id.document_number,
+                "photo": self.tax_id.photo.url,
             },
         ]
         assert data["identities"] == [
@@ -1212,6 +1227,7 @@ class TestIndividualGlobalViewSet:
                 "village": individual.household.village,
                 "geopoint": None,
                 "import_id": individual.household.unicef_id,
+                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),

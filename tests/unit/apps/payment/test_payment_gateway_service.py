@@ -3,7 +3,7 @@ import os
 from decimal import Decimal
 from typing import Any
 from unittest import mock
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from extras.test_utils.factories.account import UserFactory
@@ -1027,3 +1027,51 @@ class TestPaymentGatewayService(APITestCase):
     def test_periodic_sync_payment_gateway_delivery_mechanisms(self, sync_delivery_mechanisms_mock: Any) -> None:
         periodic_sync_payment_gateway_delivery_mechanisms()
         assert sync_delivery_mechanisms_mock.call_count == 1
+
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
+    @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
+    def test_add_missing_records_to_payment_instructions(
+        self,
+        get_record_mock: Any,
+        add_records_to_payment_instruction_mock: Any,
+        change_payment_instruction_status_mock: Any,
+    ) -> None:
+        get_record_mock.side_effect = [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(self.payments[0].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
+                auth_code="1",
+                payout_amount=float(self.payments[0].entitlement_quantity),
+                fsp_code="1",
+            ),
+            None,  # second Record not in PG
+        ]
+        pg_service = PaymentGatewayService()
+        pg_service.api.get_record = get_record_mock  # type: ignore
+        change_payment_instruction_status_mock.side_effect = [
+            PaymentInstructionStatus.CLOSED.value,
+            PaymentInstructionStatus.READY.value,
+        ]
+        add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
+            remote_id="1",
+            records=None,
+            errors={"0": "Error", "1": "Error"},
+        )
+
+        with patch.object(pg_service.api, "add_records_to_payment_instruction") as mock_add_records:
+            pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+
+            pg_service.add_missing_records_to_payment_instructions(self.pp)
+            # got one payment not in PaymentGateway -> self.payments[1]
+            assert get_record_mock.call_count == 2
+
+            # check call arguments
+            called_payments, called_split = mock_add_records.call_args[0][0], mock_add_records.call_args[0][1]
+            assert called_payments == list(Payment.objects.filter(pk=self.payments[1].pk))
+            assert called_split == self.pp_split_2.pk

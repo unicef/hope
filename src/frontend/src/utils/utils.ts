@@ -1274,6 +1274,7 @@ export const filterEmptyParams = (params) => {
 /* eslint-enable @typescript-eslint/no-unused-vars,
                  @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
+  const notCalizedKeys = ['form_errors', 'household_data'];
   if (_.isArray(data)) {
     return data.map(deepCamelize);
   } else if (_.isObject(data)) {
@@ -1281,7 +1282,7 @@ export function deepCamelize(data) {
       data,
       (result, value, key) => {
         const camelKey = _.camelCase(key);
-        if (key == 'form_errors') {
+        if (notCalizedKeys.includes(key)) {
           // Special handling for error_info to keep it as is
           result[camelKey] = value;
           return result;

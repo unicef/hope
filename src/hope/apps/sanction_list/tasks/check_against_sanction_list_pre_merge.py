@@ -180,14 +180,16 @@ def check_against_sanction_list_pre_merge(
                     log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
                     continue
                 possible_matches.add(marked_individual.id)
-                ticket, ticket_details, tickets_program = _generate_ticket(
+                tickets_info = _generate_ticket(
                     marked_individual,
                     registration_data_import,
                     sanction_list_individual,
                 )
-                tickets_to_create.append(ticket)
-                ticket_details_to_create.append(ticket_details)
-                tickets_programs.append(tickets_program)
+                if tickets_info:
+                    ticket, ticket_details, tickets_program = tickets_info
+                    tickets_to_create.append(ticket)
+                    ticket_details_to_create.append(ticket_details)
+                    tickets_programs.append(tickets_program)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {sanction_list_individual.full_name} - reference number: {sanction_list_individual.reference_number}"
