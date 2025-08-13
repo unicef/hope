@@ -424,14 +424,20 @@ class UniversalIndividualUpdateService:
     def get_individual_row(self, individual: Individual) -> list[Any]:
         row = [individual.unicef_id]
         household = individual.household
-        for field_data in self.individual_fields.values():
-            row.append(self.get_excel_value(getattr(individual, field_data[0])))
-        for field_data in self.individual_flex_fields.values():
-            row.append(self.get_excel_value(individual.flex_fields.get(field_data[0])))
-        for field_data in self.household_fields.values():
-            row.append(self.get_excel_value(getattr(household, field_data[0])))
-        for field_data in self.household_flex_fields.values():
-            row.append(self.get_excel_value(household.flex_fields.get(field_data[0])))
+        row += [
+            self.get_excel_value(getattr(individual, field_data[0])) for field_data in self.individual_fields.values()
+        ]
+        row += [
+            self.get_excel_value(individual.flex_fields.get(field_data[0]))
+            for field_data in self.individual_flex_fields.values()
+        ]
+        row += [
+            self.get_excel_value(getattr(household, field_data[0])) for field_data in self.household_fields.values()
+        ]
+        row += [
+            self.get_excel_value(household.flex_fields.get(field_data[0]))
+            for field_data in self.household_flex_fields.values()
+        ]
         all_documents = individual.documents.all()
         for document_no_column, _ in self.document_fields:
             document = [x for x in all_documents if x.type_id == self.document_types[document_no_column].id]
@@ -462,17 +468,10 @@ class UniversalIndividualUpdateService:
     def generate_xlsx_template(self) -> BytesIO:
         columns = ["unicef_id"]
 
-        for column_name in self.individual_fields:
-            columns.append(column_name)
-
-        for column_name in self.individual_flex_fields:
-            columns.append(column_name)
-
-        for column_name in self.household_fields:
-            columns.append(column_name)
-
-        for column_name in self.household_flex_fields:
-            columns.append(column_name)
+        columns += list(self.individual_fields)
+        columns += list(self.individual_flex_fields)
+        columns += list(self.household_fields)
+        columns += list(self.household_flex_fields)
 
         for col_pair in self.document_fields:
             columns.extend(col_pair)
