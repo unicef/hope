@@ -1018,8 +1018,8 @@ class TestAccountModel(TestCase):
 
     def test_validate(self) -> None:
         AccountFactory(
+            number="test",
             data={
-                "number": "test",
                 "expiry_date": "12.12.2024",
                 "name_of_cardholder": "Marek",
             },
