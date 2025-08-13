@@ -4,10 +4,9 @@ from itertools import batched
 from operator import add
 from typing import Optional, Tuple, cast
 
+from constance import config
+
 from hct_mis_api.apps.core.api.mixins import BaseAPI
-
-
-IMAGE_BATCH_SIZE = 5000
 
 
 @dataclasses.dataclass
@@ -93,7 +92,8 @@ class DeduplicationEngineAPI(BaseAPI):
 
     def bulk_upload_images(self, deduplication_set_id: str, images: list[DeduplicationImage]) -> list:
         response_data = [
-            self._bulk_upload_image_batch(deduplication_set_id, batch) for batch in batched(images, IMAGE_BATCH_SIZE)
+            self._bulk_upload_image_batch(deduplication_set_id, batch)
+            for batch in batched(images, config.DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE)
         ]
         return reduce(add, response_data, [])
 

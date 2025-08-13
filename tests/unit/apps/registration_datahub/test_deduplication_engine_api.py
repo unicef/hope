@@ -4,6 +4,7 @@ import uuid
 from itertools import batched, repeat
 from unittest import mock
 from unittest.mock import patch, call
+from constance.test import override_config
 
 from django.test import TestCase
 
@@ -64,7 +65,7 @@ class DeduplicationEngineApiTest(TestCase):
 
         get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/")
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.IMAGE_BATCH_SIZE", new=1)
+    @override_config(DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE=1)
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
