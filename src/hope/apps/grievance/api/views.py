@@ -166,9 +166,108 @@ def create_type_generated_queries() -> tuple[Q, Q]:
     return user_generated, system_generated
 
 
+class GrievanceDashboardMixin:
+    """Common dashboard logic for grievance tickets"""
+
+    def get_dashboard_base_queryset(self, program: Any = None) -> QuerySet:
+        """Get base queryset for dashboard data with optional program filtering"""
+        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
+
+        if program:
+            base_queryset = base_queryset.filter(programs__in=[program])
+
+        return base_queryset
+
+    def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
+        """Generate dashboard data from base queryset"""
+        # Tickets by type data
+        user_generated, system_generated = create_type_generated_queries()
+        tickets_by_type = (
+            base_queryset.annotate(
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
+                days_diff=Extract(F("updated_at") - F("created_at"), "days"),
+            )
+            .values_list("category_name", "days_diff")
+            .aggregate(
+                user_generated_count=Count("category_name", filter=user_generated),
+                system_generated_count=Count("category_name", filter=system_generated),
+                closed_user_generated_count=Count("category_name", filter=user_generated & Q(status=6)),
+                closed_system_generated_count=Count("category_name", filter=system_generated & Q(status=6)),
+                user_generated_avg_resolution=Avg("days_diff", filter=user_generated & Q(status=6)),
+                system_generated_avg_resolution=Avg("days_diff", filter=system_generated & Q(status=6)),
+            )
+        )
+
+        # Handle None values
+        tickets_by_type = {k: (0.00 if v is None else v) for k, v in tickets_by_type.items()}
+        tickets_by_type["user_generated_avg_resolution"] = round(tickets_by_type["user_generated_avg_resolution"], 2)
+        tickets_by_type["system_generated_avg_resolution"] = round(
+            tickets_by_type["system_generated_avg_resolution"], 2
+        )
+
+        # Tickets by category data
+        tickets_by_category_qs = (
+            base_queryset.annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
+            .values("category_name")
+            .annotate(count=Count("category"))
+            .values_list("category_name", "count")
+            .order_by("-count")
+        )
+        tickets_by_category = transform_to_chart_dataset(tickets_by_category_qs)
+
+        # Tickets by status data
+        tickets_by_status_qs = (
+            base_queryset.annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
+            .values("status_name")
+            .annotate(count=Count("status"))
+            .values_list("status_name", "count")
+            .order_by("-count", "status_name")
+        )
+        tickets_by_status = transform_to_chart_dataset(tickets_by_status_qs)
+
+        # Tickets by location and category data
+        tickets_by_location_qs = (
+            base_queryset.select_related("admin2")
+            .values_list("admin2__name", "category")
+            .annotate(
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
+            )
+            .order_by("admin2__name", "-count")
+        )
+
+        results, labels, totals = [], [], []
+        for key, group in itertools.groupby(tickets_by_location_qs, lambda x: x[0]):
+            if key is None:
+                continue
+
+            labels.append(key)
+            ticket_horizontal_counts = [0 for _ in range(9)]
+
+            for item in group:
+                _, _, ticket_name, ticket_count = item
+                idx = TICKET_ORDERING[ticket_name]
+                ticket_horizontal_counts[idx] = ticket_count
+            results.append(ticket_horizontal_counts)
+
+        ticket_vertical_counts = list(zip(*results, strict=True)) if results else []
+
+        for key, value in enumerate(ticket_vertical_counts):
+            totals.append({"label": TICKET_ORDERING_KEYS[key], "data": list(value)})
+
+        tickets_by_location_and_category = {"labels": labels, "datasets": totals}
+
+        return {
+            "tickets_by_type": tickets_by_type,
+            "tickets_by_status": tickets_by_status,
+            "tickets_by_category": tickets_by_category,
+            "tickets_by_location_and_category": tickets_by_location_and_category,
+        }
+
+
 class GrievanceTicketViewSet(
     ProgramVisibilityMixin,
     GrievancePermissionsMixin,
+    GrievanceDashboardMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
@@ -223,10 +322,19 @@ class GrievanceTicketViewSet(
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(responses={200: GrievanceDashboardSerializer})
+    @action(detail=False, methods=["get"], url_path="dashboard")
+    def dashboard(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Get grievance dashboard data filtered by program"""
+        base_queryset = self.get_dashboard_base_queryset(self.program)
+        dashboard_data = self.get_dashboard_data(base_queryset)
+        return Response(dashboard_data, status=status.HTTP_200_OK)
+
 
 class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
+    GrievanceDashboardMixin,
     SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
@@ -1152,106 +1260,7 @@ class GrievanceTicketGlobalViewSet(
     @extend_schema(responses={200: GrievanceDashboardSerializer})
     @action(detail=False, methods=["get"], url_path="dashboard")
     def dashboard(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Get grievance dashboard data"""
-        business_area_slug = self.business_area_slug
-
-        # Filter tickets by business area and ignore removed ones
-        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=business_area_slug)
-
-        # Apply program filter if provided in headers
-        program_header = request.headers.get("Program")
-        if program_header and program_header != "all":
-            from hope.apps.core.utils import decode_id_string_required
-            from hope.apps.program.models import Program
-
-            try:
-                decoded_id = decode_id_string_required(program_header)
-                program = Program.objects.get(id=decoded_id)
-                base_queryset = base_queryset.filter(programs__in=[program])
-            except (ValueError, Program.DoesNotExist):
-                pass  # If invalid program ID, don't apply filter
-
-        # Tickets by type data
-        user_generated, system_generated = create_type_generated_queries()
-        tickets_by_type = (
-            base_queryset.annotate(
-                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
-                days_diff=Extract(F("updated_at") - F("created_at"), "days"),
-            )
-            .values_list("category_name", "days_diff")
-            .aggregate(
-                user_generated_count=Count("category_name", filter=user_generated),
-                system_generated_count=Count("category_name", filter=system_generated),
-                closed_user_generated_count=Count("category_name", filter=user_generated & Q(status=6)),
-                closed_system_generated_count=Count("category_name", filter=system_generated & Q(status=6)),
-                user_generated_avg_resolution=Avg("days_diff", filter=user_generated & Q(status=6)),
-                system_generated_avg_resolution=Avg("days_diff", filter=system_generated & Q(status=6)),
-            )
-        )
-
-        # Handle None values
-        tickets_by_type = {k: (0.00 if v is None else v) for k, v in tickets_by_type.items()}
-        tickets_by_type["user_generated_avg_resolution"] = round(tickets_by_type["user_generated_avg_resolution"], 2)
-        tickets_by_type["system_generated_avg_resolution"] = round(
-            tickets_by_type["system_generated_avg_resolution"], 2
-        )
-
-        # Tickets by category data
-        tickets_by_category_qs = (
-            base_queryset.annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
-            .values("category_name")
-            .annotate(count=Count("category"))
-            .values_list("category_name", "count")
-            .order_by("-count")
-        )
-        tickets_by_category = transform_to_chart_dataset(tickets_by_category_qs)
-
-        # Tickets by status data
-        tickets_by_status_qs = (
-            base_queryset.annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
-            .values("status_name")
-            .annotate(count=Count("status"))
-            .values_list("status_name", "count")
-            .order_by("-count", "status_name")
-        )
-        tickets_by_status = transform_to_chart_dataset(tickets_by_status_qs)
-
-        # Tickets by location and category data
-        tickets_by_location_qs = (
-            base_queryset.select_related("admin2")
-            .values_list("admin2__name", "category")
-            .annotate(
-                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
-            )
-            .order_by("admin2__name", "-count")
-        )
-
-        results, labels, totals = [], [], []
-        for key, group in itertools.groupby(tickets_by_location_qs, lambda x: x[0]):
-            if key is None:
-                continue
-
-            labels.append(key)
-            ticket_horizontal_counts = [0 for _ in range(9)]
-
-            for item in group:
-                _, _, ticket_name, ticket_count = item
-                idx = TICKET_ORDERING[ticket_name]
-                ticket_horizontal_counts[idx] = ticket_count
-            results.append(ticket_horizontal_counts)
-
-        ticket_vertical_counts = list(zip(*results, strict=True)) if results else []
-
-        for key, value in enumerate(ticket_vertical_counts):
-            totals.append({"label": TICKET_ORDERING_KEYS[key], "data": list(value)})
-
-        tickets_by_location_and_category = {"labels": labels, "datasets": totals}
-
-        dashboard_data = {
-            "tickets_by_type": tickets_by_type,
-            "tickets_by_status": tickets_by_status,
-            "tickets_by_category": tickets_by_category,
-            "tickets_by_location_and_category": tickets_by_location_and_category,
-        }
-
+        """Get grievance dashboard data without program filtering (global view)"""
+        base_queryset = self.get_dashboard_base_queryset()  # No program filtering
+        dashboard_data = self.get_dashboard_data(base_queryset)
         return Response(dashboard_data, status=status.HTTP_200_OK)
