@@ -1,7 +1,12 @@
 import base64
+import os
+import tempfile
 from pathlib import Path
+from typing import Any
+from unittest.mock import patch
 
 from django.core.management import call_command
+from django.test.utils import override_settings
 
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
@@ -293,3 +298,48 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         self.assertIsNotNone(document.photo)
         self.assertTrue(document.photo.name.startswith("photo"))
         self.assertTrue(document.photo.name.endswith(".png"))
+
+    def test_file_cleanup_on_failure(self) -> None:
+        individual_data = {
+            "individual_id": "IND_CLEANUP",
+            "full_name": "Jane Doe",
+            "given_name": "Jane",
+            "family_name": "Doe",
+            "birth_date": "1992-02-02",
+            "sex": "FEMALE",
+            "documents": [
+                {
+                    "type": self.document_type.key,
+                    "country": "AF",
+                    "document_number": "DOC987654",
+                    "issuance_date": "2021-01-01",
+                    "expiry_date": "2031-01-01",
+                    "image": self.base64_encoded_data,
+                }
+            ],
+            "photo": self.base64_encoded_data,
+        }
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+
+                def fail_after_files_exist(*args: list[Any]) -> None:
+                    pre_cleanup_files = []
+                    for root, _, files in os.walk(media_root):
+                        for f in files:
+                            pre_cleanup_files.append(os.path.join(root, f))
+                    assert len(pre_cleanup_files) > 0
+                    raise RuntimeError("forced failure for cleanup test")
+
+                with patch(
+                    "hct_mis_api.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                    side_effect=fail_after_files_exist,
+                ):
+                    with self.assertRaises(RuntimeError):
+                        self.client.post(self.url, [individual_data], format="json")
+
+                leftover_files = []
+                for root, _, files in os.walk(media_root):
+                    for f in files:
+                        leftover_files.append(os.path.join(root, f))
+                self.assertEqual(leftover_files, [])

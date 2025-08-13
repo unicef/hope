@@ -1,6 +1,9 @@
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import TYPE_CHECKING
+from uuid import UUID
 
+from django.core.files import File
 from django.db.transaction import atomic
 from django.http import Http404
 from django.utils import timezone
@@ -12,7 +15,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
-from hct_mis_api.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
+from hct_mis_api.api.endpoints.rdi.mixin import PhotoMixin
 from hct_mis_api.api.endpoints.rdi.upload import BirthDateValidator
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -22,6 +25,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
     IndividualRoleInHousehold,
     PendingDocument,
     PendingHousehold,
@@ -34,9 +38,24 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
+
+
+BATCH_SIZE = 100
+
+
+@dataclass
+class IndividualsBulkStaging:
+    valid_individuals: list[PendingIndividual] = field(default_factory=list)
+    individual_external_ids_by_pk: dict[str, str] = field(default_factory=dict)
+    prepared_documents: list[dict] = field(default_factory=list)
+    prepared_accounts: list[dict] = field(default_factory=list)
+    doc_country_codes: set[str] = field(default_factory=set)
+    doc_type_keys: set[str] = field(default_factory=set)
+    saved_file_fields: list = field(default_factory=list)
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -68,7 +87,7 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ["account_type", "number", "financial_institution", "data"]
 
 
-class IndividualSerializer(serializers.ModelSerializer, PhotoMixin):
+class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
@@ -99,23 +118,6 @@ class IndividualSerializer(serializers.ModelSerializer, PhotoMixin):
             "is_removed",
         ]
 
-    def create(self, validated_data: dict) -> PendingIndividual:
-        """Create individual with associated documents and accounts using existing mixins."""
-        photo_data = validated_data.pop("photo", None)
-
-        rdi = self.context.get("rdi")
-
-        validated_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, validated_data.get("flex_fields"))
-
-        return PendingIndividual.objects.create(
-            household=None,
-            program=rdi.program,
-            registration_data_import=rdi,
-            business_area=rdi.business_area,
-            photo=self.get_photo(photo_data),
-            **validated_data,
-        )
-
 
 class CreateLaxBaseView(HOPEAPIBusinessAreaView):
     permission = Grant.API_RDI_CREATE
@@ -133,8 +135,132 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView):
             raise Http404("Registration Data Import not found or not in LOADING status")
 
 
-class CreateLaxIndividuals(CreateLaxBaseView, DocumentMixin, AccountMixin, PhotoMixin):
+class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     """API to import individuals with selected RDI."""
+
+    def _prepare_documents(
+        self,
+        documents_data: list[dict],
+        ind: PendingIndividual,
+    ) -> None:
+        for document_data in documents_data:
+            image_b64 = document_data.pop("image", None)
+            doc_photo = self.get_photo(image_b64)
+            country_code = document_data.get("country")
+            type_key = document_data.get("type")
+            if country_code:
+                self.staging.doc_country_codes.add(country_code)
+            if type_key:
+                self.staging.doc_type_keys.add(type_key)
+            self.staging.prepared_documents.append(
+                {
+                    "individual": ind,
+                    "photo_file": doc_photo,
+                    "country_code": country_code,
+                    "type_key": type_key,
+                    "document_number": document_data.get("document_number"),
+                    "issuance_date": document_data.get("issuance_date"),
+                    "expiry_date": document_data.get("expiry_date"),
+                }
+            )
+
+    def _prepare_accounts(
+        self,
+        accounts_data: list[dict],
+        ind: PendingIndividual,
+    ) -> None:
+        for account_data in accounts_data:
+            self.staging.prepared_accounts.append({"individual": ind, **account_data})
+
+    def _prepare_individual(
+        self,
+        serializer: serializers.Serializer,
+    ) -> UUID:
+        documents_data = serializer.validated_data.pop("documents", [])
+        accounts_data = serializer.validated_data.pop("accounts", [])
+        external_individual_id = serializer.validated_data.pop("individual_id")
+
+        photo_b64 = serializer.validated_data.pop("photo", None)
+        photo_file = self.get_photo(photo_b64)
+
+        validated_data = dict(serializer.validated_data)
+        validated_data["flex_fields"] = populate_pdu_with_null_values(
+            self.selected_rdi.program, validated_data.get("flex_fields")
+        )
+
+        ind = PendingIndividual(
+            household=None,
+            program=self.selected_rdi.program,
+            registration_data_import=self.selected_rdi,
+            business_area=self.selected_rdi.business_area,
+            **validated_data,
+        )
+        if photo_file:
+            ind.photo.save(photo_file.name, File(photo_file), save=False)
+            self.staging.saved_file_fields.append(ind.photo)
+
+        calculate_phone_numbers_validity(ind)
+
+        self.staging.valid_individuals.append(ind)
+        self.staging.individual_external_ids_by_pk[str(ind.id)] = external_individual_id
+
+        self._prepare_documents(documents_data, ind)
+        self._prepare_accounts(accounts_data, ind)
+        return ind.pk
+
+    def _bulk_create_individuals_and_get_unicef_ids(self, batch_size: int) -> dict[str, str]:
+        PendingIndividual.objects.bulk_create(self.staging.valid_individuals, batch_size=batch_size)
+        created_ids = [ind.id for ind in self.staging.valid_individuals]
+        return {
+            str(row["id"]): row["unicef_id"]
+            for row in PendingIndividual.objects.filter(id__in=created_ids).values("id", "unicef_id")
+        }
+
+    def _resolve_document_mappings(self) -> tuple[dict[str, int], dict[str, int]]:
+        country_map: dict[str, int] = {}
+        if self.staging.doc_country_codes:
+            country_map = {
+                c.iso_code2: c.id for c in Country.objects.filter(iso_code2__in=self.staging.doc_country_codes)
+            }
+        doc_type_map: dict[str, int] = {}
+        if self.staging.doc_type_keys:
+            doc_type_map = {dt.key: dt.id for dt in DocumentType.objects.filter(key__in=self.staging.doc_type_keys)}
+        return country_map, doc_type_map
+
+    def _bulk_create_documents(
+        self, country_map: dict[str, int], doc_type_map: dict[str, int], batch_size: int
+    ) -> None:
+        doc_instances: list[PendingDocument] = []
+        for item in self.staging.prepared_documents:
+            ind = item["individual"]
+            photo_file = item["photo_file"]
+            country_id = country_map.get(item["country_code"]) if item["country_code"] else None
+            type_id = doc_type_map.get(item["type_key"]) if item["type_key"] else None
+
+            doc = PendingDocument(
+                individual_id=ind.id,
+                program_id=ind.program_id,
+                document_number=item["document_number"] or "",
+                type_id=type_id,
+                country_id=country_id,
+                issuance_date=item["issuance_date"],
+                expiry_date=item["expiry_date"],
+            )
+            if photo_file:
+                doc.photo.save(photo_file.name, File(photo_file), save=False)
+                self.staging.saved_file_fields.append(doc.photo)
+            doc_instances.append(doc)
+
+        if doc_instances:
+            PendingDocument.objects.bulk_create(doc_instances, batch_size=batch_size)
+
+    def _bulk_create_accounts(self, batch_size: int) -> None:
+        account_instances: list[PendingAccount] = []
+        for acc in self.staging.prepared_accounts:
+            ind = acc.pop("individual")
+            account_instances.append(PendingAccount(individual_id=ind.id, **acc))
+        if account_instances:
+            PendingAccount.objects.bulk_create(account_instances, batch_size=batch_size)
 
     @extend_schema(request=IndividualSerializer(many=True))
     @atomic
@@ -142,48 +268,66 @@ class CreateLaxIndividuals(CreateLaxBaseView, DocumentMixin, AccountMixin, Photo
         individual_id_mapping = {}
         total_individuals = 0
         total_errors = 0
-        total_accepted = 0
         results = []
 
-        serializer_context = {
-            "rdi": self.selected_rdi,
-        }
+        self.staging = IndividualsBulkStaging()
 
-        for individual_raw_data in request.data:
-            total_individuals += 1
-            serializer = IndividualSerializer(data=individual_raw_data, context=serializer_context)
+        try:
+            for individual_raw_data in request.data:
+                total_individuals += 1
+                serializer = IndividualSerializer(data=individual_raw_data)
 
-            if serializer.is_valid():
-                documents_data = serializer.validated_data.pop("documents", [])
-                accounts_data = serializer.validated_data.pop("accounts", [])
-                individual_external_id = serializer.validated_data.pop("individual_id", None)
-                individual = serializer.save()
+                if serializer.is_valid():
+                    pk = self._prepare_individual(serializer)
+                    results.append({"pk": pk})
+                else:
+                    results.append(serializer.errors)
+                    total_errors += 1
 
-                for document_data in documents_data:
-                    document_data["photo"] = self.get_photo(document_data.pop("image", None))
-                    self.save_document(individual, document_data)
+            if not self.staging.valid_individuals:
+                return Response(
+                    {
+                        "id": self.selected_rdi.id,
+                        "processed": total_individuals,
+                        "accepted": 0,
+                        "errors": total_errors,
+                        "individual_id_mapping": {},
+                        "results": results,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
 
-                for account_data in accounts_data:
-                    self.save_account(individual, account_data)
+            id_to_unicef = self._bulk_create_individuals_and_get_unicef_ids(BATCH_SIZE)
 
-                individual_id_mapping[individual_external_id] = individual.unicef_id
-                results.append({"pk": individual.pk})
-                total_accepted += 1
-            else:
-                results.append(serializer.errors)
-                total_errors += 1
+            country_map, doc_type_map = self._resolve_document_mappings()
 
-        return Response(
-            {
+            self._bulk_create_documents(country_map, doc_type_map, BATCH_SIZE)
+
+            self._bulk_create_accounts(BATCH_SIZE)
+
+            for ind in self.staging.valid_individuals:
+                if external := self.staging.individual_external_ids_by_pk.get(str(ind.id)):
+                    individual_id_mapping[external] = id_to_unicef.get(str(ind.id))
+
+            accepted_count = len(self.staging.valid_individuals)
+            response_payload = {
                 "id": self.selected_rdi.id,
                 "processed": total_individuals,
-                "accepted": total_accepted,
+                "accepted": accepted_count,
                 "errors": total_errors,
                 "individual_id_mapping": individual_id_mapping,
                 "results": results,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+            }
+
+        except Exception:
+            for field_file in self.staging.saved_file_fields:
+                try:
+                    field_file.delete(save=False)
+                except Exception:
+                    pass
+            raise
+
+        return Response(response_payload, status=status.HTTP_201_CREATED)
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
@@ -329,7 +473,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
             if coc := payload.get("country_origin_code"):
                 hh.country_origin = country_map.get(coc)
 
-        PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads])
+        PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
 
         roles_to_create: list[IndividualRoleInHousehold] = []
         for payload in valid_payloads:
@@ -359,7 +503,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
             results.append({"pk": payload["instance"].pk})  # noqa
 
         if roles_to_create:
-            IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
+            IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
 
         return Response(
             {
