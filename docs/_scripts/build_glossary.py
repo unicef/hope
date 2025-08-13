@@ -41,8 +41,7 @@ for filename in terms_dir.iterdir():
         )
         TERMS[t.title] = LINE
 
-for term in sorted(TERMS.keys()):
-    TABLE.append(TERMS[term])
+TABLE += [TERMS[term] for term in sorted(TERMS.keys())]
 
 with mkdocs_gen_files.open(index, "w") as f:
     f.writelines("\n".join(TABLE))
