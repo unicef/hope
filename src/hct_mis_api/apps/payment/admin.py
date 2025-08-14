@@ -370,40 +370,11 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 message="Do you confirm to Sync with Payment Gateway missing Records?",
             )
 
-    # @button(
-    #     visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
-    #     permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
-    #         request, payment_plan
-    #     ),
-    # )
-    # def regenerate_export_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-    #     if request.method == "POST":
-    #         from hct_mis_api.apps.payment.services.payment_plan_services import (
-    #             PaymentPlanService,
-    #         )
-    #
-    #         payment_plan = PaymentPlan.objects.get(pk=pk)
-    #         # fsp_xlsx_template_id where to get it or store??..??
-    #         PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.pk, fsp_xlsx_template_id)
-    #
-    #         return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-    #     else:
-    #         return confirm_action(
-    #             modeladmin=self,
-    #             request=request,
-    #             action=self.sync_missing_records_with_payment_gateway,
-    #             message="Do you confirm to Sync with Payment Gateway missing Records?",
-    #         )
-
-    # @button(
-    #     visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
-    #     permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
-    #         request, payment_plan
-    #     ),
-    # )
     @button(
-        visible=True,
-        permission=True,
+        visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
+        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
+            request, payment_plan
+        ),
     )
     def regenerate_export_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         payment_plan = PaymentPlan.objects.get(pk=pk)
@@ -429,7 +400,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             {
                 "form": form,
                 "payment_plan": payment_plan,
-                "title": "Select Template for Export Regeneration in case if needed to export FSP Auth Code",
+                "title": "Select a template if you want the export to include the FSP Auth Code",
             },
         )
 
