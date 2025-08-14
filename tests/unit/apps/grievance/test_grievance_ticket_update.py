@@ -396,7 +396,7 @@ class TestGrievanceTicketUpdate:
         assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New One"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_UPDATE], status.HTTP_200_OK),
             ([Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], status.HTTP_403_FORBIDDEN),
@@ -542,7 +542,7 @@ class TestGrievanceTicketUpdate:
         assert "New status is incorrect" in response.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], status.HTTP_400_BAD_REQUEST),
             ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
@@ -639,7 +639,7 @@ class TestGrievanceTicketUpdate:
         assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_UPDATE], status.HTTP_202_ACCEPTED),
             ([Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_AS_CREATOR], status.HTTP_403_FORBIDDEN),
@@ -1011,7 +1011,7 @@ class TestGrievanceTicketApprove:
         self.bulk_grievance_ticket2.programs.set([self.program])
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], status.HTTP_202_ACCEPTED),
             ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
@@ -1104,7 +1104,7 @@ class TestGrievanceTicketApprove:
             ]
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], status.HTTP_202_ACCEPTED),
             ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
@@ -1512,7 +1512,7 @@ class TestGrievanceTicketApprove:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION], status.HTTP_202_ACCEPTED),
             ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
@@ -1656,7 +1656,7 @@ class TestGrievanceTicketApprove:
         assert "id" in resp_data
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.PROGRAMME_UPDATE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],

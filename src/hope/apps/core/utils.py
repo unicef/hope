@@ -418,7 +418,8 @@ class CustomOrderingFilter(OrderingFilter):
             return OrderedDict(fields)
 
         # convert iterable of values => iterable of pairs (field name, param name)
-        assert is_iterable(fields), "'fields' must be an iterable (e.g., a list, tuple, or mapping)."
+        if not is_iterable(fields):
+            raise ValueError("'fields' must be an iterable (e.g., a list, tuple, or mapping).")
 
         # fields is an iterable of field names
         assert all(

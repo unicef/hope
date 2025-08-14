@@ -116,7 +116,7 @@ class TestPeriodicDataUpdateTemplateViews:
         )
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], True, status.HTTP_200_OK),
@@ -216,7 +216,7 @@ class TestPeriodicDataUpdateTemplateViews:
         } not in response_json
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], True, status.HTTP_200_OK),
@@ -322,7 +322,7 @@ class TestPeriodicDataUpdateTemplateViews:
 
     @flaky(max_runs=3, min_passes=1)
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_TEMPLATE_CREATE], [], True, status.HTTP_201_CREATED),
@@ -476,7 +476,7 @@ class TestPeriodicDataUpdateTemplateViews:
         assert response_json == {"rounds_data": ["Each Field can only be used once in the template."]}
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_TEMPLATE_CREATE], [], True, status.HTTP_200_OK),
@@ -607,7 +607,7 @@ class TestPeriodicDataUpdateTemplateViews:
         assert response_json == ["Template is already exported"]
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_TEMPLATE_DOWNLOAD], [], True, status.HTTP_200_OK),

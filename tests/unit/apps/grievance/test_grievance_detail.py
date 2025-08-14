@@ -298,7 +298,7 @@ class TestGrievanceTicketDetail:
         assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize(
-        "permissions, area_limit, expected_status_1, expected_status_2",
+        ("permissions", "area_limit", "expected_status_1", "expected_status_2"),
         [
             (
                 [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],

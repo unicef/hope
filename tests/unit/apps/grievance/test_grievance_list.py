@@ -493,7 +493,7 @@ class TestGrievanceTicketList:
         assert str(self.grievance_ticket_different_program.id) not in result_ids
 
     @pytest.mark.parametrize(
-        "permissions, area_limit, expected_tickets",
+        ("permissions", "area_limit", "expected_tickets"),
         [
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], False, [0, 1, 2, 6, 7, 8]),
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], False, [0, 1, 6, 7, 8]),

@@ -29,9 +29,9 @@ class TestDCTValidation(TestCase):
 
         with self.assertRaises(ValidationError) as error:
             dct_full.save()
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            "Type of DCT cannot be changed if it has compatible DCTs of different type.",
+        assert (
+            str(error.exception.messages[0])
+            == "Type of DCT cannot be changed if it has compatible DCTs of different type."
         )
 
     def test_add_compatible_type_with_different_type(self) -> None:
@@ -45,6 +45,4 @@ class TestDCTValidation(TestCase):
 
         with self.assertRaises(ValidationError) as error:
             dct_full.compatible_types.add(dct_social)
-        self.assertEqual(
-            str(error.exception.messages[0]), "DCTs of different types cannot be compatible with each other."
-        )
+        assert str(error.exception.messages[0]) == "DCTs of different types cannot be compatible with each other."

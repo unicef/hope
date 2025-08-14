@@ -139,7 +139,7 @@ class TestIndividualList:
         return household, individuals
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_200_OK),
             ([Permissions.RDI_VIEW_DETAILS], status.HTTP_200_OK),
@@ -163,7 +163,7 @@ class TestIndividualList:
         assert response.status_code == expected_status
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_200_OK),
             ([Permissions.RDI_VIEW_DETAILS], status.HTTP_200_OK),
@@ -662,7 +662,7 @@ class TestIndividualDetail:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], status.HTTP_200_OK),
             ([Permissions.RDI_VIEW_DETAILS], status.HTTP_200_OK),
@@ -1124,7 +1124,7 @@ class TestIndividualGlobalViewSet:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_200_OK),
             ([Permissions.RDI_VIEW_DETAILS], status.HTTP_200_OK),
@@ -1539,7 +1539,7 @@ class TestIndividualFilter:
         assert response_data_male[0]["id"] == str(individual2.id)
 
     @pytest.mark.parametrize(
-        "program_status,filter_value,expected_results",
+        ("program_status", "filter_value", "expected_results"),
         [
             (Program.ACTIVE, True, 2),
             (Program.FINISHED, True, 0),
@@ -1610,7 +1610,7 @@ class TestIndividualFilter:
 
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
     @pytest.mark.parametrize(
-        "filters,individual1_data,individual2_data,household1_data,household2_data",
+        ("filters", "individual1_data", "individual2_data", "household1_data", "household2_data"),
         [
             ({"search": "IND-123"}, {"unicef_id": "IND-321"}, {"unicef_id": "IND-123"}, {}, {}),
             ({"search": "HH-123"}, {}, {}, {"unicef_id": "HH-321"}, {"unicef_id": "HH-123"}),

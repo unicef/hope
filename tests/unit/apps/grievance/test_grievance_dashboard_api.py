@@ -77,7 +77,7 @@ class TestGrievanceDashboardAPI:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
@@ -230,7 +230,7 @@ class TestGrievanceProgramDashboardAPI:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],

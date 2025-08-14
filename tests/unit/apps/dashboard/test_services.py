@@ -74,7 +74,7 @@ def _create_test_payment_for_queryset(
     return payment, pp
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(transaction=True)
 def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that get_cache_key returns the expected key."""
@@ -82,7 +82,7 @@ def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     assert cache_class.get_cache_key(slug) == expected_key
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
@@ -95,7 +95,7 @@ def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> Non
     assert data == {"test": f"{cache_name}_data"}
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is not found in the cache."""
@@ -104,7 +104,7 @@ def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> No
     assert data is None
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that store_data correctly stores data in the cache."""
@@ -116,7 +116,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "cache_name, cache_class, slug, expected_optional_fields",
+    ("cache_name", "cache_class", "slug", "expected_optional_fields"),
     [
         (
             "DashboardDataCache",
@@ -198,7 +198,7 @@ TEST_CASES = [
 
 
 @pytest.mark.parametrize(
-    "test_name, payment_updates, expected_total, cache_service",
+    ("test_name", "payment_updates", "expected_total", "cache_service"),
     TEST_CASES,
     ids=[case[0] for case in TEST_CASES],
 )
@@ -616,7 +616,7 @@ def test_partial_refresh_empty_cache_fallback(
 
 
 @pytest.mark.parametrize(
-    "cache_class_under_test, is_global_scenario",
+    ("cache_class_under_test", "is_global_scenario"),
     [
         (DashboardGlobalDataCache, True),
         (DashboardDataCache, False),

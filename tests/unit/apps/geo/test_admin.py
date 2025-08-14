@@ -39,7 +39,7 @@ class TestGeoApp(WebTest):
 
     def test_modeladmin_str(self) -> None:
         ma = ModelAdmin(Area, self.site)
-        self.assertEqual(str(ma), "geo.ModelAdmin")
+        assert str(ma) == "geo.ModelAdmin"
 
     def test_login(self) -> None:
         url = reverse("admin:geo_area_changelist")
@@ -50,8 +50,8 @@ class TestGeoApp(WebTest):
 
     @flaky(max_runs=3, min_passes=1)
     def test_upload(self) -> None:
-        self.assertEqual(AreaType.objects.count(), 2, "Two area types created")
-        self.assertEqual(Area.objects.count(), 5, "Five area created")
+        assert AreaType.objects.count() == 2, "Two area types created"
+        assert Area.objects.count() == 5, "Five area created"
         resp = self.app.get(reverse("admin:geo_area_changelist"), user=self.superuser).click("Import Areas")
         assert "Upload a csv" in resp
         form = resp.form
@@ -62,5 +62,5 @@ class TestGeoApp(WebTest):
         )
         resp = form.submit("Import")
         assert resp.status_int == 302, "The form is not good"
-        self.assertEqual(AreaType.objects.count(), 4, "Two new area types created")
-        self.assertEqual(Area.objects.count(), 8, "Two new area created")
+        assert AreaType.objects.count() == 4, "Two new area types created"
+        assert Area.objects.count() == 8, "Two new area created"

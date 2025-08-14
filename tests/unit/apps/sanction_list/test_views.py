@@ -47,7 +47,7 @@ class TestSanctionListIndividualViewSet:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -72,7 +72,7 @@ class TestSanctionListIndividualViewSet:
             assert individual["reference_number"] == "123"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -90,7 +90,7 @@ class TestSanctionListIndividualViewSet:
             assert response.json()["count"] == 1
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -113,7 +113,7 @@ class TestSanctionListIndividualViewSet:
             assert resp_data["reference_number"] == "123"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], status.HTTP_202_ACCEPTED),
             ([], status.HTTP_403_FORBIDDEN),

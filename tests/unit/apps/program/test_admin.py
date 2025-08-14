@@ -48,7 +48,7 @@ class ProgramAdminTest(WebTest):
 
     def test_area_limits_get_request(self) -> None:
         response = self.app.get(self.url, user=self.user)
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertIn("program_area_formset", response.context)
         self.assertIn("business_area", response.context)
         self.assertIn("areas", response.context)

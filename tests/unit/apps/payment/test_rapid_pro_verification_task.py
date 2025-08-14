@@ -142,10 +142,7 @@ class TestRapidProVerificationTask(TestCase):
         with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
             mapped_dict = api.get_mapped_flow_runs([str(uuid.uuid4())])
-            self.assertEqual(
-                mapped_dict,
-                [],
-            )
+            assert mapped_dict == []
 
     @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_mapping(self, mock_parent_init: Any) -> None:
@@ -158,16 +155,13 @@ class TestRapidProVerificationTask(TestCase):
         with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
             mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
-            self.assertEqual(
-                mapped_dict,
-                [
-                    {
-                        "phone_number": str(payment_record_verification_obj.payment.head_of_household.phone_no),
-                        "received": True,
-                        "received_amount": Decimal(200),
-                    }
-                ],
-            )
+            assert mapped_dict == [
+                {
+                    "phone_number": str(payment_record_verification_obj.payment.head_of_household.phone_no),
+                    "received": True,
+                    "received_amount": Decimal(200),
+                }
+            ]
 
     @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_not_received(self, mock_parent_init: Any) -> None:
@@ -175,10 +169,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
             "?"
         ).first()
-        self.assertEqual(
-            payment_record_verification.status,
-            PaymentVerification.STATUS_PENDING,
-        )
+        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
 
         fake_data_to_return_from_rapid_pro_api = [
             {
@@ -195,10 +186,7 @@ class TestRapidProVerificationTask(TestCase):
             task.execute()
             mock.assert_called()
             payment_record_verification.refresh_from_db()
-            self.assertEqual(
-                payment_record_verification.status,
-                PaymentVerification.STATUS_NOT_RECEIVED,
-            )
+            assert payment_record_verification.status == PaymentVerification.STATUS_NOT_RECEIVED
 
     @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received_with_issues(self, mock_parent_init: Any) -> None:
@@ -206,10 +194,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
             "?"
         ).first()
-        self.assertEqual(
-            payment_record_verification.status,
-            PaymentVerification.STATUS_PENDING,
-        )
+        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
         assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
             payment_record_verification.payment.head_of_household.phone_no
         )
@@ -226,13 +211,10 @@ class TestRapidProVerificationTask(TestCase):
             task.execute()
             mock.assert_called()
             payment_record_verification.refresh_from_db()
-            self.assertEqual(
-                payment_record_verification.status,
-                PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
-            )
-            self.assertEqual(
-                payment_record_verification.received_amount,
-                payment_record_verification.payment.delivered_quantity - 1,
+            assert payment_record_verification.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+            assert (
+                payment_record_verification.received_amount
+                == payment_record_verification.payment.delivered_quantity - 1
             )
 
     @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
@@ -241,10 +223,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
             "?"
         ).first()
-        self.assertEqual(
-            payment_record_verification.status,
-            PaymentVerification.STATUS_PENDING,
-        )
+        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
@@ -261,14 +240,8 @@ class TestRapidProVerificationTask(TestCase):
             task.execute()
             mock.assert_called()
             payment_record_verification.refresh_from_db()
-            self.assertEqual(
-                payment_record_verification.status,
-                PaymentVerification.STATUS_RECEIVED,
-            )
-            self.assertEqual(
-                payment_record_verification.received_amount,
-                payment_record_verification.payment.delivered_quantity,
-            )
+            assert payment_record_verification.status == PaymentVerification.STATUS_RECEIVED
+            assert payment_record_verification.received_amount == payment_record_verification.payment.delivered_quantity
 
     @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_wrong_phone_number(self, mock_parent_init: Any) -> None:
@@ -276,10 +249,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
             "?"
         ).first()
-        self.assertEqual(
-            payment_record_verification.status,
-            PaymentVerification.STATUS_PENDING,
-        )
+        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": "123-not-really-a-phone-number",
@@ -295,10 +265,7 @@ class TestRapidProVerificationTask(TestCase):
 
             payment_record_verification.refresh_from_db()
             # verification is still pending, so it was not considered within the verification plan
-            self.assertEqual(
-                payment_record_verification.status,
-                PaymentVerification.STATUS_PENDING,
-            )
+            assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
 
     def test_recalculating_validity_on_number_change(self) -> None:
         ind = self.individuals[0]

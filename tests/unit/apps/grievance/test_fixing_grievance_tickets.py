@@ -61,13 +61,13 @@ class TestFixingGrievanceTickets(APITestCase):
         )
         self.individual = individuals[0]
 
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        assert GrievanceTicket.objects.count() == 0
         ticket = GrievanceTicketFactory(
             business_area=self.business_area,
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        assert GrievanceTicket.objects.count() == 1
         TicketIndividualDataUpdateDetailsFactory(
             ticket=ticket,
             individual=self.individual,
@@ -77,18 +77,12 @@ class TestFixingGrievanceTickets(APITestCase):
                 }
             },
         )
-        self.assertEqual(
-            ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
-            previous_value,
-        )
+        assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == previous_value
 
         fix_disability_fields()
 
         ticket.refresh_from_db()
-        self.assertEqual(
-            ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
-            new_value,
-        )
+        assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == new_value
 
     def test_skipping_when_ind_data_update_ticket_details_does_not_exist(self) -> None:
         self.user = UserFactory.create()
@@ -125,13 +119,13 @@ class TestFixingGrievanceTickets(APITestCase):
         )
         self.individual = individuals[0]
 
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        assert GrievanceTicket.objects.count() == 0
         GrievanceTicketFactory(
             business_area=self.business_area,
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        assert GrievanceTicket.objects.count() == 1
 
         fix_disability_fields()
         # didn't throw, so it skipped ticket with not existing TicketIndividualDataUpdateDetailsFactory

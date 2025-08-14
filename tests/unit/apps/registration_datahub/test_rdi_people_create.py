@@ -82,8 +82,8 @@ class TestRdiXlsxPeople(TestCase):
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
 
-        self.assertEqual(4, households_count)
-        self.assertEqual(4, individuals_count)
+        assert households_count == 4
+        assert individuals_count == 4
 
         individual_data = {
             "full_name": "Derek Index4",
@@ -97,12 +97,11 @@ class TestRdiXlsxPeople(TestCase):
         }
         matching_individuals = PendingIndividual.objects.filter(**individual_data)
 
-        self.assertEqual(matching_individuals.count(), 1)
+        assert matching_individuals.count() == 1
         individual = matching_individuals.first()
-        self.assertEqual(
-            individual.flex_fields,
-            {"pdu_string_attribute": {"1": {"value": "Test PDU Value", "collection_date": "2020-01-08"}}},
-        )
+        assert individual.flex_fields == {
+            "pdu_string_attribute": {"1": {"value": "Test PDU Value", "collection_date": "2020-01-08"}}
+        }
         household_data = {
             "residence_status": "REFUGEE",
             "country": GeoCountry.objects.get(iso_code2=Country("IM").code).id,
@@ -111,44 +110,35 @@ class TestRdiXlsxPeople(TestCase):
         }
         household = matching_individuals.first().pending_household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
-        self.assertEqual(household_obj_data, household_data)
+        assert household_obj_data == household_data
 
         roles = household.individuals_and_roles(manager="pending_objects").all()
-        self.assertEqual(roles.count(), 2)
+        assert roles.count() == 2
         primary_role = roles.filter(role=ROLE_PRIMARY).first()
-        self.assertEqual(primary_role.role, "PRIMARY")
-        self.assertEqual(primary_role.individual.full_name, "Derek Index4")
+        assert primary_role.role == "PRIMARY"
+        assert primary_role.individual.full_name == "Derek Index4"
         alternate_role = roles.filter(role=ROLE_ALTERNATE).first()
-        self.assertEqual(alternate_role.role, "ALTERNATE")
-        self.assertEqual(alternate_role.individual.full_name, "Collector ForJanIndex_3")
+        assert alternate_role.role == "ALTERNATE"
+        assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
 
         worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
-        self.assertEqual(worker_individuals.count(), 2)
+        assert worker_individuals.count() == 2
 
-        self.assertEqual(PendingAccount.objects.count(), 3)
+        assert PendingAccount.objects.count() == 3
         dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndex_3")
         dmd2 = PendingAccount.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
         dmd3 = PendingAccount.objects.get(individual__full_name="Jan    Index3")
-        self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
-        self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
-        self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
-        self.assertEqual(
-            dmd1.data,
-            {"card_number": "164260858", "card_expiry_date": "1995-06-03T00:00:00"},
-        )
-        self.assertEqual(
-            dmd2.data,
-            {
-                "card_number": "1975549730",
-                "card_expiry_date": "2022-02-17T00:00:00",
-                "name_of_cardholder": "Name1",
-            },
-        )
-        self.assertEqual(
-            dmd3.data,
-            {
-                "card_number": "870567340",
-                "card_expiry_date": "2016-06-27T00:00:00",
-                "name_of_cardholder": "Name2",
-            },
-        )
+        assert dmd1.rdi_merge_status == MergeStatusModel.PENDING
+        assert dmd2.rdi_merge_status == MergeStatusModel.PENDING
+        assert dmd3.rdi_merge_status == MergeStatusModel.PENDING
+        assert dmd1.data == {"card_number": "164260858", "card_expiry_date": "1995-06-03T00:00:00"}
+        assert dmd2.data == {
+            "card_number": "1975549730",
+            "card_expiry_date": "2022-02-17T00:00:00",
+            "name_of_cardholder": "Name1",
+        }
+        assert dmd3.data == {
+            "card_number": "870567340",
+            "card_expiry_date": "2016-06-27T00:00:00",
+            "name_of_cardholder": "Name2",
+        }

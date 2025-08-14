@@ -22,10 +22,10 @@ class APITestCase(TestCase):
         # Log out
         self.client.logout()
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_302_FOUND, msg="You need to be logged in")
+        assert resp.status_code == status.HTTP_302_FOUND, "You need to be logged in"
         self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK, "You need to be logged in and superuser")
+        assert resp.status_code == status.HTTP_200_OK, "You need to be logged in and superuser"
         self.assertIn(str(instance1.version), resp.content.decode("utf-8"))
         self.assertIn(str(instance2.date.strftime("%A %d %b %Y")), resp.content.decode("utf-8"))
 
@@ -39,5 +39,5 @@ class APITestCase(TestCase):
         )
         self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK, "You need to be logged in and superuser")
+        assert resp.status_code == status.HTTP_200_OK, "You need to be logged in and superuser"
         self.assertIn(str(instance.version), resp.content.decode("utf-8"))

@@ -13,7 +13,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -562,12 +562,10 @@ class HouseholdAdmin(
             self,
             request,
             self.gdpr_remove,
-            mark_safe(
-                """<h1>Household erase</h1>
-                <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
-                <p>This operation cannot be undo.</p>
-                """
-            ),
+            """<h1>Household erase</h1>
+            <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
+            <p>This operation cannot be undo.</p>
+            """,
             "Successfully executed",
         )
 
@@ -585,11 +583,9 @@ class HouseholdAdmin(
             self,
             request,
             self.logical_delete,
-            mark_safe(
-                """<h1>Household logical delete</h1>
+            """<h1>Household logical delete</h1>
                 <p>After this operation household will be marked as logical deleted and will be hidden in the application.</p>
-                """
-            ),
+                """,
             "Successfully executed",
         )
 

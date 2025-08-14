@@ -36,13 +36,10 @@ class TestFlexibles(TestCase):
         groups_from_db = FlexibleAttributeGroup.objects.all()
         choices_from_db = FlexibleAttributeChoice.objects.all()
 
-        self.assertEqual(expected_attributes_count, len(attrs_from_db))
-        self.assertEqual(expected_groups_count, len(groups_from_db))
-        self.assertEqual(expected_choices_count, len(choices_from_db))
-        self.assertEqual(
-            expected_repeated_groups,
-            len(groups_from_db.filter(repeatable=True)),
-        )
+        assert expected_attributes_count == len(attrs_from_db)
+        assert expected_groups_count == len(groups_from_db)
+        assert expected_choices_count == len(choices_from_db)
+        assert expected_repeated_groups == len(groups_from_db.filter(repeatable=True))
 
         """
         How group tree should look like:
@@ -107,8 +104,8 @@ class TestFlexibles(TestCase):
         for name, label in zip(selected_attribs, attrib_english_labels, strict=True):
             attrib = FlexibleAttribute.objects.get(name=name)
             expected_associated_with = 0 if attrib.name[-4:] == "_h_f" else 1
-            self.assertEqual(attrib.label["English(EN)"], label)
-            self.assertEqual(attrib.associated_with, expected_associated_with)
+            assert attrib.label["English(EN)"] == label
+            assert attrib.associated_with == expected_associated_with
             self.assertTrue(yes_choice.flex_attributes.filter(id=attrib.id).exists())
             self.assertTrue(no_choice.flex_attributes.filter(id=attrib.id).exists())
 
@@ -126,13 +123,13 @@ class TestFlexibles(TestCase):
         groups_from_db = FlexibleAttributeGroup.objects.filter(name__in=deleted_groups)
 
         deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(name__in=deleted_groups)
-        self.assertEqual(len(groups_from_db), 0)
+        assert len(groups_from_db) == 0
 
         # check if they are soft deleted
-        self.assertEqual(len(deleted_groups_from_db), 5)
+        assert len(deleted_groups_from_db) == 5
 
         consent_group = FlexibleAttributeGroup.objects.get(name="consent")
-        self.assertEqual(consent_group.label["English(EN)"], "Consent Edited")
+        assert consent_group.label["English(EN)"] == "Consent Edited"
 
         introduction = FlexibleAttribute.objects.filter(type="note", name="introduction_h_f").exists()
         self.assertFalse(introduction)
@@ -144,8 +141,8 @@ class TestFlexibles(TestCase):
         groups_from_db = FlexibleAttributeGroup.objects.all()
         flex_attrs_from_db = FlexibleAttribute.objects.all()
 
-        self.assertEqual(len(groups_from_db), 1)
-        self.assertEqual(len(flex_attrs_from_db), 1)
+        assert len(groups_from_db) == 1
+        assert len(flex_attrs_from_db) == 1
 
         assert flex_attrs_from_db.filter(
             type="STRING",
@@ -172,15 +169,15 @@ class TestFlexibles(TestCase):
         self.assertRaises(ValidationError, self.load_xls, "flex_update_invalid_types.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
-        self.assertEqual(len(group), 1)
-        self.assertEqual(len(attribs), 1)
+        assert len(group) == 1
+        assert len(attribs) == 1
 
     def test_flexibles_missing_name(self) -> None:
         self.assertRaisesMessage(ValidationError, "Name is required", self.load_xls, "flex_field_missing_name.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
-        self.assertEqual(len(group), 0)
-        self.assertEqual(len(attribs), 0)
+        assert len(group) == 0
+        assert len(attribs) == 0
 
     def test_flexibles_missing_english_label(self) -> None:
         self.assertRaisesMessage(
@@ -188,8 +185,8 @@ class TestFlexibles(TestCase):
         )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
-        self.assertEqual(len(group), 0)
-        self.assertEqual(len(attribs), 0)
+        assert len(group) == 0
+        assert len(attribs) == 0
 
     def test_load_invalid_file(self) -> None:
         self.assertRaises(XLRDError, self.load_xls, "erd arrows.jpg")
@@ -210,4 +207,4 @@ class TestFlexibles(TestCase):
 
         self.load_xls("flex_init_valid_types.xls")
 
-        self.assertEqual(field.group, group)
+        assert field.group == group

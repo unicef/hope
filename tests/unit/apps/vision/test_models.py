@@ -40,4 +40,4 @@ class TestFundsCommitmentDBTrigger(TestCase):
         self.assertEqual(fcg.funds_commitment_items.count(), 2)
 
         fcg = FundsCommitmentGroup.objects.get(funds_commitment_number="345")
-        self.assertEqual(fcg.funds_commitment_items.count(), 1)
+        assert fcg.funds_commitment_items.count() == 1

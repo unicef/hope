@@ -18,12 +18,12 @@ from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
 
 
-@pytest.fixture()
+@pytest.fixture
 def program(poland: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland)
@@ -36,21 +36,21 @@ def program(poland: Country) -> Program:
     return program
 
 
-@pytest.fixture()
+@pytest.fixture
 def importing_registration_data_import(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory.create(
         program=program, business_area=program.business_area, status=RegistrationDataImport.IMPORTING
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def registration_data_import_merged(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory.create(
         program=program, business_area=program.business_area, status=RegistrationDataImport.MERGED
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def merged_household(
     program: Program, registration_data_import_merged: RegistrationDataImport
 ) -> tuple[Household, PendingIndividual]:
@@ -74,7 +74,7 @@ def merged_household(
     return (household, PendingIndividual.objects.get(pk=inds[0].pk))
 
 
-@pytest.fixture()
+@pytest.fixture
 def pending_household(
     program: Program, importing_registration_data_import: RegistrationDataImport
 ) -> tuple[Household, PendingIndividual]:

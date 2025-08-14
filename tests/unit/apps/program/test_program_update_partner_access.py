@@ -123,7 +123,7 @@ class TestProgramUpdatePartnerAccess:
         # TODO: also add tests for cases when partner is not allowed in BA - also in test create program
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PROGRAMME_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),

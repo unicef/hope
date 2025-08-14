@@ -13,7 +13,7 @@ from django.forms import Form, ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import view
@@ -199,7 +199,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     def stable(self, obj: Any) -> str | None:
         try:
             url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
-            return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
+            return f'<a href="{url}">{obj.latest.version}</a>'
         except (RuleCommit.DoesNotExist, AttributeError):
             return None
 

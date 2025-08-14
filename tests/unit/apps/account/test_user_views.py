@@ -331,7 +331,7 @@ class TestUserProfile:
         assert profile_data["cross_area_filter_available"] is False
 
     @pytest.mark.parametrize(
-        "permissions, filter_available",
+        ("permissions", "filter_available"),
         [
             ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], True),
             ([], False),
@@ -357,7 +357,7 @@ class TestUserProfile:
         assert profile_data["cross_area_filter_available"] == filter_available
 
     @pytest.mark.parametrize(
-        "permissions, area_limits, filter_available",
+        ("permissions", "area_limits", "filter_available"),
         [
             ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], True, False),
             ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], False, True),
@@ -436,7 +436,7 @@ class TestUserList:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.USER_MANAGEMENT_VIEW_LIST], status.HTTP_200_OK),
             (ALL_GRIEVANCES_CREATE_MODIFY, status.HTTP_200_OK),
@@ -489,7 +489,7 @@ class TestUserList:
             assert user_result["username"] == user.username
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.USER_MANAGEMENT_VIEW_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),

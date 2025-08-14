@@ -121,7 +121,7 @@ class TestLogEntryView:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACTIVITY_LOG_VIEW],
@@ -162,7 +162,7 @@ class TestLogEntryView:
             assert response_results[3]["program_slug"] == self.program_1.slug
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACTIVITY_LOG_VIEW],
@@ -186,7 +186,7 @@ class TestLogEntryView:
 
     # per Program
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACTIVITY_LOG_VIEW],
@@ -221,7 +221,7 @@ class TestLogEntryView:
                 assert log_result["is_user_generated"] == expected_is_user_generated
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACTIVITY_LOG_VIEW],

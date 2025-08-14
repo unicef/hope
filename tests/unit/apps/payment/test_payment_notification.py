@@ -386,10 +386,7 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
 
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            20,
-        )
+        assert payment_notification.user_recipients.count() == 20
 
         for recipient in [
             self.user_with_partner_unicef_hq,
@@ -448,10 +445,7 @@ class TestPaymentNotification(APITestCase):
         payment_notification = PaymentNotification(
             self.payment_plan, PaymentPlan.Action.APPROVE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            11,
-        )
+        assert payment_notification.user_recipients.count() == 11
         for recipient in [
             self.user_with_authorize_permission,
             self.user_with_partner_unicef_hq,
@@ -505,10 +499,7 @@ class TestPaymentNotification(APITestCase):
         payment_notification = PaymentNotification(
             self.payment_plan, PaymentPlan.Action.AUTHORIZE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            11,
-        )
+        assert payment_notification.user_recipients.count() == 11
         for recipient in [
             self.user_with_review_permission,
             self.user_with_partner_unicef_hq,
@@ -562,10 +553,7 @@ class TestPaymentNotification(APITestCase):
         payment_notification = PaymentNotification(
             self.payment_plan, PaymentPlan.Action.REVIEW.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            11,
-        )
+        assert payment_notification.user_recipients.count() == 11
         for recipient in [
             self.user_with_download_xlsx_permission,
             self.user_with_partner_unicef_hq,
@@ -625,10 +613,7 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(
-            mock_send.call_count,
-            1,
-        )
+        assert mock_send.call_count == 1
 
     @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -640,7 +625,7 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        self.assertEqual(payment_notification.email.subject, "[test] Payment pending for Approval")
+        assert payment_notification.email.subject == "[test] Payment pending for Approval"
 
     @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -652,7 +637,7 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        self.assertEqual(payment_notification.email.subject, "Payment pending for Approval")
+        assert payment_notification.email.subject == "Payment pending for Approval"
 
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -667,7 +652,7 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(len(payment_notification.email.recipients), 2)
+        assert len(payment_notification.email.recipients) == 2
         self.assertIn(
             "catchallemail@email.com",
             payment_notification.email.recipients,
@@ -676,10 +661,7 @@ class TestPaymentNotification(APITestCase):
             "catchallemail2@email.com",
             payment_notification.email.recipients,
         )
-        self.assertEqual(
-            mock_post.call_count,
-            1,
-        )
+        assert mock_post.call_count == 1
 
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -693,7 +675,7 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(len(payment_notification.email.recipients), 20)
+        assert len(payment_notification.email.recipients) == 20
         for recipient in [
             self.user_with_partner_unicef_in_ba,
             self.user_with_approval_permission_partner_unicef_in_ba,
@@ -720,10 +702,7 @@ class TestPaymentNotification(APITestCase):
                 payment_notification.email.recipients,
             )
 
-        self.assertEqual(
-            mock_post.call_count,
-            1,
-        )
+        assert mock_post.call_count == 1
 
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -740,10 +719,7 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(
-            len(payment_notification.email.recipients),
-            19,
-        )
+        assert len(payment_notification.email.recipients) == 19
         self.assertNotIn(
             self.user_with_partner_unicef_hq.email,
             payment_notification.email.recipients,
@@ -775,7 +751,4 @@ class TestPaymentNotification(APITestCase):
                 payment_notification.email.recipients,
             )
 
-        self.assertEqual(
-            mock_post.call_count,
-            1,
-        )
+        assert mock_post.call_count == 1

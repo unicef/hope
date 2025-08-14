@@ -484,7 +484,7 @@ class TestGrievanceTicketFilters:
             grievance_ticket.refresh_from_db()
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("Filter", 1, 1),
             ("Not", 0, 0),
@@ -505,7 +505,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("pl", 3, 3),
             ("en", 2, 4),
@@ -526,7 +526,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("system", 4, 5),
             ("user", 2, 4),
@@ -547,7 +547,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("active", 4, 7),
             ("", 6, 9),
@@ -567,7 +567,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value1, filter_value2, expected_count_for_program, expected_count_for_global",
+        ("filter_value1", "filter_value2", "expected_count_for_program", "expected_count_for_global"),
         [
             ("drivers_license", "111222333", 2, 5),
             ("birth_certificate", "55555555", 2, 5),
@@ -597,7 +597,7 @@ class TestGrievanceTicketFilters:
             assert len(response.data["results"]) == expected_count
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             (0, 4, 6),
             (1, 1, 1),
@@ -619,7 +619,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             (0, 4, 6),
             (1, 0, 1),
@@ -641,7 +641,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("HH-0001", 4, 4),
             ("HH-990808", 0, 0),
@@ -661,7 +661,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe1", 1, 3),
             ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe2", 0, 0),
@@ -681,7 +681,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6", 1, 3),
             ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e8", 0, 0),
@@ -701,7 +701,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6,f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0", 1, 1),
             ("f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0", 0, 0),
@@ -721,7 +721,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [(8, 2, 2), (3, 1, 2)],
     )
     def test_filter_by_category(
@@ -738,7 +738,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [(24, 2, 2), (1, 1, 1)],
     )
     def test_filter_by_issue_type(
@@ -755,7 +755,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             (3, 2, 4),
             (6, 2, 2),
@@ -776,7 +776,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             (50, 2, 2),
             (80, 1, 1),
@@ -796,7 +796,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             (200, 2, 2),
             (180, 1, 1),
@@ -816,7 +816,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("d19f0e24-a411-4f0e-9404-3d54b5a5c578", 2, 4),
             ("d19f0e24-a411-4f0e-9404-3d54b5a5c579", 0, 0),
@@ -836,7 +836,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("45e3ffde-6a75-4799-a036-e2b00b93e94a", 6, 8),
             ("a6f4652c-7ade-4b51-b1f2-0d28cfc08346", 0, 1),
@@ -856,7 +856,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("689ba2ea-8ffb-4787-98e4-ae12797ee4da", 1, 1),
             ("689ba2ea-8ffb-4787-98e4-ae12797ee4d1", 0, 0),
@@ -876,7 +876,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "filter_expression, filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_expression", "filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("created_at_after", "2020-07-15", 3, 5),
             ("created_at_before", "2020-07-15", 3, 4),
@@ -897,7 +897,7 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        "is_filtered, expected_count",
+        ("is_filtered", "expected_count"),
         [
             (True, 6),
             (False, 9),
@@ -914,7 +914,7 @@ class TestGrievanceTicketFilters:
         assert len(response.data["results"]) == expected_count
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count",
+        ("filter_value", "expected_count"),
         [
             (True, 6),
             (False, 3),
@@ -930,7 +930,13 @@ class TestGrievanceTicketFilters:
         assert len(response.data["results"]) == expected_count
 
     @pytest.mark.parametrize(
-        "has_cross_area_filter_permission, has_full_area_access, filter_value, is_filtered_for_program, is_filtered_for_global",
+        (
+            "has_cross_area_filter_permission",
+            "has_full_area_access",
+            "filter_value",
+            "is_filtered_for_program",
+            "is_filtered_for_global",
+        ),
         [
             (False, False, False, False, False),
             (False, False, True, False, False),
@@ -999,7 +1005,7 @@ class TestGrievanceTicketFilters:
             assert len(response.data["results"]) == expected_count
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count_for_program, expected_count_for_global",
+        ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
             ("GRV-0001", 1, 1),
             ("HH-0001", 4, 4),

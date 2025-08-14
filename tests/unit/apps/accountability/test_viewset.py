@@ -154,7 +154,7 @@ class TestFeedbackViewSet:
 
     # per BA
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -206,7 +206,7 @@ class TestFeedbackViewSet:
                 assert feedback_result["feedback_messages"] == []
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -234,7 +234,7 @@ class TestFeedbackViewSet:
             assert resp_data["count"] == 3
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -272,7 +272,7 @@ class TestFeedbackViewSet:
             assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -341,7 +341,7 @@ class TestFeedbackViewSet:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_400_BAD_REQUEST),
         ],
@@ -372,7 +372,7 @@ class TestFeedbackViewSet:
         assert "It is not possible to create Feedback for a Finished Program." in response.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -411,7 +411,7 @@ class TestFeedbackViewSet:
             assert resp_data["consent"] is True
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -503,7 +503,7 @@ class TestFeedbackViewSet:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -552,7 +552,7 @@ class TestFeedbackViewSet:
 
     # per Program
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -591,7 +591,7 @@ class TestFeedbackViewSet:
             assert feedback_result["feedback_messages"] == []
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -613,7 +613,7 @@ class TestFeedbackViewSet:
             assert resp_data["count"] == 1
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -651,7 +651,7 @@ class TestFeedbackViewSet:
             assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_1.id)}/change/"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -693,7 +693,7 @@ class TestFeedbackViewSet:
             assert resp_data["individual_id"] == str(self.individual_1.id)
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -740,7 +740,7 @@ class TestFeedbackViewSet:
             assert resp_data["consent"] is True
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_400_BAD_REQUEST),
         ],
@@ -775,7 +775,7 @@ class TestFeedbackViewSet:
         assert "POSITIVE_FEEDBACK" in response_data[1]["value"]
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -842,7 +842,7 @@ class TestFeedbackViewSet:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
@@ -883,7 +883,7 @@ class TestFeedbackViewSet:
             assert "created_at" in feedback_message
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count",
+        ("filter_value", "expected_count"),
         [
             ("POSITIVE_FEEDBACK", 1),
             ("NEGATIVE_FEEDBACK", 2),
@@ -1070,7 +1070,7 @@ class TestMessageViewSet:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
@@ -1115,7 +1115,7 @@ class TestMessageViewSet:
         assert str(self.msg_2.id) in results_ids
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
@@ -1137,7 +1137,7 @@ class TestMessageViewSet:
             assert resp_data["count"] == 2
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
@@ -1166,7 +1166,7 @@ class TestMessageViewSet:
             assert resp_data["admin_url"] is not None
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1605,7 +1605,7 @@ class TestSurveyViewSet:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
@@ -1639,7 +1639,7 @@ class TestSurveyViewSet:
                 assert survey_result["number_of_recipients"] == survey.number_of_recipients
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
@@ -1661,7 +1661,7 @@ class TestSurveyViewSet:
             assert resp_data["count"] == 2
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [
@@ -1689,7 +1689,7 @@ class TestSurveyViewSet:
             assert resp_data["category"] == "Survey with SMS"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1739,7 +1739,7 @@ class TestSurveyViewSet:
             assert Survey.objects.get(title="New SRV with TP").payment_plan_id == self.payment_plan.pk
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
