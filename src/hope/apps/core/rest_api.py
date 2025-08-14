@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Not used in the app
 @api_view()
 def all_fields_attributes(request: "Request") -> "Response":
-    """Returns the list of FieldAttribute."""
+    """Return the list of FieldAttribute."""
     business_area_slug = request.data.get("business_area_slug")
 
     records = cache.get(business_area_slug)

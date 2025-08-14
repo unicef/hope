@@ -6,9 +6,7 @@ from hope.apps.account.permissions import check_permissions
 
 
 class BaseRestPermission(BasePermission):
-    """
-    Base class for custom permissions.
-    """
+    """Base class for custom permissions."""
 
     def has_permission(self, request: Any, view: Any) -> bool:
         user = request.user

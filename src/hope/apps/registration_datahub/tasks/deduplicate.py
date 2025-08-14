@@ -88,7 +88,8 @@ class DeduplicationResult:
 
 
 class DeduplicateTask:
-    """
+    """Task to deduplicate inside a business area.
+
     WARNING: when deduplication for all business areas will be enabled we need to find a way to block
     other task from interfering with elasticsearch indexes
     (disabling parallel)
@@ -436,7 +437,8 @@ class DeduplicateTask:
         }
 
     def _prepare_queries_for_names_from_fields(self, individual_fields: dict) -> list[dict]:
-        """Prepare ES queries for:
+        """Prepare ES queries.
+
         * givenName
         * familyName
         or
