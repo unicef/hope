@@ -459,7 +459,9 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments = list(split.split_payment_items.eligible().order_by("unicef_id"))
+                payments = list(split.split_payment_items.eligible.filter(
+                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                ).order_by("unicef_id"))
                 _add_records(payments, split)
 
     def sync_fsps(self) -> None:
