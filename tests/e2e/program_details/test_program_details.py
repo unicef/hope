@@ -4,6 +4,8 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
@@ -563,13 +565,13 @@ class TestProgrammeDetails:
             assert len(pageProgrammeDetails.getProgramCycleRow()) == 3
         assert pageProgrammeDetails.getButtonEditProgramCycle()[0]
         assert pageProgrammeDetails.getButtonEditProgramCycle()[1]
-        with pytest.raises(Exception):
+        with pytest.raises(IndexError):
             assert pageProgrammeDetails.getButtonEditProgramCycle()[2]
 
         assert pageProgrammeDetails.getDeleteProgrammeCycle()[0]
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             assert pageProgrammeDetails.getDeleteProgrammeCycle()[1]
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             assert pageProgrammeDetails.getDeleteProgrammeCycle()[2]
 
     @pytest.mark.skip(reason="Unskip after fix 211823")
@@ -776,7 +778,7 @@ class TestProgrammeDetails:
         programme_creation_url = pageProgrammeDetails.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
 
     def test_program_details_program_cycle_total_quantities(

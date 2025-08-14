@@ -248,8 +248,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Exporting template for entitlement."""
-
+        """Export template for entitlement."""
         from hope.apps.payment.celery_tasks import (
             create_payment_plan_payment_list_xlsx,
         )
@@ -282,8 +281,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Importing entitlement file."""
-
+        """Import entitlement file."""
         from hope.apps.payment.celery_tasks import (
             import_payment_plan_payment_list_from_xlsx,
         )
@@ -314,8 +312,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Exporting payment plan list."""
-
+        """Export payment plan list."""
         from hope.apps.payment.celery_tasks import (
             create_payment_plan_payment_list_xlsx_per_fsp,
         )
@@ -346,8 +343,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Importing payment plan list (from xlsx)"""
-
+        """Import payment plan list (from xlsx)."""
         from hope.apps.payment.celery_tasks import (
             import_payment_plan_payment_list_per_fsp_from_xlsx,
         )
@@ -376,9 +372,7 @@ class PaymentPlanCeleryTasksMixin:
 
 
 class LinkedObjectsManagerMixin:
-    """
-    Override 'LinkedObjectsMixin' from 'smart_admin', to call overridden method 'get_related'
-    """
+    """Override 'LinkedObjectsMixin' from 'smart_admin', to call overridden method 'get_related'."""
 
     linked_objects_template = None
     linked_objects_hide_empty = True

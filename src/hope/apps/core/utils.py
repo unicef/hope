@@ -96,8 +96,7 @@ def unique_slugify(
     queryset: Optional["QuerySet"] = None,
     slug_separator: str = "-",
 ) -> None:
-    """
-    Calculates and stores a unique slug of ``value`` for an instance.
+    """Calculate and stores a unique slug of ``value`` for an instance.
 
     ``slug_field_name`` should be a string matching the name of the field to
     store the slug in (and the field to check against for uniqueness).
@@ -407,9 +406,7 @@ class CustomOrderingFilter(OrderingFilter):
         return qs.order_by(*new_ordering)
 
     def normalize_fields(self, fields: list) -> dict:
-        """
-        Normalize the fields into an ordered map of {field name: param name}
-        """
+        """Normalize the fields into an ordered map of {field name: param name}."""
         from django.db.models.functions import Lower
         from django.utils.itercompat import is_iterable
 
@@ -504,8 +501,7 @@ def check_concurrency_version_in_mutation(version: int | None, target: Any) -> N
 
 
 def update_labels_mapping(csv_file: str) -> None:
-    """
-    WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
+    """WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py.
 
     IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
 
@@ -712,7 +708,7 @@ def get_model_choices_fields(model: type, excluded: list | None = None) -> list[
 
 
 class SheetImageLoader:
-    """Loads all images in a sheet"""
+    """Load all images in a sheet."""
 
     _images = {}
 
@@ -732,11 +728,11 @@ class SheetImageLoader:
             self._images[f"{col}{row}"] = image._data
 
     def image_in(self, cell: "Cell") -> bool:
-        """Checks if there's an image in specified cell"""
+        """Check if there's an image in specified cell."""
         return cell in self._images
 
     def get(self, cell: "Cell") -> Any:
-        """Retrieves image data from a cell"""
+        """Retrieve image data from a cell."""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
         image = io.BytesIO(self._images[cell]())
@@ -818,7 +814,7 @@ def clear_cache_for_dashboard_totals() -> None:
 
 
 def clear_cache_for_key(key: str) -> None:
-    """remove cache if key starts with"""
+    """Remove cache if key starts with."""
     if hasattr(cache, "keys"):
         all_cache_keys = cache.keys(f"{key}*")
         for k in all_cache_keys:
