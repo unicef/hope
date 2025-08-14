@@ -1,5 +1,4 @@
 import {
-  XlsxImportDataQueryResult,
   XlsxRowErrorNode,
 } from '@generated/graphql';
 import { ImportCounters } from '../ImportCounters';

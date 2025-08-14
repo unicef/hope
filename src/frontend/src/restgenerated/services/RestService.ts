@@ -40,6 +40,7 @@ import type { ImportData } from '../models/ImportData';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { IndividualPhotoDetail } from '../models/IndividualPhotoDetail';
+import type { KoboAssetObject } from '../models/KoboAssetObject';
 import type { KoboImportData } from '../models/KoboImportData';
 import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
@@ -62,7 +63,6 @@ import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrieva
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
-import type { PaginatedKoboAssetObjectList } from '../models/PaginatedKoboAssetObjectList';
 import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
@@ -13086,31 +13086,21 @@ export class RestService {
     }
     /**
      * All Kobo projects/assets.
-     * @returns PaginatedKoboAssetObjectList
+     * @returns KoboAssetObject
      * @throws ApiError
      */
     public static restBusinessAreasAllKoboProjectsCreate({
         slug,
-        limit,
-        offset,
         ordering,
         requestBody,
     }: {
         slug: string,
         /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
         requestBody?: GetKoboAssetList,
-    }): CancelablePromise<PaginatedKoboAssetObjectList> {
+    }): CancelablePromise<Array<KoboAssetObject>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{slug}/all-kobo-projects/',
@@ -13118,8 +13108,6 @@ export class RestService {
                 'slug': slug,
             },
             query: {
-                'limit': limit,
-                'offset': offset,
                 'ordering': ordering,
             },
             body: requestBody,

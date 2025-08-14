@@ -456,6 +456,7 @@ class RegistrationDataImportViewSet(
                 registration_data_import_id=str(registration_data_import.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
+                program_id=str(self.program.id),
             )
         )
 

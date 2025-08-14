@@ -69,7 +69,7 @@ export function CreateImportFromXlsxForm({
     },
   });
 
-  const onSubmit = async (values): Promise<void> => {
+  const onSubmit = (values): Promise<void> => {
     setSubmitDisabled(true);
     if (!xlsxImportData?.id) {
       setSubmitDisabled(false);

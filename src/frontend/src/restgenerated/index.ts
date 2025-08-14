@@ -170,7 +170,6 @@ export type { PaginatedGrievanceTicketListList as PaginatedGrievanceTicketListLi
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedHouseholdMemberList as PaginatedHouseholdMemberListCamelCase } from './models/PaginatedHouseholdMemberList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
-export type { PaginatedKoboAssetObjectList as PaginatedKoboAssetObjectListCamelCase } from './models/PaginatedKoboAssetObjectList';
 export type { PaginatedLogEntryList as PaginatedLogEntryListCamelCase } from './models/PaginatedLogEntryList';
 export type { PaginatedMessageListList as PaginatedMessageListListCamelCase } from './models/PaginatedMessageListList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
