@@ -17,7 +17,12 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from hct_mis_api.apps.payment.admin import ArrayFieldWidget, CommaSeparatedArrayField
+from hct_mis_api.apps.payment.admin import (
+    ArrayFieldWidget,
+    CommaSeparatedArrayField,
+    can_regenerate_export_file_per_fsp,
+    can_sync_with_payment_gateway,
+)
 from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 
@@ -205,3 +210,9 @@ class SyncWithPaymentGatewayTest(TestCase):
         mock_export.assert_called_once_with(self.admin_user.pk, str(template.id))
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]), response["Location"])
+
+    def test_can_sync_with_payment_gateway(self) -> None:
+        self.assertFalse(can_sync_with_payment_gateway(self.payment_plan))
+
+    def test_can_regenerate_export_file_per_fsp(self) -> None:
+        self.assertFalse(can_regenerate_export_file_per_fsp(self.payment_plan))
