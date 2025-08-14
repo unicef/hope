@@ -149,10 +149,8 @@ def calculate_children_fields_for_not_collected_individual_data() -> int:
 @log_start_and_end
 @sentry_tags
 def revalidate_phone_number_task(individual_ids: list[UUID]) -> None:
-    individuals_to_update = []
     individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
-    for individual in individuals:
-        individuals_to_update.append(calculate_phone_numbers_validity(individual))
+    individuals_to_update = [calculate_phone_numbers_validity(individual) for individual in individuals]
     Individual.objects.bulk_update(
         individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
     )

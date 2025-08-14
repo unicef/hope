@@ -22,7 +22,7 @@ select = [
     "ICN", # flake8-import-conventions
     "ISC", # implicit string concatenation
 #    "N", # Pep* naming
-#    "PERF", # perflint
+    "PERF", # perflint
     "PIE", # flake8-pie
 #    "PL", # PyLint
 #    "PT", # flake8-pytest-style

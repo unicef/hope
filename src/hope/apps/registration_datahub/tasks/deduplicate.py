@@ -199,10 +199,9 @@ class DeduplicateTask:
         if not program.collision_detection_enabled or not program.collision_detector:
             return []
         households = Household.all_objects.filter(registration_data_import=registration_data_import).iterator(1000)
-        households_to_exclude = []
-        for household in households:
-            if program.collision_detector.detect_collision(household):
-                households_to_exclude.append(household.id)
+        households_to_exclude = [
+            household.id for household in households if program.collision_detector.detect_collision(household)
+        ]
 
         return [
             str(x)
@@ -918,11 +917,10 @@ class HardDocumentDeduplication:
             selected_individual=None,
         )
         PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
-        possible_duplicates_throughs = []
-        for possible_duplicate_individual in set(possible_duplicates_individuals):
-            possible_duplicates_throughs.append(
-                PossibleDuplicateThrough(
-                    individual=possible_duplicate_individual, ticketneedsadjudicationdetails=ticket_details
-                )
+        possible_duplicates_throughs = [
+            PossibleDuplicateThrough(
+                individual=possible_duplicate_individual, ticketneedsadjudicationdetails=ticket_details
             )
+            for possible_duplicate_individual in set(possible_duplicates_individuals)
+        ]
         return TicketData(ticket, ticket_details, possible_duplicates_throughs)
