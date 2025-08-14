@@ -460,7 +460,7 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
 
 
 def create_imported_document_types() -> None:
-    for document_key_string, _ in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
+    for document_key_string in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
         DocumentType.objects.create(key=document_key_string)
 
 
