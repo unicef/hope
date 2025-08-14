@@ -159,6 +159,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                 "name": "United Bank for Africa",
                 "uba_code": "000004",
                 "holder_name": "xxxx",
+                "financial_institution": "",
             },
         )
         self.assertEqual(account.account_type.key, "bank")
