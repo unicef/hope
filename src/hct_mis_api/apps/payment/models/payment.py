@@ -331,6 +331,14 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Reconciliation Import File",
     )
+    ftp_invoice_file = models.ForeignKey(
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Invoice File",
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
