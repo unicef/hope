@@ -92,20 +92,17 @@ export function CreateImportFromXlsxForm({
     validationSchema,
     onSubmit,
   });
-  // eslint-disable-next-line @typescript-eslint/require-await
   const saveXlsxInputData = async (): Promise<void> => {
     if (!formik.values.file) {
       return;
     }
     setSubmitDisabled(true);
-    // stopPollingImportData();
     await saveAndStartPolling({
       businessAreaSlug: businessArea,
       programSlug: programId,
       file: formik.values.file,
     });
   };
-  // useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveXlsxInputData();
   }, [formik.values.file]);
