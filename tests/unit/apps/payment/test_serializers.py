@@ -3,23 +3,11 @@ from unittest.mock import Mock
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.api.serializers import (
-    ApprovalProcessSerializer,
-    PaymentListSerializer,
-    PaymentPlanDetailSerializer,
-    PaymentPlanListSerializer,
-    TPHouseholdListSerializer,
-    VolumeByDeliveryMechanismSerializer,
-)
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismFactory,
@@ -27,13 +15,26 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
+
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import to_choice_object
+from hope.apps.payment.api.serializers import (
+    ApprovalProcessSerializer,
+    PaymentListSerializer,
+    PaymentPlanDetailSerializer,
+    PaymentPlanListSerializer,
+    PendingPaymentSerializer,
+    VolumeByDeliveryMechanismSerializer,
+)
+from hope.apps.payment.models import (
     Approval,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.models.payment import (
+from hope.apps.payment.models.payment import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -54,12 +55,19 @@ class TPHouseholdListSerializerTest(TestCase):
         cls.payment = PaymentFactory(parent=cls.pp, household=cls.hh1, vulnerability_score=123.012)
 
     def test_serializer_all_data(self) -> None:
-        serializer = TPHouseholdListSerializer(instance=self.payment)
+        serializer = PendingPaymentSerializer(instance=self.payment)
         data = serializer.data
 
         self.assertEqual(data["id"], str(self.payment.id))
         self.assertEqual(data["household_unicef_id"], self.hh1.unicef_id)
-        self.assertEqual(data["hoh_full_name"], self.hoh.full_name)
+        self.assertEqual(
+            data["head_of_household"],
+            {
+                "id": str(self.payment.head_of_household.id),
+                "full_name": f"{self.payment.head_of_household.full_name}",
+                "unicef_id": self.payment.head_of_household.unicef_id,
+            },
+        )
         self.assertEqual(data["household_size"], 2)
         self.assertEqual(data["household_admin2"], "New admin22")
         self.assertEqual(data["vulnerability_score"], "123.012")
@@ -67,10 +75,10 @@ class TPHouseholdListSerializerTest(TestCase):
     def test_hoh_full_name_if_no_hoh(self) -> None:
         self.payment.head_of_household = None
         self.payment.save()
-        serializer = TPHouseholdListSerializer(instance=self.payment)
+        serializer = PendingPaymentSerializer(instance=self.payment)
         data = serializer.data
 
-        self.assertEqual(data["hoh_full_name"], "")
+        self.assertEqual(data["head_of_household"], None)
 
 
 class PaymentListSerializerTest(TestCase):

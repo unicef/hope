@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { dateToIsoString } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -11,6 +10,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeopleListTableProps {
   filter;
@@ -30,7 +30,8 @@ export const PeopleListTable = ({
     () => ({
       businessAreaSlug: businessArea,
       programSlug: programId,
-      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      ageMax: filter.ageMax,
+      ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -39,10 +40,8 @@ export const PeopleListTable = ({
       admin2: [filter.admin2],
       flags: filter.flags,
       status: filter.status,
-      lastRegistrationDate: JSON.stringify({
-        min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
-        max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
-      }),
+      lastRegistrationDateBefore: filter.lastRegistrationDateMin,
+      lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
     }),
     [
@@ -67,6 +66,22 @@ export const PeopleListTable = ({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+  });
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
@@ -98,6 +113,7 @@ export const PeopleListTable = ({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
+        itemsCount={countData?.count}
         renderRow={(row: IndividualList) => (
           <PeopleListTableRow
             key={row.id}

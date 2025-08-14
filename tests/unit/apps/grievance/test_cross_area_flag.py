@@ -1,9 +1,9 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 
 
 class TestCrossAreaTickets(TestCase):

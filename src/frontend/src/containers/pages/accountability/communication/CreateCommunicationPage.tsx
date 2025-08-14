@@ -36,7 +36,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
-import { getPercentage } from '@utils/utils';
+import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import {
   ReactElement,
@@ -380,7 +380,7 @@ const CreateCommunicationPage = (): ReactElement => {
                 `/${baseUrl}/accountability/communication/${response.id}`,
               );
             } catch (e) {
-              showMessage(e.message || t('An error occurred'));
+              showApiErrorMessages(e, showMessage);
             }
           });
         } else {

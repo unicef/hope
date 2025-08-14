@@ -21,20 +21,20 @@ import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { paymentPlanId, paymentId } = useParams();
+  const { paymentPlanId, id } = useParams();
   const permissions = usePermissions();
   const {
     data: payment,
     isLoading: loading,
     error,
   } = useQuery<PaymentDetail>({
-    queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
+    queryKey: ['payment', businessArea, id, programId, paymentPlanId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve(
         {
           businessAreaSlug: businessArea,
           paymentVerificationPk: paymentPlanId,
-          id: paymentId,
+          id,
           programSlug: programId,
         },
       ),
@@ -84,7 +84,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
           status={payment.verification?.status}
           enabled={payment.verification.isManuallyEditable}
           receivedAmount={payment.verification.receivedAmount}
-          cashOrPaymentPlanId={paymentId}
+          paymentId={payment.id}
+          paymentPlanId={paymentPlanId}
           verificationPlanId={paymentPlanId}
         />
       ) : null}

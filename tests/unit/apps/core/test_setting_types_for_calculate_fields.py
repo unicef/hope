@@ -6,14 +6,14 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.field_attributes.fields_types import (
+from hope.apps.core.field_attributes.fields_types import (
     TYPE_DATE,
     TYPE_DECIMAL,
     TYPE_INTEGER,
     TYPE_STRING,
 )
-from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hct_mis_api.apps.core.models import FlexibleAttribute
+from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
+from hope.apps.core.models import FlexibleAttribute
 
 
 class MockSuperUser:

@@ -4,21 +4,21 @@ from typing import Any, Dict, List
 from django.core.management import call_command
 
 from dateutil.relativedelta import relativedelta
-from flaky import flaky
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
-from hct_mis_api.apps.targeting.models import (
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from flaky import flaky
+
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.models import Household, Individual
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -59,9 +59,7 @@ class TestTargetingCriteriaQuery(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
         )
-        payment_plan = cls.get_targeting_criteria_for_rule(*args, payment_plan=payment_plan, **kwargs)
-
-        return payment_plan
+        return cls.get_targeting_criteria_for_rule(*args, payment_plan=payment_plan, **kwargs)
 
     def test_size(self) -> None:
         assert (
@@ -364,10 +362,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             payment_plan=payment_plan,
-            **{
-                "household_ids": f"{self.hh_1.unicef_id}",
-                "individual_ids": "",
-            },
+            household_ids=f"{self.hh_1.unicef_id}",
+            individual_ids="",
         )
 
         assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 1
@@ -378,10 +374,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             payment_plan=payment_plan2,
-            **{
-                "household_ids": f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
-                "individual_ids": "",
-            },
+            household_ids=f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
+            individual_ids="",
         )
         assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
@@ -394,10 +388,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             payment_plan=payment_plan,
-            **{
-                "household_ids": "",
-                "individual_ids": f"{self.hh_1.individuals.first().unicef_id}",
-            },
+            household_ids="",
+            individual_ids=f"{self.hh_1.individuals.first().unicef_id}",
         )
         assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 1
         payment_plan2 = PaymentPlanFactory(
@@ -407,10 +399,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             payment_plan=payment_plan2,
-            **{
-                "household_ids": "",
-                "individual_ids": f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
-            },
+            household_ids="",
+            individual_ids=f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
         )
 
         assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
@@ -424,10 +414,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             payment_plan=payment_plan,
-            **{
-                "household_ids": f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
-                "individual_ids": f"{self.hh_3.individuals.first().unicef_id}",
-            },
+            household_ids=f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
+            individual_ids=f"{self.hh_3.individuals.first().unicef_id}",
         )
 
         assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 3

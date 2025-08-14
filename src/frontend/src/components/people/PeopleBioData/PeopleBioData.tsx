@@ -17,7 +17,6 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
-import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 import { Overview } from '@components/payments/Overview';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
@@ -52,12 +51,16 @@ export const PeopleBioData = ({
     choicesData.severityOfDisabilityChoices,
   );
 
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
+  );
+
   const mappedIndividualDocuments = individual?.documents?.map((doc) => (
     <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={doc.type.label}>
-            {doc.photo ? (
+          <LabelizedField label={doc.type}>
+            {doc.image ? (
               <DocumentPopulationPhotoModal
                 documentNumber={doc.documentNumber}
                 documentId={doc.id}
@@ -81,7 +84,7 @@ export const PeopleBioData = ({
             {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.country}</LabelizedField>
+        <LabelizedField label="issued">{item.country.name}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -257,7 +260,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {ObservedDisabilityEnum[individual?.observedDisability]}
+            {observedDisabilityChoicesDict[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

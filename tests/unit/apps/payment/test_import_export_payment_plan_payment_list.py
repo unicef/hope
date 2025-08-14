@@ -11,27 +11,11 @@ from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
 
-from rest_framework.exceptions import ValidationError
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FileTemp,
-    FlexibleAttribute,
-)
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
-from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    Document,
-    Household,
-)
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import DocumentFactory, create_household
+from extras.test_utils.factories.payment import (
+    AccountFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -41,7 +25,27 @@ from hct_mis_api.apps.payment.fixtures import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework.exceptions import ValidationError
+
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FileTemp,
+    FlexibleAttribute,
+)
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
+    Document,
+    Household,
+    IndividualRoleInHousehold,
+)
+from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -50,22 +54,21 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import to_decimal
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     XlsxPaymentPlanExportPerFspService,
 )
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
     XlsxPaymentPlanExportService,
 )
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
+from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 def valid_file() -> File:
@@ -174,7 +177,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service.validate()
         self.assertIn(error_msg, service.errors)
 
-    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
+    @patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         not_excluded_payments = self.payment_plan.eligible_payments.all()
@@ -193,7 +196,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service.validate()
         self.assertEqual(service.errors, [])
 
-        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
+        with patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
             mock.return_value = {}
             service.import_payment_list()
         payment_1.refresh_from_db()
@@ -274,7 +277,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                     file_list_fsp,
                 )
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
@@ -393,7 +396,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
             len(template_column_list),
-            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 2,
+            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 3,
             template_column_list,
         )  # - ind_id - fsp_auth_code
         self.assertIn("household_id", template_column_list)
@@ -424,7 +427,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
-        self.assertEqual(len(template_column_list), 31)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
+        self.assertEqual(
+            len(template_column_list), 30
+        )  # DEFAULT_COLUMNS -hh_id and -hh_size -account_data +ind_id +3 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
         self.assertIn("individual_id", template_column_list)
@@ -504,3 +509,58 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         empty_payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
         for value in empty_payment_row:
             self.assertEqual(value, "")
+
+    def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
+        required_fields_for_account = ["name", "number", "uba_code", "holder_name"]
+        # remove all old Roles
+        IndividualRoleInHousehold.all_objects.all().delete()
+        # add Accounts for collectors
+        for payment in self.payment_plan.eligible_payments:
+            payment.delivery_type = self.dm_transfer
+            payment.save()
+            payment.refresh_from_db()
+            payment.collector.household = payment.household
+            payment.collector.save()
+            IndividualRoleInHousehold.objects.get_or_create(
+                role=ROLE_PRIMARY,
+                household=payment.collector.household,
+                individual=payment.collector,
+                rdi_merge_status="MERGED",
+            )
+
+            AccountFactory(
+                number=payment.id,
+                account_type=self.dm_transfer.account_type,
+                individual=payment.collector,
+                data={
+                    "name": "Union Bank",
+                    "number": str(payment.id),
+                    "uba_code": "123456",
+                    "holder_name": f"Admin {payment.collector.given_name}",
+                },
+            )
+        # remove old and create new snapshot for PP
+        PaymentHouseholdSnapshot.objects.all().delete()
+        create_payment_plan_snapshot_data(self.payment_plan)
+
+        # check export
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=[], flex_fields=[])
+
+        headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
+        assert headers[-4:] == required_fields_for_account
+
+        for payment in self.payment_plan.eligible_payments:
+            # check payment row
+            payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+            assert payment_row[-4] == "Union Bank"
+            assert payment_row[-3] == str(payment.id)
+            assert payment_row[-2] == "123456"
+            assert payment_row[-1] == f"Admin {payment.collector.given_name}"
+
+        # test without snapshot
+        PaymentHouseholdSnapshot.objects.all().delete()
+        payment_row_without_snapshot = export_service.get_payment_row(
+            self.payment_plan.eligible_payments.first(), fsp_xlsx_template
+        )
+        assert payment_row_without_snapshot[-4] == ""

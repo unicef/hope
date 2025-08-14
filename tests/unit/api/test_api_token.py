@@ -8,12 +8,12 @@ from django.http import HttpRequest
 from django.test import TestCase, override_settings
 
 from constance.test import override_config
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from unit.api.factories import APITokenFactory
 
-from hct_mis_api.api.admin import TOKEN_INFO_EMAIL, APITokenAdmin
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from tests.unit.api.factories import APITokenFactory
+from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
+from hope.api.models import Grant
 
 
 class TestApiToken(TestCase):
@@ -35,7 +35,7 @@ class TestApiToken(TestCase):
         )
         cls.token.valid_for.set([cls.afg])
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @patch.object(APITokenAdmin, "message_user", return_value=None)
     @patch.object(APITokenAdmin, "__init__", return_value=None)
     @override_settings(EMAIL_SUBJECT_PREFIX="test")

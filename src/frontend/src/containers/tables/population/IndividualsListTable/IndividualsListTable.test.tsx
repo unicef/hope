@@ -7,7 +7,9 @@ import { IndividualsListTable } from './IndividualsListTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { SexEnum } from '@restgenerated/models/SexEnum';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -16,7 +18,7 @@ describe('IndividualsListTable', () => {
   let queryClient: QueryClient;
 
   // Mock data
-  const mockIndividualsData = {
+  const mockIndividualsData :PaginatedIndividualListList = {
     next: null,
     previous: null,
     results: [
@@ -41,6 +43,7 @@ describe('IndividualsListTable', () => {
         biometricDeduplicationGoldenRecordResults: [],
         household: {
           id: 'household-1',
+          programSlug: "asd3",
           geopoint: 'POINT(85.324 27.7172)',
           unicefId: 'HH-001',
           admin1: { id: 'admin1-1', name: 'Province 1' },
@@ -53,27 +56,24 @@ describe('IndividualsListTable', () => {
           totalCashReceivedUsd: '1000.00',
           deliveredQuantities: [],
           importId: 'import-1',
+          residenceStatus: ResidenceStatusEnum.REFUGEE,
         },
         program: {
           id: 'test-program',
           name: 'Test Program',
           slug: 'test-program',
-          status: Status791Enum.ACTIVE,
+          status: ProgramStatusEnum.ACTIVE,
+          screenBeneficiary: true,
         },
         lastRegistrationDate: '2023-01-15T10:30:00Z',
       },
     ],
-    count: 1,
   };
 
   const mockChoicesData = {
     documentTypeChoices: [
       { value: 'NATIONAL_ID', label: 'National ID' },
       { value: 'PASSPORT', label: 'Passport' },
-    ],
-    residenceStatusChoices: [
-      { value: 'RESIDENT', label: 'Resident' },
-      { value: 'REFUGEE', label: 'Refugee' },
     ],
     sexChoices: [],
     flagChoices: [],
@@ -91,6 +91,8 @@ describe('IndividualsListTable', () => {
     deduplicationGoldenRecordStatusChoices: [
       { value: 'SomeValue', label: 'SomeLabel' },
     ],
+    accountTypeChoices: [],
+    accountFinancialInstitutionChoices: [],
   };
 
   const defaultFilter = {

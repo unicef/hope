@@ -32,7 +32,7 @@ import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { showApiErrorMessages } from '@utils/utils';
 
 const GreyText = styled.p`
@@ -200,7 +200,7 @@ function Entitlement({
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING ||
+    BackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -256,7 +256,7 @@ function Entitlement({
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                      PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"

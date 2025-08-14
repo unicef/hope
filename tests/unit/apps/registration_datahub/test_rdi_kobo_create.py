@@ -14,26 +14,26 @@ from django.test import TestCase
 
 import pytest
 from django_countries.fields import Country
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import IndividualFactory
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import IndividualFactory
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import PendingAccount
+from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -49,7 +49,7 @@ class TestRdiKoboCreateTask(TestCase):
         super().setUpTestData()
         call_command("init-geo-fixtures")
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+        from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
@@ -103,7 +103,7 @@ class TestRdiKoboCreateTask(TestCase):
         generate_delivery_mechanisms()
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self) -> None:
@@ -175,7 +175,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(dmd.individual.full_name, "Tesa Testowski")
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self) -> None:
@@ -189,7 +189,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         documents = PendingDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
-            sorted(list(documents)),
+            sorted(documents),
             [
                 "Tesa Testowski 222",
                 "Tesa XLast",
@@ -221,7 +221,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self) -> None:
@@ -322,7 +322,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(result, False)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self) -> None:
@@ -552,7 +552,7 @@ class TestRdiKoboCreateTask(TestCase):
 
     def test_handle_household_dict(self) -> None:
         households_to_create = []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = {}, {}, {}
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",
@@ -599,3 +599,62 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
         self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
         self.assertEqual(hh.kobo_submission_uuid, "5b6f30ee-010b-4bd5-a510-e78f062af155")
+
+    def test_handle_household_drc_hotfix_dict(self) -> None:
+        program = ProgramFactory(id="f5a67047-714f-459a-8ead-911d21f7925c", status="ACTIVE")
+        self.registration_data_import.program = program
+        self.registration_data_import.save()
+        country = geo_models.Country.objects.first()
+        admin4_type = geo_models.AreaType.objects.create(name="Bakool", area_level=4, country=country)
+        admin4 = geo_models.Area.objects.create(p_code="CD8309ZS01AS01", name="CD8309ZS01AS01", area_type=admin4_type)
+        admin4_mapped = geo_models.Area.objects.create(
+            p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type
+        )
+
+        households_to_create = []
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = {}, {}, {}
+        household = {
+            "_id": 1111,
+            "uuid": "qweqweqweqwe",
+            "start": "2024-03",
+            "end": "2024-03",
+            "org_name_enumerator_h_c": "org_name_enumerator_string",
+            "name_enumerator_h_c": "name_enumerator_string",
+            "enumertor_phone_num_h_f": "321123123321",
+            "consent_h_c": "1",
+            "country_h_c": "NGA",
+            "admin1_h_c": "SO25",
+            "admin2_h_c": "SO2502",
+            "admin4_h_c": admin4.p_code,
+            "village_h_c": "VillageName",
+            "nearest_school_h_f": "next",
+            "hh_geopoint_h_c": "46.123 6.312 0 0",
+            "size_h_c": "5",
+            "children_under_18_h_f": "2",
+            "children_6_to_11_h_f": "1",
+            "hohh_is_caregiver_h_f": "0",
+            "alternate_collector": "1",
+            "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
+            "_uuid": "123123-411d-85f1-123123",
+            "_submission_time": "2022-02-22T12:22:22",
+        }
+        submission_meta_data = {
+            "kobo_submission_uuid": "123123-411d-85f1-123123",
+            "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
+            "kobo_submission_time": "2022-02-22T12:22:22",
+        }
+
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
+        task.handle_household(
+            collectors_to_create,
+            head_of_households_mapping,
+            household,
+            households_to_create,
+            individuals_ids_hash_dict,
+            submission_meta_data,
+            1,
+        )
+        hh = households_to_create[0]
+
+        self.assertEqual(len(households_to_create), 1)
+        self.assertEqual(hh.admin4, admin4_mapped)

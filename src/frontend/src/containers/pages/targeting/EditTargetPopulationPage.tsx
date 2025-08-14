@@ -5,7 +5,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { usePermissions } from '@hooks/usePermissions';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -36,7 +35,6 @@ const EditTargetPopulationPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (!paymentPlan || permissions === null) return null;
-
 
   return (
     <EditTargetPopulation

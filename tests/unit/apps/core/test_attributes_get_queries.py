@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.core.attributes_qet_queries import (
+from hope.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
     age_to_birth_date_range_query,
     country_origin_query,
@@ -39,9 +39,9 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_unhcr_id_number_query,
     registration_data_import_query,
 )
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.countries import Countries
-from hct_mis_api.apps.household.models import UNHCR, WFP
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.countries import Countries
+from hope.apps.household.models import UNHCR, WFP
 
 
 class TestAttributesGetQueries(APITestCase):
@@ -159,12 +159,12 @@ class TestAttributesGetQueries(APITestCase):
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
 
     def test_get_has_bank_account_number_query_true(self) -> None:
-        expected_query = Q(**{"accounts__account_type__key": "bank"})
+        expected_query = Q(accounts__account_type__key="bank")
         result = get_has_bank_account_number_query(None, [True])
         self.assertEqual(result, expected_query)
 
     def test_get_has_bank_account_number_query_false(self) -> None:
-        expected_query = ~Q(**{"accounts__account_type__key": "bank"})
+        expected_query = ~Q(accounts__account_type__key="bank")
         result = get_has_bank_account_number_query(None, [False])
         self.assertEqual(result, expected_query)
 

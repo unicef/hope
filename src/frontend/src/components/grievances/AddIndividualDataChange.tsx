@@ -169,7 +169,7 @@ function AddIndividualDataChange({
   }
 
   const combinedData = {
-    results: data?.results || [],
+    results: data || [],
     countriesChoices: countriesData || [],
     documentTypeChoices: choicesData?.documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
@@ -179,7 +179,6 @@ function AddIndividualDataChange({
     combinedData.results.filter((item) => item.isFlexField) || [];
   const coreFields =
     combinedData.results.filter((item) => !item.isFlexField) || [];
-
   return (
     !isEditTicket && (
       <>

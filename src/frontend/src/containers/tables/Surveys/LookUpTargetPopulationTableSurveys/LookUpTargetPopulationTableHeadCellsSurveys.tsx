@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
-export const headCells: HeadCell<PaymentPlanList>[] = [
+export const headCells: HeadCell<TargetPopulationList>[] = [
   {
     disablePadding: false,
     label: '',

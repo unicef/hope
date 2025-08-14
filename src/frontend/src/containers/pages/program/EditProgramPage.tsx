@@ -314,8 +314,10 @@ const EditProgramPage = (): ReactElement => {
             .filter((partner) => isPartnerVisible(partner.name))
             .map((partner) => ({
               id: partner.id,
-              areas: partner.areas.map((area) => decodeIdString(area.id)),
               areaAccess: partner.areaAccess,
+              areas: Array.isArray(partner.areas)
+                ? partner.areas.map((area) => area.id)
+                : [],
             }))
         : [],
     partnerAccess,
@@ -381,10 +383,7 @@ const EditProgramPage = (): ReactElement => {
           onSubmit={(values) => {
             handleSubmitProgramDetails(values);
           }}
-          validationSchema={editProgramDetailsValidationSchema(
-            t,
-            initialValuesProgramDetails,
-          )}
+          validationSchema={editProgramDetailsValidationSchema(t)}
           validationContext={{ isEdit: true }}
           validateOnChange={true}
         >

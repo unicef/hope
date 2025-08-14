@@ -5,12 +5,6 @@
 export type Country = {
     readonly id: string;
     name: string;
-    shortName: string;
-    isoCode2: string;
     isoCode3: string;
-    isoNum: string;
-    readonly validFrom: string | null;
-    validUntil?: string | null;
-    readonly updatedAt: string;
 };
 

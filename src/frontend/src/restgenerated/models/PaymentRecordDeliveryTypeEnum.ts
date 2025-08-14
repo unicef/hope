@@ -10,15 +10,15 @@
  * * `cash_over_the_counter` - Cash over the counter
  * * `cheque` - Cheque
  * * `deposit_to_card` - Deposit to Card
- * * `8b43ee32-f7a4-4801-b38c-f5154bebdd92` - Industry player trip wait likely.
  * * `mobile_money` - Mobile Money
- * * `bcd48959-83c7-42e9-9195-847f0c8d291b` - Mother teacher represent number field.
- * * `19b94b6e-fa06-43aa-a14f-cb9ee835f910` - Parent free remain.
+ * * `3ade191c-845d-4723-ab83-c6b215cc8cb7` - Old behavior him.
  * * `pre-paid_card` - Pre-paid card
+ * * `0db5e6e3-8963-4dfd-8024-3023c9e2c158` - Red many environmental.
  * * `referral` - Referral
- * * `b55439b5-598c-4225-aa3b-dca22f8c706c` - Serve news all development sign.
- * * `591698b6-a0e6-48fc-b577-12a30cc5c5e2` - Several glass.
- * * `4c6340f3-8fdc-4591-86c3-18ada9f79145` - Thank party reduce explain.
+ * * `a826b45a-1e26-40bb-aa78-2c65085dad21` - Research Republican personal senior.
+ * * `6d9eb5d3-0662-4c62-ad76-c2c9eb8b6152` - Scene wind increase our green.
+ * * `c7f47a82-1b44-4d01-95cc-0916cfc8f048` - She probably explain of prove.
+ * * `14f854cd-a253-4ba1-8588-07ac823a6559` - Smile too show.
  * * `transfer` - Transfer
  * * `transfer_to_account` - Transfer to Account
  * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
@@ -32,15 +32,15 @@ export enum PaymentRecordDeliveryTypeEnum {
     CASH_OVER_THE_COUNTER = 'cash_over_the_counter',
     CHEQUE = 'cheque',
     DEPOSIT_TO_CARD = 'deposit_to_card',
-    _8B43EE32_F7A4_4801_B38C_F5154BEBDD92 = '8b43ee32-f7a4-4801-b38c-f5154bebdd92',
     MOBILE_MONEY = 'mobile_money',
-    BCD48959_83C7_42E9_9195_847F0C8D291B = 'bcd48959-83c7-42e9-9195-847f0c8d291b',
-    _19B94B6E_FA06_43AA_A14F_CB9EE835F910 = '19b94b6e-fa06-43aa-a14f-cb9ee835f910',
+    _3ADE191C_845D_4723_AB83_C6B215CC8CB7 = '3ade191c-845d-4723-ab83-c6b215cc8cb7',
     PRE_PAID_CARD = 'pre-paid_card',
+    _0DB5E6E3_8963_4DFD_8024_3023C9E2C158 = '0db5e6e3-8963-4dfd-8024-3023c9e2c158',
     REFERRAL = 'referral',
-    B55439B5_598C_4225_AA3B_DCA22F8C706C = 'b55439b5-598c-4225-aa3b-dca22f8c706c',
-    _591698B6_A0E6_48FC_B577_12A30CC5C5E2 = '591698b6-a0e6-48fc-b577-12a30cc5c5e2',
-    _4C6340F3_8FDC_4591_86C3_18ADA9F79145 = '4c6340f3-8fdc-4591-86c3-18ada9f79145',
+    A826B45A_1E26_40BB_AA78_2C65085DAD21 = 'a826b45a-1e26-40bb-aa78-2c65085dad21',
+    _6D9EB5D3_0662_4C62_AD76_C2C9EB8B6152 = '6d9eb5d3-0662-4c62-ad76-c2c9eb8b6152',
+    C7F47A82_1B44_4D01_95CC_0916CFC8F048 = 'c7f47a82-1b44-4d01-95cc-0916cfc8f048',
+    _14F854CD_A253_4BA1_8588_07AC823A6559 = '14f854cd-a253-4ba1-8588-07ac823a6559',
     TRANSFER = 'transfer',
     TRANSFER_TO_ACCOUNT = 'transfer_to_account',
     TRANSFER_TO_DIGITAL_WALLET = 'transfer_to_digital_wallet',

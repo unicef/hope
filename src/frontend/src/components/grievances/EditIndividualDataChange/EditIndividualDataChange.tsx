@@ -81,20 +81,16 @@ function EditIndividualDataChange({
   });
 
   const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
-    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
+    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id, individual.program.slug],
     queryFn: () => {
       if (!individual?.id) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug,
+        programSlug: individual.program.slug,
         id: individual.id,
       });
     },
-    enabled:
-      !!individual?.id &&
-      !!businessAreaSlug &&
-      !!programSlug &&
-      programSlug !== 'all',
+    enabled: !!individual?.id && !!businessAreaSlug,
   });
 
   useEffect(() => {
@@ -124,7 +120,11 @@ function EditIndividualDataChange({
     !fullIndividual ||
     !addIndividualFieldsData
   ) {
-    return <LoadingComponent />;
+    return (
+      <div>
+        <LoadingComponent />
+      </div>
+    );
   }
 
   const combinedData = {
@@ -224,7 +224,7 @@ function EditIndividualDataChange({
           )}
         </Box>
       </BoxWithBorders>
-       <BoxWithBorders>
+      <BoxWithBorders>
         <Box mt={3}>
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
@@ -233,9 +233,14 @@ function EditIndividualDataChange({
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual}
-            addIndividualFieldsData={addIndividualFieldsData}
+            individualChoicesData={individualChoicesData}
           />
-           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={addIndividualFieldsData}/>}
+          {!isEditTicket && (
+            <NewAccountFieldArray
+              values={values}
+              individualChoicesData={individualChoicesData}
+            />
+          )}
         </Box>
       </BoxWithBorders>
     </>

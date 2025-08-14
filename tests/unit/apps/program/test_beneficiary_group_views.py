@@ -4,11 +4,10 @@ from django.core.cache import cache
 from django.urls import reverse
 
 import pytest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from rest_framework import status
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
 
 pytestmark = pytest.mark.django_db
 

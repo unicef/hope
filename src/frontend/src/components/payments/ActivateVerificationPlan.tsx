@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +27,7 @@ export function ActivateVerificationPlan({
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId: programSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
   const activateVerificationPlanMutation = useMutation({
     mutationFn: () =>
@@ -38,6 +39,17 @@ export function ActivateVerificationPlan({
           verificationPlanId: paymentVerificationPlanId,
         },
       ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
+    },
   });
 
   const activate = async (): Promise<void> => {

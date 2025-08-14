@@ -8,8 +8,8 @@ if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
     from responses import RequestsMock
 
-    from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.sanction_list.models import SanctionList
+    from hope.apps.account.models import User
+    from hope.apps.sanction_list.models import SanctionList
 
 
 def test_sanction_list_refresh(

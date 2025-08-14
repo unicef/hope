@@ -1,5 +1,6 @@
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import * as Yup from 'yup';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -15,37 +16,37 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
+  FormHelperText,
   Typography,
+  Button,
 } from '@mui/material';
-import { RestService } from '@restgenerated/services/RestService';
+import { Grid, Box } from '@mui/system';
+import { RestService } from '@restgenerated/index';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
-import { Field, Formik } from 'formik';
-import { ReactElement, ReactNode, useState } from 'react';
+import { showApiErrorMessages } from '@utils/utils';
+import { Formik, Field } from 'formik';
+import { ReactElement, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
-import styled from 'styled-components';
-import * as Yup from 'yup';
+import { useNavigate, Link } from 'react-router-dom';
 import {
+  hasPermissions,
   PERMISSIONS,
   hasPermissionInModule,
-  hasPermissions,
-} from '../../../../config/permissions';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { createApiParams } from '@utils/apiUtils';
-import { decodeIdString, showApiErrorMessages } from '@utils/utils';
+} from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { Admin2SyncEffect } from './Admin2SyncEffect';
+import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
 // Constants for feedback issue types
 const FEEDBACK_ISSUE_TYPE = {
@@ -88,11 +89,10 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     consent: Yup.bool().nullable(),
     area: Yup.string().nullable(),
     language: Yup.string().nullable(),
-    program: Yup.string().nullable(),
+    programId: Yup.string().nullable(),
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
-    datum.language = Yup.string().required('Languages Spoken is required');
   }
   if (currentStep >= FeedbackSteps.Verification) {
     datum.consent = Yup.bool().oneOf([true], 'Consent is required');
@@ -147,7 +147,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -173,8 +173,8 @@ function CreateFeedbackPage(): ReactElement {
     area: null,
     language: null,
     consent: false,
-    program: isAllPrograms ? '' : programId,
     verificationRequired: false,
+    programId: null,
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
@@ -240,9 +240,12 @@ function CreateFeedbackPage(): ReactElement {
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
     issueType: values.issueType,
-    admin2: decodeIdString(values.admin2),
-    language: values.language,
-    program: values.program,
+    admin2:
+      typeof values.admin2 === 'object' && values.admin2 !== null
+        ? values.admin2.id
+        : values.admin2,
+    language: values.language || '',
+    programId: values.programId || null,
   });
 
   const mappedProgramChoices = programsData?.results?.map((element) => ({
@@ -277,23 +280,23 @@ function CreateFeedbackPage(): ReactElement {
       // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
+        // Sync admin2 with selectedHousehold.admin2
+        <Admin2SyncEffect
+          selectedHousehold={values.selectedHousehold}
+          admin2={values.admin2}
+          setFieldValue={setFieldValue}
+        />;
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
-        // Set program value based on selected household or individual
-        if (
-          values.selectedHousehold?.program?.id &&
-          values.program !== values.selectedHousehold.program.id
-        ) {
-          setFieldValue('program', values.selectedHousehold.program.id);
-        } else if (
-          values.selectedIndividual?.program?.id &&
-          values.program !== values.selectedIndividual.program.id
-        ) {
-          setFieldValue('program', values.selectedIndividual.program.id);
-        }
         return (
           <>
+            <ProgramIdSyncEffect />
+            <Admin2SyncEffect
+              selectedHousehold={values.selectedHousehold}
+              admin2={values.admin2}
+              setFieldValue={setFieldValue}
+            />
             <PageHeader
               title="New Feedback"
               breadCrumbs={
@@ -342,6 +345,12 @@ function CreateFeedbackPage(): ReactElement {
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
+                            {touched.issueType &&
+                              typeof errors.issueType === 'string' && (
+                                <FormHelperText error>
+                                  {errors.issueType}
+                                </FormHelperText>
+                              )}
                           </Grid>
                         </Grid>
                       )}
@@ -452,6 +461,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
+                              {touched.description &&
+                                typeof errors.description === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.description}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 12 }}>
                               <Field
@@ -470,10 +485,13 @@ function CreateFeedbackPage(): ReactElement {
                                 variant="outlined"
                                 component={FormikAdminAreaAutocomplete}
                                 dataCy="input-admin2"
-                                disabled={Boolean(
-                                  values.selectedHousehold?.admin2,
-                                )}
                               />
+                              {touched.admin2 &&
+                                typeof errors.admin2 === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.admin2}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -484,6 +502,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-area"
                               />
+                              {touched.area &&
+                                typeof errors.area === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.area}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -494,12 +518,17 @@ function CreateFeedbackPage(): ReactElement {
                                 label={t('Languages Spoken')}
                                 component={FormikTextField}
                                 data-cy="input-languages"
-                                required
                               />
+                              {touched.language &&
+                                typeof errors.language === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.language}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 3 }}>
                               <Field
-                                name="program"
+                                name="programId"
                                 label={t('Programme Name')}
                                 fullWidth
                                 variant="outlined"
@@ -507,6 +536,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikSelectField}
                                 disabled={!isAllPrograms || !isAnonymousTicket}
                               />
+                              {touched.programId &&
+                                typeof errors.programId === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.programId}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                           </Grid>
                         </BoxPadding>
@@ -540,16 +575,6 @@ function CreateFeedbackPage(): ReactElement {
                             variant="contained"
                             onClick={submitForm}
                             data-cy="button-submit"
-                            disabled={
-                              activeStep === steps.length - 1
-                                ? // On final step, check only fields required for this step
-                                  !values.description ||
-                                  !values.language ||
-                                  Object.keys(errors).includes('description') ||
-                                  Object.keys(errors).includes('language')
-                                : // On earlier steps, check if there are any errors for fields on the current step
-                                  Object.keys(errors).length > 0
-                            }
                           >
                             {activeStep === steps.length - 1
                               ? t('Save')

@@ -2,26 +2,26 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 import pytest
-
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

@@ -4,23 +4,23 @@ from django.core.files.base import ContentFile
 
 import openpyxl
 import pytest
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import FlexibleAttribute
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import (
     FEMALE,
     MALE,
     Document,
     DocumentType,
     Individual,
 )
-from hct_mis_api.apps.payment.models import Account, AccountType, FinancialInstitution
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
+from hope.apps.payment.models import Account, AccountType, FinancialInstitution
+from hope.apps.program.models import Program
+from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )
 
@@ -62,8 +62,7 @@ def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
-    return program
+    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
 
 
 @pytest.fixture
@@ -182,13 +181,6 @@ class TestUniversalIndividualUpdateService:
         :param program:
         :return:
         """
-        # create one more DeliveryMechanismConfig with empty account_type
-        # DeliveryMechanismConfig.objects.get_or_create(
-        #     fsp=FinancialServiceProviderFactory(),
-        #     delivery_mechanism=DeliveryMechanism.objects.create(name="Test", code="test", account_type=None),
-        #     required_fields=["phone_number"],
-        # )
-        # save old values
         given_name_old = individual.given_name
         sex_old = individual.sex
         birth_date_old = individual.birth_date

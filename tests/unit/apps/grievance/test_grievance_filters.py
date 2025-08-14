@@ -4,34 +4,18 @@ from typing import Any, Callable
 from django.utils import timezone
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_HIGH,
-    PRIORITY_MEDIUM,
-    URGENCY_URGENT,
-    URGENCY_VERY_URGENT,
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
+    TicketPaymentVerificationDetailsFactory,
 )
-from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetailsFactory
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketComplaintDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
-)
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -39,10 +23,28 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.constants import (
+    PRIORITY_HIGH,
+    PRIORITY_MEDIUM,
+    URGENCY_URGENT,
+    URGENCY_VERY_URGENT,
+)
+from hope.apps.grievance.models import (
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
+)
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -146,142 +148,124 @@ class TestGrievanceTicketFilters:
 
         grievances_to_create = (
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": self.area2,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Needs Adjudication ticket, not cross area, program1",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-                    "priority": PRIORITY_HIGH,
-                    "urgency": URGENCY_URGENT,
-                }
+                business_area=self.afghanistan,
+                admin2=self.area2,
+                language="Polish",
+                consent=True,
+                description="Needs Adjudication ticket, not cross area, program1",
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_NEW,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+                priority=PRIORITY_HIGH,
+                urgency=URGENCY_URGENT,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": self.area2_2,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Needs Adjudication ticket, cross area, program1",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_CLOSED,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-                    "priority": PRIORITY_MEDIUM,
-                    "urgency": URGENCY_URGENT,
-                }
+                business_area=self.afghanistan,
+                admin2=self.area2_2,
+                language="Polish",
+                consent=True,
+                description="Needs Adjudication ticket, cross area, program1",
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_CLOSED,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+                priority=PRIORITY_MEDIUM,
+                urgency=URGENCY_URGENT,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Payment Verification ticket 1, program1",
-                    "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                }
+                business_area=self.afghanistan,
+                admin2=None,
+                language="Polish, English",
+                consent=True,
+                description="Payment Verification ticket 1, program1",
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Payment Verification ticket 2, program2",
-                    "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                }
+                business_area=self.afghanistan,
+                admin2=None,
+                language="Polish, English",
+                consent=True,
+                description="Payment Verification ticket 2, program2",
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Complaint ticket, program1",
-                    "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
-                }
+                business_area=self.afghanistan,
+                admin2=None,
+                language="Polish, English",
+                consent=True,
+                description="Complaint ticket, program1",
+                category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": self.area2,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Data Change ticket, program2",
-                    "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
-                    "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": self.user2,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-                    "urgency": URGENCY_VERY_URGENT,
-                }
+                business_area=self.afghanistan,
+                admin2=self.area2,
+                language="Polish",
+                consent=True,
+                description="Data Change ticket, program2",
+                category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+                status=GrievanceTicket.STATUS_NEW,
+                created_by=self.user2,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+                urgency=URGENCY_VERY_URGENT,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": self.area2,
-                    "language": "English",
-                    "consent": True,
-                    "description": "Sensitive ticket, program1",
-                    "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-                    "status": GrievanceTicket.STATUS_ON_HOLD,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
-                }
+                business_area=self.afghanistan,
+                admin2=self.area2,
+                language="English",
+                consent=True,
+                description="Sensitive ticket, program1",
+                category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+                status=GrievanceTicket.STATUS_ON_HOLD,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": self.area2,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Sensitive ticket, program2",
-                    "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user2,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_HARASSMENT,
-                    "priority": PRIORITY_MEDIUM,
-                }
+                business_area=self.afghanistan,
+                admin2=self.area2,
+                language="Polish, English",
+                consent=True,
+                description="Sensitive ticket, program2",
+                category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=self.user,
+                assigned_to=self.user2,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                issue_type=GrievanceTicket.ISSUE_TYPE_HARASSMENT,
+                priority=PRIORITY_MEDIUM,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": self.area1,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "System Flagging ticket, program1",
-                    "category": GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-                    "status": GrievanceTicket.STATUS_CLOSED,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                }
+                business_area=self.afghanistan,
+                admin2=self.area1,
+                language="Polish, English",
+                consent=True,
+                description="System Flagging ticket, program1",
+                category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+                status=GrievanceTicket.STATUS_CLOSED,
+                created_by=self.user,
+                assigned_to=self.user,
+                user_modified=timezone.make_aware(datetime(year=2021, month=8, day=22)),
             ),
         )
         self.grievance_tickets = GrievanceTicket.objects.bulk_create(grievances_to_create)
@@ -296,7 +280,7 @@ class TestGrievanceTicketFilters:
             timezone.make_aware(datetime(year=2020, month=8, day=25)),
             timezone.make_aware(datetime(year=2020, month=8, day=26)),
         ]
-        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set):
+        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set, strict=True):
             ticket.created_at = date
             ticket.save(update_fields=("created_at",))
 

@@ -2,12 +2,13 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+
+from hope.apps.payment.models import Payment
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
 
 class TestUpdatePaymentsSignatureInBatch(TestCase):

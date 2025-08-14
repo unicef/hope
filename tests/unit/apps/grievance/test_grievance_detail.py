@@ -1,20 +1,16 @@
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 
+from django.core.files.base import ContentFile
 from django.utils import timezone
 
 import pytest
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from freezegun import freeze_time
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
@@ -27,32 +23,37 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketPaymentVerificationDetailsFactory,
     TicketSystemFlaggingDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    SINGLE,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
-from hct_mis_api.apps.sanction_list.models import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from freezegun import freeze_time
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import (
+    DUPLICATE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    SINGLE,
+    IndividualRoleInHousehold,
+)
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from hope.apps.sanction_list.models import (
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
 )
@@ -666,13 +667,14 @@ class TestGrievanceTicketDetail:
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                 "start": ticket_details.reason_household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
-                "residence_status": ticket_details.reason_household.residence_status,
+                "residence_status": ticket_details.reason_household.get_residence_status_display(),
                 "country_origin": ticket_details.reason_household.country_origin.name,
                 "country": ticket_details.reason_household.country.name,
                 "address": ticket_details.reason_household.address,
                 "village": ticket_details.reason_household.village,
                 "geopoint": None,
                 "import_id": ticket_details.reason_household.unicef_id,
+                "program_slug": self.program.slug,
             },
         }
 
@@ -754,6 +756,7 @@ class TestGrievanceTicketDetail:
             "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
             "sex": golden_records_individual.sex,
             "duplicate": golden_records_individual.duplicate,
+            "program_slug": golden_records_individual.program.slug,
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
@@ -784,8 +787,9 @@ class TestGrievanceTicketDetail:
                 ],
                 "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%SZ}",
                 "zip_code": golden_records_individual.household.zip_code,
-                "residence_status": golden_records_individual.household.residence_status,
+                "residence_status": golden_records_individual.household.get_residence_status_display(),
                 "import_id": golden_records_individual.household.unicef_id,
+                "program_slug": golden_records_individual.household.program.slug,
             },
             "deduplication_golden_record_results": [
                 {
@@ -815,6 +819,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -956,6 +961,7 @@ class TestGrievanceTicketDetail:
             individual=golden_records_individual,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc_aaa.png"),
         )
 
         dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
@@ -1051,6 +1057,7 @@ class TestGrievanceTicketDetail:
             "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
             "sex": golden_records_individual.sex,
             "duplicate": golden_records_individual.duplicate,
+            "program_slug": golden_records_individual.program.slug,
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
@@ -1081,8 +1088,9 @@ class TestGrievanceTicketDetail:
                 ],
                 "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%SZ}",
                 "zip_code": golden_records_individual.household.zip_code,
-                "residence_status": golden_records_individual.household.residence_status,
+                "residence_status": golden_records_individual.household.get_residence_status_display(),
                 "import_id": golden_records_individual.household.unicef_id,
+                "program_slug": self.program.slug,
             },
             "deduplication_golden_record_results": [
                 {
@@ -1112,6 +1120,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -1123,6 +1132,7 @@ class TestGrievanceTicketDetail:
             "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
             "sex": self.individuals2[0].sex,
             "duplicate": self.individuals2[0].duplicate,
+            "program_slug": self.individuals2[0].program.slug,
             "household": {
                 "id": str(self.individuals2[0].household.id),
                 "unicef_id": self.individuals2[0].household.unicef_id,
@@ -1153,8 +1163,9 @@ class TestGrievanceTicketDetail:
                 ],
                 "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%SZ}",
                 "zip_code": self.individuals2[0].household.zip_code,
-                "residence_status": self.individuals2[0].household.residence_status,
+                "residence_status": self.individuals2[0].household.get_residence_status_display(),
                 "import_id": self.individuals2[0].household.unicef_id,
+                "program_slug": self.program.slug,
             },
             "deduplication_golden_record_results": [],
             "documents": [],
@@ -1168,6 +1179,7 @@ class TestGrievanceTicketDetail:
                 "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
                 "sex": self.individuals2[0].sex,
                 "duplicate": self.individuals2[0].duplicate,
+                "program_slug": self.individuals2[0].program.slug,
                 "household": {
                     "id": str(self.individuals2[0].household.id),
                     "unicef_id": self.individuals2[0].household.unicef_id,
@@ -1198,8 +1210,9 @@ class TestGrievanceTicketDetail:
                     ],
                     "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%SZ}",
                     "zip_code": self.individuals2[0].household.zip_code,
-                    "residence_status": self.individuals2[0].household.residence_status,
+                    "residence_status": self.individuals2[0].household.get_residence_status_display(),
                     "import_id": self.individuals2[0].household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1214,6 +1227,7 @@ class TestGrievanceTicketDetail:
                 "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
                 "sex": duplicate.sex,
                 "duplicate": duplicate.duplicate,
+                "program_slug": duplicate.program.slug,
                 "household": {
                     "id": str(duplicate.household.id),
                     "unicef_id": duplicate.household.unicef_id,
@@ -1244,8 +1258,9 @@ class TestGrievanceTicketDetail:
                     ],
                     "start": f"{duplicate.household.start:%Y-%m-%dT%H:%M:%SZ}",
                     "zip_code": duplicate.household.zip_code,
-                    "residence_status": duplicate.household.residence_status,
+                    "residence_status": duplicate.household.get_residence_status_display(),
                     "import_id": duplicate.household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1307,7 +1322,7 @@ class TestGrievanceTicketDetail:
         assert response.status_code == status.HTTP_200_OK
 
         assert response.data["ticket_details"]["extra_data"]["dedup_engine_similarity_pair"] == {
-            "similarity_score": f'{ticket_details.extra_data["dedup_engine_similarity_pair"]["similarity_score"]:.1f}',
+            "similarity_score": f"{ticket_details.extra_data['dedup_engine_similarity_pair']['similarity_score']:.1f}",
             "status_code": ticket_details.extra_data["dedup_engine_similarity_pair"]["status_code"],
             "individual1": {
                 "id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["id"],
@@ -1363,7 +1378,8 @@ class TestGrievanceTicketDetail:
                 "country_origin": household.country_origin.name,
                 "geopoint": household.geopoint,
                 "size": household.size,
-                "residence_status": household.residence_status,
+                "residence_status": household.get_residence_status_display(),
+                "program_slug": household.program.slug,
                 "head_of_household": {
                     "id": str(household.head_of_household.id),
                     "full_name": household.head_of_household.full_name,
@@ -1381,7 +1397,7 @@ class TestGrievanceTicketDetail:
                 "name": grievance_ticket.admin2.name,
                 "p_code": grievance_ticket.admin2.p_code,
                 "area_type": grievance_ticket.admin2.area_type.id,
-                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
             if grievance_ticket.admin2
             else None
@@ -1437,6 +1453,7 @@ class TestGrievanceTicketDetail:
                 "id": str(individual.id),
                 "unicef_id": individual.unicef_id,
                 "full_name": individual.full_name,
+                "program_slug": individual.program.slug,
                 "household": {
                     "id": str(individual.household.id),
                     "unicef_id": individual.household.unicef_id,
@@ -1448,6 +1465,7 @@ class TestGrievanceTicketDetail:
                         "id": str(individual.household.admin2.id),
                         "name": individual.household.admin2.name,
                     },
+                    "program_slug": individual.program.slug,
                     "admin3": None,
                     "admin4": None,
                     "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
@@ -1458,7 +1476,7 @@ class TestGrievanceTicketDetail:
                     or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": individual.household.residence_status,
+                    "residence_status": individual.household.get_residence_status_display(),
                     "country_origin": individual.household.country_origin.name,
                     "country": individual.household.country.name,
                     "address": individual.household.address,
@@ -1496,8 +1514,9 @@ class TestGrievanceTicketDetail:
                             or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                             "start": f"{role.household.start:%Y-%m-%dT%H:%M:%SZ}",
                             "zip_code": role.household.zip_code,
-                            "residence_status": role.household.residence_status,
+                            "residence_status": role.household.get_residence_status_display(),
                             "import_id": role.household.unicef_id,
+                            "program_slug": self.program.slug,
                         },
                     }
                     for role in individual.households_and_roles(manager="all_merge_status_objects").all()
@@ -1518,6 +1537,7 @@ class TestGrievanceTicketDetail:
                             "iso_code3": document.country.iso_code3,
                         },
                         "document_number": document.document_number,
+                        "photo": document.photo.url if document.photo else None,
                     }
                     for document in individual.documents.all()
                 ],
@@ -1560,7 +1580,7 @@ class TestGrievanceTicketDetail:
                     "email": self.user.email,
                     "username": self.user.username,
                 },
-                "created_at": f"{self.ticket_note.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "created_at": f"{self.ticket_note.created_at:%Y-%m-%dT%H:%M:%SZ}",
                 "updated_at": f"{self.ticket_note.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
         ]
@@ -1580,7 +1600,7 @@ class TestGrievanceTicketDetail:
                     "email": self.user.email,
                     "username": self.user.username,
                 },
-                "created_at": f"{self.grievance_document.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "created_at": f"{self.grievance_document.created_at:%Y-%m-%dT%H:%M:%SZ}",
                 "updated_at": f"{self.grievance_document.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
         ]

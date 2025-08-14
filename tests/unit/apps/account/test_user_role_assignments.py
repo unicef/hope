@@ -1,26 +1,29 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from django.forms.models import inlineformset_factory
-from django.forms.utils import ErrorList
 from django.test import TestCase
 
-from hct_mis_api.apps.account.admin.forms import (
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+
+from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import (
+from hope.apps.account.models import (
     IncompatibleRoles,
     Role,
     RoleAssignment,
     User,
 )
-from hct_mis_api.apps.account.permissions import (
+from hope.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
 )
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.apps.core.models import BusinessArea
+
+if TYPE_CHECKING:
+    from django.forms.utils import ErrorList
 
 
 class RoleAssignmentsTest(TestCase):

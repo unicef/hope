@@ -7,18 +7,18 @@ from django.test import RequestFactory
 from django.urls import reverse
 
 import pytest
-from rest_framework import status
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.services import DashboardGlobalDataCache
-from hct_mis_api.apps.dashboard.views import DashboardReportView
+from rest_framework import status
+
+from hope.apps.account.models import RoleAssignment
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.dashboard.services import DashboardGlobalDataCache
+from hope.apps.dashboard.views import DashboardReportView
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
 
@@ -81,7 +81,7 @@ def test_dashboard_data_view_access_granted(
 
 
 @pytest.mark.django_db(databases=["default"])
-@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay")
+@patch("hope.apps.dashboard.views.generate_dash_report_task.delay")
 def test_create_or_update_dash_report_task_triggered(
     mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
 ) -> None:
@@ -114,7 +114,7 @@ def test_create_or_update_dash_report_permission_denied(setup_client: Dict[str, 
 
 
 @pytest.mark.django_db(databases=["default"])
-@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay")
+@patch("hope.apps.dashboard.views.generate_dash_report_task.delay")
 def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: Mock, api_client: Callable) -> None:
     """
     Test that a 404 is returned if the business area does not exist.
@@ -131,7 +131,7 @@ def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: M
 
 
 @pytest.mark.django_db(databases=["default"])
-@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay", side_effect=Exception("Unexpected error"))
+@patch("hope.apps.dashboard.views.generate_dash_report_task.delay", side_effect=Exception("Unexpected error"))
 def test_create_or_update_dash_report_internal_server_error(
     mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
 ) -> None:
@@ -236,9 +236,10 @@ def test_dashboard_data_view_global_slug_cache_miss(
     client.force_authenticate(user=user)
 
     cache.delete(DashboardGlobalDataCache.get_cache_key("global"))
-    with patch.object(DashboardGlobalDataCache, "get_data", return_value=None) as mock_get_data, patch(
-        "hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay"
-    ) as mock_task_delay:
+    with (
+        patch.object(DashboardGlobalDataCache, "get_data", return_value=None) as mock_get_data,
+        patch("hope.apps.dashboard.views.generate_dash_report_task.delay") as mock_task_delay,
+    ):
         response = client.get(global_url)
 
         mock_get_data.assert_called_once_with("global")
@@ -266,9 +267,10 @@ def test_dashboard_report_view_global_slug(
     context = view.get_context_data(business_area_slug="global")
 
     assert view.template_name == "dashboard/global_dashboard.html"
-    assert (
-        context.get("has_permission") is True
-    ), f"Permission denied for global report. User superuser: {request.user.is_superuser}, User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
+    assert context.get("has_permission") is True, (
+        f"Permission denied for global report. User superuser: {request.user.is_superuser},"
+        f" User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
+    )
     assert context["business_area_slug"] == "global"
     assert context["household_data_url"] == reverse("api:household-data", args=["global"])
 

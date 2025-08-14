@@ -61,7 +61,7 @@ export const DeleteTargetPopulation = ({
       // Ignore empty response error
       if (e.message && e.message.includes('Unexpected end of JSON input')) {
         showMessage(t('Target Population Deleted'));
-        navigate(`/${baseUrl}/payment-module/payment-plans`);
+        navigate(`/${baseUrl}/target-population`);
       } else {
         showMessage(e.message);
       }

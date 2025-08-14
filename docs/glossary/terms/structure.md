@@ -5,8 +5,8 @@ template: term.html
 
 ## Business Area
 
-In HOPE, Business Area represents the area dedicated to a country 
-(with some exceptions) and used for isolating data that belongs to 
+In HOPE, Business Area represents the area dedicated to a country
+(with some exceptions) and used for isolating data that belongs to
 different country operations
 
 ## Business Unit

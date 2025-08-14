@@ -15,14 +15,13 @@ from _pytest.config.argparsing import Parser
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
+from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
 
-from hct_mis_api.apps.account.models import Partner, Role
-
-from .fixtures import *  # noqa: ABS101, F403, F401
+from hope.apps.account.models import Partner, Role
 
 
 @pytest.fixture(autouse=True)
-def create_unicef_partner() -> None:
+def create_unicef_partner(db: Any) -> None:
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
@@ -62,7 +61,7 @@ def clear_default_cache() -> None:
 
 
 def pytest_configure(config: Config) -> None:
-    pytest.localhost = True if config.getoption("--localhost") else False
+    pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
     sys.path.append(str(utils))
@@ -96,7 +95,7 @@ def pytest_configure(config: Config) -> None:
     settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
         }
     }
@@ -125,12 +124,12 @@ def pytest_configure(config: Config) -> None:
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+            "hope.apps.registration_datahub.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
@@ -228,7 +227,7 @@ def register_custom_sql_signal() -> None:
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
                 for stmt in sql_statements:
-                    all_sqls.append(stmt)
+                    all_sqls.append(stmt)  # noqa
 
     def pre_migration_custom_sql(
         sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any

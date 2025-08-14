@@ -3,20 +3,21 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import Approval, DeliveryMechanism
-from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.core.models import DataCollectingType
+from hope.apps.payment.models import Approval, DeliveryMechanism
+from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestPaymentPlanPDFExportService(TestCase):
@@ -41,7 +42,7 @@ class TestPaymentPlanPDFExportService(TestCase):
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
 
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_web_links(self, get_link_mock: Any) -> None:
@@ -51,7 +52,7 @@ class TestPaymentPlanPDFExportService(TestCase):
         self.assertEqual(self.pdf_export_service.payment_plan_link, expected_download_link)
 
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_pdf_summary(self, get_link_mock: Any) -> None:

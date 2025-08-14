@@ -7,18 +7,20 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 
 import pytest
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
+from hope.apps.core.models import BusinessArea
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
+from hope.apps.household.models import (
     FEMALE,
     HEAD,
     MALE,
@@ -27,13 +29,11 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+from hope.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -423,8 +423,6 @@ class TestGoldenRecordDeduplication(TestCase):
             individual=individual,
             status=Document.STATUS_PENDING,
             rdi_merge_status=MergeStatusModel.MERGED,
-            # now filtering is by Individual.program
-            # program=program_2,
         )
         individual.refresh_from_db()
         self.assertEqual(str(individual.program_id), str(program_2.pk))

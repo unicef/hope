@@ -1,0 +1,21 @@
+{% extends "admin_extra_buttons/change_form.html" %}{% load smart_register %}
+{% block after_field_sets %}
+    {% dump original.data "" original %}
+{% endblock after_field_sets %}
+
+{% block inline_field_sets %}{% endblock %}
+
+{% block admin_change_form_document_ready %}
+    {{ block.super }}
+    <script>
+        (function ($) {
+            $(function () {
+                $(".base64 a.preview")
+                    .click(function (e) {
+                        e.preventDefault();
+                        $(this).parent().find(".preview").toggle();
+                    });
+            });
+        })(django.jQuery);
+    </script>
+{% endblock admin_change_form_document_ready %}

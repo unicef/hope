@@ -3,7 +3,7 @@ description:  "----"
 template: term.html
 title: Beneficiaries
 terms:
-  - glossary: 
+  - glossary:
     - Beneficiary
     - Withdrawn
     - Duplicate
@@ -13,12 +13,12 @@ terms:
 
 ## Beneficiary
 
-A household or an individual (in the case of social workers) who is entitled to receive assistance 
+A household or an individual (in the case of social workers) who is entitled to receive assistance
 
 
-## Withdrawn 
+## Withdrawn
 
-When a beneficiary is marked as withdrawn, it means they will no longer be eligible to receive further assistance 
+When a beneficiary is marked as withdrawn, it means they will no longer be eligible to receive further assistance
 
 ## Duplicate
 

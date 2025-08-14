@@ -8,36 +8,36 @@ from unittest.mock import patch
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
     EntitlementCardFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from parameterized import parameterized
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import PaymentVerification
+from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
+from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestXlsxVerificationImport(APITestCase):
@@ -321,9 +321,9 @@ class TestXlsxVerificationImport(APITestCase):
         payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
-        wb.active[
-            f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"
-        ] = payment_verification.payment.delivered_quantity
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
+            payment_verification.payment.delivered_quantity
+        )
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
@@ -351,7 +351,7 @@ class TestXlsxVerificationImport(APITestCase):
         ]
     )
     @patch(
-        "hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service.XlsxVerificationImportService._check_version",
+        "hope.apps.payment.xlsx.xlsx_verification_import_service.XlsxVerificationImportService._check_version",
         return_value=None,
     )
     def test_validation_of_unordered_columns(self, file_name: str, error_list: List, mock_check_version: Any) -> None:

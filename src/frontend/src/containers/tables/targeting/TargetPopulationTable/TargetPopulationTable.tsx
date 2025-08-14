@@ -5,7 +5,7 @@ import { PaginatedTargetPopulationListList } from '@restgenerated/models/Paginat
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
@@ -47,25 +47,19 @@ export function TargetPopulationTable({
   const initialQueryVariables = useMemo(
     () => ({
       name: filter.name,
-      totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
-      totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
       status: filter.status,
-      createdAtRange: JSON.stringify({
-        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-      }),
-      businessAreaSlug: businessArea,
-      programSlug: programId,
+      totalHouseholdsCountGte: filter.totalHouseholdsCountGte,
+      totalHouseholdsCountLte: filter.totalHouseholdsCountLte,
+      createdAtGte: filter.createdAtGte,
+      createdAtLte: filter.createdAtLte,
     }),
     [
       filter.name,
-      filter.totalHouseholdsCountMin,
-      filter.totalHouseholdsCountMax,
       filter.status,
-      filter.createdAtRangeMin,
-      filter.createdAtRangeMax,
-      businessArea,
-      programId,
+      filter.totalHouseholdsCountGte,
+      filter.totalHouseholdsCountLte,
+      filter.createdAtGte,
+      filter.createdAtLte,
     ],
   );
 

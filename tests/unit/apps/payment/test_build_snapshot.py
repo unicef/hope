@@ -2,12 +2,9 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from freezegun import freeze_time
-
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
@@ -15,16 +12,19 @@ from hct_mis_api.apps.payment.fixtures import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
+from freezegun import freeze_time
+
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
 )
-from hct_mis_api.apps.payment.services import payment_household_snapshot_service
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services import payment_household_snapshot_service
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestBuildSnapshot(TestCase):

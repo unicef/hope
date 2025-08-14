@@ -2,17 +2,17 @@ from django.urls import reverse
 
 import pytest
 from django_webtest import WebTest
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
+from hope.apps.geo.models import Area
 
 pytestmark = pytest.mark.django_db()
 

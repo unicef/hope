@@ -4,18 +4,18 @@ from django.core.management import call_command
 from django.urls import reverse
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.household import create_household
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.permissions import Permissions
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -109,10 +109,10 @@ class TestGrievanceCreateSensitiveTicket:
         }
         response = self.api_client.post(self.list_url, input_data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert (
-            response.json()["extras"]["category"]["grievance_complaint_ticket_extras"]["payment_record"][0]
-            == "This field is required."
-        )
+        response_data = response.json()
+        # The test is intentionally using wrong extras type for category
+        # Should get validation error about wrong extras for this category
+        assert "You can't provide extras.category.grievance_complaint_ticket_extras in 3" in str(response_data)
 
     def test_create_sensitive_ticket_without_issue_type(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)

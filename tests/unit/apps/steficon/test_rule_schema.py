@@ -1,7 +1,8 @@
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
-from hct_mis_api.apps.steficon.models import Rule
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.steficon.models import Rule
 
 RULE_QUERY = """
 query AllSteficonRules(

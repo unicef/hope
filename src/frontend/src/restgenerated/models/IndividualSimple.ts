@@ -39,5 +39,6 @@ export type IndividualSimple = {
     relationship?: RelationshipEnum;
     readonly role: string;
     readonly documents: Record<string, any>;
+    programSlug: string;
 };
 

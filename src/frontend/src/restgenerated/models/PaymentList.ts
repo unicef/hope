@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { IndividualList } from './IndividualList';
+import type { PaymentStatusEnum } from './PaymentStatusEnum';
+import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
 export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
@@ -24,14 +26,15 @@ export type PaymentList = {
     deliveredQuantityUsd?: string | null;
     deliveryDate?: string | null;
     deliveryType?: string | null;
-    status: string;
+    status?: PaymentStatusEnum;
+    readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
     hohFullName: string;
     readonly collectorId: string;
     collectorPhoneNo: string;
     collectorPhoneNoAlt: string;
-    readonly verification: Record<string, any>;
+    readonly verification: PaymentVerificationDetails;
     readonly paymentPlanHardConflicted: boolean;
     readonly paymentPlanHardConflictedData: Array<any>;
     readonly paymentPlanSoftConflicted: boolean;

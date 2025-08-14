@@ -9,27 +9,30 @@ from django.utils import timezone
 
 import pytest
 from constance.test import override_config
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
     SurveyFactory,
 )
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FlexibleAttribute
+from hope.apps.core.utils import resolve_flex_fields_choices_to_string
+from hope.apps.household.models import (
     DUPLICATE,
     HOST,
     REFUGEE,
@@ -39,15 +42,12 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import Payment
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 class TestHouseholdList:
@@ -147,7 +147,7 @@ class TestHouseholdList:
             }
             assert household_result["status"] == household.status
             assert household_result["size"] == household.size
-            assert household_result["residence_status"] == household.residence_status
+            assert household_result["residence_status"] == household.get_residence_status_display()
             assert household_result["total_cash_received"] == household.total_cash_received
             assert household_result["total_cash_received_usd"] == household.total_cash_received_usd
             assert (
@@ -378,10 +378,26 @@ class TestHouseholdList:
         survey = SurveyFactory(created_by=self.user)
         survey.recipients.set([self.household1])
 
-        response = self.api_client.get(list_url, {"survey": str(survey.pk)})
+        response = self.api_client.get(list_url, {"survey_id": str(survey.pk)})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
-        assert response.json()["results"][0]["id"] == str(self.household1.pk)
+        recipient_1_results = response.json()["results"][0]
+        assert recipient_1_results == {
+            "id": str(self.household1.pk),
+            "unicef_id": self.household1.unicef_id,
+            "size": self.household1.size,
+            "head_of_household": {
+                "id": str(self.household1.head_of_household.pk),
+                "full_name": self.household1.head_of_household.full_name,
+            },
+            "admin2": {
+                "id": str(self.household1.admin2.pk),
+                "name": self.household1.admin2.name,
+            },
+            "status": self.household1.status,
+            "residence_status": self.household1.get_residence_status_display(),
+            "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        }
 
     def test_household_recipients(self, create_user_role_with_permissions: Any) -> None:
         list_url = reverse(
@@ -579,7 +595,7 @@ class TestHouseholdDetail:
         assert data["child_hoh"] == self.household.child_hoh
         assert data["returnee"] == self.household.returnee
         assert data["size"] == self.household.size
-        assert data["residence_status"] == self.household.residence_status
+        assert data["residence_status"] == self.household.get_residence_status_display()
         assert data["program_registration_id"] == self.household.program_registration_id
         assert data["delivered_quantities"] == [
             {
@@ -806,13 +822,14 @@ class TestHouseholdMembers:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household1.residence_status,
+                    "residence_status": self.household1.get_residence_status_display(),
                     "country_origin": "",
                     "country": "",
                     "address": self.household1.address,
                     "village": self.household1.village,
                     "geopoint": None,
                     "import_id": self.household1.unicef_id,
+                    "program_slug": self.program.slug,
                 },
             },
             {
@@ -838,13 +855,14 @@ class TestHouseholdMembers:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household1.residence_status,
+                    "residence_status": self.household1.get_residence_status_display(),
                     "country_origin": "",
                     "country": "",
                     "address": self.household1.address,
                     "village": self.household1.village,
                     "geopoint": None,
                     "import_id": self.household1.unicef_id,
+                    "program_slug": self.program.slug,
                 },
             },
             {
@@ -870,13 +888,14 @@ class TestHouseholdMembers:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household2.residence_status,
+                    "residence_status": self.household2.get_residence_status_display(),
                     "country_origin": "",
                     "country": "",
                     "address": self.household2.address,
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
+                    "program_slug": self.program.slug,
                 },
             },
         ]
@@ -1012,7 +1031,7 @@ class TestHouseholdGlobalViewSet:
             }
             assert household_result_first["status"] == household.status
             assert household_result_first["size"] == household.size
-            assert household_result_first["residence_status"] == household.residence_status
+            assert household_result_first["residence_status"] == household.get_residence_status_display()
             assert household_result_first["total_cash_received"] == household.total_cash_received
             assert household_result_first["total_cash_received_usd"] == household.total_cash_received_usd
             assert (
@@ -1411,20 +1430,6 @@ class TestHouseholdFilter:
             household2_data={"residence_status": HOST},
         )
 
-    def test_filter_by_last_registration_date(self) -> None:
-        self._test_filter_households_in_list(
-            filters={"last_registration_date_after": "2022-12-31"},
-            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
-            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
-        )
-
-    def test_filter_by_first_registration_date(self) -> None:
-        self._test_filter_households_in_list(
-            filters={"first_registration_date": "2022-12-31 00:00:00"},
-            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
-            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
-        )
-
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
     @pytest.mark.parametrize(
         "filters,household1_data,household2_data,hoh_1_data,hoh_2_data",
@@ -1444,7 +1449,7 @@ class TestHouseholdFilter:
             ({"search": "456"}, {"program_registration_id": "456"}, {"program_registration_id": "123"}, {}, {}),
         ],
     )
-    def test_search(
+    def test_1_search(
         self, filters: Dict, household1_data: Dict, household2_data: Dict, hoh_1_data: Dict, hoh_2_data: Dict
     ) -> None:
         household1, household2 = self._create_test_households(
@@ -1460,3 +1465,17 @@ class TestHouseholdFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(household1.id)
         return response_data
+
+    def test_filter_by_last_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"last_registration_date_after": "2022-12-31"},
+            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
+            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
+        )
+
+    def test_filter_by_first_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"first_registration_date": "2022-12-31 00:00:00"},
+            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
+            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
+        )

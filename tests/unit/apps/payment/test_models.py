@@ -15,25 +15,19 @@ from django.utils import timezone
 
 import pytest
 from dateutil.relativedelta import relativedelta
-
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.currencies import USDC
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import (
-    LOT_DIFFICULTY,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -43,7 +37,20 @@ from hct_mis_api.apps.payment.fixtures import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
+from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+
+from hope.apps.core.currencies import USDC
+from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
+from hope.apps.household.models import (
+    LOT_DIFFICULTY,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
+from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
+from hope.apps.payment.models import (
     Account,
     AccountType,
     Approval,
@@ -56,15 +63,11 @@ from hct_mis_api.apps.payment.models import (
     PaymentDataCollector,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
-from hct_mis_api.apps.program.models import ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
-from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from hope.apps.program.models import ProgramCycle
+from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 
@@ -890,6 +893,7 @@ class TestAccountModel(TestCase):
         cls.fsp = FinancialServiceProviderFactory()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.financial_institution = FinancialInstitution.objects.create(
             name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
         )
@@ -1024,6 +1028,8 @@ class TestAccountModel(TestCase):
         )
 
     def test_validate(self) -> None:
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind), True)
+
         AccountFactory(
             data={
                 "number": "test",
@@ -1062,10 +1068,9 @@ class TestAccountModel(TestCase):
         Account.update_unique_field.assert_called_once()
 
     def test_unique_active_wallet_constraint(self) -> None:
-        AccountFactory(**{"individual": self.ind, "unique_key": "wallet-1", "active": True, "is_unique": True})
+        AccountFactory(individual=self.ind, unique_key="wallet-1", active=True, is_unique=True)
 
         test_cases = [
-            # (desc, active, is_unique, unique_key, should_raise)
             ("Inactive, should pass", False, True, "wallet-1", False),
             ("is_unique=False, should pass", True, False, "wallet-1", False),
             ("Both False, should pass", False, False, "wallet-1", False),
@@ -1107,14 +1112,14 @@ class TestAccountModelUniqueField(TransactionTestCase):
         account_type_bank, _ = AccountType.objects.update_or_create(
             key="bank",
             label="Bank",
-            defaults=dict(
-                unique_fields=[
+            defaults={
+                "unique_fields": [
                     "number",
                     "seeing_disability",
                     "name_of_cardholder__atm_card",
                 ],
-                payment_gateway_id="123",
-            ),
+                "payment_gateway_id": "123",
+            },
         )
 
         dmd_1 = AccountFactory(

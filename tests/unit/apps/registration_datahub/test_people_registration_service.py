@@ -6,12 +6,18 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.household.models import (
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,
@@ -19,14 +25,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.people_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.people_registration_service import (
     PeopleRegistrationService,
 )
 
@@ -108,7 +108,9 @@ class TestPeopleRegistrationService(TestCase):
         cls.files = {
             "individuals": [
                 {
-                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP////////////////////////////////////"
+                    "//////////////////////////////////////////////////wgALCAABAAEBAREA/"
+                    "8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }
@@ -193,14 +195,12 @@ class TestPeopleRegistrationService(TestCase):
         assert PendingDocument.objects.get(document_number="123123123", type__key="tax_id")
         assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
         assert PendingIndividual.objects.get(
-            **{
-                "given_name": "Jan",
-                "middle_name": "Roman",
-                "family_name": "Romaniak",
-                "sex": "MALE",
-                "email": "email123@mail.com",
-                "phone_no": "+393892781511",
-                "pregnant": True,
-            }
+            given_name="Jan",
+            middle_name="Roman",
+            family_name="Romaniak",
+            sex="MALE",
+            email="email123@mail.com",
+            phone_no="+393892781511",
+            pregnant=True,
         )
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)

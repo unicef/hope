@@ -6,23 +6,23 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_ukraine
-from hct_mis_api.apps.geo.fixtures import (
+from extras.test_utils.factories.core import create_ukraine
+from extras.test_utils.factories.geo import (
     AreaFactory,
     AreaTypeFactory,
     CountryFactory,
     generate_area_types,
 )
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.geo.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db()
 

@@ -6,12 +6,21 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
+  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { data } = useQuery({
-    queryKey: ['allFieldsAttributes'],
-    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      }),
+    enabled: !!selectedProgram?.id && !isAllPrograms, // Ensure the query runs only when programId is available
   });
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);

@@ -10,23 +10,17 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-from django.urls import reverse
 from django.utils import timezone
 
 import pytest
-from openpyxl import Workbook
-from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismFactory,
@@ -37,18 +31,26 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
 )
-from hct_mis_api.apps.payment.models import (
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory
+from openpyxl import Workbook
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FileTemp
+from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
+from hope.apps.payment.models import (
     Approval,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
-from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.apps.program.models import Program, ProgramCycle
+from hope.apps.steficon.models import Rule
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from test_utils.factories.household import create_household_and_individuals
 
 pytestmark = pytest.mark.django_db()
 
@@ -257,7 +259,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)
         ApprovalProcessFactory(payment_plan=self.payment_plan2)
-        response = self.client.post(
+        return self.client.post(
             reverse(
                 "api:payments:payment-plans-managerial-bulk-action",
                 kwargs={"business_area_slug": self.afghanistan.slug},
@@ -268,7 +270,6 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
                 "comment": "Test comment",
             },
         )
-        return response
 
     def test_bulk_action(
         self,
@@ -421,7 +422,7 @@ class TestPaymentPlanList:
         assert str(self.pp.id) == payment_plan["id"]
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
-        assert payment_plan["status"] == self.pp.get_status_display().upper()
+        assert payment_plan["status"] == self.pp.status
         assert payment_plan["total_households_count"] == self.pp.total_households_count
         assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
@@ -581,7 +582,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["id"] == str(self.pp.id)
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
-        assert payment_plan["status"] == self.pp.get_status_display().upper()
+        assert payment_plan["status"] == self.pp.status
         assert payment_plan["total_households_count"] == self.pp.total_households_count
         assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
@@ -719,7 +720,7 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(self.pp.id)
-        assert response_data[0]["status"] == "IN APPROVAL"
+        assert response_data[0]["status"] == "IN_APPROVAL"
         assert response_data[0]["name"] == self.pp.name
 
     def test_filter_by_program_cycle(self) -> None:
@@ -817,15 +818,13 @@ class TestPaymentPlanFilter:
             dispersion_start_date="2022-01-01",
             dispersion_end_date="2022-01-17",
         )
-        response = self.client.get(
-            self.list_url, {"dispersion_start_date__gte": "2022-02-23", "dispersion_end_date__lte": "2022-03-04"}
-        )
+        response = self.client.get(self.list_url, {"start_date": "2022-02-23", "end_date": "2022-03-04"})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "PP_abc"
 
-        response = self.client.get(self.list_url, {"dispersion_end_date__lte": "2022-01-18"})
+        response = self.client.get(self.list_url, {"end_date": "2022-01-18"})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -919,7 +918,7 @@ class TestTargetPopulationList:
         assert response_count.json()["count"] == 2
 
         self.tp.refresh_from_db()
-        tp = response_data[0]
+        tp = response_data[1]
         assert str(self.tp.id) == tp["id"]
         assert tp["name"] == "Test new TP"
         assert tp["status"] == self.tp.get_status_display().upper()
@@ -1028,7 +1027,7 @@ class TestTargetPopulationDetail:
         assert tp["name"] == self.tp.name
         assert tp["program_cycle"]["title"] == self.cycle.title
         assert tp["program"]["name"] == self.program_active.name
-        assert tp["status"] == self.tp.get_status_display().upper()
+        assert tp["status"] == self.tp.status
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
         assert tp["created_by"] == f"{self.user.first_name} {self.user.last_name}"
@@ -1141,8 +1140,8 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 2
-        assert response_data[0]["name"] == "PP_1"
-        assert response_data[1]["name"] == "PP_2"
+        assert response_data[0]["name"] == "PP_2"
+        assert response_data[1]["name"] == "PP_1"
 
         response = self.client.get(self.list_url, {"total_households_count__lte": 101})
         assert response.status_code == status.HTTP_200_OK
@@ -1405,9 +1404,12 @@ class TestTargetPopulationActions:
     )
     def test_mark_ready(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.target_population.financial_service_provider = FinancialServiceProviderFactory()
+        self.target_population.delivery_mechanism = DeliveryMechanismFactory()
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        self.target_population.save()
 
         response = self.client.get(self.url_mark_ready)
-
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json() == {"message": "Target Population ready for Payment Plan"}
@@ -1556,6 +1558,85 @@ class TestTargetPopulationActions:
             assert PaymentPlan.all_objects.filter(name="TP_to_delete").count() == 1  # is_removed = True
 
 
+class TestPendingPaymentsAction:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.pending_payments_url_name = "api:payments:target-populations-pending-payments"
+
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+
+        self.cycle = self.program.cycles.first()
+        self.api_client = api_client(self.user)
+
+        self.household1, (self.individual1_1, self.individual1_2) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+            ],
+        )
+
+        self.target_population = PaymentPlanFactory(
+            name="TP_OPEN",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        Payment.objects.create(
+            household=self.household1,
+            parent=self.target_population,
+            business_area=self.afghanistan,
+            collector_id=self.individual1_1.id,
+            status_date="2022-02-24",
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_VIEW_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pending_payments(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.pending_payments_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.target_population.id),
+                },
+            )
+        )
+
+        assert response.status_code == expected_status
+
+
 class TestPaymentPlanActions:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
@@ -1648,8 +1729,8 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert "USD" == resp_data["currency"]
-            assert "OPEN" == resp_data["status"]
+            assert resp_data["currency"] == "USD"
+            assert resp_data["status"] == "OPEN"
 
     def test_create_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
@@ -1749,7 +1830,7 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "Exclude Beneficiaries Running" == resp_data["background_action_status"]
+            assert resp_data["background_action_status"] == "EXCLUDE_BENEFICIARIES"
 
     def test_exclude_beneficiaries_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1796,7 +1877,7 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert "Rule Engine Running" in resp_data["background_action_status"]
+            assert "RULE_ENGINE_RUN" in resp_data["background_action_status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1901,7 +1982,7 @@ class TestPaymentPlanActions:
         assert status.HTTP_400_BAD_REQUEST
         assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_pp_entitlement_import_xlsx(self, mock_exchange_rate: Any, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS], self.afghanistan, self.program_active
@@ -1931,7 +2012,7 @@ class TestPaymentPlanActions:
         assert response.status_code == status.HTTP_200_OK
         if response.status_code == status.HTTP_200_OK:
             pp = response.json()
-            assert pp["background_action_status"] == "Importing Entitlements XLSX file"
+            assert pp["background_action_status"] == "XLSX_IMPORTING_ENTITLEMENTS"
             assert pp["imported_file_name"].startswith("pp_entitlement_valid") is True
 
     def test_pp_entitlement_import_xlsx_status_invalid(self, create_user_role_with_permissions: Any) -> None:
@@ -1963,7 +2044,7 @@ class TestPaymentPlanActions:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "IN APPROVAL"
+            assert response.json()["status"] == "IN_APPROVAL"
 
     @pytest.mark.parametrize(
         "permissions, expected_status, payment_plan_status",
@@ -2000,7 +2081,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_reject, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "LOCKED FSP"
+            assert response.json()["status"] == "LOCKED_FSP"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2022,7 +2103,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_approve, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "IN AUTHORIZATION"
+            assert response.json()["status"] == "IN_AUTHORIZATION"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2044,7 +2125,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_authorize, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "IN REVIEW"
+            assert response.json()["status"] == "IN_REVIEW"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2120,7 +2201,7 @@ class TestPaymentPlanActions:
         )
 
         if expected_status == status.HTTP_200_OK:
-            assert status.HTTP_400_BAD_REQUEST == response.status_code
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
             )
@@ -2132,7 +2213,7 @@ class TestPaymentPlanActions:
                 self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
             )
 
-            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert response_2.status_code == status.HTTP_400_BAD_REQUEST
             assert "Export failed: Payment Plan already has created exported file." in response_2.data
 
             self.pp.export_file_per_fsp = None
@@ -2142,7 +2223,7 @@ class TestPaymentPlanActions:
                 self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
             )
 
-            assert status.HTTP_400_BAD_REQUEST == response_3.status_code
+            assert response_3.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
                 in response_3.data
@@ -2155,7 +2236,7 @@ class TestPaymentPlanActions:
                 self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
             )
 
-            assert status.HTTP_200_OK == response_ok.status_code
+            assert response_ok.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2192,18 +2273,18 @@ class TestPaymentPlanActions:
         response = self.client.get(self.url_reconciliation_export_xlsx)
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert status.HTTP_200_OK == response.status_code
+            assert response.status_code == status.HTTP_200_OK
             assert "id" in response.data
 
             self.pp.eligible_payments.delete()
             response_1 = self.client.get(self.url_reconciliation_export_xlsx)
-            assert status.HTTP_400_BAD_REQUEST == response_1.status_code
+            assert response_1.status_code == status.HTTP_400_BAD_REQUEST
             assert "Export failed: The Payment List is empty." in response_1.data
 
             self.pp.status = PaymentPlan.Status.IN_APPROVAL
             self.pp.save()
             response_2 = self.client.get(self.url_reconciliation_export_xlsx)
-            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert response_2.status_code == status.HTTP_400_BAD_REQUEST
             assert (
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
                 in response_2.data
@@ -2236,27 +2317,6 @@ class TestPaymentPlanActions:
             in response_2.data[0]
         )
 
-    # @pytest.mark.parametrize(
-    #     "permissions, expected_status",
-    #     [
-    #         ([Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION], status.HTTP_200_OK),
-    #         ([], status.HTTP_403_FORBIDDEN),
-    #     ],
-    # )
-    # def test_reconciliation_import_xlsx(
-    #         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
-    # ) -> None:
-    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-    # self.pp.status = PaymentPlan.Status.ACCEPTED
-    # self.pp.save()
-    # file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_one_record.xlsx").read_bytes())
-    #         file.name = "import_file_one_record.xlsx"
-    #         response = self.client.post(self.url_reconciliation_import_xlsx, {"file": file}, format="multipart")
-    # ToDo: add test for success import xlsx
-    # after upload all Payments info
-    # self.pp.refresh_from_db()
-    # assert self.pp.status == PaymentPlan.Status.FINISHED
-
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
@@ -2277,13 +2337,13 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_pp_split, data, format="json")
 
         if expected_status == status.HTTP_200_OK:
-            assert status.HTTP_400_BAD_REQUEST == response.status_code
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment plan is already sent to payment gateway" in response.data
 
             split.sent_to_payment_gateway = False
             split.save()
             response_2 = self.client.post(self.url_pp_split, data, format="json")
-            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert response_2.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment plan must be accepted to make a split" in response_2.data
 
             self.pp.status = PaymentPlan.Status.ACCEPTED
@@ -2292,7 +2352,7 @@ class TestPaymentPlanActions:
             response_3 = self.client.post(
                 self.url_pp_split, {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS}, format="json"
             )
-            assert status.HTTP_400_BAD_REQUEST == response_3.status_code
+            assert response_3.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment Number is required for split by records" in response_3.data
 
             fsp_api = FinancialServiceProviderFactory(
@@ -2302,7 +2362,7 @@ class TestPaymentPlanActions:
                 51, parent=self.pp, status=Payment.STATUS_PENDING, financial_service_provider=fsp_api
             )
             response_4 = self.client.post(self.url_pp_split, data, format="json")
-            assert status.HTTP_400_BAD_REQUEST == response_4.status_code
+            assert response_4.status_code == status.HTTP_400_BAD_REQUEST
             assert "Cannot split Payment Plan into more than 50 parts" in response_4.data
 
             # success
@@ -2311,7 +2371,7 @@ class TestPaymentPlanActions:
                 {"payments_no": 30, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
                 format="json",
             )
-            assert status.HTTP_200_OK == response_ok.status_code
+            assert response_ok.status_code == status.HTTP_200_OK
             assert "id" in response_ok.data
 
     @pytest.mark.parametrize(

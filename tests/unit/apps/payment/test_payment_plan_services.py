@@ -4,35 +4,24 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
-from django.core.exceptions import ValidationError
+
+from rest_framework.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
-from flaky import flaky
-from freezegun import freeze_time
-from pytz import utc
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
     create_household_with_individual_with_collectors,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
-)
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
@@ -40,7 +29,21 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanSplitFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from flaky import flaky
+from freezegun import freeze_time
+from pytz import utc
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import FileTemp
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.payment.celery_tasks import (
+    prepare_follow_up_payment_plan_task,
+    prepare_payment_plan_task,
+)
+from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -48,10 +51,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.program.models import Program, ProgramCycle
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -108,7 +109,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Deletion is only allowed when the status is 'Open'",
         )
 
@@ -163,12 +164,12 @@ class TestPaymentPlanServices(APITestCase):
             },
             individuals_data=[{}],
         )
-        create_input_data = dict(
-            program_cycle_id=str(program_cycle.id),
-            name="TEST_123",
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        create_input_data = {
+            "program_cycle_id": str(program_cycle.id),
+            "name": "TEST_123",
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
@@ -177,7 +178,7 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-        )
+        }
 
         with self.assertRaisesMessage(
             ValidationError, f"Target Population with name: TEST_123 and program: {program.name} already exists."
@@ -216,11 +217,11 @@ class TestPaymentPlanServices(APITestCase):
         pp.save()
 
         # check validation for Open PP
-        open_input_data = dict(
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
+        open_input_data = {
+            "dispersion_start_date": parse_date("2020-09-10"),
+            "dispersion_end_date": parse_date("2020-09-11"),
+            "currency": "USD",
+        }
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         self.assertEqual(
@@ -242,7 +243,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -271,13 +272,13 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=program_cycle.id,
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": program_cycle.id,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
@@ -286,12 +287,12 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-            fsp_id=self.fsp.id,
-            delivery_mechanism_code=self.dm_transfer_to_account.code,
-        )
+            "fsp_id": self.fsp.id,
+            "delivery_mechanism_code": self.dm_transfer_to_account.code,
+        }
 
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
+            "hope.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
@@ -313,7 +314,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
@@ -325,11 +326,11 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
+        input_data = {
+            "dispersion_start_date": parse_date("2020-09-10"),
+            "dispersion_end_date": parse_date("2020-09-11"),
+            "currency": "USD",
+        }
 
         with self.assertRaisesMessage(ValidationError, "Not Allow edit Payment Plan within status LOCKED"):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
@@ -342,7 +343,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
@@ -369,7 +370,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
         # create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
-        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES):
+        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
             payment.status = status
             payment.save()
 
@@ -389,7 +390,6 @@ class TestPaymentPlanServices(APITestCase):
 
         follow_up_pp.refresh_from_db()
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
-        # self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
         self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
         self.assertEqual(follow_up_pp.business_area, pp.business_area)
@@ -460,7 +460,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Cannot create a follow-up of a follow-up Payment Plan",
         )
 
@@ -487,8 +487,8 @@ class TestPaymentPlanServices(APITestCase):
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
@@ -547,7 +547,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
 
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS"
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS"
         ) as max_chunks_patch:
             max_chunks_patch.__get__ = mock.Mock(return_value=2)
             with self.assertRaisesMessage(ValidationError, "Too many Payment Parts to split: 6, maximum is 2"):
@@ -602,7 +602,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_payment_items.count(), 12)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
@@ -632,7 +632,7 @@ class TestPaymentPlanServices(APITestCase):
         split.sent_to_payment_gateway = False
         split.save()
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
+            "hope.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
         ) as mock_send_to_payment_gateway_task:
             pps = PaymentPlanService(pp)
             pps.user = mock.MagicMock(pk="123")
@@ -649,16 +649,16 @@ class TestPaymentPlanServices(APITestCase):
             cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
         cycle = program.cycles.first()
-        input_data = dict(
-            business_area_slug="afghanistan",
-            dispersion_start_date=parse_date("2020-11-11"),
-            dispersion_end_date=parse_date("2020-11-20"),
-            currency="USD",
-            name="TestName123",
-            program_cycle_id=str(cycle.id),
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "dispersion_start_date": parse_date("2020-11-11"),
+            "dispersion_end_date": parse_date("2020-11-20"),
+            "currency": "USD",
+            "name": "TestName123",
+            "program_cycle_id": str(cycle.id),
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [
                         {
@@ -674,7 +674,7 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-        )
+        }
 
         with self.assertRaisesMessage(
             ValidationError,
@@ -693,7 +693,7 @@ class TestPaymentPlanServices(APITestCase):
         assert cycle.status == ProgramCycle.DRAFT
 
     @freeze_time("2022-12-12")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -710,13 +710,13 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=program_cycle.id,
-            flag_exclude_if_active_adjudication_ticket=False,
-            flag_exclude_if_on_sanction_list=False,
-            rules=[
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": program_cycle.id,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
                 {
                     "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
@@ -725,9 +725,9 @@ class TestPaymentPlanServices(APITestCase):
                     "individuals_filters_blocks": [],
                 }
             ],
-        )
+        }
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
+            "hope.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
@@ -794,7 +794,7 @@ class TestPaymentPlanServices(APITestCase):
             "SEND_XLSX_PASSWORD",
         ]
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}",
         )
 
@@ -837,7 +837,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).tp_rebuild()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Can only Rebuild Population for Locked or Open Population status",
         )
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
@@ -878,7 +878,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "At least one valid Payment should exist in order to Lock the Payment Plan",
         )
 
@@ -891,28 +891,28 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Not Allow edit targeting criteria within status {payment_plan.status}",
         )
 
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status",
         )
 
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"currency": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Not Allow edit Payment Plan within status {payment_plan.status}",
         )
 
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Name can be changed only within Open status",
         )
 
@@ -927,7 +927,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             f"Name 'test_data' and program '{self.cycle.program.name}' already exists.",
         )
 
@@ -936,7 +936,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"program_cycle_id": str(self.cycle.id)})
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Not possible to assign Finished Program Cycle",
         )
 
@@ -982,7 +982,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
         )
         payment_plan.financial_service_provider = self.fsp
@@ -992,7 +992,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
-            e.exception.message,
+            e.exception.detail[0],
             "All Payments must have entitlement quantity set.",
         )
         payment.entitlement_quantity = 100
@@ -1192,3 +1192,42 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=payment_plan).acceptance_process()
 
         self.assertIn(f"Approval Process object not found for PaymentPlan {payment_plan.id}", str(error.exception))
+
+    def test_update_rules_tp_open(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.TP_OPEN,
+        )
+        input_data = {
+            "rules": [
+                {
+                    "individual_ids": "",
+                    "household_ids": "",
+                    "households_filters_blocks": [],
+                    "individuals_filters_blocks": [
+                        {
+                            "individual_block_filters": [
+                                {
+                                    "comparison_method": "RANGE",
+                                    "arguments": [10, 20],
+                                    "field_name": "age",
+                                    "flex_field_classification": "NOT_FLEX_FIELD",
+                                }
+                            ]
+                        }
+                    ],
+                    "collectors_filters_blocks": [],
+                }
+            ],
+            "flag_exclude_if_on_sanction_list": True,
+            "flag_exclude_if_active_adjudication_ticket": False,
+        }
+        # Should not raise ValidationError
+        PaymentPlanService(payment_plan).update(input_data)
+        payment_plan.refresh_from_db()
+        # Check that rules were updated
+        self.assertEqual(payment_plan.rules.count(), 1)
+        # Check flags
+        self.assertTrue(payment_plan.flag_exclude_if_on_sanction_list)
+        self.assertFalse(payment_plan.flag_exclude_if_active_adjudication_ticket)

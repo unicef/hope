@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
@@ -42,7 +42,7 @@ export function ReactivateProgram({
     onSuccess: () => {
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.ACTIVE,
+        status: ProgramStatusEnum.ACTIVE,
       });
       queryClient.invalidateQueries({
         queryKey: ['program', businessAreaSlug, program.slug],

@@ -47,6 +47,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
 
   const keys = Object.keys(changes);
   const { length } = keys;
+
   if (length === 1) {
     return (
       <Row role="checkbox" data-cy="log-row">

@@ -4,17 +4,17 @@ from urllib.parse import urlencode
 from django.urls import reverse
 
 import pytest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.activity_log.models import LogEntry
-from hct_mis_api.apps.activity_log.utils import create_diff
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hope.apps.account.permissions import Permissions
+from hope.apps.activity_log.models import LogEntry
+from hope.apps.activity_log.utils import create_diff
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -147,7 +147,7 @@ class TestLogEntryView:
                 assert log_result["changes"] == log.changes
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
-                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["content_type"] == log.content_type.name
                 assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
@@ -155,6 +155,11 @@ class TestLogEntryView:
                 else:
                     expected_is_user_generated = None
                 assert log_result["is_user_generated"] == expected_is_user_generated
+
+            assert response_results[0]["program_slug"] is None
+            assert response_results[1]["program_slug"] == self.program_1.slug
+            assert response_results[2]["program_slug"] == self.program_2.slug
+            assert response_results[3]["program_slug"] == self.program_1.slug
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -206,7 +211,7 @@ class TestLogEntryView:
                 assert log_result["changes"] == log.changes
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
-                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["content_type"] == log.content_type.name
                 assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):

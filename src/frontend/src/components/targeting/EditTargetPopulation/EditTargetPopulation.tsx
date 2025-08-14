@@ -23,7 +23,7 @@ import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFi
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
@@ -67,8 +67,7 @@ const EditTargetPopulation = ({
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.flagExcludeIfActiveAdjudicationTicket ||
-      false,
+      paymentPlan.flagExcludeIfActiveAdjudicationTicket || false,
     flagExcludeIfOnSanctionList:
       paymentPlan.flagExcludeIfOnSanctionList || false,
     programCycleId: {
@@ -77,6 +76,7 @@ const EditTargetPopulation = ({
     },
   };
 
+  const queryClient = useQueryClient();
   const { mutateAsync: updateTargetPopulation, isPending: loadingUpdate } =
     useMutation({
       mutationFn: ({
@@ -96,6 +96,12 @@ const EditTargetPopulation = ({
           programSlug: slug,
           requestBody,
         }),
+      onSuccess: () => {
+        // Invalidate and refetch the grievance ticket details
+        queryClient.invalidateQueries({
+          queryKey: ['targetPopulation', businessArea, id, programSlug],
+        });
+      },
     });
 
   const handleValidate = (values): { targetingCriteria?: string } => {
@@ -124,25 +130,28 @@ const EditTargetPopulation = ({
 
   const handleSubmit = async (values): Promise<void> => {
     try {
+      const requestBody: PatchedTargetPopulationCreate = {
+        excludedIds: values.excludedIds,
+        exclusionReason: values.exclusionReason,
+        fspId: values.targetingCriteria[0]?.fsp || null,
+        deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
+        programCycleId: values.programCycleId.value,
+        ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
+          name: values.name,
+        }),
+        ...getTargetingCriteriaVariables({
+          flagExcludeIfActiveAdjudicationTicket:
+            values.flagExcludeIfActiveAdjudicationTicket,
+          flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+          criterias: values.targetingCriteria,
+        }),
+      };
       await updateTargetPopulation(
         {
           businessAreaSlug: businessArea,
           tpId: id,
           slug: programSlug,
-          requestBody: {
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            programCycleId: values.programCycleId.value,
-            ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
-              name: values.name,
-            }),
-            ...getTargetingCriteriaVariables({
-              flagExcludeIfActiveAdjudicationTicket:
-                values.flagExcludeIfActiveAdjudicationTicket,
-              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-              criterias: values.targetingCriteria,
-            }),
-          },
+          requestBody,
         },
         {
           onSuccess: () => {

@@ -10,18 +10,41 @@ import { TicketsByLocationAndCategorySection } from '@components/grievances/Grie
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
-  const { data, loading } = useAllGrievanceDashboardChartsQuery({
-    variables: { businessAreaSlug: businessArea },
-    fetchPolicy: 'network-only',
+
+  // Use program-specific dashboard if we're in a specific program context,
+  // otherwise use global dashboard
+  const { data, isLoading: loading } = useQuery({
+    queryKey: [
+      'grievanceDashboard',
+      businessAreaSlug,
+      programSlug,
+      isAllPrograms,
+    ],
+    queryFn: () => {
+      if (isAllPrograms) {
+        return RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve({
+          businessAreaSlug,
+        });
+      } else {
+        return RestService.restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve(
+          {
+            businessAreaSlug,
+            programSlug,
+          },
+        );
+      }
+    },
+    refetchOnMount: 'always',
   });
 
   if (!data || permissions === null) return null;
@@ -95,7 +118,7 @@ function GrievancesDashboardPage(): ReactElement {
               <TicketsByStatusSection data={ticketsByStatus} />
             </Box>
           </Grid>
-          <Grid size={{ xs:8 }}>
+          <Grid size={{ xs: 8 }}>
             <Box ml={3}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>

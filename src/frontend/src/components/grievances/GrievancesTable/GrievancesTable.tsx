@@ -17,13 +17,13 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
-  PERMISSIONS,
   hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
 } from '../../../config/permissions';
 import {
   headCellsSocialProgram,
@@ -70,8 +70,8 @@ export const GrievancesTable = ({
       documentNumber: filter.documentNumber.trim(),
       status: [filter.status],
       fsp: filter.fsp,
-      createdAtBefore: dateToIsoString(filter.createdAtBefore, 'startOfDay'),
-      createdAtAfter: dateToIsoString(filter.createdAtAfter, 'endOfDay'),
+      createdAtBefore: filter.createdAtBefore,
+      createdAtAfter: filter.createdAtAfter,
       category: filter.category,
       issueType: filter.issueType,
       assignedTo: filter.assignedTo,

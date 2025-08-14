@@ -2,12 +2,13 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+
+from hope.apps.household.forms import CreateTargetPopulationTextForm
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.targeting.celery_tasks import create_tp_from_list
 
 
 class CreateTPFromListTaskTest(TestCase):
@@ -25,8 +26,8 @@ class CreateTPFromListTaskTest(TestCase):
             "program_cycle": self.program_cycle.pk,
         }
 
-    @patch("hct_mis_api.apps.household.forms.CreateTargetPopulationTextForm")
-    @patch("hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
+    @patch("hope.apps.household.forms.CreateTargetPopulationTextForm")
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
     def test_create_tp_from_list_success(self, mock_create_payments: Mock, mock_form_class: Mock) -> None:
         mock_form = Mock(spec=CreateTargetPopulationTextForm)
         mock_form.is_valid.return_value = True

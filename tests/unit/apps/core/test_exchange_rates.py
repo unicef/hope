@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional
 from unittest import mock
 
 from django.test import TestCase, override_settings
@@ -9,8 +9,8 @@ from django.utils import timezone
 import requests_mock
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
-from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
+from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
+from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     "ROWSET": {
@@ -154,20 +154,20 @@ class TestExchangeRatesAPI(TestCase):
 
     @parameterized.expand(
         [
-            ("yes", EXCHANGE_RATES_WITH_HISTORICAL_DATA),
-            ("short", EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA),
+            (ExchangeRateClientAPI.HISTORY_MODE_PARAM_LONG, EXCHANGE_RATES_WITH_HISTORICAL_DATA),
+            (ExchangeRateClientAPI.HISTORY_MODE_PARAM_SHORT, EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA),
             (None, EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA),
         ]
     )
-    def test_fetch_exchange_rates(self, mode: str, json_data: dict) -> None:
+    def test_fetch_exchange_rates(self, history_mode: Optional[str], json_data: dict) -> None:
         url = "https://uniapis.unicef.org/biapi/v1/exchangerates"
         with requests_mock.Mocker() as adapter:
-            if mode in ["yes", "short"]:
-                url += f"?history={mode}"
+            if history_mode:
+                url += f"?history={history_mode}"
             adapter.register_uri("GET", url=url, json=json_data)
 
             api_client = ExchangeRateClientAPI(api_key="TEST_API_KEY")
-            response_dict = api_client.fetch_exchange_rates(mode=mode)
+            response_dict = api_client.fetch_exchange_rates(history_mode=history_mode)
 
             self.assertEqual(json_data, response_dict)
 

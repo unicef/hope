@@ -6,17 +6,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.core.backends import PermissionsBackend
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.core.backends import PermissionsBackend
+from hope.apps.core.models import BusinessArea
+from hope.apps.program.models import Program
 
 
 class TestPermissionsBackend(TestCase):
@@ -59,7 +60,7 @@ class TestPermissionsBackend(TestCase):
 
         self.assertEqual(permissions, cached_permissions)
 
-    @patch("hct_mis_api.apps.core.backends.cache.get")
+    @patch("hope.apps.core.backends.cache.get")
     def test_cache_get(self, mock_cache_get: Any) -> None:
         mock_cache_get.return_value = {self._get_permission_name_combined(self.permission)}
         permissions = self.backend.get_all_permissions(self.user, self.business_area)

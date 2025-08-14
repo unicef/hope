@@ -4,11 +4,12 @@ from typing import Dict, Tuple
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_datahub.validators import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.core.models import BusinessArea
+from hope.apps.program.models import Program
+from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
 
@@ -567,17 +568,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
             }
         ]
         result = validator.image_validator("signature-17_10_32.png", "test_field", invalid_attachments)
-        expected = "Specified image signature-17_10_32.png for field " "test_field is not in attachments"
+        expected = "Specified image signature-17_10_32.png for field test_field is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
         result = validator.image_validator("signature-17_10_32.png", "test_field", [])
-        expected = "Specified image signature-17_10_32.png for field " "test_field is not in attachments"
+        expected = "Specified image signature-17_10_32.png for field test_field is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
         result = validator.image_validator("signature-17_10_32.txt", "test_field", [])
-        expected = "Specified image signature-17_10_32.txt for field " "test_field is not a valid image file"
+        expected = "Specified image signature-17_10_32.txt for field test_field is not a valid image file"
         self.assertEqual(result, expected)
 
         # Kobo not always returns consent_sign_h_c in attachments, according to AB#168823 we should skip it
@@ -657,7 +658,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("size_h_c", "four", attachments),
                 "expected": {
                     "header": "size_h_c",
-                    "message": "Invalid value four of type str for field " "size_h_c of type int",
+                    "message": "Invalid value four of type str for field size_h_c of type int",
                 },
             },
             # STRING
@@ -676,14 +677,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("returnee_h_c", "123", attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type str for field " "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type str for field returnee_h_c of type bool",
                 },
             },
             {
                 "args": ("returnee_h_c", 123, attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type int for field " "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type int for field returnee_h_c of type bool",
                 },
             },
             # SELECT ONE
@@ -720,7 +721,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
                 "expected": {
                     "header": "hh_geopoint_h_c",
-                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
+                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 for field hh_geopoint_h_c",
                 },
             },
         )

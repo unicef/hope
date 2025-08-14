@@ -5,27 +5,14 @@ from django.core.files.base import ContentFile
 from django.core.management import call_command
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_LOW,
-    PRIORITY_MEDIUM,
-    URGENCY_NOT_URGENT,
-)
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
@@ -35,17 +22,38 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketNeedsAdjudicationDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketComplaintDetails,
-    TicketNote,
-)
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
 )
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.models import AdminAreaLimitedTo
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.constants import (
+    PRIORITY_LOW,
+    PRIORITY_MEDIUM,
+    URGENCY_NOT_URGENT,
+)
+from hope.apps.grievance.models import (
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketNote,
+)
+from hope.apps.household.models import (
     FEMALE,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -57,18 +65,10 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-)
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -1573,39 +1573,33 @@ class TestGrievanceTicketApprove:
         household.registration_data_import.save()
 
         individual_1 = IndividualFactory(
-            **{
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Benjamin Butler",
+            given_name="Benjamin",
+            family_name="Butler",
+            phone_no="(953)682-4596",
+            birth_date="1943-07-30",
+            household=None,
+            program=self.program,
         )
 
         individual_2 = IndividualFactory(
-            **{
-                "full_name": "Andrew Jackson",
-                "given_name": "Andrew",
-                "family_name": "Jackson",
-                "phone_no": "(853)692-4696",
-                "birth_date": "1963-09-12",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Andrew Jackson",
+            given_name="Andrew",
+            family_name="Jackson",
+            phone_no="(853)692-4696",
+            birth_date="1963-09-12",
+            household=None,
+            program=self.program,
         )
 
         IndividualFactory(
-            **{
-                "full_name": "Ulysses Grant",
-                "given_name": "Ulysses",
-                "family_name": "Grant",
-                "phone_no": "(953)682-1111",
-                "birth_date": "1913-01-31",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Ulysses Grant",
+            given_name="Ulysses",
+            family_name="Grant",
+            phone_no="(953)682-1111",
+            birth_date="1913-01-31",
+            household=None,
+            program=self.program,
         )
 
         household.head_of_household = individual_1

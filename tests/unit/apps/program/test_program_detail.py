@@ -1,26 +1,26 @@
 from typing import Any
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
 )
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.models import Partner
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -124,7 +124,8 @@ class TestProgramDetail:
             "id": self.program.data_collecting_type.id,
             "label": self.program.data_collecting_type.label,
             "code": self.program.data_collecting_type.code,
-            "type": self.program.data_collecting_type.get_type_display(),
+            "type": self.program.data_collecting_type.type,
+            "type_display": self.program.data_collecting_type.get_type_display(),
             "household_filters_available": self.program.data_collecting_type.household_filters_available,
             "individual_filters_available": self.program.data_collecting_type.individual_filters_available,
         }

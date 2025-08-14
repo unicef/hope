@@ -7,44 +7,40 @@ from unittest.mock import patch
 from django.conf import settings
 
 import pytz
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
 
 
 def file_without_delivery_dates() -> BytesIO:
     content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_no_delivery_date.xlsx").read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 def file_with_existing_delivery_dates() -> BytesIO:
     content = Path(
         f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_with_existing_delivery_date.xlsx"
     ).read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 def file_one_record() -> BytesIO:
     content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_one_record.xlsx").read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 def file_reference_id() -> BytesIO:
     content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_reference_id.xlsx").read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 class TestDeliveryDate(APITestCase):
@@ -94,9 +90,9 @@ class TestDeliveryDate(APITestCase):
             currency="PLN",
         )
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch(
-        "hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
+        "hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
         return_value=datetime(2023, 10, 23).replace(tzinfo=utc),
     )
     def test_uploading_delivery_date_with_xlsx(self, mock_time_zone: Any, mock_exchange_rate: Any) -> None:
@@ -124,7 +120,7 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(self.payment_2.delivery_date, old_delivery_date2)
         self.assertEqual(self.payment_3.delivery_date, old_delivery_date3)
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:
         self.payment_1.delivery_date = datetime(2023, 10, 23).replace(tzinfo=utc)
         self.payment_2.delivery_date = datetime(2023, 10, 23).replace(tzinfo=utc)
@@ -151,7 +147,7 @@ class TestDeliveryDate(APITestCase):
             ],
         )
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
         self, mock_exchange_rate: Any
     ) -> None:
@@ -177,7 +173,7 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(self.payment_2.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
         self.assertEqual(self.payment_3.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_upload_reference_id(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),
@@ -208,7 +204,7 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(payment_1.transaction_reference_id, "ref1")
         self.assertEqual(payment_2.transaction_reference_id, "ref2")
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=1.0)
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=1.0)
     def test_upload_transaction_status_blockchain_link(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),

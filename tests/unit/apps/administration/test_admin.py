@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple, TYPE_CHECKING
 
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -6,14 +6,16 @@ from django.urls import reverse
 
 import factory
 from django_webtest import WebTest
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, RoleAssignment, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+
+if TYPE_CHECKING:
+    from hope.apps.core.models import BusinessArea
 
 EXCLUDED_MODELS = []
 

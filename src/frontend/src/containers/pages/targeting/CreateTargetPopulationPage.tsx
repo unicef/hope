@@ -117,6 +117,9 @@ const CreateTargetPopulationPage = (): ReactElement => {
       exclusionReason: values.exclusionReason,
       fspId: fsp,
       deliveryMechanismCode: deliveryMechanism,
+      flagExcludeIfActiveAdjudicationTicket:
+        values.flagExcludeIfActiveAdjudicationTicket,
+      flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
       ...getTargetingCriteriaVariables(values),
     };
 

@@ -8,6 +8,7 @@ import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFa
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { AdminButton } from '@core/AdminButton';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -71,7 +72,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
       paymentPlanStatus === PaymentPlanStatusEnum.FINISHED
     ) {
       const ButtonComponent =
-        payment.status === 'FORCE_FAILED'
+        payment.status === PaymentStatusEnum.FORCE_FAILED
           ? RevertForceFailedButton
           : ForceFailedButton;
       return <ButtonComponent paymentId={payment.id} />;

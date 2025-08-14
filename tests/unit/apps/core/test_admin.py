@@ -5,17 +5,22 @@ from django.test import TestCase
 from django.urls import reverse
 
 from django_webtest import WebTest
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import (
+    DataCollectingTypeFactory,
+    create_afghanistan,
+)
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.core.admin import (
+from hope.admin.business_area import (
     AcceptanceProcessThresholdFormset,
+)
+from hope.admin.data_collecting_type import (
     DataCollectingTypeForm,
 )
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.account.models import RoleAssignment
+from hope.apps.core.models import DataCollectingType
 
 
 class TestAcceptanceProcessThreshold(TestCase):
@@ -93,7 +98,8 @@ class TestDataCollectingTypeForm(TestCase):
         )
         self.assertEqual(
             form.errors["compatible_types"][0],
-            f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
+            f"DCTs of different types cannot be compatible with each other."
+            f" Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
         )
 
     def test_cannot_add_compatible_dct_with_different_type(self) -> None:

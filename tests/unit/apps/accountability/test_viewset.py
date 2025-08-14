@@ -1,35 +1,37 @@
 import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
+
+from hope.apps.core.services.rapid_pro.api import TokenNotProvided
+
 from urllib.parse import urlencode
 
-from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
 import pytest
-from rest_framework import status
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
     FeedbackFactory,
     SurveyFactory,
 )
-from hct_mis_api.apps.accountability.models import Survey
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.accountability.models import Survey
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -763,7 +765,7 @@ class TestFeedbackViewSet:
             format="json",
         )
         assert response.status_code == expected_status
-        assert "It is not possible to create Feedback for a Finished Program." in response.json()
+        assert "It is not possible to update Feedback for a Finished Program." in response.json()
 
     def test_list_feedback_issue_type(self) -> None:
         response_data = self.client.get(reverse("api:choices-feedback-issue-type")).data
@@ -1176,8 +1178,8 @@ class TestMessageViewSet:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1209,8 +1211,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1236,8 +1238,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1269,8 +1271,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1296,8 +1298,8 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1335,34 +1337,34 @@ class TestMessageViewSet:
         )
         rdi = RegistrationDataImportFactory(imported_by=self.user, business_area=self.afghanistan)
 
-        with pytest.raises(ValidationError) as e:
-            self.client.post(
-                self.url_list,
-                {
-                    "title": "Test Error",
-                    "body": "Thank you for tests!",
-                    "sampling_type": Survey.SAMPLING_FULL_LIST,
-                    "full_list_arguments": {"excluded_admin_areas": []},
-                    "payment_plan": str(payment_plan.pk),
-                },
-                format="json",
-            )
-        assert "No recipients found for the given criteria" in str(e.value)
+        response = self.client.post(
+            self.url_list,
+            {
+                "title": "Test Error",
+                "body": "Thank you for tests!",
+                "sampling_type": Survey.SAMPLING_FULL_LIST,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "payment_plan": str(payment_plan.pk),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "No recipients found for the given criteria" in response.json()
 
-        with pytest.raises(ValidationError) as e:
-            self.client.post(
-                self.url_list,
-                {
-                    "title": "Test Error",
-                    "body": "Thank you for tests!",
-                    "sampling_type": Survey.SAMPLING_FULL_LIST,
-                    "full_list_arguments": {"excluded_admin_areas": []},
-                    "random_sampling_arguments": None,
-                    "registration_data_import": str(rdi.pk),
-                },
-                format="json",
-            )
-        assert "No recipients found for the given criteria" in str(e.value)
+        response_2 = self.client.post(
+            self.url_list,
+            {
+                "title": "Test Error",
+                "body": "Thank you for tests!",
+                "sampling_type": Survey.SAMPLING_FULL_LIST,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "random_sampling_arguments": None,
+                "registration_data_import": str(rdi.pk),
+            },
+            format="json",
+        )
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "No recipients found for the given criteria" in response_2.json()
 
     def test_create_message_invalid_request(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1372,26 +1374,26 @@ class TestMessageViewSet:
             self.program_active,
         )
 
-        with pytest.raises(ValidationError) as e:
-            self.client.post(
-                self.url_list,
-                {
-                    "title": "Test Error",
-                    "body": "Thank you for tests!",
-                    "sampling_type": Survey.SAMPLING_RANDOM,
-                    "full_list_arguments": {"excluded_admin_areas": []},
-                    "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
-                        "sex": "MALE",
-                        "margin_of_error": 20.0,
-                        "confidence_interval": 0.9,
-                        "excluded_admin_areas": [],
-                    },
-                    "households": [str(self.households[0].pk)],
+        response = self.client.post(
+            self.url_list,
+            {
+                "title": "Test Error",
+                "body": "Thank you for tests!",
+                "sampling_type": Survey.SAMPLING_RANDOM,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "random_sampling_arguments": {
+                    "age": {"max": 80, "min": 30},
+                    "sex": "MALE",
+                    "margin_of_error": 20.0,
+                    "confidence_interval": 0.9,
+                    "excluded_admin_areas": [],
                 },
-                format="json",
-            )
-        assert f"Must not provide full_list_arguments for {Survey.SAMPLING_RANDOM}" in str(e.value)
+                "households": [str(self.households[0].pk)],
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert f"Must not provide full_list_arguments for {Survey.SAMPLING_RANDOM}" in response.json()
 
     def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1627,7 +1629,7 @@ class TestSurveyViewSet:
                 assert survey_result["unicef_id"] == str(survey.unicef_id)
                 assert survey_result["title"] == survey.title
                 assert survey_result["body"] == survey.body
-                assert survey_result["category"] == survey.category
+                assert survey_result["category"] == survey.get_category_display()
                 assert survey_result["flow_id"] == survey.flow_id
                 assert survey_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{survey.flow_id}/"
                 assert survey_result["created_by"] == f"{survey.created_by.first_name} {survey.created_by.last_name}"
@@ -1684,7 +1686,7 @@ class TestSurveyViewSet:
             assert "id" in resp_data
             assert resp_data["title"] == "Survey 1"
             assert resp_data["body"] == "Survey 1 body"
-            assert resp_data["category"] == "SMS"
+            assert resp_data["category"] == "Survey with SMS"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1778,9 +1780,9 @@ class TestSurveyViewSet:
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
         )
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
             patch(
-                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
                 MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
             ),
         ):
@@ -1887,3 +1889,17 @@ class TestSurveyViewSet:
         results_ids = [survey["id"] for survey in results]
         assert str(self.srv.id) in results_ids
         assert str(self.srv_2.id) in results_ids
+
+    def test_get_available_flows_no_token(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        with (
+            patch(
+                "hope.apps.accountability.api.views.RapidProAPI.__init__",
+                MagicMock(side_effect=TokenNotProvided),
+            ),
+        ):
+            response = self.client.get(self.url_flows)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == ["Token is not provided."]

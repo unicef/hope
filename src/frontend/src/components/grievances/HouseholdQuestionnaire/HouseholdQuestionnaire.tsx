@@ -24,19 +24,29 @@ function HouseholdQuestionnaire({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const householdId = values.selectedHousehold?.id;
+  const householdId =
+    typeof values.selectedHousehold === 'object' &&
+    values.selectedHousehold !== null
+      ? values.selectedHousehold.id
+      : values.selectedHousehold;
 
   const {
     data: household,
     isLoading,
     error,
   } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, householdId, programId],
+    queryKey: [
+      'household',
+      businessArea,
+      householdId,
+      programId,
+      values.selectedHousehold.programSlug,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: programId,
+        programSlug: values.selectedHousehold.programSlug,
       }),
     enabled: !!householdId,
   });
@@ -44,7 +54,7 @@ function HouseholdQuestionnaire({
   if (isLoading) return <LoadingComponent />;
   if (error) return <div>Error loading household data</div>;
 
-  const selectedHouseholdData = household || values.selectedHousehold;
+  const selectedHouseholdData = household;
 
   if (!selectedHouseholdData) return null;
 

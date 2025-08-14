@@ -1,9 +1,9 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { ChoiceObject } from '@generated/graphql';
 import { Choice } from '@restgenerated/models/Choice';
-import { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatus } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import localForage from 'localforage';
 import _ from 'lodash';
 import camelCase from 'lodash/camelCase';
@@ -103,16 +103,17 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case ProgramStatus.DRAFT:
+    case ProgramStatusEnum.DRAFT:
       return theme.hctPalette.gray;
-    case ProgramStatus.ACTIVE:
+    case ProgramStatusEnum.ACTIVE:
       return theme.hctPalette.green;
-    case ProgramStatus.FINISHED:
+    case ProgramStatusEnum.FINISHED:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
   }
 }
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -132,6 +133,7 @@ export function maritalStatusToColor(
       return theme.hctPalette.gray;
   }
 }
+
 export function populationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -157,6 +159,7 @@ export function cashPlanStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function paymentRecordStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -179,14 +182,14 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'PENDING':
-    case 'SENT_TO_PAYMENT_GATEWAY':
-    case 'SENT_TO_FSP':
+    case 'Pending':
+    case 'Sent to Payment Gateway':
+    case 'Sent to FSP':
       return theme.hctPalette.orange;
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case 'PARTIALLY_DISTRIBUTED':
+    case 'Partially Distributed':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -195,22 +198,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case 'PENDING':
+    case 'Pending':
       return 'PENDING';
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return 'DELIVERED FULLY';
-    case 'PARTIALLY_DISTRIBUTED':
+    case 'Partially Distributed':
       return 'DELIVERED PARTIALLY';
-    case 'NOT_DISTRIBUTED':
+    case 'Not Distributed':
       return 'NOT DELIVERED';
-    case 'FORCE_FAILED':
+    case 'Force failed':
       return 'FORCE FAILED';
-    case 'MANUALLY_CANCELLED':
+    case 'Manually Cancelled':
       return 'MANUALLY CANCELLED';
-    case 'SENT_TO_PAYMENT_GATEWAY':
+    case 'Sent to Payment Gateway':
       return 'SENT TO PAYMENT GATEWAY';
-    case 'SENT_TO_FSP':
+    case 'Sent to FSP':
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
@@ -219,6 +222,10 @@ export function paymentStatusDisplayMap(status: string): string {
 
 export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
+    case PaymentPlanStatus.OPEN:
+      return 'OPEN';
+    case PaymentPlanStatus.LOCKED:
+      return 'LOCKED';
     case PaymentPlanStatus.TP_OPEN:
       return 'OPEN';
     case PaymentPlanStatus.DRAFT:
@@ -275,6 +282,7 @@ export function verificationRecordsStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function registrationDataImportStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -378,6 +386,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   }
   return theme.palette.error.main;
 }
+
 export function periodicDataUpdatesUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -401,21 +410,17 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatus.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.RULE_ENGINE_ERROR]:
-      theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XLSX_EXPORT_ERROR]:
-      theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS]:
+    [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION]:
+    [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XLSX_IMPORT_ERROR]:
-      theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY]:
-      theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR]:
+    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
   if (status in colorsMap) {
@@ -609,14 +614,15 @@ export function choicesToDict(choices: ChoiceObject[]): {
 
 export function programStatusToPriority(status: string): number {
   switch (status) {
-    case ProgramStatus.DRAFT:
+    case ProgramStatusEnum.DRAFT:
       return 1;
-    case ProgramStatus.ACTIVE:
+    case ProgramStatusEnum.ACTIVE:
       return 2;
     default:
       return 3;
   }
 }
+
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
@@ -1264,9 +1270,11 @@ export const filterEmptyParams = (params) => {
     }),
   );
 };
+
 /* eslint-enable @typescript-eslint/no-unused-vars,
                  @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
+  const notCalizedKeys = ['form_errors', 'household_data'];
   if (_.isArray(data)) {
     return data.map(deepCamelize);
   } else if (_.isObject(data)) {
@@ -1274,6 +1282,11 @@ export function deepCamelize(data) {
       data,
       (result, value, key) => {
         const camelKey = _.camelCase(key);
+        if (notCalizedKeys.includes(key)) {
+          // Special handling for error_info to keep it as is
+          result[camelKey] = value;
+          return result;
+        }
         result[camelKey] = deepCamelize(value);
         return result;
       },
@@ -1342,8 +1355,37 @@ export function showApiErrorMessages(
   ) {
     Object.entries(error.body).forEach(([field, messages]) => {
       if (Array.isArray(messages)) {
-        messages.forEach((msg: string) => {
-          if (msg) showMessage(`${field}: ${msg}`);
+        // Check for array of objects (nested errors)
+        if (
+          messages.length > 0 &&
+          typeof messages[0] === 'object' &&
+          messages[0] !== null
+        ) {
+          messages.forEach((nestedObj, idx) => {
+            Object.entries(nestedObj).forEach(
+              ([nestedField, nestedMessages]) => {
+                if (Array.isArray(nestedMessages)) {
+                  nestedMessages.forEach((msg: string) => {
+                    if (msg)
+                      showMessage(`${field}[${idx}].${nestedField}: ${msg}`);
+                  });
+                }
+              },
+            );
+          });
+        } else {
+          messages.forEach((msg: string) => {
+            if (msg) showMessage(`${field}: ${msg}`);
+          });
+        }
+      } else if (typeof messages === 'object' && messages !== null) {
+        // Handle single nested error object
+        Object.entries(messages).forEach(([nestedField, nestedMessages]) => {
+          if (Array.isArray(nestedMessages)) {
+            nestedMessages.forEach((msg: string) => {
+              if (msg) showMessage(`${field}.${nestedField}: ${msg}`);
+            });
+          }
         });
       }
     });
@@ -1367,4 +1409,14 @@ export function showApiErrorMessages(
     return;
   }
   showMessage(fallbackMsg);
+}
+
+// Utility to split camelCase/PascalCase and capitalize
+export function splitCamelCase(str: string): string {
+  if (!str) return '';
+  // Insert space before all caps, then capitalize first letter
+  const withSpaces = str
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s) => s.toUpperCase());
+  return withSpaces.trim();
 }

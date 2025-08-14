@@ -3,20 +3,20 @@ from typing import Any, Callable
 from django.db.models import Q
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo, RoleAssignment
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.models import AdminAreaLimitedTo, RoleAssignment
+from hope.apps.account.permissions import Permissions
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

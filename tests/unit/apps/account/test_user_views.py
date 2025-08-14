@@ -8,31 +8,31 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
-from hct_mis_api.apps.account.permissions import (
+from extras.test_utils.factories.accountability import FeedbackFactory, SurveyFactory
+from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
+from hope.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
 )
-from hct_mis_api.apps.accountability.fixtures import FeedbackFactory, SurveyFactory
-from hct_mis_api.apps.accountability.models import Message
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hope.apps.accountability.models import Message
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import to_choice_object
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -999,16 +999,17 @@ class TestUserChoices:
         assert response.status_code == status.HTTP_200_OK
         assert response.data == {
             "role_choices": [
-                dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.order_by("name")
+                {"name": role.name, "value": role.id, "subsystem": role.subsystem}
+                for role in Role.objects.order_by("name")
             ],
             "status_choices": to_choice_object(USER_STATUS_CHOICES),
             "partner_choices": [
-                dict(name=partner.name, value=partner.id)
+                {"name": partner.name, "value": partner.id}
                 for partner in [self.partner, self.unicef_hq, self.unicef_partner_in_afghanistan]
             ],
             # TODO: below assert can be removed after temporary solution is removed for partners
             "partner_choices_temp": [
-                dict(name=partner.name, value=partner.id)
+                {"name": partner.name, "value": partner.id}
                 for partner in [self.unicef_hq, self.unicef_partner_in_afghanistan]
             ],
         }
@@ -1055,7 +1056,8 @@ class TestPartnerForGrievanceChoices:
             self.partner_with_access_to_test_program, [], self.afghanistan, self.program
         )
 
-        # partner with access to Test Program for Household - should be returned if Program is not passed and household/individual is passed
+        # partner with access to Test Program for Household - should be returned if Program
+        # is not passed and household/individual is passed
         # or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
         self.partner_with_access_to_test_program_for_hh = PartnerFactory(

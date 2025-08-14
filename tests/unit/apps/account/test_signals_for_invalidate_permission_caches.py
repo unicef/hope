@@ -6,18 +6,19 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.account.caches import get_user_permissions_version_key
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.account.caches import get_user_permissions_version_key
+from hope.apps.account.models import User
+from hope.apps.core.models import BusinessArea
+from hope.apps.program.models import Program
 
 
 class TestSignalsForInvalidatePermissionCaches(TestCase):

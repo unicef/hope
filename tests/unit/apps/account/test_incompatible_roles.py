@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, RoleAssignment
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+
+from hope.apps.account.models import IncompatibleRoles, Role, RoleAssignment
+from hope.apps.core.models import BusinessArea
 
 
 class IncompatibleRolesTest(TestCase):
@@ -45,6 +46,7 @@ class IncompatibleRolesTest(TestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            f"Users: [{user.email}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair.",
+            f"Users: [{user.email}] have these roles assigned to them in the same business area."
+            f" Please fix them before creating this incompatible roles pair.",
         ):
             test_role.full_clean()

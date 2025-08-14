@@ -16,9 +16,11 @@ import { ReactElement, useState } from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { createApiParams } from '@utils/apiUtils';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;
@@ -32,23 +34,42 @@ const ProgramCyclesTableProgramDetails = ({
     limit: 5,
     ordering: 'created_at',
   });
-  const { businessAreaSlug, baseUrl, programSlug } = useBaseUrl();
+  const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
-    program.status === Status791Enum.ACTIVE &&
+    program.status === ProgramStatusEnum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessAreaSlug, program.slug, queryVariables],
-    queryFn: async () => {
-      return RestService.restBusinessAreasProgramsCyclesList({
-        businessAreaSlug,
-        programSlug: program.slug,
-      });
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsCyclesList(
+        createApiParams(
+          { businessAreaSlug, programSlug: program.slug },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
     },
   });
 
-  const canViewDetails = programSlug !== 'all';
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      programId,
+      businessAreaSlug,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(
+        createApiParams(
+          { businessAreaSlug, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
+
+  const canViewDetails = programId !== 'all';
 
   const renderRow = (row: ProgramCycleList): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
@@ -147,6 +168,7 @@ const ProgramCyclesTableProgramDetails = ({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       actions={actions}
+      itemsCount={dataProgramCyclesCount?.count}
     />
   );
 };

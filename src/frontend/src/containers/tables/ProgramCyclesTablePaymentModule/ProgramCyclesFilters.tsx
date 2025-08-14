@@ -88,11 +88,11 @@ export const ProgramCyclesFilters = ({
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
-            value={filter.totalEntitledQuantityUsd_from}
+            value={filter.totalEntitledQuantityUsdFrom}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange(
-                'total_entitled_quantity_usd_from',
+                'totalEntitledQuantityUsdFrom',
                 e.target.value,
               )
             }
@@ -101,19 +101,19 @@ export const ProgramCyclesFilters = ({
         <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
-            value={filter.totalEntitledQuantityUsd_to}
+            value={filter.totalEntitledQuantityUsdTo}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange(
-                'total_entitled_quantity_usd_to',
+                'totalEntitledQuantityUsdTo',
                 e.target.value,
               )
             }
             error={
-              filter.totalEntitledQuantityUsd_from &&
-              filter.totalEntitledQuantityUsd_to &&
-              filter.totalEntitledQuantityUsd_from >
-                filter.totalEntitledQuantityUsd_to
+              filter.totalEntitledQuantityUsdFrom &&
+              filter.totalEntitledQuantityUsdTo &&
+              filter.totalEntitledQuantityUsdFrom >
+                filter.totalEntitledQuantityUsdTo
             }
           />
         </Grid>

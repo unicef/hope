@@ -54,10 +54,8 @@ export const HouseholdTable = ({
     return {
       businessAreaSlug: businessArea,
       programSlug: programId,
-      familySize: JSON.stringify({
-        before: filter.householdSizeMin,
-        after: filter.householdSizeMax,
-      }),
+      sizeMin:filter.householdSizeMin,
+      sizeMax: filter.householdSizeMax,
       search: filter.search.trim(),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
@@ -211,6 +209,7 @@ export const HouseholdTable = ({
         title={`${beneficiaryGroup?.groupLabelPlural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
+        initialRowsPerPage={5}
         data={data}
         error={error}
         isLoading={isLoading}

@@ -6,25 +6,26 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     Registration2024,
     UkraineBaseRegistrationService,
 )

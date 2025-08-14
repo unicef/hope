@@ -10,7 +10,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
@@ -30,6 +30,7 @@ export function DiscardVerificationPlan({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId: programSlug } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const discardVerificationPlanMutation = useMutation({
     mutationFn: () =>
@@ -41,6 +42,17 @@ export function DiscardVerificationPlan({
           verificationPlanId: paymentVerificationPlanId,
         },
       ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
+    },
   });
 
   const discard = async (): Promise<void> => {

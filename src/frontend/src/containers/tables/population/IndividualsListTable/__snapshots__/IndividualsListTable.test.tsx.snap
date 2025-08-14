@@ -3,27 +3,27 @@
 exports[`IndividualsListTable > should handle empty data 1`] = `
 <div>
   <div
-    class="sc-bXdtCk efUmZY"
+    class="sc-bRKDuR jnvOHb"
   >
     <div
-      class="sc-hBDmJg gFdTxp"
+      class="sc-hwkwBN dauhgJ"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kThouk jJQgA-D css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kNOymR jZtkxI css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-kieALA css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-kcLKEh css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-dibcMh fhIzLD MuiBox-root css-0"
+            class="sc-dntSTA ekJsfD MuiBox-root css-0"
           >
             <div
-              class="sc-dibcMh fhIzLD MuiBox-root css-1ruxp1v"
+              class="sc-dntSTA ekJsfD MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-dTdQuR sc-kAFUCS krrVwM fyXzWr css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-dYwGCk sc-kvnevz carVMa cGphCt css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -37,7 +37,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   />
                 </th>
@@ -47,7 +47,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Individual ID
@@ -59,7 +59,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Individual
@@ -71,7 +71,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Household ID
@@ -83,7 +83,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Relationship to HoH
@@ -95,7 +95,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Age
@@ -107,7 +107,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Gender
@@ -119,7 +119,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Administrative Level 2
@@ -131,11 +131,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -145,11 +145,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -159,11 +159,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -173,11 +173,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -187,11 +187,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -201,11 +201,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -215,11 +215,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -229,11 +229,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -243,11 +243,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -257,11 +257,11 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -285,7 +285,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
             />
             <p
               class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
-              id=":r6:"
+              id="«r8»"
             >
               Rows per page:
             </p>
@@ -295,9 +295,9 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":r6: :r5:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
-                id=":r5:"
+                aria-labelledby="«r8» «r7»"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-18zjd9i-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input"
+                id="«r7»"
                 role="combobox"
                 tabindex="0"
               >
@@ -312,7 +312,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-ug7h84-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -325,7 +325,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
             <p
               class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
             >
-              0–0 of 0
+              1–10 of more than 10
             </p>
             <div
               class="MuiTablePagination-actions"
@@ -334,7 +334,6 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
                 aria-label="Go to previous page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":r8:"
                 tabindex="-1"
                 title="Go to previous page"
                 type="button"
@@ -353,10 +352,8 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
               </button>
               <button
                 aria-label="Go to next page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
-                disabled=""
-                id=":r9:"
-                tabindex="-1"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+                tabindex="0"
                 title="Go to next page"
                 type="button"
               >
@@ -384,27 +381,27 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
 exports[`IndividualsListTable > should handle no view details permission 1`] = `
 <div>
   <div
-    class="sc-bXdtCk efUmZY"
+    class="sc-bRKDuR jnvOHb"
   >
     <div
-      class="sc-hBDmJg gFdTxp"
+      class="sc-hwkwBN dauhgJ"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kThouk jJQgA-D css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kNOymR jZtkxI css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-kieALA css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-kcLKEh css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-dibcMh fhIzLD MuiBox-root css-0"
+            class="sc-dntSTA ekJsfD MuiBox-root css-0"
           >
             <div
-              class="sc-dibcMh fhIzLD MuiBox-root css-1ruxp1v"
+              class="sc-dntSTA ekJsfD MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-dTdQuR sc-kAFUCS krrVwM fyXzWr css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-dYwGCk sc-kvnevz carVMa cGphCt css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -418,7 +415,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   />
                 </th>
@@ -428,7 +425,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Individual ID
@@ -440,7 +437,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Individual
@@ -452,7 +449,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Household ID
@@ -464,7 +461,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Relationship to HoH
@@ -476,7 +473,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Age
@@ -488,7 +485,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Gender
@@ -500,7 +497,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Administrative Level 2
@@ -512,11 +509,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -526,11 +523,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -540,11 +537,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -554,11 +551,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -568,11 +565,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -582,11 +579,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -596,11 +593,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -610,11 +607,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -624,11 +621,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -638,11 +635,11 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -666,7 +663,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
             />
             <p
               class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
-              id=":rb:"
+              id="«re»"
             >
               Rows per page:
             </p>
@@ -676,9 +673,9 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":rb: :ra:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
-                id=":ra:"
+                aria-labelledby="«re» «rd»"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-18zjd9i-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input"
+                id="«rd»"
                 role="combobox"
                 tabindex="0"
               >
@@ -693,7 +690,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-ug7h84-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -706,7 +703,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
             <p
               class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
             >
-              0–0 of 0
+              1–10 of more than 10
             </p>
             <div
               class="MuiTablePagination-actions"
@@ -715,7 +712,6 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
                 aria-label="Go to previous page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":rd:"
                 tabindex="-1"
                 title="Go to previous page"
                 type="button"
@@ -734,10 +730,8 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
               </button>
               <button
                 aria-label="Go to next page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
-                disabled=""
-                id=":re:"
-                tabindex="-1"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+                tabindex="0"
                 title="Go to next page"
                 type="button"
               >
@@ -765,27 +759,27 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
 exports[`IndividualsListTable > should render IndividualsListTable correctly 1`] = `
 <div>
   <div
-    class="sc-bXdtCk efUmZY"
+    class="sc-bRKDuR jnvOHb"
   >
     <div
-      class="sc-hBDmJg gFdTxp"
+      class="sc-hwkwBN dauhgJ"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kThouk jJQgA-D css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kNOymR jZtkxI css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-kieALA css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-kcLKEh css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-dibcMh fhIzLD MuiBox-root css-0"
+            class="sc-dntSTA ekJsfD MuiBox-root css-0"
           >
             <div
-              class="sc-dibcMh fhIzLD MuiBox-root css-1ruxp1v"
+              class="sc-dntSTA ekJsfD MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-dTdQuR sc-kAFUCS krrVwM fyXzWr css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-dYwGCk sc-kvnevz carVMa cGphCt css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -799,7 +793,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   />
                 </th>
@@ -809,7 +803,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Individual ID
@@ -821,7 +815,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Individual
@@ -833,7 +827,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Household ID
@@ -845,7 +839,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Relationship to HoH
@@ -857,7 +851,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Age
@@ -869,7 +863,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Gender
@@ -881,7 +875,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-jZhnRx fDjtfN"
+                    class="sc-jJLAfE hhvhHK"
                     data-cy="table-label"
                   >
                     Administrative Level 2
@@ -893,11 +887,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -907,11 +901,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -921,11 +915,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -935,11 +929,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -949,11 +943,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -963,11 +957,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -977,11 +971,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -991,11 +985,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -1005,11 +999,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -1019,11 +1013,11 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-llIIlC hSQnDa css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-lgpSej ebEBYf css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-elFkmj gpfTHU css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eqYatC huXXCH css-1dc80h3-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -1047,7 +1041,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
             />
             <p
               class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
-              id=":r1:"
+              id="«r2»"
             >
               Rows per page:
             </p>
@@ -1057,9 +1051,9 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
               <div
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":r1: :r0:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
-                id=":r0:"
+                aria-labelledby="«r2» «r1»"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-18zjd9i-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input"
+                id="«r1»"
                 role="combobox"
                 tabindex="0"
               >
@@ -1074,7 +1068,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-ug7h84-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -1087,7 +1081,7 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
             <p
               class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
             >
-              0–0 of 0
+              1–10 of more than 10
             </p>
             <div
               class="MuiTablePagination-actions"
@@ -1096,7 +1090,6 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
                 aria-label="Go to previous page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
-                id=":r3:"
                 tabindex="-1"
                 title="Go to previous page"
                 type="button"
@@ -1115,10 +1108,8 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
               </button>
               <button
                 aria-label="Go to next page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
-                disabled=""
-                id=":r4:"
-                tabindex="-1"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+                tabindex="0"
                 title="Go to next page"
                 type="button"
               >

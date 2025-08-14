@@ -2,37 +2,37 @@ import copy
 from typing import Any, Callable
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
     create_ukraine,
 )
-from hct_mis_api.apps.core.models import (
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.program.fixtures import (
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.program import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
+from hope.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -177,6 +177,7 @@ class TestProgramUpdate:
                 for pdu_field_data, pdu_field in zip(
                     self.base_payload_for_update_without_changes["pdu_fields"],
                     [self.pdu_field_to_be_preserved, self.pdu_field_to_be_removed, self.pdu_field_to_be_updated],
+                    strict=True,
                 )
             ],
             "partners": [

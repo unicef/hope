@@ -166,6 +166,7 @@ export function AccountField({
       }
       {/* --- Dynamic Fields Section --- */}
       <FieldArray name={dynamicFieldsName}>
+        {/* eslint-disable-next-line @typescript-eslint/unbound-method*/}
         {({ push, remove, form }) => (
           <>
             {form.values[baseName][getIndexForId(values[baseName], id)]?.dynamicFields?.map(

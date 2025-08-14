@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -31,7 +31,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
-
+  const queryClient = useQueryClient();
   const { mutateAsync: markReady, isPending: loadingFinish } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsMarkReadyRetrieve({
@@ -42,11 +42,26 @@ export const FinalizeTargetPopulationPaymentPlan = ({
     onSuccess: () => {
       showMessage(t('Target Population Finalized'));
       setOpen(false);
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          'targetPopulation',
+          businessArea,
+          targetPopulationId,
+          programId,
+        ],
+      });
       navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
     },
     onError: (error) => {
+      let backendMessage: string = null;
+      const backendError = error as any;
+      if (backendError?.body && Array.isArray(backendError?.body)) {
+        backendMessage = backendError.body.join('\n');
+      }
       showMessage(
-        error.message ||
+        backendMessage ||
+          error.message ||
           t('An error occurred while marking target population as ready.'),
       );
     },

@@ -4,24 +4,24 @@ from django.core.management import call_command
 from django.urls import reverse
 
 import pytest
-from rest_framework import status
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketDeleteIndividualDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
+from rest_framework import status
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.program.models import Program
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -55,15 +55,13 @@ class TestRoleReassignMutation:
         self.household.registration_data_import.save()
 
         self.individual = IndividualFactory(
-            **{
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Benjamin Butler",
+            given_name="Benjamin",
+            family_name="Butler",
+            phone_no="(953)682-4596",
+            birth_date="1943-07-30",
+            household=None,
+            program=self.program,
         )
 
         self.household.head_of_household = self.individual
@@ -158,39 +156,33 @@ class TestRoleReassignMutationNewTicket:
         self.household.registration_data_import.save()
 
         self.individual_1 = IndividualFactory(
-            **{
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Benjamin Butler",
+            given_name="Benjamin",
+            family_name="Butler",
+            phone_no="(953)682-4596",
+            birth_date="1943-07-30",
+            household=None,
+            program=self.program,
         )
 
         self.individual_2 = IndividualFactory(
-            **{
-                "full_name": "Andrew Jackson",
-                "given_name": "Andrew",
-                "family_name": "Jackson",
-                "phone_no": "(853)692-4696",
-                "birth_date": "1963-09-12",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Andrew Jackson",
+            given_name="Andrew",
+            family_name="Jackson",
+            phone_no="(853)692-4696",
+            birth_date="1963-09-12",
+            household=None,
+            program=self.program,
         )
 
         self.individual_3 = IndividualFactory(
-            **{
-                "full_name": "Ulysses Grant",
-                "given_name": "Ulysses",
-                "family_name": "Grant",
-                "phone_no": "(953)682-1111",
-                "birth_date": "1913-01-31",
-                "household": None,
-                "program": self.program,
-            },
+            full_name="Ulysses Grant",
+            given_name="Ulysses",
+            family_name="Grant",
+            phone_no="(953)682-1111",
+            birth_date="1913-01-31",
+            household=None,
+            program=self.program,
         )
 
         self.household.head_of_household = self.individual_1

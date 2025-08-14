@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from requests import Response, Session
 
-from hct_mis_api.apps.core.api.mixins import BaseAPI
+from hope.apps.core.api.mixins import BaseAPI
 
 
 @pytest.mark.django_db()

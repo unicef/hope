@@ -78,13 +78,13 @@ const PaymentVerificationFilters = ({
         <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
-              handleFilterChange('verificationStatus', e.target.value)
+              handleFilterChange('paymentVerificationSummaryStatus', e.target.value)
             }
             label="Status"
             multiple
             fullWidth
             data-cy="filter-status"
-            value={filter.verificationStatus}
+            value={filter.paymentVerificationSummaryStatus}
           >
             {statusChoicesData.map((item) => (
               <MenuItem key={item.value} value={item.value}>

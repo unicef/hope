@@ -4,12 +4,18 @@ from typing import Dict
 
 from django.core.management import call_command
 
+from extras.test_utils.factories.program import (
+    ProgramFactory,
+    get_program_with_dct_type_and_name,
+)
 from rest_framework import status
 from rest_framework.reverse import reverse
+from unit.api.base import HOPEApiTestCase
+from unit.api.factories import UserFactory
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.models import Grant
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
@@ -17,19 +23,13 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     AccountType,
     FinancialInstitution,
     PendingAccount,
 )
-from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
-    get_program_with_dct_type_and_name,
-)
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.unit.api.base import HOPEApiTestCase
-from tests.unit.api.factories import UserFactory
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class CreateRDITests(HOPEApiTestCase):
@@ -95,7 +95,7 @@ class PushToRDITests(HOPEApiTestCase):
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
-        AccountType.objects.get_or_create(key="bank", defaults=dict(label="Bank", unique_fields=["number"]))
+        AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank", "unique_fields": ["number"]})
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push(self) -> None:

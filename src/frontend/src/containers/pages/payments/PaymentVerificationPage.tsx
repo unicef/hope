@@ -16,7 +16,7 @@ import PaymentVerificationTable from '@containers/tables/payments/PaymentVerific
 const initialFilter = {
   status: [PaymentPlanStatusEnum.FINISHED, PaymentPlanStatusEnum.ACCEPTED],
   search: '',
-  verificationStatus: [],
+  paymentVerificationSummaryStatus: [],
   serviceProvider: '',
   deliveryTypes: [],
   startDate: '',

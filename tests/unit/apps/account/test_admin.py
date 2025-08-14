@@ -9,22 +9,22 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 import pytest
+from hope.admin.partner import PartnerAdmin
 from django_webtest import DjangoTestApp
-
-from hct_mis_api.apps.account.admin import PartnerAdmin
-from hct_mis_api.apps.account.admin.user_role import (
-    RoleAssignmentAdmin,
-    RoleAssignmentInline,
-)
-from hct_mis_api.apps.account.fixtures import (
+from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from extras.test_utils.factories.core import create_afghanistan
+
+from hope.admin.user_role import (
+    RoleAssignmentAdmin,
+    RoleAssignmentInline,
+)
+from hope.apps.account.models import Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -50,7 +50,7 @@ def test_role_sync(django_app: DjangoTestApp, superuser: User, role: Role) -> No
     res = django_app.get(url, user=superuser)
     assert res.status_code == 200
     jres = json.loads(unquote(res.json["data"]))
-    models = set([item["model"] for item in jres])
+    models = {item["model"] for item in jres}
     assert len(models) == 1
     assert models == {"account.role"}
 

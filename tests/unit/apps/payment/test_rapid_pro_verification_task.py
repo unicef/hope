@@ -5,26 +5,30 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import (
+    EntitlementCardFactory,
+    create_household,
+)
+from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.services.rapid_pro.api import RapidProAPI
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.payment.tasks.CheckRapidProVerificationTask import (
     CheckRapidProVerificationTask,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.utils.phone import is_valid_phone_number
+from hope.apps.utils.phone import is_valid_phone_number
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -127,15 +131,15 @@ class TestRapidProVerificationTask(TestCase):
         cls.payment_plan = payment_plan
         cls.verification = payment_plan.payment_verification_plans.first()
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications.first()
-        TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
-            "urn"
-        ] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
+        TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"]["urn"] = (
+            f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
+        )
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
             mapped_dict = api.get_mapped_flow_runs([str(uuid.uuid4())])
             self.assertEqual(
@@ -143,15 +147,15 @@ class TestRapidProVerificationTask(TestCase):
                 [],
             )
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_mapping(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications.first()
-        TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
-            "urn"
-        ] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
+        TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"]["urn"] = (
+            f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
+        )
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
             mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
             self.assertEqual(
@@ -160,12 +164,12 @@ class TestRapidProVerificationTask(TestCase):
                     {
                         "phone_number": str(payment_record_verification_obj.payment.head_of_household.phone_no),
                         "received": True,
-                        "received_amount": Decimal("200"),
+                        "received_amount": Decimal(200),
                     }
                 ],
             )
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_not_received(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
@@ -182,11 +186,11 @@ class TestRapidProVerificationTask(TestCase):
                 "received": False,
             }
         ]
-        assert is_valid_phone_number(
+        assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
             payment_record_verification.payment.head_of_household.phone_no
-        ), payment_record_verification.payment.head_of_household.phone_no
+        )
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -196,7 +200,7 @@ class TestRapidProVerificationTask(TestCase):
                 PaymentVerification.STATUS_NOT_RECEIVED,
             )
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received_with_issues(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
@@ -206,9 +210,9 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
         )
-        assert is_valid_phone_number(
+        assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
             payment_record_verification.payment.head_of_household.phone_no
-        ), payment_record_verification.payment.head_of_household.phone_no
+        )
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
@@ -217,7 +221,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -231,7 +235,7 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.payment.delivered_quantity - 1,
             )
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
@@ -248,11 +252,11 @@ class TestRapidProVerificationTask(TestCase):
                 "received_amount": payment_record_verification.payment.delivered_quantity,
             }
         ]
-        assert is_valid_phone_number(
+        assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
             payment_record_verification.payment.head_of_household.phone_no
-        ), payment_record_verification.payment.head_of_household.phone_no
+        )
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -266,7 +270,7 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.payment.delivered_quantity,
             )
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_wrong_phone_number(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
@@ -284,7 +288,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()

@@ -2,17 +2,18 @@ from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.payment.admin import FspXlsxTemplatePerDeliveryMechanismForm
-from hct_mis_api.apps.payment.fixtures import (
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
+
+from hope.admin.fsp import FspXlsxTemplatePerDeliveryMechanismForm
+from hope.apps.core.models import BusinessArea
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
 
 
 class TestGrievanceModelValidation(TestCase):
@@ -125,7 +126,6 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
                 continue
             form_data_inline_query_dict[key] = value
         form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
-        print(form.errors)
         self.assertTrue(form.is_valid())
         form.clean()
 

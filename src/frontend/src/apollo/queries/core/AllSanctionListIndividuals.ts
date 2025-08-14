@@ -33,6 +33,10 @@ export const ALL_SANCTION_LIST_INDIVIDUALS_QUERY = gql`
           referenceNumber
           fullName
           listedOn
+          sanctionList {
+              id
+              name
+          }
           documents {
             edges {
               node {

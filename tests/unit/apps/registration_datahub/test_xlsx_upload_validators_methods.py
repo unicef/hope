@@ -6,19 +6,19 @@ from django.conf import settings
 from django.core.management import call_command
 
 import openpyxl
-from parameterized import parameterized
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
-from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
-from hct_mis_api.apps.core.utils import SheetImageLoader
-from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
-from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
+from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+from parameterized import parameterized
+
+from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.models import DataCollectingType, PeriodicFieldData
+from hope.apps.core.utils import SheetImageLoader
+from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
 class TestXLSXValidatorsMethods(APITestCase):
@@ -468,7 +468,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_validate_file_extension(self) -> None:
         file_path, expected_values = (
-            f"{self.FILES_DIR_PATH}/" f"image.png",
+            f"{self.FILES_DIR_PATH}/image.png",
             [{"row_number": 1, "message": "Only .xlsx files are accepted for import"}],
         )
         with open(file_path, "rb") as file:
@@ -484,7 +484,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_validate_file_content_as_xlsx(self) -> None:
         file_path, expected_values = (
-            f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx",
+            f"{self.FILES_DIR_PATH}/not_excel_file.xlsx",
             [{"row_number": 1, "message": "Invalid .xlsx file"}],
         )
         with open(file_path, "rb") as file:
@@ -505,7 +505,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_required_validator(self) -> None:
         with mock.patch(
-            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+            "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
             lambda *args: {"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
@@ -513,7 +513,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             self.assertTrue(result)
 
         with mock.patch(
-            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+            "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
             lambda *args: {"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
@@ -521,7 +521,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             self.assertFalse(result)
 
         with mock.patch(
-            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+            "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
             lambda *args: {"test": {"required": False}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
@@ -641,7 +641,8 @@ class TestXLSXValidatorsMethods(APITestCase):
             {
                 "row_number": 1,
                 "header": "People",
-                "message": "Invalid value in field 'pp_relationship_i_c' with index_id 99. Value can be HEAD or NON_BENEFICIARY",
+                "message": "Invalid value in field 'pp_relationship_i_c' with index_id 99. Value can be HEAD or"
+                " NON_BENEFICIARY",
             },
             {
                 "row_number": 3,

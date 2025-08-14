@@ -33,7 +33,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  if (!individual?.accounts?.edges?.length || !canViewDeliveryMechanisms) {
+  if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
     return null;
   }
   return (
@@ -44,11 +44,11 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
         </Typography>
       </Title>
       <Grid container spacing={6}>
-        {individual.accounts.edges.map((mechanism, index) => {
-          const tabData = JSON.parse(mechanism.node.dataFields);
+        {individual.accounts.map((mechanism, index) => {
+          const tabData = JSON.parse(mechanism.data);
           return (
             <Grid size={{ xs: 12 }} key={index}>
-              <Typography variant="h6">{mechanism.node.name}</Typography>
+              <Typography variant="h6">{mechanism.accountType}</Typography>
               <Grid container spacing={3}>
                 {Object.entries(tabData).map(([key, value], idx) => (
                   <Grid key={idx} size={{ xs: 3 }}>
@@ -58,7 +58,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
                   </Grid>
                 ))}
               </Grid>
-              {index < individual.accounts.edges.length - 1 && <DividerLine />}
+              {index < individual.accounts.length - 1 && <DividerLine />}
             </Grid>
           );
         })}

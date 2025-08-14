@@ -346,6 +346,10 @@ export type Individual = {
      */
     migratedAt?: string | null;
     /**
+     * Key used to identify Collisions in the system
+     */
+    identificationKey?: string | null;
+    /**
      * Collection of individual representations
      */
     individualCollection?: number | null;

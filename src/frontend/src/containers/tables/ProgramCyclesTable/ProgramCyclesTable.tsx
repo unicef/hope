@@ -9,6 +9,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -59,6 +60,22 @@ const ProgramCyclesTablePaymentModule = ({
         );
       },
     });
+
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -193,6 +210,7 @@ const ProgramCyclesTablePaymentModule = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
+      itemsCount={dataProgramCyclesCount?.count}
       data={data}
       error={error}
       isLoading={isLoading}

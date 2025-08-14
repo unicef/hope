@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -7,10 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
-  getAutocompleteOptionLabel,
   handleAutocompleteChange,
-  handleAutocompleteClose,
-  handleOptionSelected,
 } from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
@@ -39,49 +36,47 @@ export function AdminAreaAutocomplete({
 }): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [inputValue, onInputTextChange] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const navigate = useNavigate();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
+
+  const [queryVariables, setQueryVariables] = useState({
+    limit: 20,
+    areaTypeAreaLevel: level,
+    search: debouncedInputText || undefined,
+  });
+
+  useEffect(() => {
+    setQueryVariables((prev) => ({
+      ...prev,
+      search: debouncedInputText || undefined,
+      areaTypeAreaLevel: level,
+    }));
+  }, [debouncedInputText, level]);
 
   const {
     data: areasData,
     isLoading: loading,
     refetch,
   } = useQuery({
-    queryKey: ['adminAreas', debouncedInputText, businessArea, level, open],
+    queryKey: ['adminAreas', queryVariables, businessArea],
     queryFn: () =>
       RestService.restAreasList({
-        search: debouncedInputText,
-        areaTypeAreaLevel: level,
-        limit: 20,
+        ...queryVariables,
+        // businessAreaSlug: businessArea, // Uncomment if needed by API
       }),
     enabled: open && !!businessArea,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
   });
 
-  const isMounted = useRef(true);
-
   const loadData = useCallback(() => {
-    if (isMounted.current && businessArea && open) {
+    if (businessArea) {
       refetch();
     }
-  }, [refetch, businessArea, open]);
-
-  const loadDataCallback = useCallback(() => {
-    if (isMounted.current && businessArea && open) {
-      loadData();
-    }
-  }, [loadData, businessArea, open]);
-
-  useEffect(() => {
-    if (open) {
-      loadDataCallback();
-    }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [open, loadDataCallback]);
+  }, [businessArea, refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -94,6 +89,25 @@ export function AdminAreaAutocomplete({
   );
 
   const allEdges = areasData?.results || [];
+
+  const handleOptionSelected = (option: any, selectedValue: any) => {
+    if (typeof selectedValue === 'string') {
+      return option?.id === selectedValue;
+    }
+    return option?.id === selectedValue?.id;
+  };
+
+  const handleOptionLabel = (option: any) => {
+    if (typeof option === 'string') {
+      const matching = allEdges.find((a) => a.id === option);
+      return matching ? matching.name : option;
+    }
+    return option?.name || '';
+  };
+
+  const onInputTextChange = (v: string) => {
+    setInputValue(v);
+  };
 
   return (
     <BaseAutocomplete
@@ -112,15 +126,13 @@ export function AdminAreaAutocomplete({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue)
-      }
+      handleClose={(_, reason) => {
+        setOpen(false);
+        if (reason === 'select-option') return;
+        onInputTextChange('');
+      }}
+      handleOptionSelected={handleOptionSelected}
+      handleOptionLabel={handleOptionLabel}
       data={areasData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}

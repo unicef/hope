@@ -8,12 +8,14 @@ export type TargetPopulationCreate = {
     readonly version: number;
     name: string;
     programCycleId: string;
-    rules: TargetingCriteriaRule;
+    rules: Array<TargetingCriteriaRule>;
     excludedIds?: string;
     exclusionReason?: string;
     fspId?: string | null;
     deliveryMechanismCode?: string | null;
     vulnerabilityScoreMin?: string;
     vulnerabilityScoreMax?: string;
+    flagExcludeIfOnSanctionList: boolean;
+    flagExcludeIfActiveAdjudicationTicket: boolean;
 };
 

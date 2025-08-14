@@ -5,11 +5,11 @@ import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
-import { dateToIsoString } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PaymentVerificationTableProps {
   filter?;
@@ -28,17 +28,17 @@ function PaymentVerificationTable({
       programSlug: programId,
       businessAreaSlug: businessArea,
       search: filter.search,
-      verificationStatus: filter.verificationStatus,
-      serviceProvider: filter.serviceProvider,
-      deliveryTypes: filter.deliveryTypes,
-      startDate: dateToIsoString(filter.startDate, 'startOfDay'),
-      endDate: dateToIsoString(filter.endDate, 'endOfDay'),
+      paymentVerificationSummaryStatus: filter.paymentVerificationSummaryStatus,
+      fsp: filter.serviceProvider,
+      deliveryMechanism: filter.deliveryTypes,
+      startDate: filter.startDate,
+      endDate: filter.endDate,
     }),
     [
       programId,
       businessArea,
       filter.search,
-      filter.verificationStatus,
+      filter.paymentVerificationSummaryStatus,
       filter.serviceProvider,
       filter.deliveryTypes,
       filter.startDate,
@@ -50,7 +50,21 @@ function PaymentVerificationTable({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
-
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
   const {
     data: paymentPlansData,
     isLoading,
@@ -82,6 +96,7 @@ function PaymentVerificationTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      itemsCount={countData?.count}
       renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow
           key={paymentPlan.id}

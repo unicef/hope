@@ -18,7 +18,6 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
-import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
@@ -62,12 +61,16 @@ export const IndividualBioData = ({
     choicesData.severityOfDisabilityChoices,
   );
 
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
+  );
+
   const mappedIndividualDocuments = individual?.documents?.map((doc) => (
     <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={doc.type.label}>
-            {doc.photo ? (
+          <LabelizedField label={doc.type}>
+            {doc.image ? (
               <DocumentPopulationPhotoModal
                 documentNumber={doc.documentNumber}
                 documentId={doc.id}
@@ -91,7 +94,7 @@ export const IndividualBioData = ({
             {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.country}</LabelizedField>
+        <LabelizedField label="issued">{item.country.name}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -232,7 +235,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {ObservedDisabilityEnum[individual?.observedDisability]}
+            {observedDisabilityChoicesDict[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

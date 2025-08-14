@@ -2,19 +2,21 @@ from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.program import ProgramFactory
+
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo.models import Country
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
@@ -22,8 +24,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestHousehold(TestCase):
@@ -147,10 +148,10 @@ class TestDocument(TestCase):
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "Other",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -177,10 +178,10 @@ class TestDocument(TestCase):
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "Other",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -209,10 +210,10 @@ class TestDocument(TestCase):
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -239,10 +240,10 @@ class TestDocument(TestCase):
     def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -269,10 +270,10 @@ class TestDocument(TestCase):
     def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -299,10 +300,10 @@ class TestDocument(TestCase):
     ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -329,17 +330,17 @@ class TestDocument(TestCase):
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
         document_type2, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-            defaults=dict(
-                label="Tax Number Identification",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "Tax Number Identification",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(

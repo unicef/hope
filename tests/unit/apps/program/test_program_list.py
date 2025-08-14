@@ -7,29 +7,29 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
     create_ukraine,
 )
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.household import (
     HouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import (
+from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -139,7 +139,7 @@ class TestProgramList:
         assert data_collecting_type_program_data1["id"] == self.program.data_collecting_type.id
         assert data_collecting_type_program_data1["label"] == self.program.data_collecting_type.label
         assert data_collecting_type_program_data1["code"] == self.program.data_collecting_type.code
-        assert data_collecting_type_program_data1["type"] == self.program.data_collecting_type.get_type_display()
+        assert data_collecting_type_program_data1["type"] == self.program.data_collecting_type.type
         assert (
             data_collecting_type_program_data1["household_filters_available"]
             == self.program.data_collecting_type.household_filters_available

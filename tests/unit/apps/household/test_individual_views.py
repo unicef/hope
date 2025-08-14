@@ -10,29 +10,35 @@ from django.utils import timezone
 import freezegun
 import pytest
 from constance.test import override_config
-from rest_framework import status
-from rest_framework.reverse import reverse
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
     create_ukraine,
 )
-from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.household.fixtures import (
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.payment import (
+    AccountFactory,
+    generate_delivery_mechanisms,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hope.apps.core.utils import to_choice_object
+from hope.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -64,17 +70,11 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    AccountFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import AccountType, FinancialInstitution
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import AccountType, FinancialInstitution
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.program.models import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -108,9 +108,12 @@ class TestIndividualList:
 
         self.household1, (self.individual1_1, self.individual1_2) = self._create_household(self.program)
         self.household2, (self.individual2_1, self.individual2_2) = self._create_household(self.program)
-        self.household_from_different_program, (
-            self.individual_from_different_program_1,
-            self.individual_from_different_program_2,
+        (
+            self.household_from_different_program,
+            (
+                self.individual_from_different_program_1,
+                self.individual_from_different_program_2,
+            ),
         ) = self._create_household(different_program)
 
     def _create_household(self, program: Program) -> tuple[Household, List[Individual]]:
@@ -243,13 +246,14 @@ class TestIndividualList:
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                 "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
-                "residence_status": individual.household.residence_status,
+                "residence_status": individual.household.get_residence_status_display(),
                 "country_origin": individual.household.country_origin.name,
                 "country": individual.household.country.name,
                 "address": individual.household.address,
                 "village": individual.household.village,
                 "geopoint": None,
                 "import_id": individual.household.unicef_id,
+                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
@@ -291,9 +295,12 @@ class TestIndividualList:
         )
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
 
-        household_without_areas, (
-            individual_without_areas1,
-            individual_without_areas2,
+        (
+            household_without_areas,
+            (
+                individual_without_areas1,
+                individual_without_areas2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "program": self.program,
@@ -341,7 +348,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 32
+            assert len(ctx.captured_queries) == 36
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -360,7 +367,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 31
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -370,7 +377,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 31
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -380,7 +387,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 24
+            assert len(ctx.captured_queries) == 27
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -593,6 +600,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc2.png"),
         )
 
         self.birth_certificate = DocumentFactory(
@@ -601,6 +609,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc3.png"),
         )
 
         self.disability_card = DocumentFactory(
@@ -609,6 +618,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc4.png"),
         )
 
         self.drivers_license = DocumentFactory(
@@ -616,6 +626,7 @@ class TestIndividualDetail:
             type=DocumentType.objects.get(key="drivers_license"),
             individual=self.individual1,
             program=self.program,
+            photo=ContentFile(b"abc", name="doc5.png"),
         )
 
         self.tax_id = DocumentFactory(
@@ -624,13 +635,8 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc6.png"),
         )
-
-        # self.bank_account_info = BankAccountInfoFactory(
-        #     individual=self.individual1,
-        #     bank_name="ING",
-        #     bank_account_number=11110000222255558888999925,
-        # )
 
         self.identity = IndividualIdentityFactory(
             country=self.country,
@@ -750,13 +756,14 @@ class TestIndividualDetail:
             "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
             "start": self.individual1.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "zip_code": None,
-            "residence_status": self.individual1.household.residence_status,
+            "residence_status": self.individual1.household.get_residence_status_display(),
             "country_origin": self.individual1.household.country_origin.name,
             "country": self.individual1.household.country.name,
             "address": self.individual1.household.address,
             "village": self.individual1.household.village,
             "geopoint": None,
             "import_id": self.individual1.household.unicef_id,
+            "program_slug": self.program.slug,
         }
         assert data["role"] == ROLE_PRIMARY
         assert data["relationship"] == self.individual1.relationship
@@ -808,13 +815,14 @@ class TestIndividualDetail:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household.residence_status,
+                    "residence_status": self.household.get_residence_status_display(),
                     "country_origin": self.household.country_origin.name,
                     "country": self.household.country.name,
                     "address": self.household.address,
                     "village": self.household.village,
                     "geopoint": None,
                     "import_id": self.household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "role": ROLE_PRIMARY,
             },
@@ -834,13 +842,14 @@ class TestIndividualDetail:
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
-                    "residence_status": self.household2.residence_status,
+                    "residence_status": self.household2.get_residence_status_display(),
                     "country_origin": self.household2.country_origin.name,
                     "country": self.household2.country.name,
                     "address": self.household2.address,
                     "village": self.household2.village,
                     "geopoint": None,
                     "import_id": self.household2.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "role": ROLE_ALTERNATE,
             },
@@ -886,6 +895,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.national_id.document_number,
+                "photo": self.national_id.photo.url,
             },
             {
                 "id": str(self.national_passport.id),
@@ -900,6 +910,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.national_passport.document_number,
+                "photo": self.national_passport.photo.url,
             },
             {
                 "id": str(self.birth_certificate.id),
@@ -914,6 +925,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.birth_certificate.document_number,
+                "photo": self.birth_certificate.photo.url,
             },
             {
                 "id": str(self.disability_card.id),
@@ -928,6 +940,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.disability_card.document_number,
+                "photo": self.disability_card.photo.url,
             },
             {
                 "id": str(self.drivers_license.id),
@@ -942,6 +955,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.drivers_license.document_number,
+                "photo": self.drivers_license.photo.url,
             },
             {
                 "id": str(self.tax_id.id),
@@ -956,6 +970,7 @@ class TestIndividualDetail:
                     "iso_code3": self.country.iso_code3,
                 },
                 "document_number": self.tax_id.document_number,
+                "photo": self.tax_id.photo.url,
             },
         ]
         assert data["identities"] == [
@@ -966,22 +981,23 @@ class TestIndividualDetail:
                     "name": self.country.name,
                     "iso_code3": self.country.iso_code3,
                 },
+                "partner": None,
                 "number": self.identity.number,
             }
         ]
         assert len(data["accounts"]) == 2
         account_1 = data["accounts"][0]
         account_2 = data["accounts"][1]
-        assert {
+        assert account_1["data_fields"] == {
             "card_expiry_date__bank": "2022-01-01",
             "card_number__bank": "123",
             "name_of_cardholder__bank": "Marek",
-        } == account_1["data_fields"]
-        assert {
+        }
+        assert account_2["data_fields"] == {
             "service_provider_code__mobile": "ABC",
             "delivery_phone_number__mobile": "123456789",
             "provider__mobile": "Provider",
-        } == account_2["data_fields"]
+        }
 
         assert data["linked_grievances"] == [
             {
@@ -1054,9 +1070,12 @@ class TestIndividualGlobalViewSet:
         self.area3 = AreaFactory(parent=self.area2, p_code="AF010101", area_type=admin_type_2)
         self.area4 = AreaFactory(parent=self.area3, p_code="AF01010101", area_type=admin_type_2)
 
-        self.household_afghanistan1, (
-            self.individual_afghanistan1_1,
-            self.individual_afghanistan1_2,
+        (
+            self.household_afghanistan1,
+            (
+                self.individual_afghanistan1_1,
+                self.individual_afghanistan1_2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1068,9 +1087,12 @@ class TestIndividualGlobalViewSet:
             },
             individuals_data=[{}, {}],
         )
-        self.household_afghanistan2, (
-            self.individual_afghanistan2_1,
-            self.individual_afghanistan2_2,
+        (
+            self.household_afghanistan2,
+            (
+                self.individual_afghanistan2_1,
+                self.individual_afghanistan2_2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1083,9 +1105,12 @@ class TestIndividualGlobalViewSet:
             individuals_data=[{}, {}],
         )
 
-        self.household_ukraine, (
-            self.individual_ukraine_1,
-            self.individual_ukraine_2,
+        (
+            self.household_ukraine,
+            (
+                self.individual_ukraine_1,
+                self.individual_ukraine_2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1195,13 +1220,14 @@ class TestIndividualGlobalViewSet:
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                 "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
-                "residence_status": individual.household.residence_status,
+                "residence_status": individual.household.get_residence_status_display(),
                 "country_origin": individual.household.country_origin.name,
                 "country": individual.household.country.name,
                 "address": individual.household.address,
                 "village": individual.household.village,
                 "geopoint": None,
                 "import_id": individual.household.unicef_id,
+                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
@@ -1248,9 +1274,12 @@ class TestIndividualGlobalViewSet:
             whole_business_area_access=True,
         )
         set_admin_area_limits_in_program(self.partner, self.program_afghanistan2, [self.area1, self.area2])
-        household_afghanistan_without_areas, (
-            individual_afghanistan_without_areas1,
-            individual_afghanistan_without_areas2,
+        (
+            household_afghanistan_without_areas,
+            (
+                individual_afghanistan_without_areas1,
+                individual_afghanistan_without_areas2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "program": self.program_afghanistan2,
@@ -1259,9 +1288,12 @@ class TestIndividualGlobalViewSet:
             individuals_data=[{}, {}],
         )
         area_different = AreaFactory(parent=None, p_code="AF05", area_type=self.admin_type_1)
-        household_afghanistan_different_areas, (
-            individual_afghanistan_different_areas1,
-            individual_afghanistan_different_areas2,
+        (
+            household_afghanistan_different_areas,
+            (
+                individual_afghanistan_different_areas1,
+                individual_afghanistan_different_areas2,
+            ),
         ) = create_household_and_individuals(
             household_data={
                 "admin1": area_different,

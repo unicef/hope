@@ -53,6 +53,7 @@
       "SanctionListIndividualDocumentNode",
       "SanctionListIndividualNationalitiesNode",
       "SanctionListIndividualNode",
+      "SanctionListNode",
       "SteficonRuleNode",
       "SurveyNode",
       "TicketAddIndividualDetailsNode",

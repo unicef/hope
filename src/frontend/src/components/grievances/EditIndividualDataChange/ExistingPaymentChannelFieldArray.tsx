@@ -9,12 +9,11 @@ export interface ExistingPaymentChannelFieldArrayProps {
 }
 
 export function ExistingPaymentChannelFieldArray({
-  setFieldValue,
-  values,
-  individual,
+  setFieldValue, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+  values, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+  individual, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
 }: ExistingPaymentChannelFieldArrayProps): ReactElement {
   //TODO: Uncomment and implement the logic for rendering payment channels
-  console.log(setFieldValue, values, individual);
 
   // const location = useLocation();
   // const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

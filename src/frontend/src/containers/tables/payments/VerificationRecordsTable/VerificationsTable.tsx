@@ -100,6 +100,7 @@ export function VerificationsTable({
           key={payment.id}
           payment={payment}
           canViewRecordDetails={canViewRecordDetails}
+          paymentPlanId={paymentPlanId}
           showStatusColumn={false}
         />
       )}
