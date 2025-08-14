@@ -242,7 +242,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
