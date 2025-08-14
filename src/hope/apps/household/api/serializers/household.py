@@ -199,6 +199,7 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
 
 class IndividualRoleInHouseholdForHouseholdSerializer(serializers.ModelSerializer):
     from hope.apps.household.api.serializers.individual import IndividualSmallSerializer
+
     individual = IndividualSmallSerializer()
 
     class Meta:
@@ -208,6 +209,7 @@ class IndividualRoleInHouseholdForHouseholdSerializer(serializers.ModelSerialize
             "individual",
             "role",
         )
+
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
