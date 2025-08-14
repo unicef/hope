@@ -445,18 +445,21 @@ class PaymentGatewayService:
             Payment.objects.bulk_update(_payments, ["status"])
 
         def _add_records(_payments: List[Payment], _container: PaymentPlanSplit) -> None:
-            add_records_error = False
+            add_records_error = None
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
-                    payments_chunk, _container.id, validate_response=False
+                    payments_chunk, _container.id, validate_response=True
                 )
                 if response.errors:
-                    add_records_error = True
+                    add_records_error = response.errors
                     _handle_errors(response, payments_chunk)
                 else:
                     _handle_success(response, payments_chunk)
 
-            if not add_records_error and _payments:
+            if add_records_error:
+                logger.error(f"Sent to Payment Gateway add records error: {add_records_error}")
+
+            elif _payments:
                 _container.sent_to_payment_gateway = True
                 _container.save(update_fields=["sent_to_payment_gateway"])
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
