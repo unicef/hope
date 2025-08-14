@@ -12,6 +12,8 @@ from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
@@ -108,3 +110,35 @@ def generate_rdi() -> None:
         erased=False,
         refuse_reason=None,
     )
+
+
+class ImportDataFactory(DjangoModelFactory):
+    class Meta:
+        model = ImportData
+
+    status = ImportData.STATUS_FINISHED
+    business_area_slug = "afghanistan"
+    data_type = ImportData.XLSX
+    number_of_households = factory.fuzzy.FuzzyInteger(5, 100)
+    number_of_individuals = factory.fuzzy.FuzzyInteger(10, 300)
+    error = ""
+    validation_errors = ""
+    created_by_id = factory.LazyAttribute(lambda o: UserFactory().id)
+    file = factory.django.FileField(filename="test_data.xlsx")
+
+
+class KoboImportDataFactory(DjangoModelFactory):
+    class Meta:
+        model = KoboImportData
+
+    status = ImportData.STATUS_FINISHED
+    business_area_slug = "afghanistan"
+    data_type = ImportData.JSON
+    number_of_households = factory.fuzzy.FuzzyInteger(5, 100)
+    number_of_individuals = factory.fuzzy.FuzzyInteger(10, 300)
+    error = ""
+    validation_errors = ""
+    created_by_id = factory.LazyAttribute(lambda o: UserFactory().id)
+    kobo_asset_id = factory.LazyFunction(lambda: f"kobo_{time.time_ns()}")
+    only_active_submissions = True
+    pull_pictures = True

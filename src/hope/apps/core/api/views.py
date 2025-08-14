@@ -116,7 +116,7 @@ class BusinessAreaViewSet(
             200: KoboAssetObjectSerializer(many=True),
         },
     )
-    @action(detail=True, methods=["post"], url_path="all-kobo-projects")
+    @action(detail=True, methods=["post"], url_path="all-kobo-projects", pagination_class=None)
     def all_kobo_projects(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """
         All Kobo projects/assets.
