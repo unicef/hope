@@ -84,10 +84,7 @@ class RapidProAPI:
             urns = error.get("urns")
             if not urns:
                 return False
-            errors = []
-            for index in urns:
-                errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
-            return errors
+            return [f"{phone_numbers[int(index)]} - phone number is incorrect" for index in urns]
 
         except Exception:
             return False

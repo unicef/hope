@@ -115,19 +115,20 @@ class PythonExec(Interpreter):
             return pts
 
     def validate(self) -> bool:
-        errors = []
-        for forbidden in [
-            "__import__",
-            "raw",
-            "connection",
-            "import",
-            "delete",
-            "save",
-            "eval",
-            "exec",
-        ]:
-            if forbidden in self.init_string:
-                errors.append(f"Code contains an invalid statement '{forbidden}'")
+        errors = [
+            f"Code contains an invalid statement '{forbidden}'"
+            for forbidden in [
+                "__import__",
+                "raw",
+                "connection",
+                "import",
+                "delete",
+                "save",
+                "eval",
+                "exec",
+            ]
+            if forbidden in self.init_string
+        ]
         if errors:
             raise ValidationError(errors)
         try:

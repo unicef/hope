@@ -481,9 +481,9 @@ class HouseholdAdmin(
     def tickets(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
-        tickets = []
-        for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all()):
-            tickets.append(entry.ticket)
+        tickets = [
+            entry.ticket for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all())
+        ]
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 

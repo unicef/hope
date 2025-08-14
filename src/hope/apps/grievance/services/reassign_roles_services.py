@@ -51,7 +51,7 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             "household_id", flat=True
         )
     )
-    for _key, role_data in role_reassign_data.items():
+    for role_data in role_reassign_data.values():
         role_name = role_data.get("role")
         new_individual = get_object_or_404(Individual, id=role_data.get("new_individual"))
         old_individual_to_log = Individual.objects.get(id=new_individual.id)

@@ -467,7 +467,9 @@ def payment_plan_exclude_beneficiaries(
             undo_exclude_hh_ids = payments_for_undo_exclude.values_list(filter_key, flat=True)
 
             # check if hard conflicts exists in other Payments for undo exclude HH
-            for unicef_id in undo_exclude_hh_ids:
+            error_msg += [
+                f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
+                for unicef_id in undo_exclude_hh_ids
                 if (
                     Payment.objects.exclude(parent__id=payment_plan.pk)
                     .filter(
@@ -480,10 +482,8 @@ def payment_plan_exclude_beneficiaries(
                         Q(**{filter_key: unicef_id}) & Q(conflicted=False),
                     )
                     .exists()
-                ):
-                    error_msg.append(
-                        f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
-                    )
+                )
+            ]
 
             payment_plan.exclusion_reason = exclusion_reason
 

@@ -22,19 +22,17 @@ def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:
         )
     )
 
-    result = [
+    results = [
+        {
+            "total_delivered_quantity": quantity["total_delivered_quantity"],
+            "currency": quantity["currency"],
+        }
+        for quantity in quantities_per_currency
+    ]
+
+    return [
         {
             "total_delivered_quantity": quantity_in_usd["total_delivered_quantity_usd"],
             "currency": "USD",
         }
-    ]
-
-    for quantity in quantities_per_currency:
-        result.append(
-            {
-                "total_delivered_quantity": quantity["total_delivered_quantity"],
-                "currency": quantity["currency"],
-            }
-        )
-
-    return result
+    ] + results

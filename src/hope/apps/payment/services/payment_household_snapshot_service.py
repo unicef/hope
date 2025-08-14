@@ -67,10 +67,8 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
     )
     paginator = Paginator(payments_queryset, page_size)
     for page_number in paginator.page_range:
-        to_create = []
         payments = paginator.page(page_number).object_list
-        for payment in payments:
-            to_create.append(create_payment_snapshot_data(payment))
+        to_create = [create_payment_snapshot_data(payment) for payment in payments]
         PaymentHouseholdSnapshot.objects.bulk_create(to_create)
 
 
