@@ -29,7 +29,7 @@ class AcceptanceProcessThresholdForm(forms.ModelForm):
 
 class TemplateSelectForm(forms.Form):
     template = forms.ModelChoiceField(
-        queryset=FinancialServiceProviderXlsxTemplate.objects.none(), label="Select FSP XLSX Template", required=True
+        queryset=FinancialServiceProviderXlsxTemplate.objects.none(), label="Select FSP XLSX Template", required=False
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
