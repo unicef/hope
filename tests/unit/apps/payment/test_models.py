@@ -1021,8 +1021,8 @@ class TestAccountModel(TestCase):
         self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind), True)
 
         AccountFactory(
+            number="test",
             data={
-                "number": "test",
                 "expiry_date": "12.12.2024",
                 "name_of_cardholder": "Marek",
             },
