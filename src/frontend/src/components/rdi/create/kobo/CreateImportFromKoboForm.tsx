@@ -38,7 +38,6 @@ export function CreateImportFromKoboForm({
 }): ReactElement {
   const {
     saveAndStartPolling,
-    stopPollingImportData,
     loading: saveKoboLoading,
     koboImportData,
   } = useSaveKoboImportDataAndCheckStatus();
@@ -69,8 +68,7 @@ export function CreateImportFromKoboForm({
     },
   });
 
-  const onSubmit = async (values): Promise<void> => {
-    console.log('Kobo onSubmit called with values:', values);
+  const onSubmit =  (values): void => {
     if (!koboImportData?.id) {
       return;
     }
@@ -93,13 +91,12 @@ export function CreateImportFromKoboForm({
     validationSchema,
     onSubmit,
   });
-  const saveKoboInputData = async (): Promise<void> => {
+  const saveKoboInputData = (): Promise<void> => {
     if (!formik.values.koboAssetId) {
       return;
     }
     setSubmitDisabled(true);
-    stopPollingImportData();
-    await saveAndStartPolling({
+    saveAndStartPolling({
       businessAreaSlug: businessArea,
       programSlug: programId,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
@@ -107,7 +104,6 @@ export function CreateImportFromKoboForm({
       pullPictures: formik.values.pullPictures,
     });
   };
-  useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveKoboInputData();
   }, [

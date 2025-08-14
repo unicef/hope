@@ -45,7 +45,7 @@ const StyledDialogFooter = styled(DialogFooter)`
 export const RegistrationDataImportCreateDialog = (): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [importType, setImportType] = useState('programPopulation');
+  const [importType, setImportType] = useState('');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
   const { isActiveProgram, selectedProgram } = useProgramContext();
