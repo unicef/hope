@@ -464,7 +464,9 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments_qs = split.split_payment_items.eligible()
+                payments_qs = split.split_payment_items.eligible.filter(
+                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                )
                 if id_filters:
                     # filter by id to add missing records to payment instructions
                     payments_qs = payments_qs.filter(id__in=id_filters)
