@@ -298,9 +298,9 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
 
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
-    grievance = []
-    for _ in range(4):
-        grievance.append(create_grievance_referral(assigned_to="", business_area=afghanistan, program=program))
+    grievance = [
+        create_grievance_referral(assigned_to="", business_area=afghanistan, program=program) for _ in range(4)
+    ]
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
     yield grievance

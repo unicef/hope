@@ -26,6 +26,7 @@ import type { FspChoices } from '../models/FspChoices';
 import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
+import type { GrievanceDashboard } from '../models/GrievanceDashboard';
 import type { GrievanceDeleteHouseholdApproveStatus } from '../models/GrievanceDeleteHouseholdApproveStatus';
 import type { GrievanceHouseholdDataChangeApprove } from '../models/GrievanceHouseholdDataChangeApprove';
 import type { GrievanceIndividualDataChangeApprove } from '../models/GrievanceIndividualDataChangeApprove';
@@ -1155,6 +1156,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -1385,6 +1387,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -1619,6 +1622,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1642,6 +1646,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1669,6 +1674,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1696,6 +1702,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1723,6 +1730,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1750,6 +1758,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1777,6 +1786,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1832,6 +1842,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns TicketNote
      * @throws ApiError
      */
@@ -1859,6 +1870,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1886,6 +1898,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1913,6 +1926,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns FieldAttribute
      * @throws ApiError
      */
@@ -2131,6 +2145,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedFieldAttributeList
      * @throws ApiError
      */
@@ -2361,6 +2376,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedFieldAttributeList
      * @throws ApiError
      */
@@ -2591,6 +2607,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -2825,6 +2842,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -3059,6 +3077,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -3293,6 +3312,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -3527,6 +3547,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns GrievanceChoices
      * @throws ApiError
      */
@@ -3544,6 +3565,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3758,6 +3780,24 @@ export class RestService {
                 'search': search,
                 'status': status,
                 'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * Get grievance dashboard data without program filtering (global view)
+     * @returns GrievanceDashboard
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsDashboardRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<GrievanceDashboard> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/dashboard/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -5630,6 +5670,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -5863,6 +5904,7 @@ export class RestService {
         });
     }
     /**
+     * Common dashboard logic for grievance tickets
      * @returns CountResponse
      * @throws ApiError
      */
@@ -6080,6 +6122,27 @@ export class RestService {
                 'search': search,
                 'status': status,
                 'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * Get grievance dashboard data filtered by program
+     * @returns GrievanceDashboard
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<GrievanceDashboard> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/dashboard/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
             },
         });
     }
