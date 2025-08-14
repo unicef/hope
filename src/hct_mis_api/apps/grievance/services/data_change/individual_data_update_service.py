@@ -358,6 +358,6 @@ class IndividualDataUpdateService(DataChangeService):
             transaction.on_commit(
                 lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
                     should_populate_index=True,
-                    individuals_ids=[str(new_individual.id)],
+                    individual_id=str(new_individual.id),
                 )
             )

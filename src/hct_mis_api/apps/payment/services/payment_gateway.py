@@ -94,7 +94,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
 
 
 class PaymentPayloadSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
+    amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)

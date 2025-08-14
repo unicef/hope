@@ -149,15 +149,26 @@ export function AccountField({
                 />
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <Field
-                  name={`${accountFieldName}.${key}`}
-                  fullWidth
-                  variant="outlined"
-                  label={t('New Value')}
-                  component={FormikTextField}
-                  required={!isEditTicket}
-                  disabled={isEditTicket}
-                />
+                {key == 'financial_institution' ? (
+                  <Field
+                    name={`${accountFieldName}.${key}`}
+                    variant="outlined"
+                    label={t('New Value')}
+                    component={FormikSelectField}
+                    choices={accountFinancialInstitutionChoices}
+                    required
+                  />
+                ) : (
+                  <Field
+                    name={`${accountFieldName}.${key}`}
+                    fullWidth
+                    variant="outlined"
+                    label={t('New Value')}
+                    component={FormikTextField}
+                    required={!isEditTicket}
+                    disabled={isEditTicket}
+                  />
+                )}
               </Grid>
             </Fragment>
           ))}
