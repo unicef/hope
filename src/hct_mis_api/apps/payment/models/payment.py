@@ -731,7 +731,9 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION)
+        from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -739,7 +741,16 @@ class PaymentPlan(
                 | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
             )
         else:
-            params &= Q(payment_verifications__isnull=True)
+            # exclude PaymentVerificationPlan with in statuses Error or Invalid
+            params &= Q(
+                Q(payment_verifications__isnull=True)
+                | Q(
+                    payment_verifications__payment_verification_plan__status__in=[
+                        PaymentVerificationPlan.STATUS_INVALID,
+                        PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
+                    ]
+                )
+            )
 
         payment_records = self.eligible_payments.select_related("head_of_household").filter(params).distinct()
 
@@ -1755,17 +1766,17 @@ class Payment(
         blank=True,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_date = models.DateTimeField(null=True, blank=True)
     delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
@@ -2001,10 +2012,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     @property
     def account_data(self) -> dict:
         data = self.data.copy()
-        if self.number:
-            data["number"] = self.number
-        if self.financial_institution:
-            data["financial_institution"] = str(self.financial_institution.id)
+        data["number"] = self.number or data.get("number", "")
+        data["financial_institution"] = str(self.financial_institution.id) if self.financial_institution else ""
         return data
 
     @account_data.setter
