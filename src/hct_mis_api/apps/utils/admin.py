@@ -23,7 +23,7 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery import app as celery_app
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.utils.celery_utils import get_task_in_queue_or_running
@@ -363,8 +363,15 @@ class PaymentPlanCeleryTasksMixin:
 
         if request.method == "POST":
             task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx
-            file_id = FileTemp.objects.get(object_id=pk).pk
-            args = [uuid.UUID(pk), file_id]
+            pp = PaymentPlan.objects.get(pk=pk)
+            file = pp.reconciliation_import_file
+            if not file:
+                messages.add_message(
+                    request, messages.ERROR, "There is no reconciliation_import_file for this payment plan"
+                )
+                return redirect(reverse(self.url, args=[pk]))
+
+            args = [uuid.UUID(pk), file.pk]
             task_data = get_task_in_queue_or_running(name=task_name, args=args)
             if task_data:
                 task_id = task_data["id"]

@@ -944,13 +944,13 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
     old_received_amount = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
     new_received_amount = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
+        max_digits=15,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
