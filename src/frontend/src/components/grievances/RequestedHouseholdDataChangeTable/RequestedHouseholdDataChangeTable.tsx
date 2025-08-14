@@ -1,6 +1,8 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useAllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
+import React, { ReactElement } from 'react';
+import { RestService } from '@restgenerated/services/RestService';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Checkbox } from '@mui/material';
 import Table from '@mui/material/Table';
@@ -9,12 +11,14 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
 import { snakeCase } from 'lodash';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { useQuery } from '@tanstack/react-query';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -29,8 +33,32 @@ function RequestedHouseholdDataChangeTable(
   props: RequestedHouseholdDataChangeTableProps,
 ): ReactElement {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   const { data } = useAllEditHouseholdFieldsQuery();
   const { setFieldValue, ticket, isEdit, values } = props;
+  const householdId = ticket.household?.id;
+
+  const {
+    data: household,
+    isLoading: householdLoading,
+    error,
+  } = useQuery<HouseholdDetail>({
+    queryKey: [
+      'household',
+      businessArea,
+      householdId,
+      //@ts-ignore
+      ticket.household.programSlug,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        id: householdId,
+        //@ts-ignore
+        programSlug: ticket.household.programSlug,
+      }),
+    enabled: Boolean(householdId && businessArea),
+  });
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
   const householdData = {
@@ -43,13 +71,15 @@ function RequestedHouseholdDataChangeTable(
   const handleSelectRole = (individualId: string): void => {
     handleSelected(individualId, 'selectedRoles', selectedRoles, setFieldValue);
   };
+
   const flexFields = householdData.flex_fields || {};
   delete householdData.flex_fields;
   const entries = Object.entries(householdData).filter(
     ([key]) => key !== 'roles',
   );
+
   const entriesFlexFields = Object.entries(flexFields).filter(
-    ([key]) => key !== 'approve_status',
+    ([key]) => key !== 'approveStatus',
   );
   const fieldsDict = useArrayToDict(
     data?.allEditHouseholdFieldsAttributes,
@@ -57,8 +87,6 @@ function RequestedHouseholdDataChangeTable(
     '*',
   );
 
-  console.log('entries', entries);
-  console.log('entriesFlexFields', entriesFlexFields);
   const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
 
   const StyledTable = styled(Table)`
@@ -76,8 +104,14 @@ function RequestedHouseholdDataChangeTable(
   const handleSelectBioData = (name): void => {
     handleSelected(snakeCase(name), 'selected', selectedBioData, setFieldValue);
   };
-  const roles =
-    ticket.householdDataUpdateTicketDetails.householdData.roles || [];
+  const roles = ticket.ticketDetails.householdData.roles || [];
+
+  if (householdLoading) {
+    return <div>{t('Loading household details...')}</div>;
+  }
+  if (error) {
+    return <div>{t('Error loading household details')}</div>;
+  }
 
   return (
     <StyledTable>
@@ -110,6 +144,7 @@ function RequestedHouseholdDataChangeTable(
               ticket,
               isEdit,
               handleSelectBioData,
+              household,
             ),
           )}
         {roles.length > 0 &&
@@ -161,6 +196,7 @@ function RequestedHouseholdDataChangeTable(
               ticket,
               isEdit,
               handleFlexFields,
+              household,
             ),
           )}
       </TableBody>

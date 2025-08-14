@@ -383,7 +383,6 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     householdData: any;
     roles?: any;
   };
-  console.log('values.roles', values.roles);
   if (Array.isArray(values.roles) && values.roles.length > 0) {
     householdDataUpdateIssueTypeExtras.householdData.roles = values.roles;
   }
@@ -645,10 +644,18 @@ export function prepareRestVariables(
           return prev;
         }, {});
 
+      // Add roles if present
+      if (Array.isArray(values.roles) && values.roles.length > 0) {
+        householdData.roles = values.roles;
+      }
       extras.issueType = {
         householdDataUpdateIssueTypeExtras: {
           household: values.selectedHousehold?.id,
-          householdData: { ...householdData, flexFields },
+          householdData: {
+            ...householdData,
+            flexFields,
+            ...(householdData.roles ? { roles: householdData.roles } : {}),
+          },
         },
       };
     }

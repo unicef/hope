@@ -1,20 +1,20 @@
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { useProgramContext } from '../../programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
+import { RestService } from '@restgenerated/services/RestService';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { camelCase } from 'lodash';
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { Title } from '@core/Title';
+import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useProgramContext } from '../../programContext';
-import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { useConfirmation } from '@core/ConfirmationDialog';
-import { Title } from '@core/Title';
-import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
-import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
-import { RestService } from '@restgenerated/services/RestService';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { camelCase } from 'lodash';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -25,16 +25,16 @@ export function RequestedHouseholdDataChange({
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const confirm = useConfirmation();
+  const confirmation = useConfirmation();
   const { isActiveProgram } = useProgramContext();
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
 
-  const getConfirmationText = (values): string => {
+  const getConfirmationText = (vals): string => {
     const allSelected =
-      values.selectedRoles.length +
-        values.selected.length +
-        values.selectedFlexFields.length || 0;
+      vals.selectedRoles.length +
+        vals.selected.length +
+        vals.selectedFlexFields.length || 0;
     return `You approved ${allSelected} change${
       allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
@@ -67,15 +67,15 @@ export function RequestedHouseholdDataChange({
         queryKey: ['GrievanceTicketDetail', ticket.id],
       });
     },
-    onError: (error: any) => {
-      if (error?.body?.errors) {
-        Object.values(error.body.errors)
+    onError: (err: any) => {
+      if (err?.body?.errors) {
+        Object.values(err.body.errors)
           .flat()
           .forEach((msg: string) => {
             showMessage(msg);
           });
       } else {
-        showMessage(error?.message || 'An error occurred');
+        showMessage(err?.message || 'An error occurred');
       }
     },
   });
@@ -88,29 +88,29 @@ export function RequestedHouseholdDataChange({
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
+    ([, val]: [string, { approveStatus: boolean }]) => val.approveStatus,
   ).length;
   allApprovedCount += flexFieldsEntries.filter(
-    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
+    ([, val]: [string, { approveStatus: boolean }]) => val.approveStatus,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-  const shouldShowEditButton = (values): boolean =>
-    (values.selected.length || values.selectedFlexFields.length) &&
+  const shouldShowEditButton = (vals): boolean =>
+    (vals.selected.length || vals.selectedFlexFields.length) &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
-  const areAllApproved = (values): boolean => {
+  const areAllApproved = (vals): boolean => {
     const selectedCount =
-      values.selected.length +
-      values.selectedFlexFields.length +
-      values.selectedRoles.length;
+      vals.selected.length +
+      vals.selectedFlexFields.length +
+      vals.selectedRoles.length;
     const countAll = entries.length + flexFieldsEntries.length;
     return selectedCount === countAll;
   };
 
-  const getApprovalButton = (values, submitForm): ReactElement => {
-    if (areAllApproved(values)) {
+  const getApprovalButton = (vals, submitForm): ReactElement => {
+    if (areAllApproved(vals)) {
       return (
         <Button
           onClick={submitForm}
@@ -129,9 +129,9 @@ export function RequestedHouseholdDataChange({
     return (
       <Button
         onClick={() =>
-          confirm({
+          confirmation({
             title: t('Warning'),
-            content: getConfirmationText(values),
+            content: getConfirmationText(vals),
           }).then(() => {
             submitForm();
           })
@@ -165,15 +165,15 @@ export function RequestedHouseholdDataChange({
           )
           .map((row) => row[0]),
         selectedRoles: (ticket.ticketDetails.householdData.roles || [])
-          .filter((role) => role.approve_status)
-          .map((role) => role.individual_id),
+          .filter((role) => role.approveStatus)
+          .map((role) => role.individualId),
       }}
       onSubmit={async (values) => {
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields
         entries.forEach(([key]) => {
-          if (key !== 'roles' && key !== 'flex_fields') {
+          if (key !== 'roles' && key !== 'flexFields') {
             householdApproveData[key] = values.selected.includes(key);
           }
         });
@@ -186,11 +186,21 @@ export function RequestedHouseholdDataChange({
           }
         });
         // Roles
-        const allRoles = ticket.ticketDetails.householdData.roles || [];
+        const allRolesRaw = ticket.ticketDetails.householdData.roles || [];
+        // Convert all role keys to camelCase for consistency
+        const allRoles = allRolesRaw.map((role) =>
+          Object.fromEntries(
+            Object.entries(role).map(([k, v]) => [camelCase(k), v]),
+          ),
+        );
         householdApproveData.roles = allRoles.map((role) => ({
-          individual_id: role.individual_id,
-          approve_status: values.selectedRoles.includes(role.individual_id),
+          individual_id: role.individualId,
+          approve_status: Boolean(
+            values.selectedRoles.includes(role.individualId),
+          ),
         }));
+
+        console.log('householdApproveData', householdApproveData);
 
         try {
           await mutate({

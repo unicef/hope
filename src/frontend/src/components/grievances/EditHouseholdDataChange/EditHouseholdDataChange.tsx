@@ -25,9 +25,19 @@ function EditHouseholdDataChange({
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): ReactElement {
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data: individualsChoices } = useQuery({
+    queryKey: ['individualsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasIndividualsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+    enabled: Boolean(businessArea),
+  });
+  const roleChoices = individualsChoices?.roleChoices || [];
   const { t } = useTranslation();
   const location = useLocation();
-  const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -55,12 +65,34 @@ function EditHouseholdDataChange({
       businessArea,
       household.id,
       programId,
+      //@ts-ignore
       household.program.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
+        //@ts-ignore
+        programSlug: household.program.slug,
+        // Define roleChoices for New Role select field
+      }),
+    enabled: Boolean(household && businessArea),
+  });
+
+  // Fetch household members for roles logic
+  const { data: householdMembers, isLoading: membersLoading } = useQuery({
+    queryKey: [
+      'householdMembers',
+      businessArea,
+      household.id,
+      //@ts-ignore
+      household.program.slug,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsMembersList({
+        businessAreaSlug: businessArea,
+        id: household.id,
+        //@ts-ignore
         programSlug: household.program.slug,
       }),
     enabled: Boolean(household && businessArea),
@@ -86,16 +118,16 @@ function EditHouseholdDataChange({
   }, []);
 
   useEffect(() => {
-    if (fullHousehold && (!values.roles || values.roles.length === 0)) {
+    if (householdMembers && (!values.roles || values.roles.length === 0)) {
       setFieldValue(
         'roles',
-        fullHousehold.individualsAndRoles.map((roleItem) => ({
-          individual: roleItem.individual.id,
+        householdMembers.results.map((member) => ({
+          individual: member.id,
           newRole: '',
         })),
       );
     }
-  }, [fullHousehold, setFieldValue, values.roles]);
+  }, [householdMembers, setFieldValue, values.roles]);
 
   const householdFieldsDict = householdFieldsData;
 
@@ -104,9 +136,16 @@ function EditHouseholdDataChange({
       <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
     );
   }
-  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+  if (
+    fullHouseholdLoading ||
+    householdFieldsLoading ||
+    !fullHousehold ||
+    membersLoading ||
+    !householdMembers
+  ) {
     return <LoadingComponent />;
   }
+
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
@@ -169,21 +208,17 @@ function EditHouseholdDataChange({
           <Grid size={{ xs: 1 }}></Grid>
           {/* Render all roles, including added ones */}
           {(values.roles || []).map((roleItem, index) => {
-            // Find individual details from household
-            const individualObj =
-              fullHousehold.household.individuals.edges.find(
-                (ind) => ind.node.id === roleItem.individual,
-              );
-            const currentRoleObj =
-              fullHousehold.household.individualsAndRoles.find(
-                (r) => r.individual.id === roleItem.individual,
-              );
+            // Find individual details from householdMembers
+            // Removed unused individualObj assignment
+            const currentRoleObj = fullHousehold.rolesInHousehold.find(
+              (r) => r.individual.id === roleItem.individual,
+            );
             // Filter out individuals already assigned in other rows
             const usedIds = (values.roles || []).map((r, i) =>
               i !== index ? r.individual : null,
             );
-            const availableChoices = fullHousehold.household.individuals.edges
-              .map((ind) => ({ value: ind.node.id, label: ind.node.fullName }))
+            const availableChoices = householdMembers.results
+              .map((ind) => ({ value: ind.id, label: ind.fullName }))
               .filter((choice) => !usedIds.includes(choice.value));
             return (
               <React.Fragment key={roleItem.individual + '-' + index}>
@@ -234,10 +269,9 @@ function EditHouseholdDataChange({
               onClick={() => {
                 // Find individuals not already assigned in roles
                 const usedIds = (values.roles || []).map((r) => r.individual);
-                const availableIndividuals =
-                  fullHousehold.household.individuals.edges
-                    .map((edge) => edge.node)
-                    .filter((ind) => !usedIds.includes(ind.id));
+                const availableIndividuals = householdMembers.results.filter(
+                  (ind) => !usedIds.includes(ind.id),
+                );
                 const defaultIndividual =
                   availableIndividuals.length > 0
                     ? availableIndividuals[0].id
