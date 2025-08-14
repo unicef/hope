@@ -269,6 +269,7 @@ export function validateUsingSteps(
         // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName &&
+        !values.roles?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
@@ -402,7 +403,8 @@ export function validateUsingSteps(
             }
             acc.dynamicFields?.forEach((field) => {
               if (!field.key || !field.value) {
-                errors.individualDataUpdateFieldsAccounts = 'New Account fields need to have both key/value';
+                errors.individualDataUpdateFieldsAccounts =
+                  'New Account fields need to have both key/value';
               }
             });
           });
@@ -421,7 +423,8 @@ export function validateUsingSteps(
             }
             acc.dynamicFields?.forEach((field) => {
               if (!field.key || !field.value) {
-                errors.individualDataUpdateFieldsAccounts = 'Edited Account fields need to have both key/value';
+                errors.individualDataUpdateFieldsAccounts =
+                  'Edited Account fields need to have both key/value';
               }
             });
           });

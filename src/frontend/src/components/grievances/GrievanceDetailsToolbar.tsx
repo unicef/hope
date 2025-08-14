@@ -35,16 +35,25 @@ const Separator = styled.div`
 const countApprovedAndUnapproved = (
   data,
 ): { approved: number; notApproved: number } => {
+  // Only count objects with an approve_status property
   let approved = 0;
   let notApproved = 0;
   const flattenArray = data.flat(2);
-  flattenArray.forEach((item) => {
-    if (item.approveStatus === true) {
-      approved += 1;
-    } else {
-      notApproved += 1;
-    }
-  });
+  flattenArray
+    .filter(
+      (item) =>
+        typeof item === 'object' &&
+        item !== null &&
+        'approve_status' in item &&
+        typeof item.approve_status === 'boolean',
+    )
+    .forEach((item) => {
+      if (item.approve_status === true) {
+        approved += 1;
+      } else {
+        notApproved += 1;
+      }
+    });
 
   return { approved, notApproved };
 };

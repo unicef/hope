@@ -40,13 +40,13 @@ function HouseholdQuestionnaire({
       businessArea,
       householdId,
       programId,
-      values.selectedHousehold.programSlug,
+      selectedProgram.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: values.selectedHousehold.programSlug,
+        programSlug: selectedProgram.slug,
       }),
     enabled: !!householdId,
   });

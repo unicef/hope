@@ -465,6 +465,11 @@ class TestHouseholdDetail:
             },
             individuals_data=[{}, {}],
         )
+        self.primary_role = IndividualRoleInHouseholdFactory(
+            individual=self.individuals[0],
+            household=self.household,
+            role=ROLE_PRIMARY,
+        )
 
         duplicated_individual = self.individuals[1]
         duplicated_individual.deduplication_golden_record_status = DUPLICATE
@@ -620,6 +625,16 @@ class TestHouseholdDetail:
         assert data["org_name_enumerator"] == self.household.org_name_enumerator
         assert data["registration_method"] == self.household.registration_method
         assert data["consent_sharing"] == list(self.household.consent_sharing)
+        assert data["roles_in_household"] == [
+            {
+                "id": str(self.primary_role.id),
+                "role": ROLE_PRIMARY,
+                "individual": {
+                    "id": str(self.individuals[0].id),
+                    "unicef_id": self.individuals[0].unicef_id,
+                },
+            }
+        ]
 
     @pytest.mark.parametrize(
         "permissions",
