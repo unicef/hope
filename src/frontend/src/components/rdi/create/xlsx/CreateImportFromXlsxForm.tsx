@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {
-  ImportDataStatus,
-  useCreateRegistrationXlsxImportMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { Status753Enum } from '@restgenerated/models/Status753Enum';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useMutation } from '@tanstack/react-query';
 import { Box, CircularProgress } from '@mui/material';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FormikProvider, useFormik } from 'formik';
@@ -38,36 +37,50 @@ export function CreateImportFromXlsxForm({
 }): ReactElement {
   const {
     saveAndStartPolling,
-    stopPollingImportData,
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [createImport] = useCreateRegistrationXlsxImportMutation();
+
+  // Mutation for creating registration xlsx import
+  const createImportMutation = useMutation({
+    mutationFn: async (data: {
+      importDataId: string;
+      name: string;
+      screenBeneficiary: boolean;
+    }) => {
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationXlsxImportCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          requestBody: data,
+        },
+      );
+    },
+    onSuccess: (data) => {
+      navigate(`/${baseUrl}/registration-data-import/${data.id}`);
+    },
+    onError: (error: any) => {
+      showMessage(error.message || 'Error creating import');
+      setSubmitDisabled(false);
+    },
+  });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
-    try {
-      const data = await createImport({
-        variables: {
-          registrationDataImportData: {
-            importDataId: xlsxImportData.id,
-            name: values.name,
-            screenBeneficiary: values.screenBeneficiary,
-            businessAreaSlug: businessArea,
-          },
-        },
-      });
-      navigate(
-        `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
-      );
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    if (!xlsxImportData?.id) {
       setSubmitDisabled(false);
+      return;
     }
+
+    createImportMutation.mutate({
+      importDataId: xlsxImportData.id,
+      name: values.name,
+      screenBeneficiary: values.screenBeneficiary,
+    });
   };
 
   const formik = useFormik({
@@ -85,13 +98,14 @@ export function CreateImportFromXlsxForm({
       return;
     }
     setSubmitDisabled(true);
-    stopPollingImportData();
+    // stopPollingImportData();
     await saveAndStartPolling({
       businessAreaSlug: businessArea,
+      programSlug: programId,
       file: formik.values.file,
     });
   };
-  useEffect(() => stopPollingImportData, []);
+  // useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveXlsxInputData();
   }, [formik.values.file]);
@@ -99,9 +113,7 @@ export function CreateImportFromXlsxForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (
-      xlsxImportData?.status === ImportDataStatus.Finished
-    ) {
+    if (xlsxImportData?.status === Status753Enum.FINISHED) {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);

@@ -5,9 +5,10 @@ import {
 import { ImportCounters } from '../ImportCounters';
 import { XlsxErrors } from './XlsxErrors';
 import { ReactElement } from 'react';
+import { ImportData } from '@restgenerated/models/ImportData';
 
 export interface XlsxImportDataRepresentationPropTypes {
-  xlsxImportData: XlsxImportDataQueryResult['data']['importData'];
+  xlsxImportData: ImportData;
   loading: boolean;
 }
 export function XlsxImportDataRepresentation({

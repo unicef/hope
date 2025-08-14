@@ -36,9 +36,11 @@ import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
+import type { ImportData } from '../models/ImportData';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { IndividualPhotoDetail } from '../models/IndividualPhotoDetail';
+import type { KoboImportData } from '../models/KoboImportData';
 import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
 import type { MessageSampleSize } from '../models/MessageSampleSize';
@@ -129,9 +131,12 @@ import type { RDINested } from '../models/RDINested';
 import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportCreate } from '../models/RegistrationDataImportCreate';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
+import type { RegistrationKoboImport } from '../models/RegistrationKoboImport';
+import type { RegistrationXlsxImport } from '../models/RegistrationXlsxImport';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SampleSize } from '../models/SampleSize';
 import type { SanctionListIndividual } from '../models/SanctionListIndividual';
+import type { SaveKoboImportData } from '../models/SaveKoboImportData';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
 import type { SurveyRapidProFlow } from '../models/SurveyRapidProFlow';
@@ -140,6 +145,7 @@ import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
 import type { TicketNote } from '../models/TicketNote';
+import type { UploadXlsxFile } from '../models/UploadXlsxFile';
 import type { UserChoices } from '../models/UserChoices';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -4147,6 +4153,31 @@ export class RestService {
         });
     }
     /**
+     * ViewSet for accessing ImportData objects (XLSX file uploads).
+     * Provides read-only access to import data objects.
+     * @returns ImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasImportDataRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this import data.
+         */
+        id: string,
+    }): CancelablePromise<ImportData> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/import-data/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+        });
+    }
+    /**
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -4462,6 +4493,31 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * ViewSet for accessing KoboImportData objects (Kobo submissions).
+     * Provides read-only access to kobo import data objects.
+     * @returns KoboImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasKoboImportDataRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this kobo import data.
+         */
+        id: string,
+    }): CancelablePromise<KoboImportData> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/kobo-import-data/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
             },
         });
     }
@@ -7328,6 +7384,31 @@ export class RestService {
         });
     }
     /**
+     * Upload an XLSX file asynchronously for registration data import
+     * @returns ImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsImportDataUploadUploadXlsxFileCreate({
+        businessAreaSlug,
+        programSlug,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        formData: UploadXlsxFile,
+    }): CancelablePromise<ImportData> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/import-data-upload/upload-xlsx-file/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -7845,6 +7926,31 @@ export class RestService {
                 'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
+        });
+    }
+    /**
+     * Save KoBo project import data asynchronously
+     * @returns KoboImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: SaveKoboImportData,
+    }): CancelablePromise<KoboImportData> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/kobo-import-data-upload/save-kobo-import-data/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -10980,6 +11086,56 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
+        });
+    }
+    /**
+     * Import registration data from KoBo
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: RegistrationKoboImport,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/registration-kobo-import/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Import registration data from an XLSX file
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRegistrationXlsxImportCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: RegistrationXlsxImport,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/registration-xlsx-import/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

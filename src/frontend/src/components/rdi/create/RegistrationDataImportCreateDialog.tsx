@@ -49,7 +49,6 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
   const { isActiveProgram, selectedProgram } = useProgramContext();
-
   useEffect(() => {
     if (!open) {
       setSubmitDisabled(true);
@@ -142,17 +141,16 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
               fullWidth
               data-cy="import-type-select"
             >
-              {/* <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
+              <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
                 Excel
               </MenuItem>
               <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
                 Kobo
-              </MenuItem> */}
+              </MenuItem>
               <MenuItem
                 data-cy="program-population-menu-item"
                 key="program-population"
                 value="programPopulation"
-                disabled
               >
                 Program Population
               </MenuItem>
