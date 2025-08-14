@@ -66,8 +66,8 @@ class TestBuildSnapshot(TestCase):
             AccountFactory(
                 individual=cls.hoh1,
                 account_type=AccountType.objects.get(key="bank"),
+                number="123",
                 data={
-                    "number": "123",
                     "expiry_date": "2022-01-01",
                     "name_of_cardholder": "Marek",
                 },
