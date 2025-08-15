@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch
+
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.test import RequestFactory, override_settings
@@ -12,7 +14,7 @@ from webtest import Upload
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.geo.admin import AreaAdmin
-from hct_mis_api.apps.geo.models import Area, AreaType
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
@@ -34,6 +36,12 @@ class TestGeoApp(WebTest):
             User.objects.get_or_create(username="testuser", partner=Partner.objects.get_or_create(name="UNICEF")[0])[0]
         )
 
+    def tearDown(self) -> None:
+        from django.core.cache import cache
+
+        cache.clear()
+        super().tearDown()
+
     def test_modeladmin_str(self) -> None:
         ma = ModelAdmin(Area, self.site)
         self.assertEqual(str(ma), "geo.ModelAdmin")
@@ -46,18 +54,37 @@ class TestGeoApp(WebTest):
         assert resp.status_int == 200, "You need to be logged in and superuser"
 
     @flaky(max_runs=3, min_passes=1)
-    def test_upload(self) -> None:
-        self.assertEqual(AreaType.objects.count(), 2, "Two area types created")
-        self.assertEqual(Area.objects.count(), 5, "Five area created")
+    @patch("hct_mis_api.apps.geo.admin.import_areas_from_csv_task.delay")
+    def test_upload(self, mock_task_delay: Mock) -> None:
+        Country.objects.get_or_create(
+            iso_code2="AF",
+            defaults={
+                "name": "Afghanistan",
+                "short_name": "Afghanistan",
+                "iso_code3": "AFG",
+                "iso_num": "004",
+            },
+        )
+        self.assertEqual(AreaType.objects.count(), 2)
+        self.assertEqual(Area.objects.count(), 5)
         resp = self.app.get(reverse("admin:geo_area_changelist"), user=self.superuser).click("Import Areas")
         assert "Upload a csv" in resp
         form = resp.form
+        csv_content = b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\nAfghanistan,Prov1,Distr1,AF,AF99,AF9988\n"
         form["file"] = Upload(
             "file.csv",
-            b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\nAfghanistan,Prov1,Distr1,AF,AF99,AF9988\n",
+            csv_content,
             "text/csv",
         )
         resp = form.submit("Import")
-        assert resp.status_int == 302, "The form is not good"
-        self.assertEqual(AreaType.objects.count(), 4, "Two new area types created")
-        self.assertEqual(Area.objects.count(), 8, "Two new area created")
+        assert resp.status_int == 302
+
+        redirect_resp = resp.follow()
+        messages = list(redirect_resp.context["messages"])
+        self.assertEqual(len(messages), 1)
+        self.assertIn("Found 4 new areas to create.", str(messages[0]))
+        self.assertIn("The import is running in the background.", str(messages[0]))
+
+        self.assertEqual(AreaType.objects.count(), 2)
+        self.assertEqual(Area.objects.count(), 5)
+        mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
