@@ -34,9 +34,7 @@ def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> N
 
 @receiver(pre_save, sender=Program)
 def update_slug_on_programme_code_change(sender: Any, instance: Program, **kwargs: Any) -> None:
-    """
-    Signal to regenerate the slug if the programme_code has changed.
-    """
+    """Signal to regenerate the slug if the programme_code has changed."""
     if instance.pk is None:
         return
     try:

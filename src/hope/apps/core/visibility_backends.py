@@ -9,9 +9,7 @@ if TYPE_CHECKING:
 
 
 class VisibilityBackend:
-    """
-    Visibility backend that checks if the user has access to a specific area within a program.
-    """
+    """Visibility backend that checks if the user has access to a specific area within a program."""
 
     @classmethod
     def has_area_access(cls, partner: "Partner", area_id: str | UUID, program_id: str | UUID) -> bool:

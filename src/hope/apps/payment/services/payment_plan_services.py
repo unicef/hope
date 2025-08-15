@@ -118,9 +118,7 @@ class PaymentPlanService:
         return actions_to_approval_type_map[self.action]
 
     def execute_update_status_action(self, input_data: dict, user: Union["AbstractUser", "User"]) -> PaymentPlan:
-        """Get function from get_action_function and execute it
-        return PaymentPlan object
-        """
+        """Get function from get_action_function and execute it return PaymentPlan object."""
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = user

@@ -119,8 +119,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         return user.permissions_in_business_area(business_area_slug)
 
     def get_cross_area_filter_available(self, user: User) -> bool:
-        """
-        Check if the cross area filter is available for the user.
+        """Check if the cross area filter is available for the user.
+
         Access to the cross-area filter, in addition to the standard permissions check,
         is available only if user does not have ANY area limits in the program (has full-area-access)
         """
@@ -145,8 +145,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PartnerForProgramSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Partner model
+    """Serializer for Partner model.
+
     It expects Partner objects to be annotated with partner_program which is the program that is serializing the object
     """
 

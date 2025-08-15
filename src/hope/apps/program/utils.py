@@ -75,8 +75,7 @@ class CopyProgramPopulation:
         rdi_merge_status: str = MergeStatusModel.MERGED,
         create_collection: bool = True,
     ):
-        """
-        Copy the population data from a programme to another programme.
+        """Copy the population data from a programme to another programme.
 
         copy_from_individuals: QuerySet of Individuals to copy
         copy_from_households: QuerySet of Households to copy
@@ -264,9 +263,7 @@ class CopyProgramPopulation:
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
     ) -> list[Document]:
-        """
-        Clone document for individual if new individual_representation has been created.
-        """
+        """Clone document for individual if new individual_representation has been created."""
         documents_list = []
         for document in documents:
             original_document_id = document.id
@@ -302,9 +299,7 @@ class CopyProgramPopulation:
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
     ) -> list[Account]:
-        """
-        Clone account for individual if new individual_representation has been created.
-        """
+        """Clone account for individual if new individual_representation has been created."""
         accounts_list = []
         for account in accounts:
             account.pk = None

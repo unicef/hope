@@ -9,8 +9,7 @@ KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 
 def reduce_asset(asset: dict, *args: Any, **kwargs: Any) -> dict:
-    """
-    Takes from asset only values that are needed by our frontend.
+    """Take from asset only values that are needed by our frontend.
 
     {
         "uid": "aY2dvQ64KudGV5UdSvJkB6",

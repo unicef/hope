@@ -85,8 +85,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def _validate_delivered_quantity(self, row: Row) -> None:
-        """
-        It should be possible for a user to upload a file when:
+        """Define when possible for a user to upload a file.
 
         * Fully Delivered (entitled quantity = delivered quantity) [float]
         * Partially Delivered (entitled quantity > delivered quantity > 0) [float]
@@ -98,7 +97,6 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         * delivered quantity > entitled quantity
         """
-
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:

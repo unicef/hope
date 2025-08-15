@@ -5,12 +5,12 @@ exclude = ["src/frontend", "src/hope/one_time_scripts"]
 [lint]
 select = [
     "A", # prevent using keywords that clobber python builtins
-#    "B", # bugbear: security warnings
+    "B", # bugbear: security warnings
 #    "BLE", # blind exceptions
     "C4", # flake8-comprehensions
 #    "C90", # McCabe complexity
     "COM", # flake8-commas
-#    "D", # pydocstyle
+    "D", # pydocstyle
     "DJ", # flake8-django
 #    "E", # pycodestylex
     "E4", "E7", "E9",

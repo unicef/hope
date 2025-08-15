@@ -284,7 +284,7 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
-        """Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces"""
+        """Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces."""
         return [hh_id.strip() for hh_id in re.split(r"new line|[,\|/\s]+", household_list) if hh_id]
 
     @staticmethod

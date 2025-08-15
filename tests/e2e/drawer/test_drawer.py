@@ -2,6 +2,8 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
@@ -160,7 +162,7 @@ class TestDrawer:
 
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name)
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
         # first have to search Finished program because of default filtering

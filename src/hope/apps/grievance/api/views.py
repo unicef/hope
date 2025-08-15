@@ -872,8 +872,9 @@ class GrievanceTicketGlobalViewSet(
     @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
     @action(detail=True, methods=["post"], url_path="approve-status-update")
     def approve_status_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """
-        action for approve_add_individual, approve_delete_individual, approve_system_flagging
+        """Approve action.
+
+        approve_add_individual, approve_delete_individual, approve_system_flagging.
         """
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)

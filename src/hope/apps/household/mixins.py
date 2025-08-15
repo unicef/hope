@@ -1,6 +1,6 @@
 class IndividualDeliveryDataMixin:
-    """
-    Mixin for getting FSP specific payment delivery data. Property names are defined in FspNameMapping.hope_name
+    """Mixin for getting FSP specific payment delivery data. Property names are defined in FspNameMapping.hope_name.
+
     Example usage of mixin, will be removed later.
     You can define attribute for retrieving specific document etc.
 

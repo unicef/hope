@@ -763,7 +763,7 @@ class Household(
         return self.admin4 or self.admin3 or self.admin2 or self.admin1
 
     def set_admin_areas(self, new_admin_area: Area | None = None, save: bool = True) -> None:
-        """Propagates admin1,2,3,4 based on admin_area parents"""
+        """Propagate admin1,2,3,4 based on admin_area parents."""
         admins = ["admin1", "admin2", "admin3", "admin4"]
 
         if not new_admin_area:
@@ -871,7 +871,7 @@ class DocumentType(TimeStampedUUIDModel):
 
     @classmethod
     def get_all_doc_types_choices(cls) -> list[tuple[str, str]]:
-        """return list of Document Types choices"""
+        """Return list of Document Types choices."""
         return [(obj.key, obj.label) for obj in cls.objects.all()]
 
     @classmethod
@@ -1021,9 +1021,7 @@ class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDMo
 
 
 class IndividualCollection(UnicefIdentifiedModel):
-    """
-    Collection of individual representations.
-    """
+    """Collection of individual representations."""
 
     def __str__(self) -> str:
         return self.unicef_id or ""

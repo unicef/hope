@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def update_dashboard_figures(self: Any) -> None:
-    """
-    Celery task that runs periodically (e.g., daily) to refresh all dashboard data.
-    """
+    """Celery task that runs periodically (e.g., daily) to refresh all dashboard data."""
     business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
 
     for business_area in business_areas_with_households:
@@ -36,8 +34,8 @@ def update_dashboard_figures(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def update_recent_dashboard_figures(self: Any) -> None:
-    """
-    Celery task to refresh dashboard data for recent years (current and previous).
+    """Celery task to refresh dashboard data for recent years (current and previous).
+
     Runs more frequently (e.g., hourly).
     """
     current_year = date.today().year
@@ -63,10 +61,7 @@ def update_recent_dashboard_figures(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
-    """
-    Celery task to refresh dashboard data for a specific business area (full refresh)
-    or the global dashboard.
-    """
+    """Celery task to refresh dashboard data for a specific business area (full refresh) or the global dashboard."""
     if business_area_slug == GLOBAL_SLUG:
         set_sentry_business_area_tag(GLOBAL_SLUG)
         DashboardGlobalDataCache.refresh_data()

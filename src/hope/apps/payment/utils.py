@@ -144,7 +144,8 @@ def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":
 def get_payment_delivered_quantity_status_and_value(
     delivered_quantity: int | float | str | None, entitlement_quantity: Decimal
 ) -> tuple[str, Decimal | None]:
-    """
+    """Return status and delivered quantity.
+
     * Fully Delivered (entitled quantity = delivered quantity) [int, float, str]
     * Partially Delivered (entitled quantity > delivered quantity > 0) [int, float, str]
     * Not Delivered (0 = delivered quantity) [int, float, str]

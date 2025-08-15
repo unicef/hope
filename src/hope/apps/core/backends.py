@@ -17,9 +17,9 @@ from hope.apps.program.models import Program
 
 
 class PermissionsBackend(BaseBackend):
-    """
-    Custom permissions backend that fetches permissions from the User's Groups
-    and the RoleAssignments for the User or their Partner.
+    """Custom permissions backend that fetches permissions from the User's Groups and the RoleAssignments.
+
+    for the User or their Partner.
     """
 
     def get_all_permissions(self, user: User, obj: Model | None = None) -> set[str]:  # type: ignore

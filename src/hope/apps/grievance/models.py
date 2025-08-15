@@ -395,12 +395,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @cached_property
     def _linked_tickets(self) -> QuerySet["GrievanceTicket"]:
-        """Tickets linked explicitly via UI or in 'create_needs_adjudication_tickets' function"""
+        """Tickets linked explicitly via UI or in 'create_needs_adjudication_tickets' function."""
         return self.linked_tickets.all()
 
     @cached_property
     def _existing_tickets(self) -> QuerySet["GrievanceTicket"]:
-        """All tickets for assigned Household"""
+        """Return all tickets for assigned Household."""
         if not self.household_unicef_id:
             return GrievanceTicket.objects.none()
 
@@ -410,7 +410,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @cached_property
     def _related_tickets(self) -> QuerySet["GrievanceTicket"]:
-        """Distinct linked + existing tickets"""
+        """Distinct linked + existing tickets."""
         return self._linked_tickets.union(self._existing_tickets)
 
     @property

@@ -30,8 +30,8 @@ log = logging.getLogger(__name__)
 
 
 class DashboardDataView(APIView):
-    """
-    API View to retrieve a DashReport for a specific business area.
+    """API View to retrieve a DashReport for a specific business area.
+
     Only authenticated users with the appropriate permissions can access this view.
     """
 
@@ -39,8 +39,8 @@ class DashboardDataView(APIView):
 
     @sentry_tags
     def get(self, request: Any, business_area_slug: str) -> Response:
-        """
-        Retrieve dashboard data for a given business area from Redis cache.
+        """Retrieve dashboard data for a given business area from Redis cache.
+
         If data is not cached or needs updating, refresh it.
         """
         is_global = business_area_slug.lower() == "global"
@@ -77,8 +77,8 @@ class DashboardDataView(APIView):
 
 
 class CreateOrUpdateDashReportView(APIView):
-    """
-    API to trigger the creation or update of a DashReport for a given business area.
+    """API to trigger the creation or update of a DashReport for a given business area.
+
     Restricted to superusers and users with the required permissions.
     """
 
@@ -127,9 +127,7 @@ class CreateOrUpdateDashReportView(APIView):
 
 
 class DashboardReportView(LoginRequiredMixin, TemplateView):
-    """
-    View to render the dashboard template for a specific business area.
-    """
+    """View to render the dashboard template for a specific business area."""
 
     template_name = "dashboard/dashboard.html"
 

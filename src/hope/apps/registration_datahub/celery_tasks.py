@@ -418,7 +418,6 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = N
 @log_start_and_end
 def remove_old_rdi_links_task(page_count: int = 100) -> None:
     """Remove linked RDI objects for households and related objects (individuals, documents etc.)."""
-
     from datetime import timedelta
 
     from constance import config

@@ -13,9 +13,7 @@ BATCH_SIZE_SMALL = 20
 
 
 def create_constant_objects(apps, schema_editor):
-    """
-    Create constant objects for the migration. This is necessary for tests but already present on all the environments.
-    """
+    """Create constant objects for the migration. This is necessary for tests but already present on all the environments."""
     Role = apps.get_model("account", "Role")
     Partner = apps.get_model("account", "Partner")
     register(Partner)
@@ -32,8 +30,8 @@ def create_constant_objects(apps, schema_editor):
 
 
 def migrate_user_roles(apps, schema_editor):
-    """
-    Handle migration of user roles.
+    """Handle migration of user roles.
+
     UserRole model was replaced with RoleAssignment model, which includes a program field.
     After model update, existing UserRoles would have program=null, granting users access to all programs by default.
     This migration will fetch the programs for specific Business Areas from UserRole
@@ -110,8 +108,8 @@ def migrate_user_roles(apps, schema_editor):
 
 
 def migrate_partner_roles_and_access(apps, schema_editor):
-    """
-    Handle migration of partner roles and access.
+    """Handle migration of partner roles and access.
+
     ProgramPartnerThrough and BusinessAreaPartnerThrough models need to be migrated into RoleAssignment model.
     For each combination of role in the BusinessAreaPartnerThrough and a program in the ProgramPartnerThrough,
     that partner has access to within the BA of the role -> the RoleAssignment entry needs to be created.
@@ -217,10 +215,9 @@ def migrate_partner_roles_and_access(apps, schema_editor):
 
 
 def migrate_unicef_partners(apps, schema_editor):
-    """
-    Handle migration of UNICEF partner into UNICEF HQ and UNICEF Partners per BusinessArea.
-    UNICEF partner will become parent Partner for UNICEF HQ and UNICEF Partners per BusinessArea.
+    """Handle migration of UNICEF partner into UNICEF HQ and UNICEF Partners per BusinessArea.
 
+    UNICEF partner will become parent Partner for UNICEF HQ and UNICEF Partners per BusinessArea.
     UNICEF HQ will hold "Role with all permissions" for all Business Areas (with program=None so whole BA access)
     UNICEF Partners per BusinessArea will hold role with permissions specified in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER
     within the Business Area specific for them. Within this BA they will have access to all programs.

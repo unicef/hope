@@ -4,6 +4,8 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
@@ -424,7 +426,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonDeletePopup().click()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
     def test_create_programme_cancel_scenario(

@@ -118,9 +118,7 @@ class BusinessAreaViewSet(
     )
     @action(detail=True, methods=["post"], url_path="all-kobo-projects")
     def all_kobo_projects(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """
-        All Kobo projects/assets.
-        """
+        """Return all Kobo projects/assets."""
         assets_list = resolve_assets_list(
             business_area_slug=self.kwargs["slug"], only_deployed=request.data.get("only_deployed", False)
         )
@@ -128,9 +126,9 @@ class BusinessAreaViewSet(
 
 
 class ChoicesViewSet(ViewSet):
-    """
-    return choices used in the system like statuses, currencies
-        Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+    """Return choices used in the system like statuses, currencies.
+
+    Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
     """
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

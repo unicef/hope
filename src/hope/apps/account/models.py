@@ -241,8 +241,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return [str(program_id) for program_id in programs_ids]
 
     def permissions_in_business_area(self, business_area_slug: str, program_id: UUID | str | None = None) -> set:
-        """
-        return list of permissions for the given business area and program,
+        """Return list of permissions for the given business area and program.
+
         retrieved from RoleAssignments of the user and their partner
         """
         if program_id:
@@ -314,9 +314,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         from_email_display: str | None = None,
         ccs: list[str] | None = None,
     ) -> None:
-        """
-        Send email to this user via Mailjet.
-        """
+        """Send email to this user via Mailjet."""
         email = MailjetClient(
             recipients=[self.email],
             subject=subject,
@@ -362,8 +360,8 @@ class HorizontalChoiceArrayField(ArrayField):
 
 
 class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
-    """
-    Model to represent the assignment of a role to a user or partner within a specific business area or program.
+    """Model to represent the assignment of a role to a user or partner within a specific business area or program.
+
     When program is NULL, the role is assigned to the user or partner in all programs within the business area.
     This model also associates the role with an expiry date and a group, if applicable.
     """
@@ -454,8 +452,8 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class AdminAreaLimitedTo(TimeStampedUUIDModel):
-    """
-    Model to limit the admin area access for a partner.
+    """Model to limit the admin area access for a partner.
+
     Partners with full area access for a certain program will not have any area limits - no record in this model.
     """
 
@@ -560,8 +558,8 @@ class IncompatibleRolesManager(models.Manager):
 
 
 class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
-    """
-    Keeps track of what roles are incompatible:
+    """Keep track of what roles are incompatible.
+
     user cannot be assigned both of the roles in the same business area at the same time
     """
 

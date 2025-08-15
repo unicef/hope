@@ -7,6 +7,8 @@ import factory
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
+from selenium.common.exceptions import ElementClickInterceptedException
+
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
@@ -573,7 +575,7 @@ class TestPaymentPlans:
         pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getRow(0).click()
         pagePaymentModuleDetails.getButtonCreateExclusions().click()
-        with pytest.raises(Exception):
+        with pytest.raises(ElementClickInterceptedException):
             pagePaymentModuleDetails.getButtonSaveExclusions().click()
 
     def test_payment_plan_save_exclude_people(

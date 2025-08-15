@@ -664,8 +664,9 @@ class PaymentPlan(
         return self.eligible_payments.filter(status__in=Payment.FAILED_STATUSES)
 
     def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
-        """Used for creation FPP.
-        need to call from source_payment_plan level
+        """Select unsuccessful payments to create FPP.
+
+        Need to call from source_payment_plan level
         like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
         """
         return (
@@ -753,8 +754,9 @@ class PaymentPlan(
 
     @property
     def household_list(self) -> "QuerySet":
-        """copied from TP
-        used in:
+        """Get household list.
+
+        Copied from TP and used in:
         1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
         """
         all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
@@ -839,7 +841,7 @@ class PaymentPlan(
 
     @property
     def excluded_beneficiaries_ids(self) -> list[str]:
-        """based on Program DCT return HH or Ind IDs"""
+        """Return HH or Ind IDs based on Program DCT."""
         return (
             list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
             if self.is_social_worker_program
@@ -857,7 +859,8 @@ class PaymentPlan(
 
     @property
     def has_export_file(self) -> bool:
-        """
+        """Check if export file exists.
+
         for Locked plan return export_file_entitlement file
         for Accepted and Finished export_file_per_fsp file
         """
@@ -891,7 +894,7 @@ class PaymentPlan(
 
     @property
     def imported_file_name(self) -> str:
-        """used for import entitlements"""
+        """Get file to import entitlements."""
         try:
             return self.imported_file.file.name if self.imported_file else ""
         except FileTemp.DoesNotExist:
@@ -1503,7 +1506,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_account_value_from_payment(cls, payment: "Payment", key_name: str) -> str | float | list | None:
-        """get Account values from Collector's Account.data"""
+        """Get Account values from Collector's Account.data."""
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
             logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")

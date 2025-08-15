@@ -13,9 +13,7 @@ from rest_framework.utils.urls import remove_query_param, replace_query_param
 
 
 class NoCountLimitOffsetPagination(LimitOffsetPagination):
-    """
-    Override LimitOffsetPagination to remove count query from response.
-    """
+    """Override LimitOffsetPagination to remove count query from response."""
 
     def paginate_queryset(self, queryset: Any, request: Request, view: Any = None) -> list[Any] | None:
         self.limit = self.get_limit(request)

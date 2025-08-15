@@ -38,8 +38,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseValidator:
-    """
-    Base validation class, inherit from this class to create custom validators.
+    """Base validation class, inherit from this class to create custom validators.
+
     Your custom validators have to implement validation methods that starts
     with name "validate_" so validate can call all the validators from your
     custom validator.
