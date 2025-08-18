@@ -34,6 +34,7 @@ class ExchangeRateClientDummy(ExchangeRateClient):
 class ExchangeRateClientAPI(ExchangeRateClient):
     HISTORY_MODE_PARAM_SHORT = "short"
     HISTORY_MODE_PARAM_LONG = "yes"
+    HISTORY_MODE_PARAM_LATEST_12 = "latest_12"
 
     def __init__(self, api_key: str | None = None, api_url: str | None = None) -> None:
         self.api_key = api_key or settings.EXCHANGE_RATES_API_KEY
@@ -46,7 +47,7 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
-    def fetch_exchange_rates(self, history_mode: str | None = HISTORY_MODE_PARAM_LONG) -> dict:
+    def fetch_exchange_rates(self, history_mode: str | None = HISTORY_MODE_PARAM_LATEST_12) -> dict:
         params = {}
 
         if history_mode:
