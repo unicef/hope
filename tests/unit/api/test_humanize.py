@@ -41,7 +41,7 @@ class ValidatorTest(TestCase):
 
     def assertErrors(self, post_data: Dict, expected: Dict) -> None:
         res = self._run(post_data)
-        self.assertDictEqual(res, expected)
+        assert res == expected
 
     def test_empty_post(self) -> None:
         self.assertErrors(

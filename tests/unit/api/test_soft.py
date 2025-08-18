@@ -68,7 +68,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
         )
         url = reverse("api:rdi-push-lax", args=[self.business_area.slug, str(rdi.id)])
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_push(self) -> None:
         image = Path(__file__).parent / "logo.png"
@@ -261,36 +261,32 @@ class PushLaxToRDITests(HOPEApiTestCase):
             },  # household 6
         ]
         response = self.client.post(self.url, input_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
 
         data: Dict[Any, Any] = response.json()
-        self.assertEqual(len(data["households"]), 6)
-        self.assertEqual(data["processed"], 6)
-        self.assertEqual(data["errors"], 2)
-        self.assertEqual(data["accepted"], 4)
+        assert len(data["households"]) == 6
+        assert data["processed"] == 6
+        assert data["errors"] == 2
+        assert data["accepted"] == 4
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         for valid in ["village1", "village4", "village5"]:
-            self.assertTrue(PendingHousehold.objects.filter(registration_data_import=rdi, village=valid).exists())
+            assert PendingHousehold.objects.filter(registration_data_import=rdi, village=valid).exists()
 
-        self.assertDictEqual(
-            data["households"][2], {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
-        )
-        self.assertDictEqual(
-            data["households"][5], {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]}
-        )
+        assert data["households"][2] == {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
+        assert data["households"][5] == {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]}
         pk1 = list(data["households"][0].values())[0][0]["pk"]
         hh = PendingHousehold.objects.get(pk=pk1)
-        self.assertEqual(hh.program_id, self.program.id)
-        self.assertEqual(hh.head_of_household.full_name, "James Head #1")
-        self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
-        self.assertEqual(hh.head_of_household.program_id, self.program.id)
-        self.assertEqual(hh.primary_collector.program_id, self.program.id)
+        assert hh.program_id == self.program.id
+        assert hh.head_of_household.full_name == "James Head #1"
+        assert hh.primary_collector.full_name == "Mary Primary #1"
+        assert hh.head_of_household.program_id == self.program.id
+        assert hh.primary_collector.program_id == self.program.id
 
         pk2 = list(data["households"][1].values())[0][0]["pk"]
         hh = PendingHousehold.objects.get(pk=pk2)
-        self.assertEqual(hh.program_id, self.program.id)
-        self.assertEqual(hh.head_of_household.full_name, "James Head #1")
-        self.assertEqual(hh.primary_collector.full_name, "James Head #1")
-        self.assertEqual(hh.head_of_household.program_id, self.program.id)
-        self.assertEqual(hh.primary_collector.program_id, self.program.id)
+        assert hh.program_id == self.program.id
+        assert hh.head_of_household.full_name == "James Head #1"
+        assert hh.primary_collector.full_name == "James Head #1"
+        assert hh.head_of_household.program_id == self.program.id
+        assert hh.primary_collector.program_id == self.program.id

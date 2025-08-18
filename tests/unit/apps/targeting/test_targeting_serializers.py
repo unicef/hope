@@ -38,14 +38,14 @@ class TargetingCriteriaSerializerTest(TestCase):
 
         data = TargetingCriteriaRuleSerializer(instance=rule).data
 
-        self.assertEqual(data["household_ids"], "")
-        self.assertEqual(data["individual_ids"], "")
-        self.assertEqual(data["individuals_filters_blocks"], [])
-        self.assertEqual(data["collectors_filters_blocks"], [])
-        self.assertEqual(data["households_filters_blocks"][0]["comparison_method"], "EQUALS")
-        self.assertEqual(data["households_filters_blocks"][0]["flex_field_classification"], "NOT_FLEX_FIELD")
-        self.assertEqual(data["households_filters_blocks"][0]["field_name"], "size")
-        self.assertEqual(data["households_filters_blocks"][0]["arguments"], [2])
+        assert data["household_ids"] == ""
+        assert data["individual_ids"] == ""
+        assert data["individuals_filters_blocks"] == []
+        assert data["collectors_filters_blocks"] == []
+        assert data["households_filters_blocks"][0]["comparison_method"] == "EQUALS"
+        assert data["households_filters_blocks"][0]["flex_field_classification"] == "NOT_FLEX_FIELD"
+        assert data["households_filters_blocks"][0]["field_name"] == "size"
+        assert data["households_filters_blocks"][0]["arguments"] == [2]
         field_attribute_data = data["households_filters_blocks"][0]["field_attribute"]
         expected_result = filter_choices(
             get_field_by_name(targeting_criteria_rule_filter.field_name, rule.payment_plan),
@@ -63,7 +63,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "pdu_data": None,
         }
         field_attribute_data.pop("id")
-        self.assertEqual(field_attribute_data, expected_field_attribute_data)
+        assert field_attribute_data == expected_field_attribute_data
 
     def test_targeting_criteria_serializer_for_not_flex_field_on_ind(self) -> None:
         create_afghanistan()
@@ -82,20 +82,18 @@ class TargetingCriteriaSerializerTest(TestCase):
 
         data = TargetingCriteriaRuleSerializer(instance=rule).data
 
-        self.assertEqual(data["household_ids"], "")
-        self.assertEqual(data["individual_ids"], "")
-        self.assertEqual(data["households_filters_blocks"], [])
-        self.assertEqual(data["collectors_filters_blocks"], [])
-        self.assertEqual(data["individuals_filters_blocks"][0]["target_only_hoh"], False)
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"], "EQUALS"
+        assert data["household_ids"] == ""
+        assert data["individual_ids"] == ""
+        assert data["households_filters_blocks"] == []
+        assert data["collectors_filters_blocks"] == []
+        assert not data["individuals_filters_blocks"][0]["target_only_hoh"]
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"] == "EQUALS"
+        assert (
+            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"]
+            == "NOT_FLEX_FIELD"
         )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"],
-            "NOT_FLEX_FIELD",
-        )
-        self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "size")
-        self.assertEqual(data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"], [2])
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"] == "size"
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"] == [2]
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_result = filter_choices(
             get_field_by_name(targeting_criteria_rule_filter.field_name, rule.payment_plan),
@@ -113,7 +111,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "pdu_data": None,
         }
         field_attribute_data.pop("id")
-        self.assertEqual(field_attribute_data, expected_field_attribute_data)
+        assert field_attribute_data == expected_field_attribute_data
 
     def test_targeting_criteria_serializer_for_flex_field_on_hh(self) -> None:
         create_afghanistan()
@@ -135,14 +133,14 @@ class TargetingCriteriaSerializerTest(TestCase):
 
         data = TargetingCriteriaRuleSerializer(instance=rule).data
 
-        self.assertEqual(data["household_ids"], "")
-        self.assertEqual(data["individual_ids"], "")
-        self.assertEqual(data["individuals_filters_blocks"], [])
-        self.assertEqual(data["collectors_filters_blocks"], [])
-        self.assertEqual(data["households_filters_blocks"][0]["comparison_method"], "EQUALS")
-        self.assertEqual(data["households_filters_blocks"][0]["flex_field_classification"], "FLEX_FIELD_BASIC")
-        self.assertEqual(data["households_filters_blocks"][0]["field_name"], "flex_field")
-        self.assertEqual(data["households_filters_blocks"][0]["arguments"], ["test_value"])
+        assert data["household_ids"] == ""
+        assert data["individual_ids"] == ""
+        assert data["individuals_filters_blocks"] == []
+        assert data["collectors_filters_blocks"] == []
+        assert data["households_filters_blocks"][0]["comparison_method"] == "EQUALS"
+        assert data["households_filters_blocks"][0]["flex_field_classification"] == "FLEX_FIELD_BASIC"
+        assert data["households_filters_blocks"][0]["field_name"] == "flex_field"
+        assert data["households_filters_blocks"][0]["arguments"] == ["test_value"]
         field_attribute_data = data["households_filters_blocks"][0]["field_attribute"]
         expected_field_attribute_data = {
             "id": str(flex_field.id),
@@ -156,7 +154,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "is_flex_field": True,
             "pdu_data": None,
         }
-        self.assertEqual(field_attribute_data, expected_field_attribute_data)
+        assert field_attribute_data == expected_field_attribute_data
 
     def test_targeting_criteria_serializer_for_flex_field_on_ind(self) -> None:
         create_afghanistan()
@@ -179,24 +177,18 @@ class TargetingCriteriaSerializerTest(TestCase):
 
         data = TargetingCriteriaRuleSerializer(instance=rule).data
 
-        self.assertEqual(data["household_ids"], "")
-        self.assertEqual(data["individual_ids"], "")
-        self.assertEqual(data["households_filters_blocks"], [])
-        self.assertEqual(data["collectors_filters_blocks"], [])
-        self.assertEqual(data["individuals_filters_blocks"][0]["target_only_hoh"], False)
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"], "EQUALS"
+        assert data["household_ids"] == ""
+        assert data["individual_ids"] == ""
+        assert data["households_filters_blocks"] == []
+        assert data["collectors_filters_blocks"] == []
+        assert not data["individuals_filters_blocks"][0]["target_only_hoh"]
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"] == "EQUALS"
+        assert (
+            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"]
+            == "FLEX_FIELD_BASIC"
         )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"],
-            "FLEX_FIELD_BASIC",
-        )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "flex_field"
-        )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"], ["test_value"]
-        )
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"] == "flex_field"
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"] == ["test_value"]
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_field_attribute_data = {
             "id": str(flex_field.id),
@@ -210,7 +202,7 @@ class TargetingCriteriaSerializerTest(TestCase):
             "is_flex_field": True,
             "pdu_data": None,
         }
-        self.assertEqual(field_attribute_data, expected_field_attribute_data)
+        assert field_attribute_data == expected_field_attribute_data
 
     def test_targeting_criteria_serializer_for_pdu_flex_field(self) -> None:
         afghanistan = create_afghanistan()
@@ -248,23 +240,17 @@ class TargetingCriteriaSerializerTest(TestCase):
         }
         data = TargetingCriteriaRuleSerializer(instance=rule, context={"request": request}).data
 
-        self.assertEqual(data["household_ids"], "")
-        self.assertEqual(data["individual_ids"], "")
-        self.assertEqual(data["households_filters_blocks"], [])
-        self.assertEqual(data["collectors_filters_blocks"], [])
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"], "EQUALS"
+        assert data["household_ids"] == ""
+        assert data["individual_ids"] == ""
+        assert data["households_filters_blocks"] == []
+        assert data["collectors_filters_blocks"] == []
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"] == "EQUALS"
+        assert (
+            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"]
+            == "FLEX_FIELD_PDU"
         )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"],
-            "FLEX_FIELD_PDU",
-        )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"], "pdu_field"
-        )
-        self.assertEqual(
-            data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"], ["test_value"]
-        )
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_name"] == "pdu_field"
+        assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["arguments"] == ["test_value"]
         field_attribute_data = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
         expected_field_attribute_data = {
             "id": str(pdu_field.id),
@@ -282,4 +268,4 @@ class TargetingCriteriaSerializerTest(TestCase):
                 "rounds_names": pdu_data.rounds_names,
             },
         }
-        self.assertEqual(field_attribute_data, expected_field_attribute_data)
+        assert field_attribute_data == expected_field_attribute_data

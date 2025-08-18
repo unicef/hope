@@ -73,4 +73,4 @@ class TestAdminSite(WebTest):
         self.create_user_role_with_permissions(self.superuser, [Permissions.DOWNLOAD_STORAGE_FILE], self.business_area)
         url = reverse(admin_urlname(model_admin.model._meta, "changelist"))  # type: ignore # str vs SafeString
         res = self.app.get(url, user=self.superuser)
-        self.assertEqual(res.status_code, 200)
+        assert res.status_code == 200

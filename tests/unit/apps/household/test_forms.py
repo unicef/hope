@@ -34,4 +34,4 @@ class MassEnrollFormTest(TestCase):
             business_area_id=self.business_area_id,
             households=Household.objects.filter(id=self.household.id),
         )
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()

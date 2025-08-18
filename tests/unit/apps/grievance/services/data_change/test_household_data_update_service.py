@@ -64,10 +64,10 @@ class TestHouseholdDataUpdateService(TestCase):
         household.refresh_from_db()
 
         # Then
-        self.assertEqual(household.admin_area.p_code, "AF010101")
-        self.assertEqual(household.admin1.p_code, "AF01")
-        self.assertEqual(household.admin2.p_code, "AF0101")
-        self.assertEqual(household.admin3.p_code, "AF010101")
+        assert household.admin_area.p_code == "AF010101"
+        assert household.admin1.p_code == "AF01"
+        assert household.admin2.p_code == "AF0101"
+        assert household.admin3.p_code == "AF010101"
 
     def test_update_roles_new_create_ticket(self) -> None:
         individual = IndividualFactory()

@@ -84,8 +84,8 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[MALE],
         )
         queryset = queryset.filter(payment_plan.get_query())
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().id, self.household_1_indiv.id)
+        assert queryset.count() == 1
+        assert queryset.first().id == self.household_1_indiv.id
 
     def test_all_individuals_are_female_on_mixins(self) -> None:
         query = Household.objects.all()
@@ -109,10 +109,10 @@ class TestIndividualBlockFilter(TestCase):
         )
 
         query = query.filter(pp.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
-        self.assertEqual(pp.get_individual_queryset().count(), 3)
-        self.assertEqual(pp.get_household_queryset().count(), 2)
+        assert query.count() == 1
+        assert query.first().id == self.household_1_indiv.id
+        assert pp.get_individual_queryset().count() == 3
+        assert pp.get_household_queryset().count() == 2
 
     def test_two_separate_blocks_on_mixins(self) -> None:
         query = Household.objects.all()
@@ -156,8 +156,8 @@ class TestIndividualBlockFilter(TestCase):
         )
         pp.refresh_from_db()
         query = query.filter(pp.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_2_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_2_indiv.id
 
     def test_filter_on_flex_field_not_exist(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
@@ -176,10 +176,7 @@ class TestIndividualBlockFilter(TestCase):
 
         with self.assertRaises(Exception) as e:
             query.filter(payment_plan.get_query())
-        self.assertIn(
-            "There is no Flex Field Attributes associated with this fieldName flex_field_2",
-            str(e.exception),
-        )
+        assert "There is no Flex Field Attributes associated with this fieldName flex_field_2" in str(e.exception)
 
     def test_filter_on_flex_field(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
@@ -202,15 +199,15 @@ class TestIndividualBlockFilter(TestCase):
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         query = query.filter(payment_plan.get_query())
-        self.assertEqual(query.count(), 0)
+        assert query.count() == 0
 
         self.individual_1.flex_fields["flex_field_1"] = "Average value"
         self.individual_1.save()
 
         query = query.filter(payment_plan.get_query())
 
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_1_indiv.id
 
     def test_filter_on_pdu_flex_field_not_exist(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
@@ -231,9 +228,9 @@ class TestIndividualBlockFilter(TestCase):
 
         with self.assertRaises(Exception) as e:
             query.filter(payment_plan.get_query())
-        self.assertIn(
-            "There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program",
-            str(e.exception),
+        assert (
+            "There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program"
+            in str(e.exception)
         )
 
     def test_filter_on_pdu_flex_field_no_round_number(self) -> None:
@@ -263,10 +260,7 @@ class TestIndividualBlockFilter(TestCase):
 
         with self.assertRaises(Exception) as e:
             query.filter(payment_plan.get_query())
-        self.assertIn(
-            "Round number is missing for PDU Flex Field Attribute pdu_field_1",
-            str(e.exception),
-        )
+        assert "Round number is missing for PDU Flex Field Attribute pdu_field_1" in str(e.exception)
 
     def test_filter_on_pdu_flex_field_incorrect_round_number(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
@@ -296,9 +290,8 @@ class TestIndividualBlockFilter(TestCase):
 
         with self.assertRaises(Exception) as e:
             query.filter(payment_plan.get_query())
-        self.assertIn(
-            "Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1",
-            str(e.exception),
+        assert "Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1" in str(
+            e.exception
         )
 
     def test_filter_on_pdu_flex_field(self) -> None:
@@ -335,14 +328,14 @@ class TestIndividualBlockFilter(TestCase):
         self.individual_2.save()
 
         query = query.filter(payment_plan.get_query())
-        self.assertEqual(query.count(), 0)
+        assert query.count() == 0
 
         self.individual_1.flex_fields["pdu_field_1"]["1"] = {"value": 2.5, "collection_date": "2021-01-01"}
         self.individual_1.save()
 
         query = query.filter(payment_plan.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_1_indiv.id
 
     def test_collector_blocks(self) -> None:
         query = Household.objects.all().order_by("unicef_id")
@@ -367,5 +360,5 @@ class TestIndividualBlockFilter(TestCase):
         )
         payment_plan.rules.set([tcr])
         query = query.filter(payment_plan.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().unicef_id, self.household_1_indiv.unicef_id)
+        assert query.count() == 1
+        assert query.first().unicef_id == self.household_1_indiv.unicef_id

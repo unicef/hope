@@ -10,7 +10,7 @@ from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-from django.utils.safestring import mark_safe
+
 
 from jinja2 import Environment
 
@@ -138,7 +138,7 @@ class PythonExec(Interpreter):
             logger.warning(e)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
-            raise ValidationError(mark_safe(msg))
+            raise ValidationError(msg)
 
 
 def get_env(**options: Any) -> Environment:

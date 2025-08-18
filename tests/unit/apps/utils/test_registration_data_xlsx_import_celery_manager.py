@@ -84,10 +84,10 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             data_source=RegistrationDataImport.XLS,
             program=program,
         )
-        self.assertEqual(manager.pending_queryset.count(), 1)
-        self.assertEqual(manager.pending_queryset.first(), rdi_import_scheduled)
-        self.assertEqual(manager.in_progress_queryset.count(), 1)
-        self.assertEqual(manager.in_progress_queryset.first(), rdi_importing)
+        assert manager.pending_queryset.count() == 1
+        assert manager.pending_queryset.first() == rdi_import_scheduled
+        assert manager.in_progress_queryset.count() == 1
+        assert manager.in_progress_queryset.first() == rdi_importing
 
     @mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
     @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
@@ -114,8 +114,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert mock_registration_xlsx_import_task_delay.call_count == 1
         mock_registration_xlsx_import_task_delay.assert_called_with(
             registration_data_import_id=str(rdi.id),
             import_data_id=str(rdi.import_data_id),
@@ -148,8 +148,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert mock_registration_xlsx_import_task_delay.call_count == 1
         mock_registration_xlsx_import_task_delay.assert_called_with(
             registration_data_import_id=str(rdi.id),
             import_data_id=str(rdi.import_data_id),
@@ -194,8 +194,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
-        self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 0)
+        assert rdi.status == RegistrationDataImport.IMPORTING
+        assert mock_registration_xlsx_import_task_delay.call_count == 0
 
     @mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
     @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
@@ -234,8 +234,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 0)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert mock_registration_xlsx_import_task_delay.call_count == 0
 
     @mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
     @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
@@ -273,8 +273,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         manager = RegistrationDataXlsxImportCeleryManager(business_area=BusinessArea.objects.get(slug="afghanistan"))
         manager.execute()
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert mock_registration_xlsx_import_task_delay.call_count == 1
         mock_registration_xlsx_import_task_delay.assert_called_with(
             registration_data_import_id=str(rdi.id),
             import_data_id=str(rdi.import_data_id),

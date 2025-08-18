@@ -169,7 +169,7 @@ class TestGrievanceTicketCreate:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status, create_perm_for_program",
+        ("permissions", "expected_status", "create_perm_for_program"),
         [
             ([Permissions.GRIEVANCES_CREATE], status.HTTP_201_CREATED, True),
             ([], status.HTTP_403_FORBIDDEN, True),

@@ -214,27 +214,12 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         cls.delivery_mechanism_data.save()
 
     def _object_count_before_after(self) -> None:
-        self.assertEqual(
-            Household.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 0)
+        assert Household.pending_objects.count() == 0
+        assert Individual.pending_objects.count() == 0
+        assert IndividualIdentity.pending_objects.count() == 0
+        assert Document.pending_objects.count() == 0
+        assert IndividualRoleInHousehold.pending_objects.count() == 0
+        assert Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count() == 0
 
         import_program_population(
             import_from_program_id=str(self.program_from.id),
@@ -242,32 +227,17 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             rdi=self.registration_data_import,
         )
 
-        self.assertEqual(
-            Household.pending_objects.count(),
-            1,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            2,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            1,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            1,
-        )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            1,
-        )
-        self.assertEqual(Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 1)
+        assert Household.pending_objects.count() == 1
+        assert Individual.pending_objects.count() == 2
+        assert IndividualIdentity.pending_objects.count() == 1
+        assert Document.pending_objects.count() == 1
+        assert IndividualRoleInHousehold.pending_objects.count() == 1
+        assert Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count() == 1
 
     def test_create_pending_objects_from_objects(self) -> None:
         self._object_count_before_after()
         pending_household = Household.pending_objects.first()
-        self.assertIsNotNone(pending_household)
+        assert pending_household is not None
 
         self.household.refresh_from_db()
         self.individuals[0].refresh_from_db()
@@ -276,86 +246,39 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         for field in HOUSEHOLD_FIELDS:
             pending_household_field = getattr(pending_household, field)
             household_field = getattr(self.household, field)
-            self.assertEqual(
-                pending_household_field,
-                household_field,
-            )
-        self.assertNotEqual(pending_household.first_registration_date, self.household.first_registration_date)
-        self.assertNotEqual(pending_household.last_registration_date, self.household.last_registration_date)
-        self.assertEqual(
-            pending_household.program_id,
-            self.program_to.id,
-        )
-        self.assertEqual(
-            pending_household.registration_data_import_id,
-            self.registration_data_import.id,
-        )
-        self.assertEqual(
-            pending_household.rdi_merge_status,
-            MergeStatusModel.PENDING,
-        )
-        self.assertIsNone(
-            pending_household.household_collection,
-        )
+            assert pending_household_field == household_field
+        assert pending_household.first_registration_date != self.household.first_registration_date
+        assert pending_household.last_registration_date != self.household.last_registration_date
+        assert pending_household.program_id == self.program_to.id
+        assert pending_household.registration_data_import_id == self.registration_data_import.id
+        assert pending_household.rdi_merge_status == MergeStatusModel.PENDING
+        assert (pending_household.household_collection) is None
 
         pending_individuals = Individual.pending_objects.all()
         head_of_household_pending_individual = pending_individuals.get(relationship=HEAD)
 
-        self.assertEqual(
-            pending_household.head_of_household,
-            head_of_household_pending_individual,
-        )
+        assert pending_household.head_of_household == head_of_household_pending_individual
 
-        self.assertEqual(
-            self.household.head_of_household,
-            self.individuals[0],
-        )
-        self.assertEqual(
-            self.individuals[0].household,
-            self.household,
-        )
-        self.assertEqual(
-            self.individuals[1].household,
-            self.household,
-        )
+        assert self.household.head_of_household == self.individuals[0]
+        assert self.individuals[0].household == self.household
+        assert self.individuals[1].household == self.household
 
         for field in INDIVIDUAL_FIELDS:
             imported_individual_field = getattr(head_of_household_pending_individual, field)
             individual_field = getattr(self.individuals[0], field)
-            self.assertEqual(imported_individual_field, individual_field, field)
-        self.assertNotEqual(
-            head_of_household_pending_individual.first_registration_date,
-            self.individuals[0].first_registration_date,
+            assert imported_individual_field == individual_field, field
+        assert (
+            head_of_household_pending_individual.first_registration_date != self.individuals[0].first_registration_date
         )
-        self.assertNotEqual(
-            head_of_household_pending_individual.last_registration_date,
-            self.individuals[0].last_registration_date,
-        )
+        assert head_of_household_pending_individual.last_registration_date != self.individuals[0].last_registration_date
         for pending_individual in pending_individuals:
-            self.assertEqual(
-                pending_individual.program_id,
-                self.program_to.id,
-            )
-            self.assertEqual(
-                pending_individual.registration_data_import_id,
-                self.registration_data_import.id,
-            )
-            self.assertEqual(
-                pending_individual.rdi_merge_status,
-                MergeStatusModel.PENDING,
-            )
-            self.assertIsNone(
-                pending_individual.individual_collection,
-            )
-            self.assertEqual(
-                pending_individual.household,
-                pending_household,
-            )
+            assert pending_individual.program_id == self.program_to.id
+            assert pending_individual.registration_data_import_id == self.registration_data_import.id
+            assert pending_individual.rdi_merge_status == MergeStatusModel.PENDING
+            assert (pending_individual.individual_collection) is None
+            assert pending_individual.household == pending_household
 
-        self.assertEqual(
-            head_of_household_pending_individual.relationship,
-            HEAD,
-        )
+        assert head_of_household_pending_individual.relationship == HEAD
 
         pending_document = Document.pending_objects.first()
         for field in (
@@ -366,78 +289,30 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         ):
             pending_document_field = getattr(pending_document, field)
             document_field = getattr(self.document, field)
-            self.assertEqual(
-                pending_document_field,
-                document_field,
-            )
+            assert pending_document_field == document_field
 
-        self.assertEqual(
-            pending_document.program_id,
-            self.program_to.id,
-        )
-        self.assertEqual(
-            pending_document.rdi_merge_status,
-            MergeStatusModel.PENDING,
-        )
-        self.assertEqual(
-            pending_document.individual,
-            head_of_household_pending_individual,
-        )
-        self.assertEqual(
-            pending_document.status,
-            Document.STATUS_PENDING,
-        )
+        assert pending_document.program_id == self.program_to.id
+        assert pending_document.rdi_merge_status == MergeStatusModel.PENDING
+        assert pending_document.individual == head_of_household_pending_individual
+        assert pending_document.status == Document.STATUS_PENDING
 
         pending_identity = IndividualIdentity.pending_objects.first()
-        self.assertEqual(
-            pending_identity.number,
-            self.identity.number,
-        )
+        assert pending_identity.number == self.identity.number
 
-        self.assertEqual(
-            pending_identity.country.iso_code2,
-            self.identity.country.iso_code2,
-        )
+        assert pending_identity.country.iso_code2 == self.identity.country.iso_code2
 
-        self.assertEqual(
-            pending_identity.partner,
-            self.identity.partner,
-        )
+        assert pending_identity.partner == self.identity.partner
 
-        self.assertEqual(
-            pending_identity.rdi_merge_status,
-            MergeStatusModel.PENDING,
-        )
+        assert pending_identity.rdi_merge_status == MergeStatusModel.PENDING
 
-        self.assertEqual(
-            pending_identity.individual,
-            head_of_household_pending_individual,
-        )
+        assert pending_identity.individual == head_of_household_pending_individual
         pending_individual_role_in_household = IndividualRoleInHousehold.pending_objects.first()
-        self.assertEqual(
-            pending_individual_role_in_household.household.unicef_id,
-            self.household.unicef_id,
-        )
-        self.assertEqual(
-            pending_individual_role_in_household.individual.unicef_id,
-            self.individuals[1].unicef_id,
-        )
-        self.assertEqual(
-            pending_individual_role_in_household.role,
-            ROLE_PRIMARY,
-        )
-        self.assertEqual(
-            pending_individual_role_in_household.rdi_merge_status,
-            MergeStatusModel.PENDING,
-        )
-        self.assertEqual(
-            pending_individual_role_in_household.household,
-            pending_household,
-        )
-        self.assertEqual(
-            pending_individual_role_in_household.individual,
-            pending_individuals.exclude(relationship=HEAD).first(),
-        )
+        assert pending_individual_role_in_household.household.unicef_id == self.household.unicef_id
+        assert pending_individual_role_in_household.individual.unicef_id == self.individuals[1].unicef_id
+        assert pending_individual_role_in_household.role == ROLE_PRIMARY
+        assert pending_individual_role_in_household.rdi_merge_status == MergeStatusModel.PENDING
+        assert pending_individual_role_in_household.household == pending_household
+        assert pending_individual_role_in_household.individual == pending_individuals.exclude(relationship=HEAD).first()
         registration_data_import = RegistrationDataImportFactory(
             business_area=self.afghanistan,
             program=self.program_to,
@@ -457,8 +332,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             .order_by("-created_at")
             .count()
         )
-        self.assertEqual(pending_household_count, 0)
-        self.assertEqual(pending_individual_count, 0)
+        assert pending_household_count == 0
+        assert pending_individual_count == 0
 
     def test_not_import_excluded_objects(self) -> None:
         household_withdrawn, individuals = create_household_and_individuals(
@@ -520,21 +395,11 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         individuals_already_in_program_repr[0].save()
 
         self._object_count_before_after()
-        self.assertFalse(
-            Household.pending_objects.filter(unicef_id=household_withdrawn.unicef_id).exists(),
-        )
-        self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individuals[0].unicef_id).exists(),
-        )
-        self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individuals[1].unicef_id).exists(),
-        )
-        self.assertFalse(
-            Household.pending_objects.filter(unicef_id=household_already_in_program.unicef_id).exists(),
-        )
-        self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individuals_already_in_program[0].unicef_id).exists(),
-        )
+        assert not Household.pending_objects.filter(unicef_id=household_withdrawn.unicef_id).exists()
+        assert not Individual.pending_objects.filter(unicef_id=individuals[0].unicef_id).exists()
+        assert not Individual.pending_objects.filter(unicef_id=individuals[1].unicef_id).exists()
+        assert not Household.pending_objects.filter(unicef_id=household_already_in_program.unicef_id).exists()
+        assert not Individual.pending_objects.filter(unicef_id=individuals_already_in_program[0].unicef_id).exists()
 
     def test_import_program_population_with_excluded_individuals(self) -> None:
         individual_already_in_program_to = IndividualFactory(
@@ -566,9 +431,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         individual_already_in_program_from.unicef_id = individual_already_in_program_to.unicef_id
         individual_already_in_program_from.save()
 
-        self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists(),
-        )
+        assert not Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists()
         import_program_population(
             import_from_program_id=str(self.program_from.id),
             import_to_program_id=str(self.program_to.id),
@@ -576,41 +439,32 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
 
         # still no pending individual as it is excluded from the import (representation already in the program)
-        self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists(),
-        )
+        assert not Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists()
 
         new_hh_repr = Household.pending_objects.filter(
             unicef_id=household.unicef_id,
             program=self.program_to,
         ).first()
-        self.assertEqual(
-            new_hh_repr.representatives.count(),
-            1,
-        )
-        self.assertEqual(
-            new_hh_repr.representatives.first(),
-            individual_already_in_program_to,
-        )
+        assert new_hh_repr.representatives.count() == 1
+        assert new_hh_repr.representatives.first() == individual_already_in_program_to
 
-        self.assertEqual(
-            new_hh_repr.head_of_household,
-            individual_already_in_program_to,
-        )
+        assert new_hh_repr.head_of_household == individual_already_in_program_to
 
         # role in original program
-        self.assertIsNotNone(
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 household=household,
                 individual=individual_already_in_program_from,
-            ).first(),
+            ).first()
+            is not None
         )
         # role in new program - New Role is within PENDING rdi_merge_status
-        self.assertIsNotNone(
+        assert (
             IndividualRoleInHousehold.pending_objects.filter(
                 household=new_hh_repr,
                 individual=individual_already_in_program_to,
-            ).first(),
+            ).first()
+            is not None
         )
 
     def test_import_program_population_individual_without_household(self) -> None:
@@ -639,15 +493,15 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             rdi=self.registration_data_import,
         )
 
-        self.assertEqual(Individual.pending_objects.filter(program=self.program_to).count(), 2)
+        assert Individual.pending_objects.filter(program=self.program_to).count() == 2
 
         individual_without_hh_repr = Individual.pending_objects.filter(
             program=self.program_to,
             unicef_id=individual_without_hh.unicef_id,
         ).first()
 
-        self.assertIsNotNone(individual_without_hh_repr)
-        self.assertEqual(individual_without_hh_repr.household, None)
+        assert individual_without_hh_repr is not None
+        assert individual_without_hh_repr.household is None
 
     def test_import_program_population_withdrawn_individual_with_role(self) -> None:
         program_from_1 = ProgramFactory(business_area=self.afghanistan)
@@ -686,13 +540,11 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
 
         # withdrawn individual not imported
-        self.assertEqual(Individual.pending_objects.filter(program=self.program_to).count(), 1)
+        assert Individual.pending_objects.filter(program=self.program_to).count() == 1
 
-        self.assertFalse(
-            IndividualRoleInHousehold.pending_objects.filter(
-                role=ROLE_ALTERNATE,
-            ).exists(),
-        )
+        assert not IndividualRoleInHousehold.pending_objects.filter(
+            role=ROLE_ALTERNATE,
+        ).exists()
 
     def test_import_program_population_import_from_ids(self) -> None:
         program_to_import_from_ids = ProgramFactory(business_area=self.afghanistan)
@@ -761,31 +613,13 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
 
         # assert no pending objects before import
-        self.assertEqual(
-            Household.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            0,
-        )
-        # self.assertEqual(
-        #     BankAccountInfo.pending_objects.count(),
-        #     0,
-        # )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 0)
+        assert Household.pending_objects.count() == 0
+        assert Individual.pending_objects.count() == 0
+        assert IndividualIdentity.pending_objects.count() == 0
+        assert Document.pending_objects.count() == 0
+        # assert BankAccountInfo.pending_objects.count() == 0
+        assert IndividualRoleInHousehold.pending_objects.count() == 0
+        assert Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count() == 0
 
         # import to program without import_from_ids
         import_program_population(
@@ -794,33 +628,24 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             rdi=self.registration_data_import,
         )
 
-        self.assertEqual(
-            Household.pending_objects.filter(program=program_to_without_import_from_ids).count(),
-            3,
+        assert Household.pending_objects.filter(program=program_to_without_import_from_ids).count() == 3
+        assert Individual.pending_objects.filter(program=program_to_without_import_from_ids).count() == 6
+        assert (
+            IndividualIdentity.pending_objects.filter(individual__program=program_to_without_import_from_ids).count()
+            == 2
         )
-        self.assertEqual(
-            Individual.pending_objects.filter(program=program_to_without_import_from_ids).count(),
-            6,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.filter(individual__program=program_to_without_import_from_ids).count(),
-            2,
-        )
-        self.assertEqual(
-            Document.pending_objects.filter(program=program_to_without_import_from_ids).count(),
-            1,
-        )
-        self.assertEqual(
+        assert Document.pending_objects.filter(program=program_to_without_import_from_ids).count() == 1
+        assert (
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_without_import_from_ids
-            ).count(),
-            3,
+            ).count()
+            == 3
         )
-        self.assertEqual(
+        assert (
             Account.all_objects.filter(
                 rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_without_import_from_ids
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
         # import to program with import_from_ids - import only self.household and household_2
@@ -834,35 +659,22 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             import_to_program_id=str(program_to_import_from_ids.id),
             rdi=registration_data_import,
         )
-        self.assertEqual(
-            Household.pending_objects.filter(program=program_to_import_from_ids).count(),
-            2,
-        )
-        self.assertEqual(
-            Individual.pending_objects.filter(program=program_to_import_from_ids).count(),
-            4,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.filter(individual__program=program_to_import_from_ids).count(),
-            2,
-        )
-        self.assertEqual(
-            Document.pending_objects.filter(program=program_to_import_from_ids).count(),
-            1,
-        )
-        # self.assertEqual(
+        assert Household.pending_objects.filter(program=program_to_import_from_ids).count() == 2
+        assert Individual.pending_objects.filter(program=program_to_import_from_ids).count() == 4
+        assert IndividualIdentity.pending_objects.filter(individual__program=program_to_import_from_ids).count() == 2
+        assert Document.pending_objects.filter(program=program_to_import_from_ids).count() == 1
+        # assert (
         #     BankAccountInfo.pending_objects.filter(individual__program=program_to_import_from_ids).count(),
         #     1,
         # )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.filter(household__program=program_to_import_from_ids).count(),
-            2,
+        assert (
+            IndividualRoleInHousehold.pending_objects.filter(household__program=program_to_import_from_ids).count() == 2
         )
-        self.assertEqual(
+        assert (
             Account.all_objects.filter(
                 rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_import_from_ids
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
     def test_import_program_population_exclude_external_collectors(self) -> None:
@@ -942,31 +754,16 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
 
         # assert no pending objects before import
-        self.assertEqual(
-            Household.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            0,
-        )
-        # self.assertEqual(
+        assert Household.pending_objects.count() == 0
+        assert Individual.pending_objects.count() == 0
+        assert IndividualIdentity.pending_objects.count() == 0
+        assert Document.pending_objects.count() == 0
+        # assert (
         #     BankAccountInfo.pending_objects.count(),
         #     0,
         # )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 0)
+        assert IndividualRoleInHousehold.pending_objects.count() == 0
+        assert Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count() == 0
 
         # import to program without exclude_external_collectors
         import_program_population(
@@ -975,36 +772,29 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             rdi=self.registration_data_import,
         )
 
-        self.assertEqual(
-            Household.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
-            3,
-        )
-        self.assertEqual(
-            Individual.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
-            8,  # 6 individuals from households + 2 external collectors
-        )
-        self.assertEqual(
+        assert Household.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 3
+        assert (
+            Individual.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 8
+        )  # 6 individuals from households + 2 external collectors
+        assert (
             IndividualIdentity.pending_objects.filter(
                 individual__program=program_to_without_exclude_external_collectors
-            ).count(),
-            2,  # 1 identity from self.household + 1 from external alternatecollector
-        )
-        self.assertEqual(
-            Document.pending_objects.filter(program=program_to_without_exclude_external_collectors).count(),
-            1,
-        )
-        self.assertEqual(
+            ).count()
+            == 2
+        )  # 1 identity from self.household + 1 from external alternatecollector
+        assert Document.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 1
+        assert (
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_without_exclude_external_collectors
-            ).count(),
-            5,  # 3 primary roles from households + 1 alternate role from household_1 + 1 alternate external collector from household_2
-        )
-        self.assertEqual(
+            ).count()
+            == 5
+        )  # 3 primary roles from households + 1 alternate role from household_1 + 1 alternate external collector from household_2
+        assert (
             Account.all_objects.filter(
                 rdi_merge_status=MergeStatusModel.PENDING,
                 individual__program=program_to_without_exclude_external_collectors,
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
         # import to program with exclude_external_collectors - import only self.household and household_2
@@ -1018,48 +808,41 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             import_to_program_id=str(program_to_exclude_external_collectors.id),
             rdi=registration_data_import,
         )
-        self.assertEqual(
-            Household.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
-            3,
-        )
-        self.assertEqual(
-            Individual.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
-            7,  # 6 individuals from households + 1 external primary collector from household_1 (alternate from household_2 is excluded)
-        )
-        self.assertEqual(
+        assert Household.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 3
+        assert (
+            Individual.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 7
+        )  # 6 individuals from households + 1 external primary collector from household_1 (alternate from household_2 is excluded)
+        assert (
             IndividualIdentity.pending_objects.filter(
                 individual__program=program_to_exclude_external_collectors
-            ).count(),
-            1,  # 1 identity from self.household (1 from external alternate collector is excluded)
-        )
-        self.assertEqual(
-            Document.pending_objects.filter(program=program_to_exclude_external_collectors).count(),
-            1,
-        )
-        self.assertEqual(
+            ).count()
+            == 1
+        )  # 1 identity from self.household (1 from external alternate collector is excluded)
+        assert Document.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 1
+        assert (
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_exclude_external_collectors
-            ).count(),
-            4,  # 3 primary roles from households + 1 alternate role from household_1 (alternate from household_2 is excluded)
-        )
-        self.assertEqual(
+            ).count()
+            == 4
+        )  # 3 primary roles from households + 1 alternate role from household_1 (alternate from household_2 is excluded)
+        assert (
             Account.all_objects.filter(
                 rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_exclude_external_collectors
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
-        self.assertEqual(
+        assert (
             external_collector_primary.copied_to(manager="pending_objects")
             .filter(program=program_to_exclude_external_collectors)
-            .count(),
-            1,
+            .count()
+            == 1
         )
-        self.assertEqual(
+        assert (
             external_collector_alternate.copied_to(manager="pending_objects")
             .filter(program=program_to_exclude_external_collectors)
-            .count(),
-            0,
+            .count()
+            == 0
         )
         household_1_copy = Household.pending_objects.filter(
             unicef_id=household_1.unicef_id,
@@ -1069,15 +852,11 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             unicef_id=household_2.unicef_id,
             program=program_to_exclude_external_collectors,
         ).first()
-        self.assertEqual(
-            household_1_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_PRIMARY).count(), 1
+        assert household_1_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_PRIMARY).count() == 1
+        assert (
+            household_1_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_ALTERNATE).count() == 1
         )
-        self.assertEqual(
-            household_1_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_ALTERNATE).count(), 1
-        )
-        self.assertEqual(
-            household_2_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_PRIMARY).count(), 1
-        )
-        self.assertEqual(
-            household_2_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_ALTERNATE).count(), 0
+        assert household_2_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_PRIMARY).count() == 1
+        assert (
+            household_2_copy.individuals_and_roles(manager="pending_objects").filter(role=ROLE_ALTERNATE).count() == 0
         )

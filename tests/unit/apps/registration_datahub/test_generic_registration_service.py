@@ -238,32 +238,32 @@ class TestGenericRegistrationService(TestCase):
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
         records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
-        self.assertEqual(
+        assert Record.objects.filter(id__in=records_ids, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 4
+        assert (
             PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
-        self.assertEqual(
+        assert (
             PendingDocument.objects.filter(
                 document_number="TESTID",
                 type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
                 program=rdi.program,
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
         # Checking only first is enough, because they all in one RDI
         pending_household = PendingHousehold.objects.all()[0]
         registration_data_import = pending_household.registration_data_import
-        self.assertIn("ff", pending_household.flex_fields.keys())
-        self.assertEqual(registration_data_import.program, self.program)
+        assert "ff" in pending_household.flex_fields
+        assert registration_data_import.program == self.program
 
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
+        assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
+        assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count() == 1
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
@@ -284,14 +284,14 @@ class TestGenericRegistrationService(TestCase):
         rdi = service.create_rdi(self.user, f"generic rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
+        assert Record.objects.filter(id__in=records_ids, ignored=False).count() == 1
+        assert PendingHousehold.objects.count() == 1
 
         household = PendingHousehold.objects.first()
-        self.assertEqual(household.zip_code, "00126")
-        self.assertEqual(household.flex_fields["ff"], "random")
-        self.assertEqual(household.flex_fields["enumerators"], "ABC")
-        self.assertEqual(household.flex_fields["marketing_can_unicef_contact_you"], "YES")
+        assert household.zip_code == "00126"
+        assert household.flex_fields["ff"] == "random"
+        assert household.flex_fields["enumerators"] == "ABC"
+        assert household.flex_fields["marketing_can_unicef_contact_you"] == "YES"
 
         assert PendingDocument.objects.get(document_number="123123123", type__key="tax_id")
         assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
@@ -305,4 +305,4 @@ class TestGenericRegistrationService(TestCase):
             phone_no="+393892781511",
             pregnant=True,
         )
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1

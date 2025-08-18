@@ -78,21 +78,21 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
         rebuild_search_index()
 
     def test_delete_rdi(self) -> None:
-        self.assertEqual(RegistrationDataImport.objects.count(), 1)
+        assert RegistrationDataImport.objects.count() == 1
 
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.count(), 2)
-        self.assertEqual(PendingDocument.objects.count(), 1)
+        assert PendingHousehold.objects.count() == 1
+        assert PendingIndividual.objects.count() == 2
+        assert PendingDocument.objects.count() == 1
 
         RegistrationDataImportAdmin._delete_rdi(self.rdi)
 
-        self.assertEqual(RegistrationDataImport.objects.count(), 0)
+        assert RegistrationDataImport.objects.count() == 0
         with self.assertRaises(RegistrationDataImport.DoesNotExist):
             RegistrationDataImport.objects.get(id=self.rdi.id)
 
-        self.assertEqual(PendingHousehold.objects.count(), 0)
-        self.assertEqual(PendingIndividual.objects.count(), 0)
-        self.assertEqual(PendingDocument.objects.count(), 0)
+        assert PendingHousehold.objects.count() == 0
+        assert PendingIndividual.objects.count() == 0
+        assert PendingDocument.objects.count() == 0
 
 
 @pytest.mark.elasticsearch
@@ -151,40 +151,40 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         rebuild_search_index()
 
     def test_delete_merged_rdi(self) -> None:
-        self.assertEqual(GrievanceTicket.objects.count(), 2)
-        self.assertEqual(TicketIndividualDataUpdateDetails.objects.count(), 1)
-        self.assertEqual(TicketComplaintDetails.objects.count(), 1)
-        self.assertEqual(Payment.objects.count(), 1)
+        assert GrievanceTicket.objects.count() == 2
+        assert TicketIndividualDataUpdateDetails.objects.count() == 1
+        assert TicketComplaintDetails.objects.count() == 1
+        assert Payment.objects.count() == 1
 
-        self.assertEqual(RegistrationDataImport.objects.count(), 1)
+        assert RegistrationDataImport.objects.count() == 1
 
-        self.assertEqual(Household.objects.count(), 1)
-        self.assertEqual(Individual.objects.count(), 2)
-        self.assertEqual(Document.objects.count(), 1)
+        assert Household.objects.count() == 1
+        assert Individual.objects.count() == 2
+        assert Document.objects.count() == 1
 
         RegistrationDataImportAdmin._delete_merged_rdi(self.rdi)
 
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
-        self.assertIsNone(GrievanceTicket.objects.filter(id=self.grievance_ticket1.id).first())
-        self.assertIsNone(GrievanceTicket.objects.filter(id=self.grievance_ticket2.id).first())
+        assert GrievanceTicket.objects.count() == 0
+        assert GrievanceTicket.objects.filter(id=self.grievance_ticket1.id).first() is None
+        assert GrievanceTicket.objects.filter(id=self.grievance_ticket2.id).first() is None
 
-        self.assertEqual(TicketIndividualDataUpdateDetails.objects.count(), 0)
-        self.assertIsNone(TicketIndividualDataUpdateDetails.objects.filter(ticket=self.grievance_ticket2).first())
+        assert TicketIndividualDataUpdateDetails.objects.count() == 0
+        assert TicketIndividualDataUpdateDetails.objects.filter(ticket=self.grievance_ticket2).first() is None
 
-        self.assertEqual(TicketComplaintDetails.objects.count(), 0)
-        self.assertIsNone(TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first())
+        assert TicketComplaintDetails.objects.count() == 0
+        assert TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first() is None
 
-        self.assertEqual(Payment.objects.count(), 0)
-        self.assertIsNone(Payment.objects.filter(household=self.household).first())
+        assert Payment.objects.count() == 0
+        assert Payment.objects.filter(household=self.household).first() is None
 
-        self.assertEqual(RegistrationDataImport.objects.count(), 0)
-        self.assertIsNone(RegistrationDataImport.objects.filter(id=self.rdi.id).first())
+        assert RegistrationDataImport.objects.count() == 0
+        assert RegistrationDataImport.objects.filter(id=self.rdi.id).first() is None
 
-        self.assertEqual(Household.objects.count(), 0)
-        self.assertIsNone(Household.objects.filter(id=self.household.id).first())
+        assert Household.objects.count() == 0
+        assert Household.objects.filter(id=self.household.id).first() is None
 
-        self.assertEqual(Individual.objects.count(), 0)
-        self.assertIsNone(Individual.objects.filter(id=self.individuals[0].id).first())
+        assert Individual.objects.count() == 0
+        assert Individual.objects.filter(id=self.individuals[0].id).first() is None
 
-        self.assertEqual(Document.objects.count(), 0)
-        self.assertIsNone(Document.objects.filter(id=self.document.id).first())
+        assert Document.objects.count() == 0
+        assert Document.objects.filter(id=self.document.id).first() is None

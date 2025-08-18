@@ -4,7 +4,7 @@ from django.contrib import admin, messages
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
@@ -80,11 +80,9 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 self,
                 request,
                 self.execute_sync_rapid_pro,
-                mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                         <h3>Import will only be simulated</h3>
-                        """
-                ),
+                        """,
                 "Successfully executed",
                 template="admin_extra_buttons/confirm.html",
             )

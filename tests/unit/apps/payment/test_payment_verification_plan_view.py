@@ -149,7 +149,7 @@ class TestPaymentVerificationViewSet:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_VIEW_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -168,7 +168,7 @@ class TestPaymentVerificationViewSet:
             assert pv["verification_status"] == "PENDING"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -194,7 +194,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -228,7 +228,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -261,7 +261,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_ACTIVATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -281,7 +281,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_ACTIVE
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_FINISH], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -309,7 +309,7 @@ class TestPaymentVerificationViewSet:
         assert "You can finish only ACTIVE verification" in response.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_DISCARD], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -329,7 +329,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_PENDING
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_INVALID], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -351,7 +351,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_plans"][0]["status"] == PaymentVerificationPlan.STATUS_INVALID
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_DELETE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -368,7 +368,7 @@ class TestPaymentVerificationViewSet:
             assert len(resp_data["payment_verification_plans"]) == 0
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_EXPORT], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -395,7 +395,7 @@ class TestPaymentVerificationViewSet:
                 assert resp_data["payment_verification_plans"][0]["xlsx_file_exporting"] is True
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_IMPORT], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -423,7 +423,7 @@ class TestPaymentVerificationViewSet:
             assert resp_data["payment_verification_plans"][0]["xlsx_file_imported"] is True
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -457,7 +457,7 @@ class TestPaymentVerificationViewSet:
             assert "received_amount" in payment["verification"]
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -490,7 +490,7 @@ class TestPaymentVerificationViewSet:
             assert "received_amount" in resp_data["verification"]
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
