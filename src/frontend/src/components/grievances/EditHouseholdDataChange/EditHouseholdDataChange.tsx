@@ -221,6 +221,8 @@ function EditHouseholdDataChange({
             const availableChoices = householdMembers.results
               .map((ind) => ({ value: ind.id, label: ind.fullName }))
               .filter((choice) => !usedIds.includes(choice.value));
+            // Only show trash can for roles added via 'Add a New Role' button (i.e., those with empty currentRoleObj)
+            const isNewRole = !currentRoleObj;
             return (
               <React.Fragment key={roleItem.individual + '-' + index}>
                 <Grid size={{ xs: 4 }}>
@@ -247,19 +249,21 @@ function EditHouseholdDataChange({
                   />
                 </Grid>
                 <Grid size={{ xs: 1 }}>
-                  <Button
-                    color="secondary"
-                    onClick={() => {
-                      const updatedRoles = [...(values.roles || [])];
-                      updatedRoles.splice(index, 1);
-                      setFieldValue('roles', updatedRoles);
-                    }}
-                    data-cy={`button-remove-role-${index}`}
-                  >
-                    <DarkGrey>
-                      <Delete />
-                    </DarkGrey>
-                  </Button>
+                  {isNewRole && (
+                    <Button
+                      color="secondary"
+                      onClick={() => {
+                        const updatedRoles = [...(values.roles || [])];
+                        updatedRoles.splice(index, 1);
+                        setFieldValue('roles', updatedRoles);
+                      }}
+                      data-cy={`button-remove-role-${index}`}
+                    >
+                      <DarkGrey>
+                        <Delete />
+                      </DarkGrey>
+                    </Button>
+                  )}
                 </Grid>
               </React.Fragment>
             );
