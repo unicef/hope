@@ -188,7 +188,6 @@ def migrate_partner_roles_and_access(apps, schema_editor):
     area_access_count = len(area_access_ids)
 
     for batch_start in range(0, area_access_count, BATCH_SIZE_SMALL):
-        new_area_limits = []
         new_area_limit_through = []
         batch_end = batch_start + BATCH_SIZE_SMALL
 
@@ -199,19 +198,18 @@ def migrate_partner_roles_and_access(apps, schema_editor):
             .prefetch_related("areas")
         )
 
-        for access in batched_area_access:
-            new_area_limits.append(AdminAreaLimitedTo(partner=access.partner, program=access.program))
+        new_area_limits = [
+            AdminAreaLimitedTo(partner=access.partner, program=access.program) for access in batched_area_access
+        ]
 
         if new_area_limits:
             AdminAreaLimitedTo.objects.bulk_create(new_area_limits)
 
-            for new_area_limit, areas in zip(
-                new_area_limits, [access.areas.all() for access in batched_area_access], strict=True
-            ):
-                for area in areas:
-                    new_area_limit_through.append(
-                        AdminAreaLimitedTo.areas.through(adminarealimitedto_id=new_area_limit.id, area_id=area.id)
-                    )
+            new_area_limit_through = [
+                AdminAreaLimitedTo.areas.through(adminarealimitedto_id=new_area_limit.id, area_id=area.id)
+                for new_area_limit, access in zip(new_area_limits, batched_area_access, strict=True)
+                for area in access.areas.all()
+            ]
             if new_area_limit_through:
                 AdminAreaLimitedTo.areas.through.objects.bulk_create(new_area_limit_through)
 

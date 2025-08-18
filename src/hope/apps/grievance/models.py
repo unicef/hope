@@ -864,9 +864,10 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         ]
 
         if unselected_individuals and len(unselected_individuals) > 1:
-            documents = []
-            for individual in unselected_individuals:
-                documents.append({f"{x.document_number}--{x.type_id}" for x in individual.documents.all()})
+            documents = [
+                {f"{x.document_number}--{x.type_id}" for x in individual.documents.all()}
+                for individual in unselected_individuals
+            ]
             return bool(set.intersection(*documents))
         return False
 
