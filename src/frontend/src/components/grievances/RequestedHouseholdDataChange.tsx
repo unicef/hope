@@ -12,7 +12,7 @@ import { Title } from '@core/Title';
 import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -151,23 +151,29 @@ export function RequestedHouseholdDataChange({
       </Button>
     );
   };
+  const initialValues = React.useMemo(
+    () => ({
+      selected: entries
+        .filter(
+          (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
+        )
+        .map((row) => camelCase(row[0])),
+      selectedFlexFields: flexFieldsEntries
+        .filter(
+          (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
+        )
+        .map((row) => row[0]),
+      selectedRoles: (ticket.ticketDetails.householdData.roles || [])
+        .filter((role) => role.approveStatus)
+        .map((role) => role.individualId),
+    }),
+    [entries, flexFieldsEntries, ticket.ticketDetails.householdData.roles],
+  );
+
   return (
     <Formik
-      initialValues={{
-        selected: entries
-          .filter(
-            (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
-          )
-          .map((row) => camelCase(row[0])),
-        selectedFlexFields: flexFieldsEntries
-          .filter(
-            (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
-          )
-          .map((row) => row[0]),
-        selectedRoles: (ticket.ticketDetails.householdData.roles || [])
-          .filter((role) => role.approveStatus)
-          .map((role) => role.individualId),
-      }}
+      initialValues={initialValues}
+      enableReinitialize={true}
       onSubmit={async (values) => {
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
@@ -185,6 +191,12 @@ export function RequestedHouseholdDataChange({
               values.selectedFlexFields.includes(key);
           }
         });
+        // Only add flex_fields to householdApproveData if not empty
+        if (Object.keys(flexFieldsApproveData).length > 0) {
+          householdApproveData.flex_fields = flexFieldsApproveData;
+        } else if ('flex_fields' in householdApproveData) {
+          delete householdApproveData.flex_fields;
+        }
         // Roles
         const allRolesRaw = ticket.ticketDetails.householdData.roles || [];
         // Convert all role keys to camelCase for consistency
@@ -200,13 +212,15 @@ export function RequestedHouseholdDataChange({
           ),
         }));
 
-        console.log('householdApproveData', householdApproveData);
+        // Build mutation payload
+        const mutationPayload: {
+          householdApproveData: any;
+        } = {
+          householdApproveData,
+        };
 
         try {
-          await mutate({
-            householdApproveData,
-            flexFieldsApproveData,
-          });
+          await mutate(mutationPayload);
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
         } catch (error) {

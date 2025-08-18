@@ -10,7 +10,7 @@ import isFunction from 'lodash/isFunction';
  * @param valueExtractor - if valueName = "*" whole object is used
  */
 export function useArrayToDict<T>(
-  array: T[],
+  array: T[] | undefined | null,
   keyExtractor: ((item: T) => string) | string,
   valueExtractor: ((item: T) => string) | string,
 ): { [id: string]: any } | { [id: number]: any } {
@@ -39,12 +39,11 @@ export function useArrayToDict<T>(
     previousValue[key] = value;
     return previousValue;
   };
-  const [dict, setDict] = useState(() => array?.reduce(reduceCallback, {}));
+  const safeArray = Array.isArray(array) ? array : [];
+  const [dict, setDict] = useState(() => safeArray.reduce(reduceCallback, {}));
   useEffect(() => {
-    if (array) {
-      setDict(array.reduce(reduceCallback, {}));
-    }
+    setDict(safeArray.reduce(reduceCallback, {}));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [array]);
+  }, [safeArray]);
   return dict;
 }
