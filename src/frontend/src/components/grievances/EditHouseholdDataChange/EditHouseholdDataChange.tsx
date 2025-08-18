@@ -69,13 +69,15 @@ function EditHouseholdDataChange({
       programId,
       //@ts-ignore
       household.programSlug,
+      //@ts-ignore
+      household.program?.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
         //@ts-ignore
-        programSlug: household.programSlug,
+        programSlug: household.programSlug || household.program?.slug,
         // Define roleChoices for New Role select field
       }),
     enabled: Boolean(household && businessArea),
