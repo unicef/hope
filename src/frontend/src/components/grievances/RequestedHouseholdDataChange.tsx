@@ -6,7 +6,6 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { camelCase } from 'lodash';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { Title } from '@core/Title';
 import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
@@ -79,19 +78,34 @@ export function RequestedHouseholdDataChange({
       }
     },
   });
-  const householdData = {
-    ...ticket.ticketDetails.householdData,
-  };
+  const householdData = React.useMemo(
+    () => ({
+      ...ticket.ticketDetails.householdData,
+    }),
+    [ticket.ticketDetails.householdData],
+  );
+  // Define rolesArr in main scope
+  const rolesArr = householdData.roles || [];
   let allApprovedCount = 0;
   const flexFields = householdData?.flexFields || {};
   delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
+  // Count approved top-level fields
   allApprovedCount += entries.filter(
-    ([, val]: [string, { approveStatus: boolean }]) => val.approveStatus,
+    ([, val]: [string, { approve_status: boolean }]) => val.approve_status,
   ).length;
+  // Count approved flex fields
   allApprovedCount += flexFieldsEntries.filter(
-    ([, val]: [string, { approveStatus: boolean }]) => val.approveStatus,
+    ([, val]: [string, { approve_status: boolean }]) => val.approve_status,
+  ).length;
+  // Count approved roles
+  allApprovedCount += rolesArr.filter(
+    (role) =>
+      role &&
+      typeof role === 'object' &&
+      'approve_status' in role &&
+      role.approve_status === true,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -151,24 +165,50 @@ export function RequestedHouseholdDataChange({
       </Button>
     );
   };
-  const initialValues = React.useMemo(
-    () => ({
-      selected: entries
-        .filter(
-          (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
-        )
-        .map((row) => camelCase(row[0])),
-      selectedFlexFields: flexFieldsEntries
-        .filter(
-          (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
-        )
-        .map((row) => row[0]),
-      selectedRoles: (ticket.ticketDetails.householdData.roles || [])
-        .filter((role) => role.approveStatus)
-        .map((role) => role.individualId),
-    }),
-    [entries, flexFieldsEntries, ticket.ticketDetails.householdData.roles],
-  );
+  const initialValues = React.useMemo(() => {
+    // Use householdData from upper scope
+    // Top-level fields (exclude roles and flex_fields)
+    const selected = Object.entries(householdData)
+      .filter(
+        ([key, val]) =>
+          key !== 'roles' &&
+          key !== 'flex_fields' &&
+          val &&
+          typeof val === 'object' &&
+          'approve_status' in val &&
+          (val as any).approve_status === true,
+      )
+      .map(([key]) => key);
+
+    // Flex fields
+    const flexFieldsObj = householdData.flex_fields || {};
+    const selectedFlexFields = Object.entries(flexFieldsObj)
+      .filter(
+        ([, val]) =>
+          val &&
+          typeof val === 'object' &&
+          'approve_status' in val &&
+          (val as any).approve_status === true,
+      )
+      .map(([key]) => key);
+
+    // Roles
+    const selectedRoles = rolesArr
+      .filter(
+        (role) =>
+          role &&
+          typeof role === 'object' &&
+          'approve_status' in role &&
+          role.approve_status === true,
+      )
+      .map((role) => role.individual_id);
+
+    return {
+      selected,
+      selectedFlexFields,
+      selectedRoles,
+    };
+  }, [householdData]);
 
   return (
     <Formik

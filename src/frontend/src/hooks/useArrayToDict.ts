@@ -39,11 +39,12 @@ export function useArrayToDict<T>(
     previousValue[key] = value;
     return previousValue;
   };
-  const safeArray = Array.isArray(array) ? array : [];
-  const [dict, setDict] = useState(() => safeArray.reduce(reduceCallback, {}));
+  const [dict, setDict] = useState(() =>
+    (Array.isArray(array) ? array : []).reduce(reduceCallback, {}),
+  );
   useEffect(() => {
-    setDict(safeArray.reduce(reduceCallback, {}));
+    setDict((Array.isArray(array) ? array : []).reduce(reduceCallback, {}));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safeArray]);
+  }, [array]);
   return dict;
 }
