@@ -15,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
+import { roleDisplayMap } from '@components/grievances/utils/createGrievanceUtils';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -209,10 +210,10 @@ function EditHouseholdDataChange({
           {/* Render all roles, including added ones */}
           {(values.roles || []).map((roleItem, index) => {
             // Find individual details from householdMembers
-            // Removed unused individualObj assignment
             const currentRoleObj = fullHousehold.rolesInHousehold.find(
               (r) => r.individual.id === roleItem.individual,
             );
+
             // Filter out individuals already assigned in other rows
             const usedIds = (values.roles || []).map((r, i) =>
               i !== index ? r.individual : null,
@@ -232,7 +233,9 @@ function EditHouseholdDataChange({
                   />
                 </Grid>
                 <Grid size={{ xs: 4 }}>
-                  {currentRoleObj ? currentRoleObj.role : 'None'}
+                  {currentRoleObj
+                    ? roleDisplayMap[currentRoleObj.role] || currentRoleObj.role
+                    : 'None'}
                 </Grid>
                 <Grid size={{ xs: 3 }}>
                   <Field
