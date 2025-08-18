@@ -19,9 +19,6 @@ def import_areas_from_csv_task(csv_data: str) -> None:
     """
     reader = csv.DictReader(csv_data.splitlines())
     rows = list(reader)
-    if not rows:
-        logger.warning("CSV data for import_areas_from_csv_task is empty.")
-        return
 
     try:
         with transaction.atomic():
@@ -29,17 +26,10 @@ def import_areas_from_csv_task(csv_data: str) -> None:
 
             keys = list(rows[0].keys())
             num_cols = len(keys)
-            if num_cols % 2 != 0:
-                logger.error("CSV must have an even number of columns (names and p-codes) for area import task.")
-                return
 
             d = num_cols // 2
             name_headers = keys[:d]
             p_code_headers = keys[d:]
-
-            if name_headers[0] != "Country":
-                logger.error("First column must be 'Country' for area import task.")
-                return
 
             area_types_cache = {(at.name, at.area_level): at for at in AreaType.objects.filter(country=country)}
             for level, name_header in enumerate(name_headers):

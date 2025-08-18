@@ -12,7 +12,7 @@ def country() -> Country:
     return CountryFactory(name="Testland", short_name="Testland", iso_code2="TL", iso_code3="TLD", iso_num="999")
 
 
-def test_import_areas_from_csv_task(country: Country) -> None:
+def test_import_areas_from_cs(country: Country) -> None:
     """
     Test that the celery task correctly creates and updates AreaTypes and Areas,
     including their hierarchy.
@@ -20,7 +20,6 @@ def test_import_areas_from_csv_task(country: Country) -> None:
     assert Area.objects.count() == 0
     assert AreaType.objects.count() == 0
 
-    # Test creation
     csv_data_create = (
         "Country,State,County,country_pcode,state_pcode,county_pcode\n"
         "Testland,State1,County1,TL,TL01,TL01001\n"
@@ -47,7 +46,6 @@ def test_import_areas_from_csv_task(country: Country) -> None:
     assert county2.parent == state1
     assert county3.parent == state2
 
-    # Test update
     csv_data_update = (
         "Country,State,County,country_pcode,state_pcode,county_pcode\n"
         "Testland,New State1 Name,County1,TL,TL01,TL01001\n"
@@ -55,6 +53,41 @@ def test_import_areas_from_csv_task(country: Country) -> None:
 
     import_areas_from_csv_task(csv_data_update)
 
-    assert Area.objects.count() == 6  # No new areas created
+    assert Area.objects.count() == 6
     updated_state1 = Area.objects.get(p_code="TL01")
     assert updated_state1.name == "New State1 Name"
+
+
+def test_import_areas_from_empty_csv() -> None:
+    """
+    Test that the celery task raises an IndexError when the csv data is empty.
+    The validation is expected to happen before calling the task.
+    """
+    csv_data_empty = ""
+    with pytest.raises(IndexError):
+        import_areas_from_csv_task(csv_data_empty)
+
+    csv_data_header_only = "Country,State,County,country_pcode,state_pcode,county_pcode\n"
+    with pytest.raises(IndexError):
+        import_areas_from_csv_task(csv_data_header_only)
+
+
+def test_import_areas_from_csv_no_country() -> None:
+    """
+    Test that the celery task raises Country.DoesNotExist when the country is not in DB.
+    The validation is expected to happen before calling the task.
+    """
+    assert Country.objects.count() == 0
+    csv_data = "Country,State,country_pcode,state_pcode\nTestland,State1,TL,TL01"
+    with pytest.raises(Country.DoesNotExist):
+        import_areas_from_csv_task(csv_data)
+
+
+def test_import_areas_from_no_country_column(country: Country) -> None:
+    """
+    Test that the celery task raises KeyError when there is no 'Country' column.
+    The validation is expected to happen before calling the task.
+    """
+    csv_data = "WrongHeader,State,country_pcode,state_pcode\nTestland,State1,TL,TL01"
+    with pytest.raises(KeyError):
+        import_areas_from_csv_task(csv_data)
