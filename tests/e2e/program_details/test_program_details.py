@@ -243,9 +243,7 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeProgrammeDetails:
-    def test_program_details(
-        self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails
-    ) -> None:
+    def test_program_details(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
         program = Program.objects.get(name="Test For Edit")
         # Go to Programme Details
         pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit")
@@ -264,35 +262,17 @@ class TestSmokeProgrammeDetails:
         assert (datetime.now() + relativedelta(months=1)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getLabelEndDate().text
-        assert (
-            program.programme_code in pageProgrammeDetails.getLabelProgrammeCode().text
-        )
-        assert (
-            program.sector.replace("_", " ").title()
-            in pageProgrammeDetails.getLabelSelector().text.title()
-        )
-        assert (
-            program.data_collecting_type.label
-            in pageProgrammeDetails.getLabelDataCollectingType().text
-        )
+        assert program.programme_code in pageProgrammeDetails.getLabelProgrammeCode().text
+        assert program.sector.replace("_", " ").title() in pageProgrammeDetails.getLabelSelector().text.title()
+        assert program.data_collecting_type.label in pageProgrammeDetails.getLabelDataCollectingType().text
         assert (
             program.frequency_of_payments.replace("_", "-").capitalize()
             in pageProgrammeDetails.getLabelFreqOfPayment().text
         )
-        assert (
-            program.administrative_areas_of_implementation
-            in pageProgrammeDetails.getLabelAdministrativeAreas().text
-        )
+        assert program.administrative_areas_of_implementation in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert program.description in pageProgrammeDetails.getLabelDescription().text
-        assert (
-            "Yes"
-            if program.cash_plus
-            else "No" in pageProgrammeDetails.getLabelCashPlus().text
-        )
-        assert (
-            "Only Selected Partners within the business area"
-            in pageProgrammeDetails.getLabelPartnerAccess().text
-        )
+        assert "Yes" if program.cash_plus else "No" in pageProgrammeDetails.getLabelCashPlus().text
+        assert "Only Selected Partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     def test_edit_programme_from_details(
@@ -304,37 +284,21 @@ class TestSmokeProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("Test Programm")
         pageProgrammeDetails.getButtonEditProgram().click()
         pageProgrammeDetails.getSelectEditProgramDetails().click()
-        pageProgrammeManagement.clear_input(
-            pageProgrammeManagement.getInputProgrammeName()
-        )
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeName())
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
-        pageProgrammeManagement.clear_input(
-            pageProgrammeManagement.getInputProgrammeCode()
-        )
+        pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputProgrammeCode())
         pageProgrammeManagement.getInputProgrammeCode().send_keys("NEW1")
         pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputStartDate())
-        pageProgrammeManagement.getInputStartDate().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
+        pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
         pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputEndDate())
-        pageProgrammeManagement.getInputEndDate().send_keys(
-            FormatTime(1, 10, 2099).numerically_formatted_date
-        )
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text(
-            "New name after Edit", pageProgrammeDetails.headerTitle
-        )
-        assert (
-            FormatTime(1, 1, 2022).date_in_text_format
-            in pageProgrammeDetails.getLabelStartDate().text
-        )
-        assert (
-            FormatTime(1, 10, 2099).date_in_text_format
-            in pageProgrammeDetails.getLabelEndDate().text
-        )
+        pageProgrammeDetails.wait_for_text("New name after Edit", pageProgrammeDetails.headerTitle)
+        assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
     def test_program_details_happy_path(
         self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
@@ -354,10 +318,7 @@ class TestSmokeProgrammeDetails:
         pageProgrammeDetails.driver.refresh()
         assert "1" in pageProgrammeDetails.getLabelProgramSize().text
         assert "Programme Cycles" in pageProgrammeDetails.getTableTitle().text
-        assert (
-            "Rows per page: 5 1–1 of 1"
-            in pageProgrammeDetails.getTablePagination().text.replace("\n", " ")
-        )
+        assert "Rows per page: 5 1–1 of 1" in pageProgrammeDetails.getTablePagination().text.replace("\n", " ")
         pageProgrammeDetails.getButtonFinishProgram().click()
         pageProgrammeDetails.clickButtonFinishProgramPopup()
         for _ in range(10):
@@ -383,13 +344,9 @@ class TestProgrammeDetails:
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys("Test 1234 Program")
         pageProgrammeManagement.getInputStartDate().click()
-        pageProgrammeManagement.getInputStartDate().send_keys(
-            FormatTime(1, 1, 2022).numerically_formatted_date
-        )
+        pageProgrammeManagement.getInputStartDate().send_keys(FormatTime(1, 1, 2022).numerically_formatted_date)
         pageProgrammeManagement.getInputEndDate().click()
-        pageProgrammeManagement.getInputEndDate().send_keys(
-            FormatTime(1, 2, 2032).numerically_formatted_date
-        )
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 2, 2032).numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector("Health")
         pageProgrammeManagement.chooseOptionDataCollectingType("Partial")
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
@@ -402,18 +359,13 @@ class TestProgrammeDetails:
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(
-            programme_creation_url
-        ).split("/")
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         pageProgrammeDetails.getButtonActivateProgram().click()
         pageProgrammeDetails.getButtonActivateProgramModal().click()
         assert len(pageProgrammeDetails.getProgramCycleRow()) == 1
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         assert "-" in pageProgrammeDetails.getProgramCycleEndDate()[0].text
-        assert (
-            "Default Programme Cycle"
-            in pageProgrammeDetails.getProgramCycleTitle()[0].text
-        )
+        assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
     def test_program_details_edit_default_cycle_by_add_new(
         self,
@@ -426,9 +378,7 @@ class TestProgrammeDetails:
         assert "Programme Cycles" in pageProgrammeDetails.getTableTitle().text
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
         pageProgrammeDetails.getDataPickerFilter().click()
-        pageProgrammeDetails.getDataPickerFilter().send_keys(
-            datetime.now().strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getDataPickerFilter().send_keys(datetime.now().strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonNext().click()
         pageProgrammeDetails.getInputTitle().send_keys("Test Title")
         pageProgrammeDetails.getStartDateCycle().click()
@@ -436,9 +386,7 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         pageProgrammeDetails.getProgramCycleRow()
         for _ in range(50):
@@ -449,14 +397,8 @@ class TestProgrammeDetails:
             assert len(pageProgrammeDetails.getProgramCycleRow()) == 2
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
-        assert (
-            datetime.now().strftime("%-d %b %Y")
-            in pageProgrammeDetails.getProgramCycleEndDate()[0].text
-        )
-        assert (
-            "Default Programme Cycle"
-            in pageProgrammeDetails.getProgramCycleTitle()[0].text
-        )
+        assert datetime.now().strftime("%-d %b %Y") in pageProgrammeDetails.getProgramCycleEndDate()[0].text
+        assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
         assert (datetime.now() + relativedelta(days=1)).strftime(
@@ -479,9 +421,7 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
@@ -499,10 +439,7 @@ class TestProgrammeDetails:
         from selenium.webdriver.support.ui import WebDriverWait
 
         WebDriverWait(pageProgrammeDetails.driver, 10).until(
-            lambda d: len(
-                d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)
-            )
-            == 3
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)) == 3
         )
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
@@ -533,9 +470,7 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
@@ -545,19 +480,14 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         # TODO TEST REFACTOR
         from selenium.webdriver.common.by import By
         from selenium.webdriver.support.ui import WebDriverWait
 
         WebDriverWait(pageProgrammeDetails.driver, 10).until(
-            lambda d: len(
-                d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)
-            )
-            == 3
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)) == 3
         )
         pageProgrammeDetails.getProgramCycleRow()
 
@@ -593,9 +523,7 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonSave().click()
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         start_date = (datetime.now() + relativedelta(days=11)).strftime("%-d %b %Y")
@@ -608,9 +536,7 @@ class TestProgrammeDetails:
         assert (datetime.now() + relativedelta(days=12)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[0].text
-        assert (
-            "Edited title check" in pageProgrammeDetails.getProgramCycleTitle()[0].text
-        )
+        assert "Edited title check" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_program_details_delete_programme_cycle(
@@ -640,9 +566,7 @@ class TestProgrammeDetails:
                 break
             sleep(0.1)
         else:
-            assert (
-                program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text
-            )
+            assert program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     def test_program_details_buttons_vs_programme_cycle_status(
         self,
@@ -662,9 +586,9 @@ class TestProgrammeDetails:
             assert pageProgrammeDetails.getButtonEditProgramCycle()[2]
 
         assert pageProgrammeDetails.getDeleteProgrammeCycle()[0]
-        with pytest.raises(NoSuchElementException):
+        with pytest.raises(IndexError):
             assert pageProgrammeDetails.getDeleteProgrammeCycle()[1]
-        with pytest.raises(NoSuchElementException):
+        with pytest.raises(IndexError):
             assert pageProgrammeDetails.getDeleteProgrammeCycle()[2]
 
     @pytest.mark.skip(reason="Unskip after fix 211823")
@@ -679,21 +603,13 @@ class TestProgrammeDetails:
         assert "Programme Cycles" in pageProgrammeDetails.getTableTitle().text
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
         pageProgrammeDetails.getDataPickerFilter().click()
-        pageProgrammeDetails.getDataPickerFilter().send_keys(
-            datetime.now().strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getDataPickerFilter().send_keys(datetime.now().strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonNext().click()
         pageProgrammeDetails.getButtonCancel().click()
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
-        assert (
-            datetime.now().strftime("%-d %b %Y")
-            in pageProgrammeDetails.getProgramCycleEndDate()[0].text
-        )
-        assert (
-            "Default Programme Cycle"
-            in pageProgrammeDetails.getProgramCycleTitle()[0].text
-        )
+        assert datetime.now().strftime("%-d %b %Y") in pageProgrammeDetails.getProgramCycleEndDate()[0].text
+        assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
         pageProgrammeDetails.getInputTitle().send_keys("Test %$ What?")
@@ -702,9 +618,7 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[2].text
@@ -733,16 +647,10 @@ class TestProgrammeDetails:
         )
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         for _ in range(50):
-            if (
-                "Start Date cannot be before Programme Start Date"
-                in pageProgrammeDetails.getStartDateCycleDiv().text
-            ):
+            if "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text:
                 break
             sleep(0.1)
-        assert (
-            "Start Date cannot be before Programme Start Date"
-            in pageProgrammeDetails.getStartDateCycleDiv().text
-        )
+        assert "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text
 
         pageProgrammeDetails.clear_input(pageProgrammeDetails.getStartDateCycle())
         pageProgrammeDetails.getStartDateCycle().send_keys(
@@ -754,28 +662,17 @@ class TestProgrammeDetails:
         )
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         for _ in range(50):
-            if (
-                "End Date cannot be after Programme End Date"
-                in pageProgrammeDetails.getEndDateCycleDiv().text
-            ):
+            if "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text:
                 break
             sleep(0.1)
-        assert (
-            "End Date cannot be after Programme End Date"
-            in pageProgrammeDetails.getEndDateCycleDiv().text
-        )
+        assert "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text
         pageProgrammeDetails.clear_input(pageProgrammeDetails.getEndDateCycle())
 
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         for _ in range(50):
-            if (
-                "Start date must be after the latest cycle."
-                in pageProgrammeDetails.getStartDateCycleDiv().text
-            ):
+            if "Start date must be after the latest cycle." in pageProgrammeDetails.getStartDateCycleDiv().text:
                 break
             sleep(0.1)
         assert (
@@ -803,10 +700,7 @@ class TestProgrammeDetails:
         assert (datetime.now() + relativedelta(days=1)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
-        assert (
-            "New cycle with wrong date"
-            in pageProgrammeDetails.getProgramCycleTitle()[1].text
-        )
+        assert "New cycle with wrong date" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     @pytest.mark.skip("Unskip after fixing")
     def test_program_details_edit_cycle_with_wrong_date(
@@ -846,21 +740,13 @@ class TestProgrammeDetails:
         )
         pageProgrammeDetails.getButtonSave().click()
         for _ in range(50):
-            if (
-                "End Date cannot be after Programme End Date"
-                in pageProgrammeDetails.getEndDateCycleDiv().text
-            ):
+            if "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text:
                 break
             sleep(0.1)
-        assert (
-            "End Date cannot be after Programme End Date"
-            in pageProgrammeDetails.getEndDateCycleDiv().text
-        )
+        assert "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text
         pageProgrammeDetails.clear_input(pageProgrammeDetails.getEndDateCycle())
 
-        pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
-        )
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonSave().click()
 
         # ToDo: Lack of information about wrong date 212579
@@ -892,10 +778,7 @@ class TestProgrammeDetails:
         assert (datetime.now() + relativedelta(days=12)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
-        assert (
-            "New cycle with wrong date"
-            in pageProgrammeDetails.getProgramCycleTitle()[1].text
-        )
+        assert "New cycle with wrong date" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     @pytest.mark.skip("Unskip after fix: 212581")
     def test_edit_program_details_with_wrong_date(
@@ -910,22 +793,16 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getSelectEditProgramDetails().click()
         pageProgrammeManagement.getInputProgrammeName()
         pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputStartDate())
-        pageProgrammeManagement.getInputStartDate().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
+        pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
         pageProgrammeManagement.clear_input(pageProgrammeManagement.getInputEndDate())
-        pageProgrammeManagement.getInputEndDate().send_keys(
-            FormatTime(1, 10, 2022).numerically_formatted_date
-        )
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         programme_creation_url = pageProgrammeDetails.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         with pytest.raises(NoSuchElementException):
-            assert "details" in pageProgrammeDetails.wait_for_new_url(
-                programme_creation_url
-            ).split("/")
+            assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
 
     def test_program_details_program_cycle_total_quantities(
         self,
@@ -934,15 +811,6 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
-        assert (
-            "1234.99"
-            in pageProgrammeDetails.getProgramCycleTotalEntitledQuantityUSD()[0].text
-        )
-        assert (
-            "1184.98"
-            in pageProgrammeDetails.getProgramCycleTotalUndeliveredQuantityUSD()[0].text
-        )
-        assert (
-            "50.01"
-            in pageProgrammeDetails.getProgramCycleTotalDeliveredQuantityUSD()[0].text
-        )
+        assert "1234.99" in pageProgrammeDetails.getProgramCycleTotalEntitledQuantityUSD()[0].text
+        assert "1184.98" in pageProgrammeDetails.getProgramCycleTotalUndeliveredQuantityUSD()[0].text
+        assert "50.01" in pageProgrammeDetails.getProgramCycleTotalDeliveredQuantityUSD()[0].text

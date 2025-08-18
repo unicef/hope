@@ -167,10 +167,10 @@ def create_type_generated_queries() -> tuple[Q, Q]:
 
 
 class GrievanceDashboardMixin:
-    """Common dashboard logic for grievance tickets"""
+    """Common dashboard logic for grievance tickets."""
 
     def get_dashboard_base_queryset(self, program: Any = None) -> QuerySet:
-        """Get base queryset for dashboard data with optional program filtering"""
+        """Get base queryset for dashboard data with optional program filtering."""
         base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
 
         if program:
@@ -179,7 +179,7 @@ class GrievanceDashboardMixin:
         return base_queryset
 
     def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
-        """Generate dashboard data from base queryset"""
+        """Generate dashboard data from base queryset."""
         # Tickets by type data
         user_generated, system_generated = create_type_generated_queries()
         tickets_by_type = (
@@ -325,7 +325,7 @@ class GrievanceTicketViewSet(
     @extend_schema(responses={200: GrievanceDashboardSerializer})
     @action(detail=False, methods=["get"], url_path="dashboard")
     def dashboard(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Get grievance dashboard data filtered by program"""
+        """Get grievance dashboard data filtered by program."""
         base_queryset = self.get_dashboard_base_queryset(self.program)
         dashboard_data = self.get_dashboard_data(base_queryset)
         return Response(dashboard_data, status=status.HTTP_200_OK)
@@ -1261,7 +1261,7 @@ class GrievanceTicketGlobalViewSet(
     @extend_schema(responses={200: GrievanceDashboardSerializer})
     @action(detail=False, methods=["get"], url_path="dashboard")
     def dashboard(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Get grievance dashboard data without program filtering (global view)"""
+        """Get grievance dashboard data without program filtering (global view)."""
         base_queryset = self.get_dashboard_base_queryset()  # No program filtering
         dashboard_data = self.get_dashboard_data(base_queryset)
         return Response(dashboard_data, status=status.HTTP_200_OK)
