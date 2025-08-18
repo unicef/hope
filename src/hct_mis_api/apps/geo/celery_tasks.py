@@ -25,14 +25,7 @@ def import_areas_from_csv_task(csv_data: str) -> None:
 
     try:
         with transaction.atomic():
-            try:
-                country = Country.objects.get(short_name=rows[0]["Country"])
-            except Country.DoesNotExist:
-                logger.error(f"Country '{rows[0]['Country']}' not found during area import task.")
-                return
-            except KeyError:
-                logger.error("CSV must have a 'Country' column for area import task.")
-                return
+            country = Country.objects.get(short_name=rows[0]["Country"])
 
             keys = list(rows[0].keys())
             num_cols = len(keys)
