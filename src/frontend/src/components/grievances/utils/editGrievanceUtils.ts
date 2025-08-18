@@ -120,9 +120,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     individualDataUpdateDocumentsToEdit: camelizeArrayObjects(documentsToEdit),
     individualDataUpdateIdentitiesToEdit:
       camelizeArrayObjects(identitiesToEdit),
-    individualDataUpdateAccountsToEdit: camelizeArrayObjects(
-      accountsToEdit,
-    ),
+    individualDataUpdateAccountsToEdit: camelizeArrayObjects(accountsToEdit),
     individualDataUpdateFieldsAccounts: camelizeArrayObjects(accounts),
   };
 }
@@ -134,20 +132,20 @@ function prepareInitialValueEditHousehold(
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const householdData = {
-    ...ticket.ticketDetails.householdData,
+    ...((ticket.ticketDetails && ticket.ticketDetails.householdData) || {}),
   };
-  const flexFields = householdData.flexFields;
+  const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;
-  const householdDataArray = Object.entries(householdData).map(
+  const householdDataArray = Object.entries(householdData || {}).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
-      fieldValue: entry[1].value,
+      fieldValue: entry[1]?.value,
     }),
   );
-  const flexFieldsArray = Object.entries(flexFields).map(
+  const flexFieldsArray = Object.entries(flexFields || {}).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
-      fieldValue: entry[1].value,
+      fieldValue: entry[1]?.value,
     }),
   );
   initialValues.householdDataUpdateFields = [
@@ -400,8 +398,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               identitiesToEdit: transformNestedData(
                 values.individualDataUpdateIdentitiesToEdit,
               ),
-              accountsToEdit:
-                values.individualDataUpdateAccountsToEdit,
+              accountsToEdit: values.individualDataUpdateAccountsToEdit,
             },
           },
         },

@@ -23,7 +23,6 @@ function HouseholdQuestionnaire({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   const householdId =
     typeof values.selectedHousehold === 'object' &&
     values.selectedHousehold !== null
@@ -40,13 +39,16 @@ function HouseholdQuestionnaire({
       businessArea,
       householdId,
       programId,
+      values.selectedHousehold?.programSlug,
       values.selectedHousehold?.program?.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: values.selectedHousehold?.program?.slug,
+        programSlug:
+          values.selectedHousehold?.programSlug ||
+          values.selectedHousehold?.program?.slug,
       }),
     enabled: !!householdId,
   });

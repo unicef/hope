@@ -639,7 +639,6 @@ export function prepareRestVariables(
     } else if (
       issueType === parseInt(GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD, 10)
     ) {
-      console.log('values', values);
       const householdData = values.householdDataUpdateFields
         .filter((item) => item.fieldName && !item.isFlexField)
         .reduce((prev, current) => {
