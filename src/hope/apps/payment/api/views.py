@@ -201,7 +201,7 @@ class PaymentVerificationViewSet(
     @action(detail=True, methods=["post"], url_path="create-verification-plan")
     @transaction.atomic
     def create_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Create Payment Verification Plan"""
+        """Create Payment Verification Plan."""
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -520,8 +520,7 @@ class PaymentVerificationRecordViewSet(
     @extend_schema(request=PaymentVerificationUpdateSerializer, responses={200: PaymentDetailSerializer})
     @transaction.atomic
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """update verification amount"""
-
+        """Update verification amount."""
         payment = self.get_verification_record()
         payment_verification = payment.payment_verifications.first()
         serializer = self.get_serializer(data=request.data)

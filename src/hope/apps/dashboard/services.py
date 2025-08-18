@@ -459,7 +459,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         data_from_cache_for_other_years: list[dict[str, Any]] = []
 
         def get_all_db_years() -> list[int]:
-            """Helper to fetch all distinct, valid years from payment data that meets base criteria."""
+            """Fetch all distinct, valid years from payment data that meets base criteria."""
             date_field_expr_for_years = Coalesce("delivery_date", "entitlement_date", "status_date")
             base_qs_for_years = cls._get_base_payment_queryset()
             all_distinct_years_query = (

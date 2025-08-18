@@ -44,8 +44,8 @@ logger = logging.getLogger(__name__)
 
 
 def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
-    """
-    preparing value for filter by kobo_asset_id
+    """Prepare value for filter by kobo_asset_id.
+
     value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
     return asset_id number like 111222
     """
@@ -138,8 +138,8 @@ class HouseholdFilter(UpdatedAtFilter):
         return queryset.filter(Q(registration_data_import__pk=value) | Q(id__in=extra_households))
 
     def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        """
-        Filter households by phone_no_valid
+        """Filter households by phone_no_valid.
+
         True: get households with valid phone_no or valid phone_no_alternative
         False: get households with invalid both phone_no and invalid phone_no_alternative
         """
@@ -488,9 +488,7 @@ class IndividualFilter(UpdatedAtFilter):
 
 
 class MergedHouseholdFilter(FilterSet):
-    """
-    This filter emulates ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged
-    """
+    """Filter emulates ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged."""
 
     business_area = CharFilter(field_name="business_area__slug")
     rdi_id = CharFilter(method="filter_rdi_id")
@@ -514,8 +512,9 @@ class MergedHouseholdFilter(FilterSet):
 
 
 class MergedIndividualFilter(FilterSet):
-    """
-    This filter emulates ImportedIndividual filter for data structure which is linked to Import Preview when RDI is merged
+    """Filter which emulates ImportedIndividual filter.
+
+    for data structure which is linked to Import Preview when RDI is merged.
     """
 
     rdi_id = CharFilter(method="filter_rdi_id")

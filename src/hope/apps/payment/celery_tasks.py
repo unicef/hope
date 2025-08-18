@@ -334,7 +334,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
-    """Remove old Payment Plan Payment List XLSX files"""
+    """Remove old Payment Plan Payment List XLSX files."""
     try:
         from hope.apps.core.models import FileTemp
         from hope.apps.payment.models import PaymentPlan
@@ -525,7 +525,7 @@ def payment_plan_exclude_beneficiaries(
 @log_start_and_end
 @sentry_tags
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
-    """create PDF file with summary and sent an enail to request user"""
+    """Create PDF file with summary and sent an email to request user."""
     try:
         from hope.apps.core.models import FileTemp
         from hope.apps.payment.models import PaymentPlan

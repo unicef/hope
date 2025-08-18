@@ -136,7 +136,8 @@ class APITestCase(SnapshotTestTestCase):
         name: str | None = None,
         whole_business_area_access: bool | None = False,
     ) -> RoleAssignment:
-        """
+        """Create Partner Role with permissions.
+
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
         """
         permission_list = [perm.value for perm in permissions]
@@ -165,7 +166,8 @@ class APITestCase(SnapshotTestTestCase):
         name: str | None = None,
         whole_business_area_access: bool | None = False,
     ) -> RoleAssignment:
-        """
+        """Create User Role with related permissions.
+
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
         """
         permission_list = [perm.value for perm in permissions]
