@@ -19,7 +19,7 @@ interface HouseholdQuestionnaireProps {
 function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
-  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -31,12 +31,17 @@ function HouseholdQuestionnaire({
     isLoading,
     error,
   } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, householdId, programId],
+    queryKey: [
+      'household',
+      businessArea,
+      householdId,
+      values.selectedHousehold?.program?.slug,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: programId,
+        programSlug: values.selectedHousehold?.program?.slug,
       }),
     enabled: !!householdId && !isAllPrograms,
   });
@@ -46,7 +51,8 @@ function HouseholdQuestionnaire({
     : household;
 
   if (isLoading) return <LoadingComponent />;
-  if (error) return <div>Error loading household data</div>;
+  if (error)
+    return <div>Error loading {beneficiaryGroup?.groupLabel} data</div>;
   if (!selectedHouseholdData) return null;
 
   return (

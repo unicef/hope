@@ -53,6 +53,8 @@ export function RequestedHouseholdDataChange({
         flexFieldsApproveData,
       };
 
+      console.log('formData', formData);
+
       return RestService.restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate(
         {
           businessAreaSlug: businessArea,
@@ -197,20 +199,11 @@ export function RequestedHouseholdDataChange({
         } else if ('flex_fields' in householdApproveData) {
           delete householdApproveData.flex_fields;
         }
-        // Roles
+        // Roles: add each as roles__<individual_id>: boolean
         const allRolesRaw = ticket.ticketDetails.householdData.roles || [];
-        // Convert all role keys to camelCase for consistency
-        const allRoles = allRolesRaw.map((role) =>
-          Object.fromEntries(
-            Object.entries(role).map(([k, v]) => [camelCase(k), v]),
-          ),
-        );
-        householdApproveData.roles = allRoles.map((role) => ({
-          individual_id: role.individualId,
-          approve_status: Boolean(
-            values.selectedRoles.includes(role.individualId),
-          ),
-        }));
+        allRolesRaw.forEach((role) => {
+          householdApproveData[`roles__${role.individualId}`] = values.selectedRoles.includes(role.individualId);
+        });
 
         // Build mutation payload
         const mutationPayload: {
