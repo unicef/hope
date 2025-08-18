@@ -9,8 +9,6 @@ import AddIndividualDataChange from '../AddIndividualDataChange';
 import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
-import { UpdateGrievanceTicketExtras } from '@restgenerated/models/UpdateGrievanceTicketExtras';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface EditValuesTypes {
@@ -92,17 +90,17 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
 
   const {
     documents,
-    documents_to_remove: documentsToRemove,
-    documents_to_edit: documentsToEdit,
+    documentsToRemove,
+    documentsToEdit,
     identities,
-    identities_to_remove: identitiesToRemove,
-    identities_to_edit: identitiesToEdit,
+    identitiesToRemove,
+    identitiesToEdit,
     accounts,
-    accounts_to_edit: accountsToEdit,
+    accountsToEdit,
     ...rest
   } = individualData;
 
-  const { flex_fields: flexFields, ...remainingFields } = rest;
+  const { flexFields, ...remainingFields } = rest;
 
   const individualDataArray = mapFieldsToObjects(remainingFields);
   const flexFieldsArray = mapFieldsToObjects(flexFields);
@@ -412,18 +410,22 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
   const householdData = values.householdDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
   const flexFields = values.householdDataUpdateFields
     .filter((item) => item.fieldName && item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
       prev[current.fieldName] = current.fieldValue;
       return prev;
     }, {});
   householdData.flexFields = flexFields;
+  // Add roles if present and valid
+  if (Array.isArray(values.roles) && values.roles.length > 0) {
+    householdData.roles = values.roles;
+  } else if (householdData.roles) {
+    delete householdData.roles;
+  }
   return {
     variables: {
       input: {
@@ -474,7 +476,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function prepareVariables(_businessArea, values, ticket) {
+export function prepareRestUpdateVariables(_businessArea, values, ticket) {
   const mapDocumentationToUpdate = (
     documentationToUpdate,
   ): { id: number; name: string; file: File }[] | null => {
@@ -515,7 +517,7 @@ export function prepareVariables(_businessArea, values, ticket) {
     comments: values.comments,
     program: ticket.programs?.[0]?.id || values?.program,
     paymentRecord: values.selectedPaymentRecords
-      ? values.selectedPaymentRecords[0]?.id
+      ? (values.selectedPaymentRecords[0] as PaymentDetail)?.id
       : null,
     documentation: values.documentation || null,
     documentationToUpdate: mapDocumentationToUpdate(
@@ -533,68 +535,3 @@ export function prepareVariables(_businessArea, values, ticket) {
 }
 
 // REST API version for updating grievance tickets
-export function prepareRestUpdateVariables(
-  values: EditValuesTypes,
-  ticket: GrievanceTicketDetail,
-): PatchedUpdateGrievanceTicket {
-  const baseUpdate: PatchedUpdateGrievanceTicket = {
-    assignedTo: values.assignedTo,
-    language: values.language,
-    admin: values?.admin,
-    area: values.area,
-    household: values.selectedHousehold?.id,
-    individual: values.selectedIndividual?.id,
-    priority:
-      values.priority === 'Not set' ||
-      values.priority === null ||
-      values.priority === ''
-        ? 0
-        : Number(values.priority),
-    urgency:
-      values.urgency === 'Not set' ||
-      values.urgency === null ||
-      values.urgency === ''
-        ? 0
-        : Number(values.urgency),
-    partner: values.partner ? Number(values.partner) : undefined,
-    comments: values.comments,
-    program: ticket.programs?.[0]?.id || values?.program,
-    paymentRecord: values.selectedPaymentRecords
-      ? values.selectedPaymentRecords[0]?.id
-      : undefined,
-    documentation: values.documentation || undefined,
-    documentationToUpdate: values.documentationToUpdate
-      ? values.documentationToUpdate
-          .filter((el) => el)
-          .map((doc) => ({
-            id: String(doc.id),
-            name: doc.name,
-            file: doc.file,
-          }))
-      : undefined,
-    documentationToDelete: values.documentationToDelete || undefined,
-    linkedTickets: values.selectedLinkedTickets || undefined,
-  };
-
-  // For now, keep extras minimal - can be expanded later based on requirements
-  if (values.individualData || values.householdDataUpdateFields) {
-    const extras: UpdateGrievanceTicketExtras = {};
-
-    // Simple approach for now - just pass the data as-is
-    if (values.individualData) {
-      extras.individualDataUpdateIssueTypeExtras = {
-        individualData: values.individualData,
-      };
-    }
-
-    if (values.householdDataUpdateFields) {
-      extras.householdDataUpdateIssueTypeExtras = {
-        householdData: values.householdDataUpdateFields,
-      };
-    }
-
-    baseUpdate.extras = extras;
-  }
-
-  return baseUpdate;
-}
