@@ -11,6 +11,7 @@ def _generate_code(model, program):
         return _generate_code(model, program)
     return programme_code
 
+
 def generate_slug(apps, schema_editor):
     Program = apps.get_model("program", "Program")
     for program in Program.objects.all():
