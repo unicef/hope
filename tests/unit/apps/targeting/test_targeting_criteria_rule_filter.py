@@ -121,7 +121,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         try:
             rule_filter.get_query()
-            assert False
+            raise AssertionError()
         except ValidationError:
             assert True
 
@@ -132,7 +132,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         try:
             rule_filter.get_query()
-            assert False
+            raise AssertionError()
         except ValidationError:
             assert True
 
@@ -142,7 +142,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         try:
             rule_filter.get_query()
-            assert False
+            raise AssertionError()
         except ValidationError:
             assert True
 
