@@ -321,7 +321,7 @@ class RegistrationDataImportViewSet(
     @action(detail=False, methods=["post"], url_path="registration-xlsx-import")
     @transaction.atomic
     def registration_xlsx_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Import registration data from an XLSX file"""
+        """Import registration data from an XLSX file."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -402,7 +402,7 @@ class RegistrationDataImportViewSet(
     @action(detail=False, methods=["post"], url_path="registration-kobo-import")
     @transaction.atomic
     def registration_kobo_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Import registration data from KoBo"""
+        """Import registration data from KoBo."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

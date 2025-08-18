@@ -20,8 +20,8 @@ class ImportDataUploadViewSet(
     SerializerActionMixin,
     BaseViewSet,
 ):
-    """
-    ViewSet for uploading XLSX files for import data.
+    """ViewSet for uploading XLSX files for import data.
+
     Program-specific endpoints for file upload and processing.
     """
 
@@ -40,7 +40,7 @@ class ImportDataUploadViewSet(
     @action(detail=False, methods=["post"], url_path="upload-xlsx-file", parser_classes=[DictDrfNestedParser])
     @transaction.atomic
     def upload_xlsx_file(self, request, *args, **kwargs):
-        """Upload an XLSX file asynchronously for registration data import"""
+        """Upload an XLSX file asynchronously for registration data import."""
         from hope.apps.registration_datahub.celery_tasks import validate_xlsx_import_task
 
         serializer = self.get_serializer(data=request.data)
@@ -69,8 +69,8 @@ class KoboImportDataUploadViewSet(
     SerializerActionMixin,
     BaseViewSet,
 ):
-    """
-    ViewSet for saving KoBo import data.
+    """ViewSet for saving KoBo import data.
+
     Program-specific endpoints for KoBo data processing.
     """
 
@@ -93,7 +93,7 @@ class KoboImportDataUploadViewSet(
     )
     @transaction.atomic
     def save_kobo_import_data(self, request, *args, **kwargs):
-        """Save KoBo project import data asynchronously"""
+        """Save KoBo project import data asynchronously."""
         from hope.apps.registration_datahub.celery_tasks import pull_kobo_submissions_task
 
         serializer = self.get_serializer(data=request.data)
