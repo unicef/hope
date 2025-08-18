@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 def populate_rounds_covered(apps, schema_editor):
     Program = apps.get_model("program", "Program")
-    PeriodicDataUpdateXlsxTemplate = apps.get_model("periodic_data_update", "PeriodicDataUpdateXlsxTemplate")
+    PDUXlsxTemplate = apps.get_model("periodic_data_update", "PDUXlsxTemplate")
     FlexibleAttribute = apps.get_model("core", "FlexibleAttribute")
     PeriodicFieldData = apps.get_model("core", "PeriodicFieldData")
 
@@ -22,7 +22,7 @@ def populate_rounds_covered(apps, schema_editor):
         if not field_name_to_pdu_map:
             continue
 
-        templates = PeriodicDataUpdateXlsxTemplate.objects.filter(program=program)
+        templates = PDUXlsxTemplate.objects.filter(program=program)
         for template in templates.iterator():
             if not template.rounds_data:
                 continue

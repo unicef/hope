@@ -32,30 +32,37 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
-from hope.apps.periodic_data_update.api.mixins import PeriodicDataUpdateOnlineEditAuthorizedUserMixin
+from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
 from hope.apps.periodic_data_update.api.serializers import (
-    PeriodicDataUpdateXlsxTemplateCreateSerializer,
-    PeriodicDataUpdateXlsxTemplateDetailSerializer,
-    PeriodicDataUpdateXlsxTemplateListSerializer,
-    PeriodicDataUpdateXlsxUploadDetailSerializer,
-    PeriodicDataUpdateXlsxUploadListSerializer,
-    PeriodicDataUpdateXlsxUploadSerializer,
-    PeriodicFieldSerializer, PeriodicDataUpdateOnlineEditListSerializer, PeriodicDataUpdateOnlineEditDetailSerializer,
-    PeriodicDataUpdateOnlineEditCreateSerializer, PeriodicDataUpdateOnlineEditSaveDataSerializer,
-    PeriodicDataUpdateOnlineEditSendBackSerializer, BulkSerializer,
-    PeriodicDataUpdateOnlineEditUpdateAuthorizedUsersSerializer, AuthorizedUserSerializer,
+    PDUXlsxTemplateCreateSerializer,
+    PDUXlsxTemplateDetailSerializer,
+    PDUXlsxTemplateListSerializer,
+    PDUXlsxUploadDetailSerializer,
+    PDUXlsxUploadListSerializer,
+    PDUXlsxUploadSerializer,
+    PeriodicFieldSerializer,
+    PDUOnlineEditListSerializer,
+    PDUOnlineEditDetailSerializer,
+    PDUOnlineEditCreateSerializer,
+    PDUOnlineEditSaveDataSerializer,
+    PDUOnlineEditSendBackSerializer,
+    BulkSerializer,
+    PDUOnlineEditUpdateAuthorizedUsersSerializer,
+    AuthorizedUserSerializer,
     PDU_ONLINE_EDIT_RELATED_PERMISSIONS,
 )
 from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload, PeriodicDataUpdateOnlineEdit, PeriodicDataUpdateOnlineEditSentBackComment,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
+    PDUOnlineEdit,
+    PDUOnlineEditSentBackComment,
 )
-from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PeriodicDataUpdateImportService
+from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 
 logger = logging.getLogger(__name__)
 
 
-class PeriodicDataUpdateXlsxTemplateViewSet(
+class PDUXlsxTemplateViewSet(
     SerializerActionMixin,
     ProgramMixin,
     CountActionMixin,
@@ -64,11 +71,11 @@ class PeriodicDataUpdateXlsxTemplateViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PeriodicDataUpdateXlsxTemplate.objects.all()
+    queryset = PDUXlsxTemplate.objects.all()
     serializer_classes_by_action = {
-        "list": PeriodicDataUpdateXlsxTemplateListSerializer,
-        "retrieve": PeriodicDataUpdateXlsxTemplateDetailSerializer,
-        "create": PeriodicDataUpdateXlsxTemplateCreateSerializer,
+        "list": PDUXlsxTemplateListSerializer,
+        "retrieve": PDUXlsxTemplateDetailSerializer,
+        "create": PDUXlsxTemplateCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -96,7 +103,7 @@ class PeriodicDataUpdateXlsxTemplateViewSet(
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pdu_template = self.get_object()
 
-        if pdu_template.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTING:
+        if pdu_template.status == PDUXlsxTemplate.Status.EXPORTING:
             raise ValidationError("Template is already being exported")
         if pdu_template.file:
             raise ValidationError("Template is already exported")
@@ -108,12 +115,12 @@ class PeriodicDataUpdateXlsxTemplateViewSet(
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         pdu_template = self.get_object()
 
-        if pdu_template.status != PeriodicDataUpdateXlsxTemplate.Status.EXPORTED:
+        if pdu_template.status != PDUXlsxTemplate.Status.EXPORTED:
             raise ValidationError("Template is not exported yet")
         if not pdu_template.number_of_records:
             raise ValidationError("Template has no records")
         if not pdu_template.file:
-            logger.warning(f"XLSX File not found. PeriodicDataUpdateXlsxTemplate ID: {pdu_template.id}")
+            logger.warning(f"XLSX File not found. PDUXlsxTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
 
         return FileResponse(
@@ -124,7 +131,7 @@ class PeriodicDataUpdateXlsxTemplateViewSet(
         )
 
 
-class PeriodicDataUpdateXlsxUploadViewSet(
+class PDUXlsxUploadViewSet(
     SerializerActionMixin,
     ProgramMixin,
     CountActionMixin,
@@ -132,12 +139,12 @@ class PeriodicDataUpdateXlsxUploadViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PeriodicDataUpdateXlsxUpload.objects.all()
+    queryset = PDUXlsxUpload.objects.all()
     program_model_field = "template__program"
     serializer_classes_by_action = {
-        "list": PeriodicDataUpdateXlsxUploadListSerializer,
-        "upload": PeriodicDataUpdateXlsxUploadSerializer,
-        "retrieve": PeriodicDataUpdateXlsxUploadDetailSerializer,
+        "list": PDUXlsxUploadListSerializer,
+        "upload": PDUXlsxUploadSerializer,
+        "retrieve": PDUXlsxUploadDetailSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -163,7 +170,7 @@ class PeriodicDataUpdateXlsxUploadViewSet(
             serializer.validated_data["created_by"] = request.user
             try:
                 serializer.validated_data["template"] = (
-                    PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
+                    PDUXlsxImportService.read_periodic_data_update_template_object(
                         serializer.validated_data["file"]
                     )
                 )
@@ -183,8 +190,8 @@ class PeriodicDataUpdateXlsxUploadViewSet(
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # pragma: no cover
 
 
-class PeriodicDataUpdateOnlineEditViewSet(
-    PeriodicDataUpdateOnlineEditAuthorizedUserMixin,
+class PDUOnlineEditViewSet(
+    PDUOnlineEditAuthorizedUserMixin,
     SerializerActionMixin,
     ProgramMixin,
     CountActionMixin,
@@ -194,14 +201,14 @@ class PeriodicDataUpdateOnlineEditViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PeriodicDataUpdateOnlineEdit.objects.all()
+    queryset = PDUOnlineEdit.objects.all()
     serializer_classes_by_action = {
-        "list": PeriodicDataUpdateOnlineEditListSerializer,
-        "retrieve": PeriodicDataUpdateOnlineEditDetailSerializer,
-        "create": PeriodicDataUpdateOnlineEditCreateSerializer,  # TODO: PDU - task
-        "update_authorized_users": PeriodicDataUpdateOnlineEditUpdateAuthorizedUsersSerializer,
-        "save_data": PeriodicDataUpdateOnlineEditSaveDataSerializer, # TODO: PDU - handle the update of edit_data
-        "send_back": PeriodicDataUpdateOnlineEditSendBackSerializer,
+        "list": PDUOnlineEditListSerializer,
+        "retrieve": PDUOnlineEditDetailSerializer,
+        "create": PDUOnlineEditCreateSerializer,  # TODO: PDU - task
+        "update_authorized_users": PDUOnlineEditUpdateAuthorizedUsersSerializer,
+        "save_data": PDUOnlineEditSaveDataSerializer, # TODO: PDU - handle the update of edit_data
+        "send_back": PDUOnlineEditSendBackSerializer,
         "bulk_approve": BulkSerializer,
         "bulk_merge": BulkSerializer,  # TODO: PDU - task
         "users_available": AuthorizedUserSerializer,
@@ -237,11 +244,11 @@ class PeriodicDataUpdateOnlineEditViewSet(
     def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
-        if instance.status != PeriodicDataUpdateOnlineEdit.Status.NEW:
+        if instance.status != PDUOnlineEdit.Status.NEW:
             raise ValidationError("Only new edits can be sent for approval.")
         if hasattr(instance, "sent_back_comment"):  # clean up any previous sent back comment
             instance.sent_back_comment.delete()
-        instance.status = PeriodicDataUpdateOnlineEdit.Status.READY
+        instance.status = PDUOnlineEdit.Status.READY
         instance.save()
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
 
@@ -253,13 +260,13 @@ class PeriodicDataUpdateOnlineEditViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if instance.status != PeriodicDataUpdateOnlineEdit.Status.READY:
+        if instance.status != PDUOnlineEdit.Status.READY:
             raise ValidationError("PDU Online Edit is not in the 'Ready' status and cannot be sent back.")
 
-        instance.status = PeriodicDataUpdateOnlineEdit.Status.NEW
+        instance.status = PDUOnlineEdit.Status.NEW
         instance.save()
 
-        PeriodicDataUpdateOnlineEditSentBackComment.objects.create(
+        PDUOnlineEditSentBackComment.objects.create(
             comment=serializer.validated_data["sent_back_comment"],
             created_by=request.user,
             pdu_online_edit=instance,
@@ -276,11 +283,11 @@ class PeriodicDataUpdateOnlineEditViewSet(
 
         pdu_edits = self.get_queryset().filter(pk__in=serializer.validated_data["ids"])
 
-        if pdu_edits.exclude(status=PeriodicDataUpdateOnlineEdit.Status.READY).exists():
+        if pdu_edits.exclude(status=PDUOnlineEdit.Status.READY).exists():
             raise ValidationError("PDU Online Edit is not in the 'Ready' status and cannot be approved.")
 
         approved_count = pdu_edits.update(
-            status=PeriodicDataUpdateOnlineEdit.Status.APPROVED,
+            status=PDUOnlineEdit.Status.APPROVED,
             approved_by=request.user,
             approved_at=timezone.now(),
         )
@@ -297,13 +304,13 @@ class PeriodicDataUpdateOnlineEditViewSet(
 
         pdu_edits = self.get_queryset().filter(pk__in=serializer.validated_data["ids"])
 
-        if pdu_edits.exclude(status=PeriodicDataUpdateOnlineEdit.Status.APPROVED).exists():
+        if pdu_edits.exclude(status=PDUOnlineEdit.Status.APPROVED).exists():
             raise ValidationError(
                 "PDU Online Edit is not in the 'Approved' status and cannot be merged."
             )
 
         merged_count = pdu_edits.update(
-            status=PeriodicDataUpdateOnlineEdit.Status.MERGED,
+            status=PDUOnlineEdit.Status.MERGED,
         )
         # TODO: PDU - handle the merging of edit_data; update status in the task instead of here
 

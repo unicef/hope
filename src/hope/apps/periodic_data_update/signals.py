@@ -7,15 +7,15 @@ from django.dispatch import receiver
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
 )
 
 
-@receiver(post_save, sender=PeriodicDataUpdateXlsxTemplate)
-@receiver(pre_delete, sender=PeriodicDataUpdateXlsxTemplate)
+@receiver(post_save, sender=PDUXlsxTemplate)
+@receiver(pre_delete, sender=PDUXlsxTemplate)
 def increment_periodic_data_update_template_version_cache(
-    sender: Any, instance: PeriodicDataUpdateXlsxTemplate, **kwargs: dict
+    sender: Any, instance: PDUXlsxTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
     program_slug = instance.program.slug
@@ -30,10 +30,10 @@ def increment_periodic_data_update_template_version_cache_function(business_area
     cache.incr(version_key)
 
 
-@receiver(post_save, sender=PeriodicDataUpdateXlsxUpload)
-@receiver(pre_delete, sender=PeriodicDataUpdateXlsxUpload)
+@receiver(post_save, sender=PDUXlsxUpload)
+@receiver(pre_delete, sender=PDUXlsxUpload)
 def increment_periodic_data_update_upload_version_cache(
-    sender: Any, instance: PeriodicDataUpdateXlsxUpload, **kwargs: dict
+    sender: Any, instance: PDUXlsxUpload, **kwargs: dict
 ) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)

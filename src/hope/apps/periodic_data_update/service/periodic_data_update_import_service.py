@@ -12,15 +12,15 @@ import openpyxl
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import Individual
 from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
+    PDUXlsxExportTemplateService,
 )
 
 
-class PeriodicDataUpdateBaseForm(forms.Form):
+class PDUBaseForm(forms.Form):
     individual__uuid = forms.UUIDField()
     individual_unicef_id = forms.CharField()
     first_name = forms.CharField(required=False)
@@ -92,22 +92,22 @@ def validation_error_to_json(
     return error.messages if hasattr(error, "messages") else str(error)
 
 
-class PeriodicDataUpdateImportService:
-    def __init__(self, periodic_data_update_upload: PeriodicDataUpdateXlsxUpload) -> None:
+class PDUXlsxImportService:
+    def __init__(self, periodic_data_update_upload: PDUXlsxUpload) -> None:
         self.periodic_data_update_upload = periodic_data_update_upload
         self.periodic_data_update_template = self.periodic_data_update_upload.template
         self.file = self.periodic_data_update_upload.file
 
     def import_data(self) -> None:
         try:
-            self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.PROCESSING
+            self.periodic_data_update_upload.status = PDUXlsxUpload.Status.PROCESSING
             self.periodic_data_update_upload.save()
             with transaction.atomic():
                 self._open_workbook()
                 self._read_flexible_attributes()
                 cleaned_data_list, form_errors = self._read_rows()
                 if form_errors:
-                    self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.FAILED
+                    self.periodic_data_update_upload.status = PDUXlsxUpload.Status.FAILED
                     self.periodic_data_update_upload.error_message = json.dumps(
                         {
                             "form_errors": form_errors,
@@ -118,10 +118,10 @@ class PeriodicDataUpdateImportService:
                     return
                 self._update_individuals(cleaned_data_list)
                 self.file.close()
-                self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.SUCCESSFUL
+                self.periodic_data_update_upload.status = PDUXlsxUpload.Status.SUCCESSFUL
                 self.periodic_data_update_upload.save()
         except ValidationError as e:
-            self.periodic_data_update_upload.status = PeriodicDataUpdateXlsxUpload.Status.FAILED
+            self.periodic_data_update_upload.status = PDUXlsxUpload.Status.FAILED
             self.periodic_data_update_upload.error_message = json.dumps(
                 {
                     "non_form_errors": validation_error_to_json(e),
@@ -133,25 +133,25 @@ class PeriodicDataUpdateImportService:
 
     def _open_workbook(self) -> None:
         self.wb = openpyxl.load_workbook(self.file)
-        self.ws_pdu = self.wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
-        self.ws_meta = self.wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        self.periodic_data_update_template_id: PeriodicDataUpdateXlsxTemplate | None = None
+        self.ws_pdu = self.wb[PDUXlsxExportTemplateService.PDU_SHEET]
+        self.ws_meta = self.wb[PDUXlsxExportTemplateService.META_SHEET]
+        self.periodic_data_update_template_id: PDUXlsxTemplate | None = None
         self.flexible_attributes_dict: dict[str, FlexibleAttribute] | None = None
 
     @classmethod
-    def read_periodic_data_update_template_object(cls, file: File) -> PeriodicDataUpdateXlsxTemplate:
+    def read_periodic_data_update_template_object(cls, file: File) -> PDUXlsxTemplate:
         wb = openpyxl.load_workbook(file)  # type: ignore
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
         try:
             periodic_data_update_template_id = wb.custom_doc_props[
-                PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME
+                PDUXlsxExportTemplateService.PROPERTY_ID_NAME
             ]
         except KeyError:
             periodic_data_update_template_id = None
         if periodic_data_update_template_id:
             periodic_data_update_template_id = periodic_data_update_template_id.value
         if not periodic_data_update_template_id:
-            periodic_data_update_template_id = ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS].value
+            periodic_data_update_template_id = ws_meta[PDUXlsxExportTemplateService.META_ID_ADDRESS].value
         if not periodic_data_update_template_id:
             raise ValidationError("Periodic Data Update Template ID is missing in the file")
         try:
@@ -163,7 +163,7 @@ class PeriodicDataUpdateImportService:
         if type(periodic_data_update_template_id) is not int:
             raise ValidationError("Periodic Data Update Template ID must be an integer")
 
-        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.filter(
+        periodic_data_update_template = PDUXlsxTemplate.objects.filter(
             id=periodic_data_update_template_id
         ).first()
         if not periodic_data_update_template:
@@ -293,7 +293,7 @@ class PeriodicDataUpdateImportService:
             form_fields_dict[f"{value['field']}__round_value"] = self._get_form_field_for_value(flexible_attribute)
             form_fields_dict[f"{value['field']}__collection_date"] = StrictDateField(required=False)
 
-        return type("PeriodicDataUpdateForm", (PeriodicDataUpdateBaseForm,), form_fields_dict)
+        return type("PDUForm", (PDUBaseForm,), form_fields_dict)
 
     def _get_form_field_for_value(self, flexible_attribute: FlexibleAttribute) -> forms.Field:
         if flexible_attribute.pdu_data.subtype == PeriodicFieldData.STRING:

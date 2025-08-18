@@ -8,14 +8,14 @@ from django.utils import timezone
 import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateXlsxTemplateFactory,
+    PDUXlsxTemplateFactory,
 )
 
 from hope.apps.core.models import FileTemp
 from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
-from hope.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
+from hope.apps.periodic_data_update.models import PDUXlsxTemplate
 
 pytestmark = pytest.mark.django_db
 
@@ -23,17 +23,17 @@ pytestmark = pytest.mark.django_db
 class TestRemoveOldPDUTemplateFilesTask:
     def set_up(self, afghanistan: BusinessAreaFactory) -> None:
         self.afghanistan = afghanistan
-        self.pdu_template1 = PeriodicDataUpdateXlsxTemplateFactory()
+        self.pdu_template1 = PDUXlsxTemplateFactory()
         self.pdu_template1.refresh_from_db()
-        self.pdu_template2 = PeriodicDataUpdateXlsxTemplateFactory()
-        self.pdu_template3 = PeriodicDataUpdateXlsxTemplateFactory()
+        self.pdu_template2 = PDUXlsxTemplateFactory()
+        self.pdu_template3 = PDUXlsxTemplateFactory()
 
         # Save files with different creation dates
         self._create_file(self.pdu_template1, days_ago=10)  # Recent file
         self._create_file(self.pdu_template2, days_ago=35)  # Old file
         self._create_file(self.pdu_template3, days_ago=40)  # Older file
 
-    def _create_file(self, pdu_template: PeriodicDataUpdateXlsxTemplate, days_ago: int) -> None:
+    def _create_file(self, pdu_template: PDUXlsxTemplate, days_ago: int) -> None:
         filename = f"Test File {pdu_template.pk}.xlsx"
         file_content = b"Test content"
         with NamedTemporaryFile(delete=False) as file_temp:
@@ -48,7 +48,7 @@ class TestRemoveOldPDUTemplateFilesTask:
             file=ContentFile(file_content, filename),
         )
         pdu_template.file = file
-        pdu_template.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+        pdu_template.status = PDUXlsxTemplate.Status.EXPORTED
         pdu_template.save()
 
     def test_remove_old_pdu_template_files_task(self, afghanistan: BusinessAreaFactory) -> None:
@@ -58,9 +58,9 @@ class TestRemoveOldPDUTemplateFilesTask:
         assert self.pdu_template2.file is not None  # Older than 30 days
         assert self.pdu_template3.file is not None  # Older than 30 days
 
-        assert self.pdu_template1.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
-        assert self.pdu_template2.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
-        assert self.pdu_template3.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template1.status == PDUXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template2.status == PDUXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template3.status == PDUXlsxTemplate.Status.EXPORTED
 
         remove_old_pdu_template_files_task()
 
@@ -72,9 +72,9 @@ class TestRemoveOldPDUTemplateFilesTask:
         assert self.pdu_template2.file is None  # Older than 30 days
         assert self.pdu_template3.file is None  # Older than 30 days
 
-        assert self.pdu_template1.status == PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
-        assert self.pdu_template2.status == PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
-        assert self.pdu_template3.status == PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT
+        assert self.pdu_template1.status == PDUXlsxTemplate.Status.EXPORTED
+        assert self.pdu_template2.status == PDUXlsxTemplate.Status.TO_EXPORT
+        assert self.pdu_template3.status == PDUXlsxTemplate.Status.TO_EXPORT
 
         assert self.pdu_template1.can_export is False
         assert self.pdu_template2.can_export is True

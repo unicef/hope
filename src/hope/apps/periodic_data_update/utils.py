@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate, PeriodicDataUpdateOnlineEdit
+from hope.apps.periodic_data_update.models import PDUXlsxTemplate, PDUOnlineEdit
 from hope.apps.program.models import Program
 
 
@@ -52,7 +52,7 @@ def populate_pdu_new_rounds_with_null_values(program: Program) -> None:
     Individual.all_merge_status_objects.bulk_update(individuals, ["flex_fields"])
 
 def update_rounds_covered_for_template(
-        pdu_template: PeriodicDataUpdateXlsxTemplate | PeriodicDataUpdateOnlineEdit,
+        pdu_template: PDUXlsxTemplate | PDUOnlineEdit,
         rounds_data: list[dict]
     ) -> None:
     field_to_round_map = {item["field"]: item["round"] for item in rounds_data}

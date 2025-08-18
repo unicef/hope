@@ -2,13 +2,13 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 
-from hope.apps.periodic_data_update.models import PeriodicDataUpdateOnlineEdit
+from hope.apps.periodic_data_update.models import PDUOnlineEdit
 
 
-class PeriodicDataUpdateOnlineEditAuthorizedUserMixin:
+class PDUOnlineEditAuthorizedUserMixin:
     """
     This mixin provides an authorization check to ensure that the requesting user
-    is in the `authorized_users` list of the PeriodicDataUpdateOnlineEdit instance.
+    is in the `authorized_users` list of the PDUOnlineEdit instance.
     If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
     """
 
@@ -24,7 +24,7 @@ class PeriodicDataUpdateOnlineEditAuthorizedUserMixin:
         else:
             ids = request.data.get("ids")
             if ids:
-                queryset = PeriodicDataUpdateOnlineEdit.objects.filter(pk__in=ids)
+                queryset = PDUOnlineEdit.objects.filter(pk__in=ids)
                 if queryset.count() != len(ids):
                     raise PermissionDenied("One or more PDU online edits not found.")
 

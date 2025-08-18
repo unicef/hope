@@ -19,8 +19,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateXlsxTemplateFactory,
-    PeriodicDataUpdateXlsxUploadFactory,
+    PDUXlsxTemplateFactory,
+    PDUXlsxUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
@@ -33,7 +33,7 @@ from unit.apps.periodic_data_update.test_periodic_data_update_import_service imp
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import PeriodicFieldData
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
+    PDUXlsxExportTemplateService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 
@@ -41,7 +41,7 @@ pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
-class TestPeriodicDataUpdateXlsxUploadViews:
+class TestPDUXlsxUploadViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
@@ -50,17 +50,17 @@ class TestPeriodicDataUpdateXlsxUploadViews:
         self.program1 = ProgramFactory(business_area=self.afghanistan, name="Program1")
         self.program2 = ProgramFactory(business_area=self.afghanistan, name="Program2")
 
-        pdu_template1_program1 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1)
-        pdu_template2_program1 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program1)
-        pdu_template_program2 = PeriodicDataUpdateXlsxTemplateFactory(program=self.program2)
+        pdu_template1_program1 = PDUXlsxTemplateFactory(program=self.program1)
+        pdu_template2_program1 = PDUXlsxTemplateFactory(program=self.program1)
+        pdu_template_program2 = PDUXlsxTemplateFactory(program=self.program2)
 
-        self.pdu_upload1_program1 = PeriodicDataUpdateXlsxUploadFactory(
+        self.pdu_upload1_program1 = PDUXlsxUploadFactory(
             template=pdu_template1_program1, created_by=self.user
         )
-        self.pdu_upload2_program1 = PeriodicDataUpdateXlsxUploadFactory(
+        self.pdu_upload2_program1 = PDUXlsxUploadFactory(
             template=pdu_template2_program1, created_by=self.user
         )
-        self.pdu_upload_program2 = PeriodicDataUpdateXlsxUploadFactory(template=pdu_template_program2, created_by=self.user)
+        self.pdu_upload_program2 = PDUXlsxUploadFactory(template=pdu_template_program2, created_by=self.user)
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
             kwargs={
@@ -287,7 +287,7 @@ class TestPeriodicDataUpdateXlsxUploadViews:
             label="PDU Field",
             pdu_data=pdu_data,
         )
-        pdu_template = PeriodicDataUpdateXlsxTemplateFactory(
+        pdu_template = PDUXlsxTemplateFactory(
             program=self.program1,
             rounds_data=[
                 {
@@ -300,7 +300,7 @@ class TestPeriodicDataUpdateXlsxUploadViews:
         )
         rows = [["Positive", "2024-07-20"]]
 
-        service = PeriodicDataUpdateExportTemplateService(pdu_template)
+        service = PDUXlsxExportTemplateService(pdu_template)
         service.generate_workbook()
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
@@ -353,7 +353,7 @@ class TestPeriodicDataUpdateXlsxUploadViews:
         )
         populate_pdu_with_null_values(self.program1, individual.flex_fields)
         individual.save()
-        pdu_template = PeriodicDataUpdateXlsxTemplateFactory(
+        pdu_template = PDUXlsxTemplateFactory(
             program=self.program1,
             rounds_data=[
                 {
@@ -366,7 +366,7 @@ class TestPeriodicDataUpdateXlsxUploadViews:
         )
         rows = [["Positive", "2024-07-20"]]
 
-        service = PeriodicDataUpdateExportTemplateService(pdu_template)
+        service = PDUXlsxExportTemplateService(pdu_template)
         service.generate_workbook()
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
