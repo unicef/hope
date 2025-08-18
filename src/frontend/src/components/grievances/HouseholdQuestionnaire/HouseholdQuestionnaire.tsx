@@ -40,19 +40,20 @@ function HouseholdQuestionnaire({
       businessArea,
       householdId,
       programId,
-      selectedProgram.slug,
+      values.selectedHousehold?.program?.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug: selectedProgram.slug,
+        programSlug: values.selectedHousehold?.program?.slug,
       }),
     enabled: !!householdId,
   });
 
   if (isLoading) return <LoadingComponent />;
-  if (error) return <div>Error loading household data</div>;
+  if (error)
+    return <div>Error loading {beneficiaryGroup?.groupLabel} data</div>;
 
   const selectedHouseholdData = household;
 
