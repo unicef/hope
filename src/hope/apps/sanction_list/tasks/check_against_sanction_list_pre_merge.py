@@ -52,9 +52,7 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
     possible_names = [
         sanction_list_individual.full_name,
     ]
-    for alias_name in sanction_list_individual.alias_names.all():
-        possible_names.append(alias_name.name)
-
+    possible_names += [alias_name.name for alias_name in sanction_list_individual.alias_names.all()]
     queries: list = [
         {
             "match": {

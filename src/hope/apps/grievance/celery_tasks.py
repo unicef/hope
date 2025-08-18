@@ -22,8 +22,9 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     should_populate_index: bool,
     individual_id: str,
 ) -> None:
-    """
-    This task is used in Grievance Tickets which changes/ adds an individual.
+    """Deduplicate and check against the sanction List.
+
+    This task is used in Grievance Tickets which changes or adds an individual.
     """
     try:
         from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (

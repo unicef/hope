@@ -334,7 +334,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
-    """Remove old Payment Plan Payment List XLSX files"""
+    """Remove old Payment Plan Payment List XLSX files."""
     try:
         from hope.apps.core.models import FileTemp
         from hope.apps.payment.models import PaymentPlan
@@ -467,7 +467,9 @@ def payment_plan_exclude_beneficiaries(
             undo_exclude_hh_ids = payments_for_undo_exclude.values_list(filter_key, flat=True)
 
             # check if hard conflicts exists in other Payments for undo exclude HH
-            for unicef_id in undo_exclude_hh_ids:
+            error_msg += [
+                f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
+                for unicef_id in undo_exclude_hh_ids
                 if (
                     Payment.objects.exclude(parent__id=payment_plan.pk)
                     .filter(
@@ -480,10 +482,8 @@ def payment_plan_exclude_beneficiaries(
                         Q(**{filter_key: unicef_id}) & Q(conflicted=False),
                     )
                     .exists()
-                ):
-                    error_msg.append(
-                        f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
-                    )
+                )
+            ]
 
             payment_plan.exclusion_reason = exclusion_reason
 
@@ -525,7 +525,7 @@ def payment_plan_exclude_beneficiaries(
 @log_start_and_end
 @sentry_tags
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
-    """create PDF file with summary and sent an enail to request user"""
+    """Create PDF file with summary and sent an email to request user."""
     try:
         from hope.apps.core.models import FileTemp
         from hope.apps.payment.models import PaymentPlan

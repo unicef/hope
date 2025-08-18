@@ -30,7 +30,7 @@ def post_process_dedupe_results(record: Any) -> None:
 
 
 def combine_collections(a: dict, b: dict, path: list | None = None, update: bool = True) -> dict:
-    """Merges b into a version from flex registration."""
+    """Merge b into a version from flex registration."""
     if path is None:
         path = []
     for key in b:

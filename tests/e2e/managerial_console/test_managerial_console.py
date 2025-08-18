@@ -5,6 +5,8 @@ from django.utils import timezone
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from selenium.webdriver.common.by import By
 from extras.test_utils.factories.account import UserFactory
@@ -96,15 +98,15 @@ class TestSmokeManagerialConsole:
     ) -> None:
         pageManagerialConsole.getNavManagerialConsole().click()
         pageManagerialConsole.getSelectAllApproval()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageManagerialConsole.getApproveButton().click()
 
         pageManagerialConsole.getSelectAllAuthorization()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageManagerialConsole.getAuthorizeButton().click()
 
         pageManagerialConsole.getSelectAllRelease()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageManagerialConsole.getReleaseButton().click()
 
         program = Program.objects.filter(name="Test Programm").first()
@@ -141,17 +143,17 @@ class TestSmokeManagerialConsole:
         pageManagerialConsole.getSelectAllApproval()
         pageManagerialConsole.getProgramSelectApproval()
 
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageManagerialConsole.getApproveButton().click()
 
         pageManagerialConsole.getSelectAllAuthorization()
         pageManagerialConsole.getProgramSelectAuthorization()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageManagerialConsole.getAuthorizeButton().click()
 
         pageManagerialConsole.getSelectAllRelease()
         pageManagerialConsole.getProgramSelectRelease()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageManagerialConsole.getReleaseButton().click()
 
         pageManagerialConsole.getSelectApproval().click()

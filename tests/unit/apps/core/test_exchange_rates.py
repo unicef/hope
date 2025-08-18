@@ -102,6 +102,48 @@ EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA = {
     }
 }
 
+EXCHANGE_RATES_WITH_LATEST_12_HISTORICAL_DATA = {
+    "ROWSET": {
+        "ROW": [
+            {
+                "CURRENCY_CODE": "XEU",
+                "CURRENCY_NAME": "European Currency Unit",
+                "X_RATE": ".867",
+                "VALID_FROM": "01-DEC-98",
+                "VALID_TO": "31-DEC-99",
+                "RATIO": "1",
+                "NO_OF_DECIMAL": "2",
+                "PAST_XRATE": {
+                    "PAST_XRATE_ROW": [
+                        {
+                            "VALID_FROM": "01-JAN-98",
+                            "VALID_TO": "31-JAN-98",
+                            "PAST_XRATE": ".906",
+                            "PAST_RATIO": "1",
+                        },
+                        {
+                            "VALID_FROM": "01-FEB-98",
+                            "VALID_TO": "28-FEB-98",
+                            "PAST_XRATE": ".926",
+                            "PAST_RATIO": "1",
+                        },
+                    ]
+                },
+            },
+            {
+                "CURRENCY_CODE": "CUP1",
+                "CURRENCY_NAME": "Cuban Peso (non convertible)",
+                "X_RATE": "24",
+                "VALID_FROM": "15-AUG-06",
+                "VALID_TO": "31-DEC-99",
+                "RATIO": "1",
+                "NO_OF_DECIMAL": "2",
+                "PAST_XRATE": None,
+            },
+        ]
+    }
+}
+
 EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
     "ROWSET": {
         "ROW": [
@@ -156,6 +198,7 @@ class TestExchangeRatesAPI(TestCase):
         [
             (ExchangeRateClientAPI.HISTORY_MODE_PARAM_LONG, EXCHANGE_RATES_WITH_HISTORICAL_DATA),
             (ExchangeRateClientAPI.HISTORY_MODE_PARAM_SHORT, EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA),
+            (ExchangeRateClientAPI.HISTORY_MODE_PARAM_LATEST_12, EXCHANGE_RATES_WITH_LATEST_12_HISTORICAL_DATA),
             (None, EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA),
         ]
     )

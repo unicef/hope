@@ -68,32 +68,29 @@ class EUParser:
                         "country_of_birth": None,
                     }
                 )
-            birthdays = []
-            for birthdate_element in entity.findall("ns:birthdate", namespace):
-                birthdays.append(
-                    {
-                        "date": birthdate_element.get("birthdate"),
-                    }
-                )
-            citizenships = []
-            for citizenship_element in entity.findall("ns:citizenship", namespace):
-                citizenships.append(
-                    {
-                        "region": citizenship_element.get("region"),
-                        "iso_code2": citizenship_element.get("countryIso2Code"),
-                        "country": citizenship_element.get("countryDescription"),
-                    }
-                )
-            identifications = []
-            for id_element in entity.findall("ns:identification", namespace):
-                identifications.append(
-                    {
-                        "type_of_document": id_element.get("identificationTypeCode"),
-                        "document_number": id_element.get("number"),
-                        "date_of_issue": id_element.get("issueDate"),
-                        "issuing_country__iso_code2": id_element.get("countryIso2Code"),
-                    }
-                )
+            birthdays = [
+                {
+                    "date": birthdate_element.get("birthdate"),
+                }
+                for birthdate_element in entity.findall("ns:birthdate", namespace)
+            ]
+            citizenships = [
+                {
+                    "region": citizenship_element.get("region"),
+                    "iso_code2": citizenship_element.get("countryIso2Code"),
+                    "country": citizenship_element.get("countryDescription"),
+                }
+                for citizenship_element in entity.findall("ns:citizenship", namespace)
+            ]
+            identifications = [
+                {
+                    "type_of_document": id_element.get("identificationTypeCode"),
+                    "document_number": id_element.get("number"),
+                    "date_of_issue": id_element.get("issueDate"),
+                    "issuing_country__iso_code2": id_element.get("countryIso2Code"),
+                }
+                for id_element in entity.findall("ns:identification", namespace)
+            ]
             yield {
                 "id": _i,
                 "aliases": aliases,
