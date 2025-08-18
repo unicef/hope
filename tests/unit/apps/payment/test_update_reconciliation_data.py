@@ -116,9 +116,9 @@ class TestDeliveryDate(APITestCase):
         self.payment_2.refresh_from_db()
         self.payment_3.refresh_from_db()
         date_now = pytz.utc.localize(datetime(2023, 10, 23))
-        self.assertEqual(self.payment_1.delivery_date, date_now)
-        self.assertEqual(self.payment_2.delivery_date, old_delivery_date2)
-        self.assertEqual(self.payment_3.delivery_date, old_delivery_date3)
+        assert self.payment_1.delivery_date == date_now
+        assert self.payment_2.delivery_date == old_delivery_date2
+        assert self.payment_3.delivery_date == old_delivery_date3
 
     @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:
@@ -135,17 +135,14 @@ class TestDeliveryDate(APITestCase):
         import_service.open_workbook()
         import_service.validate()
 
-        self.assertEqual(len(import_service.errors), 1)
+        assert len(import_service.errors) == 1
 
         error = import_service.errors[0]
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Test FSP 1",
-                None,
-                "There aren't any updates in imported file, please add changes and try again",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Test FSP 1",
+            None,
+            "There aren't any updates in imported file, please add changes and try again",
+        ]
 
     @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
@@ -169,9 +166,9 @@ class TestDeliveryDate(APITestCase):
         self.payment_2.refresh_from_db()
         self.payment_3.refresh_from_db()
 
-        self.assertEqual(self.payment_1.delivery_date, datetime(2023, 5, 5).replace(tzinfo=utc))  # only this changed
-        self.assertEqual(self.payment_2.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
-        self.assertEqual(self.payment_3.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
+        assert self.payment_1.delivery_date == datetime(2023, 5, 5).replace(tzinfo=utc)  # only this changed
+        assert self.payment_2.delivery_date == datetime(2023, 12, 24).replace(tzinfo=utc)
+        assert self.payment_3.delivery_date == datetime(2023, 12, 24).replace(tzinfo=utc)
 
     @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_upload_reference_id(self, mock_exchange_rate: Any) -> None:
@@ -201,8 +198,8 @@ class TestDeliveryDate(APITestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        self.assertEqual(payment_1.transaction_reference_id, "ref1")
-        self.assertEqual(payment_2.transaction_reference_id, "ref2")
+        assert payment_1.transaction_reference_id == "ref1"
+        assert payment_2.transaction_reference_id == "ref2"
 
     @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=1.0)
     def test_upload_transaction_status_blockchain_link(self, mock_exchange_rate: Any) -> None:
@@ -232,5 +229,5 @@ class TestDeliveryDate(APITestCase):
         payment_1.refresh_from_db(fields=["transaction_status_blockchain_link"])
         payment_2.refresh_from_db(fields=["transaction_status_blockchain_link"])
 
-        self.assertEqual(payment_1.transaction_status_blockchain_link, "transaction_status_blockchain_link_111")
-        self.assertEqual(payment_2.transaction_status_blockchain_link, "www_link")
+        assert payment_1.transaction_status_blockchain_link == "transaction_status_blockchain_link_111"
+        assert payment_2.transaction_status_blockchain_link == "www_link"

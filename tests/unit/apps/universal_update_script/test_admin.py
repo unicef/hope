@@ -26,5 +26,5 @@ class UniversalUpdateAdminTest(TestCase):
         )
         url = reverse("admin:universal_update_script_universalupdate_change", args=(universal_update.pk,))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertContains(response, "Test Program for Household")

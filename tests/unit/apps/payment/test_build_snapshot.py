@@ -103,21 +103,18 @@ class TestBuildSnapshot(TestCase):
         create_payment_plan_snapshot_data(self.pp)
         self.p1.refresh_from_db()
         self.p2.refresh_from_db()
-        self.assertIsNotNone(self.p1.household_snapshot)
-        self.assertIsNotNone(self.p2.household_snapshot)
-        self.assertEqual(str(self.p1.household_snapshot.snapshot_data["id"]), str(self.hh1.id))
-        self.assertEqual(str(self.p2.household_snapshot.snapshot_data["id"]), str(self.hh2.id))
-        self.assertEqual(len(self.p1.household_snapshot.snapshot_data["individuals"]), self.hh1.individuals.count())
-        self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
-        self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
-        self.assertEqual(
-            self.p1.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}),
-            {
-                "expiry_date": "2022-01-01",
-                "number": "123",
-                "name_of_cardholder": "Marek",
-            },
-        )
+        assert self.p1.household_snapshot is not None
+        assert self.p2.household_snapshot is not None
+        assert str(self.p1.household_snapshot.snapshot_data["id"]) == str(self.hh1.id)
+        assert str(self.p2.household_snapshot.snapshot_data["id"]) == str(self.hh2.id)
+        assert len(self.p1.household_snapshot.snapshot_data["individuals"]) == self.hh1.individuals.count()
+        assert len(self.p2.household_snapshot.snapshot_data["individuals"]) == self.hh2.individuals.count()
+        assert self.p1.household_snapshot.snapshot_data["primary_collector"] is not None
+        assert self.p1.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}) == {
+            "expiry_date": "2022-01-01",
+            "number": "123",
+            "name_of_cardholder": "Marek",
+        }
 
     def test_batching(self) -> None:
         program = RealProgramFactory()
@@ -147,6 +144,6 @@ class TestBuildSnapshot(TestCase):
                 financial_service_provider=None,
                 currency="PLN",
             )
-        self.assertEqual(pp.payment_items.count(), number_of_payments)
+        assert pp.payment_items.count() == number_of_payments
         create_payment_plan_snapshot_data(pp)
-        self.assertEqual(pp.payment_items.filter(household_snapshot__isnull=False).count(), number_of_payments)
+        assert pp.payment_items.filter(household_snapshot__isnull=False).count() == number_of_payments

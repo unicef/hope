@@ -469,15 +469,15 @@ class TestPaymentGatewayService(APITestCase):
             payout_amount=float(self.payments[0].entitlement_quantity),
             fsp_code="1",
         )
-        self.assertEqual(p.get_hope_status(self.payments[0].entitlement_quantity), Payment.STATUS_DISTRIBUTION_SUCCESS)
-        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_DISTRIBUTION_PARTIAL)
+        assert p.get_hope_status(self.payments[0].entitlement_quantity) == Payment.STATUS_DISTRIBUTION_SUCCESS
+        assert p.get_hope_status(Decimal(1000000.00)) == Payment.STATUS_DISTRIBUTION_PARTIAL
 
         p.payout_amount = None
-        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_ERROR)
+        assert p.get_hope_status(Decimal(1000000.00)) == Payment.STATUS_ERROR
 
         p.payout_amount = float(self.payments[0].entitlement_quantity)
         p.status = "NOT EXISTING STATUS"
-        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_ERROR)
+        assert p.get_hope_status(Decimal(1000000.00)) == Payment.STATUS_ERROR
 
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
@@ -512,11 +512,11 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp_split_1.sent_to_payment_gateway, True)
-        self.assertEqual(self.pp_split_2.sent_to_payment_gateway, True)
-        self.assertEqual(change_payment_instruction_status_mock.call_count, 4)
-        self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
-        self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)
+        assert self.pp_split_1.sent_to_payment_gateway
+        assert self.pp_split_2.sent_to_payment_gateway
+        assert change_payment_instruction_status_mock.call_count == 4
+        assert self.payments[0].status == Payment.STATUS_SENT_TO_PG
+        assert self.payments[1].status == Payment.STATUS_SENT_TO_PG
 
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
@@ -549,12 +549,12 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp_split_1.sent_to_payment_gateway, False)
-        self.assertEqual(self.pp_split_2.sent_to_payment_gateway, False)
-        self.assertEqual(self.payments[0].status, Payment.STATUS_ERROR)
-        self.assertEqual(self.payments[1].status, Payment.STATUS_ERROR)
-        self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")
-        self.assertEqual(self.payments[1].reason_for_unsuccessful_payment, "Error")
+        assert self.pp_split_1.sent_to_payment_gateway is False
+        assert self.pp_split_2.sent_to_payment_gateway is False
+        assert self.payments[0].status == Payment.STATUS_ERROR
+        assert self.payments[1].status == Payment.STATUS_ERROR
+        assert self.payments[0].reason_for_unsuccessful_payment == "Error"
+        assert self.payments[1].reason_for_unsuccessful_payment == "Error"
 
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
@@ -625,11 +625,11 @@ class TestPaymentGatewayService(APITestCase):
 
         # remove old and create new snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
-        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 0)
-        self.assertEqual(Payment.objects.count(), 2)
+        assert PaymentHouseholdSnapshot.objects.count() == 0
+        assert Payment.objects.count() == 2
 
         create_payment_plan_snapshot_data(self.payments[0].parent)
-        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
+        assert PaymentHouseholdSnapshot.objects.count() == 2
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
@@ -694,11 +694,11 @@ class TestPaymentGatewayService(APITestCase):
 
         # remove old and create new snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
-        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 0)
-        self.assertEqual(Payment.objects.count(), 2)
+        assert PaymentHouseholdSnapshot.objects.count() == 0
+        assert Payment.objects.count() == 2
 
         create_payment_plan_snapshot_data(self.payments[0].parent)
-        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
+        assert PaymentHouseholdSnapshot.objects.count() == 2
         self.payments[0].refresh_from_db()
 
         # no mapping, different payment fsp

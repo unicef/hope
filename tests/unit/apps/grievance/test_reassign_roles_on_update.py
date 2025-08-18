@@ -90,10 +90,10 @@ class TestReassignRolesOnUpdate(APITestCase):
         individual.refresh_from_db()
         self.household.refresh_from_db()
 
-        self.assertEqual(self.household.head_of_household, individual)
-        self.assertEqual(individual.relationship, HEAD)
+        assert self.household.head_of_household == individual
+        assert individual.relationship == HEAD
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
-        self.assertEqual(role, ROLE_PRIMARY)
+        assert role == ROLE_PRIMARY
 
     def test_reassign_alternate_role_to_primary_collector(self) -> None:
         role_reassign_data = {
@@ -109,7 +109,7 @@ class TestReassignRolesOnUpdate(APITestCase):
                 self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
             )
 
-        self.assertTrue("Cannot reassign the role" in str(context.exception))
+        assert "Cannot reassign the role" in str(context.exception)
 
     def test_reassign_alternate_role(self) -> None:
         individual = IndividualFactory(household=self.household, program=self.program_one)
@@ -126,7 +126,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
         )
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
-        self.assertEqual(role, ROLE_ALTERNATE)
+        assert role == ROLE_ALTERNATE
 
     def test_reassign_primary_role_to_current_alternate_collector(self) -> None:
         role_reassign_data = {
@@ -144,10 +144,10 @@ class TestReassignRolesOnUpdate(APITestCase):
         role = IndividualRoleInHousehold.objects.get(
             household=self.household, individual=self.alternate_collector_individual
         ).role
-        self.assertEqual(role, ROLE_PRIMARY)
+        assert role == ROLE_PRIMARY
 
         previous_role = IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first()
-        self.assertIsNone(previous_role)
+        assert previous_role is None
 
     def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(self) -> None:
         household, _ = create_household_and_individuals(
@@ -178,9 +178,9 @@ class TestReassignRolesOnUpdate(APITestCase):
         )
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=self.no_role_individual).role
-        self.assertEqual(role, ROLE_ALTERNATE)
+        assert role == ROLE_ALTERNATE
 
         external_role = IndividualRoleInHousehold.objects.get(
             household=household, individual=self.no_role_individual
         ).role
-        self.assertEqual(external_role, ROLE_PRIMARY)  # still with primary role in another household
+        assert external_role == ROLE_PRIMARY  # still with primary role in another household

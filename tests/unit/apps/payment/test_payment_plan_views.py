@@ -107,7 +107,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([], status.HTTP_403_FORBIDDEN),
             ([Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_200_OK),
@@ -334,13 +334,13 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert self.payment_plan2.status == PaymentPlan.Status.IN_APPROVAL
 
     @pytest.mark.parametrize(
-        "action_name, result",
-        (
+        ("action_name", "result"),
+        [
             (PaymentPlan.Action.APPROVE.name, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name),
             (PaymentPlan.Action.AUTHORIZE.name, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name),
             (PaymentPlan.Action.REVIEW.name, Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name),
             ("Some other action name", None),
-        ),
+        ],
     )
     def test_get_action_permission(self, action_name: str, result: str) -> None:
         payment_plan_managerial_viewset = PaymentPlanManagerialViewSet()
@@ -555,7 +555,7 @@ class TestPaymentPlanDetail:
         self.client = api_client(self.user)
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -999,7 +999,7 @@ class TestTargetPopulationDetail:
         self.client = api_client(self.user)
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1230,7 +1230,7 @@ class TestTargetPopulationCreateUpdate:
         ]
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1276,7 +1276,7 @@ class TestTargetPopulationCreateUpdate:
         assert "program_cycle_id" in response.data
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1347,7 +1347,7 @@ class TestTargetPopulationActions:
         self.url_apply_steficon = reverse("api:payments:target-populations-apply-engine-formula", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_LOCK], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1363,7 +1363,7 @@ class TestTargetPopulationActions:
             assert response.json() == {"message": "Target Population locked"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_UNLOCK], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1380,7 +1380,7 @@ class TestTargetPopulationActions:
             assert response.json() == {"message": "Target Population unlocked"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_LOCK], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1396,7 +1396,7 @@ class TestTargetPopulationActions:
             assert response.json() == {"message": "Target Population rebuilding"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1415,7 +1415,7 @@ class TestTargetPopulationActions:
             assert response.json() == {"message": "Target Population ready for Payment Plan"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_DUPLICATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1470,7 +1470,7 @@ class TestTargetPopulationActions:
         assert "program_cycle_id" in response_3.data
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1529,7 +1529,7 @@ class TestTargetPopulationActions:
         assert "engine_formula_rule_id" in response_3.data
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_REMOVE], status.HTTP_204_NO_CONTENT),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1605,7 +1605,7 @@ class TestPendingPaymentsAction:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.TARGETING_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1708,7 +1708,7 @@ class TestPaymentPlanActions:
         self.url_funds_commitments = reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1741,7 +1741,7 @@ class TestPaymentPlanActions:
         assert "currency" in response.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_LOCK_AND_UNLOCK], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1759,7 +1759,7 @@ class TestPaymentPlanActions:
             assert response.json() == {"message": "Payment Plan locked"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_LOCK_AND_UNLOCK], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1776,7 +1776,7 @@ class TestPaymentPlanActions:
             assert response.json() == {"message": "Payment Plan unlocked"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_CREATE], status.HTTP_204_NO_CONTENT),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1807,7 +1807,7 @@ class TestPaymentPlanActions:
             assert PaymentPlan.objects.filter(name="new pp for delete test").first().status == PaymentPlan.Status.DRAFT
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1852,7 +1852,7 @@ class TestPaymentPlanActions:
         assert "excluded_households_ids" in response_3.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1915,7 +1915,7 @@ class TestPaymentPlanActions:
         assert "engine_formula_rule_id" in response_3.data
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1935,7 +1935,7 @@ class TestPaymentPlanActions:
             assert response.json() == {"message": "Payment Plan FSP locked"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -1954,7 +1954,7 @@ class TestPaymentPlanActions:
             assert response.json() == {"message": "Payment Plan FSP unlocked"}
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2028,7 +2028,7 @@ class TestPaymentPlanActions:
         assert "User can only import for LOCKED Payment Plan" in response.data[0]
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_SEND_FOR_APPROVAL], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2047,7 +2047,7 @@ class TestPaymentPlanActions:
             assert response.json()["status"] == "IN_APPROVAL"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status, payment_plan_status",
+        ("permissions", "expected_status", "payment_plan_status"),
         [
             (
                 [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PM_VIEW_LIST],
@@ -2084,7 +2084,7 @@ class TestPaymentPlanActions:
             assert response.json()["status"] == "LOCKED_FSP"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -2106,7 +2106,7 @@ class TestPaymentPlanActions:
             assert response.json()["status"] == "IN_AUTHORIZATION"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -2128,7 +2128,7 @@ class TestPaymentPlanActions:
             assert response.json()["status"] == "IN_REVIEW"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             (
                 [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
@@ -2150,7 +2150,7 @@ class TestPaymentPlanActions:
             assert response.json()["status"] == "ACCEPTED"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_SEND_TO_PAYMENT_GATEWAY], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2175,7 +2175,7 @@ class TestPaymentPlanActions:
             assert response.json()["status"] == "ACCEPTED"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_DOWNLOAD_FSP_AUTH_CODE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2239,7 +2239,7 @@ class TestPaymentPlanActions:
             assert response_ok.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_SEND_XLSX_PASSWORD], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2256,7 +2256,7 @@ class TestPaymentPlanActions:
         assert response.status_code == expected_status
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2318,7 +2318,7 @@ class TestPaymentPlanActions:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_SPLIT], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2375,7 +2375,7 @@ class TestPaymentPlanActions:
             assert "id" in response_ok.data
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_EXPORT_PDF_SUMMARY], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2395,7 +2395,7 @@ class TestPaymentPlanActions:
             assert "id" in response.json()
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
@@ -2424,7 +2424,7 @@ class TestPaymentPlanActions:
             assert response.json()["currency"] == self.pp.currency
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),

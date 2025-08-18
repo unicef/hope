@@ -82,7 +82,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         rebuild_search_index()
 
     def test_create_needs_adjudication_ticket_with_the_same_ind(self) -> None:
-        self.assertEqual(Individual.objects.count(), 2)
+        assert Individual.objects.count() == 2
         ind = Individual.objects.first()
         ind_2 = Individual.objects.last()
         ind.deduplication_golden_record_results = {
@@ -100,7 +100,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
 
         create_needs_adjudication_tickets(
             individuals_queryset,
@@ -109,7 +109,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
 
         # ticket_have to be created
         deduplication_golden_record_results_data = {
@@ -130,7 +130,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
 
 
 @pytest.mark.elasticsearch

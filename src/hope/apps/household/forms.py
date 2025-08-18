@@ -161,7 +161,8 @@ class CreateTargetPopulationTextForm(forms.Form):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.program = kwargs.pop("program")
-        assert self.program is not None
+        if not self.program:
+            raise forms.ValidationError("Missing programme")
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
         self.fields["program_cycle"] = forms.ModelChoiceField(

@@ -63,8 +63,8 @@ class TestGrievanceModelValidation(TestCase):
         grievance_ticket_1.save()
         grievance_ticket_2.save()
 
-        self.assertEqual(self.valid_model_data["issue_type"], grievance_ticket_1.issue_type)
-        self.assertEqual(self.valid_model_2_data["issue_type"], grievance_ticket_2.issue_type)
+        assert self.valid_model_data["issue_type"] == grievance_ticket_1.issue_type
+        assert self.valid_model_2_data["issue_type"] == grievance_ticket_2.issue_type
 
     def test_invalid_issue_types(self) -> None:
         grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.invalid_model_data)
@@ -111,7 +111,7 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             form_data_standalone_query_dict[key] = value
 
         form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()
         form.clean()
 
         # test inline form data valid
@@ -129,13 +129,13 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
                 continue
             form_data_inline_query_dict[key] = value
         form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()
         form.clean()
 
         # test delivery mechanism not supported
         fsp.delivery_mechanisms.remove(self.dm_transfer_to_account)
         form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         with self.assertRaisesMessage(
             ValidationError,
             "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
@@ -153,7 +153,7 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         for key, value in form_data_inline.items():
             form_data_inline_query_dict[key] = value
         form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         with self.assertRaisesMessage(
             ValidationError,
             "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",

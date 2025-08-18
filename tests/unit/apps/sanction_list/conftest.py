@@ -21,7 +21,7 @@ def eu_file() -> str:
     return (Path(__file__).parent / "test_files" / "eu.xml").read_text()
 
 
-@pytest.fixture()
+@pytest.fixture
 def always_eager() -> Generator[Any, None, None]:
     status = app.conf.task_always_eager
     app.conf.task_always_eager = False
@@ -29,7 +29,7 @@ def always_eager() -> Generator[Any, None, None]:
     app.conf.task_always_eager = status
 
 
-@pytest.fixture()
+@pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
     from test_utils.factories.sanction_list import SanctionListFactory
 
