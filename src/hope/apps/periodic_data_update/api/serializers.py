@@ -14,10 +14,10 @@ from hope.apps.core.models import (
     PeriodicFieldData,
 )
 from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload,
-    PeriodicDataUpdateOnlineEdit,
-    PeriodicDataUpdateOnlineEditSentBackComment,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
+    PDUOnlineEdit,
+    PDUOnlineEditSentBackComment,
 )
 from hope.apps.periodic_data_update.utils import update_rounds_covered_for_template
 from hope.apps.program.models import Program
@@ -28,14 +28,14 @@ PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
     Permissions.PDU_ONLINE_MERGE,
 ]
 
-class PeriodicDataUpdateXlsxTemplateListSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
     can_export = serializers.BooleanField()
 
     class Meta:
-        model = PeriodicDataUpdateXlsxTemplate
+        model = PDUXlsxTemplate
         fields = (
             "id",
             "name",
@@ -48,9 +48,9 @@ class PeriodicDataUpdateXlsxTemplateListSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateXlsxTemplateCreateSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateXlsxTemplate
+        model = PDUXlsxTemplate
         fields = (
             "id",
             "name",
@@ -68,7 +68,7 @@ class PeriodicDataUpdateXlsxTemplateCreateSerializer(serializers.ModelSerializer
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
-    def create(self, validated_data: dict[str, Any]) -> PeriodicDataUpdateXlsxTemplate:
+    def create(self, validated_data: dict[str, Any]) -> PDUXlsxTemplate:
         request = self.context["request"]
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         program_slug = self.context["request"].parser_context["kwargs"]["program_slug"]
@@ -81,9 +81,9 @@ class PeriodicDataUpdateXlsxTemplateCreateSerializer(serializers.ModelSerializer
         return pdu_template
 
 
-class PeriodicDataUpdateXlsxTemplateDetailSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateDetailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateXlsxTemplate
+        model = PDUXlsxTemplate
         fields = (
             "id",
             "name",
@@ -91,13 +91,13 @@ class PeriodicDataUpdateXlsxTemplateDetailSerializer(serializers.ModelSerializer
         )
 
 
-class PeriodicDataUpdateXlsxUploadListSerializer(serializers.ModelSerializer):
+class PDUXlsxUploadListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
-        model = PeriodicDataUpdateXlsxUpload
+        model = PDUXlsxUpload
         fields = (
             "id",
             "template",
@@ -108,14 +108,14 @@ class PeriodicDataUpdateXlsxUploadListSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateXlsxUploadDetailSerializer(serializers.ModelSerializer):
+class PDUXlsxUploadDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
     errors_info = serializers.JSONField(source="errors")
 
     class Meta:
-        model = PeriodicDataUpdateXlsxUpload
+        model = PDUXlsxUpload
         fields = (
             "id",
             "template",
@@ -127,9 +127,9 @@ class PeriodicDataUpdateXlsxUploadDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class PeriodicDataUpdateXlsxUploadSerializer(serializers.ModelSerializer):
+class PDUXlsxUploadSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateXlsxUpload
+        model = PDUXlsxUpload
         fields = ("file",)
 
 
@@ -187,22 +187,22 @@ class AuthorizedUserSerializer(serializers.ModelSerializer):
         return sorted(pdu_online_related_permissions)
 
 
-class PeriodicDataUpdateOnlineEditSentBackCommentSerializer(serializers.ModelSerializer):
+class PDUOnlineEditSentBackCommentSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source="created_by.get_full_name", read_only=True)
 
     class Meta:
-        model = PeriodicDataUpdateOnlineEditSentBackComment
+        model = PDUOnlineEditSentBackComment
         fields = ("comment", "created_by", "created_at")
 
 
-class PeriodicDataUpdateOnlineEditListSerializer(serializers.ModelSerializer):
+class PDUOnlineEditListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
     is_authorized = serializers.SerializerMethodField()
 
     class Meta:
-        model = PeriodicDataUpdateOnlineEdit
+        model = PDUOnlineEdit
         fields = (
             "id",
             "name",
@@ -213,19 +213,19 @@ class PeriodicDataUpdateOnlineEditListSerializer(serializers.ModelSerializer):
             "status_display",
         )
 
-    def get_is_authorized(self, obj: PeriodicDataUpdateOnlineEdit) -> bool:
+    def get_is_authorized(self, obj: PDUOnlineEdit) -> bool:
         request = self.context.get("request")
         user = request.user
         return user in obj.authorized_users.all()
 
 
-class PeriodicDataUpdateOnlineEditDetailSerializer(PeriodicDataUpdateOnlineEditListSerializer):
-    sent_back_comment = PeriodicDataUpdateOnlineEditSentBackCommentSerializer()
+class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
+    sent_back_comment = PDUOnlineEditSentBackCommentSerializer()
     authorized_users = AuthorizedUserSerializer(many=True)
 
     class Meta:
-        model = PeriodicDataUpdateOnlineEdit
-        fields = PeriodicDataUpdateOnlineEditListSerializer.Meta.fields + (  # type: ignore
+        model = PDUOnlineEdit
+        fields = PDUOnlineEditListSerializer.Meta.fields + (  # type: ignore
             "approved_by",
             "approved_at",
             "sent_back_comment",
@@ -234,7 +234,7 @@ class PeriodicDataUpdateOnlineEditDetailSerializer(PeriodicDataUpdateOnlineEditL
         )
 
 
-class PeriodicDataUpdateOnlineEditCreateSerializer(serializers.ModelSerializer):
+class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
     filters = serializers.JSONField(write_only=True)
     rounds_data = serializers.ListField(child=serializers.DictField(), write_only=True)
     authorized_users = serializers.PrimaryKeyRelatedField(
@@ -242,7 +242,7 @@ class PeriodicDataUpdateOnlineEditCreateSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = PeriodicDataUpdateOnlineEdit
+        model = PDUOnlineEdit
         fields = (
             "id",
             "name",
@@ -283,17 +283,17 @@ class PeriodicDataUpdateOnlineEditCreateSerializer(serializers.ModelSerializer):
         return pdu_online_edit
 
 
-class PeriodicDataUpdateOnlineEditUpdateAuthorizedUsersSerializer(serializers.ModelSerializer):
+class PDUOnlineEditUpdateAuthorizedUsersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicDataUpdateOnlineEdit
+        model = PDUOnlineEdit
         fields = ("authorized_users",)
 
 
-class PeriodicDataUpdateOnlineEditSaveDataSerializer(serializers.Serializer):
+class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
     individual_edit_data = serializers.JSONField()
 
 
-class PeriodicDataUpdateOnlineEditSendBackSerializer(serializers.Serializer):
+class PDUOnlineEditSendBackSerializer(serializers.Serializer):
     comment = serializers.CharField(allow_blank=False, trim_whitespace=True)
 
 

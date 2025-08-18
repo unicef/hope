@@ -6,19 +6,19 @@ from faker import Faker
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateXlsxTemplate,
-    PeriodicDataUpdateXlsxUpload,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
 )
 
 fake = Faker()
 
 
-class PeriodicDataUpdateXlsxTemplateFactory(DjangoModelFactory):
+class PDUXlsxTemplateFactory(DjangoModelFactory):
     class Meta:
-        model = PeriodicDataUpdateXlsxTemplate
+        model = PDUXlsxTemplate
 
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PeriodicDataUpdateXlsxTemplate.Status.choices])
+    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PDUXlsxTemplate.Status.choices])
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     program = factory.SubFactory(ProgramFactory)
     number_of_records = fake.random_int(min=1, max=100)
@@ -36,10 +36,10 @@ class PeriodicDataUpdateXlsxTemplateFactory(DjangoModelFactory):
     filters = {}
 
 
-class PeriodicDataUpdateXlsxUploadFactory(DjangoModelFactory):
+class PDUXlsxUploadFactory(DjangoModelFactory):
     class Meta:
-        model = PeriodicDataUpdateXlsxUpload
+        model = PDUXlsxUpload
 
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PeriodicDataUpdateXlsxUpload.Status.choices])
-    template = factory.SubFactory(PeriodicDataUpdateXlsxTemplateFactory)
+    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PDUXlsxUpload.Status.choices])
+    template = factory.SubFactory(PDUXlsxTemplateFactory)

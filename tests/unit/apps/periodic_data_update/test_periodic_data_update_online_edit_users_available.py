@@ -14,7 +14,7 @@ from hope.apps.program.models import Program
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-class TestPeriodicDataUpdateOnlineEditUsersAvailable:
+class TestPDUOnlineEditUsersAvailable:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()

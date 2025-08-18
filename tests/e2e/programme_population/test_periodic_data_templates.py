@@ -4,21 +4,21 @@ from time import sleep
 import pytest
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDataUpdateXlsxTemplates,
-    PeriodicDataUpdateXlsxTemplatesDetails,
+    PDUXlsxTemplates,
+    PDUXlsxTemplatesDetails,
 )
 from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateXlsxTemplateFactory,
+    PDUXlsxTemplateFactory,
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
+from hope.apps.periodic_data_update.models import PDUXlsxTemplate
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -128,10 +128,10 @@ class TestPeriodicDataTemplates:
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.create(
+        periodic_data_update_template = PDUXlsxTemplate.objects.create(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
+            status=PDUXlsxTemplate.Status.TO_EXPORT,
             filters={},
             rounds_data=[
                 {
@@ -169,12 +169,12 @@ class TestPeriodicDataTemplates:
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
-        pagePeriodicDataUpdateXlsxTemplates: PeriodicDataUpdateXlsxTemplates,
+        pagePDUXlsxTemplates: PDUXlsxTemplates,
     ) -> None:
-        periodic_data_update_template = PeriodicDataUpdateXlsxTemplateFactory(
+        periodic_data_update_template = PDUXlsxTemplateFactory(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateXlsxTemplate.Status.EXPORTED,
+            status=PDUXlsxTemplate.Status.EXPORTED,
             number_of_records=10,
             filters={},
             rounds_data=[
@@ -194,22 +194,22 @@ class TestPeriodicDataTemplates:
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
 
-        pagePeriodicDataUpdateXlsxTemplates.getPduTemplatesBtn().click()
-        assert str(index) in pagePeriodicDataUpdateXlsxTemplates.getTemplateId(index).text
+        pagePDUXlsxTemplates.getPduTemplatesBtn().click()
+        assert str(index) in pagePDUXlsxTemplates.getTemplateId(index).text
         assert (
             str(periodic_data_update_template.number_of_records)
-            in pagePeriodicDataUpdateXlsxTemplates.getTemplateRecords(index).text
+            in pagePDUXlsxTemplates.getTemplateRecords(index).text
         )
         assert (
             f"{periodic_data_update_template.created_at:%-d %b %Y}"
-            in pagePeriodicDataUpdateXlsxTemplates.getTemplateCreatedAt(index).text
+            in pagePDUXlsxTemplates.getTemplateCreatedAt(index).text
         )
         assert (
             periodic_data_update_template.created_by.get_full_name()
-            in pagePeriodicDataUpdateXlsxTemplates.getTemplateCreatedBy(index).text
+            in pagePDUXlsxTemplates.getTemplateCreatedBy(index).text
         )
 
-        assert "EXPORTED" in pagePeriodicDataUpdateXlsxTemplates.getTemplateStatus(index).text
+        assert "EXPORTED" in pagePDUXlsxTemplates.getTemplateStatus(index).text
 
     @pytest.mark.night
     def test_periodic_data_template_details(
@@ -217,7 +217,7 @@ class TestPeriodicDataTemplates:
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
-        pagePeriodicDataUpdateXlsxTemplates: PeriodicDataUpdateXlsxTemplates,
+        pagePDUXlsxTemplates: PDUXlsxTemplates,
         individual: Individual,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
@@ -230,10 +230,10 @@ class TestPeriodicDataTemplates:
                 "number_of_records": 0,
             }
         ]
-        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.create(
+        periodic_data_update_template = PDUXlsxTemplate.objects.create(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateXlsxTemplate.Status.TO_EXPORT,
+            status=PDUXlsxTemplate.Status.TO_EXPORT,
             filters={},
             rounds_data=rounds_data,
         )
@@ -245,18 +245,18 @@ class TestPeriodicDataTemplates:
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
 
-        pagePeriodicDataUpdateXlsxTemplates.getPduTemplatesBtn().click()
+        pagePDUXlsxTemplates.getPduTemplatesBtn().click()
 
-        btn = pagePeriodicDataUpdateXlsxTemplates.getTemplateDetailsBtn(index)
+        btn = pagePDUXlsxTemplates.getTemplateDetailsBtn(index)
         btn.find_element(By.TAG_NAME, "button").click()
-        pagePeriodicDataUpdateXlsxTemplates.getDetailModal()
+        pagePDUXlsxTemplates.getDetailModal()
 
-        assert string_attribute.label["English(EN)"] in pagePeriodicDataUpdateXlsxTemplates.getTemplateField(0).text
-        assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateXlsxTemplates.getTemplateRoundNumber(0).text
-        assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateXlsxTemplates.getTemplateRoundName(0).text
+        assert string_attribute.label["English(EN)"] in pagePDUXlsxTemplates.getTemplateField(0).text
+        assert str(rounds_data[0]["round"]) in pagePDUXlsxTemplates.getTemplateRoundNumber(0).text
+        assert rounds_data[0]["round_name"] in pagePDUXlsxTemplates.getTemplateRoundName(0).text
         assert (
             str(rounds_data[0]["number_of_records"])
-            in pagePeriodicDataUpdateXlsxTemplates.getTemplateNumberOfIndividuals(0).text
+            in pagePDUXlsxTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
     @pytest.mark.night
@@ -265,8 +265,8 @@ class TestPeriodicDataTemplates:
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
-        pagePeriodicDataUpdateXlsxTemplates: PeriodicDataUpdateXlsxTemplates,
-        pagePeriodicDataUpdateXlsxTemplatesDetails: PeriodicDataUpdateXlsxTemplatesDetails,
+        pagePDUXlsxTemplates: PDUXlsxTemplates,
+        pagePDUXlsxTemplatesDetails: PDUXlsxTemplatesDetails,
         individual: Individual,
         download_path: str,
         clear_downloaded_files: None,
@@ -278,19 +278,19 @@ class TestPeriodicDataTemplates:
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
 
-        pagePeriodicDataUpdateXlsxTemplates.getNewTemplateButton().click()
-        pagePeriodicDataUpdateXlsxTemplatesDetails.getFiltersRegistrationDataImport().click()
+        pagePDUXlsxTemplates.getNewTemplateButton().click()
+        pagePDUXlsxTemplatesDetails.getFiltersRegistrationDataImport().click()
 
-        pagePeriodicDataUpdateXlsxTemplatesDetails.select_listbox_element(individual.registration_data_import.name)
-        pagePeriodicDataUpdateXlsxTemplatesDetails.getSubmitButton().click()
-        pagePeriodicDataUpdateXlsxTemplatesDetails.getCheckbox(string_attribute.name).click()
-        pagePeriodicDataUpdateXlsxTemplatesDetails.getSubmitButton().click()
-        pagePeriodicDataUpdateXlsxTemplates.getNewTemplateButton()  # wait for the page to load
-        assert PeriodicDataUpdateXlsxTemplate.objects.count() == 1
-        periodic_data_update_template = PeriodicDataUpdateXlsxTemplate.objects.first()
+        pagePDUXlsxTemplatesDetails.select_listbox_element(individual.registration_data_import.name)
+        pagePDUXlsxTemplatesDetails.getSubmitButton().click()
+        pagePDUXlsxTemplatesDetails.getCheckbox(string_attribute.name).click()
+        pagePDUXlsxTemplatesDetails.getSubmitButton().click()
+        pagePDUXlsxTemplates.getNewTemplateButton()  # wait for the page to load
+        assert PDUXlsxTemplate.objects.count() == 1
+        periodic_data_update_template = PDUXlsxTemplate.objects.first()
         assert (
             str(periodic_data_update_template.id)
-            in pagePeriodicDataUpdateXlsxTemplates.getTemplateId(periodic_data_update_template.id).text
+            in pagePDUXlsxTemplates.getTemplateId(periodic_data_update_template.id).text
         )
 
         for _ in range(10):

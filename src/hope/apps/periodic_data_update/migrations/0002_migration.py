@@ -11,25 +11,25 @@ def migrate_celery_task_results_ids(apps, schema_editor):
     Migrate from curr_async_result_id to celery_tasks_results_ids,
     using the specific task name for each model in bulk.
     """
-    # Migrate PeriodicDataUpdateXlsxTemplate
-    PeriodicDataUpdateXlsxTemplate = apps.get_model("periodic_data_update", "PeriodicDataUpdateXlsxTemplate")
+    # Migrate PDUXlsxTemplate
+    PDUXlsxTemplate = apps.get_model("periodic_data_update", "PDUXlsxTemplate")
     templates_to_update = []
-    for obj in PeriodicDataUpdateXlsxTemplate.objects.filter(curr_async_result_id__isnull=False):
+    for obj in PDUXlsxTemplate.objects.filter(curr_async_result_id__isnull=False):
         if obj.curr_async_result_id:
             obj.celery_tasks_results_ids = {"export": obj.curr_async_result_id}
             templates_to_update.append(obj)
     if templates_to_update:
-        PeriodicDataUpdateXlsxTemplate.objects.bulk_update(templates_to_update, ["celery_tasks_results_ids"])
+        PDUXlsxTemplate.objects.bulk_update(templates_to_update, ["celery_tasks_results_ids"])
 
-    # Migrate PeriodicDataUpdateXlsxUpload
-    PeriodicDataUpdateXlsxUpload = apps.get_model("periodic_data_update", "PeriodicDataUpdateXlsxUpload")
+    # Migrate PDUXlsxUpload
+    PDUXlsxUpload = apps.get_model("periodic_data_update", "PDUXlsxUpload")
     uploads_to_update = []
-    for obj in PeriodicDataUpdateXlsxUpload.objects.filter(curr_async_result_id__isnull=False):
+    for obj in PDUXlsxUpload.objects.filter(curr_async_result_id__isnull=False):
         if obj.curr_async_result_id:
             obj.celery_tasks_results_ids = {"import": obj.curr_async_result_id}
             uploads_to_update.append(obj)
     if uploads_to_update:
-        PeriodicDataUpdateXlsxUpload.objects.bulk_update(uploads_to_update, ["celery_tasks_results_ids"])
+        PDUXlsxUpload.objects.bulk_update(uploads_to_update, ["celery_tasks_results_ids"])
 
 
 class Migration(migrations.Migration):
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="PeriodicDataUpdateOnlineEdit",
+            name="PDUOnlineEdit",
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
@@ -63,70 +63,70 @@ class Migration(migrations.Migration):
         ),
         migrations.RenameModel(
             old_name="PeriodicDataUpdateTemplate",
-            new_name="PeriodicDataUpdateXlsxTemplate",
+            new_name="PDUXlsxTemplate",
         ),
         migrations.RenameModel(
             old_name="PeriodicDataUpdateUpload",
-            new_name="PeriodicDataUpdateXlsxUpload",
+            new_name="PDUXlsxUpload",
         ),
         migrations.AddField(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             name="name",
             field=models.CharField(max_length=255, null=True, validators=[django.core.validators.MinLengthValidator(3), django.core.validators.MaxLengthValidator(255), django.core.validators.RegexValidator("\\s{2,}", "Double spaces characters are not allowed.", code="double_spaces_characters_not_allowed", inverse_match=True), django.core.validators.RegexValidator("(^\\s+)|(\\s+$)", "Leading or trailing spaces characters are not allowed.", code="leading_trailing_spaces_characters_not_allowed", inverse_match=True), django.core.validators.ProhibitNullCharactersValidator()]),
         ),
         migrations.AddConstraint(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             constraint=models.UniqueConstraint(fields=("name", "program"), name="pdu_xlsx_template_name_unique_per_program"),
         ),
         migrations.AddConstraint(
-            model_name="periodicdataupdateonlineedit",
+            model_name="pduonlineedit",
             constraint=models.UniqueConstraint(fields=("name", "program"), name="pdu_online_name_unique_per_program"),
         ),
         migrations.AddField(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             name="celery_tasks_results_ids",
             field=models.JSONField(blank=True, default=dict, help_text="Current (active) AsyncResult ids for celery tasks."),
         ),
         migrations.AddField(
-            model_name="periodicdataupdatexlsxupload",
+            model_name="pduxlsxupload",
             name="celery_tasks_results_ids",
             field=models.JSONField(blank=True, default=dict, help_text="Current (active) AsyncResult ids for celery tasks."),
         ),
         migrations.RunPython(migrate_celery_task_results_ids, migrations.RunPython.noop),
         migrations.RemoveField(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             name="curr_async_result_id",
         ),
         migrations.RemoveField(
-            model_name="periodicdataupdatexlsxupload",
+            model_name="pduxlsxupload",
             name="curr_async_result_id",
         ),
         migrations.AlterField(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             name="business_area",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="pdu_xlsx_templates",
                                     to="core.businessarea"),
         ),
         migrations.AlterField(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             name="created_by",
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
                                     related_name="pdu_xlsx_templates_created", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
-            model_name="periodicdataupdatexlsxtemplate",
+            model_name="pduxlsxtemplate",
             name="program",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="pdu_xlsx_templates",
                                     to="program.program"),
         ),
         migrations.AlterField(
-            model_name="periodicdataupdatexlsxupload",
+            model_name="pduxlsxupload",
             name="created_by",
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
                                     related_name="pdu_uploads", to=settings.AUTH_USER_MODEL),
         ),
         migrations.CreateModel(
-            name='PeriodicDataUpdateOnlineEditSentBackComment',
+            name='PDUOnlineEditSentBackComment',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
@@ -136,7 +136,7 @@ class Migration(migrations.Migration):
                                                  related_name='sent_back_comments', to=settings.AUTH_USER_MODEL)),
                 ('pdu_online_edit',
                  models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='sent_back_comment',
-                                      to='periodic_data_update.periodicdataupdateonlineedit')),
+                                      to='periodic_data_update.pduonlineedit')),
             ],
             options={
                 'ordering': ['-created_at'],

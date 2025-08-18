@@ -2,7 +2,7 @@ from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
 
-class PeriodicDataUpdateXlsxTemplates(BaseComponents):
+class PDUXlsxTemplates(BaseComponents):
     navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
     navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
@@ -152,7 +152,7 @@ class PeriodicDataUpdateXlsxTemplates(BaseComponents):
         return self.wait_for(self.detailModal)
 
 
-class PeriodicDataUpdateXlsxTemplatesDetails(BaseComponents):
+class PDUXlsxTemplatesDetails(BaseComponents):
     navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
     navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'

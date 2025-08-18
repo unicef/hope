@@ -10,7 +10,7 @@ from hope.apps.utils.models import CeleryEnabledModel, TimeStampedModel
 from hope.apps.utils.validators import StartEndSpaceValidator, DoubleSpaceValidator
 
 
-class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
+class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         TO_EXPORT = "TO_EXPORT", "To export"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
@@ -140,7 +140,7 @@ class PeriodicDataUpdateXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
         return f"{self.pk} - {self.status}"
 
 
-class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
+class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
@@ -150,7 +150,7 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
         CANCELED = "CANCELED", "Canceled"
 
     template = models.ForeignKey(
-        PeriodicDataUpdateXlsxTemplate,
+        PDUXlsxTemplate,
         on_delete=models.CASCADE,
         related_name="uploads",
     )
@@ -208,7 +208,7 @@ class PeriodicDataUpdateXlsxUpload(TimeStampedModel, CeleryEnabledModel):
         return status_dict[self.combined_status]
 
 
-class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
+class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         NEW = "NEW", "New"
         READY = "READY", "Ready"  # sent for approval
@@ -303,9 +303,9 @@ class PeriodicDataUpdateOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         return status_dict[self.combined_status]
 
 
-class PeriodicDataUpdateOnlineEditSentBackComment(TimeStampedModel):
+class PDUOnlineEditSentBackComment(TimeStampedModel):
     pdu_online_edit = models.OneToOneField(
-        PeriodicDataUpdateOnlineEdit,
+        PDUOnlineEdit,
         on_delete=models.CASCADE,
         related_name="sent_back_comment",
     )

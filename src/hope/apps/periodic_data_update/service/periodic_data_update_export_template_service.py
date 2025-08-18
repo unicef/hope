@@ -24,17 +24,17 @@ from hope.apps.grievance.models import (
 )
 from hope.apps.household.models import Individual
 from hope.apps.payment.models import Payment
-from hope.apps.periodic_data_update.models import PeriodicDataUpdateXlsxTemplate
+from hope.apps.periodic_data_update.models import PDUXlsxTemplate
 
 
 
-class PeriodicDataUpdateExportTemplateService:
+class PDUXlsxExportTemplateService:
     PDU_SHEET = "Periodic Data Update"
     META_SHEET = "Meta"
     META_ID_ADDRESS = "B1"
     PROPERTY_ID_NAME = "pdu_template_id"
 
-    def __init__(self, periodic_data_update_template: PeriodicDataUpdateXlsxTemplate):
+    def __init__(self, periodic_data_update_template: PDUXlsxTemplate):
         self.periodic_data_update_template = periodic_data_update_template
         self.rounds_data = periodic_data_update_template.rounds_data
         self.program = periodic_data_update_template.program
@@ -67,7 +67,7 @@ class PeriodicDataUpdateExportTemplateService:
                         self.ws_pdu.append(row)
                 return self.wb
         except Exception:
-            self.periodic_data_update_template.status = PeriodicDataUpdateXlsxTemplate.Status.FAILED
+            self.periodic_data_update_template.status = PDUXlsxTemplate.Status.FAILED
             self.periodic_data_update_template.save()
             raise
 
@@ -83,16 +83,16 @@ class PeriodicDataUpdateExportTemplateService:
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
             self.periodic_data_update_template.file = xlsx_obj
-            self.periodic_data_update_template.status = PeriodicDataUpdateXlsxTemplate.Status.EXPORTED
+            self.periodic_data_update_template.status = PDUXlsxTemplate.Status.EXPORTED
             self.periodic_data_update_template.save()
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_pdu = wb.active
-        ws_pdu.title = PeriodicDataUpdateExportTemplateService.PDU_SHEET
+        ws_pdu.title = PDUXlsxExportTemplateService.PDU_SHEET
         self.wb = wb
         self.ws_pdu = ws_pdu
-        self.ws_meta = wb.create_sheet(PeriodicDataUpdateExportTemplateService.META_SHEET)
+        self.ws_meta = wb.create_sheet(PDUXlsxExportTemplateService.META_SHEET)
         return wb
 
     def _add_meta(self) -> None:
