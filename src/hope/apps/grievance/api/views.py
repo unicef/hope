@@ -828,8 +828,8 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
-        household_approve_data = input_data.get("household_approve_data")
-        flex_fields_approve_data = input_data.get("flex_fields_approve_data")
+        household_approve_data = input_data.get("household_approve_data", {})
+        flex_fields_approve_data = input_data.get("flex_fields_approve_data", {})
         user = self.request.user
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
@@ -857,6 +857,13 @@ class GrievanceTicketGlobalViewSet(
                     household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
                         flex_field_name
                     )
+            elif field_name == "roles":
+                for role in household_data["roles"]:
+                    individual_id = role["individual_id"]
+                    if household_approve_data.get(individual_id):
+                        role["approve_status"] = True
+                    else:
+                        role["approve_status"] = False
             elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
             else:
