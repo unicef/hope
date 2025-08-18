@@ -321,7 +321,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     @staticmethod
     def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
         new_roles = [item["new_role"] for item in value]
-        duplicates = {role for role in new_roles if new_roles.count(role) > 1}
+        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role != "NO_ROLE"}
         if duplicates:
             raise serializers.ValidationError(f"Duplicate roles are not allowed: {', '.join(duplicates)}")
         return value
