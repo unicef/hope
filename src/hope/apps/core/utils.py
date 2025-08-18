@@ -23,7 +23,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Func, Q, Value
+from django.db.models import Func, Q, Value, F
 from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -920,9 +920,13 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
+    from hope.apps.core.models import BusinessArea
 
     try:
-        assets = KoboAPI(business_area_slug).get_all_projects_data()  # type: ignore
+        business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
+            slug=business_area_slug
+        )
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)  # type: ignore
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise ValidationError("Provided business area does not exist.") from e
