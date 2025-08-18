@@ -3,7 +3,7 @@ from django.urls import include, path
 from hope.apps.periodic_data_update.api.views import (
     PeriodicDataUpdateXlsxTemplateViewSet,
     PeriodicDataUpdateXlsxUploadViewSet,
-    PeriodicFieldViewSet,
+    PeriodicFieldViewSet, PeriodicDataUpdateOnlineEditViewSet,
 )
 from hope.apps.program.api.urls import program_base_router
 
@@ -20,6 +20,11 @@ program_nested_router.register(
     "periodic-data-update-uploads",
     PeriodicDataUpdateXlsxUploadViewSet,
     basename="periodic-data-update-uploads",
+)
+program_nested_router.register(
+    "periodic-data-update-online-edits",
+    PeriodicDataUpdateOnlineEditViewSet,
+    basename="periodic-data-update-online-edits",
 )
 program_nested_router.register(
     "periodic-fields",
