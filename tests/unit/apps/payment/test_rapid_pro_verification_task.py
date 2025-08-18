@@ -273,31 +273,31 @@ class TestRapidProVerificationTask(TestCase):
         first_phone = "+380 637 541 345"
         ind.phone_no = first_phone
         ind.save()
-        self.assertTrue(ind.phone_no_valid)
+        assert ind.phone_no_valid
 
         second_phone = "+380 637 541 X"
         ind.phone_no = second_phone
         ind.save()
 
-        self.assertNotEqual(first_phone, second_phone)
-        self.assertFalse(ind.phone_no_valid)
+        assert first_phone != second_phone
+        assert not ind.phone_no_valid
 
 
 class TestPhoneNumberVerification(TestCase):
     def test_phone_numbers(self) -> None:
-        self.assertFalse(is_valid_phone_number("+40 032 215 789"))
-        self.assertTrue(is_valid_phone_number("+48 632 215 789"))
+        assert not is_valid_phone_number("+40 032 215 789")
+        assert is_valid_phone_number("+48 632 215 789")
 
-        self.assertTrue(is_valid_phone_number("+48 123 234 345"))
-        self.assertFalse(is_valid_phone_number("0048 123 234 345"))
+        assert is_valid_phone_number("+48 123 234 345")
+        assert not is_valid_phone_number("0048 123 234 345")
 
-        self.assertFalse(is_valid_phone_number("(201) 555-0123"))
-        self.assertTrue(is_valid_phone_number("+1 (201) 555-0123"))
+        assert not is_valid_phone_number("(201) 555-0123")
+        assert is_valid_phone_number("+1 (201) 555-0123")
 
-        self.assertFalse(is_valid_phone_number("123-not-really-a-phone-number"))
+        assert not is_valid_phone_number("123-not-really-a-phone-number")
 
-        self.assertFalse(is_valid_phone_number("+38063754115"))
-        self.assertTrue(is_valid_phone_number("+380637541150"))
-        self.assertTrue(is_valid_phone_number("+380 637 541 345"))
-        self.assertTrue(is_valid_phone_number("+380 637 541 XXX"))  # it's ok to have A-Z in number
-        self.assertFalse(is_valid_phone_number("+380 23 234 345"))
+        assert not is_valid_phone_number("+38063754115")
+        assert is_valid_phone_number("+380637541150")
+        assert is_valid_phone_number("+380 637 541 345")
+        assert is_valid_phone_number("+380 637 541 XXX")  # it's ok to have A-Z in number
+        assert not is_valid_phone_number("+380 23 234 345")

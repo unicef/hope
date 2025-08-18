@@ -62,8 +62,8 @@ class TestTemplateFileGenerator(TestCase):
 
         individuals_rows = tuple(result_wb["Individuals"].iter_rows(values_only=True))
 
-        self.assertIn("pdu_flex_attribute_round_1_value", individuals_rows[0])
-        self.assertIn("pdu_flex_attribute_round_1_collection_date", individuals_rows[0])
+        assert "pdu_flex_attribute_round_1_value" in individuals_rows[0]
+        assert "pdu_flex_attribute_round_1_collection_date" in individuals_rows[0]
 
         assert individuals_rows[0][0] == "age"
         assert individuals_rows[1][0] == "Age (calculated) - INTEGER"

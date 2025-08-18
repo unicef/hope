@@ -81,13 +81,13 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert org["aurora_id"] == 777
 
         cache_key = f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}"
-        self.assertIsNotNone(cache.get(cache_key))
-        self.assertGreater(len(queries), 0)
+        assert cache.get(cache_key)
+        assert len(queries) > 0
         # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_organization)
         assert resp_2.status_code == 200
-        self.assertLess(len(queries2), len(queries))
+        assert len(queries2) < len(queries)
 
     # Project
     def test_project_list_no_permission(self) -> None:
@@ -109,13 +109,13 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert project["organization"] == "test_organization"
 
         cache_key = f"{ProjectListVersionsKeyBit.specific_view_cache_key}:{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}"
-        self.assertIsNotNone(cache.get(cache_key))
-        self.assertGreater(len(queries), 0)
+        assert cache.get(cache_key) is not None
+        assert len(queries) > 0
         # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_project)
         assert resp_2.status_code == 200
-        self.assertLess(len(queries2), len(queries))
+        assert len(queries2) < len(queries)
 
     def test_project_list_filter_by_org_slug(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
@@ -156,13 +156,13 @@ class ProjectListViewTests(HOPEApiTestCase):
             f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:"
             f"{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
         )
-        self.assertIsNotNone(cache.get(cache_key))
-        self.assertGreater(len(queries), 0)
+        assert cache.get(cache_key) is not None
+        assert len(queries) > 0
         # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_registration)
         assert resp_2.status_code == 200
-        self.assertLess(len(queries2), len(queries))
+        assert len(queries2) < len(queries)
 
     def test_registration_list_filter_by_org_slug(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):

@@ -103,13 +103,13 @@ class TestBuildSnapshot(TestCase):
         create_payment_plan_snapshot_data(self.pp)
         self.p1.refresh_from_db()
         self.p2.refresh_from_db()
-        self.assertIsNotNone(self.p1.household_snapshot)
-        self.assertIsNotNone(self.p2.household_snapshot)
+        assert self.p1.household_snapshot is not None
+        assert self.p2.household_snapshot is not None
         assert str(self.p1.household_snapshot.snapshot_data["id"]) == str(self.hh1.id)
         assert str(self.p2.household_snapshot.snapshot_data["id"]) == str(self.hh2.id)
         assert len(self.p1.household_snapshot.snapshot_data["individuals"]) == self.hh1.individuals.count()
         assert len(self.p2.household_snapshot.snapshot_data["individuals"]) == self.hh2.individuals.count()
-        self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
+        assert self.p1.household_snapshot.snapshot_data["primary_collector"] is not None
         assert self.p1.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}) == {
             "expiry_date": "2022-01-01",
             "number": "123",

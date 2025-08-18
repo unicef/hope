@@ -149,37 +149,37 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         batch_duplicates = response.data["batch_duplicates_count_and_percentage"]
         assert len(batch_duplicates) == 2
         assert batch_duplicates[0]["count"] == 5
-        self.assertAlmostEqual(batch_duplicates[0]["percentage"], 10.0)
+        assert round(batch_duplicates[0]["percentage"]) == 10
         assert batch_duplicates[1]["count"] == 4
-        self.assertAlmostEqual(batch_duplicates[1]["percentage"], 8.0)
+        assert round(batch_duplicates[1]["percentage"]) == 8.0
 
         batch_unique = response.data["batch_unique_count_and_percentage"]
         assert len(batch_unique) == 2
         assert batch_unique[0]["count"] == 45
-        self.assertAlmostEqual(batch_unique[0]["percentage"], 90.0)
+        assert round(batch_unique[0]["percentage"]) == 90
         assert batch_unique[1]["count"] == 46
-        self.assertAlmostEqual(batch_unique[1]["percentage"], 92.0)
+        assert round(batch_unique[1]["percentage"]) == 92
 
         gr_duplicates = response.data["golden_record_duplicates_count_and_percentage"]
         assert gr_duplicates[0]["count"] == 3
-        self.assertAlmostEqual(gr_duplicates[0]["percentage"], 6.0)
+        assert round(gr_duplicates[0]["percentage"]) == 6
 
         gr_possible_duplicates = response.data["golden_record_possible_duplicates_count_and_percentage"]
         assert len(gr_possible_duplicates) == 2
         assert gr_possible_duplicates[0]["count"] == 2
-        self.assertAlmostEqual(gr_possible_duplicates[0]["percentage"], 4.0)
+        assert round(gr_possible_duplicates[0]["percentage"]) == 4
         assert gr_possible_duplicates[1]["count"] == 3
-        self.assertAlmostEqual(gr_possible_duplicates[1]["percentage"], 6.0)
+        assert round(gr_possible_duplicates[1]["percentage"]) == 6
 
         gr_unique = response.data["golden_record_unique_count_and_percentage"]
         assert len(gr_unique) == 2
         assert gr_unique[0]["count"] == 45
-        self.assertAlmostEqual(gr_unique[0]["percentage"], 90.0)
+        assert round(gr_unique[0]["percentage"]) == 90
         assert gr_unique[1]["count"] == 47
-        self.assertAlmostEqual(gr_unique[1]["percentage"], 94.0)
+        assert round(gr_unique[1]["percentage"]) == 94
 
-        self.assertIn("admin_url", response.data)
-        self.assertTrue(response.data["admin_url"])
+        assert "admin_url" in response.data
+        assert response.data["admin_url"]
 
     @patch("hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay")
     def test_merge_rdi(self, mock_merge_task: Mock) -> None:
@@ -293,7 +293,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
 
         rdi.refresh_from_db()
-        self.assertFalse(rdi.erased)
+        assert not rdi.erased
 
     def test_refuse_rdi(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -418,7 +418,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        self.assertIsInstance(response.data, list)
+        assert isinstance(response.data, list)
         assert all("name" in c and "value" in c for c in response.data)
 
 
@@ -605,7 +605,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        self.assertIsInstance(response.data, list)
+        assert isinstance(response.data, list)
         assert all("name" in c and "value" in c for c in response.data)
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")

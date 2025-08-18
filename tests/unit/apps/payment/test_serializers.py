@@ -220,7 +220,7 @@ class PaymentPlanDetailSerializerTest(TestCase):
         assert data["can_download_xlsx"] is False
         assert data["can_send_xlsx_password"] is False
         assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
-        self.assertIsNotNone(data.get("volume_by_delivery_mechanism"))
+        assert data.get("volume_by_delivery_mechanism") is not None
 
     def test_can_export_xlsx(self) -> None:
         self._create_user_with_permissions_in_ba(

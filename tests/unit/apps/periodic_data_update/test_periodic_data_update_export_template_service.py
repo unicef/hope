@@ -88,7 +88,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
     ) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         wb = service.generate_workbook()
-        self.assertIsNotNone(wb)
+        assert wb is not None
         assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
         meta_sheet = wb[service.META_SHEET]
         pdu_sheet = wb[service.PDU_SHEET]
@@ -101,7 +101,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         service.generate_workbook()
         service.save_xlsx_file()
         self.periodic_data_update_template.refresh_from_db()
-        self.assertIsNotNone(self.periodic_data_update_template.file)
+        assert self.periodic_data_update_template.file is not None
         wb = openpyxl.load_workbook(self.periodic_data_update_template.file.file.path)
         assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
 

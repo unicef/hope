@@ -259,7 +259,7 @@ class TestGenericRegistrationService(TestCase):
         # Checking only first is enough, because they all in one RDI
         pending_household = PendingHousehold.objects.all()[0]
         registration_data_import = pending_household.registration_data_import
-        self.assertIn("ff", pending_household.flex_fields.keys())
+        assert "ff" in pending_household.flex_fields
         assert registration_data_import.program == self.program
 
         assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1

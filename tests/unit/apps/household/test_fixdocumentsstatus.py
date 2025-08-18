@@ -33,7 +33,7 @@ class TestDocumentStatusFixer(TestCase):
 
         fixed_documents = fix_documents_statuses()
 
-        self.assertTrue(Household.objects.filter(withdrawn=True).count(), 1)
+        assert Household.objects.filter(withdrawn=True).count(), 1
         assert Individual.objects.filter(withdrawn=True).count() == 5
         assert Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count() == 40
         assert fixed_documents == 10

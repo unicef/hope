@@ -335,8 +335,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.status_finished()
         payment_plan.save()
         payment_plan.refresh_from_db()
-        self.assertTrue(
-            all(
-                payment.entitlement_quantity == payment.delivered_quantity for payment in payment_plan.eligible_payments
-            )
+        assert all(
+            payment.entitlement_quantity == payment.delivered_quantity for payment in payment_plan.eligible_payments
         )

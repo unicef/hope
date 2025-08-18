@@ -49,16 +49,16 @@ class ProgramAdminTest(WebTest):
     def test_area_limits_get_request(self) -> None:
         response = self.app.get(self.url, user=self.user)
         assert response.status_code == 200
-        self.assertIn("program_area_formset", response.context)
-        self.assertIn("business_area", response.context)
-        self.assertIn("areas", response.context)
+        assert "program_area_formset" in response.context
+        assert "business_area" in response.context
+        assert "areas" in response.context
         self.assertQuerysetEqual(
             response.context["areas"],
             Area.objects.filter(area_type__country__business_areas__id=self.program.business_area.id),
         )
-        self.assertIn("partners", response.context)
+        assert "partners" in response.context
         self.assertQuerysetEqual(response.context["partners"], Partner.objects.filter(id=self.partner_with_role.id))
-        self.assertIn("program", response.context)
+        assert "program" in response.context
 
     def test_area_limits_post_request_create(self) -> None:
         self.app.post(
@@ -72,9 +72,7 @@ class ProgramAdminTest(WebTest):
             },
         )
 
-        self.assertTrue(
-            AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
-        )
+        assert AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
         self.assertQuerysetEqual(
             AdminAreaLimitedTo.objects.get(partner=self.partner_with_role, program=self.program).areas.all(),
             Area.objects.filter(id__in=[self.admin_area1.id, self.admin_area2.id]),
@@ -93,9 +91,7 @@ class ProgramAdminTest(WebTest):
                 "program_areas-0-areas": [self.admin_area1.id],
             },
         )
-        self.assertTrue(
-            AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
-        )
+        assert AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
         self.assertQuerysetEqual(
             AdminAreaLimitedTo.objects.get(partner=self.partner_with_role, program=self.program).areas.all(),
             Area.objects.filter(id__in=[self.admin_area1.id]),
@@ -115,6 +111,4 @@ class ProgramAdminTest(WebTest):
                 "program_areas-0-DELETE": True,
             },
         )
-        self.assertFalse(
-            AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
-        )
+        assert not AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()

@@ -62,7 +62,7 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.set_active()
         self.cycle.refresh_from_db()
         assert self.cycle.status == ProgramCycle.ACTIVE
-        self.assertFalse(self.cycle.can_remove_cycle)
+        assert not self.cycle.can_remove_cycle
 
     def test_set_draft(self) -> None:
         with self.assertRaisesMessage(ValidationError, "Program should be within Active status."):
@@ -100,7 +100,7 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.set_finish()
         self.cycle.refresh_from_db()
         assert self.cycle.status == ProgramCycle.FINISHED
-        self.assertFalse(self.cycle.can_remove_cycle)
+        assert not self.cycle.can_remove_cycle
 
     def test_total_entitled_quantity_usd(self) -> None:
         assert self.cycle.total_entitled_quantity_usd == Decimal("0.0")
@@ -127,7 +127,7 @@ class TestProgramCycleMethods(TestCase):
             )
 
         cycle2 = ProgramCycleFactory(program=self.program)
-        self.assertTrue(cycle2.start_date > parse_date(self.cycle.start_date))
+        assert cycle2.start_date > parse_date(self.cycle.start_date)
 
         cycle_new = ProgramCycleFactory(program=self.program, start_date=parse_date("2099-01-01"))
-        self.assertTrue(cycle_new.start_date > timezone.now().date())
+        assert cycle_new.start_date > timezone.now().date()

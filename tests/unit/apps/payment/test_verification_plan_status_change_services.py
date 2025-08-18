@@ -139,7 +139,7 @@ class TestPhoneNumberVerification(TestCase):
 
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self) -> None:
         assert self.verification.status == PaymentVerification.STATUS_PENDING
-        self.assertIsNone(self.verification.error)
+        assert self.verification.error is None
         assert self.verification.payment_record_verifications.count() == self.payment_record_amount
 
         def create_flow_response() -> Dict:
@@ -165,7 +165,7 @@ class TestPhoneNumberVerification(TestCase):
 
         self.verification.refresh_from_db()
         assert self.verification.status == PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
-        self.assertIsNotNone(self.verification.error)
+        assert self.verification.error is not None
 
         assert (
             PaymentVerification.objects.filter(
@@ -222,7 +222,7 @@ class TestPhoneNumberVerification(TestCase):
 
         self.verification.refresh_from_db()
         assert self.verification.status == PaymentVerificationPlan.STATUS_ACTIVE
-        self.assertIsNone(self.verification.error)
+        assert self.verification.error is None
 
         assert (
             PaymentVerification.objects.filter(

@@ -209,13 +209,14 @@ class TestEnrolHouseholdToProgram(TestCase):
         assert roles_count + 1 == IndividualRoleInHousehold.objects.count()
 
         assert hh.head_of_household == self.individual_hoh_e.copied_to.filter(program=self.program2).first()
-        self.assertIsNotNone(self.individual_external.copied_to.filter(program=self.program2).first())
-        self.assertIsNotNone(
+        assert self.individual_external.copied_to.filter(program=self.program2).first() is not None
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 individual=self.individual_external.copied_to.filter(program=self.program2).first(),
                 household=hh,
                 role=ROLE_PRIMARY,
             ).first()
+            is not None
         )
 
     def test_enroll_household_with_head_of_household_already_copied(self) -> None:
@@ -300,4 +301,4 @@ class TestEnrolHouseholdToProgram(TestCase):
         result = generate_rdi_unique_name(self.program1)
         expected_name = "RDI for enroll households to Programme: Program 1"
         assert result == expected_name
-        self.assertFalse(RegistrationDataImport.objects.filter(name=expected_name).exists())
+        assert not RegistrationDataImport.objects.filter(name=expected_name).exists()

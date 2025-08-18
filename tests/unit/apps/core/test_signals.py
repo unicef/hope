@@ -23,7 +23,7 @@ class TestSignalCreateBusinessArea(TestCase):
         assert Partner.objects.count() == partner_count + 1
 
         new_partner = Partner.objects.filter(name=f"UNICEF Partner for {new_ba.slug}").first()
-        self.assertIsNotNone(new_partner)
+        assert new_partner is not None
         assert new_partner.allowed_business_areas.count() == 1
         assert new_partner.allowed_business_areas.first().name == "Test Business Area"
         assert new_partner.role_assignments.count() == 1

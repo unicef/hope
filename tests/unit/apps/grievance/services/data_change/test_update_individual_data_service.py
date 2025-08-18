@@ -463,6 +463,6 @@ class TestUpdateIndividualDataService(TestCase):
         assert hh.admin_area.name == "Test Area M"
         assert hh.admin2.p_code == "PL22M33"
         assert hh.admin2.name == "Test Area M"
-        self.assertIsNone(hh.admin3)
+        assert hh.admin3 is None
         assert hh.admin1 is not None
         assert hh.admin2.parent == hh.admin1

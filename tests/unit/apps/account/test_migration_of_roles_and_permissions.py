@@ -283,7 +283,7 @@ class MigrateUserRolesTest(TestCase):
 
         # user_unicef_in_afg - has role_1 in Afg, UNICEF has access to all programs -> should have role_1 in Afg for each program
         assert self.user_unicef_in_afg.role_assignments.count() == 2
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_unicef_in_afg,
                 business_area=self.business_area_afg,
@@ -291,8 +291,9 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_afg,
                 expiry_date=None,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_unicef_in_afg,
                 business_area=self.business_area_afg,
@@ -300,11 +301,12 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_2_afg,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # user_unicef_in_ukr - has role_2 in Ukr, UNICEF has access to all programs -> should have role_2 in Ukr for each program
         assert self.user_unicef_in_ukr.role_assignments.count() == 2
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_unicef_in_ukr,
                 business_area=self.business_area_ukr,
@@ -312,8 +314,9 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_unicef_in_ukr,
                 business_area=self.business_area_ukr,
@@ -321,27 +324,30 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_2_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # unicef_user_hq - has role_1 in Afg and role_2 Ukr, UNICEF has access to all programs -> should have role_1 in Afg and role_2 Ukr for each program
         assert self.unicef_user_hq.role_assignments.count() == 4
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.unicef_user_hq,
                 business_area=self.business_area_afg,
                 role=self.role_1,
                 program=self.program_1_afg,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.unicef_user_hq,
                 business_area=self.business_area_afg,
                 role=self.role_1,
                 program=self.program_2_afg,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.unicef_user_hq,
                 business_area=self.business_area_ukr,
@@ -349,8 +355,9 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.unicef_user_hq,
                 business_area=self.business_area_ukr,
@@ -358,6 +365,7 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_2_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # unicef_user_without_any_role - no role, UNICEF has access to all programs -> should have no roles
@@ -365,7 +373,7 @@ class MigrateUserRolesTest(TestCase):
 
         # user_1_partner_1 - has role_1 in Afg and role_2 in Ukr, his partner has access to Program 1 AFG -> should have role_1 in Program 1 AFG, role_2 in Ukr is marked as expired
         assert self.user_1_partner_1.role_assignments.count() == 2
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_1_partner_1,
                 business_area=self.business_area_afg,
@@ -373,8 +381,9 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_afg,
                 expiry_date=None,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_1_partner_1,
                 business_area=self.business_area_ukr,
@@ -382,12 +391,13 @@ class MigrateUserRolesTest(TestCase):
                 program=None,
                 expiry_date__lte=now,
             ).first()
+            is not None
         )
 
         # user_2_partner_1 - has role_2 in Ukr, his partner has access to Program 1 AFG ->
         # his role in Ukr is marked as expired
         assert self.user_2_partner_1.role_assignments.count() == 1
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_2_partner_1,
                 business_area=self.business_area_ukr,
@@ -395,12 +405,13 @@ class MigrateUserRolesTest(TestCase):
                 program=None,
                 expiry_date__lte=now,
             ).first()
+            is not None
         )
 
         # user_1_partner_2 - has role_1 in Afg, his partner has access to Program 1 and 2 AFG and Program 1 UKR ->
         # should have role_1 in Afg for each program
         assert self.user_1_partner_2.role_assignments.count() == 2
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_1_partner_2,
                 business_area=self.business_area_afg,
@@ -408,8 +419,9 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_afg,
                 expiry_date=None,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_1_partner_2,
                 business_area=self.business_area_afg,
@@ -417,11 +429,12 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_2_afg,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # user_2_partner_2 - has role_2 in Ukr, his partner has access to Program 1 and 2 AFG and Program 1 UKR -> should have role_2 in Ukr for Program 1
         assert self.user_2_partner_2.role_assignments.count() == 1
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_2_partner_2,
                 business_area=self.business_area_ukr,
@@ -429,11 +442,12 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # user_3 - has role_1 in Afg, his partner has access to Program 1 in AFG -> role marked as expired
         assert self.user_3.role_assignments.count() == 1
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_3,
                 business_area=self.business_area_afg,
@@ -441,11 +455,12 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_afg,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # user_no_partner - has role_1 in Afg, no partner -> role marked as expired
         assert self.user_no_partner.role_assignments.count() == 1
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 user=self.user_no_partner,
                 business_area=self.business_area_afg,
@@ -453,6 +468,7 @@ class MigrateUserRolesTest(TestCase):
                 program=None,
                 expiry_date__lte=now,
             ).first()
+            is not None
         )
 
         # user_default_empty_partner - has role_1 in Afg, partner Default Empty Partner -> role marked as expired
@@ -488,7 +504,7 @@ class MigrateUserRolesTest(TestCase):
         # partner_2 - has role_1 and role_2 in Ukr, access to Program 1 and 2 AFG and Program 1 UKR ->
         # should have role_1 and role_2 in Ukr for Program 1
         assert self.partner_2.role_assignments.count() == 2
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 partner=self.partner_2,
                 business_area=self.business_area_ukr,
@@ -496,8 +512,9 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
-        self.assertIsNotNone(
+        assert (
             RoleAssignment.objects.filter(
                 partner=self.partner_2,
                 business_area=self.business_area_ukr,
@@ -505,6 +522,7 @@ class MigrateUserRolesTest(TestCase):
                 program=self.program_1_ukr,
                 expiry_date=None,
             ).first()
+            is not None
         )
 
         # partner_3 - has role_2 in Ukraine, access to Program 1 AFG -> no RoleAssignment should be created
@@ -539,12 +557,12 @@ class MigrateUserRolesTest(TestCase):
         unicef_hq = Partner.objects.filter(name="UNICEF HQ").first()
         unicef_global = Partner.objects.filter(name="UNICEF Partner for global").first()
 
-        self.assertIsNotNone(unicef_in_afg)
-        self.assertIsNotNone(unicef_in_ukr)
-        self.assertIsNotNone(unicef_hq)
-        self.assertIsNotNone(unicef_in_syria)
+        assert unicef_in_afg is not None
+        assert unicef_in_ukr is not None
+        assert unicef_hq is not None
+        assert unicef_in_syria is not None
         # unicef_global should be created
-        self.assertIsNone(unicef_global)
+        assert unicef_global is None
 
         assert unicef_in_afg.parent == self.partner_unicef
         assert unicef_in_ukr.parent == self.partner_unicef
@@ -581,15 +599,15 @@ class MigrateUserRolesTest(TestCase):
         assert unicef_in_ukr.allowed_business_areas.first() == self.business_area_ukr
 
         assert unicef_hq.allowed_business_areas.count() == 4
-        self.assertTrue(self.business_area_afg in unicef_hq.allowed_business_areas.all())
-        self.assertTrue(self.business_area_ukr in unicef_hq.allowed_business_areas.all())
+        assert self.business_area_afg in unicef_hq.allowed_business_areas.all()
+        assert self.business_area_ukr in unicef_hq.allowed_business_areas.all()
 
         # check roles for UNICEF subpartners
         # newly created "Role for UNICEF Partners" should be assigned for UNICEF subpartners per BA
         # and "Role with all permissions" for UNICEF HQ
         role_with_all_permissions = Role.objects.get(name="Role with all permissions")
         role_for_unicef_partners = Role.objects.filter(name="Role for UNICEF Partners").first()
-        self.assertIsNotNone(role_for_unicef_partners)
+        assert role_for_unicef_partners is not None
 
         assert unicef_in_afg.role_assignments.count() == 1
         assert unicef_in_afg.role_assignments.first().role == role_for_unicef_partners
@@ -640,8 +658,8 @@ class MigrateUserRolesTest(TestCase):
         # should have area limit in Program 1 AFG
         assert self.partner_3.admin_area_limits.count() == 1
         assert self.partner_3.admin_area_limits.first().areas.count() == 2
-        self.assertTrue(self.area_1_afg in self.partner_3.admin_area_limits.first().areas.all())
-        self.assertTrue(self.area_2_afg in self.partner_3.admin_area_limits.first().areas.all())
+        assert self.area_1_afg in self.partner_3.admin_area_limits.first().areas.all()
+        assert self.area_2_afg in self.partner_3.admin_area_limits.first().areas.all()
 
         # partner_empty - has no access -> no area limits
         assert self.partner_empty.admin_area_limits.count() == 0

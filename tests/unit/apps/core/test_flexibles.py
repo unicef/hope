@@ -106,8 +106,8 @@ class TestFlexibles(TestCase):
             expected_associated_with = 0 if attrib.name[-4:] == "_h_f" else 1
             assert attrib.label["English(EN)"] == label
             assert attrib.associated_with == expected_associated_with
-            self.assertTrue(yes_choice.flex_attributes.filter(id=attrib.id).exists())
-            self.assertTrue(no_choice.flex_attributes.filter(id=attrib.id).exists())
+            assert yes_choice.flex_attributes.filter(id=attrib.id).exists()
+            assert no_choice.flex_attributes.filter(id=attrib.id).exists()
 
         # Test updating/deleting values
         self.load_xls("flex_updated.xls")
@@ -132,7 +132,7 @@ class TestFlexibles(TestCase):
         assert consent_group.label["English(EN)"] == "Consent Edited"
 
         introduction = FlexibleAttribute.objects.filter(type="note", name="introduction_h_f").exists()
-        self.assertFalse(introduction)
+        assert not introduction
 
     def test_flexibles_type_validation(self) -> None:
         # import valid file
@@ -196,14 +196,14 @@ class TestFlexibles(TestCase):
         field = FlexibleAttribute.objects.get(name="introduction_h_f")
         group = FlexibleAttributeGroup.objects.get(name="consent")
 
-        self.assertTrue(field)
-        self.assertTrue(group)
+        assert field
+        assert group
 
         field.delete()
         group.delete()
 
-        self.assertTrue(field.is_removed)
-        self.assertTrue(group.is_removed)
+        assert field.is_removed
+        assert group.is_removed
 
         self.load_xls("flex_init_valid_types.xls")
 

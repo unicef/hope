@@ -269,16 +269,12 @@ class PushLaxToRDITests(HOPEApiTestCase):
         assert data["errors"] == 2
         assert data["accepted"] == 4
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         for valid in ["village1", "village4", "village5"]:
-            self.assertTrue(PendingHousehold.objects.filter(registration_data_import=rdi, village=valid).exists())
+            assert PendingHousehold.objects.filter(registration_data_import=rdi, village=valid).exists()
 
-        self.assertDictEqual(
-            data["households"][2], {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
-        )
-        self.assertDictEqual(
-            data["households"][5], {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]}
-        )
+        assert data["households"][2] == {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
+        assert data["households"][5] == {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]}
         pk1 = list(data["households"][0].values())[0][0]["pk"]
         hh = PendingHousehold.objects.get(pk=pk1)
         assert hh.program_id == self.program.id

@@ -78,15 +78,15 @@ class UploadRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         data = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         assert rdi.program == self.program
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNone(hh.alternate_collector)
+        assert hh is not None
+        assert hh.head_of_household is not None
+        assert hh.primary_collector is not None
+        assert hh.alternate_collector is None
 
         assert hh.head_of_household.full_name == "John Doe"
         assert hh.head_of_household.sex == MALE
@@ -127,13 +127,13 @@ class UploadRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_201_CREATED, data
 
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNone(hh.alternate_collector)
+        assert hh is not None
+        assert hh.head_of_household is not None
+        assert hh.primary_collector is not None
+        assert hh.alternate_collector is None
 
         assert hh.head_of_household.full_name == "John Doe"
         assert hh.head_of_household.sex == MALE
@@ -181,17 +181,17 @@ class UploadRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         hoh = PendingIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
-        self.assertTrue(hoh)
+        assert hoh
         hh = hoh.pending_household
         assert hh.village == "village1"
 
         # check collectors
-        self.assertNotEqual(hh.primary_collector, hoh)
-        self.assertIsNone(hh.alternate_collector)
+        assert hh.primary_collector != hoh
+        assert hh.alternate_collector is None
         members = hh.individuals.all()
         assert len(members) == 1
 
-        self.assertTrue(hoh.documents.exists())
+        assert hoh.documents.exists()
 
     def test_upload_with_document_photo(self) -> None:
         image = Path(__file__).parent / "logo.png"
@@ -237,13 +237,13 @@ class UploadRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         data = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNone(hh.alternate_collector)
+        assert hh is not None
+        assert hh.head_of_household is not None
+        assert hh.primary_collector is not None
+        assert hh.alternate_collector is None
 
         assert hh.head_of_household.full_name == "John Doe"
         assert hh.head_of_household.sex == MALE
@@ -367,13 +367,13 @@ class UploadRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         data = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi, village="village1").first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNotNone(hh.alternate_collector)
+        assert hh is not None
+        assert hh.head_of_household is not None
+        assert hh.primary_collector is not None
+        assert hh.alternate_collector is not None
 
         assert hh.primary_collector.full_name == "Jhon Primary #1"
         assert hh.head_of_household.full_name == "James Head #1"

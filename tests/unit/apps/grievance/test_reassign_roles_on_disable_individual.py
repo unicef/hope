@@ -114,7 +114,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
                 self.program_one,
             )
 
-        self.assertTrue("Cannot reassign the role" in str(context.exception))
+        assert "Cannot reassign the role" in str(context.exception)
 
     def test_reassign_alternate_role(self) -> None:
         individual = IndividualFactory(household=self.household, program=self.program_one)
@@ -155,7 +155,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         assert role == ROLE_PRIMARY
 
         previous_role = IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first()
-        self.assertIsNone(previous_role)
+        assert previous_role is None
 
     def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(self) -> None:
         household, _ = create_household_and_individuals(

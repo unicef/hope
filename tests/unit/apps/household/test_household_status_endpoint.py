@@ -117,7 +117,7 @@ class TestDetails(TestCase):
         assert info["date"] == _time(pending_household.updated_at)
 
         individual = info["individual"]
-        self.assertIsNotNone(individual)
+        assert individual is not None
         assert individual["relationship"] == HEAD
         assert individual["role"] == ROLE_NO_ROLE
         assert individual["tax_id"] == tax_id
@@ -180,7 +180,7 @@ class TestDetails(TestCase):
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         assert response.status_code == 200
         data = response.json()
-        self.assertIsNotNone(data["info"])
+        assert data["info"] is not None
         info = data["info"]
         assert info["status"] == "paid"
 
@@ -197,7 +197,7 @@ class TestDetails(TestCase):
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         assert response.status_code == 200
         data = response.json()
-        self.assertIsNotNone(data["info"])
+        assert data["info"] is not None
         info = data["info"]
         assert info["status"] == "paid"
         assert datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date() == payment.delivery_date
@@ -227,7 +227,7 @@ class TestDetails(TestCase):
         info = data["info"]
         assert info["status"] == "imported"
         assert info["date"] == _time(pending_household.updated_at)
-        self.assertTrue("individual" not in info)
+        assert "individual" not in info
 
     def test_getting_household_with_status_paid(self) -> None:
         detail_id = "HOPE-2022530111222"
@@ -242,7 +242,7 @@ class TestDetails(TestCase):
         info = data["info"]
         assert info["status"] == "paid"
         assert info["date"] == _time(payment.delivery_date)
-        self.assertTrue("individual" not in info)
+        assert "individual" not in info
 
     def test_query_params_validation(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=xxx&tax_id=yyy")

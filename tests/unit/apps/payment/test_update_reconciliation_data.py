@@ -138,14 +138,11 @@ class TestDeliveryDate(APITestCase):
         assert len(import_service.errors) == 1
 
         error = import_service.errors[0]
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Test FSP 1",
-                None,
-                "There aren't any updates in imported file, please add changes and try again",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Test FSP 1",
+            None,
+            "There aren't any updates in imported file, please add changes and try again",
+        ]
 
     @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(

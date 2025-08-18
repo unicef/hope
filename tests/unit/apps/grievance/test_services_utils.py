@@ -69,8 +69,8 @@ class FlexibleAttribute:
 class TestGrievanceUtils(TestCase):
     def test_convert_to_empty_string_if_null(self) -> None:
         assert convert_to_empty_string_if_null(None) == ""
-        self.assertTrue(convert_to_empty_string_if_null(True))
-        self.assertFalse(convert_to_empty_string_if_null(False))
+        assert convert_to_empty_string_if_null(True)
+        assert not convert_to_empty_string_if_null(False)
         assert convert_to_empty_string_if_null("test") == "test"
         assert convert_to_empty_string_if_null(123) == 123
 
@@ -189,7 +189,7 @@ class TestGrievanceUtils(TestCase):
         assert Document.objects.all().count() == 0
 
         document = handle_add_document(document_data, individual)
-        self.assertIsInstance(document, Document)
+        assert isinstance(document, Document)
         assert document.rdi_merge_status == MergeStatusModel.MERGED
 
     def test_validate_individual_for_need_adjudication(self) -> None:
