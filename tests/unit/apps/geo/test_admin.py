@@ -82,7 +82,7 @@ class TestGeoApp(WebTest):
         redirect_resp = resp.follow()
         messages = list(redirect_resp.context["messages"])
         self.assertEqual(len(messages), 1)
-        self.assertIn("Found 4 new areas to create.", str(messages[0]))
+        self.assertIn("Found 3 new areas to create.", str(messages[0]))
         self.assertIn("The import is running in the background.", str(messages[0]))
 
         self.assertEqual(AreaType.objects.count(), 2)
