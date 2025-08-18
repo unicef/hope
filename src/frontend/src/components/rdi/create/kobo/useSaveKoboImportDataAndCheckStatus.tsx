@@ -1,81 +1,88 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
-import {
-  ImportDataStatus,
-  KoboImportDataQueryResult,
-  SaveKoboImportDataAsyncMutationVariables,
-  useKoboImportDataLazyQuery,
-  useSaveKoboImportDataAsyncMutation,
-} from '@generated/graphql';
-import { useLazyInterval } from '@hooks/useInterval';
+import { useState } from 'react';
+import { RestService } from '@restgenerated/services/RestService';
+import { KoboImportData } from '@restgenerated/models/KoboImportData';
+import { Status753Enum } from '@restgenerated/models/Status753Enum';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+
+interface SaveKoboVariables {
+  businessAreaSlug: string;
+  programSlug: string;
+  koboAssetId: string;
+  onlyActiveSubmissions: boolean;
+  pullPictures: boolean;
+}
 
 export interface UseSaveKoboImportDataAndCheckStatusReturnType {
-  saveAndStartPolling: (
-    variables: SaveKoboImportDataAsyncMutationVariables,
-  ) => Promise<void>;
-  stopPollingImportData: () => void;
+  saveAndStartPolling: (variables: SaveKoboVariables) => void;
   loading: boolean;
-  koboImportData: KoboImportDataQueryResult['data']['koboImportData'];
+  koboImportData: KoboImportData | null;
 }
 
 export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndCheckStatusReturnType {
-  const [loading, setLoading] = useState(false);
-  const [saveKoboImportDataMutate, { data: koboImportDataFromMutation }] =
-    useSaveKoboImportDataAsyncMutation();
-  const [loadImportData, { data: koboImportData }] = useKoboImportDataLazyQuery(
-    {
-      variables: {
-        id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
-      },
-      fetchPolicy: 'network-only',
-    },
-  );
-  const [startPollingImportData, stopPollingImportData] = useLazyInterval(
-    (args) =>
-      loadImportData({
-        variables: {
-          id: args.id,
+  const [importDataId, setImportDataId] = useState<string | null>(null);
+  const { businessAreaSlug } = useBaseUrl();
+
+  // Mutation for saving Kobo import data
+  const saveMutation = useMutation({
+    mutationFn: async (variables: SaveKoboVariables) => {
+      return RestService.restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate(
+        {
+          businessAreaSlug: variables.businessAreaSlug,
+          programSlug: variables.programSlug,
+          requestBody: {
+            uid: variables.koboAssetId,
+            onlyActiveSubmissions: variables.onlyActiveSubmissions,
+            pullPictures: variables.pullPictures,
+          },
         },
-      }),
-    3000,
-  );
-  useEffect(() => {
-    if (koboImportDataFromMutation?.saveKoboImportDataAsync?.importData) {
-      startPollingImportData({
-        id: koboImportDataFromMutation.saveKoboImportDataAsync.importData.id,
+      );
+    },
+    onSuccess: (data) => {
+      setImportDataId(data.id);
+    },
+  });
+
+  // Query for polling kobo import data status
+  const { data: koboImportData } = useQuery({
+    queryKey: ['koboImportData', importDataId, businessAreaSlug],
+    queryFn: async () => {
+      if (!importDataId || !businessAreaSlug) return null;
+      return RestService.restBusinessAreasKoboImportDataRetrieve({
+        businessAreaSlug: businessAreaSlug,
+        id: importDataId,
       });
-    }
-  }, [koboImportDataFromMutation?.saveKoboImportDataAsync?.importData]);
-  useEffect(() => {
-    if (!koboImportData) {
-      return;
-    }
-    if (
-      [
-        ImportDataStatus.Error,
-        ImportDataStatus.ValidationError,
-        ImportDataStatus.Finished,
-      ].includes(koboImportData?.koboImportData?.status)
-    ) {
-      stopPollingImportData();
-      setLoading(false);
-    }
-  }, [koboImportData]);
-  const saveAndStartPolling = async (
-    variables: SaveKoboImportDataAsyncMutationVariables,
-  ): Promise<void> => {
-    try {
-      setLoading(true);
-      await saveKoboImportDataMutate({ variables });
-    } catch (error) {
-      setLoading(false);
-      throw error;
-    }
+    },
+    enabled: !!importDataId,
+    refetchInterval: (data) => {
+      console.log('Polling kobo import data status...', data);
+      // Stop polling if status is final
+      if (
+        data &&
+        [
+          Status753Enum.ERROR,
+          Status753Enum.VALIDATION_ERROR,
+          Status753Enum.FINISHED,
+        ].includes(data?.state?.data?.status)
+      ) {
+        return false;
+      }
+      return 3000; // Poll every 3 seconds
+    },
+  });
+
+  const saveAndStartPolling = (variables: SaveKoboVariables): void => {
+    saveMutation.mutateAsync(variables);
   };
+
   return {
     saveAndStartPolling,
-    stopPollingImportData,
-    loading,
-    koboImportData: koboImportData?.koboImportData,
+    loading:
+      saveMutation.isPending ||
+      [Status753Enum.PENDING, Status753Enum.RUNNING].includes(
+        koboImportData?.status,
+      ),
+    koboImportData: koboImportData || null,
   };
 }

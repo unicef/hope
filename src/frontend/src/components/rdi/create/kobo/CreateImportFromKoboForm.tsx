@@ -6,12 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import {
-  ImportDataStatus,
-  useCreateRegistrationKoboImportMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { Status753Enum } from '@restgenerated/models/Status753Enum';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useMutation } from '@tanstack/react-query';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
@@ -39,35 +38,47 @@ export function CreateImportFromKoboForm({
 }): ReactElement {
   const {
     saveAndStartPolling,
-    stopPollingImportData,
     loading: saveKoboLoading,
     koboImportData,
   } = useSaveKoboImportDataAndCheckStatus();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { baseUrl, businessArea } = useBaseUrl();
-  const [createImport] = useCreateRegistrationKoboImportMutation();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
 
-  const onSubmit = async (values): Promise<void> => {
-    try {
-      const data = await createImport({
-        variables: {
-          registrationDataImportData: {
-            importDataId: koboImportData.id,
-            name: values.name,
-            screenBeneficiary: values.screenBeneficiary,
-            businessAreaSlug: businessArea,
-            pullPictures: values.pullPictures,
-          },
-        },
+  // Mutation for creating registration kobo import
+  const createImportMutation = useMutation({
+    mutationFn: async (data: { 
+      importDataId: string; 
+      name: string; 
+      screenBeneficiary: boolean;
+      pullPictures: boolean;
+    }) => {
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody: data,
       });
-      navigate(
-        `/${baseUrl}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
-      );
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    },
+    onSuccess: (data) => {
+      navigate(`/${baseUrl}/registration-data-import/${data.id}`);
+    },
+    onError: (error: any) => {
+      showMessage(error.message || 'Error creating kobo import');
+    },
+  });
+
+  const onSubmit =  (values): void => {
+    if (!koboImportData?.id) {
+      return;
     }
+    
+    createImportMutation.mutate({
+      importDataId: koboImportData.id,
+      name: values.name,
+      screenBeneficiary: values.screenBeneficiary,
+      pullPictures: values.pullPictures,
+    });
   };
   const formik = useFormik({
     initialValues: {
@@ -80,20 +91,19 @@ export function CreateImportFromKoboForm({
     validationSchema,
     onSubmit,
   });
-  const saveKoboInputData = async (): Promise<void> => {
+  const saveKoboInputData = (): Promise<void> => {
     if (!formik.values.koboAssetId) {
       return;
     }
     setSubmitDisabled(true);
-    stopPollingImportData();
-    await saveAndStartPolling({
+    saveAndStartPolling({
       businessAreaSlug: businessArea,
+      programSlug: programId,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
       pullPictures: formik.values.pullPictures,
     });
   };
-  useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveKoboInputData();
   }, [
@@ -106,7 +116,7 @@ export function CreateImportFromKoboForm({
   }, [formik.submitForm]);
   useEffect(() => {
     if (
-      koboImportData?.status === ImportDataStatus.Finished) {
+      koboImportData?.status === Status753Enum.FINISHED) {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);
