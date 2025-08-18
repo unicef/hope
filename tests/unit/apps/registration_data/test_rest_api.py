@@ -445,25 +445,25 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, {"file": uploaded_file}, format="multipart")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
         # Check response contains required fields
-        self.assertIn("id", response.data)
-        self.assertIn("status", response.data)
-        self.assertEqual(response.data["data_type"], ImportData.XLSX)
+        assert "id" in response.data
+        assert "status" in response.data
+        assert response.data["data_type"] == ImportData.XLSX
 
         # Check ImportData was created
         import_data = ImportData.objects.get(id=response.data["id"])
-        self.assertEqual(import_data.status, ImportData.STATUS_PENDING)
-        self.assertEqual(import_data.data_type, ImportData.XLSX)
-        self.assertEqual(import_data.business_area_slug, self.business_area.slug)
-        self.assertEqual(import_data.created_by_id, self.user.id)
+        assert import_data.status == ImportData.STATUS_PENDING
+        assert import_data.data_type == ImportData.XLSX
+        assert import_data.business_area_slug == self.business_area.slug
+        assert import_data.created_by_id == self.user.id
 
         # Check celery task was called
         mock_validate_task.assert_called_once()
         call_args = mock_validate_task.call_args[0]
-        self.assertEqual(call_args[0], import_data.id)
-        self.assertEqual(call_args[1], str(self.program.id))
+        assert call_args[0] == import_data.id
+        assert call_args[1] == str(self.program.id)
 
     @patch("hope.apps.registration_datahub.celery_tasks.pull_kobo_submissions_task.delay")
     def test_save_kobo_import_data(self, mock_pull_task: Mock) -> None:
@@ -482,30 +482,30 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
         # Check response contains required fields
-        self.assertIn("id", response.data)
-        self.assertIn("status", response.data)
-        self.assertEqual(response.data["kobo_asset_id"], "test_kobo_asset_123")
-        self.assertEqual(response.data["only_active_submissions"], True)
-        self.assertEqual(response.data["pull_pictures"], False)
+        assert "id" in response.data
+        assert "status" in response.data
+        assert response.data["kobo_asset_id"] == "test_kobo_asset_123"
+        assert response.data["only_active_submissions"]
+        assert not response.data["pull_pictures"]
 
         # Check KoboImportData was created
         kobo_import_data = KoboImportData.objects.get(id=response.data["id"])
-        self.assertEqual(kobo_import_data.status, ImportData.STATUS_PENDING)
-        self.assertEqual(kobo_import_data.data_type, ImportData.JSON)
-        self.assertEqual(kobo_import_data.kobo_asset_id, "test_kobo_asset_123")
-        self.assertEqual(kobo_import_data.only_active_submissions, True)
-        self.assertEqual(kobo_import_data.pull_pictures, False)
-        self.assertEqual(kobo_import_data.business_area_slug, self.business_area.slug)
-        self.assertEqual(kobo_import_data.created_by_id, self.user.id)
+        assert kobo_import_data.status == ImportData.STATUS_PENDING
+        assert kobo_import_data.data_type == ImportData.JSON
+        assert kobo_import_data.kobo_asset_id == "test_kobo_asset_123"
+        assert kobo_import_data.only_active_submissions
+        assert not kobo_import_data.pull_pictures
+        assert kobo_import_data.business_area_slug == self.business_area.slug
+        assert kobo_import_data.created_by_id == self.user.id
 
         # Check celery task was called
         mock_pull_task.assert_called_once()
         call_args = mock_pull_task.call_args[0]
-        self.assertEqual(call_args[0], kobo_import_data.id)
-        self.assertEqual(call_args[1], str(self.program.id))
+        assert call_args[0] == kobo_import_data.id
+        assert call_args[1] == str(self.program.id)
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
     def test_registration_xlsx_import(self, mock_import_task: Mock) -> None:
@@ -534,23 +534,23 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
         # Check response contains required fields
-        self.assertIn("id", response.data)
-        self.assertEqual(response.data["name"], "Test XLSX Import")
-        self.assertIn("status", response.data)
+        assert "id" in response.data
+        assert response.data["name"] == "Test XLSX Import"
+        assert "status" in response.data
 
         # Check RegistrationDataImport was created
         rdi = RegistrationDataImport.objects.get(id=response.data["id"])
-        self.assertEqual(rdi.name, "Test XLSX Import")
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(rdi.data_source, RegistrationDataImport.XLS)
-        self.assertEqual(rdi.number_of_households, 5)
-        self.assertEqual(rdi.number_of_individuals, 15)
-        self.assertTrue(rdi.screen_beneficiary)
-        self.assertEqual(rdi.program, self.program)
-        self.assertEqual(rdi.imported_by, self.user)
+        assert rdi.name == "Test XLSX Import"
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.XLS
+        assert rdi.number_of_households == 5
+        assert rdi.number_of_individuals == 15
+        assert rdi.screen_beneficiary
+        assert rdi.program == self.program
+        assert rdi.imported_by == self.user
 
         # Check celery task was called
         mock_import_task.assert_called_once()
@@ -571,8 +571,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Import data not found", response.data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Import data not found" in response.data
 
     def test_registration_xlsx_import_import_data_not_ready(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -596,8 +596,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Import data is not ready for import", response.data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Import data is not ready for import" in response.data
 
     def test_registration_xlsx_import_program_finished(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -625,8 +625,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("In order to perform this action, program status must not be finished.", response.data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "In order to perform this action, program status must not be finished." in response.data
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_kobo_import_task.delay")
     def test_registration_kobo_import(self, mock_import_task: Mock) -> None:
@@ -656,24 +656,24 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
         # Check response contains required fields
-        self.assertIn("id", response.data)
-        self.assertEqual(response.data["name"], "Test Kobo Import")
-        self.assertIn("status", response.data)
+        assert "id" in response.data
+        assert response.data["name"] == "Test Kobo Import"
+        assert "status" in response.data
 
         # Check RegistrationDataImport was created
         rdi = RegistrationDataImport.objects.get(id=response.data["id"])
-        self.assertEqual(rdi.name, "Test Kobo Import")
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(rdi.data_source, RegistrationDataImport.KOBO)
-        self.assertEqual(rdi.number_of_households, 8)
-        self.assertEqual(rdi.number_of_individuals, 25)
-        self.assertTrue(rdi.pull_pictures)
-        self.assertFalse(rdi.screen_beneficiary)
-        self.assertEqual(rdi.program, self.program)
-        self.assertEqual(rdi.imported_by, self.user)
+        assert rdi.name == "Test Kobo Import"
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.KOBO
+        assert rdi.number_of_households == 8
+        assert rdi.number_of_individuals == 25
+        assert rdi.pull_pictures
+        assert not rdi.screen_beneficiary
+        assert rdi.program == self.program
+        assert rdi.imported_by == self.user
 
         # Check celery task was called
         mock_import_task.assert_called_once()
@@ -695,8 +695,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Kobo import data not found", response.data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Kobo import data not found" in response.data
 
     def test_registration_kobo_import_kobo_data_not_ready(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -721,8 +721,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Kobo import data is not ready for import", response.data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Kobo import data is not ready for import" in response.data
 
     def test_registration_kobo_import_program_finished(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -751,8 +751,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.post(url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("In order to perform this action, program status must not be finished.", response.data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "In order to perform this action, program status must not be finished." in response.data
 
     def test_import_data_retrieve(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -771,21 +771,21 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         # Check response structure
-        self.assertEqual(response.data["id"], str(import_data.id))
-        self.assertEqual(response.data["status"], import_data.status)
-        self.assertEqual(response.data["data_type"], import_data.data_type)
-        self.assertEqual(response.data["error"], "Test error message")
+        assert response.data["id"] == str(import_data.id)
+        assert response.data["status"] == import_data.status
+        assert response.data["data_type"] == import_data.data_type
+        assert response.data["error"] == "Test error message"
 
         # Check validation errors are parsed
-        self.assertIn("xlsx_validation_errors", response.data)
+        assert "xlsx_validation_errors" in response.data
         validation_errors = response.data["xlsx_validation_errors"]
-        self.assertEqual(len(validation_errors), 1)
-        self.assertEqual(validation_errors[0]["row_number"], 1)
-        self.assertEqual(validation_errors[0]["header"], "name")
-        self.assertEqual(validation_errors[0]["message"], "Name is required")
+        assert len(validation_errors) == 1
+        assert validation_errors[0]["row_number"] == 1
+        assert validation_errors[0]["header"] == "name"
+        assert validation_errors[0]["message"] == "Name is required"
 
     def test_kobo_import_data_retrieve(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -806,21 +806,21 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         # Check response structure
-        self.assertEqual(response.data["id"], str(kobo_import_data.id))
-        self.assertEqual(response.data["status"], kobo_import_data.status)
-        self.assertEqual(response.data["kobo_asset_id"], "test_asset_123")
-        self.assertEqual(response.data["only_active_submissions"], True)
-        self.assertEqual(response.data["pull_pictures"], False)
+        assert response.data["id"] == str(kobo_import_data.id)
+        assert response.data["status"] == kobo_import_data.status
+        assert response.data["kobo_asset_id"] == "test_asset_123"
+        assert response.data["only_active_submissions"]
+        assert not response.data["pull_pictures"]
 
         # Check validation errors are parsed
-        self.assertIn("kobo_validation_errors", response.data)
+        assert "kobo_validation_errors" in response.data
         validation_errors = response.data["kobo_validation_errors"]
-        self.assertEqual(len(validation_errors), 1)
-        self.assertEqual(validation_errors[0]["header"], "age")
-        self.assertEqual(validation_errors[0]["message"], "Age must be a number")
+        assert len(validation_errors) == 1
+        assert validation_errors[0]["header"] == "age"
+        assert validation_errors[0]["message"] == "Age must be a number"
 
     def test_import_data_retrieve_different_business_area(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -837,7 +837,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_kobo_import_data_retrieve_different_business_area(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -854,7 +854,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 class RegistrationDataImportPermissionTest(HOPEApiTestCase):
@@ -1364,7 +1364,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Should be forbidden without permission
         response = self.client.post(url, {"file": uploaded_file}, format="multipart")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -1379,7 +1379,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         response = self.client.post(url, {"file": uploaded_file2}, format="multipart")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_permission_checks_save_kobo_import_data(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -1397,7 +1397,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Should be forbidden without permission
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -1406,7 +1406,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_permission_checks_registration_xlsx_import(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -1430,7 +1430,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Should be forbidden without permission
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -1439,7 +1439,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_permission_checks_registration_kobo_import(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -1464,7 +1464,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Should be forbidden without permission
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -1473,7 +1473,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_permission_checks_import_data_retrieve(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -1487,7 +1487,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Should be forbidden without permission
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -1496,7 +1496,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_kobo_import_data_retrieve(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -1510,7 +1510,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Should be forbidden without permission
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -1519,7 +1519,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_permission_denied(self, mock_registration_task: Mock) -> None:

@@ -13,8 +13,8 @@ class ImportDataViewSet(
     RetrieveModelMixin,
     BaseViewSet,
 ):
-    """
-    ViewSet for accessing ImportData objects (XLSX file uploads).
+    """ViewSet for accessing ImportData objects (XLSX file uploads).
+
     Provides read-only access to import data objects.
     """
 
@@ -37,8 +37,8 @@ class KoboImportDataViewSet(
     RetrieveModelMixin,
     BaseViewSet,
 ):
-    """
-    ViewSet for accessing KoboImportData objects (Kobo submissions).
+    """ViewSet for accessing KoboImportData objects (Kobo submissions).
+
     Provides read-only access to kobo import data objects.
     """
 
