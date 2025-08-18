@@ -113,7 +113,7 @@ class TestHouseholdDataUpdateService(TestCase):
             "flex_fields": {},
         }
 
-        self.assertEqual(details.household_data, expected_dict)
+        assert details.household_data == expected_dict
 
     def test_update_roles_new_update_ticket_add_new_role(self) -> None:
         individual = IndividualFactory()
@@ -149,7 +149,7 @@ class TestHouseholdDataUpdateService(TestCase):
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
-        self.assertEqual(details.household_data, expected_dict)
+        assert details.household_data == expected_dict
 
         # update ticket details and add new Role
         extras = {
@@ -179,7 +179,7 @@ class TestHouseholdDataUpdateService(TestCase):
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
-        self.assertEqual(details.household_data, expected_dict)
+        assert details.household_data == expected_dict
 
     def test_update_roles_new_update_ticket_update_role(self) -> None:
         individual = IndividualFactory()
@@ -224,7 +224,7 @@ class TestHouseholdDataUpdateService(TestCase):
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
-        self.assertEqual(details.household_data, expected_dict)
+        assert details.household_data == expected_dict
 
         # update Role to PRIMARY
         extras = {
@@ -254,7 +254,7 @@ class TestHouseholdDataUpdateService(TestCase):
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
-        self.assertEqual(details.household_data, expected_dict)
+        assert details.household_data == expected_dict
 
     def test_update_roles_new_approve_ticket(self) -> None:
         individual = IndividualFactory()
@@ -299,7 +299,7 @@ class TestHouseholdDataUpdateService(TestCase):
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
-        self.assertEqual(details.household_data, expected_dict)
+        assert details.household_data == expected_dict
 
     def test_close_household_update_new_roles(self) -> None:
         first_individual = IndividualFactory(program=self.program)
@@ -347,8 +347,8 @@ class TestHouseholdDataUpdateService(TestCase):
                 ],
             },
         )
-        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 1)
-        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=first_individual).role, "ALTERNATE")
+        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 1
+        assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "ALTERNATE"
 
         service = HouseholdDataUpdateService(
             grievance_ticket=household_data_change_grv_new, extras=details.household_data
@@ -356,6 +356,6 @@ class TestHouseholdDataUpdateService(TestCase):
         service.close(self.user)
 
         # check if role updated and new one created for second_individual
-        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 2)
-        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=first_individual).role, "PRIMARY")
-        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=second_individual).role, "ALTERNATE")
+        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 2
+        assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "PRIMARY"
+        assert IndividualRoleInHousehold.objects.get(individual=second_individual).role == "ALTERNATE"

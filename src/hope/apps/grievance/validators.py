@@ -25,15 +25,15 @@ class DataChangeValidator:
             if "approve_status" not in role:
                 log_and_raise("Can't find approve_status in role")
             if not (
-                    isinstance(role["approve_status"], bool)
-                    or (isinstance(role["approve_status"], str) and role["approve_status"].lower() in ["true", "false"])
+                isinstance(role["approve_status"], bool)
+                or (isinstance(role["approve_status"], str) and role["approve_status"].lower() in ["true", "false"])
             ):
                 log_and_raise("Value for approve_status must be boolean or string")
 
         if not all(
-                isinstance(v, bool) or (isinstance(v, str) and v.lower() in ["true", "false"])
-                for k, v in approve_data.items()
-                if k != "roles"
+            isinstance(v, bool) or (isinstance(v, str) and v.lower() in ["true", "false"])
+            for k, v in approve_data.items()
+            if k != "roles"
         ):
             log_and_raise("Values must be booleans")
 
