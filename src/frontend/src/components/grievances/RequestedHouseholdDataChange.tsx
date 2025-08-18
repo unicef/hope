@@ -178,10 +178,8 @@ export function RequestedHouseholdDataChange({
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields
-        entries.forEach(([key]) => {
-          if (key !== 'roles' && key !== 'flexFields') {
-            householdApproveData[key] = values.selected.includes(key);
-          }
+        values.selected.forEach((key) => {
+          householdApproveData[key] = true;
         });
         // Flex fields
         const flexFieldsApproveData: { [key: string]: boolean } = {};
@@ -198,11 +196,12 @@ export function RequestedHouseholdDataChange({
           delete householdApproveData.flex_fields;
         }
         // Roles: add each as roles__<individual_id>: boolean
-        const allRolesRaw = ticket.ticketDetails.householdData.roles || [];
-        allRolesRaw.forEach((role) => {
-          householdApproveData[`roles__${role.individualId}`] =
-            values.selectedRoles.includes(role.individualId);
-        });
+        householdApproveData.roles = values.selectedRoles.map(
+          (individualId) => ({
+            individual_id: individualId,
+            approve_status: true,
+          }),
+        );
 
         // Build mutation payload
         const mutationPayload: {
