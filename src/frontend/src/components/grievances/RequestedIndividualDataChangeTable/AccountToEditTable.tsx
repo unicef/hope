@@ -35,6 +35,7 @@ export interface AccountToEditTableProps {
   setFieldValue;
   index;
   account;
+  accountFinancialInstitutionsDict;
 }
 
 export function AccountToEditTable({
@@ -44,6 +45,7 @@ export function AccountToEditTable({
   setFieldValue,
   index,
   account,
+  accountFinancialInstitutionsDict,
 }: AccountToEditTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedAccountsToEdit } = values;
@@ -103,21 +105,26 @@ export function AccountToEditTable({
         </TableHead>
         <TableBody>
             {account.data_fields.map(
-              (field, fieldIndex) => (
+              (field, fieldIndex) => {
+                const isFinancialInstitutionField = field.name === 'financial_institution';
+                const previousValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.previous_value] : field.previous_value;
+                const newValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.value] : field.value;
+                return (
                 <TableRow key={fieldIndex}>
                   <TableCell align="left"></TableCell>
                   <TableCell align="left">{field.name}</TableCell>
                   <TableCell align="left">
-                    {field.previous_value || '-'}
+                    {previousValue || '-'}
                   </TableCell>
                   <TableCell align="left">
                     {renderNewOrNotUpdated(
-                      field.previous_value,
-                      field.value,
+                      previousValue,
+                      newValue,
                     )}
                   </TableCell>
                 </TableRow>
-              ),
+              );
+},
             )}
           </TableBody>
       </StyledTable>
