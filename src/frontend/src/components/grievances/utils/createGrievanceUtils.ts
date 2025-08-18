@@ -391,6 +391,8 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
   };
   if (Array.isArray(values.roles) && values.roles.length > 0) {
     householdDataUpdateIssueTypeExtras.householdData.roles = values.roles;
+  } else if (householdDataUpdateIssueTypeExtras.householdData.roles) {
+    delete householdDataUpdateIssueTypeExtras.householdData.roles;
   }
   return {
     variables: {
@@ -637,6 +639,7 @@ export function prepareRestVariables(
     } else if (
       issueType === parseInt(GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD, 10)
     ) {
+      console.log('values', values);
       const householdData = values.householdDataUpdateFields
         .filter((item) => item.fieldName && !item.isFlexField)
         .reduce((prev, current) => {
@@ -650,9 +653,29 @@ export function prepareRestVariables(
           return prev;
         }, {});
 
-      // Add roles if present
+      // Add roles if present and valid
       if (Array.isArray(values.roles) && values.roles.length > 0) {
-        householdData.roles = values.roles;
+        // Accept both newRole and new_role, always map to new_role for backend
+        const validRoles = values.roles
+          .filter((role) => {
+            const roleValue = role.new_role || role.newRole;
+            return (
+              roleValue &&
+              typeof roleValue === 'string' &&
+              roleValue.trim() !== ''
+            );
+          })
+          .map((role) => ({
+            ...role,
+            new_role: role.new_role || role.newRole,
+          }));
+        if (validRoles.length > 0) {
+          householdData.roles = validRoles;
+        } else if (householdData.roles) {
+          delete householdData.roles;
+        }
+      } else if (householdData.roles) {
+        delete householdData.roles;
       }
       extras.issueType = {
         householdDataUpdateIssueTypeExtras: {
@@ -660,7 +683,10 @@ export function prepareRestVariables(
           householdData: {
             ...householdData,
             flexFields,
-            ...(householdData.roles ? { roles: householdData.roles } : {}),
+            ...(Array.isArray(householdData.roles) &&
+            householdData.roles.length > 0
+              ? { roles: householdData.roles }
+              : {}),
           },
         },
       };

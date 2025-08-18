@@ -53,8 +53,6 @@ export function RequestedHouseholdDataChange({
         flexFieldsApproveData,
       };
 
-      console.log('formData', formData);
-
       return RestService.restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate(
         {
           businessAreaSlug: businessArea,
@@ -202,7 +200,8 @@ export function RequestedHouseholdDataChange({
         // Roles: add each as roles__<individual_id>: boolean
         const allRolesRaw = ticket.ticketDetails.householdData.roles || [];
         allRolesRaw.forEach((role) => {
-          householdApproveData[`roles__${role.individualId}`] = values.selectedRoles.includes(role.individualId);
+          householdApproveData[`roles__${role.individualId}`] =
+            values.selectedRoles.includes(role.individualId);
         });
 
         // Build mutation payload
