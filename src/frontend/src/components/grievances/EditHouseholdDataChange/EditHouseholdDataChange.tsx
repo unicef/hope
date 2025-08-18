@@ -3,6 +3,7 @@ import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { Field, FieldArray } from 'formik';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { AddCircleOutline, Delete } from '@mui/icons-material';
+import Tooltip from '@mui/material/Tooltip';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -270,31 +271,45 @@ function EditHouseholdDataChange({
           })}
           {/* Add a New Role button */}
           <Grid size={{ xs: 12 }} style={{ marginTop: 16 }}>
-            <Button
-              color="primary"
-              startIcon={<AddCircleOutline />}
-              onClick={() => {
-                // Find individuals not already assigned in roles
-                const usedIds = (values.roles || []).map((r) => r.individual);
-                const availableIndividuals = householdMembers.results.filter(
-                  (ind) => !usedIds.includes(ind.id),
-                );
-                const defaultIndividual =
-                  availableIndividuals.length > 0
-                    ? availableIndividuals[0].id
-                    : '';
-                setFieldValue('roles', [
-                  ...(values.roles || []),
-                  {
-                    individual: defaultIndividual,
-                    newRole: '',
-                  },
-                ]);
-              }}
-              data-cy="button-add-new-role"
-            >
-              {t('Add a New Role')}
-            </Button>
+            {(() => {
+              const usedIds = (values.roles || []).map((r) => r.individual);
+              const availableIndividuals = householdMembers.results.filter(
+                (ind) => !usedIds.includes(ind.id),
+              );
+              const isDisabled = availableIndividuals.length === 0;
+              return (
+                <Tooltip
+                  title={isDisabled ? t('All roles reassigned') : ''}
+                  placement="top"
+                  arrow
+                  disableHoverListener={!isDisabled}
+                >
+                  <span>
+                    <Button
+                      color="primary"
+                      startIcon={<AddCircleOutline />}
+                      onClick={() => {
+                        const defaultIndividual =
+                          availableIndividuals.length > 0
+                            ? availableIndividuals[0].id
+                            : '';
+                        setFieldValue('roles', [
+                          ...(values.roles || []),
+                          {
+                            individual: defaultIndividual,
+                            newRole: '',
+                          },
+                        ]);
+                      }}
+                      data-cy="button-add-new-role"
+                      disabled={isDisabled}
+                    >
+                      {t('Add a New Role')}
+                    </Button>
+                  </span>
+                </Tooltip>
+              );
+            })()}
           </Grid>
         </Grid>
       </>
