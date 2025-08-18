@@ -98,7 +98,7 @@ class TestUpdateIndividualDataService(TestCase):
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
-        self.assertEqual(Document.objects.filter(document_number="111111").count(), 1)
+        assert Document.objects.filter(document_number="111111").count() == 1
 
     def test_add_document_of_same_type_not_unique_per_individual_pending(self) -> None:
         DocumentFactory(
@@ -128,7 +128,7 @@ class TestUpdateIndividualDataService(TestCase):
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
-        self.assertEqual(Document.objects.filter(document_number="111111").count(), 1)
+        assert Document.objects.filter(document_number="111111").count() == 1
 
     def test_add_document_of_same_type_unique_per_individual_valid(self) -> None:
         DocumentFactory(
@@ -155,12 +155,12 @@ class TestUpdateIndividualDataService(TestCase):
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         with self.assertRaises(ValidationError) as e:
             service.close(self.user)
-        self.assertEqual(
-            f"Document of type {self.document_type_unique_for_individual} already exists for this individual",
-            e.exception.message,
+        assert (
+            f"Document of type {self.document_type_unique_for_individual} already exists for this individual"
+            == e.exception.message
         )
 
-        self.assertEqual(Document.objects.filter(document_number="111111").count(), 0)
+        assert Document.objects.filter(document_number="111111").count() == 0
 
     def test_add_document_of_same_type_unique_per_individual_pending(self) -> None:
         DocumentFactory(
@@ -190,7 +190,7 @@ class TestUpdateIndividualDataService(TestCase):
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
-        self.assertEqual(Document.objects.filter(document_number="111111").count(), 1)
+        assert Document.objects.filter(document_number="111111").count() == 1
 
     def test_edit_document_of_same_type_unique_per_individual(self) -> None:
         DocumentFactory(
@@ -233,14 +233,14 @@ class TestUpdateIndividualDataService(TestCase):
 
         with self.assertRaises(ValidationError) as e:
             service.close(self.user)
-        self.assertEqual(
-            f"Document of type {self.document_type_unique_for_individual} already exists for this individual",
-            e.exception.message,
+        assert (
+            f"Document of type {self.document_type_unique_for_individual} already exists for this individual"
+            == e.exception.message
         )
 
         document_to_edit.refresh_from_db()
         # document was not updated
-        self.assertEqual(document_to_edit.type, self.document_type_not_unique_for_individual)
+        assert document_to_edit.type == self.document_type_not_unique_for_individual
 
     def test_edit_document_unique_per_individual(self) -> None:
         document_to_edit = DocumentFactory(
@@ -279,7 +279,7 @@ class TestUpdateIndividualDataService(TestCase):
 
         document_to_edit.refresh_from_db()
         # document updated
-        self.assertEqual(document_to_edit.document_number, "22222")
+        assert document_to_edit.document_number == "22222"
 
     def test_edit_document_with_data_already_existing_in_same_program(self) -> None:
         household, _ = create_household({"program": self.program})
@@ -323,14 +323,14 @@ class TestUpdateIndividualDataService(TestCase):
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         with self.assertRaises(ValidationError) as e:
             service.close(self.user)
-        self.assertEqual(
-            f"Document with number {existing_document.document_number} of type {self.document_type_unique_for_individual} already exists",
-            e.exception.message,
+        assert (
+            f"Document with number {existing_document.document_number} of type {self.document_type_unique_for_individual} already exists"
+            == e.exception.message
         )
 
         document_to_edit.refresh_from_db()
         # document was not updated
-        self.assertEqual(document_to_edit.document_number, "111111")
+        assert document_to_edit.document_number == "111111"
 
     def test_edit_account(self) -> None:
         fi1 = FinancialInstitutionFactory(id="6")
@@ -383,25 +383,19 @@ class TestUpdateIndividualDataService(TestCase):
             self.fail("ValidationError should not be raised")
 
         account.refresh_from_db()
-        self.assertEqual(account.number, "123123")
-        self.assertEqual(account.financial_institution, fi2)
-        self.assertEqual(
-            account.data,
-            {
-                "field": "updated_value",
-                "new_field": "new_value",
-            },
-        )
+        assert account.number == "123123"
+        assert account.financial_institution == fi2
+        assert account.data == {
+            "field": "updated_value",
+            "new_field": "new_value",
+        }
 
         new_account = self.individual.accounts.exclude(id=account.id).first()
-        self.assertEqual(new_account.number, "2222")
-        self.assertEqual(new_account.financial_institution, fi1)
-        self.assertEqual(
-            new_account.data,
-            {
-                "new_field": "new_value",
-            },
-        )
+        assert new_account.number == "2222"
+        assert new_account.financial_institution == fi1
+        assert new_account.data == {
+            "new_field": "new_value",
+        }
 
     def test_update_people_individual_hh_fields(self) -> None:
         pl = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
@@ -463,12 +457,12 @@ class TestUpdateIndividualDataService(TestCase):
             hh_value = (
                 getattr(hh, hh_field).iso_code3 if isinstance(getattr(hh, hh_field), Country) else getattr(hh, hh_field)
             )
-            self.assertEqual(hh_value, new_data.get(hh_field))
+            assert hh_value == new_data.get(hh_field)
 
-        self.assertEqual(hh.admin_area.p_code, "PL22M33")
-        self.assertEqual(hh.admin_area.name, "Test Area M")
-        self.assertEqual(hh.admin2.p_code, "PL22M33")
-        self.assertEqual(hh.admin2.name, "Test Area M")
-        self.assertIsNone(hh.admin3)
-        self.assertIsNotNone(hh.admin1)
-        self.assertEqual(hh.admin2.parent, hh.admin1)
+        assert hh.admin_area.p_code == "PL22M33"
+        assert hh.admin_area.name == "Test Area M"
+        assert hh.admin2.p_code == "PL22M33"
+        assert hh.admin2.name == "Test Area M"
+        assert hh.admin3 is None
+        assert hh.admin1 is not None
+        assert hh.admin2.parent == hh.admin1

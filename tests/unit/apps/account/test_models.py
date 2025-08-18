@@ -58,10 +58,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 role=self.role2,
                 business_area=self.business_area,
             )
-        self.assertIn(
-            "Either user or partner must be set, but not both.",
-            str(ve_context.exception),
-        )
+        assert "Either user or partner must be set, but not both." in str(ve_context.exception)
 
     def test_user_or_partner_not_both(self) -> None:
         # Not possible to have both user and partner in the same role assignment
@@ -73,10 +70,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 partner=self.partner,
                 program=self.program1,
             )
-        self.assertIn(
-            "Either user or partner must be set, but not both.",
-            str(ve_context.exception),
-        )
+        assert "Either user or partner must be set, but not both." in str(ve_context.exception)
 
     def test_is_available_for_partner_flag(self) -> None:
         # is_available_for_partner flag is set to True
@@ -86,7 +80,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             role=self.role2,
             business_area=self.business_area,
         )
-        self.assertIsNotNone(role_assignment.id)
+        assert role_assignment.id is not None
 
         # is_available_for_partner flag is set to False
         self.role2.is_available_for_partner = False
@@ -98,10 +92,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 role=self.role2,
                 business_area=self.business_area,
             )
-        self.assertIn(
-            "Partner can only be assigned roles that are available for partners.",
-            str(ve_context.exception),
-        )
+        assert "Partner can only be assigned roles that are available for partners." in str(ve_context.exception)
 
         # user can be assigned the role despite the flag
         role_assignment_user = RoleAssignment.objects.create(
@@ -110,7 +101,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             role=self.role2,
             business_area=self.business_area,
         )
-        self.assertIsNotNone(role_assignment_user.id)
+        assert role_assignment_user.id is not None
 
         # UNICEF sub-partners can be assigned the role despite the flag
         unicef = PartnerFactory(name="UNICEF")
@@ -124,7 +115,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             role=self.role2,
             business_area=self.business_area,
         )
-        self.assertIsNotNone(role_assignment_unicef_hq.id)
+        assert role_assignment_unicef_hq.id is not None
 
     def test_partner_role_in_business_area_vs_allowed_business_areas(self) -> None:
         # Possible to create RoleAssignment for a business area that is allowed for the partner
@@ -144,9 +135,8 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 role=self.role,
                 business_area=not_allowed_ba,
             )
-        self.assertIn(
-            f"{not_allowed_ba} is not within the allowed business areas for {self.partner}.",
-            str(ve_context.exception),
+        assert f"{not_allowed_ba} is not within the allowed business areas for {self.partner}." in str(
+            ve_context.exception
         )
 
         # Validation not relevant for user
@@ -249,10 +239,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 role=self.role,
                 business_area=self.business_area,
             )
-        self.assertIn(
-            f"{parent_partner} is a parent partner and cannot have role assignments.",
-            str(ve_context.exception),
-        )
+        assert f"{parent_partner} is a parent partner and cannot have role assignments." in str(ve_context.exception)
 
     def test_parent_partner_with_role_assignment(self) -> None:
         parent_partner = PartnerFactory(name="Parent Partner")
@@ -269,10 +256,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
         with self.assertRaises(ValidationError) as ve_context:
             PartnerFactory(name="Child Partner", parent=parent_partner)
 
-        self.assertIn(
-            f"{parent_partner} cannot become a parent as it has RoleAssignments.",
-            str(ve_context.exception),
-        )
+        assert f"{parent_partner} cannot become a parent as it has RoleAssignments." in str(ve_context.exception)
 
     def test_assign_parent_partner_to_user(self) -> None:
         parent_partner = PartnerFactory(name="Parent Partner")
@@ -283,10 +267,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             self.user.partner = parent_partner
             self.user.save()
 
-        self.assertIn(
-            f"{parent_partner} is a parent partner and cannot have users.",
-            str(ve_context.exception),
-        )
+        assert f"{parent_partner} is a parent partner and cannot have users." in str(ve_context.exception)
 
     def test_assign_partner_with_user_as_parent(self) -> None:
         parent_partner = PartnerFactory(name="Parent Partner")
@@ -296,10 +277,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             self.partner.parent = parent_partner
             self.partner.save()
 
-        self.assertIn(
-            f"{parent_partner} cannot become a parent as it has users.",
-            str(ve_context.exception),
-        )
+        assert f"{parent_partner} cannot become a parent as it has users." in str(ve_context.exception)
 
     def test_area_limits_for_program_with_selected_partner_access(self) -> None:
         # Possible to have area limits for a program with selected partner access
@@ -314,9 +292,8 @@ class TestRoleAssignmentModel(TransactionTestCase):
         self.program1.save()
         with self.assertRaises(ValidationError) as ve_context:
             AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
-        self.assertIn(
-            f"Area limits cannot be set for programs with {self.program1.partner_access} access.",
-            str(ve_context.exception),
+        assert f"Area limits cannot be set for programs with {self.program1.partner_access} access." in str(
+            ve_context.exception
         )
 
     def test_area_limits_for_program_with_none_partner_access(self) -> None:
@@ -325,7 +302,6 @@ class TestRoleAssignmentModel(TransactionTestCase):
         self.program1.save()
         with self.assertRaises(ValidationError) as ve_context:
             AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
-        self.assertIn(
-            f"Area limits cannot be set for programs with {self.program1.partner_access} access.",
-            str(ve_context.exception),
+        assert f"Area limits cannot be set for programs with {self.program1.partner_access} access." in str(
+            ve_context.exception
         )

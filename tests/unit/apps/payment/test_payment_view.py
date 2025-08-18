@@ -56,7 +56,7 @@ class TestPaymentViewSet:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -76,7 +76,7 @@ class TestPaymentViewSet:
             assert payment["status"] == "Transaction Successful"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_VIEW_DETAILS], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -95,7 +95,7 @@ class TestPaymentViewSet:
             assert resp_data["status"] == "Transaction Successful"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_MARK_PAYMENT_AS_FAILED], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
@@ -116,7 +116,7 @@ class TestPaymentViewSet:
             assert resp_data["status"] == "Force failed"
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PM_MARK_PAYMENT_AS_FAILED], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),

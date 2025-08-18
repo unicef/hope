@@ -29,12 +29,12 @@ from hope.apps.account.models import Partner, Role, RoleAssignment, User
 pytestmark = pytest.mark.django_db()
 
 
-@pytest.fixture()
+@pytest.fixture
 def superuser(request: pytest.FixtureRequest, partner_unicef: Partner) -> User:
     return UserFactory(is_superuser=True, is_staff=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def role(request: pytest.FixtureRequest) -> Role:
     return RoleFactory(name="Role")
 
@@ -83,57 +83,57 @@ class RoleAssignmentInlineTest(TestCase):
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
 
         field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
-        self.assertIn(self.business_area, field.queryset)
-        self.assertNotIn(self.other_ba, field.queryset)
+        assert self.business_area in field.queryset
+        assert self.other_ba not in field.queryset
 
         request = self.get_mock_request(object_id="some not digit string")
 
         field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
-        self.assertIn(self.business_area, field.queryset)
-        self.assertIn(self.other_ba, field.queryset)
+        assert self.business_area in field.queryset
+        assert self.other_ba in field.queryset
 
     def test_formfield_for_foreignkey_role(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
 
         field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
-        self.assertIn(self.role, field.queryset)
-        self.assertNotIn(self.role_not_available, field.queryset)
+        assert self.role in field.queryset
+        assert self.role_not_available not in field.queryset
 
         request = self.get_mock_request(object_id="some not digit string")
 
         field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
-        self.assertIn(self.role, field.queryset)
-        self.assertIn(self.role_not_available, field.queryset)
+        assert self.role in field.queryset
+        assert self.role_not_available in field.queryset
 
     def test_has_add_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        self.assertFalse(self.admin.has_add_permission(request, self.unicef_subpartner))
+        assert not self.admin.has_add_permission(request, self.unicef_subpartner)
 
-        self.assertFalse(self.admin.has_add_permission(request, self.unicef_parent))
+        assert not self.admin.has_add_permission(request, self.unicef_parent)
 
-        self.assertTrue(self.admin.has_add_permission(request, self.partner_without_parent))
+        assert self.admin.has_add_permission(request, self.partner_without_parent)
 
-        self.assertTrue(self.admin.has_add_permission(request, self.user))
+        assert self.admin.has_add_permission(request, self.user)
 
     def test_has_change_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        self.assertFalse(self.admin.has_change_permission(request, self.unicef_subpartner))
+        assert not self.admin.has_change_permission(request, self.unicef_subpartner)
 
-        self.assertTrue(self.admin.has_change_permission(request, self.unicef_parent))
+        assert self.admin.has_change_permission(request, self.unicef_parent)
 
-        self.assertTrue(self.admin.has_change_permission(request, self.partner_without_parent))
+        assert self.admin.has_change_permission(request, self.partner_without_parent)
 
-        self.assertTrue(self.admin.has_change_permission(request, self.user))
+        assert self.admin.has_change_permission(request, self.user)
 
     def test_has_delete_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        self.assertFalse(self.admin.has_delete_permission(request, self.unicef_subpartner))
+        assert not self.admin.has_delete_permission(request, self.unicef_subpartner)
 
-        self.assertTrue(self.admin.has_delete_permission(request, self.unicef_parent))
+        assert self.admin.has_delete_permission(request, self.unicef_parent)
 
-        self.assertTrue(self.admin.has_delete_permission(request, self.partner_without_parent))
+        assert self.admin.has_delete_permission(request, self.partner_without_parent)
 
-        self.assertTrue(self.admin.has_delete_permission(request, self.user))
+        assert self.admin.has_delete_permission(request, self.user)
 
 
 class RoleAssignmentAdminTest(TestCase):
@@ -160,24 +160,24 @@ class RoleAssignmentAdminTest(TestCase):
     def test_get_queryset(self) -> None:
         request = self.get_mock_request()
         queryset = self.admin.get_queryset(request)
-        self.assertIn(self.role_assignment, queryset)
+        assert self.role_assignment in queryset
 
     def test_get_actions(self) -> None:
         request = self.get_mock_request()
         actions = self.admin.get_actions(request)
-        self.assertIsInstance(actions, dict)
+        assert isinstance(actions, dict)
 
     def test_check_sync_permission(self) -> None:
         request = self.get_mock_request()
-        self.assertTrue(self.admin.check_sync_permission(request))
+        assert self.admin.check_sync_permission(request)
 
         request.user.is_staff = False
         request.user.save()
-        self.assertFalse(self.admin.check_sync_permission(request))
+        assert not self.admin.check_sync_permission(request)
 
     def test_check_publish_permission(self) -> None:
         request = self.get_mock_request()
-        self.assertFalse(self.admin.check_publish_permission(request))
+        assert not self.admin.check_publish_permission(request)
 
 
 @pytest.mark.skip("Fail on pipeline")
@@ -197,41 +197,41 @@ class PartnerAdminTest(TestCase):
 
     def test_get_inline_instances(self) -> None:
         inline_instances = self.admin.get_inline_instances(self.request)
-        self.assertEqual(inline_instances, [])
+        assert inline_instances == []
 
         inline_instances = self.admin.get_inline_instances(self.request, self.partner)
-        self.assertEqual(len(inline_instances), 1)
-        self.assertIsInstance(inline_instances[0], RoleAssignmentInline)
+        assert len(inline_instances) == 1
+        assert isinstance(inline_instances[0], RoleAssignmentInline)
 
     def test_get_readonly_fields(self) -> None:
         readonly_fields = self.admin.get_readonly_fields(self.request)
-        self.assertEqual(readonly_fields, ["sub_partners"])
+        assert readonly_fields == ["sub_partners"]
 
         readonly_fields = self.admin.get_readonly_fields(self.request, self.partner)
-        self.assertEqual(readonly_fields, ["sub_partners"])
+        assert readonly_fields == ["sub_partners"]
 
         readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef)
-        self.assertEqual(readonly_fields, ["sub_partners", "name", "parent"])
+        assert readonly_fields == ["sub_partners", "name", "parent"]
 
         readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef_subpartner)
-        self.assertEqual(readonly_fields, ["sub_partners", "name", "parent"])
+        assert readonly_fields == ["sub_partners", "name", "parent"]
 
     def test_get_form_no_obj(self) -> None:
         form = self.admin.get_form(self.request)
         # level 0
-        self.assertIn(self.unicef, form.base_fields["parent"].queryset)
-        self.assertIn(self.parent_partner, form.base_fields["parent"].queryset)
+        assert self.unicef in form.base_fields["parent"].queryset
+        assert self.parent_partner in form.base_fields["parent"].queryset
         # level 1
-        self.assertNotIn(self.unicef_subpartner, form.base_fields["parent"].queryset)
-        self.assertNotIn(self.partner, form.base_fields["parent"].queryset)
+        assert self.unicef_subpartner not in form.base_fields["parent"].queryset
+        assert self.partner not in form.base_fields["parent"].queryset
 
     def test_get_form_unicef_subpartner(self) -> None:
         form = self.admin.get_form(self.request, self.unicef_subpartner)
-        self.assertNotIn("parent", form.base_fields)
+        assert "parent" not in form.base_fields
 
     def test_get_form_unicef(self) -> None:
         form = self.admin.get_form(self.request, self.unicef)
-        self.assertNotIn("parent", form.base_fields)
+        assert "parent" not in form.base_fields
 
     def test_get_form_parent_partner(self) -> None:
         form = self.admin.get_form(self.request, self.parent_partner)
@@ -239,7 +239,7 @@ class PartnerAdminTest(TestCase):
 
     def test_get_form_partner(self) -> None:
         form = self.admin.get_form(self.request, self.partner)
-        self.assertIn(self.unicef, form.base_fields["parent"].queryset)
-        self.assertIn(self.parent_partner, form.base_fields["parent"].queryset)
-        self.assertNotIn(self.unicef_subpartner, form.base_fields["parent"].queryset)
-        self.assertNotIn(self.partner, form.base_fields["parent"].queryset)
+        assert self.unicef in form.base_fields["parent"].queryset
+        assert self.parent_partner in form.base_fields["parent"].queryset
+        assert self.unicef_subpartner not in form.base_fields["parent"].queryset
+        assert self.partner not in form.base_fields["parent"].queryset

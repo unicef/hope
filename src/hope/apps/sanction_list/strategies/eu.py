@@ -107,7 +107,7 @@ class EUSanctionList(BaseSanctionList):
         self.parse(root)
 
     def load_from_url(self) -> None:
-        response = requests.get(self.context.config["url"])
+        response = requests.get(self.context.config["url"], timeout=10)
         tree = ET.parse(io.BytesIO(response.content))
         root = tree.getroot()
         self.parse(root)

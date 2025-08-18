@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-@pytest.fixture()
+@pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
     from test_utils.factories.sanction_list import SanctionListFactory
 

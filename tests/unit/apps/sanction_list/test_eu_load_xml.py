@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-@pytest.fixture()
+@pytest.fixture
 def strategy(sanction_list: "SanctionList") -> "EUSanctionList":
     return sanction_list.strategy  # type: ignore[return-value]
 

@@ -39,7 +39,7 @@ class TestBuildSummary(TestCase):
 
         summary = self.payment_plan.payment_verification_summary
 
-        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_PENDING)
+        assert summary.status == PaymentVerificationSummary.STATUS_PENDING
 
     def test_status_active_when_at_least_one_active_verification(self) -> None:
         self._create_verification_with_status(PaymentVerificationPlan.STATUS_ACTIVE)
@@ -47,7 +47,7 @@ class TestBuildSummary(TestCase):
         build_summary(self.payment_plan)
 
         summary = self.payment_plan.payment_verification_summary
-        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_ACTIVE)
+        assert summary.status == PaymentVerificationSummary.STATUS_ACTIVE
 
     def test_status_finished_when_all_verifications_finished(self) -> None:
         self._create_verification_with_status(PaymentVerificationPlan.STATUS_FINISHED)
@@ -55,7 +55,7 @@ class TestBuildSummary(TestCase):
         build_summary(self.payment_plan)
 
         summary = self.payment_plan.payment_verification_summary
-        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_FINISHED)
+        assert summary.status == PaymentVerificationSummary.STATUS_FINISHED
 
     def test_status_pending_when_add_and_removed_verification(self) -> None:
         payment_verification_plan = self._create_verification_with_status(PaymentVerificationPlan.STATUS_PENDING)
@@ -64,7 +64,7 @@ class TestBuildSummary(TestCase):
         build_summary(self.payment_plan)
 
         summary = self.payment_plan.payment_verification_summary
-        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_PENDING)
+        assert summary.status == PaymentVerificationSummary.STATUS_PENDING
 
     def test_query_number(self) -> None:
         with self.assertNumQueries(2):
