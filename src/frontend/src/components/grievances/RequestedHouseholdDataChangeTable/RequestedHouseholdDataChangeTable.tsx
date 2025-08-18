@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
 import { snakeCase } from 'lodash';
+import { roleDisplayMap } from '../utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
@@ -180,8 +181,12 @@ function RequestedHouseholdDataChangeTable(
                 <TableCell id={labelId} scope="row" align="left">
                   {`Roles (${role.full_name})`}
                 </TableCell>
-                <TableCell align="left">{role.previous_value}</TableCell>
-                <TableCell align="left">{role.value}</TableCell>
+                <TableCell align="left">
+                  {roleDisplayMap[role.previous_value] || role.previous_value}
+                </TableCell>
+                <TableCell align="left">
+                  {roleDisplayMap[role.value] || role.value}
+                </TableCell>
               </TableRow>
             );
           })}

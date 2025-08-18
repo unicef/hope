@@ -359,6 +359,12 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 }
 
+// Map role values for display
+export const roleDisplayMap = {
+  PRIMARY: 'Primary Collector',
+  ALTERNATE: 'Alternate Collector',
+};
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
   const householdData = values.householdDataUpdateFields
