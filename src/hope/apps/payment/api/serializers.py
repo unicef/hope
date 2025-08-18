@@ -1045,7 +1045,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
-        """return primary_collector or alternate_collector field value or None"""
+        """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
@@ -1197,7 +1197,7 @@ class VerificationListSerializer(serializers.ModelSerializer):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
-        """return primary_collector or alternate_collector field value or None"""
+        """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (

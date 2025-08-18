@@ -21,7 +21,7 @@ INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
 def es_autosync() -> Callable:
-    """This decorator checks if auto-synchronization with Elasticsearch is turned on"""
+    """Check if auto-synchronization with Elasticsearch is turned on [Decorator]."""
 
     def wrapper(func: Callable) -> Callable:
         def inner(*args: Any, **kwargs: Any) -> Callable | None:

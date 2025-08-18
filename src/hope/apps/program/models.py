@@ -323,6 +323,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     @property
     def screen_beneficiary(self) -> None:
         """Return if program will be screened against the sanction lists.
+
         :return:
         """
         return self.sanction_lists.exists()

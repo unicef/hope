@@ -189,7 +189,7 @@ class ImportDataInstanceValidator:
                     issuing_countries = [None] * len(values["validation_data"])
                 if key == "other_id_type_i_c":
                     for name, value, validation_data, issuing_country in zip(
-                        values["names"], values["numbers"], values["validation_data"], issuing_countries
+                        values["names"], values["numbers"], values["validation_data"], issuing_countries, strict=False
                     ):
                         row_number = validation_data.get("row_number")
                         if not name and value:
