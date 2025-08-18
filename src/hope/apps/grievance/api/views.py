@@ -860,10 +860,12 @@ class GrievanceTicketGlobalViewSet(
             elif field_name == "roles":
                 for role in household_data["roles"]:
                     individual_id = role["individual_id"]
-                    if household_approve_data.get(individual_id):
-                        role["approve_status"] = True
-                    else:
-                        role["approve_status"] = False
+                    approve_lookup = {
+                        individual_id: str(role.get("approve_status", "")).lower() == "true"
+                        for role in household_approve_data.get("roles", [])
+                    }
+                    for role in household_data["roles"]:
+                        role["approve_status"] = approve_lookup.get(individual_id, False)
             elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
             else:
