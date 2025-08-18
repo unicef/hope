@@ -26,8 +26,8 @@ class APITestCase(TestCase):
         self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
         resp = self.client.get(url)
         assert resp.status_code == status.HTTP_200_OK, "You need to be logged in and superuser"
-        self.assertIn(str(instance1.version), resp.content.decode("utf-8"))
-        self.assertIn(str(instance2.date.strftime("%A %d %b %Y")), resp.content.decode("utf-8"))
+        assert str(instance1.version) in resp.content.decode("utf-8")
+        assert str(instance2.date.strftime("%A %d %b %Y")) in resp.content.decode("utf-8")
 
     def tests_changelog_detail_view(self) -> None:
         instance = ChangelogFactory()
@@ -40,4 +40,4 @@ class APITestCase(TestCase):
         self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
         resp = self.client.get(url)
         assert resp.status_code == status.HTTP_200_OK, "You need to be logged in and superuser"
-        self.assertIn(str(instance.version), resp.content.decode("utf-8"))
+        assert str(instance.version) in resp.content.decode("utf-8")

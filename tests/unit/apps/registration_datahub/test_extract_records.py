@@ -78,7 +78,7 @@ class TestExtractRecords(TestCase):
         extract_records_task()
 
         record = Record.objects.first()
-        self.assertTrue(record.data)
+        assert record.data
 
     def test_extract_without_image(self) -> None:
         extract_records_task()

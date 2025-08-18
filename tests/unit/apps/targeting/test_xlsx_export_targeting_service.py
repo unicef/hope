@@ -36,13 +36,13 @@ class TestXlsxExportTargetingService(APITestCase):
         service = XlsxExportTargetingService(self.payment_plan)
         service._create_workbook()
         service._add_version()
-        self.assertEqual(
-            service.ws_meta[XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES].value,
-            XlsxExportTargetingService.VERSION_CELL_NAME,
+        assert (
+            service.ws_meta[XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES].value
+            == XlsxExportTargetingService.VERSION_CELL_NAME
         )
-        self.assertEqual(
-            service.ws_meta[XlsxExportTargetingService.VERSION_CELL_COORDINATES].value,
-            XlsxExportTargetingService.VERSION,
+        assert (
+            service.ws_meta[XlsxExportTargetingService.VERSION_CELL_COORDINATES].value
+            == XlsxExportTargetingService.VERSION
         )
 
     def test_add_standard_columns_headers(self) -> None:
@@ -50,7 +50,7 @@ class TestXlsxExportTargetingService(APITestCase):
         service._create_workbook()
         service._add_standard_columns_headers()
         headers = [cell.value for cell in service.ws_individuals[1]]
-        self.assertEqual(headers, ["Household unicef_id", "unicef_id", "Linked Households", "Accounts information"])
+        assert headers == ["Household unicef_id", "unicef_id", "Linked Households", "Accounts information"]
 
     def test_export_service_households_property(self) -> None:
         program = self.payment_plan.program_cycle.program
@@ -76,7 +76,7 @@ class TestXlsxExportTargetingService(APITestCase):
         )
 
         service = XlsxExportTargetingService(self.payment_plan)
-        self.assertEqual(len(service.households), 2)
+        assert len(service.households) == 2
 
         self.payment_plan.status = PaymentPlan.Status.LOCKED
         self.payment_plan.vulnerability_score_min = 10
@@ -84,8 +84,8 @@ class TestXlsxExportTargetingService(APITestCase):
         self.payment_plan.save()
 
         service = XlsxExportTargetingService(self.payment_plan)
-        self.assertEqual(len(service.households), 1)
-        self.assertEqual(service.households.first().unicef_id, p1.household.unicef_id)
+        assert len(service.households) == 1
+        assert service.households.first().unicef_id == p1.household.unicef_id
 
     def test_accounts_info(self) -> None:
         generate_delivery_mechanisms()
@@ -127,8 +127,7 @@ class TestXlsxExportTargetingService(APITestCase):
             number="321",
         )
 
-        self.assertEqual(
-            service._accounts_info(individual),
-            "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
-            " 'name_of_cardholder': 'Marek', 'number': '123'}, {'provider': 'Provider', 'delivery_phone_number': '123456789', 'service_provider_code': 'ABC', 'number': '321'}",
+        assert (
+            service._accounts_info(individual) == "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
+            " 'name_of_cardholder': 'Marek', 'number': '123'}, {'provider': 'Provider', 'delivery_phone_number': '123456789', 'service_provider_code': 'ABC', 'number': '321'}"
         )

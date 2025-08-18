@@ -53,7 +53,7 @@ class CreateRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         rdi = RegistrationDataImport.objects.filter(name="aaaa").first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         assert rdi.program == self.program
         assert rdi.status == RegistrationDataImport.LOADING
         assert rdi.imported_by == user
@@ -69,7 +69,7 @@ class CreateRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
-        self.assertIn("User with this email does not exist.", str(response.json()))
+        assert "User with this email does not exist." in str(response.json())
 
 
 class PushToRDITests(HOPEApiTestCase):
@@ -147,20 +147,20 @@ class PushToRDITests(HOPEApiTestCase):
 
         data: Dict = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi, village="village1").first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNone(hh.alternate_collector)
+        assert hh is not None
+        assert hh.head_of_household is not None
+        assert hh.primary_collector is not None
+        assert hh.alternate_collector is None
         assert hh.program_id == self.program.id
 
         assert hh.primary_collector.full_name == "Mary Primary #1"
         assert hh.head_of_household.full_name == "James Head #1"
-        self.assertIsNotNone(hh.head_of_household.photo)
+        assert hh.head_of_household.photo is not None
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
-        self.assertIsNotNone(account)
+        assert account is not None
         assert account.account_type.key == "bank"
         assert account.financial_institution.id == self.fi.id
         assert account.number == "123"
@@ -210,6 +210,6 @@ class CompleteRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         assert response.status_code == status.HTTP_200_OK, str(response.json())
         data = response.json()
-        self.assertDictEqual(data[0], {"id": str(self.rdi.id), "status": "IN_REVIEW"})
+        assert data[0] == {"id": str(self.rdi.id), "status": "IN_REVIEW"}
         self.rdi.refresh_from_db()
         assert self.rdi.status == RegistrationDataImport.IN_REVIEW

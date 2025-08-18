@@ -159,9 +159,9 @@ class TestKoboErrorHandling(APITestCase):
             )
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.CONNECTION_FAILED
-            self.assertNotEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.first_connection_failed_time is not None
             one_day_earlier_time = timezone.now() - timedelta(days=1)
-            self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
+            assert empty_template.first_connection_failed_time > one_day_earlier_time
 
     @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_400(self, mock_parent_init: Any) -> None:
@@ -188,9 +188,9 @@ class TestKoboErrorHandling(APITestCase):
             )
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.CONNECTION_FAILED
-            self.assertNotEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.first_connection_failed_time is not None
             one_day_earlier_time = timezone.now() - timedelta(days=1)
-            self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
+            assert empty_template.first_connection_failed_time > one_day_earlier_time
 
     @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_exception(self, mock_parent_init: Any) -> None:

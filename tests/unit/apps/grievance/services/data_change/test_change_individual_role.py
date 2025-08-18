@@ -110,7 +110,7 @@ class TestChangeIndividualRole(TestCase):
         role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual
         ).first()
-        self.assertIsNone(role)
+        assert role is None
 
     def test_change_role_from_none_to_primary(self) -> None:
         IndividualRoleInHousehold.objects.create(
@@ -134,7 +134,7 @@ class TestChangeIndividualRole(TestCase):
         previous_role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual_hoh
         ).first()
-        self.assertIsNone(previous_role)  # previous primary collector does not have a role anymore
+        assert previous_role is None  # previous primary collector does not have a role anymore
 
     def test_change_role_to_primary(self) -> None:
         TicketIndividualDataUpdateDetailsFactory(
@@ -152,7 +152,7 @@ class TestChangeIndividualRole(TestCase):
         previous_role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual_hoh
         ).first()
-        self.assertIsNone(previous_role)  # previous primary collector does not have a role anymore
+        assert previous_role is None  # previous primary collector does not have a role anymore
 
     def test_change_role_from_alternate_to_primary(self) -> None:
         IndividualRoleInHousehold.objects.create(
@@ -176,7 +176,7 @@ class TestChangeIndividualRole(TestCase):
         previous_role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual_hoh
         ).first()
-        self.assertIsNone(previous_role)
+        assert previous_role is None
 
     def test_change_role_from_primary_to_alternate(self) -> None:
         TicketIndividualDataUpdateDetailsFactory(

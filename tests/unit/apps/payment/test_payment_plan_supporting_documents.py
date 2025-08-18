@@ -48,22 +48,22 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         self.file.size = PaymentPlanSupportingDocument.FILE_SIZE_LIMIT + 1
         document_data = {"file": self.file, "title": "test"}
         serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=self.context)
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("file", serializer.errors)
+        assert not serializer.is_valid()
+        assert "file" in serializer.errors
         assert serializer.errors["file"][0] == "File size must be ≤ 10MB."
 
     def test_validate_file_extension_success(self) -> None:
         valid_file = SimpleUploadedFile("test.jpg", b"abc", content_type="image/jpeg")
         document_data = {"file": valid_file, "title": "test"}
         serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=self.context)
-        self.assertTrue(serializer.is_valid())
+        assert serializer.is_valid()
 
     def test_validate_file_extension_failure(self) -> None:
         invalid_file = SimpleUploadedFile("test.exe", b"abc", content_type="application/octet-stream")
         document_data = {"file": invalid_file, "title": "test"}
         serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=self.context)
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("file", serializer.errors)
+        assert not serializer.is_valid()
+        assert "file" in serializer.errors
         assert serializer.errors["file"][0] == "Unsupported file type."
 
     def test_validate_payment_plan_status_failure(self) -> None:
@@ -72,8 +72,8 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         serializer = PaymentPlanSupportingDocumentSerializer(
             data={"file": self.file, "title": "test"}, context=self.context
         )
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        assert not serializer.is_valid()
+        assert "non_field_errors" in serializer.errors
         assert serializer.errors["non_field_errors"][0] == "Payment plan must be within status OPEN or LOCKED."
 
     def test_validate_file_limit_failure(self) -> None:
@@ -95,8 +95,8 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         serializer = PaymentPlanSupportingDocumentSerializer(
             data={"file": self.file, "title": "test"}, context=self.context
         )
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        assert not serializer.is_valid()
+        assert "non_field_errors" in serializer.errors
         assert (
             serializer.errors["non_field_errors"][0]
             == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
@@ -140,8 +140,8 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
 
         assert response.status_code == status.HTTP_201_CREATED
         assert PaymentPlanSupportingDocument.objects.count() == 1
-        self.assertIn("id", response.data)
-        self.assertIn("uploaded_at", response.data)
+        assert "id" in response.data
+        assert "uploaded_at" in response.data
         assert response.data["file"] == "test_file.pdf"
         assert response.data["title"] == "Test Document"
         assert response.data["created_by"] == self.user.pk
@@ -152,7 +152,7 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         data = {"file": invalid_file, "title": "Test Document"}
         response = self.client.post(self.url, data, format="multipart")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        self.assertIn("file", response.data)
+        assert "file" in response.data
 
 
 class PaymentPlanSupportingDocumentViewTests(TestCase):
@@ -207,5 +207,5 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         response = self.client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        self.assertIsInstance(response, FileResponse)
+        assert isinstance(response, FileResponse)
         assert response["Content-Disposition"] == f"attachment; filename={self.document.file.name}"

@@ -172,7 +172,7 @@ class TestIndividualXlsxUpdate(APITestCase):
         with self.assertRaises(InvalidColumnsError) as context:
             IndividualXlsxUpdate(self.xlsx_update_invalid_file)
 
-        self.assertTrue("Invalid columns" in str(context.exception))
+        assert "Invalid columns" in str(context.exception)
 
     def test_complex_update_individual(self) -> None:
         # Given

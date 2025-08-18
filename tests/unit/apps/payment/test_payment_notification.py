@@ -414,16 +414,10 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert recipient in payment_notification.user_recipients.all()
 
         # action user should be excluded from recipients
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
         for not_recipient in [
             self.user_with_no_permissions,
@@ -436,10 +430,7 @@ class TestPaymentNotification(APITestCase):
             self.user_with_review_permission,
             self.user_with_download_xlsx_permission,
         ]:
-            self.assertNotIn(
-                not_recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert not_recipient not in payment_notification.user_recipients.all()
 
     def test_prepare_user_recipients_for_approve(self) -> None:
         payment_notification = PaymentNotification(
@@ -459,16 +450,10 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert recipient in payment_notification.user_recipients.all()
 
         # action user should be excluded from recipients
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
         for not_recipient in [
             self.user_with_no_permissions,
@@ -490,10 +475,7 @@ class TestPaymentNotification(APITestCase):
             self.user_with_review_permission,
             self.user_with_download_xlsx_permission,
         ]:
-            self.assertNotIn(
-                not_recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert not_recipient not in payment_notification.user_recipients.all()
 
     def test_prepare_user_recipients_for_authorize(self) -> None:
         payment_notification = PaymentNotification(
@@ -513,16 +495,10 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert recipient in payment_notification.user_recipients.all()
 
         # action user should be excluded from recipients
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
         for not_recipient in [
             self.user_with_no_permissions,
@@ -544,10 +520,7 @@ class TestPaymentNotification(APITestCase):
             self.user_with_authorize_permission,
             self.user_with_download_xlsx_permission,
         ]:
-            self.assertNotIn(
-                not_recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert not_recipient not in payment_notification.user_recipients.all()
 
     def test_prepare_user_recipients_for_release(self) -> None:
         payment_notification = PaymentNotification(
@@ -567,16 +540,10 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert recipient in payment_notification.user_recipients.all()
 
         # action user should be excluded from recipients
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
         for not_recipient in [
             self.user_with_no_permissions,
@@ -598,10 +565,7 @@ class TestPaymentNotification(APITestCase):
             self.user_with_authorize_permission,
             self.user_with_review_permission,
         ]:
-            self.assertNotIn(
-                not_recipient,
-                payment_notification.user_recipients.all(),
-            )
+            assert not_recipient not in payment_notification.user_recipients.all()
 
     @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -653,14 +617,8 @@ class TestPaymentNotification(APITestCase):
         )
         payment_notification.send_email_notification()
         assert len(payment_notification.email.recipients) == 2
-        self.assertIn(
-            "catchallemail@email.com",
-            payment_notification.email.recipients,
-        )
-        self.assertIn(
-            "catchallemail2@email.com",
-            payment_notification.email.recipients,
-        )
+        assert "catchallemail@email.com" in payment_notification.email.recipients
+        assert "catchallemail2@email.com" in payment_notification.email.recipients
         assert mock_post.call_count == 1
 
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
@@ -697,10 +655,7 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            self.assertIn(
-                recipient.email,
-                payment_notification.email.recipients,
-            )
+            assert recipient.email in payment_notification.email.recipients
 
         assert mock_post.call_count == 1
 
@@ -720,10 +675,7 @@ class TestPaymentNotification(APITestCase):
         )
         payment_notification.send_email_notification()
         assert len(payment_notification.email.recipients) == 19
-        self.assertNotIn(
-            self.user_with_partner_unicef_hq.email,
-            payment_notification.email.recipients,
-        )
+        assert self.user_with_partner_unicef_hq.email not in payment_notification.email.recipients
 
         for recipient in [
             self.user_with_partner_unicef_in_ba,
@@ -746,9 +698,6 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            self.assertIn(
-                recipient.email,
-                payment_notification.email.recipients,
-            )
+            assert recipient.email in payment_notification.email.recipients
 
         assert mock_post.call_count == 1

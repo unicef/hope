@@ -93,7 +93,7 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         assert self.program_source.households.count() == 2
         assert self.program_source.individuals.count() == 2
 
-        self.assertIsNone(self.household1.household_collection)
+        assert self.household1.household_collection is None
 
         assert Household.objects.filter(unicef_id=self.household1.unicef_id).count() == 1
         assert Household.objects.filter(unicef_id=self.household2.unicef_id).count() == 2
@@ -111,7 +111,7 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         assert self.program_source.households.count() == 2
         assert self.program_source.individuals.count() == 2
 
-        self.assertIsNotNone(self.household1.household_collection)
+        assert self.household1.household_collection is not None
 
         assert Household.objects.filter(unicef_id=self.household1.unicef_id).count() == 2
         assert Household.objects.filter(unicef_id=self.household2.unicef_id).count() == 2

@@ -67,13 +67,13 @@ class TestDataCollectingTypeForm(TestCase):
     def test_type_cannot_be_blank(self) -> None:
         form = DataCollectingTypeForm(self.form_data)
 
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         assert form.errors["type"][0] == "This field is required."
 
     def test_household_filters_cannot_be_marked_when_type_is_social(self) -> None:
         form = DataCollectingTypeForm({**self.form_data, "type": DataCollectingType.Type.SOCIAL})
 
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         assert form.errors["type"][0] == "Household filters cannot be applied for data collecting type with social type"
 
     def test_type_cannot_be_changed_to_different_than_compatible_types(self) -> None:
@@ -90,7 +90,7 @@ class TestDataCollectingTypeForm(TestCase):
             },
             instance=social_dct,
         )
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         assert form.errors["type"][0] == "Type of DCT cannot be changed if it has compatible DCTs of different type"
         assert (
             form.errors["compatible_types"][0] == f"DCTs of different types cannot be compatible with each other."
@@ -108,7 +108,7 @@ class TestDataCollectingTypeForm(TestCase):
             },
             instance=social_dct,
         )
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         assert (
             form.errors["compatible_types"][0]
             == f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: ['{str(standard_dct.label)}']"
@@ -135,9 +135,9 @@ class BusinessAreaAdminTest(WebTest):
         cls.partner2.allowed_business_areas.add(cls.business_area)
 
     def check_initial_state(self) -> None:
-        self.assertIn(self.business_area, self.partner1.allowed_business_areas.all())
-        self.assertIn(self.business_area, self.partner2.allowed_business_areas.all())
-        self.assertNotIn(self.business_area, self.partner3.allowed_business_areas.all())
+        assert self.business_area in self.partner1.allowed_business_areas.all()
+        assert self.business_area in self.partner2.allowed_business_areas.all()
+        assert self.business_area not in self.partner3.allowed_business_areas.all()
 
     def refresh_partners(self) -> None:
         self.partner1.refresh_from_db()
@@ -148,7 +148,7 @@ class BusinessAreaAdminTest(WebTest):
         """Ensure GET request returns a valid response with the correct form"""
         response = self.app.get(self.url, user=self.user)
         assert response.status_code == 200
-        self.assertIn("form", response.context)
+        assert "form" in response.context
 
     def test_allowed_partners_post_request_success(self) -> None:
         self.check_initial_state()
@@ -160,9 +160,9 @@ class BusinessAreaAdminTest(WebTest):
         assert response.status_code == status.HTTP_302_FOUND
 
         self.refresh_partners()
-        self.assertIn(self.business_area, self.partner1.allowed_business_areas.all())
-        self.assertNotIn(self.business_area, self.partner2.allowed_business_areas.all())  # Removed
-        self.assertIn(self.business_area, self.partner3.allowed_business_areas.all())  # Added
+        assert self.business_area in self.partner1.allowed_business_areas.all()
+        assert self.business_area not in self.partner2.allowed_business_areas.all()  # Removed
+        assert self.business_area in self.partner3.allowed_business_areas.all()  # Added
 
     def test_allowed_partners_post_request_prevent_removal_due_to_role_assignment(self) -> None:
         """Ensure a partner with an existing role assignment cannot be removed"""

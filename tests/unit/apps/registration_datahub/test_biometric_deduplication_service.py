@@ -193,7 +193,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.delete_deduplication_set(self.program)
         mock_delete_deduplication_set.assert_called_once_with(str(deduplication_set_id))
         self.program.refresh_from_db()
-        self.assertIsNone(self.program.deduplication_set_id)
+        assert self.program.deduplication_set_id is None
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication")

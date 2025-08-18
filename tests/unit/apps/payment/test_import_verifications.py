@@ -157,15 +157,12 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.validate()
 
         error = import_service.errors[0]
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Payment Verifications",
-                f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
-                "(None, 'YES', 'NO')",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Payment Verifications",
+            f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+            "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
+            "(None, 'YES', 'NO')",
+        ]
 
     def test_validation_invalid_version(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -194,14 +191,11 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Payment Verifications",
-                "A2",
-                f"This payment record id {wrong_uuid} is not in Cash Plan Payment Record Verification",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Payment Verifications",
+            "A2",
+            f"This payment record id {wrong_uuid} is not in Cash Plan Payment Record Verification",
+        ]
 
     def test_validation_wrong_type(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -215,14 +209,11 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.validate()
         error = import_service.errors[0]
 
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Payment Verifications",
-                f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3",
-                "Wrong type off cell number expected, text given.",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Payment Verifications",
+            f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3",
+            "Wrong type off cell number expected, text given.",
+        ]
 
     def test_validation_invalid_received_not_received_with_amount(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -236,14 +227,11 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Payment Verifications",
-                f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                "If received_amount(10.00) is not 0, you should set received to YES",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Payment Verifications",
+            f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+            "If received_amount(10.00) is not 0, you should set received to YES",
+        ]
 
     def test_validation_invalid_received_received_with_0_amount(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
@@ -257,14 +245,11 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
-        self.assertListEqual(
-            [error.sheet, error.coordinates, error.message],
-            [
-                "Payment Verifications",
-                f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                "Amount Received' equals to 0, please set status as 'Not Received'",
-            ],
-        )
+        assert [error.sheet, error.coordinates, error.message] == [
+            "Payment Verifications",
+            f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+            "Amount Received' equals to 0, please set status as 'Not Received'",
+        ]
 
     def test_import_valid_status_changed_received_no(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)

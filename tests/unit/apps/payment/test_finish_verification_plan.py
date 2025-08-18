@@ -106,8 +106,8 @@ class TestFinishVerificationPlan(TestCase):
         assert ticket.programs.count() == 1
         assert ticket.programs.first().id == self.program.id
         household = Household.objects.get(unicef_id=ticket.household_unicef_id)
-        self.assertIsNotNone(ticket.admin2_id)
-        self.assertIsNotNone(household.admin2_id)
+        assert ticket.admin2_id is not None
+        assert household.admin2_id is not None
         assert ticket.admin2_id == household.admin2_id
 
         assert mocked_requests_post.call_count == 10

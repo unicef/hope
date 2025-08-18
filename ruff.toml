@@ -66,12 +66,13 @@ ignore = [
     "PLR2004", # Magic value used in comparison
     "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
 
-    "PT009",
-    "PT011",
-    "PT019",
-    "PT012",
-    "PT027",
-    "PT022",
+#    "PT009",
+    "PT011",  # pytest.raises match
+    "PT019",  # pytest.mark.usefixtures
+    "PT012",  # pytest.raises single statement
+    "PT027",  # pytest.raises
+    "PT022",  # yield
+    "PT015",  # pytest.fail
 
 ]
 

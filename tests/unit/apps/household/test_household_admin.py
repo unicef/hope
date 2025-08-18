@@ -127,10 +127,10 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         self.grievance_ticket_household2.refresh_from_db()
 
         assert self.household.withdrawn is True
-        self.assertIsNotNone(self.household.withdrawn_date)
+        assert self.household.withdrawn_date is not None
         assert self.household.internal_data["withdrawn_tag"] == tag
         assert self.individuals[0].withdrawn is True
-        self.assertIsNotNone(self.individuals[0].withdrawn_date)
+        assert self.individuals[0].withdrawn_date is not None
         assert self.document.status == Document.STATUS_INVALID
         assert self.grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
         assert self.grievance_ticket.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
@@ -138,12 +138,12 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         assert self.grievance_ticket2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
 
         assert self.household2.withdrawn is True
-        self.assertIsNotNone(self.household2.withdrawn_date)
+        assert self.household2.withdrawn_date is not None
         assert self.household2.internal_data["withdrawn_tag"] == tag
         assert self.individuals2[0].withdrawn is True
-        self.assertIsNotNone(self.individuals2[0].withdrawn_date)
+        assert self.individuals2[0].withdrawn_date is not None
         assert self.individuals2[1].withdrawn is True
-        self.assertIsNotNone(self.individuals2[1].withdrawn_date)
+        assert self.individuals2[1].withdrawn_date is not None
         assert self.grievance_ticket_household2.status == GrievanceTicket.STATUS_CLOSED
         assert self.grievance_ticket_household2.extras["status_before_withdrawn"] == str(
             GrievanceTicket.STATUS_IN_PROGRESS
@@ -162,9 +162,9 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         self.grievance_ticket.refresh_from_db()
         self.grievance_ticket2.refresh_from_db()
         assert self.household.withdrawn is False
-        self.assertIsNone(self.household.withdrawn_date)
+        assert self.household.withdrawn_date is None
         assert self.individuals[0].withdrawn is False
-        self.assertIsNone(self.individuals[0].withdrawn_date)
+        assert self.individuals[0].withdrawn_date is None
         assert self.grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
         assert self.grievance_ticket.extras.get("status_before_withdrawn") == ""
         assert self.grievance_ticket2.status == GrievanceTicket.STATUS_IN_PROGRESS

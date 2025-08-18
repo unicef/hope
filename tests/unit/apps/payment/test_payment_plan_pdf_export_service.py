@@ -60,7 +60,7 @@ class TestPaymentPlanPDFExportService(TestCase):
 
         assert self.payment_plan.program.data_collecting_type.type == DataCollectingType.Type.STANDARD
 
-        self.assertTrue(isinstance(pdf1, bytes))
+        assert isinstance(pdf1, bytes)
         assert filename1 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
 
         self.payment_plan.program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
@@ -69,7 +69,7 @@ class TestPaymentPlanPDFExportService(TestCase):
 
         assert self.payment_plan.program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
         pdf2, filename2 = self.pdf_export_service.generate_pdf_summary()
-        self.assertTrue(isinstance(pdf2, bytes))
+        assert isinstance(pdf2, bytes)
         assert filename2 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
 
     def test_get_email_context(self) -> None:
@@ -89,4 +89,4 @@ class TestPaymentPlanPDFExportService(TestCase):
 
         context = self.pdf_export_service.get_email_context(user_mock)
 
-        self.assertDictEqual(context, expected_context)
+        assert context == expected_context

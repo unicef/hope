@@ -54,10 +54,7 @@ class TestFlexibleAttribute(TransactionTestCase):
                 program=self.program1,
                 label="PDU Field 1",
             )
-        self.assertIn(
-            'duplicate key value violates unique constraint "unique_name_program"',
-            str(ie_context.exception),
-        )
+        assert 'duplicate key value violates unique constraint "unique_name_program"' in str(ie_context.exception)
 
         # Not possible to have flex fields with the same name without a program
         with self.assertRaises(IntegrityError) as ie_context:
@@ -67,9 +64,8 @@ class TestFlexibleAttribute(TransactionTestCase):
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 label={"English(EN)": "value"},
             )
-        self.assertIn(
-            'duplicate key value violates unique constraint "unique_name_without_program"',
-            str(ie_context.exception),
+        assert 'duplicate key value violates unique constraint "unique_name_without_program"' in str(
+            ie_context.exception
         )
 
         # Not possible to have flex fields with the same name in a program and without a program
@@ -80,9 +76,8 @@ class TestFlexibleAttribute(TransactionTestCase):
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 label={"English(EN)": "value"},
             )
-        self.assertIn(
-            f'Flex field with name "{self.pdu_field.name}" already exists inside a program.',
-            str(ve_context.exception),
+        assert f'Flex field with name "{self.pdu_field.name}" already exists inside a program.' in str(
+            ve_context.exception
         )
 
         with self.assertRaises(ValidationError) as ve_context:
@@ -90,9 +85,8 @@ class TestFlexibleAttribute(TransactionTestCase):
                 program=self.program1,
                 label="Flex Field 1",
             )
-        self.assertIn(
-            f'Flex field with name "{self.flex_field.name}" already exists without a program.',
-            str(ve_context.exception),
+        assert f'Flex field with name "{self.flex_field.name}" already exists without a program.' in str(
+            ve_context.exception
         )
 
     def test_flexible_attribute_label_without_english_en_key(self) -> None:

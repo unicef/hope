@@ -399,7 +399,7 @@ class TestRdiXlsxCreateTask(TestCase):
             individual,
             "birth_certificate_photo_i_c",
         )
-        self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
+        assert "individual_14_birth_certificate_i_c" in task.documents
         birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
         assert birth_certificate["individual"] == individual
         assert birth_certificate["photo"].name == "12-2020-06-22 12:00:00+00:00.jpg"
@@ -467,8 +467,8 @@ class TestRdiXlsxCreateTask(TestCase):
 
         document = PendingDocument.objects.first()
         photo = document.photo.name
-        self.assertTrue(photo.startswith("image"))
-        self.assertTrue(photo.endswith(".png"))
+        assert photo.startswith("image")
+        assert photo.endswith(".png")
 
     def test_cast_value(self) -> None:
         task = self.RdiXlsxCreateTask()
@@ -512,11 +512,11 @@ class TestRdiXlsxCreateTask(TestCase):
 
         households = PendingHousehold.objects.all()
         for household in households:
-            self.assertTrue(int(household.detail_id) in [3, 4, 6])
+            assert int(household.detail_id) in [3, 4, 6]
 
         individuals = PendingIndividual.objects.all()
         for individual in individuals:
-            self.assertTrue(int(individual.detail_id) in [3, 4, 5, 7, 8, 9])
+            assert int(individual.detail_id) in [3, 4, 5, 7, 8, 9]
 
     def test_create_tax_id_document(self) -> None:
         task = self.RdiXlsxCreateTask()

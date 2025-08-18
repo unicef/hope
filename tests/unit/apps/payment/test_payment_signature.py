@@ -96,7 +96,7 @@ class TestPaymentSignature(APITestCase):
         payment.entitlement_quantity = 21
         Payment.signature_manager.bulk_update_with_signature([payment], ["entitlement_quantity"])
         payment.refresh_from_db()
-        self.assertNotEqual(payment.signature_hash, old_signature)
+        assert payment.signature_hash != old_signature
         assert payment.signature_hash == self.calculate_hash_manually(payment)
 
     def test_bulk_create(self) -> None:

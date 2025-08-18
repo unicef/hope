@@ -114,7 +114,7 @@ class TestHousehold(TestCase):
         household1.delete()
         assert Household.all_objects.filter(unicef_id="HH-9090").first().is_removed is True
         household2.delete(soft=False)
-        self.assertIsNone(Household.all_objects.filter(unicef_id="HH-9191").first())
+        assert Household.all_objects.filter(unicef_id="HH-9191").first() is None
 
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         HouseholdFactory(unicef_id="HH-123", program=self.program)
@@ -128,7 +128,7 @@ class TestHousehold(TestCase):
         assert household.longitude == 1.2
         assert household.latitude == 0.5
         household.geopoint = None
-        self.assertIsNone(household.longitude)
+        assert household.longitude is None
         assert household.latitude is None
 
 

@@ -109,7 +109,7 @@ class TestExcludeHouseholds(APITestCase):
 
         assert self.payment_plan.exclusion_reason == "reason exclusion Error 123"
         assert self.payment_plan.exclude_household_error == error_msg
-        self.assertIsNone(self.payment_plan.background_action_status)
+        assert self.payment_plan.background_action_status is None
 
     def test_exclude_all_households(self) -> None:
         self.payment_1.excluded = True

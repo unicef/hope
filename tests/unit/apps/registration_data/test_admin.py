@@ -165,26 +165,26 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         RegistrationDataImportAdmin._delete_merged_rdi(self.rdi)
 
         assert GrievanceTicket.objects.count() == 0
-        self.assertIsNone(GrievanceTicket.objects.filter(id=self.grievance_ticket1.id).first())
-        self.assertIsNone(GrievanceTicket.objects.filter(id=self.grievance_ticket2.id).first())
+        assert GrievanceTicket.objects.filter(id=self.grievance_ticket1.id).first() is None
+        assert GrievanceTicket.objects.filter(id=self.grievance_ticket2.id).first() is None
 
         assert TicketIndividualDataUpdateDetails.objects.count() == 0
-        self.assertIsNone(TicketIndividualDataUpdateDetails.objects.filter(ticket=self.grievance_ticket2).first())
+        assert TicketIndividualDataUpdateDetails.objects.filter(ticket=self.grievance_ticket2).first() is None
 
         assert TicketComplaintDetails.objects.count() == 0
-        self.assertIsNone(TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first())
+        assert TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first() is None
 
         assert Payment.objects.count() == 0
-        self.assertIsNone(Payment.objects.filter(household=self.household).first())
+        assert Payment.objects.filter(household=self.household).first() is None
 
         assert RegistrationDataImport.objects.count() == 0
-        self.assertIsNone(RegistrationDataImport.objects.filter(id=self.rdi.id).first())
+        assert RegistrationDataImport.objects.filter(id=self.rdi.id).first() is None
 
         assert Household.objects.count() == 0
-        self.assertIsNone(Household.objects.filter(id=self.household.id).first())
+        assert Household.objects.filter(id=self.household.id).first() is None
 
         assert Individual.objects.count() == 0
-        self.assertIsNone(Individual.objects.filter(id=self.individuals[0].id).first())
+        assert Individual.objects.filter(id=self.individuals[0].id).first() is None
 
         assert Document.objects.count() == 0
-        self.assertIsNone(Document.objects.filter(id=self.document.id).first())
+        assert Document.objects.filter(id=self.document.id).first() is None

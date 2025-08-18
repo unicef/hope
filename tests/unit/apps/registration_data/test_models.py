@@ -72,7 +72,7 @@ class TestRegistrationDataModels(TestCase):
         )
 
     def test_rdi_can_be_merged(self) -> None:
-        self.assertTrue(self.registration_data_import.can_be_merged())
+        assert self.registration_data_import.can_be_merged()
 
     def test_imported_household_str(self) -> None:
         assert str(self.imported_household) == self.imported_household.unicef_id

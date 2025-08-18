@@ -564,9 +564,9 @@ class TestGoldenRecordDeduplication(TestCase):
 
         assert GrievanceTicket.objects.all().count() == 1
         ticket_details = TicketNeedsAdjudicationDetails.objects.first()
-        self.assertIsNotNone(ticket_details.golden_records_individual)
+        assert ticket_details.golden_records_individual is not None
         assert ticket_details.possible_duplicates.all().count() == 1
-        self.assertNotEqual(ticket_details.golden_records_individual, ticket_details.possible_duplicates.first())
+        assert ticket_details.golden_records_individual != ticket_details.possible_duplicates.first()
 
         passport.refresh_from_db()
         assert passport.status == Document.STATUS_VALID

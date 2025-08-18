@@ -91,14 +91,14 @@ class TestPushPeople(HOPEApiTestCase):
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         assert rdi.program == self.program
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(ind)
+        assert hh is not None
+        assert ind is not None
         assert hh.head_of_household == ind
         assert hh.primary_collector == ind
         assert hh.village == "village1"
@@ -137,15 +137,15 @@ class TestPushPeople(HOPEApiTestCase):
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(ind)
+        assert ind is not None
         assert ind.full_name == "John Doe"
         assert ind.sex == MALE
 
         document = PendingDocument.objects.filter(individual=ind).first()
-        self.assertIsNotNone(document)
+        assert document is not None
         assert document.document_number == "10"
 
     def test_upload_multiple_people_with_documents(self) -> None:
@@ -185,7 +185,7 @@ class TestPushPeople(HOPEApiTestCase):
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         assert len(response_json["people"]) == 2
 
@@ -197,18 +197,18 @@ class TestPushPeople(HOPEApiTestCase):
 
         john_doe = PendingIndividual.objects.filter(full_name="John Doe").first()
 
-        self.assertIsNotNone(john_doe)
+        assert john_doe is not None
         assert john_doe.full_name == "John Doe"
         assert john_doe.sex == MALE
 
         mary_doe = PendingIndividual.objects.filter(full_name="Mary Doe").first()
 
-        self.assertIsNotNone(mary_doe)
+        assert mary_doe is not None
         assert mary_doe.full_name == "Mary Doe"
         assert mary_doe.sex == FEMALE
 
         document = PendingDocument.objects.filter(individual=john_doe).first()
-        self.assertIsNotNone(document)
+        assert document is not None
         assert document.document_number == "10"
 
     def test_upload_with_errors(self) -> None:
@@ -282,9 +282,9 @@ class TestPushPeople(HOPEApiTestCase):
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(ind)
+        assert ind is not None
         assert ind.full_name == "John Doe"
         assert getattr(ind, f"{field_name}_valid") == expected_value
 
@@ -313,7 +313,7 @@ class TestPushPeople(HOPEApiTestCase):
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
         assert ind.household.village == expected_value
 
@@ -339,7 +339,7 @@ class TestPushPeople(HOPEApiTestCase):
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
         assert ind.household.admin1.p_code == "AF01"
         assert ind.household.admin2.p_code == "AF0101"

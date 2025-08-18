@@ -413,7 +413,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment = follow_up_pp.payment_items.first()
         assert follow_up_payment.status == Payment.STATUS_PENDING
         assert follow_up_payment.parent == follow_up_pp
-        self.assertIsNotNone(follow_up_payment.source_payment)
+        assert follow_up_payment.source_payment is not None
         assert follow_up_payment.is_follow_up is True
         assert follow_up_payment.business_area == follow_up_payment.source_payment.business_area
         assert follow_up_payment.household == follow_up_payment.source_payment.household
@@ -750,7 +750,7 @@ class TestPaymentPlanServices(APITestCase):
         new_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
 
         for p_id in new_payment_ids:
-            self.assertNotIn(p_id, old_payment_ids)
+            assert p_id not in old_payment_ids
 
         for p_unicef_id in new_payment_unicef_ids:
             assert p_unicef_id not in old_payment_unicef_ids
@@ -1119,9 +1119,7 @@ class TestPaymentPlanServices(APITestCase):
             with self.assertRaises(IntegrityError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
-            self.assertIn(
-                'duplicate key value violates unique constraint "payment_plan_and_household"', str(error.exception)
-            )
+            assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(error.exception)
 
         with transaction.atomic():
             IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
@@ -1129,7 +1127,7 @@ class TestPaymentPlanServices(APITestCase):
             with self.assertRaises(ValidationError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
-            self.assertIn(f"Couldn't find a primary collector in {household.unicef_id}", str(error.exception))
+            assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.exception)
 
     def test_acceptance_process_validation_error(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1141,7 +1139,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(ValidationError) as error:
             PaymentPlanService(payment_plan=payment_plan).acceptance_process()
 
-        self.assertIn(f"Approval Process object not found for PaymentPlan {payment_plan.id}", str(error.exception))
+        assert f"Approval Process object not found for PaymentPlan {payment_plan.id}" in str(error.exception)
 
     def test_update_rules_tp_open(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1179,5 +1177,5 @@ class TestPaymentPlanServices(APITestCase):
         # Check that rules were updated
         assert payment_plan.rules.count() == 1
         # Check flags
-        self.assertTrue(payment_plan.flag_exclude_if_on_sanction_list)
-        self.assertFalse(payment_plan.flag_exclude_if_active_adjudication_ticket)
+        assert payment_plan.flag_exclude_if_on_sanction_list
+        assert not payment_plan.flag_exclude_if_active_adjudication_ticket

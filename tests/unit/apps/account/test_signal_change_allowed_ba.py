@@ -66,18 +66,16 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         assert self.program_ukr_2.role_assignments.first().partner == self.partner
 
         assert self.partner.role_assignments.count() == 3
-        self.assertIsNotNone(self.partner.role_assignments.filter(program=self.program_afg).first())
-        self.assertIsNotNone(
-            self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first()
+        assert self.partner.role_assignments.filter(program=self.program_afg).first() is not None
+        assert (
+            self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first() is not None
         )
-        self.assertIsNotNone(self.partner.role_assignments.filter(program=self.program_ukr_2).first())
+        assert self.partner.role_assignments.filter(program=self.program_ukr_2).first() is not None
 
         assert AdminAreaLimitedTo.objects.filter(partner=self.partner).count() == 0
 
         self.partner.allowed_business_areas.remove(self.business_area_afg)
         # removing from allowed BA -> removing roles in this BA
-        self.assertIsNone(self.partner.role_assignments.filter(program=self.program_afg).first())
-        self.assertIsNone(
-            self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first()
-        )
-        self.assertIsNotNone(self.partner.role_assignments.filter(program=self.program_ukr_2).first())
+        assert self.partner.role_assignments.filter(program=self.program_afg).first() is None
+        assert self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first() is None
+        assert self.partner.role_assignments.filter(program=self.program_ukr_2).first() is not None

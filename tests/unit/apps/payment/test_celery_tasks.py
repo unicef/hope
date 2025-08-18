@@ -264,14 +264,14 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db()
         file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
-        self.assertIsNone(payment_plan.background_action_status)
-        self.assertTrue(payment_plan.has_export_file)
-        self.assertTrue(
-            payment_plan.export_file_per_fsp.file.name.startswith(f"payment_plan_payment_list_{payment_plan.unicef_id}")
+        assert payment_plan.background_action_status is None
+        assert payment_plan.has_export_file
+        assert payment_plan.export_file_per_fsp.file.name.startswith(
+            f"payment_plan_payment_list_{payment_plan.unicef_id}"
         )
-        self.assertTrue(payment_plan.export_file_per_fsp.file.name.endswith(".zip"))
-        self.assertIsNotNone(file_obj.password)
-        self.assertIsNotNone(file_obj.xlsx_password)
+        assert payment_plan.export_file_per_fsp.file.name.endswith(".zip")
+        assert file_obj.password is not None
+        assert file_obj.xlsx_password is not None
 
     @patch("hope.apps.payment.notifications.MailjetClient.send_email")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password(self, mock_mailjet_send: Mock) -> None:
@@ -289,10 +289,10 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db()
         file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
-        self.assertIsNone(payment_plan.background_action_status)
+        assert payment_plan.background_action_status is None
         assert payment_plan.export_file_per_fsp == file_obj
-        self.assertIsNotNone(file_obj.password)
-        self.assertIsNotNone(file_obj.xlsx_password)
+        assert file_obj.password is not None
+        assert file_obj.xlsx_password is not None
 
         send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
 
