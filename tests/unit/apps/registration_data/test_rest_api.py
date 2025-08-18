@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from typing import Callable, Generator
 from unittest.mock import Mock, patch
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
 
@@ -9,7 +10,11 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.registration_data import (
+    ImportDataFactory,
+    KoboImportDataFactory,
+    RegistrationDataImportFactory,
+)
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -19,7 +24,7 @@ from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
 from hope.apps.sanction_list.models import SanctionList
 
 
@@ -420,6 +425,436 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
         assert all("name" in c and "value" in c for c in response.data)
+
+    @patch("hope.apps.registration_datahub.celery_tasks.validate_xlsx_import_task.delay")
+    def test_upload_xlsx_file(self, mock_validate_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        url = reverse(
+            "api:registration-data:import-data-upload-upload-xlsx-file",
+            args=["afghanistan", self.program.slug],
+        )
+
+        # Create a test XLSX file
+        file_content = b"test xlsx content"
+        uploaded_file = SimpleUploadedFile(
+            "test_data.xlsx",
+            file_content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, {"file": uploaded_file}, format="multipart")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert "status" in response.data
+        assert response.data["data_type"] == ImportData.XLSX
+
+        # Check ImportData was created
+        import_data = ImportData.objects.get(id=response.data["id"])
+        assert import_data.status == ImportData.STATUS_PENDING
+        assert import_data.data_type == ImportData.XLSX
+        assert import_data.business_area_slug == self.business_area.slug
+        assert import_data.created_by_id == self.user.id
+
+        # Check celery task was called
+        mock_validate_task.assert_called_once()
+        call_args = mock_validate_task.call_args[0]
+        assert call_args[0] == import_data.id
+        assert call_args[1] == str(self.program.id)
+
+    @patch("hope.apps.registration_datahub.celery_tasks.pull_kobo_submissions_task.delay")
+    def test_save_kobo_import_data(self, mock_pull_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        url = reverse(
+            "api:registration-data:kobo-import-data-upload-save-kobo-import-data",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "uid": "test_kobo_asset_123",
+            "only_active_submissions": True,
+            "pull_pictures": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert "status" in response.data
+        assert response.data["kobo_asset_id"] == "test_kobo_asset_123"
+        assert response.data["only_active_submissions"]
+        assert not response.data["pull_pictures"]
+
+        # Check KoboImportData was created
+        kobo_import_data = KoboImportData.objects.get(id=response.data["id"])
+        assert kobo_import_data.status == ImportData.STATUS_PENDING
+        assert kobo_import_data.data_type == ImportData.JSON
+        assert kobo_import_data.kobo_asset_id == "test_kobo_asset_123"
+        assert kobo_import_data.only_active_submissions
+        assert not kobo_import_data.pull_pictures
+        assert kobo_import_data.business_area_slug == self.business_area.slug
+        assert kobo_import_data.created_by_id == self.user.id
+
+        # Check celery task was called
+        mock_pull_task.assert_called_once()
+        call_args = mock_pull_task.call_args[0]
+        assert call_args[0] == kobo_import_data.id
+        assert call_args[1] == str(self.program.id)
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+    def test_registration_xlsx_import(self, mock_import_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's ready for import
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+            data_type=ImportData.XLSX,
+            number_of_households=5,
+            number_of_individuals=15,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert response.data["name"] == "Test XLSX Import"
+        assert "status" in response.data
+
+        # Check RegistrationDataImport was created
+        rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+        assert rdi.name == "Test XLSX Import"
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.XLS
+        assert rdi.number_of_households == 5
+        assert rdi.number_of_individuals == 15
+        assert rdi.screen_beneficiary
+        assert rdi.program == self.program
+        assert rdi.imported_by == self.user
+
+        # Check celery task was called
+        mock_import_task.assert_called_once()
+
+    def test_registration_xlsx_import_import_data_not_found(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": "00000000-0000-0000-0000-000000000000",
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Import data not found" in response.data
+
+    def test_registration_xlsx_import_import_data_not_ready(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's not ready
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_PENDING,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Import data is not ready for import" in response.data
+
+    def test_registration_xlsx_import_program_finished(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's ready for import
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        # Set program to finished
+        self.program.status = Program.FINISHED
+        self.program.save()
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "In order to perform this action, program status must not be finished." in response.data
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_kobo_import_task.delay")
+    def test_registration_kobo_import(self, mock_import_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's ready for import
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+            kobo_asset_id="test_kobo_asset_456",
+            number_of_households=8,
+            number_of_individuals=25,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert response.data["name"] == "Test Kobo Import"
+        assert "status" in response.data
+
+        # Check RegistrationDataImport was created
+        rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+        assert rdi.name == "Test Kobo Import"
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.KOBO
+        assert rdi.number_of_households == 8
+        assert rdi.number_of_individuals == 25
+        assert rdi.pull_pictures
+        assert not rdi.screen_beneficiary
+        assert rdi.program == self.program
+        assert rdi.imported_by == self.user
+
+        # Check celery task was called
+        mock_import_task.assert_called_once()
+
+    def test_registration_kobo_import_kobo_data_not_found(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": "00000000-0000-0000-0000-000000000000",
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Kobo import data not found" in response.data
+
+    def test_registration_kobo_import_kobo_data_not_ready(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's not ready
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_PENDING,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Kobo import data is not ready for import" in response.data
+
+    def test_registration_kobo_import_program_finished(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's ready for import
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        # Set program to finished
+        self.program.status = Program.FINISHED
+        self.program.save()
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "In order to perform this action, program status must not be finished." in response.data
+
+    def test_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData with validation errors
+        import_data = ImportDataFactory(
+            business_area_slug=self.business_area.slug,
+            status=ImportData.STATUS_FINISHED,
+            validation_errors='[{"row_number": 1, "header": "name", "message": "Name is required"}]',
+            error="Test error message",
+        )
+
+        url = reverse(
+            "api:registration-data:import-data-detail",
+            args=["afghanistan", import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+        # Check response structure
+        assert response.data["id"] == str(import_data.id)
+        assert response.data["status"] == import_data.status
+        assert response.data["data_type"] == import_data.data_type
+        assert response.data["error"] == "Test error message"
+
+        # Check validation errors are parsed
+        assert "xlsx_validation_errors" in response.data
+        validation_errors = response.data["xlsx_validation_errors"]
+        assert len(validation_errors) == 1
+        assert validation_errors[0]["row_number"] == 1
+        assert validation_errors[0]["header"] == "name"
+        assert validation_errors[0]["message"] == "Name is required"
+
+    def test_kobo_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData with validation errors
+        kobo_import_data = KoboImportDataFactory(
+            business_area_slug=self.business_area.slug,
+            status=ImportData.STATUS_FINISHED,
+            kobo_asset_id="test_asset_123",
+            validation_errors='[{"header": "age", "message": "Age must be a number"}]',
+            only_active_submissions=True,
+            pull_pictures=False,
+        )
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-detail",
+            args=["afghanistan", kobo_import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+        # Check response structure
+        assert response.data["id"] == str(kobo_import_data.id)
+        assert response.data["status"] == kobo_import_data.status
+        assert response.data["kobo_asset_id"] == "test_asset_123"
+        assert response.data["only_active_submissions"]
+        assert not response.data["pull_pictures"]
+
+        # Check validation errors are parsed
+        assert "kobo_validation_errors" in response.data
+        validation_errors = response.data["kobo_validation_errors"]
+        assert len(validation_errors) == 1
+        assert validation_errors[0]["header"] == "age"
+        assert validation_errors[0]["message"] == "Age must be a number"
+
+    def test_import_data_retrieve_different_business_area(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData in different business area
+        import_data = ImportDataFactory(
+            business_area_slug="different_area",
+            status=ImportData.STATUS_FINISHED,
+        )
+
+        url = reverse(
+            "api:registration-data:import-data-detail",
+            args=["afghanistan", import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_kobo_import_data_retrieve_different_business_area(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData in different business area
+        kobo_import_data = KoboImportDataFactory(
+            business_area_slug="different_area",
+            status=ImportData.STATUS_FINISHED,
+        )
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-detail",
+            args=["afghanistan", kobo_import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 class RegistrationDataImportPermissionTest(HOPEApiTestCase):
@@ -911,6 +1346,180 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
             response = self.client.post(url, data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "This action would result in importing 0 households and 0 individuals." in response.data
+
+    def test_permission_checks_upload_xlsx_file(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:import-data-upload-upload-xlsx-file",
+            args=["afghanistan", self.program.slug],
+        )
+
+        file_content = b"test xlsx content"
+        uploaded_file = SimpleUploadedFile(
+            "test_data.xlsx",
+            file_content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # Should be forbidden without permission
+        response = self.client.post(url, {"file": uploaded_file}, format="multipart")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionUploadXlsxRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        # Create a fresh file upload
+        uploaded_file2 = SimpleUploadedFile(
+            "test_data.xlsx",
+            file_content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response = self.client.post(url, {"file": uploaded_file2}, format="multipart")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_save_kobo_import_data(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-upload-save-kobo-import-data",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "uid": "test_kobo_asset_123",
+            "only_active_submissions": True,
+            "pull_pictures": False,
+        }
+
+        # Should be forbidden without permission
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionSaveKoboRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_registration_xlsx_import(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's ready for import
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        # Should be forbidden without permission
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionXlsxImportRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_registration_kobo_import(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's ready for import
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        # Should be forbidden without permission
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionKoboImportRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        import_data = ImportDataFactory(business_area_slug=self.business_area.slug)
+
+        url = reverse(
+            "api:registration-data:import-data-detail",
+            args=["afghanistan", import_data.id],
+        )
+
+        # Should be forbidden without permission
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionImportDataRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_permission_checks_kobo_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        kobo_import_data = KoboImportDataFactory(business_area_slug=self.business_area.slug)
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-detail",
+            args=["afghanistan", kobo_import_data.id],
+        )
+
+        # Should be forbidden without permission
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionKoboImportDataRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_permission_denied(self, mock_registration_task: Mock) -> None:

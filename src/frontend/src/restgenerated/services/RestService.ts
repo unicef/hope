@@ -37,9 +37,12 @@ import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
+import type { ImportData } from '../models/ImportData';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { IndividualPhotoDetail } from '../models/IndividualPhotoDetail';
+import type { KoboAssetObject } from '../models/KoboAssetObject';
+import type { KoboImportData } from '../models/KoboImportData';
 import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
 import type { MessageSampleSize } from '../models/MessageSampleSize';
@@ -61,7 +64,6 @@ import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrieva
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
-import type { PaginatedKoboAssetObjectList } from '../models/PaginatedKoboAssetObjectList';
 import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
@@ -130,9 +132,12 @@ import type { RDINested } from '../models/RDINested';
 import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportCreate } from '../models/RegistrationDataImportCreate';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
+import type { RegistrationKoboImport } from '../models/RegistrationKoboImport';
+import type { RegistrationXlsxImport } from '../models/RegistrationXlsxImport';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SampleSize } from '../models/SampleSize';
 import type { SanctionListIndividual } from '../models/SanctionListIndividual';
+import type { SaveKoboImportData } from '../models/SaveKoboImportData';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
 import type { SurveyRapidProFlow } from '../models/SurveyRapidProFlow';
@@ -141,6 +146,7 @@ import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
 import type { TicketNote } from '../models/TicketNote';
+import type { UploadXlsxFile } from '../models/UploadXlsxFile';
 import type { UserChoices } from '../models/UserChoices';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -1156,7 +1162,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -1387,7 +1393,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -1622,7 +1628,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1646,7 +1652,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1674,7 +1680,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1702,7 +1708,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1730,7 +1736,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1758,7 +1764,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1786,7 +1792,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1814,7 +1820,9 @@ export class RestService {
         });
     }
     /**
-     * action for approve_add_individual, approve_delete_individual, approve_system_flagging
+     * Approve action.
+     *
+     * approve_add_individual, approve_delete_individual, approve_system_flagging.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1842,7 +1850,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns TicketNote
      * @throws ApiError
      */
@@ -1870,7 +1878,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1898,7 +1906,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1926,7 +1934,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns FieldAttribute
      * @throws ApiError
      */
@@ -2145,7 +2153,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedFieldAttributeList
      * @throws ApiError
      */
@@ -2376,7 +2384,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedFieldAttributeList
      * @throws ApiError
      */
@@ -2607,7 +2615,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -2842,7 +2850,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -3077,7 +3085,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -3312,7 +3320,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
@@ -3547,7 +3555,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns GrievanceChoices
      * @throws ApiError
      */
@@ -3565,7 +3573,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3784,7 +3792,7 @@ export class RestService {
         });
     }
     /**
-     * Get grievance dashboard data without program filtering (global view)
+     * Get grievance dashboard data without program filtering (global view).
      * @returns GrievanceDashboard
      * @throws ApiError
      */
@@ -4187,6 +4195,32 @@ export class RestService {
         });
     }
     /**
+     * ViewSet for accessing ImportData objects (XLSX file uploads).
+     *
+     * Provides read-only access to import data objects.
+     * @returns ImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasImportDataRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this import data.
+         */
+        id: string,
+    }): CancelablePromise<ImportData> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/import-data/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+        });
+    }
+    /**
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -4502,6 +4536,32 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * ViewSet for accessing KoboImportData objects (Kobo submissions).
+     *
+     * Provides read-only access to kobo import data objects.
+     * @returns KoboImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasKoboImportDataRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this kobo import data.
+         */
+        id: string,
+    }): CancelablePromise<KoboImportData> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/kobo-import-data/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
             },
         });
     }
@@ -5670,7 +5730,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -5904,7 +5964,7 @@ export class RestService {
         });
     }
     /**
-     * Common dashboard logic for grievance tickets
+     * Common dashboard logic for grievance tickets.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -6126,7 +6186,7 @@ export class RestService {
         });
     }
     /**
-     * Get grievance dashboard data filtered by program
+     * Get grievance dashboard data filtered by program.
      * @returns GrievanceDashboard
      * @throws ApiError
      */
@@ -7391,6 +7451,31 @@ export class RestService {
         });
     }
     /**
+     * Upload an XLSX file asynchronously for registration data import.
+     * @returns ImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsImportDataUploadUploadXlsxFileCreate({
+        businessAreaSlug,
+        programSlug,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        formData: UploadXlsxFile,
+    }): CancelablePromise<ImportData> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/import-data-upload/upload-xlsx-file/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -7908,6 +7993,31 @@ export class RestService {
                 'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
+        });
+    }
+    /**
+     * Save KoBo project import data asynchronously.
+     * @returns KoboImportData
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: SaveKoboImportData,
+    }): CancelablePromise<KoboImportData> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/kobo-import-data-upload/save-kobo-import-data/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -9790,7 +9900,7 @@ export class RestService {
         });
     }
     /**
-     * update verification amount
+     * Update verification amount.
      * @returns PaymentDetail
      * @throws ApiError
      */
@@ -10003,7 +10113,7 @@ export class RestService {
         });
     }
     /**
-     * Create Payment Verification Plan
+     * Create Payment Verification Plan.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -11043,6 +11153,56 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
+        });
+    }
+    /**
+     * Import registration data from KoBo.
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: RegistrationKoboImport,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/registration-kobo-import/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Import registration data from an XLSX file.
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRegistrationXlsxImportCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: RegistrationXlsxImport,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/registration-xlsx-import/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -12992,32 +13152,22 @@ export class RestService {
         });
     }
     /**
-     * All Kobo projects/assets.
-     * @returns PaginatedKoboAssetObjectList
+     * Return all Kobo projects/assets.
+     * @returns KoboAssetObject
      * @throws ApiError
      */
     public static restBusinessAreasAllKoboProjectsCreate({
         slug,
-        limit,
-        offset,
         ordering,
         requestBody,
     }: {
         slug: string,
         /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
         requestBody?: GetKoboAssetList,
-    }): CancelablePromise<PaginatedKoboAssetObjectList> {
+    }): CancelablePromise<Array<KoboAssetObject>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{slug}/all-kobo-projects/',
@@ -13025,8 +13175,6 @@ export class RestService {
                 'slug': slug,
             },
             query: {
-                'limit': limit,
-                'offset': offset,
                 'ordering': ordering,
             },
             body: requestBody,
@@ -13086,7 +13234,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13098,7 +13247,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13110,7 +13260,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13122,7 +13273,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13134,7 +13286,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13146,7 +13299,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13158,7 +13312,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13170,7 +13325,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13182,7 +13338,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13194,7 +13351,8 @@ export class RestService {
         });
     }
     /**
-     * return choices used in the system like statuses, currencies
+     * Return choices used in the system like statuses, currencies.
+     *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
      * @returns Choice
      * @throws ApiError
@@ -13217,6 +13375,7 @@ export class RestService {
     }
     /**
      * Retrieve dashboard data for a given business area from Redis cache.
+     *
      * If data is not cached or needs updating, refresh it.
      * @returns any No response body
      * @throws ApiError
@@ -13236,6 +13395,7 @@ export class RestService {
     }
     /**
      * API to trigger the creation or update of a DashReport for a given business area.
+     *
      * Restricted to superusers and users with the required permissions.
      * @returns any No response body
      * @throws ApiError
