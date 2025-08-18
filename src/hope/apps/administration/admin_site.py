@@ -7,7 +7,7 @@ from django.core.cache import caches
 from django.shortcuts import render
 from django.urls import path
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
+
 
 from constance import config
 from smart_admin.site import SmartAdminSite
@@ -30,7 +30,7 @@ def get_bookmarks(request: Any) -> list:
         if entry := clean(entry):
             try:
                 if entry == "--":
-                    quick_links.append(mark_safe("<li><hr/></li>"))
+                    quick_links.append("<li><hr/></li>")
                 elif parts := entry.split(","):
                     args = None
                     if len(parts) == 1:

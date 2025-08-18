@@ -18,27 +18,27 @@ class TestKoboAPI:
         with pytest.raises(CountryCodeNotProvided):
             service.get_all_projects_data(None)  # type: ignore[arg-type]
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     def test_get_all_projects_filter_by_country_code(self) -> None:
         service = KoboAPI()
         projects = service.get_all_projects_data("AFG")
         assert len(projects) == 117
         assert "AFG" in projects[0]["settings"]["country_codes"]
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     def test_get_single_project_data(self) -> None:
         service = KoboAPI()
         project_data = service.get_single_project_data("aWnA2d5YBBDgQ5WZXpbaRe")
         assert project_data
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     def test_get_project_submissions(self) -> None:
         service = KoboAPI()
         service.LIMIT = 10
         submissions = service.get_project_submissions("aWnA2d5YBBDgQ5WZXpbaRe", only_active_submissions=False)
         assert len(submissions) == 10
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     def test_get_project_submissions_only_active_submissions(self) -> None:
         service = KoboAPI()
         service.LIMIT = 10

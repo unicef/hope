@@ -214,7 +214,7 @@ def download_path(worker_id: str) -> str:
         yield settings.DOWNLOAD_DIRECTORY
 
 
-@pytest.fixture()
+@pytest.fixture
 def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -236,7 +236,7 @@ def driver(download_path: str) -> Chrome:
     yield driver
 
 
-@pytest.fixture()
+@pytest.fixture
 def live_server() -> LiveServer:
     yield LiveServer("localhost")
 
@@ -679,7 +679,7 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
     setattr(item, "rep_" + rep.when, rep)
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
     yield
     if request.node.rep_setup.failed:

@@ -9,4 +9,4 @@ from hope import get_full_version
 class TestUtils(TestCase):
     @patch("hope.version", return_value="2.3.4")
     def test_get_full_version(self, mock_version: Any) -> None:
-        self.assertEqual(get_full_version(), "2.3.4")
+        assert get_full_version() == "2.3.4"

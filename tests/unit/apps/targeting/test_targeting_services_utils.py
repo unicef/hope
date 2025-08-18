@@ -41,24 +41,24 @@ class TestPaymentPlanModel(TestCase):
 
     def test_get_unicef_ids(self) -> None:
         ids_1 = get_existing_unicef_ids(f"{self.hh1},HH-invalid", Household, self.program)
-        self.assertEqual(ids_1, f"{self.hh1}")
+        assert ids_1 == f"{self.hh1}"
 
         ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", Household, self.program)
-        self.assertEqual(ids_2, f"{self.hh1}, {self.hh2}")
+        assert ids_2 == f"{self.hh1}, {self.hh2}"
 
         ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", Individual, self.program)
-        self.assertEqual(ids_3, f"{self.ind1}")
+        assert ids_3 == f"{self.ind1}"
 
         ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", Individual, self.program)
-        self.assertEqual(ids_4, f"{self.ind1}, {self.ind2}")
+        assert ids_4 == f"{self.ind1}, {self.ind2}"
 
     def test_from_input_to_targeting_criteria(self) -> None:
-        self.assertEqual(TargetingCriteriaRule.objects.count(), 0)
-        self.assertEqual(TargetingCriteriaRuleFilter.objects.count(), 0)
-        self.assertEqual(TargetingIndividualRuleFilterBlock.objects.count(), 0)
-        self.assertEqual(TargetingIndividualBlockRuleFilter.objects.count(), 0)
-        self.assertEqual(TargetingCollectorRuleFilterBlock.objects.count(), 0)
-        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.count(), 0)
+        assert TargetingCriteriaRule.objects.count() == 0
+        assert TargetingCriteriaRuleFilter.objects.count() == 0
+        assert TargetingIndividualRuleFilterBlock.objects.count() == 0
+        assert TargetingIndividualBlockRuleFilter.objects.count() == 0
+        assert TargetingCollectorRuleFilterBlock.objects.count() == 0
+        assert TargetingCollectorBlockRuleFilter.objects.count() == 0
 
         targeting_criteria_input = {
             "flag_exclude_if_active_adjudication_ticket": False,
@@ -104,21 +104,21 @@ class TestPaymentPlanModel(TestCase):
         }
         from_input_to_targeting_criteria(targeting_criteria_input, self.program, self.pp)
 
-        self.assertEqual(TargetingCriteriaRule.objects.count(), 1)
-        self.assertEqual(TargetingCriteriaRuleFilter.objects.count(), 1)
-        self.assertEqual(TargetingIndividualRuleFilterBlock.objects.count(), 1)
-        self.assertEqual(TargetingIndividualBlockRuleFilter.objects.count(), 1)
-        self.assertEqual(TargetingCollectorRuleFilterBlock.objects.count(), 1)
-        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.count(), 1)
+        assert TargetingCriteriaRule.objects.count() == 1
+        assert TargetingCriteriaRuleFilter.objects.count() == 1
+        assert TargetingIndividualRuleFilterBlock.objects.count() == 1
+        assert TargetingIndividualBlockRuleFilter.objects.count() == 1
+        assert TargetingCollectorRuleFilterBlock.objects.count() == 1
+        assert TargetingCollectorBlockRuleFilter.objects.count() == 1
 
-        self.assertEqual(TargetingCriteriaRule.objects.first().household_ids, self.hh1.unicef_id)
-        self.assertEqual(TargetingCriteriaRule.objects.first().individual_ids, self.ind2.unicef_id)
+        assert TargetingCriteriaRule.objects.first().household_ids == self.hh1.unicef_id
+        assert TargetingCriteriaRule.objects.first().individual_ids == self.ind2.unicef_id
 
-        self.assertEqual(TargetingCriteriaRuleFilter.objects.first().field_name, "size")
-        self.assertEqual(TargetingCriteriaRuleFilter.objects.first().arguments, [2])
+        assert TargetingCriteriaRuleFilter.objects.first().field_name == "size"
+        assert TargetingCriteriaRuleFilter.objects.first().arguments == [2]
 
-        self.assertEqual(TargetingIndividualBlockRuleFilter.objects.first().field_name, "age_at_registration")
-        self.assertEqual(TargetingIndividualBlockRuleFilter.objects.first().arguments, [1, 99])
+        assert TargetingIndividualBlockRuleFilter.objects.first().field_name == "age_at_registration"
+        assert TargetingIndividualBlockRuleFilter.objects.first().arguments == [1, 99]
 
-        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().field_name, "mobile_phone_number__test_data")
-        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().arguments, [True])
+        assert TargetingCollectorBlockRuleFilter.objects.first().field_name == "mobile_phone_number__test_data"
+        assert TargetingCollectorBlockRuleFilter.objects.first().arguments == [True]

@@ -36,7 +36,7 @@ class TestMarkSubmissions(TestCase):
         task = MarkSubmissions(self.business_area)
         task.execute()
 
-        self.assertEqual(KoboImportedSubmission.objects.filter(amended=True).count(), 1)
+        assert KoboImportedSubmission.objects.filter(amended=True).count() == 1
 
     @classmethod
     def _create_submission_with_in_review_rdi(cls) -> None:

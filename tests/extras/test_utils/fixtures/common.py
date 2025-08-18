@@ -5,7 +5,7 @@ import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory
 
 
-@pytest.fixture()
+@pytest.fixture
 def afghanistan() -> BusinessAreaFactory:
     return BusinessAreaFactory(
         code="0060",
@@ -20,7 +20,7 @@ def afghanistan() -> BusinessAreaFactory:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def id_to_base64() -> Callable:
     def _id_to_base64(object_id: str, name: str) -> str:
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()

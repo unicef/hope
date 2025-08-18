@@ -29,7 +29,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         self._run_task(rdi.id)
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
+        assert rdi.status == RegistrationDataImport.IMPORTING
 
     def test_rdi_cannot_be_import_if_not_schedule_for_import(self) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORTING)
@@ -37,7 +37,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         self._run_task(rdi.id)
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
+        assert rdi.status == RegistrationDataImport.IMPORTING
 
     def test_only_one_task_for_the_same_rdi_could_be_run(self) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORTING)
@@ -50,7 +50,7 @@ class TestRegistrationXlsxImportTask(TestCase):
             self._run_task(rdi.id)
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
+        assert rdi.status == RegistrationDataImport.IMPORTING
 
     def test_rdi_marked_as_import_error_on_task_failed(self) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORT_SCHEDULED)
@@ -62,7 +62,7 @@ class TestRegistrationXlsxImportTask(TestCase):
             with self.assertRaises(Exception) as context:
                 self._run_task(rdi.id)
 
-        self.assertEqual(str(context.exception), "something went wrong")
+        assert str(context.exception) == "something went wrong"
 
     def _run_task(self, rdi_id: str) -> None:
         registration_xlsx_import_task(
