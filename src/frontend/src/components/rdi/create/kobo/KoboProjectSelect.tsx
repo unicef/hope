@@ -9,9 +9,10 @@ import {
 } from '@mui/material';
 import styled from 'styled-components';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useAllKoboProjectsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const ComboBox = styled(Select)`
   & {
@@ -31,16 +32,23 @@ export function KoboProjectSelect(): ReactElement {
   const [field] = useField('koboAssetId');
   const {
     data: koboProjectsData,
-    loading,
+    isLoading: loading,
     error,
-  } = useAllKoboProjectsQuery({
-    variables: { businessAreaSlug: businessArea },
+  } = useQuery({
+    queryKey: ['koboProjects', businessArea],
+    queryFn: async () => {
+      return RestService.restBusinessAreasAllKoboProjectsCreate({
+        slug: businessArea,
+      });
+    },
+    enabled: !!businessArea,
   });
-  const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
+  
+  const koboProjects = koboProjectsData || [];
 
   const formatError = (errorObject): string | null => {
     if (errorObject) {
-      return errorObject.message.replace('GraphQL error: ', '');
+      return errorObject.message || 'Error loading projects';
     }
     return null;
   };
@@ -68,8 +76,8 @@ export function KoboProjectSelect(): ReactElement {
           data-cy="kobo-project-select"
         >
           {koboProjects.map((item) => (
-            <MenuItem key={item.node.id} value={item.node.id}>
-              {item.node.name}
+            <MenuItem key={item.id} value={item.id}>
+              {item.name}
             </MenuItem>
           ))}
         </ComboBox>
