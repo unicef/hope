@@ -1,5 +1,4 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useAllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import React, { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
@@ -24,6 +23,9 @@ import { useQuery } from '@tanstack/react-query';
 const GreenIcon = styled.div`
   color: #28cb15;
 `;
+const StyledTable = styled(Table)`
+  min-width: 100px;
+`;
 type RequestedHouseholdDataChangeTableProps = {
   ticket: any;
   setFieldValue: any;
@@ -35,7 +37,6 @@ function RequestedHouseholdDataChangeTable(
 ): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { data } = useAllEditHouseholdFieldsQuery();
   const { setFieldValue, ticket, isEdit, values } = props;
   const householdId = ticket.household?.id;
 
@@ -82,17 +83,29 @@ function RequestedHouseholdDataChangeTable(
   const entriesFlexFields = Object.entries(flexFields).filter(
     ([key]) => key !== 'approveStatus',
   );
+
+  const { data: allEditHouseholdFieldsData } = useQuery({
+    queryKey: ['allEditHouseholdFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+        { businessAreaSlug: businessArea },
+      ),
+    enabled: Boolean(businessArea),
+  });
+
   const fieldsDict = useArrayToDict(
-    data?.allEditHouseholdFieldsAttributes,
+    //@ts-ignore
+    allEditHouseholdFieldsData ?? [],
     'name',
     '*',
   );
 
-  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
-
-  const StyledTable = styled(Table)`
-    min-width: 100px;
-  `;
+  const { data: countriesChoicesData } = useQuery({
+    queryKey: ['restChoicesCountriesList'],
+    queryFn: () => RestService.restChoicesCountriesList(),
+    enabled: true,
+  });
+  const countriesDict = useArrayToDict(countriesChoicesData, 'value', 'name');
 
   const handleFlexFields = (name): void => {
     handleSelected(

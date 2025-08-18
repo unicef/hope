@@ -279,7 +279,7 @@ function EditHouseholdDataChange({
               const isDisabled = availableIndividuals.length === 0;
               return (
                 <Tooltip
-                  title={isDisabled ? t('All roles reassigned') : ''}
+                  title={isDisabled ? t('No more roles available') : ''}
                   placement="top"
                   arrow
                   disableHoverListener={!isDisabled}
