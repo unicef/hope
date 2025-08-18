@@ -44,7 +44,8 @@ class AbstractCollisionDetector:
     def _update_individual_identities(
         self, individual_destination: Individual, individual_source: Individual
     ) -> Individual:
-        """
+        """Update individual identities.
+
         1. Remove all identities from destination individual
         2. Reassign identities from source individual to destination individual
         :return: The updated destination individual
@@ -62,7 +63,8 @@ class AbstractCollisionDetector:
         return individual_destination
 
     def _update_documents(self, individual_destination: Individual, individual_source: Individual) -> Individual:
-        """
+        """Update documents.
+
         1. Saves statuses in dict by number+type_id
         2. Deletes all documents in destination
         4. Reassigns documents from source individual to destination individual
@@ -163,8 +165,7 @@ class AbstractCollisionDetector:
         exclude: set[str],
         extra_fields: dict[str, Any] | None = None,
     ) -> None:
-        """
-        Update a database instance by copying data from a source model to a destination model.
+        """Update a database instance by copying data from a source model to a destination model.
 
         This function performs the following steps:
         1. Converts the source model to a dictionary, excluding specified fields
@@ -177,6 +178,7 @@ class AbstractCollisionDetector:
             destination: The destination Django model instance to update
             exclude: A set/list of field names to exclude from the update
             extra_fields: Optional dictionary of additional fields to set on the destination
+
         """
         data = model_to_dict(source, exclude=list(exclude))
         for name, field in source._meta.fields_map.items():
@@ -231,8 +233,8 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
         Raises:
             ValueError: If any individual in either household lacks an identification key
-        """
 
+        """
         # 1. Sanity check - household_to_merge must have an identification key
         if not household_to_merge.identification_key:
             return

@@ -5,6 +5,8 @@ from typing import Optional
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
 from e2e.filters.test_filters import create_grievance
 from e2e.helpers.date_time_format import FormatTime
@@ -985,7 +987,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonEdit().click()
         pageGrievanceNewTicket.getButtonSubmit().click()
         pageGrievanceNewTicket.getButtonDelete().click()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageGrievanceNewTicket.getLinkedTicketId()
         pageGrievanceNewTicket.getLookUpButton().click()
         pageGrievanceNewTicket.getCheckboxSelectAll().click()
@@ -1386,5 +1388,5 @@ class TestGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
         pageGrievanceNewTicket.getButtonNext().click()
-        with pytest.raises(Exception):
+        with pytest.raises(NoSuchElementException):
             pageGrievanceNewTicket.getHouseholdTab()
