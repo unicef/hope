@@ -65,13 +65,19 @@ export function RequestedIndividualDataChangeTable({
     'value',
     'name',
   );
+  const accountFinancialInstitutionsDict = useArrayToDict(
+    data?.accountFinancialInstitutionChoices,
+    'value',
+    'name',
+  );
 
   if (
     loading ||
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||
-    !identityTypeDict
+    !identityTypeDict ||
+    !accountFinancialInstitutionsDict
   ) {
     return <LoadingComponent />;
   }
@@ -152,6 +158,7 @@ export function RequestedIndividualDataChangeTable({
           setFieldValue={setFieldValue}
           index={index}
           account={account}
+          accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
         />
       )) : null}
       {accountsToEdit?.length
@@ -164,6 +171,7 @@ export function RequestedIndividualDataChangeTable({
               setFieldValue={setFieldValue}
               index={index}
               account={account}
+              accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
             />
           ))
         : null}
