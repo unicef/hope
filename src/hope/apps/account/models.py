@@ -18,8 +18,9 @@ from django.db import models
 from django.db.models import JSONField, Q, QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 from model_utils.models import UUIDModel
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 from natural_keys import NaturalKeyModel
 
 from hope.apps.account.fields import ChoiceArrayField
@@ -31,12 +32,7 @@ from hope.apps.core.visibility_backends import VisibilityBackend
 from hope.apps.geo.models import Area
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.models import TimeStampedUUIDModel
-from hope.apps.utils.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
-from mptt.fields import TreeForeignKey
-from mptt.models import MPTTModel
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +194,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             return self._program_ids_for_business_area_cache[business_area_id]
 
         if RoleAssignment.objects.filter(
-            Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
+            Q(user=self) | Q(partner__user=self),
+            business_area_id=business_area_id,
+            program=None,
         ).exists():
             programs_ids = (
                 Program.objects.filter(business_area_id=business_area_id).order_by("id").values_list("id", flat=True)
@@ -247,9 +245,21 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         """
         if program_id:
             role_assignments = RoleAssignment.objects.filter(
-                Q(partner__user=self, business_area__slug=business_area_slug, program_id=program_id)
-                | Q(partner__user=self, business_area__slug=business_area_slug, program=None)
-                | Q(user=self, business_area__slug=business_area_slug, program_id=program_id)
+                Q(
+                    partner__user=self,
+                    business_area__slug=business_area_slug,
+                    program_id=program_id,
+                )
+                | Q(
+                    partner__user=self,
+                    business_area__slug=business_area_slug,
+                    program=None,
+                )
+                | Q(
+                    user=self,
+                    business_area__slug=business_area_slug,
+                    program_id=program_id,
+                )
                 | Q(user=self, business_area__slug=business_area_slug, program=None)
             ).exclude(expiry_date__lt=timezone.now())
         else:
@@ -293,7 +303,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     def can_change_fsp(self) -> bool:
         return any(
-            self.has_perm(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            self.has_perm(
+                Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name,
+                role.business_area,
+            )
             for role in self.cached_role_assignments()
         )
 
@@ -348,7 +361,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
 
 class HorizontalChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Any | None = ..., choices_form_class: Any | None = ..., **kwargs: Any) -> Any:
+    def formfield(
+        self,
+        form_class: Any | None = ...,
+        choices_form_class: Any | None = ...,
+        **kwargs: Any,
+    ) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,
@@ -368,21 +386,45 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
 
     business_area = models.ForeignKey("core.BusinessArea", related_name="role_assignments", on_delete=models.CASCADE)
     user = models.ForeignKey(
-        "account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+        "account.User",
+        related_name="role_assignments",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     partner = models.ForeignKey(
-        "account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+        "account.Partner",
+        related_name="role_assignments",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     role = models.ForeignKey(
-        "account.Role", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+        "account.Role",
+        related_name="role_assignments",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     program = models.ForeignKey(
-        "program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+        "program.Program",
+        related_name="role_assignments",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     expiry_date = models.DateField(
-        blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
+        blank=True,
+        null=True,
+        help_text="After expiry date this Role Assignment will be inactive.",
     )
-    group = models.ForeignKey(Group, related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
+    group = models.ForeignKey(
+        Group,
+        related_name="role_assignments",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         constraints = [
@@ -583,7 +625,10 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
-        for role_pair in ((self.role_one, self.role_two), (self.role_two, self.role_one)):
+        for role_pair in (
+            (self.role_one, self.role_two),
+            (self.role_two, self.role_one),
+        ):
             for userrole in RoleAssignment.objects.filter(role=role_pair[0]):
                 if RoleAssignment.objects.filter(
                     user=userrole.user,

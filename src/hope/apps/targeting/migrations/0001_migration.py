@@ -31,7 +31,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -51,7 +56,9 @@ class Migration(migrations.Migration):
                 (
                     "household",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="selections", to="household.household"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="selections",
+                        to="household.household",
                     ),
                 ),
             ],
@@ -64,7 +71,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -88,14 +100,22 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(models.Model, hope.apps.targeting.services.targeting_service.TargetingCriteriaQueryingBase),
+            bases=(
+                models.Model,
+                hope.apps.targeting.services.targeting_service.TargetingCriteriaQueryingBase,
+            ),
         ),
         migrations.CreateModel(
             name="TargetingCriteriaRule",
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -122,11 +142,19 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
                 (
                     "name",
                     django.contrib.postgres.fields.citext.CICharField(
@@ -151,7 +179,10 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ("ca_id", django.contrib.postgres.fields.citext.CICharField(blank=True, max_length=255, null=True)),
+                (
+                    "ca_id",
+                    django.contrib.postgres.fields.citext.CICharField(blank=True, max_length=255, null=True),
+                ),
                 (
                     "ca_hash_id",
                     django.contrib.postgres.fields.citext.CICharField(blank=True, max_length=255, null=True),
@@ -182,7 +213,12 @@ class Migration(migrations.Migration):
                 (
                     "build_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("BUILDING", "Building"), ("FAILED", "Failed"), ("OK", "Ok")],
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("BUILDING", "Building"),
+                            ("FAILED", "Failed"),
+                            ("OK", "Ok"),
+                        ],
                         db_index=True,
                         default="PENDING",
                         max_length=256,
@@ -220,15 +256,37 @@ class Migration(migrations.Migration):
                 ),
                 ("excluded_ids", models.TextField(blank=True)),
                 ("exclusion_reason", models.TextField(blank=True)),
-                ("total_households_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("total_individuals_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("child_male_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("child_female_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("adult_male_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("adult_female_count", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "total_households_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "total_individuals_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "child_male_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "child_female_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "adult_male_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "adult_female_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
                 (
                     "business_area",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "changed_by",
@@ -296,7 +354,10 @@ class Migration(migrations.Migration):
                 (
                     "storage_file",
                     models.OneToOneField(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="core.storagefile"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="core.storagefile",
                     ),
                 ),
                 (
@@ -320,7 +381,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -347,7 +413,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -381,7 +452,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("field_name", models.CharField(max_length=50)),
-                ("arguments", models.JSONField(help_text="\n            Array of arguments\n            ")),
+                (
+                    "arguments",
+                    models.JSONField(help_text="\n            Array of arguments\n            "),
+                ),
                 ("round_number", models.PositiveIntegerField(blank=True, null=True)),
                 (
                     "individuals_filters_block",
@@ -395,14 +469,22 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(models.Model, hope.apps.targeting.services.targeting_service.TargetingCriteriaFilterBase),
+            bases=(
+                models.Model,
+                hope.apps.targeting.services.targeting_service.TargetingCriteriaFilterBase,
+            ),
         ),
         migrations.CreateModel(
             name="TargetingCriteriaRuleFilter",
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -436,7 +518,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("field_name", models.CharField(max_length=50)),
-                ("arguments", models.JSONField(help_text="\n            Array of arguments\n            ")),
+                (
+                    "arguments",
+                    models.JSONField(help_text="\n            Array of arguments\n            "),
+                ),
                 ("round_number", models.PositiveIntegerField(blank=True, null=True)),
                 (
                     "targeting_criteria_rule",
@@ -450,13 +535,18 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(models.Model, hope.apps.targeting.services.targeting_service.TargetingCriteriaFilterBase),
+            bases=(
+                models.Model,
+                hope.apps.targeting.services.targeting_service.TargetingCriteriaFilterBase,
+            ),
         ),
         migrations.AddField(
             model_name="householdselection",
             name="target_population",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="selections", to="targeting.targetpopulation"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="selections",
+                to="targeting.targetpopulation",
             ),
         ),
         migrations.AddConstraint(

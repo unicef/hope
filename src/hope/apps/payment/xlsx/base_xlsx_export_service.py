@@ -3,10 +3,9 @@ import logging
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+import openpyxl
 from django.conf import settings
 from django.urls import reverse
-
-import openpyxl
 from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
@@ -57,7 +56,10 @@ class XlsxExportBaseService:
         ws.column_dimensions = dim_holder
 
     def _add_col_bgcolor(
-        self, col: list | None = None, hex_code: str = "A0FDB0", no_of_columns: int | None = None
+        self,
+        col: list | None = None,
+        hex_code: str = "A0FDB0",
+        no_of_columns: int | None = None,
     ) -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")

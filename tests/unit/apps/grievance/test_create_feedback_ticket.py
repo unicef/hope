@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -42,7 +41,12 @@ class TestGrievanceCreateFeedbackTicket:
         self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
         self.household, self.individuals = create_household(
             {"size": 1, "business_area": self.afghanistan},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         self.list_url = reverse(
             "api:grievance-tickets:grievance-tickets-global-list",

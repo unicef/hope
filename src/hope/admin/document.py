@@ -1,13 +1,12 @@
 import logging
 from typing import Any
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils import timezone
-
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.combo import RelatedFieldComboFilter
 
 from hope.admin.utils import (
     HOPEModelAdminBase,
@@ -15,12 +14,7 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.core.utils import AutoCompleteFilterTemp
-from hope.apps.household.models import (
-    FOSTER_CHILD,
-    Document,
-    DocumentType,
-    Individual,
-)
+from hope.apps.household.models import FOSTER_CHILD, Document, DocumentType, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +22,15 @@ logger = logging.getLogger(__name__)
 @admin.register(Document)
 class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     search_fields = ("document_number", "country__name", "individual__unicef_id")
-    list_display = ("document_number", "type", "country", "status", "individual", "program", "cleared_by")
+    list_display = (
+        "document_number",
+        "type",
+        "country",
+        "status",
+        "individual",
+        "program",
+        "cleared_by",
+    )
     raw_id_fields = ("individual", "copied_from", "program", "country", "type")
     list_filter = (
         ("program__business_area", AutoCompleteFilter),
@@ -62,5 +64,17 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label", "key")
-    list_display = ("label", "key", "is_identity_document", "unique_for_individual", "valid_for_deduplication")
-    list_filter = ("label", "key", "is_identity_document", "unique_for_individual", "valid_for_deduplication")
+    list_display = (
+        "label",
+        "key",
+        "is_identity_document",
+        "unique_for_individual",
+        "valid_for_deduplication",
+    )
+    list_filter = (
+        "label",
+        "key",
+        "is_identity_document",
+        "unique_for_individual",
+        "valid_for_deduplication",
+    )

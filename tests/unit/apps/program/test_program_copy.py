@@ -41,13 +41,22 @@ class TestProgramCopy:
         self.client = api_client(self.user)
 
         self.dct_original = DataCollectingTypeFactory(
-            label="Original DCT", code="origdct", type=DataCollectingType.Type.STANDARD, active=True
+            label="Original DCT",
+            code="origdct",
+            type=DataCollectingType.Type.STANDARD,
+            active=True,
         )
         self.dct_compatible = DataCollectingTypeFactory(
-            label="Compatible DCT", code="compdct", type=DataCollectingType.Type.STANDARD, active=True
+            label="Compatible DCT",
+            code="compdct",
+            type=DataCollectingType.Type.STANDARD,
+            active=True,
         )
         self.dct_incompatible = DataCollectingTypeFactory(
-            label="Incompatible DCT", code="incompdct", type=DataCollectingType.Type.SOCIAL, active=True
+            label="Incompatible DCT",
+            code="incompdct",
+            type=DataCollectingType.Type.SOCIAL,
+            active=True,
         )
         self.dct_original.compatible_types.add(self.dct_compatible)
 
@@ -74,14 +83,20 @@ class TestProgramCopy:
 
         self.copy_url = reverse(
             "api:programs:programs-copy",
-            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program_to_copy.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "slug": self.program_to_copy.slug,
+            },
         )
 
         pdu_data = PeriodicFieldDataFactory(subtype=PeriodicFieldData.STRING, number_of_rounds=1, rounds_names=["R1"])
         FlexibleAttributeForPDUFactory(program=self.program_to_copy, label="Original PDU1", pdu_data=pdu_data)
 
         create_household_and_individuals(
-            household_data={"program": self.program_to_copy, "business_area": self.afghanistan},
+            household_data={
+                "program": self.program_to_copy,
+                "business_area": self.afghanistan,
+            },
             individuals_data=[{"business_area": self.afghanistan}],
         )
 
@@ -134,7 +149,11 @@ class TestProgramCopy:
             "pdu_fields": [
                 {
                     "label": "New PDU For Copy",
-                    "pdu_data": {"subtype": PeriodicFieldData.BOOL, "number_of_rounds": 1, "rounds_names": ["R1C"]},
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 1,
+                        "rounds_names": ["R1C"],
+                    },
                 }
             ],
         }
@@ -148,7 +167,10 @@ class TestProgramCopy:
         ],
     )
     def test_copy_program_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
         response = self.client.post(self.copy_url, self.base_copy_payload)
@@ -160,7 +182,10 @@ class TestProgramCopy:
 
     def test_copy_program(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         response = self.client.post(self.copy_url, self.base_copy_payload)
@@ -224,7 +249,10 @@ class TestProgramCopy:
 
     def test_copy_program_new_programme_code_generation(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -241,7 +269,10 @@ class TestProgramCopy:
 
     def test_copy_program_existing_programme_code(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -256,7 +287,10 @@ class TestProgramCopy:
 
     def test_copy_program_invalid_programme_code(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -274,7 +308,10 @@ class TestProgramCopy:
 
     def test_copy_program_with_invalid_dates(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -290,7 +327,10 @@ class TestProgramCopy:
 
     def test_copy_program_incompatible_dct(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -308,7 +348,10 @@ class TestProgramCopy:
 
     def test_copy_program_dct_invalid(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         payload = {
             **self.base_copy_payload,
@@ -353,7 +396,10 @@ class TestProgramCopy:
 
     def test_copy_program_all_partners_access(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -378,7 +424,10 @@ class TestProgramCopy:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -399,7 +448,10 @@ class TestProgramCopy:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -418,7 +470,10 @@ class TestProgramCopy:
 
     def test_copy_program_selected_access(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -458,14 +513,20 @@ class TestProgramCopy:
 
     def test_copy_program_selected_access_without_partner(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_DUPLICATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
             **self.base_copy_payload,
             "partner_access": Program.SELECTED_PARTNERS_ACCESS,
             "partners": [
-                {"partner": str(self.partner1_for_assign.id), "areas": [str(self.area1.id)]},
+                {
+                    "partner": str(self.partner1_for_assign.id),
+                    "areas": [str(self.area1.id)],
+                },
                 {"partner": str(self.partner2_for_assign.id), "areas": []},
             ],
         }

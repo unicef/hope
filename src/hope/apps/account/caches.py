@@ -1,5 +1,4 @@
-from typing import Optional, TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from hope.apps.account.models import User
@@ -12,6 +11,9 @@ def get_user_permissions_version_key(user: "User") -> str:
 
 
 def get_user_permissions_cache_key(
-    user: "User", user_version: int, business_area: Optional["BusinessArea"], program: Optional["Program"]
+    user: "User",
+    user_version: int,
+    business_area: Optional["BusinessArea"],
+    program: Optional["Program"],
 ) -> str:
     return f"permissions:{str(user.id)}:{user_version}:{business_area.slug if business_area else 'None'}:{program.id if program else 'None'}"

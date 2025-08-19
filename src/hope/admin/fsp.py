@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
@@ -8,11 +9,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
-from adminfilters.autocomplete import AutoCompleteFilter
-
-from hope.admin.utils import (
-    HOPEModelAdminBase,
-)
+from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -20,7 +17,6 @@ from hope.apps.payment.models import (
     FspXlsxTemplatePerDeliveryMechanism,
     PaymentPlan,
 )
-
 
 if TYPE_CHECKING:
     from django.forms import Form
@@ -52,7 +48,11 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     total_selected_columns.short_description = "# of columns"
 
     def save_model(
-        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+        self,
+        request: HttpRequest,
+        obj: FinancialServiceProviderXlsxTemplate,
+        form: "Form",
+        change: bool,
     ) -> None:
         for required_field in ["payment_id", "delivered_quantity"]:
             if required_field not in obj.columns:
@@ -97,7 +97,12 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
 
 @admin.register(FspXlsxTemplatePerDeliveryMechanism)
 class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
-    list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
+    list_display = (
+        "financial_service_provider",
+        "delivery_mechanism",
+        "xlsx_template",
+        "created_by",
+    )
     list_filter = (
         ("created_by", AutoCompleteFilter),
         ("financial_service_provider", AutoCompleteFilter),
@@ -105,18 +110,32 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         ("xlsx_template", AutoCompleteFilter),
     )
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
-    fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
+    fields = (
+        "financial_service_provider",
+        "delivery_mechanism",
+        "xlsx_template",
+        "created_by",
+    )
     form = FspXlsxTemplatePerDeliveryMechanismForm
 
     def get_queryset(self, request: "HttpRequest") -> "QuerySet":
         return (
             super()
             .get_queryset(request)
-            .select_related("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
+            .select_related(
+                "financial_service_provider",
+                "delivery_mechanism",
+                "xlsx_template",
+                "created_by",
+            )
         )
 
     def save_model(
-        self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
+        self,
+        request: HttpRequest,
+        obj: FspXlsxTemplatePerDeliveryMechanism,
+        form: "Form",
+        change: bool,
     ) -> None:
         if not change:
             obj.created_by = request.user
@@ -134,7 +153,9 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
     @staticmethod
-    def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
+    def locked_payment_plans_for_fsp(
+        obj: FinancialServiceProvider,
+    ) -> QuerySet[PaymentPlan]:
         return PaymentPlan.objects.filter(
             ~Q(
                 status__in=[
@@ -193,7 +214,11 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "created_by",
     )
     search_fields = ("name", "vision_vendor_number")
-    filter_horizontal = ("allowed_business_areas", "delivery_mechanisms", "xlsx_templates")
+    filter_horizontal = (
+        "allowed_business_areas",
+        "delivery_mechanisms",
+        "xlsx_templates",
+    )
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     list_filter = (
@@ -223,7 +248,13 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     fsp_xlsx_templates.short_description = "FSP XLSX Templates"
     fsp_xlsx_templates.allow_tags = True
 
-    def save_model(self, request: HttpRequest, obj: FinancialServiceProvider, form: "Form", change: bool) -> None:
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: FinancialServiceProvider,
+        form: "Form",
+        change: bool,
+    ) -> None:
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)

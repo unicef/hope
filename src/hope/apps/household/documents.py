@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db.models import Q, QuerySet
-
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
@@ -32,7 +31,8 @@ index_settings = {
 class IndividualDocument(Document):
     id = fields.KeywordField()  # The boost parameter on field mappings has been removed
     given_name = fields.TextField(
-        analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
+        analyzer=name_synonym_analyzer,
+        fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)},
     )
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})

@@ -7,7 +7,6 @@ from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-
 from single_source import get_version
 
 from hope.config.env import env
@@ -101,7 +100,10 @@ RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
-        "TEST": {"READ_ONLY": True, "MIRROR": "default"},  # Do not manage this database during tests
+        "TEST": {
+            "READ_ONLY": True,
+            "MIRROR": "default",
+        },  # Do not manage this database during tests
     }
 )
 DATABASES = {
@@ -439,7 +441,20 @@ FLAGS = {
 
 MARKDOWNIFY = {
     "default": {
-        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ulbr"]
+        "WHITELIST_TAGS": [
+            "a",
+            "abbr",
+            "acronym",
+            "b",
+            "blockquote",
+            "em",
+            "i",
+            "li",
+            "ol",
+            "p",
+            "strong",
+            "ulbr",
+        ]
     }
 }
 

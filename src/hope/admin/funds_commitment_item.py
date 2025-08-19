@@ -1,11 +1,8 @@
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
-from adminfilters.autocomplete import AutoCompleteFilter
-
 from hope.admin.utils import HOPEModelAdminBase
-from hope.contrib.vision.models import (
-    FundsCommitmentItem,
-)
+from hope.contrib.vision.models import FundsCommitmentItem
 
 
 @admin.register(FundsCommitmentItem)

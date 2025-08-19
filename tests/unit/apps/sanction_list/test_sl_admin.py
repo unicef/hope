@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING
 
-from django.urls import reverse
-
 import responses
+from django.urls import reverse
 
 if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
@@ -27,7 +26,10 @@ def test_sanction_list_refresh(
 
 
 def test_sanction_list_empty(
-    django_app: "DjangoTestApp", admin_user: "User", sanction_list: "SanctionList", mocked_responses: "RequestsMock"
+    django_app: "DjangoTestApp",
+    admin_user: "User",
+    sanction_list: "SanctionList",
+    mocked_responses: "RequestsMock",
 ) -> None:
     url = reverse("admin:sanction_list_sanctionlist_change", args=(sanction_list.id,))
     res = django_app.get(url, user=admin_user)

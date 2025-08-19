@@ -3,10 +3,9 @@ import random
 import time
 from typing import Any, List
 
+import factory
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
-import factory
 from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 

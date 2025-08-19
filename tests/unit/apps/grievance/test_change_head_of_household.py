@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -18,12 +17,7 @@ from rest_framework import status
 from hope.apps.account.permissions import Permissions
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import (
-    AUNT_UNCLE,
-    BROTHER_SISTER,
-    HEAD,
-    Individual,
-)
+from hope.apps.household.models import AUNT_UNCLE, BROTHER_SISTER, HEAD, Individual
 from hope.apps.program.models import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -84,7 +78,11 @@ class TestChangeHeadOfHousehold:
             ticket=self.grievance_ticket,
             individual=self.individual2,
             individual_data={
-                "relationship": {"value": "HEAD", "approve_status": True, "previous_value": "BROTHER_SISTER"}
+                "relationship": {
+                    "value": "HEAD",
+                    "approve_status": True,
+                    "previous_value": "BROTHER_SISTER",
+                }
             },
         )
         rebuild_search_index()
@@ -94,11 +92,17 @@ class TestChangeHeadOfHousehold:
     ) -> None:
         url = reverse(
             "api:grievance-tickets:grievance-tickets-global-status-change",
-            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grievance_ticket.pk)},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.grievance_ticket.pk),
+            },
         )
         create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_UPDATE],
+            [
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_UPDATE,
+            ],
             self.afghanistan,
             self.program,
         )
@@ -129,11 +133,17 @@ class TestChangeHeadOfHousehold:
     ) -> None:
         url = reverse(
             "api:grievance-tickets:grievance-tickets-global-status-change",
-            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grievance_ticket.pk)},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.grievance_ticket.pk),
+            },
         )
         create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_UPDATE],
+            [
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_UPDATE,
+            ],
             self.afghanistan,
             self.program,
         )

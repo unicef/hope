@@ -1,11 +1,10 @@
 import logging
 from typing import Any
 
+from constance import config
 from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils import timezone
-
-from constance import config
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
@@ -52,7 +51,13 @@ class PaymentNotification:
         },
     }
 
-    def __init__(self, payment_plan: PaymentPlan, action: str, action_user: User, action_date: str) -> None:
+    def __init__(
+        self,
+        payment_plan: PaymentPlan,
+        action: str,
+        action_user: User,
+        action_date: str,
+    ) -> None:
         self.payment_plan = payment_plan
         self.action = action
         self.action_user = action_user

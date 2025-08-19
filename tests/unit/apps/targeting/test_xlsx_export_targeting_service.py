@@ -50,15 +50,24 @@ class TestXlsxExportTargetingService(APITestCase):
         service._create_workbook()
         service._add_standard_columns_headers()
         headers = [cell.value for cell in service.ws_individuals[1]]
-        assert headers == ["Household unicef_id", "unicef_id", "Linked Households", "Accounts information"]
+        assert headers == [
+            "Household unicef_id",
+            "unicef_id",
+            "Linked Households",
+            "Accounts information",
+        ]
 
     def test_export_service_households_property(self) -> None:
         program = self.payment_plan.program_cycle.program
         hh1 = HouseholdFactory(
-            business_area=self.business_area, program=program, head_of_household=IndividualFactory(household=None)
+            business_area=self.business_area,
+            program=program,
+            head_of_household=IndividualFactory(household=None),
         )
         hh2 = HouseholdFactory(
-            business_area=self.business_area, program=program, head_of_household=IndividualFactory(household=None)
+            business_area=self.business_area,
+            program=program,
+            head_of_household=IndividualFactory(household=None),
         )
         p1 = PaymentFactory(
             parent=self.payment_plan,
@@ -92,7 +101,10 @@ class TestXlsxExportTargetingService(APITestCase):
         service = XlsxExportTargetingService(self.payment_plan)
 
         _, individuals = create_household_and_individuals(
-            household_data={"business_area": self.business_area, "program": self.payment_plan.program_cycle.program},
+            household_data={
+                "business_area": self.business_area,
+                "program": self.payment_plan.program_cycle.program,
+            },
             individuals_data=[
                 {
                     "full_name": "Benjamin Butler",

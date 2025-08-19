@@ -13,7 +13,6 @@ from django.db.models import (
     Value,
     When,
 )
-
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 
 

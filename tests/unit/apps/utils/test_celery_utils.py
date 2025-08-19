@@ -32,7 +32,12 @@ class TestCeleryUtils(TestCase):
                 {
                     "acknowledged": False,
                     "args": [],
-                    "delivery_info": {"exchange": "", "priority": 0, "redelivered": False, "routing_key": "default"},
+                    "delivery_info": {
+                        "exchange": "",
+                        "priority": 0,
+                        "redelivered": False,
+                        "routing_key": "default",
+                    },
                     "hostname": "celery@low-priority-hope-celery-worker-6b77cc79b8-9wp5h",
                     "id": "aa993de4-0353-44b9-a512-a700ced30a51",
                     "kwargs": {},

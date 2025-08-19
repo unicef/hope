@@ -1,15 +1,18 @@
+import contextlib
 import json
 from typing import Any
 
 from django.db.models import Q
-
 from rest_framework import serializers
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import get_count_and_percentage
-from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
+from hope.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
 from hope.apps.registration_datahub.utils import get_rdi_program_population
-import contextlib
 
 
 class RegistrationDataImportListSerializer(serializers.ModelSerializer):
@@ -155,7 +158,9 @@ class RefuseRdiSerializer(serializers.Serializer):
 class RegistrationDataImportCreateSerializer(serializers.Serializer):
     import_from_program_id = serializers.CharField(required=True)
     import_from_ids = serializers.CharField(
-        required=True, allow_blank=True, help_text="String of Ind or HH ids separated by comma"
+        required=True,
+        allow_blank=True,
+        help_text="String of Ind or HH ids separated by comma",
     )
     name = serializers.CharField(required=True)
     screen_beneficiary = serializers.BooleanField(required=True)
@@ -171,7 +176,10 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
         import_from_ids = validated_data.get("import_from_ids")
         exclude_external_collectors = validated_data["exclude_external_collectors"]
         households, individuals = get_rdi_program_population(
-            import_from_program_id, program.id, import_from_ids, exclude_external_collectors
+            import_from_program_id,
+            program.id,
+            import_from_ids,
+            exclude_external_collectors,
         )
         return RegistrationDataImport(
             name=validated_data["name"],

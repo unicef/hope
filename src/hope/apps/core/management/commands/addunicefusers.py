@@ -28,6 +28,10 @@ class Command(BaseCommand):
         for username in emails:
             email = username + "@unicef.org"
             user = User.objects.create_user(
-                username=username, email=email, password="PaymentModule123", is_staff=True, is_superuser=True
+                username=username,
+                email=email,
+                password="PaymentModule123",
+                is_staff=True,
+                is_superuser=True,
             )
             RoleAssignment.objects.create(business_area=afg, user=user, role=role)

@@ -16,7 +16,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="exclude_household_error",
-            field=models.TextField(blank=True, help_text="Exclusion reason (Targeting level) [sys]", null=True),
+            field=models.TextField(
+                blank=True,
+                help_text="Exclusion reason (Targeting level) [sys]",
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name="paymentplan",

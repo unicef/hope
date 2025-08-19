@@ -4,6 +4,8 @@ from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock
 
+import pytest
+from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
@@ -12,9 +14,6 @@ from django.db import models, transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
-
-import pytest
-from dateutil.relativedelta import relativedelta
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -94,7 +93,9 @@ class TestBasePaymentPlanModel:
         )
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
         approval_approval2 = ApprovalFactory(
-            type=Approval.APPROVAL, approval_process=approval_process, created_by=approval_user
+            type=Approval.APPROVAL,
+            approval_process=approval_process,
+            created_by=approval_user,
         )
         ApprovalFactory(type=Approval.AUTHORIZATION, approval_process=approval_process)
         modified_data = payment_plan._get_last_approval_process_data()
@@ -109,7 +110,9 @@ class TestBasePaymentPlanModel:
         )
         ApprovalFactory(type=Approval.AUTHORIZATION, approval_process=approval_process)
         approval_authorization2 = ApprovalFactory(
-            type=Approval.AUTHORIZATION, approval_process=approval_process, created_by=approval_user
+            type=Approval.AUTHORIZATION,
+            approval_process=approval_process,
+            created_by=approval_user,
         )
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
         modified_data = payment_plan._get_last_approval_process_data()
@@ -312,13 +315,15 @@ class TestPaymentPlanModel(TestCase):
         assert pp.steficon_rule_id is None
 
         with self.assertRaisesMessage(
-            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+            ValidationError,
+            f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}.",
         ):
             pp.steficon_rule = rule_for_tp
             pp.save()
 
         with self.assertRaisesMessage(
-            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+            ValidationError,
+            f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}.",
         ):
             pp.steficon_rule_targeting = rule_for_pp
             pp.save()
@@ -364,7 +369,9 @@ class TestPaymentPlanModel(TestCase):
 
     def test_remove_imported_file(self) -> None:
         pp = PaymentPlanFactory(
-            created_by=self.user, status=PaymentPlan.Status.LOCKED, imported_file_date=timezone.now()
+            created_by=self.user,
+            status=PaymentPlan.Status.LOCKED,
+            imported_file_date=timezone.now(),
         )
         file_temp = FileTemp.objects.create(
             object_id=pp.pk,
@@ -481,7 +488,10 @@ class TestPaymentModel(TestCase):
         )
         payment_invalid_status = PaymentFactory(parent=self.pp, entitlement_quantity=999, status=Payment.STATUS_PENDING)
         payment = PaymentFactory(
-            parent=self.pp, entitlement_quantity=999, delivered_quantity=111, status=Payment.STATUS_FORCE_FAILED
+            parent=self.pp,
+            entitlement_quantity=999,
+            delivered_quantity=111,
+            status=Payment.STATUS_FORCE_FAILED,
         )
         date = timezone.now().date()
 
@@ -522,9 +532,17 @@ class TestPaymentModel(TestCase):
         pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
 
         # create hard conflicted payment
-        pp2 = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, program_cycle=program_cycle, created_by=self.user)
+        pp2 = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=program_cycle,
+            created_by=self.user,
+        )
         # create soft conflicted payments
-        pp3 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
+        pp3 = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program_cycle,
+            created_by=self.user,
+        )
         pp4 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
             program_cycle=program_cycle,
@@ -936,7 +954,10 @@ class TestAccountModel(TestCase):
         dm_config.save()
 
         FspNameMapping.objects.create(
-            external_name="number", hope_name="number", source=FspNameMapping.SourceModel.ACCOUNT, fsp=self.fsp
+            external_name="number",
+            hope_name="number",
+            source=FspNameMapping.SourceModel.ACCOUNT,
+            fsp=self.fsp,
         )
         FspNameMapping.objects.create(
             external_name="expiry_date",
@@ -957,7 +978,10 @@ class TestAccountModel(TestCase):
             fsp=self.fsp,
         )
         FspNameMapping.objects.create(
-            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+            external_name="address",
+            hope_name="address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
         )
 
         def my_custom_ind_name(self: Any) -> str:
@@ -1030,7 +1054,10 @@ class TestAccountModel(TestCase):
         dm_config.save()
 
         FspNameMapping.objects.create(
-            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+            external_name="address",
+            hope_name="address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
         )
         assert PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind) is True
 
@@ -1140,4 +1167,7 @@ class TestAccountTypeModel(TestCase):
         generate_delivery_mechanisms()
 
     def test_get_targeting_field_names(self) -> None:
-        assert AccountType.get_targeting_field_names() == ["bank__number", "mobile__number"]
+        assert AccountType.get_targeting_field_names() == [
+            "bank__number",
+            "mobile__number",
+        ]

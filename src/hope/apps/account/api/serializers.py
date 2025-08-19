@@ -2,7 +2,6 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
@@ -42,7 +41,12 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
         return []
 
     def get_is_accountability_applicable(self, obj: BusinessArea) -> bool:
-        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), obj.is_accountability_applicable])
+        return all(
+            [
+                bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")),
+                obj.is_accountability_applicable,
+            ]
+        )
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -199,7 +203,10 @@ class UserChoicesSerializer(serializers.Serializer):
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
-                .filter(role_assignments__business_area__slug=business_area_slug, role_assignments__program=None)
+                .filter(
+                    role_assignments__business_area__slug=business_area_slug,
+                    role_assignments__program=None,
+                )
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
                 .values_list("id", "name")
             )

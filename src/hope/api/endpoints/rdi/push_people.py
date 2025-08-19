@@ -1,13 +1,12 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from django.db.transaction import atomic
 from django.http import Http404
 from django.utils import timezone
 from django.utils.functional import cached_property
-
 from django_countries import Countries
-from drf_spectacular.utils import extend_schema, extend_schema_field, OpenApiTypes
+from drf_spectacular.utils import OpenApiTypes, extend_schema, extend_schema_field
 from rest_framework import serializers, status
 from rest_framework.response import Response
 

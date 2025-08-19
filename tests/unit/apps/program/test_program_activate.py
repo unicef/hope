@@ -29,7 +29,10 @@ class TestProgramActivate:
 
         self.activate_url = reverse(
             "api:programs:programs-activate",
-            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "slug": self.program.slug,
+            },
         )
 
     @pytest.mark.parametrize(
@@ -41,7 +44,10 @@ class TestProgramActivate:
         ],
     )
     def test_activate_program_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
         assert self.program.status == Program.DRAFT
@@ -58,7 +64,10 @@ class TestProgramActivate:
 
     def test_activate_program_already_active(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_ACTIVATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_ACTIVATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         self.program.status = Program.ACTIVE
         self.program.save()
@@ -72,7 +81,10 @@ class TestProgramActivate:
 
     def test_activate_program_status_finished(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_ACTIVATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_ACTIVATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         self.program.status = Program.FINISHED
         self.program.save()

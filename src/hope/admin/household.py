@@ -1,19 +1,8 @@
 import logging
 import re
 from itertools import chain
-from typing import Any
+from typing import Any, Iterable
 from uuid import UUID
-
-from django.contrib import admin, messages
-from django.contrib.messages import DEFAULT_TAGS
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
-from django.db.models import F, Q, QuerySet, Value
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils import timezone
-
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -21,6 +10,18 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
+from django.contrib import admin, messages
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
+from django.contrib.messages import DEFAULT_TAGS
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
+from django.db.models import F, Q, QuerySet, Value
+from django.db.transaction import atomic
+from django.forms import Form
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils import timezone
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
@@ -38,7 +39,13 @@ from hope.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
 )
-from hope.apps.household.forms import MassEnrollForm, WithdrawHouseholdsForm
+from hope.apps.household.forms import (
+    MassEnrollForm,
+    MassRestoreForm,
+    MassWithdrawForm,
+    WithdrawForm,
+    WithdrawHouseholdsForm,
+)
 from hope.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -49,22 +56,9 @@ from hope.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 from hope.apps.program.models import Program
 from hope.apps.utils.security import is_root
-
-
-from typing import Iterable
-
-from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
-from django.db.transaction import atomic
-from django.forms import Form
-
-from hope.apps.household.forms import (
-    MassRestoreForm,
-    MassWithdrawForm,
-    WithdrawForm,
-)
-from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 logger = logging.getLogger(__name__)
 
@@ -266,7 +260,11 @@ class HouseholdWithdrawFromListMixin:
             if status == GrievanceTicket.STATUS_CLOSED:
                 continue
             GrievanceTicket.objects.filter(id__in=ticket_ids, status=status).update(
-                extras=JSONBSet(F("extras"), Value("{status_before_withdrawn}"), Value(f'"{status}"')),
+                extras=JSONBSet(
+                    F("extras"),
+                    Value("{status_before_withdrawn}"),
+                    Value(f'"{status}"'),
+                ),
                 status=GrievanceTicket.STATUS_CLOSED,
             )
 
@@ -301,7 +299,11 @@ class HouseholdWithdrawFromListMixin:
         if step == "0":
             context["form"] = WithdrawHouseholdsForm()
             context["step"] = "0"
-            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+            return TemplateResponse(
+                request,
+                "admin/household/household/withdraw_households_from_list.html",
+                context,
+            )
 
         if step == "1":
             business_area = request.POST.get("business_area")
@@ -313,7 +315,11 @@ class HouseholdWithdrawFromListMixin:
                     "step": "1",
                 }
             )
-            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+            return TemplateResponse(
+                request,
+                "admin/household/household/withdraw_households_from_list.html",
+                context,
+            )
 
         business_area = request.session.get("business_area")
         form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
@@ -333,14 +339,20 @@ class HouseholdWithdrawFromListMixin:
                 )
                 self.get_and_set_context_data(request, context)
                 return TemplateResponse(
-                    request, "admin/household/household/withdraw_households_from_list.html", context
+                    request,
+                    "admin/household/household/withdraw_households_from_list.html",
+                    context,
                 )
 
             if step == "3":
                 mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
                 self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
-        return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+        return TemplateResponse(
+            request,
+            "admin/household/household/withdraw_households_from_list.html",
+            context,
+        )
 
 
 @admin.register(Household)
@@ -376,7 +388,10 @@ class HouseholdAdmin(
         QueryStringFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
+        (
+            "registration_data_import",
+            LinkedAutoCompleteFilter.factory(parent="program"),
+        ),
         "registration_method",
         "residence_status",
         "collect_type",
@@ -554,7 +569,11 @@ class HouseholdAdmin(
             try:
                 with transaction.atomic():
                     household.erase()
-                self.message_user(request, f"Household {household.unicef_id} erased.", messages.SUCCESS)
+                self.message_user(
+                    request,
+                    f"Household {household.unicef_id} erased.",
+                    messages.SUCCESS,
+                )
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
@@ -575,7 +594,11 @@ class HouseholdAdmin(
         if request.method == "POST":
             try:
                 household.delete()
-                self.message_user(request, f"Household {household.unicef_id} was soft removed.", messages.SUCCESS)
+                self.message_user(
+                    request,
+                    f"Household {household.unicef_id} was soft removed.",
+                    messages.SUCCESS,
+                )
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
@@ -619,7 +642,11 @@ class HouseholdAdmin(
         form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
-        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
+        return TemplateResponse(
+            request,
+            "admin/household/household/enroll_households_to_program.html",
+            context,
+        )
 
     mass_enroll_to_another_program.short_description = "Mass enroll households to another program"
 

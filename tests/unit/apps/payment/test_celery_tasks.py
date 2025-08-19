@@ -1,11 +1,10 @@
 import logging.config
 from unittest.mock import Mock, patch
 
+from celery.exceptions import Retry
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
-
-from celery.exceptions import Retry
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (

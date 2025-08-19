@@ -17,7 +17,6 @@ from hope.apps.utils.schema import Arg
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
     from graphene.types.structures import List as GrapheneList
 
     from hope.apps.targeting.models import TargetingIndividualRuleFilterBlock

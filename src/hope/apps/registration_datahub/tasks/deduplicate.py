@@ -4,20 +4,16 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 from typing import Any, Iterable
 
+from constance import config
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
-
-from constance import config
 from psycopg2._psycopg import IntegrityError
 
 from hope.apps.activity_log.models import log_create
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_dict
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
 from hope.apps.household.models import (
     DUPLICATE,
@@ -194,7 +190,9 @@ class DeduplicateTask:
         )
 
     def collided_individuals_ids_to_exclude(
-        self, individuals: Iterable[PendingIndividual], registration_data_import: RegistrationDataImport
+        self,
+        individuals: Iterable[PendingIndividual],
+        registration_data_import: RegistrationDataImport,
     ) -> list[str]:
         program = registration_data_import.program
         if not program.collision_detection_enabled or not program.collision_detector:
@@ -452,7 +450,17 @@ class DeduplicateTask:
 
         if not given_name or not family_name:
             # max possible score 7
-            return [{"match": {"full_name": {"query": full_name, "boost": 8.0, "operator": "AND"}}}]
+            return [
+                {
+                    "match": {
+                        "full_name": {
+                            "query": full_name,
+                            "boost": 8.0,
+                            "operator": "AND",
+                        }
+                    }
+                }
+            ]
 
         given_name_complex_query = self._get_complex_query_for_name(given_name, "given_name")
         family_name_complex_query = self._get_complex_query_for_name(family_name, "family_name")
@@ -474,7 +482,12 @@ class DeduplicateTask:
                 "boost": 4,
             }
         }
-        max_from_should_and_must = {"dis_max": {"queries": [names_should_query, names_must_query], "tie_breaker": 0}}
+        max_from_should_and_must = {
+            "dis_max": {
+                "queries": [names_should_query, names_must_query],
+                "tie_breaker": 0,
+            }
+        }
 
         return [max_from_should_and_must]
 
@@ -495,7 +508,12 @@ class DeduplicateTask:
         # choose max from fuzzy and phonetic
         # phonetic score === 0 or 1
         # fuzzy score <=1 changes if there is need make change
-        return {"dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}}
+        return {
+            "dis_max": {
+                "queries": [name_fuzzy_query_dict, name_phonetic_query_dict],
+                "tie_breaker": 0,
+            }
+        }
 
     def _prepare_identities_queries_from_fields(self, identities: list) -> list[dict]:
         queries = []
@@ -838,7 +856,11 @@ class HardDocumentDeduplication:
             )
 
             possible_duplicates_through_dict = defaultdict(set)
-            for ticked_details_id, individual_id, main_individual_id in possible_duplicates_through_existing_list:
+            for (
+                ticked_details_id,
+                individual_id,
+                main_individual_id,
+            ) in possible_duplicates_through_existing_list:
                 possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
                 possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 
@@ -859,7 +881,8 @@ class HardDocumentDeduplication:
                 ticket_data_collected.append(prepared_ticket)
                 tickets_programs.append(
                     GrievanceTicketProgramThrough(
-                        grievanceticket=prepared_ticket.ticket, program_id=main_individual.program_id
+                        grievanceticket=prepared_ticket.ticket,
+                        program_id=main_individual.program_id,
                     )
                 )
 
@@ -895,7 +918,10 @@ class HardDocumentDeduplication:
             TicketNeedsAdjudicationDetails,
         )
 
-        new_duplicates_set = {str(main_individual.id), *[str(x.id) for x in possible_duplicates_individuals]}
+        new_duplicates_set = {
+            str(main_individual.id),
+            *[str(x.id) for x in possible_duplicates_individuals],
+        }
         for duplicates_set in possible_duplicates_through_dict.values():
             if new_duplicates_set.issubset(duplicates_set):
                 return None
@@ -921,7 +947,8 @@ class HardDocumentDeduplication:
         PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
         possible_duplicates_throughs = [
             PossibleDuplicateThrough(
-                individual=possible_duplicate_individual, ticketneedsadjudicationdetails=ticket_details
+                individual=possible_duplicate_individual,
+                ticketneedsadjudicationdetails=ticket_details,
             )
             for possible_duplicate_individual in set(possible_duplicates_individuals)
         ]

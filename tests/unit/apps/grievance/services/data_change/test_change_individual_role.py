@@ -1,7 +1,6 @@
+import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,

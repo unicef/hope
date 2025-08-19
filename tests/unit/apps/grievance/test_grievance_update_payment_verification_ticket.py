@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -133,7 +132,10 @@ class TestGrievanceUpdatePaymentVerificationTicket:
 
     def test_payment_verification_ticket_approve_payment_details(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION], self.afghanistan, self.program
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
+            self.afghanistan,
+            self.program,
         )
         # update status for approval
         self.ticket.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -147,7 +149,10 @@ class TestGrievanceUpdatePaymentVerificationTicket:
         response = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-payment-details",
-                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.ticket.ticket.pk)},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(self.ticket.ticket.pk),
+                },
             ),
             input_data,
             format="json",

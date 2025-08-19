@@ -13,11 +13,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.api.mixins import (
-    BaseViewSet,
-    BusinessAreaMixin,
-    PermissionsMixin,
-)
+from hope.apps.core.api.mixins import BaseViewSet, BusinessAreaMixin, PermissionsMixin
 from hope.apps.geo.api.caches import AreaKeyConstructor
 from hope.apps.geo.api.filters import AreaFilter
 from hope.apps.geo.api.serializers import AreaListSerializer, AreaTreeSerializer
@@ -53,7 +49,10 @@ class AreaViewSet(
     def all_areas_tree(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         # get Area max level 3
         queryset = (
-            Area.objects.filter(area_type__country__business_areas=self.business_area, area_type__area_level__lte=3)
+            Area.objects.filter(
+                area_type__country__business_areas=self.business_area,
+                area_type__area_level__lte=3,
+            )
             .select_related("area_type", "area_type__country")
             .prefetch_related("area_type__country__business_areas")
         )

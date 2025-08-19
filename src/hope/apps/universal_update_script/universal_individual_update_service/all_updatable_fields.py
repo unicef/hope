@@ -30,32 +30,80 @@ individual_fields: dict[str, tuple[str, Any, Any]] = {
     "family_name": ("family_name", validate_string, handle_simple_field),
     "sex": ("sex", validate_choices, handle_simple_field),
     "birth_date": ("birth_date", validate_date, handle_date_field),
-    "estimated_birth_date": ("estimated_birth_date", validate_boolean, handle_boolean_field),
+    "estimated_birth_date": (
+        "estimated_birth_date",
+        validate_boolean,
+        handle_boolean_field,
+    ),
     "marital_status": ("marital_status", validate_string, handle_simple_field),
     "phone_no": ("phone_no", validate_phone_number, handle_simple_field),
-    "phone_no_alternative": ("phone_no_alternative", validate_phone_number, handle_simple_field),
+    "phone_no_alternative": (
+        "phone_no_alternative",
+        validate_phone_number,
+        handle_simple_field,
+    ),
     "email": ("email", validate_string, handle_simple_field),
-    "payment_delivery_phone_no": ("payment_delivery_phone_no", validate_phone_number, handle_simple_field),
+    "payment_delivery_phone_no": (
+        "payment_delivery_phone_no",
+        validate_phone_number,
+        handle_simple_field,
+    ),
     "relationship": ("relationship", validate_string, handle_simple_field),
     "work_status": ("work_status", validate_choices, handle_simple_field),
-    "first_registration_date": ("first_registration_date", validate_date, handle_simple_field),
-    "last_registration_date": ("last_registration_date", validate_date, handle_simple_field),
-    "enrolled_in_nutrition_programme": ("enrolled_in_nutrition_programme", validate_boolean, handle_boolean_field),
+    "first_registration_date": (
+        "first_registration_date",
+        validate_date,
+        handle_simple_field,
+    ),
+    "last_registration_date": (
+        "last_registration_date",
+        validate_date,
+        handle_simple_field,
+    ),
+    "enrolled_in_nutrition_programme": (
+        "enrolled_in_nutrition_programme",
+        validate_boolean,
+        handle_boolean_field,
+    ),
     "pregnant": ("pregnant", validate_boolean, handle_boolean_field),
     "disability": ("disability", validate_choices, handle_simple_field),
-    "observed_disability": ("observed_disability", validate_boolean, handle_boolean_field),
+    "observed_disability": (
+        "observed_disability",
+        validate_boolean,
+        handle_boolean_field,
+    ),
     "seeing_disability": ("seeing_disability", validate_boolean, handle_boolean_field),
-    "hearing_disability": ("hearing_disability", validate_boolean, handle_boolean_field),
-    "physical_disability": ("physical_disability", validate_boolean, handle_boolean_field),
+    "hearing_disability": (
+        "hearing_disability",
+        validate_boolean,
+        handle_boolean_field,
+    ),
+    "physical_disability": (
+        "physical_disability",
+        validate_boolean,
+        handle_boolean_field,
+    ),
     "memory_disability": ("memory_disability", validate_boolean, handle_boolean_field),
-    "selfcare_disability": ("selfcare_disability", validate_boolean, handle_boolean_field),
+    "selfcare_disability": (
+        "selfcare_disability",
+        validate_boolean,
+        handle_boolean_field,
+    ),
     "comms_disability": ("comms_disability", validate_boolean, handle_boolean_field),
     "who_answers_phone": ("who_answers_phone", validate_string, handle_simple_field),
-    "who_answers_alt_phone": ("who_answers_alt_phone", validate_string, handle_simple_field),
+    "who_answers_alt_phone": (
+        "who_answers_alt_phone",
+        validate_string,
+        handle_simple_field,
+    ),
     "fchild_hoh": ("fchild_hoh", validate_boolean, handle_boolean_field),
     "child_hoh": ("child_hoh", validate_boolean, handle_boolean_field),
     "preferred_language": ("preferred_language", validate_string, handle_simple_field),
-    "age_at_registration": ("age_at_registration", validate_string, handle_simple_field),
+    "age_at_registration": (
+        "age_at_registration",
+        validate_string,
+        handle_simple_field,
+    ),
 }
 household_fields: dict[str, tuple[str, Any, Any]] = {
     "consent": ("consent", validate_boolean, handle_boolean_field),
@@ -68,17 +116,57 @@ household_fields: dict[str, tuple[str, Any, Any]] = {
     "admin3": ("admin3", validate_string, handle_admin_field),
     "admin4": ("admin4", validate_string, handle_admin_field),
     "size": ("size", validate_integer, handle_integer_field),
-    "female_age_group_0_5_count": ("female_age_group_0_5_count", validate_integer, handle_integer_field),
-    "female_age_group_6_11_count": ("female_age_group_6_11_count", validate_integer, handle_integer_field),
-    "female_age_group_12_17_count": ("female_age_group_12_17_count", validate_integer, handle_integer_field),
-    "female_age_group_18_59_count": ("female_age_group_18_59_count", validate_integer, handle_integer_field),
-    "female_age_group_60_count": ("female_age_group_60_count", validate_integer, handle_integer_field),
+    "female_age_group_0_5_count": (
+        "female_age_group_0_5_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "female_age_group_6_11_count": (
+        "female_age_group_6_11_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "female_age_group_12_17_count": (
+        "female_age_group_12_17_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "female_age_group_18_59_count": (
+        "female_age_group_18_59_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "female_age_group_60_count": (
+        "female_age_group_60_count",
+        validate_integer,
+        handle_integer_field,
+    ),
     "pregnant_count": ("pregnant_count", validate_integer, handle_integer_field),
-    "male_age_group_0_5_count": ("male_age_group_0_5_count", validate_integer, handle_integer_field),
-    "male_age_group_6_11_count": ("male_age_group_6_11_count", validate_integer, handle_integer_field),
-    "male_age_group_12_17_count": ("male_age_group_12_17_count", validate_integer, handle_integer_field),
-    "male_age_group_18_59_count": ("male_age_group_18_59_count", validate_integer, handle_integer_field),
-    "male_age_group_60_count": ("male_age_group_60_count", validate_integer, handle_integer_field),
+    "male_age_group_0_5_count": (
+        "male_age_group_0_5_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "male_age_group_6_11_count": (
+        "male_age_group_6_11_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "male_age_group_12_17_count": (
+        "male_age_group_12_17_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "male_age_group_18_59_count": (
+        "male_age_group_18_59_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "male_age_group_60_count": (
+        "male_age_group_60_count",
+        validate_integer,
+        handle_integer_field,
+    ),
     "female_age_group_0_5_disabled_count": (
         "female_age_group_0_5_disabled_count",
         validate_integer,
@@ -104,7 +192,11 @@ household_fields: dict[str, tuple[str, Any, Any]] = {
         validate_integer,
         handle_integer_field,
     ),
-    "male_age_group_0_5_disabled_count": ("male_age_group_0_5_disabled_count", validate_integer, handle_integer_field),
+    "male_age_group_0_5_disabled_count": (
+        "male_age_group_0_5_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
     "male_age_group_6_11_disabled_count": (
         "male_age_group_6_11_disabled_count",
         validate_integer,
@@ -120,20 +212,56 @@ household_fields: dict[str, tuple[str, Any, Any]] = {
         validate_integer,
         handle_integer_field,
     ),
-    "male_age_group_60_disabled_count": ("male_age_group_60_disabled_count", validate_integer, handle_integer_field),
+    "male_age_group_60_disabled_count": (
+        "male_age_group_60_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
     "children_count": ("children_count", validate_integer, handle_integer_field),
-    "male_children_count": ("male_children_count", validate_integer, handle_integer_field),
-    "female_children_count": ("female_children_count", validate_integer, handle_integer_field),
-    "children_disabled_count": ("children_disabled_count", validate_integer, handle_integer_field),
-    "male_children_disabled_count": ("male_children_disabled_count", validate_integer, handle_integer_field),
-    "female_children_disabled_count": ("female_children_disabled_count", validate_integer, handle_integer_field),
+    "male_children_count": (
+        "male_children_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "female_children_count": (
+        "female_children_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "children_disabled_count": (
+        "children_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "male_children_disabled_count": (
+        "male_children_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "female_children_disabled_count": (
+        "female_children_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
     "returnee": ("returnee", validate_boolean, handle_boolean_field),
-    "first_registration_date": ("first_registration_date", validate_date, handle_simple_field),
-    "last_registration_date": ("last_registration_date", validate_date, handle_simple_field),
+    "first_registration_date": (
+        "first_registration_date",
+        validate_date,
+        handle_simple_field,
+    ),
+    "last_registration_date": (
+        "last_registration_date",
+        validate_date,
+        handle_simple_field,
+    ),
     "fchild_hoh": ("fchild_hoh", validate_boolean, handle_boolean_field),
     "child_hoh": ("child_hoh", validate_boolean, handle_boolean_field),
     "village": ("village", validate_string, handle_simple_field),
-    "registration_method": ("registration_method", validate_choices, handle_simple_field),
+    "registration_method": (
+        "registration_method",
+        validate_choices,
+        handle_simple_field,
+    ),
     "currency": ("currency", validate_choices, handle_simple_field),
     "unhcr_id": ("unhcr_id", validate_string, handle_simple_field),
 }
@@ -176,7 +304,12 @@ def get_account_fields() -> dict[Any, Any]:
         wallet_fields: set[tuple[str, str | None]] = set()
         wallet_fields.add((f"account__{account_type}__*", None))
         wallet_fields.add((f"account__{account_type}__number", "number"))
-        wallet_fields.add((f"account__{account_type}__financial_institution_pk", "financial_institution"))
+        wallet_fields.add(
+            (
+                f"account__{account_type}__financial_institution_pk",
+                "financial_institution",
+            )
+        )
         if len(wallet_fields) > 0:
             deliver_mechanism_data_fields[account_type] = tuple(wallet_fields)
     return deliver_mechanism_data_fields

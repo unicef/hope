@@ -4,7 +4,6 @@ from unittest import mock
 
 from django.conf import settings
 from django.utils import timezone
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -166,7 +165,9 @@ class TestPaymentSignature(APITestCase):
 
         with mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(
-                input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
 
         pp.refresh_from_db()

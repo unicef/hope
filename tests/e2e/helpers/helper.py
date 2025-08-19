@@ -1,21 +1,19 @@
-import os
+import contextlib
 import logging
+import os
 import time
 from time import sleep
-from typing import Literal, Optional, Union, Tuple, Callable
+from typing import Callable, Literal, Optional, Tuple, Union
 
 from django.conf import settings
-
 from selenium.common import NoSuchElementException
-from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver import Chrome, Keys
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-import contextlib
-
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +58,12 @@ class Common:
         else:
             raise Exception("No elements found")
 
-    def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
+    def wait_for(
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> WebElement:
         try:
             return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
         except TimeoutException:
@@ -68,17 +71,28 @@ class Common:
         raise NoSuchElementException(f"Element: {locator} not found")
 
     def wait_for_disappear(
-        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait(timeout).until_not(EC.visibility_of_element_located((element_type, locator)))
 
     def wait_for_text_disappear(
-        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait(timeout).until_not(EC.text_to_be_present_in_element((element_type, locator), text))
 
     def wait_for_text(
-        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> Union[Literal[False, True], bool]:
         try:
             return self._wait(timeout).until(EC.text_to_be_present_in_element((element_type, locator), text))
@@ -90,7 +104,11 @@ class Common:
         )
 
     def wait_for_text_to_be_exact(
-        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> bool:
         """
         Wait until element text equals *exactly* ``text``.
@@ -110,7 +128,11 @@ class Common:
             )
 
     def wait_for_text_in_any_element(
-        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> bool:
         try:
             return self._wait(timeout).until(
@@ -128,7 +150,10 @@ class Common:
         return self.driver.current_url
 
     def element_clickable(
-        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> bool:
         return self._wait(timeout).until(EC.element_to_be_clickable((element_type, locator)))
 
@@ -174,10 +199,16 @@ class Common:
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         current_page_url = self.driver.current_url
         button.click()
-        assert url_fragment in self.wait_for_new_url(current_page_url).split("/")[-1], (current_page_url, url_fragment)
+        assert url_fragment in self.wait_for_new_url(current_page_url).split("/")[-1], (
+            current_page_url,
+            url_fragment,
+        )
 
     def upload_file(
-        self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
+        self,
+        upload_file: str,
+        xpath: str = "//input[@type='file']",
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
         from time import sleep
 
@@ -221,7 +252,11 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: Optional[str] = None, delay_sec: float = 1
+        self,
+        file_name: str = "test",
+        file_type: str = "png",
+        file_path: Optional[str] = None,
+        delay_sec: float = 1,
     ) -> None:
         if file_path is None:
             file_path = settings.SCREENSHOT_DIRECTORY
@@ -229,7 +264,12 @@ class Common:
         full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
         self.driver.get_screenshot_as_file(full_filename)
 
-    def scroll(self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1) -> None:
+    def scroll(
+        self,
+        scroll_by: int = 600,
+        wait_after_start_scrolling: int = 2,
+        execute: int = 1,
+    ) -> None:
         for _ in range(execute):
             self.driver.execute_script(
                 f"""

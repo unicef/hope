@@ -3,45 +3,35 @@ import logging
 from collections import defaultdict, namedtuple
 from typing import TYPE_CHECKING, Any, Sequence, Union
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db.models import JSONField, QuerySet
 from django.db.transaction import atomic
+from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
-
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
 from jsoneditor.forms import JSONEditor
+from requests import HTTPError
 
 from hope.admin.account_filters import BusinessAreaFilter, HasKoboAccount
-from hope.admin.account_forms import (
-    AddRoleForm,
-    HopeUserCreationForm,
-    ImportCSVForm,
-)
+from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.account_mixins import KoboAccessMixin
+from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account import models as account_models
-from hope.apps.account.models import Partner, User
-
-
-from django.core.validators import validate_email
-from django.forms.forms import Form
-
-from requests import HTTPError
-
-from hope.admin.steficon import AutocompleteWidget
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
+from hope.apps.account.models import Partner, User
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import build_arg_dict_from_dict
-
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -328,7 +318,14 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         return self.get_fields(request)
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list[str]:
-        return ["last_name", "first_name", "email", "username", "job_title", "last_login"]
+        return [
+            "last_name",
+            "first_name",
+            "email",
+            "username",
+            "job_title",
+            "last_login",
+        ]
 
     def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> Any:
         fieldsets = self.base_fieldset

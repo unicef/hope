@@ -3,20 +3,17 @@ import json
 import logging
 from uuid import UUID
 
+from concurrency.api import disable_concurrency
+from constance import config
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
 
-from concurrency.api import disable_concurrency
-from constance import config
-
 from hope.apps.core.celery import app
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.models import Household, Individual
-from hope.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.program.models import Program
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -86,7 +83,8 @@ def recalculate_population_fields_task(household_ids: list[str] | None = None, p
         for page_number in paginator.page_range:
             page = paginator.page(page_number)
             recalculate_population_fields_chunk_task.delay(
-                households_ids=list(page.object_list.values_list("pk", flat=True)), program_id=program_id
+                households_ids=list(page.object_list.values_list("pk", flat=True)),
+                program_id=program_id,
             )
 
 
@@ -152,7 +150,9 @@ def revalidate_phone_number_task(individual_ids: list[UUID]) -> None:
     individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
     individuals_to_update = [calculate_phone_numbers_validity(individual) for individual in individuals]
     Individual.objects.bulk_update(
-        individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
+        individuals_to_update,
+        fields=("phone_no_valid", "phone_no_alternative_valid"),
+        batch_size=1000,
     )
 
 
@@ -182,7 +182,8 @@ def enroll_households_to_program_task(households_ids: list, program_for_enroll_i
             get_individual_doc(program_for_enroll.business_area.slug),
         )
         populate_index(
-            Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll), HouseholdDocument
+            Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll),
+            HouseholdDocument,
         )
     finally:
         cache.delete(cache_key)
@@ -192,9 +193,7 @@ def enroll_households_to_program_task(households_ids: list, program_for_enroll_i
 @log_start_and_end
 @sentry_tags
 def mass_withdraw_households_from_list_task(household_id_list: list, tag: str, program_id: str) -> None:
-    from hope.admin.household import (
-        HouseholdWithdrawFromListMixin,
-    )
+    from hope.admin.household import HouseholdWithdrawFromListMixin
 
     program = Program.objects.get(id=program_id)
     HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)

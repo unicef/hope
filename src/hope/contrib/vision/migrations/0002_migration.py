@@ -15,46 +15,108 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="FundsCommitmentGroup",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("funds_commitment_number", models.CharField(max_length=10)),
             ],
         ),
         migrations.CreateModel(
             name="FundsCommitmentItem",
             fields=[
-                ("funds_commitment_item", models.CharField(db_index=True, max_length=3)),
-                ("rec_serial_number", models.IntegerField(primary_key=True, serialize=False)),
+                (
+                    "funds_commitment_item",
+                    models.CharField(db_index=True, max_length=3),
+                ),
+                (
+                    "rec_serial_number",
+                    models.IntegerField(primary_key=True, serialize=False),
+                ),
                 ("vendor_id", models.CharField(blank=True, max_length=10, null=True)),
-                ("business_area", models.CharField(blank=True, max_length=4, null=True)),
+                (
+                    "business_area",
+                    models.CharField(blank=True, max_length=4, null=True),
+                ),
                 ("posting_date", models.DateField(blank=True, null=True)),
-                ("vision_approval", models.CharField(blank=True, max_length=1, null=True)),
+                (
+                    "vision_approval",
+                    models.CharField(blank=True, max_length=1, null=True),
+                ),
                 ("document_reference", models.CharField(max_length=16, null=True)),
                 ("fc_status", models.CharField(blank=True, max_length=1, null=True)),
-                ("wbs_element", models.CharField(blank=True, default="", max_length=24, null=True)),
-                ("grant_number", models.CharField(blank=True, default="", max_length=20, null=True)),
-                ("document_type", models.CharField(blank=True, max_length=2, null=True)),
-                ("document_text", models.CharField(blank=True, max_length=50, null=True)),
-                ("currency_code", models.CharField(blank=True, max_length=5, null=True)),
+                (
+                    "wbs_element",
+                    models.CharField(blank=True, default="", max_length=24, null=True),
+                ),
+                (
+                    "grant_number",
+                    models.CharField(blank=True, default="", max_length=20, null=True),
+                ),
+                (
+                    "document_type",
+                    models.CharField(blank=True, max_length=2, null=True),
+                ),
+                (
+                    "document_text",
+                    models.CharField(blank=True, max_length=50, null=True),
+                ),
+                (
+                    "currency_code",
+                    models.CharField(blank=True, max_length=5, null=True),
+                ),
                 ("gl_account", models.CharField(blank=True, max_length=10, null=True)),
                 (
                     "commitment_amount_local",
                     models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True),
                 ),
-                ("commitment_amount_usd", models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True)),
+                (
+                    "commitment_amount_usd",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True),
+                ),
                 (
                     "total_open_amount_local",
                     models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True),
                 ),
-                ("total_open_amount_usd", models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True)),
-                ("sponsor", models.CharField(blank=True, default="", max_length=10, null=True)),
-                ("sponsor_name", models.CharField(blank=True, default="", max_length=100, null=True)),
-                ("fund", models.CharField(blank=True, default="", max_length=10, null=True)),
-                ("funds_center", models.CharField(blank=True, default="", max_length=16, null=True)),
-                ("percentage", models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
+                (
+                    "total_open_amount_usd",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True),
+                ),
+                (
+                    "sponsor",
+                    models.CharField(blank=True, default="", max_length=10, null=True),
+                ),
+                (
+                    "sponsor_name",
+                    models.CharField(blank=True, default="", max_length=100, null=True),
+                ),
+                (
+                    "fund",
+                    models.CharField(blank=True, default="", max_length=10, null=True),
+                ),
+                (
+                    "funds_center",
+                    models.CharField(blank=True, default="", max_length=16, null=True),
+                ),
+                (
+                    "percentage",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
+                ),
                 ("create_date", models.DateTimeField(auto_now_add=True, null=True)),
-                ("created_by", models.CharField(blank=True, default="", max_length=20, null=True)),
+                (
+                    "created_by",
+                    models.CharField(blank=True, default="", max_length=20, null=True),
+                ),
                 ("update_date", models.DateTimeField(blank=True, null=True)),
-                ("updated_by", models.CharField(blank=True, default="", max_length=20, null=True)),
+                (
+                    "updated_by",
+                    models.CharField(blank=True, default="", max_length=20, null=True),
+                ),
                 (
                     "funds_commitment_group",
                     models.ForeignKey(

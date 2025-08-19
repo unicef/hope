@@ -128,7 +128,11 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
 
 
 def create_pdu_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str,
+    subtype: str,
+    number_of_rounds: int,
+    rounds_names: list[str],
+    program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
@@ -391,7 +395,9 @@ def generate_pdu_data() -> None:
     test_program = Program.objects.get(business_area__slug="afghanistan", name="Test Program")
     group = FlexibleAttributeGroup.objects.create(name="Group 1", label={"english": "english"})
     pdu_data = PeriodicFieldData.objects.create(
-        subtype="STRING", number_of_rounds=12, rounds_names=["test1", "test2", "test3..."]
+        subtype="STRING",
+        number_of_rounds=12,
+        rounds_names=["test1", "test2", "test3..."],
     )
     FlexibleAttributeForPDUFactory(
         name="test_1_i_f",

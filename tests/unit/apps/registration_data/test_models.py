@@ -2,7 +2,6 @@ import datetime
 
 from django.core.management import call_command
 from django.test import TestCase
-
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -37,10 +36,12 @@ class TestRegistrationDataModels(TestCase):
             status=RegistrationDataImport.IN_REVIEW, program=cls.program
         )
         cls.imported_individual_1 = IndividualFactory(
-            registration_data_import_id=cls.registration_data_import.id, rdi_merge_status=Individual.PENDING
+            registration_data_import_id=cls.registration_data_import.id,
+            rdi_merge_status=Individual.PENDING,
         )
         cls.imported_individual_2 = IndividualFactory(
-            registration_data_import_id=cls.registration_data_import.id, rdi_merge_status=Individual.PENDING
+            registration_data_import_id=cls.registration_data_import.id,
+            rdi_merge_status=Individual.PENDING,
         )
 
         # ImportedHousehold

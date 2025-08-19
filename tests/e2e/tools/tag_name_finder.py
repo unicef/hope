@@ -3,7 +3,12 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
 
-def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_object_str: str = "self") -> None:
+def printing(
+    what: str,
+    web_driver: WebDriver,
+    label: str = "data-cy",
+    page_object_str: str = "self",
+) -> None:
     """
     :param web_driver: Selenium WebDriver
     :param what: What type of return will occur:

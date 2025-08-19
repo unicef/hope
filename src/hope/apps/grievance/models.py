@@ -15,7 +15,6 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
 from model_utils.models import UUIDModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
@@ -414,7 +413,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return self._linked_tickets.union(self._existing_tickets)
 
     @property
-    def existing_tickets(self) -> QuerySet["GrievanceTicket"]:  # temporarily linked tickets
+    def existing_tickets(
+        self,
+    ) -> QuerySet["GrievanceTicket"]:  # temporarily linked tickets
         all_through_objects = GrievanceTicketThrough.objects.filter(
             Q(linked_ticket=self) | Q(main_ticket=self)
         ).values_list("main_ticket", "linked_ticket")
@@ -676,7 +677,9 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 
 @receiver(post_delete, sender=TicketHouseholdDataUpdateDetails)
 def delete_grievance_ticket_on_household_details_update_delete(
-    sender: TicketHouseholdDataUpdateDetails, instance: TicketHouseholdDataUpdateDetails, **kwargs: Any
+    sender: TicketHouseholdDataUpdateDetails,
+    instance: TicketHouseholdDataUpdateDetails,
+    **kwargs: Any,
 ) -> None:
     if hasattr(instance, "ticket"):  # pragma: no cover
         instance.ticket.delete()
@@ -708,7 +711,9 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
 @receiver(post_delete, sender=TicketIndividualDataUpdateDetails)
 def delete_grievance_ticket_on_individual_details_update_delete(
-    sender: TicketIndividualDataUpdateDetails, instance: TicketIndividualDataUpdateDetails, **kwargs: Any
+    sender: TicketIndividualDataUpdateDetails,
+    instance: TicketIndividualDataUpdateDetails,
+    **kwargs: Any,
 ) -> None:
     if hasattr(instance, "ticket"):  # pragma: no cover
         instance.ticket.delete()
@@ -764,7 +769,9 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="delete_household_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="delete_household_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -826,7 +833,9 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     )
     # probably unique Individual
     golden_records_individual = models.ForeignKey(
-        "household.Individual", related_name="ticket_golden_records", on_delete=models.CASCADE
+        "household.Individual",
+        related_name="ticket_golden_records",
+        on_delete=models.CASCADE,
     )
     # list of possible duplicates in the ticket
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
@@ -856,7 +865,10 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
             documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
             return bool(set(documents1) & set(documents2))
-        possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+        possible_duplicates = [
+            self.golden_records_individual,
+            *self.possible_duplicates.all(),
+        ]
         selected_individuals = self.selected_individuals.all()
 
         unselected_individuals = [
@@ -916,9 +928,17 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         choices=PaymentVerification.STATUS_CHOICES,
     )
     payment_verification = models.ForeignKey(
-        "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
+        "payment.PaymentVerification",
+        related_name="ticket_detail",
+        on_delete=models.SET_NULL,
+        null=True,
     )
-    new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
+    new_status = models.CharField(
+        max_length=50,
+        choices=PaymentVerification.STATUS_CHOICES,
+        default=None,
+        null=True,
+    )
     old_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -1034,7 +1054,10 @@ class GrievanceDocument(UUIDModel):
     updated_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100, null=True)
     grievance_ticket = models.ForeignKey(
-        GrievanceTicket, null=True, related_name="support_documents", on_delete=models.SET_NULL
+        GrievanceTicket,
+        null=True,
+        related_name="support_documents",
+        on_delete=models.SET_NULL,
     )
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)

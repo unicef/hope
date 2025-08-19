@@ -3,8 +3,14 @@ from django.urls import include, path
 from hope.apps.core.api.urls import get_business_area_nested_router
 from hope.apps.program.api.urls import program_base_router
 from hope.apps.registration_data.api.views import RegistrationDataImportViewSet
-from hope.apps.registration_data.api.views_import_data import ImportDataViewSet, KoboImportDataViewSet
-from hope.apps.registration_data.api.views_upload import ImportDataUploadViewSet, KoboImportDataUploadViewSet
+from hope.apps.registration_data.api.views_import_data import (
+    ImportDataViewSet,
+    KoboImportDataViewSet,
+)
+from hope.apps.registration_data.api.views_upload import (
+    ImportDataUploadViewSet,
+    KoboImportDataUploadViewSet,
+)
 
 app_name = "registration_data"
 

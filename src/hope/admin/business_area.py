@@ -1,6 +1,10 @@
 import logging
 from typing import TYPE_CHECKING, Any
 
+from admin_extra_buttons.api import button
+from admin_extra_buttons.mixins import confirm_action
+from admin_sync.mixin import GetManyFromRemoteMixin
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter, TabularInline
@@ -10,37 +14,22 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.forms import inlineformset_factory
-from django.http import (
-    HttpRequest,
-    HttpResponseRedirect,
-)
+from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_buttons.api import button
-from admin_extra_buttons.mixins import confirm_action
-from admin_sync.mixin import GetManyFromRemoteMixin
-from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from jsoneditor.forms import JSONEditor
 
-from hope.admin.utils import (
-    HOPEModelAdminBase,
-    LastSyncDateResetMixin,
-)
+from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
 from hope.apps.account.models import Partner, RoleAssignment
 from hope.apps.administration.widgets import JsonWidget
-
-from hope.apps.core.models import (
-    BusinessArea,
-)
+from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.household.models import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
 from hope.apps.payment.models import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
-
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -165,7 +154,10 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(
-    GetManyFromRemoteMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase
+    GetManyFromRemoteMixin,
+    LastSyncDateResetMixin,
+    AdminAutoCompleteSearchMixin,
+    HOPEModelAdminBase,
 ):
     inlines = [
         AcceptanceProcessThresholdInline,

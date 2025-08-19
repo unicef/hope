@@ -1,12 +1,11 @@
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 
-from django.core.files.base import ContentFile
-from django.utils import timezone
-
 import pytest
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from django.core.files.base import ContentFile
+from django.utils import timezone
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -230,7 +229,9 @@ class TestGrievanceTicketDetail:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_grievance_detail_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         grievance_ticket = GrievanceTicketFactory(
             **self.grievance_ticket_base_data,
@@ -318,7 +319,12 @@ class TestGrievanceTicketDetail:
                 status.HTTP_404_NOT_FOUND,
                 status.HTTP_404_NOT_FOUND,
             ),
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE], False, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK),
+            (
+                [Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE],
+                False,
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_200_OK,
+            ),
             (
                 [Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR],
                 False,
@@ -1280,7 +1286,8 @@ class TestGrievanceTicketDetail:
                     "proximity_to_score": ticket_details.extra_data["golden_records"][0]["proximity_to_score"],
                     "location": ticket_details.extra_data["golden_records"][0]["location"],
                     "age": relativedelta(
-                        date.today(), parse(ticket_details.extra_data["golden_records"][0]["dob"])
+                        date.today(),
+                        parse(ticket_details.extra_data["golden_records"][0]["dob"]),
                     ).years,
                     "duplicate": ticket_details.extra_data["golden_records"][0]["duplicate"],
                     "distinct": ticket_details.extra_data["golden_records"][0]["distinct"],
@@ -1295,7 +1302,8 @@ class TestGrievanceTicketDetail:
                     "proximity_to_score": ticket_details.extra_data["possible_duplicate"][0]["proximity_to_score"],
                     "location": ticket_details.extra_data["possible_duplicate"][0]["location"],
                     "age": relativedelta(
-                        date.today(), parse(ticket_details.extra_data["possible_duplicate"][0]["dob"])
+                        date.today(),
+                        parse(ticket_details.extra_data["possible_duplicate"][0]["dob"]),
                     ).years,
                     "duplicate": ticket_details.extra_data["possible_duplicate"][0]["duplicate"],
                     "distinct": ticket_details.extra_data["possible_duplicate"][0]["distinct"],
@@ -1349,7 +1357,10 @@ class TestGrievanceTicketDetail:
         grievance_ticket.linked_tickets.add(self.linked_ticket)
 
     def _assert_base_grievance_data(
-        self, data: Dict, grievance_ticket: GrievanceTicket, delivered_quantities: Optional[List] = None
+        self,
+        data: Dict,
+        grievance_ticket: GrievanceTicket,
+        delivered_quantities: Optional[List] = None,
     ) -> None:
         assert data["id"] == str(grievance_ticket.id)
         assert data["unicef_id"] == grievance_ticket.unicef_id
@@ -1372,8 +1383,14 @@ class TestGrievanceTicketDetail:
                 "unhcr_id": household.unhcr_id,
                 "village": household.village,
                 "address": household.address,
-                "admin1": {"id": str(household.admin1.id), "name": household.admin1.name},
-                "admin2": {"id": str(household.admin2.id), "name": household.admin2.name},
+                "admin1": {
+                    "id": str(household.admin1.id),
+                    "name": household.admin1.name,
+                },
+                "admin2": {
+                    "id": str(household.admin2.id),
+                    "name": household.admin2.name,
+                },
                 "country": household.country.name,
                 "country_origin": household.country_origin.name,
                 "geopoint": household.geopoint,

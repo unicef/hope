@@ -2,9 +2,15 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import view
+from admin_extra_buttons.utils import labelize
+from admin_sync.mixin import SyncMixin
+from adminactions.export import ForeignKeysCollector
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import messages
 from django.contrib.admin import register
 from django.db.models import QuerySet
@@ -13,14 +19,6 @@ from django.forms import Form, ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-
-from admin_extra_buttons.api import button
-from admin_extra_buttons.decorators import view
-from admin_extra_buttons.utils import labelize
-from admin_sync.mixin import SyncMixin
-from adminactions.export import ForeignKeysCollector
-from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -28,7 +26,6 @@ from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
-from .steficon import TestRuleMixin
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.models import User
 from hope.apps.administration.widgets import JsonWidget
@@ -40,6 +37,8 @@ from hope.apps.steficon.forms import (
 from hope.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hope.apps.utils.security import is_root
 
+from .steficon import TestRuleMixin
+
 if TYPE_CHECKING:
     from django import forms
 
@@ -48,11 +47,15 @@ logger = logging.getLogger(__name__)
 
 class RuleResource(ModelResource):
     created_by = fields.Field(
-        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="created_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
@@ -145,7 +148,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 ),
             },
         ),
-        ("Allowed business areas", {"classes": ("collapse",), "fields": ("allowed_business_areas",)}),
+        (
+            "Allowed business areas",
+            {"classes": ("collapse",), "fields": ("allowed_business_areas",)},
+        ),
     ]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -173,7 +179,16 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         # not editable for is_superuser
         if not is_root(request):
             readonly_fields.extend(
-                ["name", "type", "enabled", "deprecated", "language", "definition", "description", "flags"]
+                [
+                    "name",
+                    "type",
+                    "enabled",
+                    "deprecated",
+                    "language",
+                    "definition",
+                    "description",
+                    "flags",
+                ]
             )
         if not request.user.is_superuser:
             readonly_fields.append("allowed_business_areas")
@@ -192,7 +207,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         return ["history"]
 
     def get_form(
-        self, request: HttpRequest, obj: Any | None = None, change: bool = False, **kwargs: Any
+        self,
+        request: HttpRequest,
+        obj: Any | None = None,
+        change: bool = False,
+        **kwargs: Any,
     ) -> type["ModelForm[Any]"]:
         return super().get_form(request, obj, change, **kwargs)
 
@@ -294,7 +313,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
-    @button(visible=lambda btn: "/changelog/" not in btn.request.path, permission="steficon.changelog")
+    @button(
+        visible=lambda btn: "/changelog/" not in btn.request.path,
+        permission="steficon.changelog",
+    )
     def changelog(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
@@ -328,7 +350,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button(visible=lambda btn: "/change/" in btn.request.path, permission="steficon.check_diff")
+    @button(
+        visible=lambda btn: "/change/" in btn.request.path,
+        permission="steficon.check_diff",
+    )
     def diff(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect | TemplateResponse:
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -359,19 +384,33 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return HttpResponseRedirect(reverse("admin:index"))
 
     def change_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Any | None = None
+        self,
+        request: HttpRequest,
+        object_id: str,
+        form_url: str = "",
+        extra_context: Any | None = None,
     ) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 
     def _changeform_view(
-        self, request: HttpRequest, object_id: str | None, form_url: str = "", extra_context: Any | None = None
+        self,
+        request: HttpRequest,
+        object_id: str | None,
+        form_url: str = "",
+        extra_context: Any | None = None,
     ) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None
         return super()._changeform_view(request, object_id, form_url, extra_context)
 
     @atomic()
-    def save_model(self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Any | None = None) -> None:
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: Any,
+        form_url: str = "",
+        extra_context: Any | None = None,
+    ) -> None:
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user
@@ -387,5 +426,8 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+            collector.data,
+            use_natural_foreign_keys=True,
+            use_natural_primary_keys=True,
+            indent=3,
         )

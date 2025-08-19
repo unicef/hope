@@ -67,7 +67,9 @@ def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) ->
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-def test_update_dashboard_figures_retry_on_global_failure(afghanistan: BusinessArea) -> None:
+def test_update_dashboard_figures_retry_on_global_failure(
+    afghanistan: BusinessArea,
+) -> None:
     """
     Test that update_dashboard_figures retries on failure of global data refresh.
     """
@@ -190,7 +192,10 @@ def test_update_recent_dashboard_figures_ba_error_continues(
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_global_error_continues(
-    mock_ba_refresh: Mock, mock_global_refresh: Mock, mock_logger_error: Mock, afghanistan: BusinessArea
+    mock_ba_refresh: Mock,
+    mock_global_refresh: Mock,
+    mock_logger_error: Mock,
+    afghanistan: BusinessArea,
 ) -> None:
     """
     Test that update_recent_dashboard_figures logs error if global refresh fails but BAs were processed.
@@ -210,7 +215,8 @@ def test_update_recent_dashboard_figures_global_error_continues(
     mock_ba_refresh.assert_called_once_with(afghanistan.slug, years_to_refresh=years_to_refresh)
     mock_global_refresh.assert_called_once_with(years_to_refresh=years_to_refresh)
     mock_logger_error.assert_called_once_with(
-        "Error refreshing recent global dashboard data: Global refresh error", exc_info=True
+        "Error refreshing recent global dashboard data: Global refresh error",
+        exc_info=True,
     )
 
 

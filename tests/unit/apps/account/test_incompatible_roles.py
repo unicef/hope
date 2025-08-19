@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 
@@ -31,7 +30,8 @@ class IncompatibleRolesTest(TestCase):
 
         test_role = IncompatibleRoles(role_one=self.role_2, role_two=self.role_1)
         with self.assertRaisesMessage(
-            ValidationError, "This combination of roles already exists as incompatible pair."
+            ValidationError,
+            "This combination of roles already exists as incompatible pair.",
         ):
             test_role.full_clean()
 

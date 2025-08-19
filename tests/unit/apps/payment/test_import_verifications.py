@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -89,12 +88,19 @@ class TestXlsxVerificationImport(APITestCase):
             ("from_pending", PaymentVerification.STATUS_PENDING, None),
             ("from_not_received", PaymentVerification.STATUS_NOT_RECEIVED, "NO"),
             ("from_received", PaymentVerification.STATUS_RECEIVED, "YES"),
-            ("from_received_with_issues", PaymentVerification.STATUS_RECEIVED_WITH_ISSUES, "YES"),
+            (
+                "from_received_with_issues",
+                PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+                "YES",
+            ),
         ]
     )
     def test_export_received_from_pending(self, _: Any, initial_status: str, result: Any) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PAYMENT_VERIFICATION_IMPORT], self.business_area, whole_business_area_access=True
+            self.user,
+            [Permissions.PAYMENT_VERIFICATION_IMPORT],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         self.verification.payment_record_verifications.all().update(status=initial_status)

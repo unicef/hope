@@ -2,11 +2,10 @@ import datetime
 from enum import Enum
 from typing import Any
 
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -61,7 +60,9 @@ class TestProgramList:
 
         deprecated_dct = DataCollectingTypeFactory(deprecated=True)
         self.program_with_dct_deprecated = ProgramFactory(
-            business_area=self.afghanistan, name="Deprecated DCT Program", data_collecting_type=deprecated_dct
+            business_area=self.afghanistan,
+            name="Deprecated DCT Program",
+            data_collecting_type=deprecated_dct,
         )
 
         unknown_dct = DataCollectingTypeFactory(code="unknown")
@@ -215,10 +216,14 @@ class TestProgramList:
     def test_program_list_ordering(self, create_user_role_with_permissions: Any) -> None:
         program_finished = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
         program_draft_first = ProgramFactory(
-            business_area=self.afghanistan, status=Program.DRAFT, start_date=datetime.datetime(2000, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.DRAFT,
+            start_date=datetime.datetime(2000, 1, 1),
         )
         program_draft_second = ProgramFactory(
-            business_area=self.afghanistan, status=Program.DRAFT, start_date=datetime.datetime(2001, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.DRAFT,
+            start_date=datetime.datetime(2001, 1, 1),
         )
         for program in [
             self.program,
@@ -253,7 +258,10 @@ class TestProgramList:
             self.program_in_ukraine,
         ]:
             create_user_role_with_permissions(
-                self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program
+                self.user,
+                [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+                self.afghanistan,
+                program,
             )
 
         def _test_response_len_and_queries(response_len: int, queries_len: int) -> None:
@@ -277,7 +285,10 @@ class TestProgramList:
         _test_response_len_and_queries(1, 5)  # on CI we have 7 here instead of 5 #FIXME
         # changing user permissions should invalidate cache
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program_afghanistan2
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program_afghanistan2,
         )
         _test_response_len_and_queries(2, no_queries_not_cached_no_permissions + 1)
         # cached data with another call
@@ -288,7 +299,10 @@ class TestProgramFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
         self.afghanistan = create_afghanistan()
-        self.list_url = reverse("api:programs:programs-list", kwargs={"business_area_slug": self.afghanistan.slug})
+        self.list_url = reverse(
+            "api:programs:programs-list",
+            kwargs={"business_area_slug": self.afghanistan.slug},
+        )
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -303,10 +317,16 @@ class TestProgramFilter:
         program1 = ProgramFactory(business_area=self.afghanistan, **program1_data)
         program2 = ProgramFactory(business_area=self.afghanistan, **program2_data)
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program1
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program1,
         )
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program2
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program2,
         )
 
         response = self.client.get(self.list_url, filters)
@@ -318,13 +338,17 @@ class TestProgramFilter:
 
     def test_filter_by_status(self) -> None:
         response_data = self._test_filter_programs_in_list(
-            {"status": Program.ACTIVE}, {"status": Program.FINISHED}, {"status": Program.ACTIVE}
+            {"status": Program.ACTIVE},
+            {"status": Program.FINISHED},
+            {"status": Program.ACTIVE},
         )
         assert response_data[0]["status"] == Program.ACTIVE
 
     def test_filter_by_sector(self) -> None:
         response_data = self._test_filter_programs_in_list(
-            {"sector": Program.HEALTH}, {"sector": Program.EDUCATION}, {"sector": Program.HEALTH}
+            {"sector": Program.HEALTH},
+            {"sector": Program.EDUCATION},
+            {"sector": Program.HEALTH},
         )
         assert response_data[0]["sector"] == Program.HEALTH
 
@@ -342,15 +366,23 @@ class TestProgramFilter:
 
     def test_filter_by_end_date(self) -> None:
         response_data = self._test_filter_programs_in_list(
-            {"start_date": datetime.datetime(2020, 1, 1), "end_date": datetime.datetime(2022, 1, 1)},
-            {"start_date": datetime.datetime(2020, 1, 1), "end_date": datetime.datetime(2023, 1, 1)},
+            {
+                "start_date": datetime.datetime(2020, 1, 1),
+                "end_date": datetime.datetime(2022, 1, 1),
+            },
+            {
+                "start_date": datetime.datetime(2020, 1, 1),
+                "end_date": datetime.datetime(2023, 1, 1),
+            },
             {"end_date": "2022-12-31"},
         )
         assert response_data[0]["end_date"] == "2022-01-01"
 
     def test_filter_by_name(self) -> None:
         self._test_filter_programs_in_list(
-            {"name": "Health Program"}, {"name": "Education Program"}, {"name": "Health"}
+            {"name": "Health Program"},
+            {"name": "Education Program"},
+            {"name": "Health"},
         )
 
     def test_filter_by_compatible_dct(self) -> None:
@@ -360,10 +392,16 @@ class TestProgramFilter:
         program1 = ProgramFactory(business_area=self.afghanistan, data_collecting_type=dct1)
         program2 = ProgramFactory(business_area=self.afghanistan, data_collecting_type=dct2)
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program1
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program1,
         )
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program2
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program2,
         )
 
         response = self.client.get(self.list_url, {"compatible_dct": program1.slug})
@@ -379,10 +417,16 @@ class TestProgramFilter:
         program2 = ProgramFactory(business_area=self.afghanistan, beneficiary_group=beneficiary_group2)
         program3 = ProgramFactory(business_area=self.afghanistan, beneficiary_group=beneficiary_group1)
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program1
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program1,
         )
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program2
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program2,
         )
 
         # additional check to test filter doesn't break allowed_programs constraints
@@ -392,7 +436,10 @@ class TestProgramFilter:
         assert len(response_data) == 0
 
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program3
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program3,
         )
         response = self.client.get(self.list_url, {"beneficiary_group_match": program1.slug})
         assert response.status_code == status.HTTP_200_OK
@@ -404,10 +451,16 @@ class TestProgramFilter:
         program1 = ProgramFactory(business_area=self.afghanistan, name="Health Program")
         program2 = ProgramFactory(business_area=self.afghanistan, name="Education Program")
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program1
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program1,
         )
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program2
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program2,
         )
 
         response = self.client.get(self.list_url, {"search": "Health"})
@@ -422,10 +475,16 @@ class TestProgramFilter:
         HouseholdFactory.create_batch(5, business_area=self.afghanistan, program=program1)
         HouseholdFactory.create_batch(3, business_area=self.afghanistan, program=program2)
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program1
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program1,
         )
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program2
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            program2,
         )
 
         response_min = self.client.get(self.list_url, {"number_of_households_min": 4})
@@ -476,27 +535,35 @@ class TestProgramFilter:
             _create_hhs_for_pp(program, payment_plan, no_hhs)
 
         program1 = ProgramFactory(
-            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2020, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            start_date=datetime.datetime(2020, 1, 1),
         )
         _create_pp_and_hhs_for_program_cycle(program1, program1.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 5)
 
         # program with payments in 2 payment plans, one with excluded status, hh_count=7 but 3 excluded
         program2 = ProgramFactory(
-            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2021, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            start_date=datetime.datetime(2021, 1, 1),
         )
         _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_OPEN, 3)
         _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
 
         # program with payments in 2 payment plans, hh_count=7
         program3 = ProgramFactory(
-            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2022, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            start_date=datetime.datetime(2022, 1, 1),
         )
         _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
         _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
 
         # program with payments in 2 program cycles with payment plans in correct status, hh_count=6
         program4 = ProgramFactory(
-            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2023, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            start_date=datetime.datetime(2023, 1, 1),
         )
         _create_pp_and_hhs_for_program_cycle(program4, program4.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
         program_cycle_program4 = ProgramCycleFactory(program=program4)
@@ -504,7 +571,9 @@ class TestProgramFilter:
 
         # program with repeated household in 2 payments, hh_count=5 but 1 repetition
         program5 = ProgramFactory(
-            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2024, 1, 1)
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            start_date=datetime.datetime(2024, 1, 1),
         )
         payment_plan_1 = PaymentPlanFactory(
             program_cycle=program5.cycles.first(),
@@ -526,7 +595,10 @@ class TestProgramFilter:
 
         for program in [program1, program2, program3, program4, program5]:
             self.create_user_role_with_permissions(
-                self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program
+                self.user,
+                [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+                self.afghanistan,
+                program,
             )
 
         response_min = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_min": 5})
@@ -555,7 +627,10 @@ class TestProgramFilter:
 
         response_min_max = self.client.get(
             self.list_url,
-            {"number_of_households_with_tp_in_program_min": 5, "number_of_households_with_tp_in_program_max": 5},
+            {
+                "number_of_households_with_tp_in_program_min": 5,
+                "number_of_households_with_tp_in_program_max": 5,
+            },
         )
         assert response_min_max.status_code == status.HTTP_200_OK
         response_data_min_max = response_min_max.json()["results"]

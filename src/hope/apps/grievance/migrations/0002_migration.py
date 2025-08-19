@@ -24,7 +24,9 @@ class Migration(migrations.Migration):
             model_name="ticketsystemflaggingdetails",
             name="sanction_list_individual",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="+", to="sanction_list.sanctionlistindividual"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="sanction_list.sanctionlistindividual",
             ),
         ),
         migrations.AddField(
@@ -60,7 +62,9 @@ class Migration(migrations.Migration):
             model_name="ticketsensitivedetails",
             name="payment_content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AddField(

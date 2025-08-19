@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
-
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household_and_individuals
@@ -24,7 +23,11 @@ from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
+from hope.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
 from hope.apps.sanction_list.models import SanctionList
 
 
@@ -42,7 +45,12 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         ]
         unicef_partner = PartnerFactory(name="UNICEF")
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
-        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=unicef, is_superuser=True)
+        cls.user = UserFactory(
+            username="Hope_Test_DRF",
+            password="HopePass",
+            partner=unicef,
+            is_superuser=True,
+        )
         permission_list = [perm.value for perm in user_permissions]
         role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
         user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
@@ -863,7 +871,12 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         super().setUpTestData()
         unicef_partner = PartnerFactory(name="UNICEF")
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
-        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=unicef, is_superuser=False)
+        cls.user = UserFactory(
+            username="Hope_Test_DRF",
+            password="HopePass",
+            partner=unicef,
+            is_superuser=False,
+        )
         cls.program = ProgramFactory(
             name="Test Program",
             status=Program.ACTIVE,
@@ -892,7 +905,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionListRole", defaults={"permissions": [Permissions.RDI_VIEW_LIST.value]}
+            name="TestPermissionListRole",
+            defaults={"permissions": [Permissions.RDI_VIEW_LIST.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -911,7 +925,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionRetrieveRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+            name="TestPermissionRetrieveRole",
+            defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -937,7 +952,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionMergeRole", defaults={"permissions": [Permissions.RDI_MERGE_IMPORT.value]}
+            name="TestPermissionMergeRole",
+            defaults={"permissions": [Permissions.RDI_MERGE_IMPORT.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -963,7 +979,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionEraseRole", defaults={"permissions": [Permissions.RDI_REFUSE_IMPORT.value]}
+            name="TestPermissionEraseRole",
+            defaults={"permissions": [Permissions.RDI_REFUSE_IMPORT.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -989,7 +1006,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionRefuseRole", defaults={"permissions": [Permissions.RDI_REFUSE_IMPORT.value]}
+            name="TestPermissionRefuseRole",
+            defaults={"permissions": [Permissions.RDI_REFUSE_IMPORT.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1015,7 +1033,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionDeduplicateRole", defaults={"permissions": [Permissions.RDI_RERUN_DEDUPE.value]}
+            name="TestPermissionDeduplicateRole",
+            defaults={"permissions": [Permissions.RDI_RERUN_DEDUPE.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1034,7 +1053,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionStatusChoicesRole", defaults={"permissions": [Permissions.RDI_VIEW_LIST.value]}
+            name="TestPermissionStatusChoicesRole",
+            defaults={"permissions": [Permissions.RDI_VIEW_LIST.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1048,7 +1068,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         # Grant permission for create
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         # Create a source program to import from, matching beneficiary group and data collecting type
@@ -1105,7 +1126,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         # Grant permission for create
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         # Create a source program to import from, matching beneficiary group and data collecting type
@@ -1160,7 +1182,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     def test_create_registration_data_import_invalid_bg(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         import_from_program = ProgramFactory(
@@ -1200,7 +1223,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     def test_create_registration_data_import_invalid_dct(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         import_from_program = ProgramFactory(
@@ -1240,7 +1264,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     def test_create_registration_data_import_program_finished(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         import_from_program = ProgramFactory(
@@ -1282,7 +1307,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     ) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         SanctionList.objects.all().delete()  # screen_beneficiary=False
         assert self.program.screen_beneficiary is False
@@ -1322,7 +1348,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     def test_create_registration_data_import_0_objects(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         import_from_program = ProgramFactory(
@@ -1368,7 +1395,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionUploadXlsxRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionUploadXlsxRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1401,7 +1429,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionSaveKoboRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionSaveKoboRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1434,7 +1463,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionXlsxImportRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionXlsxImportRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1468,7 +1498,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionKoboImportRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+            name="TestPermissionKoboImportRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1491,7 +1522,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionImportDataRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+            name="TestPermissionImportDataRole",
+            defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
@@ -1514,7 +1546,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
-            name="TestPermissionKoboImportDataRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+            name="TestPermissionKoboImportDataRole",
+            defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]},
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 

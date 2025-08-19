@@ -1,9 +1,8 @@
 import logging
 
+from celery.exceptions import TaskError
 from django.db.transaction import atomic
 from django.utils import timezone
-
-from celery.exceptions import TaskError
 
 from hope.apps.core.celery import app
 from hope.apps.household.forms import CreateTargetPopulationTextForm

@@ -2,7 +2,6 @@ import base64
 from pathlib import Path
 
 from django.core.management import call_command
-
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -36,7 +35,8 @@ class UploadRDITests(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
         cls.program = ProgramFactory.create(

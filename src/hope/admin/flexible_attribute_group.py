@@ -1,21 +1,15 @@
 import logging
 
-from django.contrib import admin
-from django.contrib.postgres.fields import JSONField
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
+from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
 from jsoneditor.forms import JSONEditor
-
-from hope.admin.utils import (
-    SoftDeletableAdminMixin,
-)
-from hope.apps.core.models import (
-    FlexibleAttribute,
-    FlexibleAttributeGroup,
-)
 from mptt.admin import MPTTModelAdmin
 
+from hope.admin.utils import SoftDeletableAdminMixin
+from hope.apps.core.models import FlexibleAttribute, FlexibleAttributeGroup
 
 logger = logging.getLogger(__name__)
 

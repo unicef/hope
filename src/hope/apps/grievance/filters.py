@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.db.models import Count, F, Func, Q, QuerySet, Window
-
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -256,7 +255,10 @@ class GrievanceTicketFilter(FilterSet):
 
     def _get_ticket_filters(self, lookup: str, value: str) -> Q:
         query = Q()
-        for ticket_type, lookup_objs in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+        for (
+            ticket_type,
+            lookup_objs,
+        ) in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
             if real_lookup := lookup_objs.get(lookup):
                 query |= Q(**{f"{ticket_type}__{real_lookup}": value})
         return query

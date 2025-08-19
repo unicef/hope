@@ -1,9 +1,8 @@
 import traceback
 
+from celery.exceptions import SoftTimeLimitExceeded
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-
-from celery.exceptions import SoftTimeLimitExceeded
 
 from hope.apps.core.celery import app
 from hope.apps.universal_update_script.models import UniversalUpdate

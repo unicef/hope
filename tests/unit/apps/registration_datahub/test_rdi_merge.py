@@ -3,12 +3,11 @@ from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import (
@@ -99,9 +98,24 @@ class TestRdiMergeTask(TestCase):
             area_level=4,
         )
         cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
-        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
-        cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2",
+            parent=cls.area1,
+        )
+        cls.area3 = AreaFactory(
+            name="City Test3",
+            area_type=area_type_level_3,
+            p_code="area3",
+            parent=cls.area2,
+        )
+        cls.area4 = AreaFactory(
+            name="City Test4",
+            area_type=area_type_level_4,
+            p_code="area4",
+            parent=cls.area3,
+        )
 
         rebuild_search_index()
 
@@ -495,7 +509,10 @@ class TestRdiMergeTask(TestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @mock.patch(
         "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"

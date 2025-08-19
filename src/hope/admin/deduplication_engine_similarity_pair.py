@@ -1,15 +1,10 @@
 import logging
 
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
-from adminfilters.autocomplete import AutoCompleteFilter
-
-
 from hope.admin.utils import HOPEModelAdminBase
-
-from hope.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-)
+from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,10 @@ from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan")
     dct = DataCollectingTypeFactory(type=dct_type)

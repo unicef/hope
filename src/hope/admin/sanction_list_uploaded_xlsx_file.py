@@ -1,11 +1,8 @@
 from django.contrib import admin
 from django.http import HttpRequest
 
-
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import (
-    UploadedXLSXFile,
-)
+from hope.apps.sanction_list.models import UploadedXLSXFile
 
 
 @admin.register(UploadedXLSXFile)

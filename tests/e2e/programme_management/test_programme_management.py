@@ -4,8 +4,6 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from selenium.common.exceptions import NoSuchElementException
-
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
@@ -19,6 +17,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
@@ -56,7 +55,9 @@ def create_unhcr_partner() -> None:
 
 
 def create_program(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
@@ -101,7 +102,10 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -162,7 +166,10 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_optional_values(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -224,7 +231,10 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_Frequency_of_Payment(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -276,7 +286,10 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_Cash_Plus(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -328,7 +341,10 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_check(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -396,7 +412,10 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_delete_partners(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -430,7 +449,9 @@ class TestProgrammeManagement:
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
     def test_create_programme_cancel_scenario(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -734,7 +755,10 @@ class TestManualCalendar:
     )
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_programme_chose_dates_via_calendar(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -787,7 +811,10 @@ class TestManualCalendar:
         ],
     )
     def test_create_programme_accesses(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -861,7 +888,11 @@ class TestManualCalendar:
         partner1 = Partner.objects.create(name="Test Partner 1")
         partner2 = Partner.objects.create(name="Test Partner 2")
         role = RoleFactory(name="Role in BA")
-        RoleAssignmentFactory(role=role, partner=partner1, business_area=BusinessArea.objects.get(slug="afghanistan"))
+        RoleAssignmentFactory(
+            role=role,
+            partner=partner1,
+            business_area=BusinessArea.objects.get(slug="afghanistan"),
+        )
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
