@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 
+from django.core.files.base import ContentFile
 from django.utils import timezone
 
 import pytest
@@ -297,7 +298,7 @@ class TestGrievanceTicketDetail:
         assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize(
-        "permissions, area_limit, expected_status_1, expected_status_2",
+        ("permissions", "area_limit", "expected_status_1", "expected_status_2"),
         [
             (
                 [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
@@ -673,6 +674,7 @@ class TestGrievanceTicketDetail:
                 "village": ticket_details.reason_household.village,
                 "geopoint": None,
                 "import_id": ticket_details.reason_household.unicef_id,
+                "program_slug": self.program.slug,
             },
         }
 
@@ -754,6 +756,7 @@ class TestGrievanceTicketDetail:
             "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
             "sex": golden_records_individual.sex,
             "duplicate": golden_records_individual.duplicate,
+            "program_slug": golden_records_individual.program.slug,
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
@@ -786,6 +789,7 @@ class TestGrievanceTicketDetail:
                 "zip_code": golden_records_individual.household.zip_code,
                 "residence_status": golden_records_individual.household.get_residence_status_display(),
                 "import_id": golden_records_individual.household.unicef_id,
+                "program_slug": golden_records_individual.household.program.slug,
             },
             "deduplication_golden_record_results": [
                 {
@@ -815,6 +819,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -956,6 +961,7 @@ class TestGrievanceTicketDetail:
             individual=golden_records_individual,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc_aaa.png"),
         )
 
         dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
@@ -1051,6 +1057,7 @@ class TestGrievanceTicketDetail:
             "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
             "sex": golden_records_individual.sex,
             "duplicate": golden_records_individual.duplicate,
+            "program_slug": golden_records_individual.program.slug,
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
@@ -1083,6 +1090,7 @@ class TestGrievanceTicketDetail:
                 "zip_code": golden_records_individual.household.zip_code,
                 "residence_status": golden_records_individual.household.get_residence_status_display(),
                 "import_id": golden_records_individual.household.unicef_id,
+                "program_slug": self.program.slug,
             },
             "deduplication_golden_record_results": [
                 {
@@ -1112,6 +1120,7 @@ class TestGrievanceTicketDetail:
                         "iso_code3": document.country.iso_code3,
                     },
                     "document_number": document.document_number,
+                    "photo": document.photo.url if document.photo else None,
                 },
             ],
         }
@@ -1123,6 +1132,7 @@ class TestGrievanceTicketDetail:
             "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
             "sex": self.individuals2[0].sex,
             "duplicate": self.individuals2[0].duplicate,
+            "program_slug": self.individuals2[0].program.slug,
             "household": {
                 "id": str(self.individuals2[0].household.id),
                 "unicef_id": self.individuals2[0].household.unicef_id,
@@ -1155,6 +1165,7 @@ class TestGrievanceTicketDetail:
                 "zip_code": self.individuals2[0].household.zip_code,
                 "residence_status": self.individuals2[0].household.get_residence_status_display(),
                 "import_id": self.individuals2[0].household.unicef_id,
+                "program_slug": self.program.slug,
             },
             "deduplication_golden_record_results": [],
             "documents": [],
@@ -1168,6 +1179,7 @@ class TestGrievanceTicketDetail:
                 "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
                 "sex": self.individuals2[0].sex,
                 "duplicate": self.individuals2[0].duplicate,
+                "program_slug": self.individuals2[0].program.slug,
                 "household": {
                     "id": str(self.individuals2[0].household.id),
                     "unicef_id": self.individuals2[0].household.unicef_id,
@@ -1200,6 +1212,7 @@ class TestGrievanceTicketDetail:
                     "zip_code": self.individuals2[0].household.zip_code,
                     "residence_status": self.individuals2[0].household.get_residence_status_display(),
                     "import_id": self.individuals2[0].household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1214,6 +1227,7 @@ class TestGrievanceTicketDetail:
                 "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
                 "sex": duplicate.sex,
                 "duplicate": duplicate.duplicate,
+                "program_slug": duplicate.program.slug,
                 "household": {
                     "id": str(duplicate.household.id),
                     "unicef_id": duplicate.household.unicef_id,
@@ -1246,6 +1260,7 @@ class TestGrievanceTicketDetail:
                     "zip_code": duplicate.household.zip_code,
                     "residence_status": duplicate.household.get_residence_status_display(),
                     "import_id": duplicate.household.unicef_id,
+                    "program_slug": self.program.slug,
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1364,6 +1379,7 @@ class TestGrievanceTicketDetail:
                 "geopoint": household.geopoint,
                 "size": household.size,
                 "residence_status": household.get_residence_status_display(),
+                "program_slug": household.program.slug,
                 "head_of_household": {
                     "id": str(household.head_of_household.id),
                     "full_name": household.head_of_household.full_name,
@@ -1437,6 +1453,7 @@ class TestGrievanceTicketDetail:
                 "id": str(individual.id),
                 "unicef_id": individual.unicef_id,
                 "full_name": individual.full_name,
+                "program_slug": individual.program.slug,
                 "household": {
                     "id": str(individual.household.id),
                     "unicef_id": individual.household.unicef_id,
@@ -1448,6 +1465,7 @@ class TestGrievanceTicketDetail:
                         "id": str(individual.household.admin2.id),
                         "name": individual.household.admin2.name,
                     },
+                    "program_slug": individual.program.slug,
                     "admin3": None,
                     "admin4": None,
                     "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
@@ -1498,6 +1516,7 @@ class TestGrievanceTicketDetail:
                             "zip_code": role.household.zip_code,
                             "residence_status": role.household.get_residence_status_display(),
                             "import_id": role.household.unicef_id,
+                            "program_slug": self.program.slug,
                         },
                     }
                     for role in individual.households_and_roles(manager="all_merge_status_objects").all()
@@ -1518,6 +1537,7 @@ class TestGrievanceTicketDetail:
                             "iso_code3": document.country.iso_code3,
                         },
                         "document_number": document.document_number,
+                        "photo": document.photo.url if document.photo else None,
                     }
                     for document in individual.documents.all()
                 ],

@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from typing import Callable, Generator
 from unittest.mock import Mock, patch
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
 
@@ -9,7 +10,11 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.registration_data import (
+    ImportDataFactory,
+    KoboImportDataFactory,
+    RegistrationDataImportFactory,
+)
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -19,7 +24,7 @@ from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
 from hope.apps.sanction_list.models import SanctionList
 
 
@@ -57,8 +62,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
         resp = self.client.post(url, {}, format="json")
 
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data, {"message": "Deduplication process started"})
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data == {"message": "Deduplication process started"}
         mock_deduplication_engine_process.assert_called_once_with(str(self.program.id))
 
     @patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
@@ -68,7 +73,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             args=["afghanistan", self.program.slug],
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         mock_fetch_dedup_results.assert_called_once_with(self.program.deduplication_set_id)
 
     def test_list_registrations(self) -> None:
@@ -96,21 +101,21 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         results = response.data["results"]
-        self.assertEqual(len(results), 2)
-        self.assertEqual({r["name"] for r in results}, {rdi1.name, rdi2.name})
+        assert len(results) == 2
+        assert {r["name"] for r in results} == {rdi1.name, rdi2.name}
 
         for result in results:
             if result["name"] == "Test RDI 1":
-                self.assertEqual(result["status"], "In Review")
-                self.assertEqual(result["data_source"], "Excel")
-                self.assertEqual(result["imported_by"], self.user.get_full_name())
+                assert result["status"] == "In Review"
+                assert result["data_source"] == "Excel"
+                assert result["imported_by"] == self.user.get_full_name()
             elif result["name"] == "Test RDI 2":
-                self.assertEqual(result["status"], "Deduplication")
-                self.assertEqual(result["data_source"], "KoBo")
-                self.assertEqual(result["imported_by"], self.user.get_full_name())
+                assert result["status"] == "Deduplication"
+                assert result["data_source"] == "KoBo"
+                assert result["imported_by"] == self.user.get_full_name()
 
     def test_retrieve_registration(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -138,48 +143,48 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["name"], rdi.name)
-        self.assertEqual(response.data["id"], str(rdi.id))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["name"] == rdi.name
+        assert response.data["id"] == str(rdi.id)
 
-        self.assertEqual(response.data["status_display"], "In Review")
-        self.assertEqual(response.data["data_source"], "Excel")
-        self.assertEqual(response.data["imported_by"], self.user.get_full_name())
+        assert response.data["status_display"] == "In Review"
+        assert response.data["data_source"] == "Excel"
+        assert response.data["imported_by"] == self.user.get_full_name()
 
         batch_duplicates = response.data["batch_duplicates_count_and_percentage"]
-        self.assertEqual(len(batch_duplicates), 2)
-        self.assertEqual(batch_duplicates[0]["count"], 5)
-        self.assertAlmostEqual(batch_duplicates[0]["percentage"], 10.0)
-        self.assertEqual(batch_duplicates[1]["count"], 4)
-        self.assertAlmostEqual(batch_duplicates[1]["percentage"], 8.0)
+        assert len(batch_duplicates) == 2
+        assert batch_duplicates[0]["count"] == 5
+        assert round(batch_duplicates[0]["percentage"]) == 10
+        assert batch_duplicates[1]["count"] == 4
+        assert round(batch_duplicates[1]["percentage"]) == 8.0
 
         batch_unique = response.data["batch_unique_count_and_percentage"]
-        self.assertEqual(len(batch_unique), 2)
-        self.assertEqual(batch_unique[0]["count"], 45)
-        self.assertAlmostEqual(batch_unique[0]["percentage"], 90.0)
-        self.assertEqual(batch_unique[1]["count"], 46)
-        self.assertAlmostEqual(batch_unique[1]["percentage"], 92.0)
+        assert len(batch_unique) == 2
+        assert batch_unique[0]["count"] == 45
+        assert round(batch_unique[0]["percentage"]) == 90
+        assert batch_unique[1]["count"] == 46
+        assert round(batch_unique[1]["percentage"]) == 92
 
         gr_duplicates = response.data["golden_record_duplicates_count_and_percentage"]
-        self.assertEqual(gr_duplicates[0]["count"], 3)
-        self.assertAlmostEqual(gr_duplicates[0]["percentage"], 6.0)
+        assert gr_duplicates[0]["count"] == 3
+        assert round(gr_duplicates[0]["percentage"]) == 6
 
         gr_possible_duplicates = response.data["golden_record_possible_duplicates_count_and_percentage"]
-        self.assertEqual(len(gr_possible_duplicates), 2)
-        self.assertEqual(gr_possible_duplicates[0]["count"], 2)
-        self.assertAlmostEqual(gr_possible_duplicates[0]["percentage"], 4.0)
-        self.assertEqual(gr_possible_duplicates[1]["count"], 3)
-        self.assertAlmostEqual(gr_possible_duplicates[1]["percentage"], 6.0)
+        assert len(gr_possible_duplicates) == 2
+        assert gr_possible_duplicates[0]["count"] == 2
+        assert round(gr_possible_duplicates[0]["percentage"]) == 4
+        assert gr_possible_duplicates[1]["count"] == 3
+        assert round(gr_possible_duplicates[1]["percentage"]) == 6
 
         gr_unique = response.data["golden_record_unique_count_and_percentage"]
-        self.assertEqual(len(gr_unique), 2)
-        self.assertEqual(gr_unique[0]["count"], 45)
-        self.assertAlmostEqual(gr_unique[0]["percentage"], 90.0)
-        self.assertEqual(gr_unique[1]["count"], 47)
-        self.assertAlmostEqual(gr_unique[1]["percentage"], 94.0)
+        assert len(gr_unique) == 2
+        assert gr_unique[0]["count"] == 45
+        assert round(gr_unique[0]["percentage"]) == 90
+        assert gr_unique[1]["count"] == 47
+        assert round(gr_unique[1]["percentage"]) == 94
 
-        self.assertIn("admin_url", response.data)
-        self.assertTrue(response.data["admin_url"])
+        assert "admin_url" in response.data
+        assert response.data["admin_url"]
 
     @patch("hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay")
     def test_merge_rdi(self, mock_merge_task: Mock) -> None:
@@ -197,11 +202,11 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {"message": "Registration Data Import Merge Scheduled"})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {"message": "Registration Data Import Merge Scheduled"}
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.MERGE_SCHEDULED)
+        assert rdi.status == RegistrationDataImport.MERGE_SCHEDULED
         mock_merge_task.assert_called_once_with(registration_data_import_id=rdi.id)
 
     def test_merge_rdi_with_invalid_status(self) -> None:
@@ -219,10 +224,10 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.DEDUPLICATION)
+        assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
     def test_erase_rdi(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -245,8 +250,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             ],
         )
 
-        self.assertEqual(Household.all_objects.filter(registration_data_import=rdi).count(), 1)
-        self.assertEqual(Individual.all_objects.filter(registration_data_import=rdi).count(), 2)
+        assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+        assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
 
         url = reverse(
             "api:registration-data:registration-data-imports-erase",
@@ -254,13 +259,13 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {"message": "Registration Data Import Erased"})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {"message": "Registration Data Import Erased"}
 
-        self.assertEqual(Household.all_objects.filter(registration_data_import=rdi).count(), 0)
+        assert Household.all_objects.filter(registration_data_import=rdi).count() == 0
 
         rdi.refresh_from_db()
-        self.assertTrue(rdi.erased)
+        assert rdi.erased
 
     def test_erase_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -288,12 +293,12 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-        self.assertEqual(Household.all_objects.filter(registration_data_import=rdi).count(), 1)
+        assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
 
         rdi.refresh_from_db()
-        self.assertFalse(rdi.erased)
+        assert not rdi.erased
 
     def test_refuse_rdi(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -316,8 +321,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             ],
         )
 
-        self.assertEqual(Household.all_objects.filter(registration_data_import=rdi).count(), 1)
-        self.assertEqual(Individual.all_objects.filter(registration_data_import=rdi).count(), 2)
+        assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+        assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
 
         url = reverse(
             "api:registration-data:registration-data-imports-refuse",
@@ -325,14 +330,14 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {"message": "Registration Data Import Refused"})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {"message": "Registration Data Import Refused"}
 
-        self.assertEqual(Household.all_objects.filter(registration_data_import=rdi).count(), 0)
+        assert Household.all_objects.filter(registration_data_import=rdi).count() == 0
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.REFUSED_IMPORT)
-        self.assertEqual(rdi.refuse_reason, "Testing refuse endpoint")
+        assert rdi.status == RegistrationDataImport.REFUSED_IMPORT
+        assert rdi.refuse_reason == "Testing refuse endpoint"
 
     def test_refuse_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -360,12 +365,12 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-        self.assertEqual(Household.all_objects.filter(registration_data_import=rdi).count(), 1)
+        assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.DEDUPLICATION)
+        assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
     @patch("hope.apps.registration_datahub.celery_tasks.rdi_deduplication_task.delay")
     def test_deduplicate_rdi(self, mock_deduplicate_task: Mock) -> None:
@@ -383,10 +388,10 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.DEDUPLICATION)
+        assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
         mock_deduplicate_task.assert_called_once_with(registration_data_import_id=str(rdi.id))
 
@@ -405,10 +410,10 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IN_REVIEW)
+        assert rdi.status == RegistrationDataImport.IN_REVIEW
 
     def test_status_choices(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -417,9 +422,439 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             args=["afghanistan", self.program.slug],
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response.data, list)
-        self.assertTrue(all("name" in c and "value" in c for c in response.data))
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+        assert all("name" in c and "value" in c for c in response.data)
+
+    @patch("hope.apps.registration_datahub.celery_tasks.validate_xlsx_import_task.delay")
+    def test_upload_xlsx_file(self, mock_validate_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        url = reverse(
+            "api:registration-data:import-data-upload-upload-xlsx-file",
+            args=["afghanistan", self.program.slug],
+        )
+
+        # Create a test XLSX file
+        file_content = b"test xlsx content"
+        uploaded_file = SimpleUploadedFile(
+            "test_data.xlsx",
+            file_content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, {"file": uploaded_file}, format="multipart")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert "status" in response.data
+        assert response.data["data_type"] == ImportData.XLSX
+
+        # Check ImportData was created
+        import_data = ImportData.objects.get(id=response.data["id"])
+        assert import_data.status == ImportData.STATUS_PENDING
+        assert import_data.data_type == ImportData.XLSX
+        assert import_data.business_area_slug == self.business_area.slug
+        assert import_data.created_by_id == self.user.id
+
+        # Check celery task was called
+        mock_validate_task.assert_called_once()
+        call_args = mock_validate_task.call_args[0]
+        assert call_args[0] == import_data.id
+        assert call_args[1] == str(self.program.id)
+
+    @patch("hope.apps.registration_datahub.celery_tasks.pull_kobo_submissions_task.delay")
+    def test_save_kobo_import_data(self, mock_pull_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        url = reverse(
+            "api:registration-data:kobo-import-data-upload-save-kobo-import-data",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "uid": "test_kobo_asset_123",
+            "only_active_submissions": True,
+            "pull_pictures": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert "status" in response.data
+        assert response.data["kobo_asset_id"] == "test_kobo_asset_123"
+        assert response.data["only_active_submissions"]
+        assert not response.data["pull_pictures"]
+
+        # Check KoboImportData was created
+        kobo_import_data = KoboImportData.objects.get(id=response.data["id"])
+        assert kobo_import_data.status == ImportData.STATUS_PENDING
+        assert kobo_import_data.data_type == ImportData.JSON
+        assert kobo_import_data.kobo_asset_id == "test_kobo_asset_123"
+        assert kobo_import_data.only_active_submissions
+        assert not kobo_import_data.pull_pictures
+        assert kobo_import_data.business_area_slug == self.business_area.slug
+        assert kobo_import_data.created_by_id == self.user.id
+
+        # Check celery task was called
+        mock_pull_task.assert_called_once()
+        call_args = mock_pull_task.call_args[0]
+        assert call_args[0] == kobo_import_data.id
+        assert call_args[1] == str(self.program.id)
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+    def test_registration_xlsx_import(self, mock_import_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's ready for import
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+            data_type=ImportData.XLSX,
+            number_of_households=5,
+            number_of_individuals=15,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert response.data["name"] == "Test XLSX Import"
+        assert "status" in response.data
+
+        # Check RegistrationDataImport was created
+        rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+        assert rdi.name == "Test XLSX Import"
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.XLS
+        assert rdi.number_of_households == 5
+        assert rdi.number_of_individuals == 15
+        assert rdi.screen_beneficiary
+        assert rdi.program == self.program
+        assert rdi.imported_by == self.user
+
+        # Check celery task was called
+        mock_import_task.assert_called_once()
+
+    def test_registration_xlsx_import_import_data_not_found(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": "00000000-0000-0000-0000-000000000000",
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Import data not found" in response.data
+
+    def test_registration_xlsx_import_import_data_not_ready(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's not ready
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_PENDING,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Import data is not ready for import" in response.data
+
+    def test_registration_xlsx_import_program_finished(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's ready for import
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        # Set program to finished
+        self.program.status = Program.FINISHED
+        self.program.save()
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "In order to perform this action, program status must not be finished." in response.data
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_kobo_import_task.delay")
+    def test_registration_kobo_import(self, mock_import_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's ready for import
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+            kobo_asset_id="test_kobo_asset_456",
+            number_of_households=8,
+            number_of_individuals=25,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Check response contains required fields
+        assert "id" in response.data
+        assert response.data["name"] == "Test Kobo Import"
+        assert "status" in response.data
+
+        # Check RegistrationDataImport was created
+        rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+        assert rdi.name == "Test Kobo Import"
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.KOBO
+        assert rdi.number_of_households == 8
+        assert rdi.number_of_individuals == 25
+        assert rdi.pull_pictures
+        assert not rdi.screen_beneficiary
+        assert rdi.program == self.program
+        assert rdi.imported_by == self.user
+
+        # Check celery task was called
+        mock_import_task.assert_called_once()
+
+    def test_registration_kobo_import_kobo_data_not_found(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": "00000000-0000-0000-0000-000000000000",
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Kobo import data not found" in response.data
+
+    def test_registration_kobo_import_kobo_data_not_ready(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's not ready
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_PENDING,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Kobo import data is not ready for import" in response.data
+
+    def test_registration_kobo_import_program_finished(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's ready for import
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        # Set program to finished
+        self.program.status = Program.FINISHED
+        self.program.save()
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "In order to perform this action, program status must not be finished." in response.data
+
+    def test_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData with validation errors
+        import_data = ImportDataFactory(
+            business_area_slug=self.business_area.slug,
+            status=ImportData.STATUS_FINISHED,
+            validation_errors='[{"row_number": 1, "header": "name", "message": "Name is required"}]',
+            error="Test error message",
+        )
+
+        url = reverse(
+            "api:registration-data:import-data-detail",
+            args=["afghanistan", import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+        # Check response structure
+        assert response.data["id"] == str(import_data.id)
+        assert response.data["status"] == import_data.status
+        assert response.data["data_type"] == import_data.data_type
+        assert response.data["error"] == "Test error message"
+
+        # Check validation errors are parsed
+        assert "xlsx_validation_errors" in response.data
+        validation_errors = response.data["xlsx_validation_errors"]
+        assert len(validation_errors) == 1
+        assert validation_errors[0]["row_number"] == 1
+        assert validation_errors[0]["header"] == "name"
+        assert validation_errors[0]["message"] == "Name is required"
+
+    def test_kobo_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData with validation errors
+        kobo_import_data = KoboImportDataFactory(
+            business_area_slug=self.business_area.slug,
+            status=ImportData.STATUS_FINISHED,
+            kobo_asset_id="test_asset_123",
+            validation_errors='[{"header": "age", "message": "Age must be a number"}]',
+            only_active_submissions=True,
+            pull_pictures=False,
+        )
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-detail",
+            args=["afghanistan", kobo_import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+        # Check response structure
+        assert response.data["id"] == str(kobo_import_data.id)
+        assert response.data["status"] == kobo_import_data.status
+        assert response.data["kobo_asset_id"] == "test_asset_123"
+        assert response.data["only_active_submissions"]
+        assert not response.data["pull_pictures"]
+
+        # Check validation errors are parsed
+        assert "kobo_validation_errors" in response.data
+        validation_errors = response.data["kobo_validation_errors"]
+        assert len(validation_errors) == 1
+        assert validation_errors[0]["header"] == "age"
+        assert validation_errors[0]["message"] == "Age must be a number"
+
+    def test_import_data_retrieve_different_business_area(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData in different business area
+        import_data = ImportDataFactory(
+            business_area_slug="different_area",
+            status=ImportData.STATUS_FINISHED,
+        )
+
+        url = reverse(
+            "api:registration-data:import-data-detail",
+            args=["afghanistan", import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_kobo_import_data_retrieve_different_business_area(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData in different business area
+        kobo_import_data = KoboImportDataFactory(
+            business_area_slug="different_area",
+            status=ImportData.STATUS_FINISHED,
+        )
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-detail",
+            args=["afghanistan", kobo_import_data.id],
+        )
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 class RegistrationDataImportPermissionTest(HOPEApiTestCase):
@@ -454,7 +889,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
             name="TestPermissionListRole", defaults={"permissions": [Permissions.RDI_VIEW_LIST.value]}
@@ -462,7 +897,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_retrieve(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -473,7 +908,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
             name="TestPermissionRetrieveRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
@@ -481,7 +916,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_merge(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -499,7 +934,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
             name="TestPermissionMergeRole", defaults={"permissions": [Permissions.RDI_MERGE_IMPORT.value]}
@@ -507,7 +942,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_erase(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -525,7 +960,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
             name="TestPermissionEraseRole", defaults={"permissions": [Permissions.RDI_REFUSE_IMPORT.value]}
@@ -533,7 +968,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_refuse(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -551,7 +986,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {"reason": "Test reason"}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
             name="TestPermissionRefuseRole", defaults={"permissions": [Permissions.RDI_REFUSE_IMPORT.value]}
@@ -559,7 +994,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, {"reason": "Test reason"}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_deduplicate(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -577,7 +1012,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         role, _ = Role.objects.update_or_create(
             name="TestPermissionDeduplicateRole", defaults={"permissions": [Permissions.RDI_RERUN_DEDUPE.value]}
@@ -585,7 +1020,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_permission_checks_status_choices(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -595,7 +1030,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
         # Should be forbidden without permission
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Grant permission and try again
         role, _ = Role.objects.update_or_create(
@@ -604,9 +1039,9 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
 
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response.data, list)
-        self.assertTrue(all("name" in c and "value" in c for c in response.data))
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+        assert all("name" in c and "value" in c for c in response.data)
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import(self, mock_registration_task: Mock) -> None:
@@ -658,11 +1093,11 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["name"], "Test Import")
-        self.assertEqual(response.data["number_of_households"], 2)
-        self.assertEqual(response.data["number_of_individuals"], 3)
-        self.assertIn("id", response.data)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "Test Import"
+        assert response.data["number_of_households"] == 2
+        assert response.data["number_of_individuals"] == 3
+        assert "id" in response.data
         mock_registration_task.assert_called_once()
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
@@ -715,10 +1150,10 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["name"], "Test Import")
-        self.assertEqual(response.data["number_of_households"], 1)
-        self.assertEqual(response.data["number_of_individuals"], 2)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "Test Import"
+        assert response.data["number_of_households"] == 1
+        assert response.data["number_of_individuals"] == 2
         mock_registration_task.assert_called_once()
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
@@ -758,7 +1193,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot import data from a program with a different Beneficiary Group." in response.data
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
@@ -798,7 +1233,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot import data from a program with not compatible data collecting type." in response.data
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
@@ -838,7 +1273,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "In order to perform this action, program status must not be finished." in response.data
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
@@ -880,7 +1315,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot check against sanction list." in response.data
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
@@ -909,8 +1344,182 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "This action would result in importing 0 households and 0 individuals." in response.data
+
+    def test_permission_checks_upload_xlsx_file(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:import-data-upload-upload-xlsx-file",
+            args=["afghanistan", self.program.slug],
+        )
+
+        file_content = b"test xlsx content"
+        uploaded_file = SimpleUploadedFile(
+            "test_data.xlsx",
+            file_content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # Should be forbidden without permission
+        response = self.client.post(url, {"file": uploaded_file}, format="multipart")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionUploadXlsxRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        # Create a fresh file upload
+        uploaded_file2 = SimpleUploadedFile(
+            "test_data.xlsx",
+            file_content,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response = self.client.post(url, {"file": uploaded_file2}, format="multipart")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_save_kobo_import_data(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-upload-save-kobo-import-data",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "uid": "test_kobo_asset_123",
+            "only_active_submissions": True,
+            "pull_pictures": False,
+        }
+
+        # Should be forbidden without permission
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionSaveKoboRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_registration_xlsx_import(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create ImportData that's ready for import
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test XLSX Import",
+            "screen_beneficiary": True,
+        }
+
+        # Should be forbidden without permission
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionXlsxImportRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_registration_kobo_import(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        # Create KoboImportData that's ready for import
+        kobo_import_data = KoboImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-kobo-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(kobo_import_data.id),
+            "name": "Test Kobo Import",
+            "pull_pictures": True,
+            "screen_beneficiary": False,
+        }
+
+        # Should be forbidden without permission
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionKoboImportRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_permission_checks_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        import_data = ImportDataFactory(business_area_slug=self.business_area.slug)
+
+        url = reverse(
+            "api:registration-data:import-data-detail",
+            args=["afghanistan", import_data.id],
+        )
+
+        # Should be forbidden without permission
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionImportDataRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_permission_checks_kobo_import_data_retrieve(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        kobo_import_data = KoboImportDataFactory(business_area_slug=self.business_area.slug)
+
+        url = reverse(
+            "api:registration-data:kobo-import-data-detail",
+            args=["afghanistan", kobo_import_data.id],
+        )
+
+        # Should be forbidden without permission
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionKoboImportDataRole", defaults={"permissions": [Permissions.RDI_VIEW_DETAILS.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
 
     @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_permission_denied(self, mock_registration_task: Mock) -> None:
@@ -945,7 +1554,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         }
         with capture_on_commit_callbacks(execute=True):
             response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
         mock_registration_task.assert_not_called()
 
 

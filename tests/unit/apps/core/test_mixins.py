@@ -8,7 +8,7 @@ from requests import Response, Session
 from hope.apps.core.api.mixins import BaseAPI
 
 
-@pytest.mark.django_db()
+@pytest.mark.django_db
 class TestMixinBaseAPI:
     @pytest.fixture
     def api_class(self) -> Type[BaseAPI]:

@@ -15,7 +15,7 @@ from _pytest.config.argparsing import Parser
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
-from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
+from extras.test_utils.fixtures import *  # noqa: F403, F401
 
 from hope.apps.account.models import Partner, Role
 
@@ -23,7 +23,7 @@ from hope.apps.account.models import Partner, Role
 @pytest.fixture(autouse=True)
 def create_unicef_partner(db: Any) -> None:
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-    yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+    return Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
 @pytest.fixture(scope="class", autouse=True)
@@ -35,7 +35,7 @@ def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) 
 
 @pytest.fixture(autouse=True)
 def create_role_with_all_permissions(db: Any) -> None:
-    yield Role.objects.get_or_create(name="Role with all permissions")
+    return Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(scope="class", autouse=True)
@@ -227,7 +227,7 @@ def register_custom_sql_signal() -> None:
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
                 for stmt in sql_statements:
-                    all_sqls.append(stmt)
+                    all_sqls.append(stmt)  # noqa
 
     def pre_migration_custom_sql(
         sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any

@@ -23,6 +23,8 @@ class ProgramCycleFilter(UpdatedAtFilter):
     title = filters.CharFilter(field_name="title", lookup_expr="istartswith")
     total_delivered_quantity_usd_from = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
     total_delivered_quantity_usd_to = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
+    total_entitled_quantity_usd_from = filters.NumberFilter(method="filter_total_entitled_quantity_usd")
+    total_entitled_quantity_usd_to = filters.NumberFilter(method="filter_total_entitled_quantity_usd")
 
     class Meta:
         model = ProgramCycle
@@ -54,6 +56,21 @@ class ProgramCycleFilter(UpdatedAtFilter):
             queryset = queryset.annotate(
                 total_delivered_q_usd=Coalesce(
                     Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                )
+            )
+            filter_dict = {filter_mapping.get(name): value}
+        return queryset.filter(**filter_dict)
+
+    def filter_total_entitled_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
+        filter_dict = {}
+        filter_mapping = {
+            "total_entitled_quantity_usd_from": "total_entitled_q_usd__gte",
+            "total_entitled_quantity_usd_to": "total_entitled_q_usd__lte",
+        }
+        if value:
+            queryset = queryset.annotate(
+                total_entitled_q_usd=Coalesce(
+                    Sum("payment_plans__total_entitled_quantity_usd", output_field=DecimalField()), Decimal(0.0)
                 )
             )
             filter_dict = {filter_mapping.get(name): value}

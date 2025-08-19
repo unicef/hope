@@ -7,7 +7,7 @@ from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -145,7 +145,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
         elif "confirm" in request.POST:
             create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
-            message = mark_safe(f"Creation of target population <b>{request.POST['name']}</b> scheduled.")
+            message = f"Creation of target population <b>{request.POST['name']}</b> scheduled."
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
             return HttpResponseRedirect(url)
@@ -170,14 +170,13 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
 
         if request.method == "GET" or not is_editable:
-            partner_area_data = []
-            for area_limits in program.admin_area_limits.all():
-                partner_area_data.append(
-                    {
-                        "partner": area_limits.partner,
-                        "areas": [str(area_id) for area_id in area_limits.areas.values_list("id", flat=True)],
-                    }
-                )
+            partner_area_data = [
+                {
+                    "partner": area_limits.partner,
+                    "areas": [str(area_id) for area_id in area_limits.areas.values_list("id", flat=True)],
+                }
+                for area_limits in program.admin_area_limits.all()
+            ]
             partner_area_form_set = PartnerAreaLimitFormSet(initial=partner_area_data, prefix="program_areas")
         elif request.method == "POST":
             partner_area_form_set = PartnerAreaLimitFormSet(request.POST or None, prefix="program_areas")

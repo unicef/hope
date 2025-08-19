@@ -18,7 +18,6 @@ from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
@@ -106,7 +105,7 @@ class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
         if ranges[0][0] != 0:
             raise forms.ValidationError("Ranges need to start from 0")
 
-        for r1, r2 in zip(ranges, ranges[1:]):
+        for r1, r2 in zip(ranges, ranges[1:], strict=False):
             if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
                 raise forms.ValidationError(
                     f"Provided ranges overlap [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
@@ -373,10 +372,8 @@ class BusinessAreaAdmin(
             self,
             request,
             self.mark_submissions,
-            mark_safe(
-                """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
-                <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
-                """
-            ),
+            """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+            <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
+            """,
             "Successfully executed",
         )

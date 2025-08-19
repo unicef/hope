@@ -26,5 +26,5 @@ class TestRdiUtils(TestCase):
         hash2 = calculate_hash_for_kobo_submission(test_data2)
         hash3 = calculate_hash_for_kobo_submission(test_data3)
 
-        self.assertEqual(hash1, hash2)
-        self.assertNotEqual(hash1, hash3)
+        assert hash1 == hash2
+        assert hash1 != hash3

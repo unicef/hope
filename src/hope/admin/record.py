@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+
 from django.utils.translation import gettext_lazy as _
 
 import requests
@@ -285,7 +285,7 @@ class RecordAdmin(HOPEModelAdminBase):
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
                                 request,
-                                mark_safe(f"Adding to RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                                f"Adding to RDI Import with name: <a href='{url}'>{rdi.name}</a>",
                                 messages.SUCCESS,
                             )
                         except Exception as e:

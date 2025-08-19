@@ -13,6 +13,7 @@ import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -28,21 +29,26 @@ function EditHouseholdDataChange({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const isEditTicket = location.pathname.includes('edit-ticket');
-  const household: HouseholdDetail = values.selectedHousehold;
-
+  const household: HouseholdList = values.selectedHousehold;
   const {
     data: fullHousehold,
     isLoading: fullHouseholdLoading,
     refetch: refetchHousehold,
   } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, household.id, programId],
+    queryKey: [
+      'household',
+      businessArea,
+      household.id,
+      programId,
+      household.program.slug,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
-        programSlug: programId,
+        programSlug: household.program.slug,
       }),
-    enabled: Boolean(programId && businessArea),
+    enabled: Boolean(household && businessArea),
   });
 
   useEffect(() => {

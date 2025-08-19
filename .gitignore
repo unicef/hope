@@ -136,3 +136,6 @@ pytest_html_report.html
 compose.dist.yml
 compose.pycharm.yml
 data/
+
+
+.claude

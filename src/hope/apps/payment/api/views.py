@@ -53,6 +53,7 @@ from hope.apps.payment.api.serializers import (
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
     PaymentDetailSerializer,
+    PaymentChoicesSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanCreateFollowUpSerializer,
@@ -200,7 +201,7 @@ class PaymentVerificationViewSet(
     @action(detail=True, methods=["post"], url_path="create-verification-plan")
     @transaction.atomic
     def create_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Create Payment Verification Plan"""
+        """Create Payment Verification Plan."""
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -519,8 +520,7 @@ class PaymentVerificationRecordViewSet(
     @extend_schema(request=PaymentVerificationUpdateSerializer, responses={200: PaymentDetailSerializer})
     @transaction.atomic
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """update verification amount"""
-
+        """Update verification amount."""
         payment = self.get_verification_record()
         payment_verification = payment.payment_verifications.first()
         serializer = self.get_serializer(data=request.data)
@@ -1719,6 +1719,44 @@ class PaymentViewSet(
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
         )
+
+
+class PaymentGlobalViewSet(
+    BusinessAreaProgramsAccessMixin,
+    SerializerActionMixin,
+    CountActionMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Payment.objects.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).all()
+    serializer_classes_by_action = {
+        "list": PaymentListSerializer,
+        "choices": PaymentChoicesSerializer,
+    }
+    PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
+    filter_backends = (OrderingFilter,)
+    program_model_field = "program"
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "household",
+                "household__admin1",
+                "household__admin2",
+                "head_of_household",
+                "collector",
+                "parent",
+                "financial_service_provider",
+                "program",
+            )
+            .order_by("created_at")
+        )
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore

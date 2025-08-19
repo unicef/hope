@@ -27,7 +27,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """
+        """Load a business area.
+
         <DocumentElement>
             <BusinessArea>
                 <BUSINESS_AREA_CODE>8970</BUSINESS_AREA_CODE>

@@ -38,8 +38,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseValidator:
-    """
-    Base validation class, inherit from this class to create custom validators.
+    """Base validation class, inherit from this class to create custom validators.
+
     Your custom validators have to implement validation methods that starts
     with name "validate_" so validate can call all the validators from your
     custom validator.
@@ -264,15 +264,14 @@ class KoboTemplateValidator:
                     }
                 )
 
-        for file_choice in from_file_choices:
-            if file_choice not in field_choices:
-                errors.append(
-                    {
-                        "field": core_field,
-                        "message": f"Choice: {file_choice} is not present in HOPE",
-                    }
-                )
-
+        errors += [
+            {
+                "field": core_field,
+                "message": f"Choice: {file_choice} is not present in HOPE",
+            }
+            for file_choice in from_file_choices
+            if file_choice not in field_choices
+        ]
         return errors
 
     @classmethod

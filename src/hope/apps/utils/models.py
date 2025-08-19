@@ -259,7 +259,7 @@ class AbstractSession(models.Model):
             err = capture_exception(exc)
             self.sentry_id = err
         except Exception:
-            pass
+            logger.warning("Cannot log with Sentry")
 
         try:
             from django.views.debug import ExceptionReporter

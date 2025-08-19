@@ -85,7 +85,7 @@ class TestPDUXlsxUploadViews:
 
     @flaky(max_runs=3, min_passes=1)
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], True, status.HTTP_200_OK),
@@ -223,7 +223,7 @@ class TestPDUXlsxUploadViews:
         assert response.json()["count"] == 2
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.PDU_UPLOAD], [], True, status.HTTP_202_ACCEPTED),

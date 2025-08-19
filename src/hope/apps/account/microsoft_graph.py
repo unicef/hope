@@ -38,7 +38,7 @@ class MicrosoftGraphAPI:
             "client_secret": self.azure_client_secret,
             "resource": settings.AZURE_GRAPH_API_BASE_URL,
         }
-        response = requests.post(settings.AZURE_TOKEN_URL, post_dict)
+        response = requests.post(settings.AZURE_TOKEN_URL, post_dict, timeout=60)
 
         if response.status_code != 200:
             log_and_raise(
@@ -51,7 +51,7 @@ class MicrosoftGraphAPI:
 
     def get_results(self, url: str) -> dict:
         headers = {"Authorization": f"Bearer {self.access_token}"}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
