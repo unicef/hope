@@ -77,7 +77,7 @@ const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   },
 ];
 
-export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
+export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
