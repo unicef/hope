@@ -6,8 +6,7 @@ from hope.apps.periodic_data_update.models import PDUOnlineEdit
 
 
 class PDUOnlineEditAuthorizedUserMixin:
-    """
-    This mixin provides an authorization check to ensure that the requesting user
+    """This mixin provides an authorization check to ensure that the requesting user
     is in the `authorized_users` list of the PDUOnlineEdit instance.
     If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
     """
