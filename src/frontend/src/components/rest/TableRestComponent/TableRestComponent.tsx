@@ -112,6 +112,7 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event: ChangeEvent<HTMLInputElement>, rows: T[]) => void;
   numSelected?: number;
+  hidePagination?: boolean;
 }
 
 export function TableRestComponent<T>({
@@ -134,6 +135,7 @@ export function TableRestComponent<T>({
   isOnPaper = true,
   actions = [],
   numSelected = 0,
+  hidePagination = false,
 }: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
@@ -204,17 +206,21 @@ export function TableRestComponent<T>({
           <MuiTableBody>{body}</MuiTableBody>
         </StyledTable>
       </StyledTableContainer>
-      <TablePagination
-        rowsPerPageOptions={rowsPerPageOptions}
-        component="div"
-        count={itemsCount == null || itemsCount === undefined ? -1 : itemsCount}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePageProp}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        ActionsComponent={TablePaginationActions}
-        data-cy="table-pagination"
-      />
+      {!hidePagination && (
+        <TablePagination
+          rowsPerPageOptions={rowsPerPageOptions}
+          component="div"
+          count={
+            itemsCount == null || itemsCount === undefined ? -1 : itemsCount
+          }
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePageProp}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          ActionsComponent={TablePaginationActions}
+          data-cy="table-pagination"
+        />
+      )}
     </>
   );
 
