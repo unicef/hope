@@ -84,8 +84,10 @@ export function RequestedHouseholdDataChange({
     }),
     [ticket.ticketDetails.householdData],
   );
-  // Define rolesArr in main scope
-  const rolesArr = householdData.roles || [];
+  const rolesArr = React.useMemo(
+    () => householdData.roles || [],
+    [householdData.roles],
+  );
   let allApprovedCount = 0;
   const flexFields = householdData?.flexFields || {};
   delete householdData.flexFields;
@@ -208,7 +210,7 @@ export function RequestedHouseholdDataChange({
       selectedFlexFields,
       selectedRoles,
     };
-  }, [householdData]);
+  }, [householdData, rolesArr]);
 
   return (
     <Formik
