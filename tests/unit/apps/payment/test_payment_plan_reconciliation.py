@@ -527,6 +527,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             financial_service_provider=santander_fsp,
             currency="PLN",
             has_valid_wallet=True,
+            delivery_date=None,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
         create_payment_plan_snapshot_data(payment_plan)
