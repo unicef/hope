@@ -290,20 +290,20 @@ class TestEnrolHouseholdToProgram(TestCase):
         assert hh_count + 1 == Household.objects.count()
         assert ind_count + 2 == Individual.objects.count()
 
-    @patch("hope.apps.program.utils.randint")
-    def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
-        mock_randint.side_effect = [1111, 5555]
+    @patch("hope.apps.program.utils.randbelow")
+    def test_generate_rdi_unique_name_when_conflicts(self, mock_randbelow: Any) -> None:
+        mock_randbelow.side_effect = [1111, 5555]
         RegistrationDataImportFactory(
             business_area=self.program1.business_area,
             name="RDI for enroll households to Programme: Program 1",
         )
         result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1 (1111)"
+        expected_name = "RDI for enroll households to Programme: Program 1 (2111)"
         assert result == expected_name
 
-    @patch("hope.apps.program.utils.randint")
-    def test_generate_rdi_unique_name_no_conflicts(self, mock_randint: Any) -> None:
-        mock_randint.return_value = 3333
+    @patch("hope.apps.program.utils.randbelow")
+    def test_generate_rdi_unique_name_no_conflicts(self, mock_randbelow: Any) -> None:
+        mock_randbelow.return_value = 3333
         result = generate_rdi_unique_name(self.program1)
         expected_name = "RDI for enroll households to Programme: Program 1"
         assert result == expected_name

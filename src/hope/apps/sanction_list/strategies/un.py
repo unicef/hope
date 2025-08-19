@@ -1,9 +1,11 @@
 import contextlib
+import logging
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Iterable
+from urllib.parse import urlparse
 from urllib.request import urlopen
 
 import dateutil.parser
@@ -31,6 +33,8 @@ from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import 
 
 from ...program.models import Program
 from ._base import BaseSanctionList
+
+logger = logging.getLogger(__name__)
 
 
 class LoadSanctionListXMLTask:
@@ -120,7 +124,7 @@ class LoadSanctionListXMLTask:
                             )
                         )
                     except Exception:  # pragma: no cover
-                        pass
+                        logger.log("Cannot parse date")
                 elif type_of_date == "BETWEEN":
                     from_year: str = date_of_birth_tag.find("FROM_YEAR").text or ""
                     to_year: str = date_of_birth_tag.find("TO_YEAR").text or ""
@@ -411,7 +415,10 @@ class LoadSanctionListXMLTask:
         self.parse(root)
 
     def load_from_url(self) -> None:  # pragma: no cover
-        url = urlopen(self.url)
+        parsed_url = urlparse(self.url)
+        if parsed_url.scheme not in ["http", "https"]:
+            raise ValueError("The URL scheme is not permitted. Only 'http' and 'https' are allowed.")
+        url = urlopen(self.url)  # noqa: S310
         tree = ET.parse(url)
         root = tree.getroot()
         self.parse(root)
