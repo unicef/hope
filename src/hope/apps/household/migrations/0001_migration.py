@@ -6,12 +6,12 @@ import concurrency.fields
 import django.contrib.postgres.fields
 import django.contrib.postgres.search
 import django.core.validators
-from django.db import migrations, models
 import django.utils.timezone
 import model_utils.fields
 import multiselectfield.db.fields
 import phonenumber_field.modelfields
 import sorl.thumbnail.fields
+from django.db import migrations, models
 
 import hope.apps.core.utils
 import hope.apps.utils.models
@@ -46,12 +46,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("is_original", models.BooleanField(db_index=True, default=False)),
@@ -62,9 +69,18 @@ class Migration(migrations.Migration):
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
                 ("bank_name", models.CharField(max_length=255)),
                 ("bank_account_number", models.CharField(db_index=True, max_length=64)),
-                ("debit_card_number", models.CharField(blank=True, db_index=True, default="", max_length=255)),
-                ("bank_branch_name", models.CharField(blank=True, default="", max_length=255)),
-                ("account_holder_name", models.CharField(blank=True, default="", max_length=255)),
+                (
+                    "debit_card_number",
+                    models.CharField(blank=True, db_index=True, default="", max_length=255),
+                ),
+                (
+                    "bank_branch_name",
+                    models.CharField(blank=True, default="", max_length=255),
+                ),
+                (
+                    "account_holder_name",
+                    models.CharField(blank=True, default="", max_length=255),
+                ),
             ],
             options={
                 "abstract": False,
@@ -75,12 +91,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("is_removed", models.BooleanField(default=False)),
@@ -88,7 +111,10 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
-                ("document_number", models.CharField(blank=True, db_index=True, max_length=255)),
+                (
+                    "document_number",
+                    models.CharField(blank=True, db_index=True, max_length=255),
+                ),
                 ("photo", models.ImageField(blank=True, upload_to="")),
                 (
                     "status",
@@ -104,9 +130,15 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("cleared", models.BooleanField(default=False)),
-                ("cleared_date", models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "cleared_date",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
                 ("issuance_date", models.DateTimeField(blank=True, null=True)),
-                ("expiry_date", models.DateTimeField(blank=True, db_index=True, null=True)),
+                (
+                    "expiry_date",
+                    models.DateTimeField(blank=True, db_index=True, null=True),
+                ),
                 ("is_migration_handled", models.BooleanField(default=False)),
             ],
         ),
@@ -115,7 +147,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -134,7 +171,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -149,7 +191,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -157,7 +204,11 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     models.CharField(
-                        choices=[("ACTIVE", "Active"), ("ERRONEOUS", "Erroneous"), ("CLOSED", "Closed")],
+                        choices=[
+                            ("ACTIVE", "Active"),
+                            ("ERRONEOUS", "Erroneous"),
+                            ("CLOSED", "Closed"),
+                        ],
                         default="ACTIVE",
                         max_length=10,
                     ),
@@ -177,12 +228,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("is_original", models.BooleanField(db_index=True, default=False)),
@@ -191,14 +249,25 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(db_index=True, default=False)),
                 ("removed_date", models.DateTimeField(blank=True, null=True)),
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 ("withdrawn", models.BooleanField(db_index=True, default=False)),
-                ("withdrawn_date", models.DateTimeField(blank=True, db_index=True, null=True)),
+                (
+                    "withdrawn_date",
+                    models.DateTimeField(blank=True, db_index=True, null=True),
+                ),
                 (
                     "consent_sign",
                     sorl.thumbnail.fields.ImageField(
-                        blank=True, upload_to="", validators=[django.core.validators.validate_image_file_extension]
+                        blank=True,
+                        upload_to="",
+                        validators=[django.core.validators.validate_image_file_extension],
                     ),
                 ),
                 ("consent", models.BooleanField(null=True)),
@@ -232,36 +301,123 @@ class Migration(migrations.Migration):
                         max_length=254,
                     ),
                 ),
-                ("address", django.contrib.postgres.fields.citext.CICharField(blank=True, max_length=1024)),
+                (
+                    "address",
+                    django.contrib.postgres.fields.citext.CICharField(blank=True, max_length=1024),
+                ),
                 ("zip_code", models.CharField(blank=True, max_length=12, null=True)),
-                ("size", models.PositiveIntegerField(blank=True, db_index=True, null=True)),
-                ("female_age_group_0_5_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_6_11_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_12_17_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_18_59_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_60_count", models.PositiveIntegerField(default=None, null=True)),
-                ("pregnant_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_0_5_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_6_11_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_12_17_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_18_59_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_60_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_0_5_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_6_11_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_12_17_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_18_59_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_age_group_60_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_0_5_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_6_11_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_12_17_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_18_59_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_age_group_60_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("children_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_children_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_children_count", models.PositiveIntegerField(default=None, null=True)),
-                ("children_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("male_children_disabled_count", models.PositiveIntegerField(default=None, null=True)),
-                ("female_children_disabled_count", models.PositiveIntegerField(default=None, null=True)),
+                (
+                    "size",
+                    models.PositiveIntegerField(blank=True, db_index=True, null=True),
+                ),
+                (
+                    "female_age_group_0_5_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_6_11_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_12_17_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_18_59_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_60_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "pregnant_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_0_5_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_6_11_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_12_17_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_18_59_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_60_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_0_5_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_6_11_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_12_17_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_18_59_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_age_group_60_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_0_5_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_6_11_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_12_17_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_18_59_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_age_group_60_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "children_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_children_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_children_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "children_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "male_children_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
+                (
+                    "female_children_disabled_count",
+                    models.PositiveIntegerField(default=None, null=True),
+                ),
                 ("returnee", models.BooleanField(null=True)),
                 ("flex_fields", models.JSONField(blank=True, default=dict)),
                 ("first_registration_date", models.DateTimeField()),
@@ -270,14 +426,26 @@ class Migration(migrations.Migration):
                 ("child_hoh", models.BooleanField(null=True)),
                 ("start", models.DateTimeField(blank=True, null=True)),
                 ("deviceid", models.CharField(blank=True, default="", max_length=250)),
-                ("name_enumerator", models.CharField(blank=True, default="", max_length=250)),
+                (
+                    "name_enumerator",
+                    models.CharField(blank=True, default="", max_length=250),
+                ),
                 (
                     "org_enumerator",
                     models.CharField(
-                        choices=[("", "None"), ("PARTNER", "Partner"), ("UNICEF", "UNICEF")], default="", max_length=250
+                        choices=[
+                            ("", "None"),
+                            ("PARTNER", "Partner"),
+                            ("UNICEF", "UNICEF"),
+                        ],
+                        default="",
+                        max_length=250,
                     ),
                 ),
-                ("org_name_enumerator", models.CharField(blank=True, default="", max_length=250)),
+                (
+                    "org_name_enumerator",
+                    models.CharField(blank=True, default="", max_length=250),
+                ),
                 ("village", models.CharField(blank=True, default="", max_length=250)),
                 (
                     "registration_method",
@@ -477,18 +645,28 @@ class Migration(migrations.Migration):
                         max_length=250,
                     ),
                 ),
-                ("unhcr_id", models.CharField(blank=True, db_index=True, default="", max_length=250)),
+                (
+                    "unhcr_id",
+                    models.CharField(blank=True, db_index=True, default="", max_length=250),
+                ),
                 ("user_fields", models.JSONField(blank=True, default=dict)),
                 (
                     "detail_id",
                     models.CharField(
-                        blank=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID", max_length=150, null=True
+                        blank=True,
+                        help_text="Kobo asset ID, Xlsx row ID, Aurora source ID",
+                        max_length=150,
+                        null=True,
                     ),
                 ),
                 (
                     "registration_id",
                     django.contrib.postgres.fields.citext.CICharField(
-                        blank=True, db_index=True, max_length=100, null=True, verbose_name="Aurora Registration Id"
+                        blank=True,
+                        db_index=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Aurora Registration Id",
                     ),
                 ),
                 (
@@ -506,23 +684,40 @@ class Migration(migrations.Migration):
                     "total_cash_received_usd",
                     models.DecimalField(blank=True, decimal_places=2, max_digits=64, null=True),
                 ),
-                ("total_cash_received", models.DecimalField(blank=True, decimal_places=2, max_digits=64, null=True)),
+                (
+                    "total_cash_received",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=64, null=True),
+                ),
                 ("family_id", models.CharField(blank=True, max_length=100, null=True)),
-                ("origin_unicef_id", models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "origin_unicef_id",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
                 ("is_migration_handled", models.BooleanField(default=False)),
                 ("migrated_at", models.DateTimeField(blank=True, null=True)),
                 ("is_recalculated_group_ages", models.BooleanField(default=False)),
                 (
                     "collect_type",
                     models.CharField(
-                        choices=[("STANDARD", "Standard"), ("SINGLE", "Single")], default="STANDARD", max_length=8
+                        choices=[("STANDARD", "Standard"), ("SINGLE", "Single")],
+                        default="STANDARD",
+                        max_length=8,
                     ),
                 ),
                 ("kobo_submission_uuid", models.UUIDField(default=None, null=True)),
-                ("kobo_submission_time", models.DateTimeField(blank=True, max_length=150, null=True)),
-                ("enumerator_rec_id", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "kobo_submission_time",
+                    models.DateTimeField(blank=True, max_length=150, null=True),
+                ),
+                (
+                    "enumerator_rec_id",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
                 ("mis_unicef_id", models.CharField(max_length=255, null=True)),
-                ("flex_registrations_record_id", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "flex_registrations_record_id",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
             ],
             options={
                 "verbose_name": "Household",
@@ -533,8 +728,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="HouseholdCollection",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
             ],
             options={
                 "abstract": False,
@@ -545,12 +751,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("is_original", models.BooleanField(db_index=True, default=False)),
@@ -559,8 +772,14 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(db_index=True, default=False)),
                 ("removed_date", models.DateTimeField(blank=True, null=True)),
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 ("duplicate", models.BooleanField(db_index=True, default=False)),
                 ("duplicate_date", models.DateTimeField(blank=True, null=True)),
                 ("withdrawn", models.BooleanField(db_index=True, default=False)),
@@ -570,7 +789,9 @@ class Migration(migrations.Migration):
                 (
                     "full_name",
                     django.contrib.postgres.fields.citext.CICharField(
-                        db_index=True, max_length=255, validators=[django.core.validators.MinLengthValidator(2)]
+                        db_index=True,
+                        max_length=255,
+                        validators=[django.core.validators.MinLengthValidator(2)],
                     ),
                 ),
                 (
@@ -587,7 +808,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "sex",
-                    models.CharField(choices=[("MALE", "Male"), ("FEMALE", "Female")], db_index=True, max_length=255),
+                    models.CharField(
+                        choices=[("MALE", "Male"), ("FEMALE", "Female")],
+                        db_index=True,
+                        max_length=255,
+                    ),
                 ),
                 ("birth_date", models.DateField(db_index=True)),
                 ("estimated_birth_date", models.BooleanField(default=False)),
@@ -620,7 +845,10 @@ class Migration(migrations.Migration):
                         blank=True, db_index=True, max_length=128, region=None
                     ),
                 ),
-                ("phone_no_alternative_valid", models.BooleanField(db_index=True, null=True)),
+                (
+                    "phone_no_alternative_valid",
+                    models.BooleanField(db_index=True, null=True),
+                ),
                 ("email", models.CharField(blank=True, max_length=255)),
                 (
                     "payment_delivery_phone_no",
@@ -640,11 +868,20 @@ class Migration(migrations.Migration):
                             ("GRANDMOTHER_GRANDFATHER", "Grandmother / Grandfather"),
                             ("HEAD", "Head of household (self)"),
                             ("MOTHER_FATHER", "Mother / Father"),
-                            ("MOTHERINLAW_FATHERINLAW", "Mother-in-law / Father-in-law"),
+                            (
+                                "MOTHERINLAW_FATHERINLAW",
+                                "Mother-in-law / Father-in-law",
+                            ),
                             ("NEPHEW_NIECE", "Nephew / Niece"),
-                            ("NON_BENEFICIARY", "Not a Family Member. Can only act as a recipient."),
+                            (
+                                "NON_BENEFICIARY",
+                                "Not a Family Member. Can only act as a recipient.",
+                            ),
                             ("OTHER", "Other"),
-                            ("SISTERINLAW_BROTHERINLAW", "Sister-in-law / Brother-in-law"),
+                            (
+                                "SISTERINLAW_BROTHERINLAW",
+                                "Sister-in-law / Brother-in-law",
+                            ),
                             ("SON_DAUGHTER", "Son / Daughter"),
                             ("WIFE_HUSBAND", "Wife / Husband"),
                             ("FOSTER_CHILD", "Foster child"),
@@ -658,7 +895,11 @@ class Migration(migrations.Migration):
                     "work_status",
                     models.CharField(
                         blank=True,
-                        choices=[("1", "Yes"), ("0", "No"), ("NOT_PROVIDED", "Not provided")],
+                        choices=[
+                            ("1", "Yes"),
+                            ("0", "No"),
+                            ("NOT_PROVIDED", "Not provided"),
+                        ],
                         default="NOT_PROVIDED",
                         max_length=20,
                     ),
@@ -667,7 +908,11 @@ class Migration(migrations.Migration):
                 ("last_registration_date", models.DateField()),
                 (
                     "flex_fields",
-                    models.JSONField(blank=True, default=dict, encoder=hope.apps.core.utils.FlexFieldsEncoder),
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        encoder=hope.apps.core.utils.FlexFieldsEncoder,
+                    ),
                 ),
                 ("user_fields", models.JSONField(blank=True, default=dict)),
                 ("enrolled_in_nutrition_programme", models.BooleanField(null=True)),
@@ -701,16 +946,31 @@ class Migration(migrations.Migration):
                         max_length=50,
                     ),
                 ),
-                ("deduplication_golden_record_results", models.JSONField(blank=True, default=dict)),
-                ("deduplication_batch_results", models.JSONField(blank=True, default=dict)),
+                (
+                    "deduplication_golden_record_results",
+                    models.JSONField(blank=True, default=dict),
+                ),
+                (
+                    "deduplication_batch_results",
+                    models.JSONField(blank=True, default=dict),
+                ),
                 ("imported_individual_id", models.UUIDField(blank=True, null=True)),
-                ("sanction_list_possible_match", models.BooleanField(db_index=True, default=False)),
-                ("sanction_list_confirmed_match", models.BooleanField(db_index=True, default=False)),
+                (
+                    "sanction_list_possible_match",
+                    models.BooleanField(db_index=True, default=False),
+                ),
+                (
+                    "sanction_list_confirmed_match",
+                    models.BooleanField(db_index=True, default=False),
+                ),
                 ("pregnant", models.BooleanField(null=True)),
                 (
                     "disability",
                     models.CharField(
-                        choices=[("disabled", "disabled"), ("not disabled", "not disabled")],
+                        choices=[
+                            ("disabled", "disabled"),
+                            ("not disabled", "not disabled"),
+                        ],
                         default="not disabled",
                         max_length=20,
                     ),
@@ -721,17 +981,29 @@ class Migration(migrations.Migration):
                         choices=[
                             ("NONE", "None"),
                             ("SEEING", "Difficulty seeing (even if wearing glasses)"),
-                            ("HEARING", "Difficulty hearing (even if using a hearing aid)"),
+                            (
+                                "HEARING",
+                                "Difficulty hearing (even if using a hearing aid)",
+                            ),
                             ("WALKING", "Difficulty walking or climbing steps"),
                             ("MEMORY", "Difficulty remembering or concentrating"),
-                            ("SELF_CARE", "Difficulty with self care (washing, dressing)"),
-                            ("COMMUNICATING", "Difficulty communicating (e.g understanding or being understood)"),
+                            (
+                                "SELF_CARE",
+                                "Difficulty with self care (washing, dressing)",
+                            ),
+                            (
+                                "COMMUNICATING",
+                                "Difficulty communicating (e.g understanding or being understood)",
+                            ),
                         ],
                         default="NONE",
                         max_length=58,
                     ),
                 ),
-                ("disability_certificate_picture", models.ImageField(blank=True, null=True, upload_to="")),
+                (
+                    "disability_certificate_picture",
+                    models.ImageField(blank=True, null=True, upload_to=""),
+                ),
                 (
                     "seeing_disability",
                     models.CharField(
@@ -817,19 +1089,28 @@ class Migration(migrations.Migration):
                 (
                     "detail_id",
                     models.CharField(
-                        blank=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID", max_length=150, null=True
+                        blank=True,
+                        help_text="Kobo asset ID, Xlsx row ID, Aurora source ID",
+                        max_length=150,
+                        null=True,
                     ),
                 ),
                 (
                     "registration_id",
                     django.contrib.postgres.fields.citext.CICharField(
-                        blank=True, max_length=100, null=True, verbose_name="Aurora Registration Id"
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Aurora Registration Id",
                     ),
                 ),
                 (
                     "program_registration_id",
                     django.contrib.postgres.fields.citext.CICharField(
-                        blank=True, max_length=100, null=True, verbose_name="Beneficiary Program Registration Id"
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Beneficiary Program Registration Id",
                     ),
                 ),
                 (
@@ -859,15 +1140,33 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("relationship_confirmed", models.BooleanField(default=False)),
-                ("age_at_registration", models.PositiveSmallIntegerField(blank=True, null=True)),
-                ("wallet_name", models.CharField(blank=True, default="", max_length=64)),
-                ("blockchain_name", models.CharField(blank=True, default="", max_length=64)),
-                ("wallet_address", models.CharField(blank=True, default="", max_length=128)),
-                ("origin_unicef_id", models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "age_at_registration",
+                    models.PositiveSmallIntegerField(blank=True, null=True),
+                ),
+                (
+                    "wallet_name",
+                    models.CharField(blank=True, default="", max_length=64),
+                ),
+                (
+                    "blockchain_name",
+                    models.CharField(blank=True, default="", max_length=64),
+                ),
+                (
+                    "wallet_address",
+                    models.CharField(blank=True, default="", max_length=128),
+                ),
+                (
+                    "origin_unicef_id",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
                 ("is_migration_handled", models.BooleanField(default=False)),
                 ("migrated_at", models.DateTimeField(blank=True, null=True)),
                 ("mis_unicef_id", models.CharField(max_length=255, null=True)),
-                ("vector_column", django.contrib.postgres.search.SearchVectorField(null=True)),
+                (
+                    "vector_column",
+                    django.contrib.postgres.search.SearchVectorField(null=True),
+                ),
             ],
             options={
                 "verbose_name": "Individual",
@@ -877,8 +1176,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="IndividualCollection",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
             ],
             options={
                 "abstract": False,
@@ -887,23 +1197,37 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="IndividualIdentity",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "created",
                     model_utils.fields.AutoCreatedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="created"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
                     ),
                 ),
                 (
                     "modified",
                     model_utils.fields.AutoLastModifiedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="modified"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
                     ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("is_removed", models.BooleanField(default=False)),
@@ -920,12 +1244,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("is_removed", models.BooleanField(default=False)),
@@ -954,7 +1285,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -967,11 +1303,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "program",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="program.program"),
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="program.program",
+                    ),
                 ),
             ],
             options={

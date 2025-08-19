@@ -23,17 +23,35 @@ class Migration(migrations.Migration):
                         ("RDI_RERUN_DEDUPE", "RDI RERUN DEDUPE"),
                         ("RDI_MERGE_IMPORT", "RDI MERGE IMPORT"),
                         ("RDI_REFUSE_IMPORT", "RDI REFUSE IMPORT"),
-                        ("POPULATION_VIEW_HOUSEHOLDS_LIST", "POPULATION VIEW HOUSEHOLDS LIST"),
-                        ("POPULATION_VIEW_HOUSEHOLDS_DETAILS", "POPULATION VIEW HOUSEHOLDS DETAILS"),
-                        ("POPULATION_VIEW_INDIVIDUALS_LIST", "POPULATION VIEW INDIVIDUALS LIST"),
-                        ("POPULATION_VIEW_INDIVIDUALS_DETAILS", "POPULATION VIEW INDIVIDUALS DETAILS"),
+                        (
+                            "POPULATION_VIEW_HOUSEHOLDS_LIST",
+                            "POPULATION VIEW HOUSEHOLDS LIST",
+                        ),
+                        (
+                            "POPULATION_VIEW_HOUSEHOLDS_DETAILS",
+                            "POPULATION VIEW HOUSEHOLDS DETAILS",
+                        ),
+                        (
+                            "POPULATION_VIEW_INDIVIDUALS_LIST",
+                            "POPULATION VIEW INDIVIDUALS LIST",
+                        ),
+                        (
+                            "POPULATION_VIEW_INDIVIDUALS_DETAILS",
+                            "POPULATION VIEW INDIVIDUALS DETAILS",
+                        ),
                         (
                             "POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION",
                             "POPULATION VIEW INDIVIDUAL DELIVERY MECHANISMS SECTION",
                         ),
-                        ("PROGRAMME_VIEW_LIST_AND_DETAILS", "PROGRAMME VIEW LIST AND DETAILS"),
+                        (
+                            "PROGRAMME_VIEW_LIST_AND_DETAILS",
+                            "PROGRAMME VIEW LIST AND DETAILS",
+                        ),
                         ("PROGRAMME_MANAGEMENT_VIEW", "PROGRAMME MANAGEMENT VIEW"),
-                        ("PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS", "PROGRAMME VIEW PAYMENT RECORD DETAILS"),
+                        (
+                            "PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS",
+                            "PROGRAMME VIEW PAYMENT RECORD DETAILS",
+                        ),
                         ("PROGRAMME_CREATE", "PROGRAMME CREATE"),
                         ("PROGRAMME_UPDATE", "PROGRAMME UPDATE"),
                         ("PROGRAMME_REMOVE", "PROGRAMME REMOVE"),
@@ -49,14 +67,32 @@ class Migration(migrations.Migration):
                         ("TARGETING_LOCK", "TARGETING LOCK"),
                         ("TARGETING_UNLOCK", "TARGETING UNLOCK"),
                         ("TARGETING_SEND", "TARGETING SEND"),
-                        ("PAYMENT_VIEW_LIST_MANAGERIAL", "PAYMENT VIEW LIST MANAGERIAL"),
-                        ("PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED", "PAYMENT VIEW LIST MANAGERIAL RELEASED"),
-                        ("PAYMENT_VERIFICATION_VIEW_LIST", "PAYMENT VERIFICATION VIEW LIST"),
-                        ("PAYMENT_VERIFICATION_VIEW_DETAILS", "PAYMENT VERIFICATION VIEW DETAILS"),
+                        (
+                            "PAYMENT_VIEW_LIST_MANAGERIAL",
+                            "PAYMENT VIEW LIST MANAGERIAL",
+                        ),
+                        (
+                            "PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED",
+                            "PAYMENT VIEW LIST MANAGERIAL RELEASED",
+                        ),
+                        (
+                            "PAYMENT_VERIFICATION_VIEW_LIST",
+                            "PAYMENT VERIFICATION VIEW LIST",
+                        ),
+                        (
+                            "PAYMENT_VERIFICATION_VIEW_DETAILS",
+                            "PAYMENT VERIFICATION VIEW DETAILS",
+                        ),
                         ("PAYMENT_VERIFICATION_CREATE", "PAYMENT VERIFICATION CREATE"),
                         ("PAYMENT_VERIFICATION_UPDATE", "PAYMENT VERIFICATION UPDATE"),
-                        ("PAYMENT_VERIFICATION_ACTIVATE", "PAYMENT VERIFICATION ACTIVATE"),
-                        ("PAYMENT_VERIFICATION_DISCARD", "PAYMENT VERIFICATION DISCARD"),
+                        (
+                            "PAYMENT_VERIFICATION_ACTIVATE",
+                            "PAYMENT VERIFICATION ACTIVATE",
+                        ),
+                        (
+                            "PAYMENT_VERIFICATION_DISCARD",
+                            "PAYMENT VERIFICATION DISCARD",
+                        ),
                         ("PAYMENT_VERIFICATION_FINISH", "PAYMENT VERIFICATION FINISH"),
                         ("PAYMENT_VERIFICATION_EXPORT", "PAYMENT VERIFICATION EXPORT"),
                         ("PAYMENT_VERIFICATION_IMPORT", "PAYMENT VERIFICATION IMPORT"),
@@ -66,12 +102,21 @@ class Migration(migrations.Migration):
                             "PAYMENT VERIFICATION VIEW PAYMENT RECORD DETAILS",
                         ),
                         ("PAYMENT_VERIFICATION_DELETE", "PAYMENT VERIFICATION DELETE"),
-                        ("PAYMENT_VERIFICATION_INVALID", "PAYMENT VERIFICATION INVALID"),
-                        ("PAYMENT_VERIFICATION_MARK_AS_FAILED", "PAYMENT VERIFICATION MARK AS FAILED"),
+                        (
+                            "PAYMENT_VERIFICATION_INVALID",
+                            "PAYMENT VERIFICATION INVALID",
+                        ),
+                        (
+                            "PAYMENT_VERIFICATION_MARK_AS_FAILED",
+                            "PAYMENT VERIFICATION MARK AS FAILED",
+                        ),
                         ("PM_VIEW_LIST", "PM VIEW LIST"),
                         ("PM_CREATE", "PM CREATE"),
                         ("PM_VIEW_DETAILS", "PM VIEW DETAILS"),
-                        ("PM_IMPORT_XLSX_WITH_ENTITLEMENTS", "PM IMPORT XLSX WITH ENTITLEMENTS"),
+                        (
+                            "PM_IMPORT_XLSX_WITH_ENTITLEMENTS",
+                            "PM IMPORT XLSX WITH ENTITLEMENTS",
+                        ),
                         (
                             "PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS",
                             "PM APPLY RULE ENGINE FORMULA WITH ENTITLEMENTS",
@@ -81,11 +126,26 @@ class Migration(migrations.Migration):
                         ("PM_LOCK_AND_UNLOCK", "PM LOCK AND UNLOCK"),
                         ("PM_LOCK_AND_UNLOCK_FSP", "PM LOCK AND UNLOCK FSP"),
                         ("PM_SEND_FOR_APPROVAL", "PM SEND FOR APPROVAL"),
-                        ("PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP", "PM EXCLUDE BENEFICIARIES FROM FOLLOW UP PP"),
-                        ("PM_ACCEPTANCE_PROCESS_APPROVE", "PM ACCEPTANCE PROCESS APPROVE"),
-                        ("PM_ACCEPTANCE_PROCESS_AUTHORIZE", "PM ACCEPTANCE PROCESS AUTHORIZE"),
-                        ("PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW", "PM ACCEPTANCE PROCESS FINANCIAL REVIEW"),
-                        ("PM_IMPORT_XLSX_WITH_RECONCILIATION", "PM IMPORT XLSX WITH RECONCILIATION"),
+                        (
+                            "PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP",
+                            "PM EXCLUDE BENEFICIARIES FROM FOLLOW UP PP",
+                        ),
+                        (
+                            "PM_ACCEPTANCE_PROCESS_APPROVE",
+                            "PM ACCEPTANCE PROCESS APPROVE",
+                        ),
+                        (
+                            "PM_ACCEPTANCE_PROCESS_AUTHORIZE",
+                            "PM ACCEPTANCE PROCESS AUTHORIZE",
+                        ),
+                        (
+                            "PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW",
+                            "PM ACCEPTANCE PROCESS FINANCIAL REVIEW",
+                        ),
+                        (
+                            "PM_IMPORT_XLSX_WITH_RECONCILIATION",
+                            "PM IMPORT XLSX WITH RECONCILIATION",
+                        ),
                         ("PM_EXPORT_XLSX_FOR_FSP", "PM EXPORT XLSX FOR FSP"),
                         ("PM_DOWNLOAD_XLSX_FOR_FSP", "PM DOWNLOAD XLSX FOR FSP"),
                         ("PM_MARK_PAYMENT_AS_FAILED", "PM MARK PAYMENT AS FAILED"),
@@ -94,19 +154,40 @@ class Migration(migrations.Migration):
                         ("PM_VIEW_FSP_AUTH_CODE", "PM VIEW FSP AUTH CODE"),
                         ("PM_DOWNLOAD_FSP_AUTH_CODE", "PM DOWNLOAD FSP AUTH CODE"),
                         ("PM_SEND_XLSX_PASSWORD", "PM SEND XLSX PASSWORD"),
-                        ("PM_DOWNLOAD_SUPPORTING_DOCUMENT", "PM DOWNLOAD SUPPORTING DOCUMENT"),
-                        ("PM_UPLOAD_SUPPORTING_DOCUMENT", "PM UPLOAD SUPPORTING DOCUMENT"),
-                        ("PM_DELETE_SUPPORTING_DOCUMENT", "PM DELETE SUPPORTING DOCUMENT"),
-                        ("PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE", "PM ADMIN FINANCIAL SERVICE PROVIDER UPDATE"),
-                        ("PM_PROGRAMME_CYCLE_VIEW_LIST", "PM PROGRAMME CYCLE VIEW LIST"),
-                        ("PM_PROGRAMME_CYCLE_VIEW_DETAILS", "PM PROGRAMME CYCLE VIEW DETAILS"),
+                        (
+                            "PM_DOWNLOAD_SUPPORTING_DOCUMENT",
+                            "PM DOWNLOAD SUPPORTING DOCUMENT",
+                        ),
+                        (
+                            "PM_UPLOAD_SUPPORTING_DOCUMENT",
+                            "PM UPLOAD SUPPORTING DOCUMENT",
+                        ),
+                        (
+                            "PM_DELETE_SUPPORTING_DOCUMENT",
+                            "PM DELETE SUPPORTING DOCUMENT",
+                        ),
+                        (
+                            "PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE",
+                            "PM ADMIN FINANCIAL SERVICE PROVIDER UPDATE",
+                        ),
+                        (
+                            "PM_PROGRAMME_CYCLE_VIEW_LIST",
+                            "PM PROGRAMME CYCLE VIEW LIST",
+                        ),
+                        (
+                            "PM_PROGRAMME_CYCLE_VIEW_DETAILS",
+                            "PM PROGRAMME CYCLE VIEW DETAILS",
+                        ),
                         ("PM_PROGRAMME_CYCLE_CREATE", "PM PROGRAMME CYCLE CREATE"),
                         ("PM_PROGRAMME_CYCLE_UPDATE", "PM PROGRAMME CYCLE UPDATE"),
                         ("PM_PROGRAMME_CYCLE_DELETE", "PM PROGRAMME CYCLE DELETE"),
                         ("USER_MANAGEMENT_VIEW_LIST", "USER MANAGEMENT VIEW LIST"),
                         ("DASHBOARD_VIEW_COUNTRY", "DASHBOARD VIEW COUNTRY"),
                         ("DASHBOARD_EXPORT", "DASHBOARD EXPORT"),
-                        ("GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE", "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE"),
+                        (
+                            "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE",
+                            "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE",
+                        ),
                         (
                             "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR",
                             "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS CREATOR",
@@ -115,10 +196,22 @@ class Migration(migrations.Migration):
                             "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER",
                             "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS OWNER",
                         ),
-                        ("GRIEVANCES_VIEW_LIST_SENSITIVE", "GRIEVANCES VIEW LIST SENSITIVE"),
-                        ("GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR", "GRIEVANCES VIEW LIST SENSITIVE AS CREATOR"),
-                        ("GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER", "GRIEVANCES VIEW LIST SENSITIVE AS OWNER"),
-                        ("GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE", "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE"),
+                        (
+                            "GRIEVANCES_VIEW_LIST_SENSITIVE",
+                            "GRIEVANCES VIEW LIST SENSITIVE",
+                        ),
+                        (
+                            "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR",
+                            "GRIEVANCES VIEW LIST SENSITIVE AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER",
+                            "GRIEVANCES VIEW LIST SENSITIVE AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE",
+                            "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE",
+                        ),
                         (
                             "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR",
                             "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS CREATOR",
@@ -127,19 +220,34 @@ class Migration(migrations.Migration):
                             "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER",
                             "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS OWNER",
                         ),
-                        ("GRIEVANCES_VIEW_DETAILS_SENSITIVE", "GRIEVANCES VIEW DETAILS SENSITIVE"),
+                        (
+                            "GRIEVANCES_VIEW_DETAILS_SENSITIVE",
+                            "GRIEVANCES VIEW DETAILS SENSITIVE",
+                        ),
                         (
                             "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR",
                             "GRIEVANCES VIEW DETAILS SENSITIVE AS CREATOR",
                         ),
-                        ("GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER", "GRIEVANCES VIEW DETAILS SENSITIVE AS OWNER"),
-                        ("GRIEVANCES_VIEW_HOUSEHOLD_DETAILS", "GRIEVANCES VIEW HOUSEHOLD DETAILS"),
+                        (
+                            "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER",
+                            "GRIEVANCES VIEW DETAILS SENSITIVE AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS",
+                            "GRIEVANCES VIEW HOUSEHOLD DETAILS",
+                        ),
                         (
                             "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR",
                             "GRIEVANCES VIEW HOUSEHOLD DETAILS AS CREATOR",
                         ),
-                        ("GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER", "GRIEVANCES VIEW HOUSEHOLD DETAILS AS OWNER"),
-                        ("GRIEVANCES_VIEW_INDIVIDUALS_DETAILS", "GRIEVANCES VIEW INDIVIDUALS DETAILS"),
+                        (
+                            "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER",
+                            "GRIEVANCES VIEW HOUSEHOLD DETAILS AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS",
+                            "GRIEVANCES VIEW INDIVIDUALS DETAILS",
+                        ),
                         (
                             "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR",
                             "GRIEVANCES VIEW INDIVIDUALS DETAILS AS CREATOR",
@@ -150,9 +258,15 @@ class Migration(migrations.Migration):
                         ),
                         ("GRIEVANCES_CREATE", "GRIEVANCES CREATE"),
                         ("GRIEVANCES_UPDATE", "GRIEVANCES UPDATE"),
-                        ("GRIEVANCES_UPDATE_AS_CREATOR", "GRIEVANCES UPDATE AS CREATOR"),
+                        (
+                            "GRIEVANCES_UPDATE_AS_CREATOR",
+                            "GRIEVANCES UPDATE AS CREATOR",
+                        ),
                         ("GRIEVANCES_UPDATE_AS_OWNER", "GRIEVANCES UPDATE AS OWNER"),
-                        ("GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE", "GRIEVANCES UPDATE REQUESTED DATA CHANGE"),
+                        (
+                            "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE",
+                            "GRIEVANCES UPDATE REQUESTED DATA CHANGE",
+                        ),
                         (
                             "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR",
                             "GRIEVANCES UPDATE REQUESTED DATA CHANGE AS CREATOR",
@@ -162,24 +276,69 @@ class Migration(migrations.Migration):
                             "GRIEVANCES UPDATE REQUESTED DATA CHANGE AS OWNER",
                         ),
                         ("GRIEVANCES_ADD_NOTE", "GRIEVANCES ADD NOTE"),
-                        ("GRIEVANCES_ADD_NOTE_AS_CREATOR", "GRIEVANCES ADD NOTE AS CREATOR"),
-                        ("GRIEVANCES_ADD_NOTE_AS_OWNER", "GRIEVANCES ADD NOTE AS OWNER"),
+                        (
+                            "GRIEVANCES_ADD_NOTE_AS_CREATOR",
+                            "GRIEVANCES ADD NOTE AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_ADD_NOTE_AS_OWNER",
+                            "GRIEVANCES ADD NOTE AS OWNER",
+                        ),
                         ("GRIEVANCES_SET_IN_PROGRESS", "GRIEVANCES SET IN PROGRESS"),
-                        ("GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR", "GRIEVANCES SET IN PROGRESS AS CREATOR"),
-                        ("GRIEVANCES_SET_IN_PROGRESS_AS_OWNER", "GRIEVANCES SET IN PROGRESS AS OWNER"),
+                        (
+                            "GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR",
+                            "GRIEVANCES SET IN PROGRESS AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_SET_IN_PROGRESS_AS_OWNER",
+                            "GRIEVANCES SET IN PROGRESS AS OWNER",
+                        ),
                         ("GRIEVANCES_SET_ON_HOLD", "GRIEVANCES SET ON HOLD"),
-                        ("GRIEVANCES_SET_ON_HOLD_AS_CREATOR", "GRIEVANCES SET ON HOLD AS CREATOR"),
-                        ("GRIEVANCES_SET_ON_HOLD_AS_OWNER", "GRIEVANCES SET ON HOLD AS OWNER"),
-                        ("GRIEVANCES_SEND_FOR_APPROVAL", "GRIEVANCES SEND FOR APPROVAL"),
-                        ("GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR", "GRIEVANCES SEND FOR APPROVAL AS CREATOR"),
-                        ("GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER", "GRIEVANCES SEND FOR APPROVAL AS OWNER"),
+                        (
+                            "GRIEVANCES_SET_ON_HOLD_AS_CREATOR",
+                            "GRIEVANCES SET ON HOLD AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_SET_ON_HOLD_AS_OWNER",
+                            "GRIEVANCES SET ON HOLD AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_SEND_FOR_APPROVAL",
+                            "GRIEVANCES SEND FOR APPROVAL",
+                        ),
+                        (
+                            "GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR",
+                            "GRIEVANCES SEND FOR APPROVAL AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER",
+                            "GRIEVANCES SEND FOR APPROVAL AS OWNER",
+                        ),
                         ("GRIEVANCES_SEND_BACK", "GRIEVANCES SEND BACK"),
-                        ("GRIEVANCES_SEND_BACK_AS_CREATOR", "GRIEVANCES SEND BACK AS CREATOR"),
-                        ("GRIEVANCES_SEND_BACK_AS_OWNER", "GRIEVANCES SEND BACK AS OWNER"),
-                        ("GRIEVANCES_APPROVE_DATA_CHANGE", "GRIEVANCES APPROVE DATA CHANGE"),
-                        ("GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR", "GRIEVANCES APPROVE DATA CHANGE AS CREATOR"),
-                        ("GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER", "GRIEVANCES APPROVE DATA CHANGE AS OWNER"),
-                        ("GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK", "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK"),
+                        (
+                            "GRIEVANCES_SEND_BACK_AS_CREATOR",
+                            "GRIEVANCES SEND BACK AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_SEND_BACK_AS_OWNER",
+                            "GRIEVANCES SEND BACK AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_APPROVE_DATA_CHANGE",
+                            "GRIEVANCES APPROVE DATA CHANGE",
+                        ),
+                        (
+                            "GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR",
+                            "GRIEVANCES APPROVE DATA CHANGE AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER",
+                            "GRIEVANCES APPROVE DATA CHANGE AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK",
+                            "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK",
+                        ),
                         (
                             "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR",
                             "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS CREATOR",
@@ -188,16 +347,34 @@ class Migration(migrations.Migration):
                             "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER",
                             "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS OWNER",
                         ),
-                        ("GRIEVANCES_CLOSE_TICKET_FEEDBACK", "GRIEVANCES CLOSE TICKET FEEDBACK"),
-                        ("GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR", "GRIEVANCES CLOSE TICKET FEEDBACK AS CREATOR"),
-                        ("GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER", "GRIEVANCES CLOSE TICKET FEEDBACK AS OWNER"),
-                        ("GRIEVANCES_APPROVE_FLAG_AND_DEDUPE", "GRIEVANCES APPROVE FLAG AND DEDUPE"),
+                        (
+                            "GRIEVANCES_CLOSE_TICKET_FEEDBACK",
+                            "GRIEVANCES CLOSE TICKET FEEDBACK",
+                        ),
+                        (
+                            "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR",
+                            "GRIEVANCES CLOSE TICKET FEEDBACK AS CREATOR",
+                        ),
+                        (
+                            "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER",
+                            "GRIEVANCES CLOSE TICKET FEEDBACK AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE",
+                            "GRIEVANCES APPROVE FLAG AND DEDUPE",
+                        ),
                         (
                             "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR",
                             "GRIEVANCES APPROVE FLAG AND DEDUPE AS CREATOR",
                         ),
-                        ("GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER", "GRIEVANCES APPROVE FLAG AND DEDUPE AS OWNER"),
-                        ("GRIEVANCES_APPROVE_PAYMENT_VERIFICATION", "GRIEVANCES APPROVE PAYMENT VERIFICATION"),
+                        (
+                            "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER",
+                            "GRIEVANCES APPROVE FLAG AND DEDUPE AS OWNER",
+                        ),
+                        (
+                            "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION",
+                            "GRIEVANCES APPROVE PAYMENT VERIFICATION",
+                        ),
                         (
                             "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR",
                             "GRIEVANCES APPROVE PAYMENT VERIFICATION AS CREATOR",
@@ -208,13 +385,34 @@ class Migration(migrations.Migration):
                         ),
                         ("GRIEVANCE_ASSIGN", "GRIEVANCE ASSIGN"),
                         ("GRIEVANCE_DOCUMENTS_UPLOAD", "GRIEVANCE DOCUMENTS UPLOAD"),
-                        ("GRIEVANCES_CROSS_AREA_FILTER", "GRIEVANCES CROSS AREA FILTER"),
-                        ("GRIEVANCES_VIEW_BIOMETRIC_RESULTS", "GRIEVANCES VIEW BIOMETRIC RESULTS"),
-                        ("GRIEVANCES_FEEDBACK_VIEW_CREATE", "GRIEVANCES FEEDBACK VIEW CREATE"),
-                        ("GRIEVANCES_FEEDBACK_VIEW_LIST", "GRIEVANCES FEEDBACK VIEW LIST"),
-                        ("GRIEVANCES_FEEDBACK_VIEW_DETAILS", "GRIEVANCES FEEDBACK VIEW DETAILS"),
-                        ("GRIEVANCES_FEEDBACK_VIEW_UPDATE", "GRIEVANCES FEEDBACK VIEW UPDATE"),
-                        ("GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE", "GRIEVANCES FEEDBACK MESSAGE VIEW CREATE"),
+                        (
+                            "GRIEVANCES_CROSS_AREA_FILTER",
+                            "GRIEVANCES CROSS AREA FILTER",
+                        ),
+                        (
+                            "GRIEVANCES_VIEW_BIOMETRIC_RESULTS",
+                            "GRIEVANCES VIEW BIOMETRIC RESULTS",
+                        ),
+                        (
+                            "GRIEVANCES_FEEDBACK_VIEW_CREATE",
+                            "GRIEVANCES FEEDBACK VIEW CREATE",
+                        ),
+                        (
+                            "GRIEVANCES_FEEDBACK_VIEW_LIST",
+                            "GRIEVANCES FEEDBACK VIEW LIST",
+                        ),
+                        (
+                            "GRIEVANCES_FEEDBACK_VIEW_DETAILS",
+                            "GRIEVANCES FEEDBACK VIEW DETAILS",
+                        ),
+                        (
+                            "GRIEVANCES_FEEDBACK_VIEW_UPDATE",
+                            "GRIEVANCES FEEDBACK VIEW UPDATE",
+                        ),
+                        (
+                            "GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE",
+                            "GRIEVANCES FEEDBACK MESSAGE VIEW CREATE",
+                        ),
                         ("REPORTING_EXPORT", "REPORTING EXPORT"),
                         ("PDU_VIEW_LIST_AND_DETAILS", "PDU VIEW LIST AND DETAILS"),
                         ("PDU_TEMPLATE_CREATE", "PDU TEMPLATE CREATE"),
@@ -241,11 +439,23 @@ class Migration(migrations.Migration):
                             "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR",
                             "ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS AS CREATOR",
                         ),
-                        ("ACCOUNTABILITY_SURVEY_VIEW_CREATE", "ACCOUNTABILITY SURVEY VIEW CREATE"),
-                        ("ACCOUNTABILITY_SURVEY_VIEW_LIST", "ACCOUNTABILITY SURVEY VIEW LIST"),
-                        ("ACCOUNTABILITY_SURVEY_VIEW_DETAILS", "ACCOUNTABILITY SURVEY VIEW DETAILS"),
+                        (
+                            "ACCOUNTABILITY_SURVEY_VIEW_CREATE",
+                            "ACCOUNTABILITY SURVEY VIEW CREATE",
+                        ),
+                        (
+                            "ACCOUNTABILITY_SURVEY_VIEW_LIST",
+                            "ACCOUNTABILITY SURVEY VIEW LIST",
+                        ),
+                        (
+                            "ACCOUNTABILITY_SURVEY_VIEW_DETAILS",
+                            "ACCOUNTABILITY SURVEY VIEW DETAILS",
+                        ),
                         ("GEO_VIEW_LIST", "GEO VIEW LIST"),
-                        ("CAN_ADD_BUSINESS_AREA_TO_PARTNER", "CAN ADD BUSINESS AREA TO PARTNER"),
+                        (
+                            "CAN_ADD_BUSINESS_AREA_TO_PARTNER",
+                            "CAN ADD BUSINESS AREA TO PARTNER",
+                        ),
                     ],
                     max_length=255,
                 ),

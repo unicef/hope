@@ -9,13 +9,20 @@ class AreaListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "area_list"
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         countries_version = get_or_create_cache_key(f"{business_area_slug}:{business_area_version}:country_list", 1)
         area_types_version = get_or_create_cache_key(
-            f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list", 1
+            f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list",
+            1,
         )
         version_key = f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list:{area_types_version}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
@@ -26,7 +33,13 @@ class CountryListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "country_list"
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -39,7 +52,13 @@ class AreaTypeListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "area_type_list"
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)

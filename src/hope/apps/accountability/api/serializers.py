@@ -1,5 +1,4 @@
 from django.conf import settings
-
 from rest_framework import serializers
 
 from hope.apps.accountability.models import (
@@ -11,9 +10,7 @@ from hope.apps.accountability.models import (
 )
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
-from hope.apps.household.api.serializers.household import (
-    HouseholdSmallSerializer,
-)
+from hope.apps.household.api.serializers.household import HouseholdSmallSerializer
 from hope.apps.household.models import Household
 from hope.apps.payment.api.serializers import (
     FollowUpPaymentPlanSerializer,
@@ -205,7 +202,9 @@ class MessageCreateSerializer(serializers.Serializer):
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
     households = serializers.ListSerializer(
-        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()), required=False, allow_empty=True
+        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
+        required=False,
+        allow_empty=True,
     )
 
 
@@ -231,7 +230,11 @@ class SurveySerializer(serializers.ModelSerializer):
     sampling_type = serializers.CharField()
     flow = serializers.CharField(required=False, write_only=True, allow_blank=True)
     payment_plan = serializers.SlugRelatedField(
-        slug_field="id", required=False, allow_null=True, queryset=PaymentPlan.objects.all(), write_only=True
+        slug_field="id",
+        required=False,
+        allow_null=True,
+        queryset=PaymentPlan.objects.all(),
+        write_only=True,
     )
     full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True, required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
@@ -314,7 +317,9 @@ class SampleSizeSerializer(serializers.Serializer):
 
 class MessageSampleSizeSerializer(serializers.Serializer):
     households = serializers.ListSerializer(
-        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()), required=False, allow_empty=True
+        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
+        required=False,
+        allow_empty=True,
     )
     payment_plan = serializers.PrimaryKeyRelatedField(
         queryset=PaymentPlan.objects.all(), required=False, allow_null=True

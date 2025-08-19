@@ -4,25 +4,20 @@ from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
-from typing import Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
+import openpyxl
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
-
-import openpyxl
 from django_countries.fields import Country
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.account.models import Partner
 from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader, timezone_datetime
 from hope.apps.geo.models import Area
 from hope.apps.household.models import (
@@ -44,9 +39,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_import_service 
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.registration_datahub.tasks.rdi_base_create import (
-    RdiBaseCreateTask,
-)
+from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
 from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
 from hope.apps.utils.phone import is_valid_phone_number
@@ -491,9 +484,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(PendingHousehold, registration_data_import=rdi, program_id=rdi.program.id)
+            obj = partial(
+                PendingHousehold,
+                registration_data_import=rdi,
+                program_id=rdi.program.id,
+            )
         elif sheet_title == "individuals":
-            obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
+            obj = partial(
+                PendingIndividual,
+                registration_data_import=rdi,
+                program_id=rdi.program.id,
+            )
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")  # pragma: no cover
 
@@ -591,16 +592,19 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.flex_fields["enumerator_id"] = cell.value
 
                             if header in ("country_h_c", "country_origin_h_c"):
-                                from hope.apps.geo.models import (
-                                    Country as GeoCountry,
-                                )
+                                from hope.apps.geo.models import Country as GeoCountry
 
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
                                     GeoCountry.objects.get(iso_code3=value),
                                 )
-                            elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
+                            elif header in (
+                                "admin1_h_c",
+                                "admin2_h_c",
+                                "admin3_h_c",
+                                "admin4_h_c",
+                            ):
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
@@ -657,7 +661,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
                     obj_to_create.age_at_registration = calculate_age_at_registration(
-                        registration_data_import.created_at, str(obj_to_create.birth_date)
+                        registration_data_import.created_at,
+                        str(obj_to_create.birth_date),
                     )
                     populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
@@ -692,7 +697,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic
     def execute(
-        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+        self,
+        registration_data_import_id: str,
+        import_data_id: str,
+        business_area_id: str,
+        program_id: str,
     ) -> None:
         try:
             registration_data_import = RegistrationDataImport.objects.select_for_update().get(

@@ -2,11 +2,10 @@ import uuid
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -401,7 +400,9 @@ class TestGrievanceUtils(TestCase):
         assert ind_1.duplicate is False
         assert ind_2.duplicate is True
 
-    def test_close_needs_adjudication_ticket_service_individual_without_household(self) -> None:
+    def test_close_needs_adjudication_ticket_service_individual_without_household(
+        self,
+    ) -> None:
         user = UserFactory()
         ba = BusinessAreaFactory(slug="afghanistan")
         program = ProgramFactory(business_area=ba)
@@ -577,7 +578,11 @@ class TestGrievanceUtils(TestCase):
             is_multiple_duplicates_version=True,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
             dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
-                program=program, individual1=ind_1, individual2=ind_2, similarity_score=90.55, status_code="200"
+                program=program,
+                individual1=ind_1,
+                individual2=ind_2,
+                similarity_score=90.55,
+                status_code="200",
             ),
         )
         if not ticket:

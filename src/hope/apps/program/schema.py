@@ -1,15 +1,11 @@
 from typing import Any
 
-from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
-
 import graphene
+from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.decorators import cached_in_django_cache
-from hope.apps.core.utils import (
-    chart_filters_decoder,
-    chart_permission_decorator,
-)
+from hope.apps.core.utils import chart_filters_decoder, chart_permission_decorator
 from hope.apps.payment.models import DeliveryMechanism
 from hope.apps.payment.utils import get_payment_items_for_dashboard
 from hope.apps.program.models import Program
@@ -93,7 +89,20 @@ class Query(graphene.ObjectType):
             .order_by("delivery_month")
         )
 
-        months_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        months_labels = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
         previous_transfers = [0] * 12
         cash_transfers = [0] * 12
         voucher_transfers = [0] * 12

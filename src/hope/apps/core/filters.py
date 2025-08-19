@@ -2,6 +2,7 @@ import json
 from datetime import date, timedelta
 from typing import Any, Callable
 
+from dateutil.parser import parse
 from django.db.models import QuerySet
 from django.forms import (
     CharField,
@@ -12,8 +13,6 @@ from django.forms import (
     IntegerField,
 )
 from django.utils import timezone
-
-from dateutil.parser import parse
 from django_filters import Filter
 
 from hope.apps.core.models import BusinessArea

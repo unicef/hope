@@ -1,23 +1,25 @@
 import logging
 from typing import Any
 
-from django.contrib import admin
-from django.http import (
-    HttpRequest,
-)
 from admin_extra_buttons.mixins import ExtraButtonsMixin
+from django.contrib import admin
+from django.http import HttpRequest
 
-from hope.apps.core.models import (
-    StorageFile,
-)
-
+from hope.apps.core.models import StorageFile
 
 logger = logging.getLogger(__name__)
 
 
 @admin.register(StorageFile)
 class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
+    list_display = (
+        "file_name",
+        "file",
+        "business_area",
+        "file_size",
+        "created_by",
+        "created_at",
+    )
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_download_storage_files()

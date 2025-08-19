@@ -21,10 +21,22 @@ class Migration(migrations.Migration):
                     ("household_size", "Household Size"),
                     ("collector_name", "Collector Name"),
                     ("alternate_collector_full_name", "Alternate collector Full Name"),
-                    ("alternate_collector_given_name", "Alternate collector Given Name"),
-                    ("alternate_collector_middle_name", "Alternate collector Middle Name"),
-                    ("alternate_collector_phone_no", "Alternate collector phone number"),
-                    ("alternate_collector_document_numbers", "Alternate collector Document numbers"),
+                    (
+                        "alternate_collector_given_name",
+                        "Alternate collector Given Name",
+                    ),
+                    (
+                        "alternate_collector_middle_name",
+                        "Alternate collector Middle Name",
+                    ),
+                    (
+                        "alternate_collector_phone_no",
+                        "Alternate collector phone number",
+                    ),
+                    (
+                        "alternate_collector_document_numbers",
+                        "Alternate collector Document numbers",
+                    ),
                     ("alternate_collector_sex", "Alternate collector Gender"),
                     ("payment_channel", "Payment Channel"),
                     ("fsp_name", "FSP Name"),
@@ -34,7 +46,10 @@ class Migration(migrations.Migration):
                     ("delivered_quantity", "Delivered Quantity"),
                     ("delivery_date", "Delivery Date"),
                     ("reference_id", "Reference id"),
-                    ("reason_for_unsuccessful_payment", "Reason for unsuccessful payment"),
+                    (
+                        "reason_for_unsuccessful_payment",
+                        "Reason for unsuccessful payment",
+                    ),
                     ("order_number", "Order Number"),
                     ("token_number", "Token Number"),
                     ("additional_collector_name", "Additional Collector Name"),
@@ -42,7 +57,10 @@ class Migration(migrations.Migration):
                     ("additional_document_number", "Additional Document Number"),
                     ("registration_token", "Registration Token"),
                     ("status", "Status"),
-                    ("transaction_status_blockchain_link", "Transaction Status on the Blockchain"),
+                    (
+                        "transaction_status_blockchain_link",
+                        "Transaction Status on the Blockchain",
+                    ),
                     ("fsp_auth_code", "Auth Code"),
                 ],
                 default=[

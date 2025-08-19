@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any
 from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils import timezone
-
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
@@ -30,11 +29,7 @@ from hope.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 

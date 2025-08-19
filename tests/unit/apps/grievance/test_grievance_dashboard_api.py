@@ -1,11 +1,10 @@
 from datetime import datetime
 from typing import Any, List
 
+import pytest
+import pytz
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytz
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -44,14 +43,30 @@ class TestGrievanceDashboardAPI:
         }
 
         grievances_to_create = (
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_NEW),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK, status=GrievanceTicket.STATUS_ON_HOLD),
             GrievanceTicket(
-                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_IN_PROGRESS
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_NEW,
             ),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_CLOSED),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, status=GrievanceTicket.STATUS_CLOSED),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, status=GrievanceTicket.STATUS_CLOSED),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_ON_HOLD,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_CLOSED,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_CLOSED,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_CLOSED,
+            ),
         )
 
         for grievance_ticket in grievances_to_create:
@@ -90,7 +105,10 @@ class TestGrievanceDashboardAPI:
         ],
     )
     def test_dashboard_api_endpoint(
-        self, permissions: List[Permissions], expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List[Permissions],
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.business_area, whole_business_area_access=True)
 
@@ -189,14 +207,30 @@ class TestGrievanceProgramDashboardAPI:
         }
 
         grievances_to_create = (
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_NEW),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK, status=GrievanceTicket.STATUS_ON_HOLD),
             GrievanceTicket(
-                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_IN_PROGRESS
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_NEW,
             ),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_CLOSED),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, status=GrievanceTicket.STATUS_CLOSED),
-            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, status=GrievanceTicket.STATUS_CLOSED),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_ON_HOLD,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_CLOSED,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_CLOSED,
+            ),
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_CLOSED,
+            ),
         )
 
         for grievance_ticket in grievances_to_create:
@@ -243,7 +277,10 @@ class TestGrievanceProgramDashboardAPI:
         ],
     )
     def test_program_dashboard_api_endpoint(
-        self, permissions: List[Permissions], expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List[Permissions],
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 

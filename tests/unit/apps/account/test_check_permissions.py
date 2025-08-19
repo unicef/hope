@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
-
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
@@ -31,7 +30,8 @@ class TestCheckPermissions(TestCase):
 
         cls.program = ProgramFactory(status=Program.DRAFT, business_area=cls.business_area)
         cls.role = RoleFactory(
-            name="POPULATION VIEW INDIVIDUALS DETAILS", permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"]
+            name="POPULATION VIEW INDIVIDUALS DETAILS",
+            permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"],
         )
         cls.area = AreaFactory(name="POPULATION")
 
@@ -80,7 +80,10 @@ class TestCheckPermissions(TestCase):
         partner = PartnerFactory(name="Partner")
         partner.allowed_business_areas.add(self.business_area)
         RoleAssignment.objects.create(
-            partner=partner, business_area=self.business_area, role=self.role, program=self.program
+            partner=partner,
+            business_area=self.business_area,
+            role=self.role,
+            program=self.program,
         )
 
         self.user.partner = partner
@@ -99,7 +102,10 @@ class TestCheckPermissions(TestCase):
         self.user.save()
 
         RoleAssignment.objects.create(
-            user=self.user, business_area=self.business_area, role=self.role, program=self.program
+            user=self.user,
+            business_area=self.business_area,
+            role=self.role,
+            program=self.program,
         )
 
         arguments = {

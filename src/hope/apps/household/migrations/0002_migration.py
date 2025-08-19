@@ -25,14 +25,19 @@ class Migration(migrations.Migration):
             model_name="xlsxupdatefile",
             name="rdi",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="registration_data.registrationdataimport"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="registration_data.registrationdataimport",
             ),
         ),
         migrations.AddField(
             model_name="xlsxupdatefile",
             name="uploaded_by",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
@@ -86,7 +91,9 @@ class Migration(migrations.Migration):
             model_name="individualidentity",
             name="individual",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="identities", to="household.individual"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="identities",
+                to="household.individual",
             ),
         ),
         migrations.AddField(
@@ -162,34 +169,55 @@ class Migration(migrations.Migration):
             model_name="household",
             name="admin1",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="geo.area",
             ),
         ),
         migrations.AddField(
             model_name="household",
             name="admin2",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="geo.area",
             ),
         ),
         migrations.AddField(
             model_name="household",
             name="admin3",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="geo.area",
             ),
         ),
         migrations.AddField(
             model_name="household",
             name="admin4",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to="geo.area"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="geo.area",
             ),
         ),
         migrations.AddField(
             model_name="household",
             name="admin_area",
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="geo.area"),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="geo.area",
+            ),
         ),
         migrations.AddField(
             model_name="household",
@@ -212,14 +240,22 @@ class Migration(migrations.Migration):
             model_name="household",
             name="country",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name="+", to="geo.country"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="+",
+                to="geo.country",
             ),
         ),
         migrations.AddField(
             model_name="household",
             name="country_origin",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name="+", to="geo.country"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="+",
+                to="geo.country",
             ),
         ),
         migrations.AddField(
@@ -246,7 +282,10 @@ class Migration(migrations.Migration):
             model_name="household",
             name="program",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="program.program"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="program.program",
             ),
         ),
         migrations.AddField(
@@ -279,7 +318,10 @@ class Migration(migrations.Migration):
             model_name="household",
             name="storage_obj",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="core.storagefile"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="core.storagefile",
             ),
         ),
         migrations.AddField(
@@ -296,14 +338,18 @@ class Migration(migrations.Migration):
             model_name="documentvalidator",
             name="type",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="validators", to="household.documenttype"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="validators",
+                to="household.documenttype",
             ),
         ),
         migrations.AddField(
             model_name="document",
             name="cleared_by",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
@@ -322,28 +368,38 @@ class Migration(migrations.Migration):
             model_name="document",
             name="country",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="geo.country",
             ),
         ),
         migrations.AddField(
             model_name="document",
             name="individual",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="documents", to="household.individual"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="documents",
+                to="household.individual",
             ),
         ),
         migrations.AddField(
             model_name="document",
             name="program",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, related_name="+", to="program.program"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="program.program",
             ),
         ),
         migrations.AddField(
             model_name="document",
             name="type",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="documents", to="household.documenttype"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="documents",
+                to="household.documenttype",
             ),
         ),
         migrations.AddField(
@@ -362,7 +418,9 @@ class Migration(migrations.Migration):
             model_name="bankaccountinfo",
             name="individual",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="bank_account_info", to="household.individual"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="bank_account_info",
+                to="household.individual",
             ),
         ),
         migrations.CreateModel(
@@ -470,7 +528,11 @@ class Migration(migrations.Migration):
             model_name="document",
             constraint=models.UniqueConstraint(
                 condition=models.Q(
-                    models.Q(("is_removed", False), ("status", "VALID"), ("rdi_merge_status", "MERGED"))
+                    models.Q(
+                        ("is_removed", False),
+                        ("status", "VALID"),
+                        ("rdi_merge_status", "MERGED"),
+                    )
                 ),
                 fields=("document_number", "type", "country", "program", "is_original"),
                 name="unique_if_not_removed_and_valid_for_representations",

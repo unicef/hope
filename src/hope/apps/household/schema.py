@@ -1,9 +1,8 @@
 from typing import Any
 
+import graphene
 from django.db.models import F, Func, OuterRef, Q, QuerySet, Subquery, Sum
 from django.db.models.functions import Coalesce
-
-import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -259,7 +258,10 @@ class Query(graphene.ObjectType):
 
         if does_path_exist_in_query("edges.node.hasDuplicates", info):
             subquery = Subquery(
-                Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")
+                Individual.objects.filter(
+                    household_id=OuterRef("pk"),
+                    deduplication_golden_record_status="DUPLICATE",
+                )
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )

@@ -3,7 +3,6 @@ import tempfile
 from typing import Callable
 
 from django.core.files.base import ContentFile
-
 from openpyxl import load_workbook
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet

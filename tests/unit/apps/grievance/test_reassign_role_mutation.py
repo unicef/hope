@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -99,7 +98,10 @@ class TestRoleReassignMutation:
         response = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-reassign-role",
-                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grievance_ticket.id)},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(self.grievance_ticket.id),
+                },
             ),
             {
                 "household_id": str(self.household.id),
@@ -225,7 +227,10 @@ class TestRoleReassignMutationNewTicket:
         response = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-reassign-role",
-                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grievance_ticket.id)},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(self.grievance_ticket.id),
+                },
             ),
             {
                 "household_id": str(self.household.id),

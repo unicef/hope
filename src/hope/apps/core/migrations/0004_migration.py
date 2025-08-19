@@ -28,7 +28,10 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ("-created_at",),
                 "permissions": (
-                    ("download_last_valid_file", "Can download the last valid KOBO template"),
+                    (
+                        "download_last_valid_file",
+                        "Can download the last valid KOBO template",
+                    ),
                     ("rerun_kobo_import", "Can rerun a KOBO import"),
                 ),
             },

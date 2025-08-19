@@ -2,12 +2,11 @@ import json
 from datetime import datetime
 from typing import Any, Callable
 
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -19,10 +18,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
@@ -41,11 +37,17 @@ class TestGrievanceTicketList:
 
         self.list_url = reverse(
             "api:grievance:grievance-tickets-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         self.count_url = reverse(
             "api:grievance:grievance-tickets-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
 
         self.partner = PartnerFactory(name="TestPartner")
@@ -428,7 +430,9 @@ class TestGrievanceTicketList:
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
 
     def test_grievance_ticket_list_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -495,19 +499,37 @@ class TestGrievanceTicketList:
     @pytest.mark.parametrize(
         ("permissions", "area_limit", "expected_tickets"),
         [
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], False, [0, 1, 2, 6, 7, 8]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], False, [0, 1, 6, 7, 8]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER], False, [0, 2, 6, 7, 8]),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                False,
+                [0, 1, 2, 6, 7, 8],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR],
+                False,
+                [0, 1, 6, 7, 8],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER],
+                False,
+                [0, 2, 6, 7, 8],
+            ),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], False, [3, 4, 5]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR], False, [3, 5]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER], False, [3, 4]),
             (
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
                 False,
                 [0, 1, 2, 3, 4, 5, 6, 7, 8],
             ),
             (
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
                 True,
                 [0, 1, 4, 6, 7, 8],
             ),
@@ -613,7 +635,12 @@ class TestGrievanceTicketList:
             assert response.has_header("etag")
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 5
-            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
+            assert etag_fourth_call not in [
+                etag,
+                etag_second_call,
+                etag_third_call,
+                etag_changed_areas,
+            ]
             assert len(ctx.captured_queries) == 38
 
         # no change - use cache

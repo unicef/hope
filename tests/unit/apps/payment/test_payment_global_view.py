@@ -1,8 +1,7 @@
 from typing import Any, List
 
-from django.urls import reverse
-
 import pytest
+from django.urls import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
@@ -12,7 +11,6 @@ from rest_framework import status
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program
-
 
 pytestmark = pytest.mark.django_db
 
@@ -37,7 +35,10 @@ class TestPaymentGlobalViewSet:
             created_at="2022-02-24",
         )
         self.payment = PaymentFactory(
-            parent=self.pp, status=Payment.STATUS_SUCCESS, delivered_quantity=999, entitlement_quantity=112
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=999,
+            entitlement_quantity=112,
         )
 
         self.url_list_global = reverse(
@@ -56,7 +57,12 @@ class TestPaymentGlobalViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_global_list(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_global_list(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_list_global)
 
@@ -76,7 +82,10 @@ class TestPaymentGlobalViewSet:
         ],
     )
     def test_global_choices(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_choices_global)
@@ -91,7 +100,10 @@ class TestPaymentGlobalViewSet:
     def test_count_endpoint(self, create_user_role_with_permissions: Any) -> None:
         """Test the count action endpoint from CountActionMixin"""
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
 
         # Create additional payment
@@ -109,7 +121,10 @@ class TestPaymentGlobalViewSet:
     def test_ordering(self, create_user_role_with_permissions: Any) -> None:
         """Test ordering functionality from OrderingFilter"""
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
 
         # Create payments with different delivered quantities for ordering test
@@ -132,7 +147,10 @@ class TestPaymentGlobalViewSet:
     def test_excludes_pre_payment_statuses(self, create_user_role_with_permissions: Any) -> None:
         """Test that payments with pre-payment plan statuses are excluded"""
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
 
         # Create payment plan with TP_OPEN status (pre-payment status)
@@ -163,7 +181,10 @@ class TestPaymentGlobalViewSet:
 
         # User only has access to self.program_active
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
 
         response = self.client.get(self.url_list_global)
@@ -176,7 +197,10 @@ class TestPaymentGlobalViewSet:
     def test_multiple_payments(self, create_user_role_with_permissions: Any) -> None:
         """Test with multiple payments"""
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
 
         # Create multiple payments

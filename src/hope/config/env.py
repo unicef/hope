@@ -125,7 +125,10 @@ DEFAULTS = {
         str,
         None,
     ),
-    "EXCHANGE_RATES_API_URL": (str, "https://uniapis.unicef.org/biapi/v1/exchangerates"),
+    "EXCHANGE_RATES_API_URL": (
+        str,
+        "https://uniapis.unicef.org/biapi/v1/exchangerates",
+    ),
     "MATOMO_TRACKER_URL": (
         str,
         "https://unisitetracker.unicef.io/",

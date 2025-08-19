@@ -1,8 +1,9 @@
+from typing import TYPE_CHECKING
+
 from django_filters import BooleanFilter, CharFilter
 
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.program.models import Program
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet

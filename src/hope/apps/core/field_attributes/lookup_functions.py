@@ -41,7 +41,11 @@ def get_other_id_no(individual: Individual) -> str:
 
 
 def get_document_no(individual: Individual, document_type: str) -> str:
-    return getattr(individual.documents.filter(type__key=document_type.lower()).first(), "document_number", "")
+    return getattr(
+        individual.documents.filter(type__key=document_type.lower()).first(),
+        "document_number",
+        "",
+    )
 
 
 def get_birth_certificate_issuer(individual: Individual) -> str | None:

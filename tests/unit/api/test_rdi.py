@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict
 
 from django.core.management import call_command
-
 from extras.test_utils.factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
@@ -23,11 +22,7 @@ from hope.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hope.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 
@@ -82,7 +77,8 @@ class PushToRDITests(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         cls.fi = FinancialInstitution.objects.create(
             name="mbank", type=FinancialInstitution.FinancialInstitutionType.BANK

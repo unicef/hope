@@ -103,7 +103,11 @@ def total_cash_transferred_by_administrative_area_table_query(
         .distinct()
         .annotate(
             total_transferred_payments=Coalesce(
-                Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                Sum(
+                    "household__payment__delivered_quantity_usd",
+                    output_field=DecimalField(),
+                ),
+                Decimal(0.0),
             ),
         )
         .annotate(

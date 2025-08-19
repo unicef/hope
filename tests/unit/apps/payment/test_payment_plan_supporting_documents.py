@@ -5,7 +5,6 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedF
 from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
@@ -14,9 +13,7 @@ from rest_framework.test import APIClient, APIRequestFactory
 
 from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.api.serializers import (
-    PaymentPlanSupportingDocumentSerializer,
-)
+from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
 from hope.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 
 
@@ -109,7 +106,8 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         cls.client = APIClient()
         cls.user = UserFactory(username="Hope_USER", password="GoodJod")
         role, created = Role.objects.update_or_create(
-            name="TestName", defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]}
+            name="TestName",
+            defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]},
         )
         user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory(
@@ -174,7 +172,9 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
             status=PaymentPlan.Status.OPEN,
         )
         cls.document = PaymentPlanSupportingDocument.objects.create(
-            payment_plan=cls.payment_plan, title="Test Document333", file=SimpleUploadedFile("test.pdf", b"aaa")
+            payment_plan=cls.payment_plan,
+            title="Test Document333",
+            file=SimpleUploadedFile("test.pdf", b"aaa"),
         )
 
         cls.url = reverse(

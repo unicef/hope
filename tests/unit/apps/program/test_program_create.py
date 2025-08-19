@@ -131,7 +131,10 @@ class TestProgramCreate:
         ],
     )
     def test_create_program_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
 
@@ -151,7 +154,10 @@ class TestProgramCreate:
 
     def test_create_program_with_programme_code(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_program_code = {
             **self.valid_input_data_standard,
@@ -171,7 +177,10 @@ class TestProgramCreate:
 
     def test_create_program_with_programme_code_invalid(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_program_code = {
             **self.valid_input_data_standard,
@@ -188,7 +197,10 @@ class TestProgramCreate:
     def test_create_program_with_programme_code_existing(self, create_user_role_with_permissions: Any) -> None:
         ProgramFactory(programme_code="T3ST", business_area=self.afghanistan)
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_program_code = {
             **self.valid_input_data_standard,
@@ -201,7 +213,10 @@ class TestProgramCreate:
 
     def test_create_program_with_missing_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         missing_input_data = {
             **self.valid_input_data_standard,
@@ -217,7 +232,10 @@ class TestProgramCreate:
 
     def test_create_program_with_invalid_data_collecting_type(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         dct_invalid = DataCollectingTypeFactory(label="Invalid", code="invalid", type=DataCollectingType.Type.STANDARD)
         invalid_input_data = {
@@ -268,7 +286,10 @@ class TestProgramCreate:
 
     def test_create_program_with_invalid_beneficiary_group(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         invalid_input_data = {
             **self.valid_input_data_standard,
@@ -284,7 +305,10 @@ class TestProgramCreate:
 
     def test_create_program_with_invalid_dates(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         invalid_input_data = {
             **self.valid_input_data_standard,
@@ -298,7 +322,10 @@ class TestProgramCreate:
 
     def test_create_program_without_end_date(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         invalid_input_data = {
             **self.valid_input_data_standard,
@@ -319,7 +346,10 @@ class TestProgramCreate:
 
     def test_create_program_with_partners_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_partners_data = {
             **self.valid_input_data_standard,
@@ -384,7 +414,10 @@ class TestProgramCreate:
 
     def test_create_program_with_invalid_partners_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_partners_data = {
             **self.valid_input_data_standard,
@@ -406,7 +439,10 @@ class TestProgramCreate:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_partners_data = {
             **self.valid_input_data_standard,
@@ -430,7 +466,10 @@ class TestProgramCreate:
 
     def test_create_program_with_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_pdu_fields = {
             **self.valid_input_data_standard,
@@ -499,7 +538,10 @@ class TestProgramCreate:
 
     def test_create_program_with_invalid_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_invalid_pdu_fields = {
             **self.valid_input_data_standard,
@@ -535,7 +577,10 @@ class TestProgramCreate:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         input_data_with_invalid_pdu_fields = {
             **self.valid_input_data_standard,
@@ -567,7 +612,10 @@ class TestProgramCreate:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         # pdu data with field name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(

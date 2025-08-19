@@ -5,14 +5,13 @@ from pathlib import Path
 from typing import Any, Dict
 from unittest import mock
 
+import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
-
-import pytest
 from django_countries.fields import Country
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import IndividualFactory
@@ -543,7 +542,11 @@ class TestRdiKoboCreateTask(TestCase):
 
     def test_handle_household_dict(self) -> None:
         households_to_create = []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = {}, {}, {}
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = (
+            {},
+            {},
+            {},
+        )
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",
@@ -603,7 +606,11 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         households_to_create = []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = {}, {}, {}
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = (
+            {},
+            {},
+            {},
+        )
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",

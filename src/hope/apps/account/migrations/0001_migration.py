@@ -25,7 +25,10 @@ class Migration(migrations.Migration):
             name="User",
             fields=[
                 ("password", models.CharField(max_length=128, verbose_name="password")),
-                ("last_login", models.DateTimeField(blank=True, null=True, verbose_name="last login")),
+                (
+                    "last_login",
+                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
+                ),
                 (
                     "is_superuser",
                     models.BooleanField(
@@ -45,8 +48,14 @@ class Migration(migrations.Migration):
                         verbose_name="username",
                     ),
                 ),
-                ("first_name", models.CharField(blank=True, max_length=150, verbose_name="first name")),
-                ("last_name", models.CharField(blank=True, max_length=150, verbose_name="last name")),
+                (
+                    "first_name",
+                    models.CharField(blank=True, max_length=150, verbose_name="first name"),
+                ),
+                (
+                    "last_name",
+                    models.CharField(blank=True, max_length=150, verbose_name="last name"),
+                ),
                 (
                     "is_staff",
                     models.BooleanField(
@@ -63,32 +72,62 @@ class Migration(migrations.Migration):
                         verbose_name="active",
                     ),
                 ),
-                ("date_joined", models.DateTimeField(default=django.utils.timezone.now, verbose_name="date joined")),
+                (
+                    "date_joined",
+                    models.DateTimeField(default=django.utils.timezone.now, verbose_name="date joined"),
+                ),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "status",
                     models.CharField(
-                        choices=[("ACTIVE", "Active"), ("INACTIVE", "Inactive"), ("INVITED", "Invited")],
+                        choices=[
+                            ("ACTIVE", "Active"),
+                            ("INACTIVE", "Inactive"),
+                            ("INVITED", "Invited"),
+                        ],
                         default="INVITED",
                         max_length=10,
                     ),
                 ),
-                ("email", models.EmailField(max_length=254, unique=True, verbose_name="email address")),
+                (
+                    "email",
+                    models.EmailField(max_length=254, unique=True, verbose_name="email address"),
+                ),
                 (
                     "available_for_export",
-                    models.BooleanField(default=True, help_text="Indicating if a User can be exported to CashAssist"),
+                    models.BooleanField(
+                        default=True,
+                        help_text="Indicating if a User can be exported to CashAssist",
+                    ),
                 ),
                 ("custom_fields", models.JSONField(blank=True, default=dict)),
                 ("job_title", models.CharField(blank=True, max_length=255)),
-                ("ad_uuid", models.CharField(blank=True, editable=False, max_length=64, null=True, unique=True)),
+                (
+                    "ad_uuid",
+                    models.CharField(
+                        blank=True,
+                        editable=False,
+                        max_length=64,
+                        null=True,
+                        unique=True,
+                    ),
+                ),
                 ("last_modify_date", models.DateTimeField(auto_now=True, null=True)),
                 (
                     "last_doap_sync",
                     models.DateTimeField(
-                        blank=True, default=None, help_text="Timestamp of last sync with CA", null=True
+                        blank=True,
+                        default=None,
+                        help_text="Timestamp of last sync with CA",
+                        null=True,
                     ),
                 ),
                 (
@@ -112,7 +151,10 @@ class Migration(migrations.Migration):
                     ("quick_links", "Can see quick links in admin"),
                     ("restrict_help_desk", "Limit fields to be editable for help desk"),
                     ("can_reindex_programs", "Can reindex programs"),
-                    ("can_add_business_area_to_partner", "Can add business area to partner"),
+                    (
+                        "can_add_business_area_to_partner",
+                        "Can add business area to partner",
+                    ),
                 ),
             },
             managers=[
@@ -124,7 +166,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -137,8 +184,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Partner",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", django.contrib.postgres.fields.citext.CICharField(max_length=100, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    django.contrib.postgres.fields.citext.CICharField(max_length=100, unique=True),
+                ),
                 ("is_un", models.BooleanField(default=False, verbose_name="U.N.")),
                 ("lft", models.PositiveIntegerField(editable=False)),
                 ("rght", models.PositiveIntegerField(editable=False)),
@@ -157,7 +215,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -187,7 +250,12 @@ class Migration(migrations.Migration):
                 (
                     "subsystem",
                     models.CharField(
-                        choices=[("HOPE", "HOPE"), ("KOBO", "Kobo"), ("CA", "CashAssist"), ("API", "API")],
+                        choices=[
+                            ("HOPE", "HOPE"),
+                            ("KOBO", "Kobo"),
+                            ("CA", "CashAssist"),
+                            ("API", "API"),
+                        ],
                         default="HOPE",
                         max_length=30,
                     ),
@@ -203,17 +271,38 @@ class Migration(migrations.Migration):
                                 ("RDI_RERUN_DEDUPE", "RDI RERUN DEDUPE"),
                                 ("RDI_MERGE_IMPORT", "RDI MERGE IMPORT"),
                                 ("RDI_REFUSE_IMPORT", "RDI REFUSE IMPORT"),
-                                ("POPULATION_VIEW_HOUSEHOLDS_LIST", "POPULATION VIEW HOUSEHOLDS LIST"),
-                                ("POPULATION_VIEW_HOUSEHOLDS_DETAILS", "POPULATION VIEW HOUSEHOLDS DETAILS"),
-                                ("POPULATION_VIEW_INDIVIDUALS_LIST", "POPULATION VIEW INDIVIDUALS LIST"),
-                                ("POPULATION_VIEW_INDIVIDUALS_DETAILS", "POPULATION VIEW INDIVIDUALS DETAILS"),
+                                (
+                                    "POPULATION_VIEW_HOUSEHOLDS_LIST",
+                                    "POPULATION VIEW HOUSEHOLDS LIST",
+                                ),
+                                (
+                                    "POPULATION_VIEW_HOUSEHOLDS_DETAILS",
+                                    "POPULATION VIEW HOUSEHOLDS DETAILS",
+                                ),
+                                (
+                                    "POPULATION_VIEW_INDIVIDUALS_LIST",
+                                    "POPULATION VIEW INDIVIDUALS LIST",
+                                ),
+                                (
+                                    "POPULATION_VIEW_INDIVIDUALS_DETAILS",
+                                    "POPULATION VIEW INDIVIDUALS DETAILS",
+                                ),
                                 (
                                     "POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION",
                                     "POPULATION VIEW INDIVIDUAL DELIVERY MECHANISMS SECTION",
                                 ),
-                                ("PROGRAMME_VIEW_LIST_AND_DETAILS", "PROGRAMME VIEW LIST AND DETAILS"),
-                                ("PROGRAMME_MANAGEMENT_VIEW", "PROGRAMME MANAGEMENT VIEW"),
-                                ("PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS", "PROGRAMME VIEW PAYMENT RECORD DETAILS"),
+                                (
+                                    "PROGRAMME_VIEW_LIST_AND_DETAILS",
+                                    "PROGRAMME VIEW LIST AND DETAILS",
+                                ),
+                                (
+                                    "PROGRAMME_MANAGEMENT_VIEW",
+                                    "PROGRAMME MANAGEMENT VIEW",
+                                ),
+                                (
+                                    "PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS",
+                                    "PROGRAMME VIEW PAYMENT RECORD DETAILS",
+                                ),
                                 ("PROGRAMME_CREATE", "PROGRAMME CREATE"),
                                 ("PROGRAMME_UPDATE", "PROGRAMME UPDATE"),
                                 ("PROGRAMME_REMOVE", "PROGRAMME REMOVE"),
@@ -229,29 +318,77 @@ class Migration(migrations.Migration):
                                 ("TARGETING_LOCK", "TARGETING LOCK"),
                                 ("TARGETING_UNLOCK", "TARGETING UNLOCK"),
                                 ("TARGETING_SEND", "TARGETING SEND"),
-                                ("PAYMENT_VIEW_LIST_MANAGERIAL", "PAYMENT VIEW LIST MANAGERIAL"),
-                                ("PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED", "PAYMENT VIEW LIST MANAGERIAL RELEASED"),
-                                ("PAYMENT_VERIFICATION_VIEW_LIST", "PAYMENT VERIFICATION VIEW LIST"),
-                                ("PAYMENT_VERIFICATION_VIEW_DETAILS", "PAYMENT VERIFICATION VIEW DETAILS"),
-                                ("PAYMENT_VERIFICATION_CREATE", "PAYMENT VERIFICATION CREATE"),
-                                ("PAYMENT_VERIFICATION_UPDATE", "PAYMENT VERIFICATION UPDATE"),
-                                ("PAYMENT_VERIFICATION_ACTIVATE", "PAYMENT VERIFICATION ACTIVATE"),
-                                ("PAYMENT_VERIFICATION_DISCARD", "PAYMENT VERIFICATION DISCARD"),
-                                ("PAYMENT_VERIFICATION_FINISH", "PAYMENT VERIFICATION FINISH"),
-                                ("PAYMENT_VERIFICATION_EXPORT", "PAYMENT VERIFICATION EXPORT"),
-                                ("PAYMENT_VERIFICATION_IMPORT", "PAYMENT VERIFICATION IMPORT"),
-                                ("PAYMENT_VERIFICATION_VERIFY", "PAYMENT VERIFICATION VERIFY"),
+                                (
+                                    "PAYMENT_VIEW_LIST_MANAGERIAL",
+                                    "PAYMENT VIEW LIST MANAGERIAL",
+                                ),
+                                (
+                                    "PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED",
+                                    "PAYMENT VIEW LIST MANAGERIAL RELEASED",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_VIEW_LIST",
+                                    "PAYMENT VERIFICATION VIEW LIST",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_VIEW_DETAILS",
+                                    "PAYMENT VERIFICATION VIEW DETAILS",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_CREATE",
+                                    "PAYMENT VERIFICATION CREATE",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_UPDATE",
+                                    "PAYMENT VERIFICATION UPDATE",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_ACTIVATE",
+                                    "PAYMENT VERIFICATION ACTIVATE",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_DISCARD",
+                                    "PAYMENT VERIFICATION DISCARD",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_FINISH",
+                                    "PAYMENT VERIFICATION FINISH",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_EXPORT",
+                                    "PAYMENT VERIFICATION EXPORT",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_IMPORT",
+                                    "PAYMENT VERIFICATION IMPORT",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_VERIFY",
+                                    "PAYMENT VERIFICATION VERIFY",
+                                ),
                                 (
                                     "PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS",
                                     "PAYMENT VERIFICATION VIEW PAYMENT RECORD DETAILS",
                                 ),
-                                ("PAYMENT_VERIFICATION_DELETE", "PAYMENT VERIFICATION DELETE"),
-                                ("PAYMENT_VERIFICATION_INVALID", "PAYMENT VERIFICATION INVALID"),
-                                ("PAYMENT_VERIFICATION_MARK_AS_FAILED", "PAYMENT VERIFICATION MARK AS FAILED"),
+                                (
+                                    "PAYMENT_VERIFICATION_DELETE",
+                                    "PAYMENT VERIFICATION DELETE",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_INVALID",
+                                    "PAYMENT VERIFICATION INVALID",
+                                ),
+                                (
+                                    "PAYMENT_VERIFICATION_MARK_AS_FAILED",
+                                    "PAYMENT VERIFICATION MARK AS FAILED",
+                                ),
                                 ("PM_VIEW_LIST", "PM VIEW LIST"),
                                 ("PM_CREATE", "PM CREATE"),
                                 ("PM_VIEW_DETAILS", "PM VIEW DETAILS"),
-                                ("PM_IMPORT_XLSX_WITH_ENTITLEMENTS", "PM IMPORT XLSX WITH ENTITLEMENTS"),
+                                (
+                                    "PM_IMPORT_XLSX_WITH_ENTITLEMENTS",
+                                    "PM IMPORT XLSX WITH ENTITLEMENTS",
+                                ),
                                 (
                                     "PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS",
                                     "PM APPLY RULE ENGINE FORMULA WITH ENTITLEMENTS",
@@ -264,29 +401,77 @@ class Migration(migrations.Migration):
                                     "PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP",
                                     "PM EXCLUDE BENEFICIARIES FROM FOLLOW UP PP",
                                 ),
-                                ("PM_ACCEPTANCE_PROCESS_APPROVE", "PM ACCEPTANCE PROCESS APPROVE"),
-                                ("PM_ACCEPTANCE_PROCESS_AUTHORIZE", "PM ACCEPTANCE PROCESS AUTHORIZE"),
-                                ("PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW", "PM ACCEPTANCE PROCESS FINANCIAL REVIEW"),
-                                ("PM_IMPORT_XLSX_WITH_RECONCILIATION", "PM IMPORT XLSX WITH RECONCILIATION"),
+                                (
+                                    "PM_ACCEPTANCE_PROCESS_APPROVE",
+                                    "PM ACCEPTANCE PROCESS APPROVE",
+                                ),
+                                (
+                                    "PM_ACCEPTANCE_PROCESS_AUTHORIZE",
+                                    "PM ACCEPTANCE PROCESS AUTHORIZE",
+                                ),
+                                (
+                                    "PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW",
+                                    "PM ACCEPTANCE PROCESS FINANCIAL REVIEW",
+                                ),
+                                (
+                                    "PM_IMPORT_XLSX_WITH_RECONCILIATION",
+                                    "PM IMPORT XLSX WITH RECONCILIATION",
+                                ),
                                 ("PM_EXPORT_XLSX_FOR_FSP", "PM EXPORT XLSX FOR FSP"),
-                                ("PM_DOWNLOAD_XLSX_FOR_FSP", "PM DOWNLOAD XLSX FOR FSP"),
-                                ("PM_MARK_PAYMENT_AS_FAILED", "PM MARK PAYMENT AS FAILED"),
+                                (
+                                    "PM_DOWNLOAD_XLSX_FOR_FSP",
+                                    "PM DOWNLOAD XLSX FOR FSP",
+                                ),
+                                (
+                                    "PM_MARK_PAYMENT_AS_FAILED",
+                                    "PM MARK PAYMENT AS FAILED",
+                                ),
                                 ("PM_EXPORT_PDF_SUMMARY", "PM EXPORT PDF SUMMARY"),
-                                ("PM_SEND_TO_PAYMENT_GATEWAY", "PM SEND TO PAYMENT GATEWAY"),
+                                (
+                                    "PM_SEND_TO_PAYMENT_GATEWAY",
+                                    "PM SEND TO PAYMENT GATEWAY",
+                                ),
                                 ("PM_VIEW_FSP_AUTH_CODE", "PM VIEW FSP AUTH CODE"),
-                                ("PM_DOWNLOAD_SUPPORTING_DOCUMENT", "PM DOWNLOAD SUPPORTING DOCUMENT"),
-                                ("PM_UPLOAD_SUPPORTING_DOCUMENT", "PM UPLOAD SUPPORTING DOCUMENT"),
-                                ("PM_DELETE_SUPPORTING_DOCUMENT", "PM DELETE SUPPORTING DOCUMENT"),
+                                (
+                                    "PM_DOWNLOAD_SUPPORTING_DOCUMENT",
+                                    "PM DOWNLOAD SUPPORTING DOCUMENT",
+                                ),
+                                (
+                                    "PM_UPLOAD_SUPPORTING_DOCUMENT",
+                                    "PM UPLOAD SUPPORTING DOCUMENT",
+                                ),
+                                (
+                                    "PM_DELETE_SUPPORTING_DOCUMENT",
+                                    "PM DELETE SUPPORTING DOCUMENT",
+                                ),
                                 (
                                     "PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE",
                                     "PM ADMIN FINANCIAL SERVICE PROVIDER UPDATE",
                                 ),
-                                ("PM_PROGRAMME_CYCLE_VIEW_LIST", "PM PROGRAMME CYCLE VIEW LIST"),
-                                ("PM_PROGRAMME_CYCLE_VIEW_DETAILS", "PM PROGRAMME CYCLE VIEW DETAILS"),
-                                ("PM_PROGRAMME_CYCLE_CREATE", "PM PROGRAMME CYCLE CREATE"),
-                                ("PM_PROGRAMME_CYCLE_UPDATE", "PM PROGRAMME CYCLE UPDATE"),
-                                ("PM_PROGRAMME_CYCLE_DELETE", "PM PROGRAMME CYCLE DELETE"),
-                                ("USER_MANAGEMENT_VIEW_LIST", "USER MANAGEMENT VIEW LIST"),
+                                (
+                                    "PM_PROGRAMME_CYCLE_VIEW_LIST",
+                                    "PM PROGRAMME CYCLE VIEW LIST",
+                                ),
+                                (
+                                    "PM_PROGRAMME_CYCLE_VIEW_DETAILS",
+                                    "PM PROGRAMME CYCLE VIEW DETAILS",
+                                ),
+                                (
+                                    "PM_PROGRAMME_CYCLE_CREATE",
+                                    "PM PROGRAMME CYCLE CREATE",
+                                ),
+                                (
+                                    "PM_PROGRAMME_CYCLE_UPDATE",
+                                    "PM PROGRAMME CYCLE UPDATE",
+                                ),
+                                (
+                                    "PM_PROGRAMME_CYCLE_DELETE",
+                                    "PM PROGRAMME CYCLE DELETE",
+                                ),
+                                (
+                                    "USER_MANAGEMENT_VIEW_LIST",
+                                    "USER MANAGEMENT VIEW LIST",
+                                ),
                                 ("DASHBOARD_VIEW_COUNTRY", "DASHBOARD VIEW COUNTRY"),
                                 ("DASHBOARD_EXPORT", "DASHBOARD EXPORT"),
                                 (
@@ -301,12 +486,18 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER",
                                     "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS OWNER",
                                 ),
-                                ("GRIEVANCES_VIEW_LIST_SENSITIVE", "GRIEVANCES VIEW LIST SENSITIVE"),
+                                (
+                                    "GRIEVANCES_VIEW_LIST_SENSITIVE",
+                                    "GRIEVANCES VIEW LIST SENSITIVE",
+                                ),
                                 (
                                     "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR",
                                     "GRIEVANCES VIEW LIST SENSITIVE AS CREATOR",
                                 ),
-                                ("GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER", "GRIEVANCES VIEW LIST SENSITIVE AS OWNER"),
+                                (
+                                    "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER",
+                                    "GRIEVANCES VIEW LIST SENSITIVE AS OWNER",
+                                ),
                                 (
                                     "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE",
                                     "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE",
@@ -319,7 +510,10 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER",
                                     "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS OWNER",
                                 ),
-                                ("GRIEVANCES_VIEW_DETAILS_SENSITIVE", "GRIEVANCES VIEW DETAILS SENSITIVE"),
+                                (
+                                    "GRIEVANCES_VIEW_DETAILS_SENSITIVE",
+                                    "GRIEVANCES VIEW DETAILS SENSITIVE",
+                                ),
                                 (
                                     "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR",
                                     "GRIEVANCES VIEW DETAILS SENSITIVE AS CREATOR",
@@ -328,7 +522,10 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER",
                                     "GRIEVANCES VIEW DETAILS SENSITIVE AS OWNER",
                                 ),
-                                ("GRIEVANCES_VIEW_HOUSEHOLD_DETAILS", "GRIEVANCES VIEW HOUSEHOLD DETAILS"),
+                                (
+                                    "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS",
+                                    "GRIEVANCES VIEW HOUSEHOLD DETAILS",
+                                ),
                                 (
                                     "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR",
                                     "GRIEVANCES VIEW HOUSEHOLD DETAILS AS CREATOR",
@@ -337,7 +534,10 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER",
                                     "GRIEVANCES VIEW HOUSEHOLD DETAILS AS OWNER",
                                 ),
-                                ("GRIEVANCES_VIEW_INDIVIDUALS_DETAILS", "GRIEVANCES VIEW INDIVIDUALS DETAILS"),
+                                (
+                                    "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS",
+                                    "GRIEVANCES VIEW INDIVIDUALS DETAILS",
+                                ),
                                 (
                                     "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR",
                                     "GRIEVANCES VIEW INDIVIDUALS DETAILS AS CREATOR",
@@ -348,9 +548,18 @@ class Migration(migrations.Migration):
                                 ),
                                 ("GRIEVANCES_CREATE", "GRIEVANCES CREATE"),
                                 ("GRIEVANCES_UPDATE", "GRIEVANCES UPDATE"),
-                                ("GRIEVANCES_UPDATE_AS_CREATOR", "GRIEVANCES UPDATE AS CREATOR"),
-                                ("GRIEVANCES_UPDATE_AS_OWNER", "GRIEVANCES UPDATE AS OWNER"),
-                                ("GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE", "GRIEVANCES UPDATE REQUESTED DATA CHANGE"),
+                                (
+                                    "GRIEVANCES_UPDATE_AS_CREATOR",
+                                    "GRIEVANCES UPDATE AS CREATOR",
+                                ),
+                                (
+                                    "GRIEVANCES_UPDATE_AS_OWNER",
+                                    "GRIEVANCES UPDATE AS OWNER",
+                                ),
+                                (
+                                    "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE",
+                                    "GRIEVANCES UPDATE REQUESTED DATA CHANGE",
+                                ),
                                 (
                                     "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR",
                                     "GRIEVANCES UPDATE REQUESTED DATA CHANGE AS CREATOR",
@@ -360,26 +569,68 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES UPDATE REQUESTED DATA CHANGE AS OWNER",
                                 ),
                                 ("GRIEVANCES_ADD_NOTE", "GRIEVANCES ADD NOTE"),
-                                ("GRIEVANCES_ADD_NOTE_AS_CREATOR", "GRIEVANCES ADD NOTE AS CREATOR"),
-                                ("GRIEVANCES_ADD_NOTE_AS_OWNER", "GRIEVANCES ADD NOTE AS OWNER"),
-                                ("GRIEVANCES_SET_IN_PROGRESS", "GRIEVANCES SET IN PROGRESS"),
-                                ("GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR", "GRIEVANCES SET IN PROGRESS AS CREATOR"),
-                                ("GRIEVANCES_SET_IN_PROGRESS_AS_OWNER", "GRIEVANCES SET IN PROGRESS AS OWNER"),
+                                (
+                                    "GRIEVANCES_ADD_NOTE_AS_CREATOR",
+                                    "GRIEVANCES ADD NOTE AS CREATOR",
+                                ),
+                                (
+                                    "GRIEVANCES_ADD_NOTE_AS_OWNER",
+                                    "GRIEVANCES ADD NOTE AS OWNER",
+                                ),
+                                (
+                                    "GRIEVANCES_SET_IN_PROGRESS",
+                                    "GRIEVANCES SET IN PROGRESS",
+                                ),
+                                (
+                                    "GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR",
+                                    "GRIEVANCES SET IN PROGRESS AS CREATOR",
+                                ),
+                                (
+                                    "GRIEVANCES_SET_IN_PROGRESS_AS_OWNER",
+                                    "GRIEVANCES SET IN PROGRESS AS OWNER",
+                                ),
                                 ("GRIEVANCES_SET_ON_HOLD", "GRIEVANCES SET ON HOLD"),
-                                ("GRIEVANCES_SET_ON_HOLD_AS_CREATOR", "GRIEVANCES SET ON HOLD AS CREATOR"),
-                                ("GRIEVANCES_SET_ON_HOLD_AS_OWNER", "GRIEVANCES SET ON HOLD AS OWNER"),
-                                ("GRIEVANCES_SEND_FOR_APPROVAL", "GRIEVANCES SEND FOR APPROVAL"),
-                                ("GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR", "GRIEVANCES SEND FOR APPROVAL AS CREATOR"),
-                                ("GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER", "GRIEVANCES SEND FOR APPROVAL AS OWNER"),
+                                (
+                                    "GRIEVANCES_SET_ON_HOLD_AS_CREATOR",
+                                    "GRIEVANCES SET ON HOLD AS CREATOR",
+                                ),
+                                (
+                                    "GRIEVANCES_SET_ON_HOLD_AS_OWNER",
+                                    "GRIEVANCES SET ON HOLD AS OWNER",
+                                ),
+                                (
+                                    "GRIEVANCES_SEND_FOR_APPROVAL",
+                                    "GRIEVANCES SEND FOR APPROVAL",
+                                ),
+                                (
+                                    "GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR",
+                                    "GRIEVANCES SEND FOR APPROVAL AS CREATOR",
+                                ),
+                                (
+                                    "GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER",
+                                    "GRIEVANCES SEND FOR APPROVAL AS OWNER",
+                                ),
                                 ("GRIEVANCES_SEND_BACK", "GRIEVANCES SEND BACK"),
-                                ("GRIEVANCES_SEND_BACK_AS_CREATOR", "GRIEVANCES SEND BACK AS CREATOR"),
-                                ("GRIEVANCES_SEND_BACK_AS_OWNER", "GRIEVANCES SEND BACK AS OWNER"),
-                                ("GRIEVANCES_APPROVE_DATA_CHANGE", "GRIEVANCES APPROVE DATA CHANGE"),
+                                (
+                                    "GRIEVANCES_SEND_BACK_AS_CREATOR",
+                                    "GRIEVANCES SEND BACK AS CREATOR",
+                                ),
+                                (
+                                    "GRIEVANCES_SEND_BACK_AS_OWNER",
+                                    "GRIEVANCES SEND BACK AS OWNER",
+                                ),
+                                (
+                                    "GRIEVANCES_APPROVE_DATA_CHANGE",
+                                    "GRIEVANCES APPROVE DATA CHANGE",
+                                ),
                                 (
                                     "GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR",
                                     "GRIEVANCES APPROVE DATA CHANGE AS CREATOR",
                                 ),
-                                ("GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER", "GRIEVANCES APPROVE DATA CHANGE AS OWNER"),
+                                (
+                                    "GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER",
+                                    "GRIEVANCES APPROVE DATA CHANGE AS OWNER",
+                                ),
                                 (
                                     "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK",
                                     "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK",
@@ -392,7 +643,10 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER",
                                     "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS OWNER",
                                 ),
-                                ("GRIEVANCES_CLOSE_TICKET_FEEDBACK", "GRIEVANCES CLOSE TICKET FEEDBACK"),
+                                (
+                                    "GRIEVANCES_CLOSE_TICKET_FEEDBACK",
+                                    "GRIEVANCES CLOSE TICKET FEEDBACK",
+                                ),
                                 (
                                     "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR",
                                     "GRIEVANCES CLOSE TICKET FEEDBACK AS CREATOR",
@@ -401,7 +655,10 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER",
                                     "GRIEVANCES CLOSE TICKET FEEDBACK AS OWNER",
                                 ),
-                                ("GRIEVANCES_APPROVE_FLAG_AND_DEDUPE", "GRIEVANCES APPROVE FLAG AND DEDUPE"),
+                                (
+                                    "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE",
+                                    "GRIEVANCES APPROVE FLAG AND DEDUPE",
+                                ),
                                 (
                                     "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR",
                                     "GRIEVANCES APPROVE FLAG AND DEDUPE AS CREATOR",
@@ -410,7 +667,10 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER",
                                     "GRIEVANCES APPROVE FLAG AND DEDUPE AS OWNER",
                                 ),
-                                ("GRIEVANCES_APPROVE_PAYMENT_VERIFICATION", "GRIEVANCES APPROVE PAYMENT VERIFICATION"),
+                                (
+                                    "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION",
+                                    "GRIEVANCES APPROVE PAYMENT VERIFICATION",
+                                ),
                                 (
                                     "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR",
                                     "GRIEVANCES APPROVE PAYMENT VERIFICATION AS CREATOR",
@@ -420,20 +680,50 @@ class Migration(migrations.Migration):
                                     "GRIEVANCES APPROVE PAYMENT VERIFICATION AS OWNER",
                                 ),
                                 ("GRIEVANCE_ASSIGN", "GRIEVANCE ASSIGN"),
-                                ("GRIEVANCE_DOCUMENTS_UPLOAD", "GRIEVANCE DOCUMENTS UPLOAD"),
-                                ("GRIEVANCES_CROSS_AREA_FILTER", "GRIEVANCES CROSS AREA FILTER"),
-                                ("GRIEVANCES_VIEW_BIOMETRIC_RESULTS", "GRIEVANCES VIEW BIOMETRIC RESULTS"),
-                                ("GRIEVANCES_FEEDBACK_VIEW_CREATE", "GRIEVANCES FEEDBACK VIEW CREATE"),
-                                ("GRIEVANCES_FEEDBACK_VIEW_LIST", "GRIEVANCES FEEDBACK VIEW LIST"),
-                                ("GRIEVANCES_FEEDBACK_VIEW_DETAILS", "GRIEVANCES FEEDBACK VIEW DETAILS"),
-                                ("GRIEVANCES_FEEDBACK_VIEW_UPDATE", "GRIEVANCES FEEDBACK VIEW UPDATE"),
-                                ("GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE", "GRIEVANCES FEEDBACK MESSAGE VIEW CREATE"),
+                                (
+                                    "GRIEVANCE_DOCUMENTS_UPLOAD",
+                                    "GRIEVANCE DOCUMENTS UPLOAD",
+                                ),
+                                (
+                                    "GRIEVANCES_CROSS_AREA_FILTER",
+                                    "GRIEVANCES CROSS AREA FILTER",
+                                ),
+                                (
+                                    "GRIEVANCES_VIEW_BIOMETRIC_RESULTS",
+                                    "GRIEVANCES VIEW BIOMETRIC RESULTS",
+                                ),
+                                (
+                                    "GRIEVANCES_FEEDBACK_VIEW_CREATE",
+                                    "GRIEVANCES FEEDBACK VIEW CREATE",
+                                ),
+                                (
+                                    "GRIEVANCES_FEEDBACK_VIEW_LIST",
+                                    "GRIEVANCES FEEDBACK VIEW LIST",
+                                ),
+                                (
+                                    "GRIEVANCES_FEEDBACK_VIEW_DETAILS",
+                                    "GRIEVANCES FEEDBACK VIEW DETAILS",
+                                ),
+                                (
+                                    "GRIEVANCES_FEEDBACK_VIEW_UPDATE",
+                                    "GRIEVANCES FEEDBACK VIEW UPDATE",
+                                ),
+                                (
+                                    "GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE",
+                                    "GRIEVANCES FEEDBACK MESSAGE VIEW CREATE",
+                                ),
                                 ("REPORTING_EXPORT", "REPORTING EXPORT"),
-                                ("PDU_VIEW_LIST_AND_DETAILS", "PDU VIEW LIST AND DETAILS"),
+                                (
+                                    "PDU_VIEW_LIST_AND_DETAILS",
+                                    "PDU VIEW LIST AND DETAILS",
+                                ),
                                 ("PDU_TEMPLATE_CREATE", "PDU TEMPLATE CREATE"),
                                 ("PDU_TEMPLATE_DOWNLOAD", "PDU TEMPLATE DOWNLOAD"),
                                 ("PDU_UPLOAD", "PDU UPLOAD"),
-                                ("ALL_VIEW_PII_DATA_ON_LISTS", "ALL VIEW PII DATA ON LISTS"),
+                                (
+                                    "ALL_VIEW_PII_DATA_ON_LISTS",
+                                    "ALL VIEW PII DATA ON LISTS",
+                                ),
                                 ("ACTIVITY_LOG_VIEW", "ACTIVITY LOG VIEW"),
                                 ("ACTIVITY_LOG_DOWNLOAD", "ACTIVITY LOG DOWNLOAD"),
                                 ("UPLOAD_STORAGE_FILE", "UPLOAD STORAGE FILE"),
@@ -454,11 +744,23 @@ class Migration(migrations.Migration):
                                     "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR",
                                     "ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS AS CREATOR",
                                 ),
-                                ("ACCOUNTABILITY_SURVEY_VIEW_CREATE", "ACCOUNTABILITY SURVEY VIEW CREATE"),
-                                ("ACCOUNTABILITY_SURVEY_VIEW_LIST", "ACCOUNTABILITY SURVEY VIEW LIST"),
-                                ("ACCOUNTABILITY_SURVEY_VIEW_DETAILS", "ACCOUNTABILITY SURVEY VIEW DETAILS"),
+                                (
+                                    "ACCOUNTABILITY_SURVEY_VIEW_CREATE",
+                                    "ACCOUNTABILITY SURVEY VIEW CREATE",
+                                ),
+                                (
+                                    "ACCOUNTABILITY_SURVEY_VIEW_LIST",
+                                    "ACCOUNTABILITY SURVEY VIEW LIST",
+                                ),
+                                (
+                                    "ACCOUNTABILITY_SURVEY_VIEW_DETAILS",
+                                    "ACCOUNTABILITY SURVEY VIEW DETAILS",
+                                ),
                                 ("GEO_VIEW_LIST", "GEO VIEW LIST"),
-                                ("CAN_ADD_BUSINESS_AREA_TO_PARTNER", "CAN ADD BUSINESS AREA TO PARTNER"),
+                                (
+                                    "CAN_ADD_BUSINESS_AREA_TO_PARTNER",
+                                    "CAN ADD BUSINESS AREA TO PARTNER",
+                                ),
                             ],
                             max_length=255,
                         ),
@@ -475,7 +777,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="UserGroup",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
@@ -483,14 +793,21 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "expiry_date",
                     models.DateField(
-                        blank=True, help_text="After expiry date this User Role will be inactive.", null=True
+                        blank=True,
+                        help_text="After expiry date this User Role will be inactive.",
+                        null=True,
                     ),
                 ),
             ],

@@ -4,7 +4,6 @@ from typing import Any, Callable
 from uuid import UUID
 
 from django.core.paginator import Paginator
-
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.geo.models import Country
@@ -112,7 +111,10 @@ def get_household_snapshot(household: Household, payment: Payment | None = None)
             ]
     for role in household.individuals_and_roles.all():
         household_data["roles"].append(
-            {"role": role.role, "individual": get_individual_snapshot(role.individual, payment)}
+            {
+                "role": role.role,
+                "individual": get_individual_snapshot(role.individual, payment),
+            }
         )
     return household_data
 
@@ -143,7 +145,9 @@ def get_individual_snapshot(individual: Individual, payment: Payment | None = No
         individual_data["documents"].append(document_data)
 
     is_hh_collector = IndividualRoleInHousehold.objects.filter(
-        role__in=[ROLE_PRIMARY, ROLE_ALTERNATE], household=individual.household, individual=individual
+        role__in=[ROLE_PRIMARY, ROLE_ALTERNATE],
+        household=individual.household,
+        individual=individual,
     ).exists()
 
     if is_hh_collector and payment and payment.delivery_type:

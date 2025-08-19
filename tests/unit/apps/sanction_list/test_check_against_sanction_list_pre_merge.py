@@ -1,11 +1,10 @@
-from typing import Any, TYPE_CHECKING
-
-from django.conf import settings
-from django.core.management import call_command
-from django.test import TestCase
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from constance.test import override_config
+from django.conf import settings
+from django.core.management import call_command
+from django.test import TestCase
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -19,10 +18,7 @@ from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    Individual,
-)
+from hope.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID, Individual
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,

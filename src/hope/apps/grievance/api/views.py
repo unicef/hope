@@ -1,14 +1,24 @@
-from typing import Any, TYPE_CHECKING
 import itertools
+from typing import TYPE_CHECKING, Any
 
+from constance import config
 from django.db import transaction
-from django.db.models import Avg, Case, CharField, Count, DateField, F, Q, QuerySet, Value, When
+from django.db.models import (
+    Avg,
+    Case,
+    CharField,
+    Count,
+    DateField,
+    F,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.db.models.functions import Extract
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_str
-
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -46,10 +56,7 @@ from hope.apps.core.api.serializers import FieldAttributeSerializer
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.models import FlexibleAttribute
-from hope.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    sort_by_attr,
-)
+from hope.apps.core.utils import check_concurrency_version_in_mutation, sort_by_attr
 from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
     GrievanceMutationMixin,
@@ -84,15 +91,11 @@ from hope.apps.grievance.models import (
 )
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
-from hope.apps.grievance.services.data_change_services import (
-    update_data_change_extras,
-)
+from hope.apps.grievance.services.data_change_services import update_data_change_extras
 from hope.apps.grievance.services.payment_verification_services import (
     update_ticket_payment_verification_service,
 )
-from hope.apps.grievance.services.referral_services import (
-    update_referral_service,
-)
+from hope.apps.grievance.services.referral_services import update_referral_service
 from hope.apps.grievance.services.ticket_based_on_payment_record_services import (
     update_ticket_based_on_payment_record_service,
 )
@@ -230,7 +233,8 @@ class GrievanceDashboardMixin:
             base_queryset.select_related("admin2")
             .values_list("admin2__name", "category")
             .annotate(
-                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
+                count=Count("category"),
             )
             .order_by("admin2__name", "-count")
         )
@@ -619,7 +623,10 @@ class GrievanceTicketGlobalViewSet(
         return Response(resp.data, status.HTTP_200_OK)
 
     @transaction.atomic
-    @extend_schema(request=GrievanceStatusChangeSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @extend_schema(
+        request=GrievanceStatusChangeSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="status-change")
     def status_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         grievance_ticket = self.get_object()
@@ -639,7 +646,10 @@ class GrievanceTicketGlobalViewSet(
             raise ValidationError("Feedback tickets are not allowed to be created through this mutation.")
 
         if grievance_ticket.status == new_status:
-            return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                GrievanceTicketDetailSerializer(grievance_ticket).data,
+                status=status.HTTP_202_ACCEPTED,
+            )
         if permissions_to_use := self.get_permissions_for_status_change(
             new_status, grievance_ticket.status, grievance_ticket.is_feedback
         ):
@@ -673,7 +683,8 @@ class GrievanceTicketGlobalViewSet(
 
             for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
                 if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                    area_id=selected_individual.household.admin2.id,
+                    program_id=selected_individual.program.id,
                 ):
                     raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
@@ -752,7 +763,8 @@ class GrievanceTicketGlobalViewSet(
 
     @transaction.atomic
     @extend_schema(
-        request=GrievanceIndividualDataChangeApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
+        request=GrievanceIndividualDataChangeApproveSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-individual-data-change")
     def approve_individual_data_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -816,11 +828,15 @@ class GrievanceTicketGlobalViewSet(
         individual_data_details.save()
         grievance_ticket.refresh_from_db()
 
-        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @transaction.atomic
     @extend_schema(
-        request=GrievanceHouseholdDataChangeApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
+        request=GrievanceHouseholdDataChangeApproveSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-household-data-change")
     def approve_household_data_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -866,10 +882,16 @@ class GrievanceTicketGlobalViewSet(
         household_data_details.save()
         grievance_ticket.refresh_from_db()
 
-        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @transaction.atomic
-    @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @extend_schema(
+        request=GrievanceUpdateApproveStatusSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="approve-status-update")
     def approve_status_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Approve action.
@@ -913,11 +935,15 @@ class GrievanceTicketGlobalViewSet(
         ticket_details.save()
         grievance_ticket.refresh_from_db()
 
-        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @transaction.atomic
     @extend_schema(
-        request=GrievanceDeleteHouseholdApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer}
+        request=GrievanceDeleteHouseholdApproveStatusSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-delete-household")
     def approve_delete_household(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -946,7 +972,9 @@ class GrievanceTicketGlobalViewSet(
         if reason_hh_id:
             # validate reason HH id
             reason_hh_obj = get_object_or_404(
-                Household, unicef_id=reason_hh_id, program=ticket_details.household.program
+                Household,
+                unicef_id=reason_hh_id,
+                program=ticket_details.household.program,
             )
             if reason_hh_obj.withdrawn:
                 raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
@@ -961,11 +989,15 @@ class GrievanceTicketGlobalViewSet(
         ticket_details.save()
         grievance_ticket.refresh_from_db()
 
-        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @transaction.atomic
     @extend_schema(
-        request=GrievanceNeedsAdjudicationApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
+        request=GrievanceNeedsAdjudicationApproveSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-needs-adjudication")
     def approve_needs_adjudication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1044,7 +1076,10 @@ class GrievanceTicketGlobalViewSet(
         )
 
     @transaction.atomic
-    @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @extend_schema(
+        request=GrievanceUpdateApproveStatusSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="approve-payment-details")
     def approve_payment_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         grievance_ticket = self.get_object()
@@ -1072,10 +1107,16 @@ class GrievanceTicketGlobalViewSet(
         ]
         grievance_ticket.payment_verification_ticket_details.save()
         grievance_ticket.refresh_from_db()
-        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @transaction.atomic
-    @extend_schema(request=GrievanceReassignRoleSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @extend_schema(
+        request=GrievanceReassignRoleSerializer,
+        responses={202: GrievanceTicketDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="reassign-role")
     def reassign_role(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         grievance_ticket = self.get_object()
@@ -1222,7 +1263,10 @@ class GrievanceTicketGlobalViewSet(
             ).prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
-        return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
+        return Response(
+            FieldAttributeSerializer(sorted_list, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         responses={200: FieldAttributeSerializer(many=True)},
@@ -1238,12 +1282,20 @@ class GrievanceTicketGlobalViewSet(
             ).prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
-        return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
+        return Response(
+            FieldAttributeSerializer(sorted_list, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         responses={200: FieldAttributeSerializer(many=True)},
     )
-    @action(detail=False, methods=["get"], url_path="all-add-individuals-fields-attributes", pagination_class=None)
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="all-add-individuals-fields-attributes",
+        pagination_class=None,
+    )
     def all_add_individuals_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         fields = (
             FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
@@ -1256,7 +1308,10 @@ class GrievanceTicketGlobalViewSet(
             .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
-        return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
+        return Response(
+            FieldAttributeSerializer(sorted_list, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(responses={200: GrievanceDashboardSerializer})
     @action(detail=False, methods=["get"], url_path="dashboard")

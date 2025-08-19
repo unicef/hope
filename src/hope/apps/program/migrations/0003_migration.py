@@ -25,7 +25,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="program",
             name="admin_areas",
-            field=models.ManyToManyField(blank=True, help_text="Admin areas", related_name="programs", to="geo.Area"),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Admin areas",
+                related_name="programs",
+                to="geo.Area",
+            ),
         ),
         migrations.AlterField(
             model_name="program",
@@ -65,7 +70,9 @@ class Migration(migrations.Migration):
             model_name="program",
             name="business_area",
             field=models.ForeignKey(
-                help_text="Business area", on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+                help_text="Business area",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.businessarea",
             ),
         ),
         migrations.AlterField(
@@ -228,7 +235,11 @@ class Migration(migrations.Migration):
             model_name="program",
             name="status",
             field=models.CharField(
-                choices=[("ACTIVE", "Active"), ("DRAFT", "Draft"), ("FINISHED", "Finished")],
+                choices=[
+                    ("ACTIVE", "Active"),
+                    ("DRAFT", "Draft"),
+                    ("FINISHED", "Finished"),
+                ],
                 db_index=True,
                 help_text="Program status",
                 max_length=10,

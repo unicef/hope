@@ -1,15 +1,11 @@
 import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
-
-from hope.apps.core.services.rapid_pro.api import TokenNotProvided
-
 from urllib.parse import urlencode
 
+import pytest
 from django.urls import reverse
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
@@ -30,6 +26,7 @@ from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.accountability.models import Survey
+from hope.apps.core.services.rapid_pro.api import TokenNotProvided
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.program.models import Program
 
@@ -44,7 +41,9 @@ class TestFeedbackViewSet:
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
         self.client = api_client(self.user)
         self.program_active = ProgramFactory(
-            name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
+            name="Test Active Program",
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
         )
         self.hh_1 = HouseholdFactory(program=self.program_active)
         self.individual_1 = IndividualFactory(household_id=self.hh_1.id)
@@ -157,14 +156,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_200_OK,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_feedback_get_list(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
@@ -209,14 +214,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_200_OK,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_feedback_get_count(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_count)
@@ -237,14 +248,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_200_OK,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_feedback_details(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_details)
@@ -279,7 +296,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_create_feedback(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(
@@ -321,7 +341,10 @@ class TestFeedbackViewSet:
 
     def test_create_feedback_without_permission_in_program(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], self.afghanistan, self.program_2
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE],
+            self.afghanistan,
+            self.program_2,
         )
         response = self.client.post(
             self.url_list,
@@ -343,15 +366,23 @@ class TestFeedbackViewSet:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_400_BAD_REQUEST),
+            (
+                [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE],
+                status.HTTP_400_BAD_REQUEST,
+            ),
         ],
     )
     def test_create_feedback_for_finished_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         program_finished = ProgramFactory(
-            name="Test Finished Program", business_area=self.afghanistan, status=Program.FINISHED
+            name="Test Finished Program",
+            business_area=self.afghanistan,
+            status=Program.FINISHED,
         )
         response = self.client.post(
             self.url_list,
@@ -379,7 +410,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_create_feedback_with_minimum_data(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(
@@ -418,7 +452,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_update_feedback_without_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.patch(
@@ -462,7 +499,10 @@ class TestFeedbackViewSet:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
+            self.afghanistan,
+            self.program_active,
         )
         response = self.client.patch(
             self.url_details_feedback_1,
@@ -484,7 +524,10 @@ class TestFeedbackViewSet:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], self.afghanistan, self.program_2
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
+            self.afghanistan,
+            self.program_2,
         )
         response = self.client.patch(
             self.url_details_feedback_1,
@@ -510,7 +553,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_update_feedback_hh_lookup(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.patch(
@@ -555,14 +601,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_200_OK,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_feedback_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_list_per_program)
@@ -594,14 +646,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_200_OK,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_feedback_get_count_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
         response = self.client.get(self.url_count_per_program)
@@ -616,14 +674,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_200_OK,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_feedback_details_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_details_per_program)
@@ -658,7 +722,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_create_feedback_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(
@@ -700,7 +767,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_update_feedback_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.patch(
@@ -742,11 +812,17 @@ class TestFeedbackViewSet:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_400_BAD_REQUEST),
+            (
+                [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
+                status.HTTP_400_BAD_REQUEST,
+            ),
         ],
     )
     def test_update_feedback_per_program_when_finished(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.program_active.status = Program.FINISHED
@@ -778,14 +854,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_201_CREATED,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_create_feedback_message(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(
@@ -819,7 +901,10 @@ class TestFeedbackViewSet:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
         )
         response = self.client.post(
             self.url_msg_create_for_feedback_1,
@@ -832,7 +917,10 @@ class TestFeedbackViewSet:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE], self.afghanistan, self.program_2
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_2,
         )
         response = self.client.post(
             self.url_msg_create_for_feedback_1,
@@ -845,14 +933,20 @@ class TestFeedbackViewSet:
         ("permissions", "expected_status"),
         [
             (
-                [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                [
+                    Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                ],
                 status.HTTP_201_CREATED,
             ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_create_feedback_message_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(
@@ -890,7 +984,10 @@ class TestFeedbackViewSet:
         ],
     )
     def test_filter_feedback_by_issue_type(
-        self, filter_value: str, expected_count: int, create_user_role_with_permissions: Any
+        self,
+        filter_value: str,
+        expected_count: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -985,10 +1082,14 @@ class TestMessageViewSet:
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
         self.client = api_client(self.user)
         self.program_active = ProgramFactory(
-            name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
+            name="Test Active Program",
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
         )
         self.program_finished = ProgramFactory(
-            name="Test Finished Program", business_area=self.afghanistan, status=Program.FINISHED
+            name="Test Finished Program",
+            business_area=self.afghanistan,
+            status=Program.FINISHED,
         )
         self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
@@ -1080,7 +1181,10 @@ class TestMessageViewSet:
         ],
     )
     def test_msg_get_list(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_list)
@@ -1125,7 +1229,10 @@ class TestMessageViewSet:
         ],
     )
     def test_msg_get_count(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_count)
@@ -1146,7 +1253,12 @@ class TestMessageViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_msg_details(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_msg_details(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_details)
 
@@ -1168,18 +1280,30 @@ class TestMessageViewSet:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], status.HTTP_201_CREATED),
+            (
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                status.HTTP_201_CREATED,
+            ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_create_new_message(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1211,8 +1335,14 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1238,8 +1368,14 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1271,8 +1407,14 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1298,8 +1440,14 @@ class TestMessageViewSet:
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             response = self.client.post(
                 self.url_list,
@@ -1520,7 +1668,9 @@ class TestSurveyViewSet:
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
         self.client = api_client(self.user)
         self.program_active = ProgramFactory(
-            name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
+            name="Test Active Program",
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
         )
         hoh1 = IndividualFactory(household=None)
         self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
@@ -1614,7 +1764,12 @@ class TestSurveyViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_survey_list(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_survey_list(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_list)
 
@@ -1649,7 +1804,10 @@ class TestSurveyViewSet:
         ],
     )
     def test_survey_get_count(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_count)
@@ -1674,7 +1832,10 @@ class TestSurveyViewSet:
         ],
     )
     def test_survey_details(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_details)
@@ -1696,7 +1857,10 @@ class TestSurveyViewSet:
         ],
     )
     def test_create_survey(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(
@@ -1749,7 +1913,10 @@ class TestSurveyViewSet:
         ],
     )
     def test_survey_export_sample(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_export_sample)
@@ -1762,7 +1929,10 @@ class TestSurveyViewSet:
 
     def test_get_category_choices(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         response = self.client.get(self.url_category_choices)
         assert response.status_code == status.HTTP_200_OK
@@ -1777,13 +1947,24 @@ class TestSurveyViewSet:
 
     def test_get_available_flows(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
             patch(
                 "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
-                MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+                MagicMock(
+                    return_value=[
+                        {"uuid": 123, "name": "flow2"},
+                        {"uuid": 234, "name": "flow2"},
+                    ]
+                ),
             ),
         ):
             response = self.client.get(self.url_flows)
@@ -1793,7 +1974,10 @@ class TestSurveyViewSet:
 
     def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
         )
         url = reverse(
             "api:accountability:surveys-sample-size",
@@ -1892,7 +2076,10 @@ class TestSurveyViewSet:
 
     def test_get_available_flows_no_token(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         with (
             patch(

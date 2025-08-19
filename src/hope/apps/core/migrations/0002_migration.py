@@ -33,14 +33,19 @@ class Migration(migrations.Migration):
             model_name="filetemp",
             name="content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AddField(
             model_name="filetemp",
             name="created_by",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to=settings.AUTH_USER_MODEL
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
@@ -57,7 +62,10 @@ class Migration(migrations.Migration):
             model_name="countrycodemap",
             name="country",
             field=models.OneToOneField(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="geo.country",
             ),
         ),
         migrations.AddField(
@@ -103,7 +111,9 @@ class Migration(migrations.Migration):
             model_name="businessarea",
             name="partners",
             field=models.ManyToManyField(
-                related_name="business_areas", through="core.BusinessAreaPartnerThrough", to="account.Partner"
+                related_name="business_areas",
+                through="core.BusinessAreaPartnerThrough",
+                to="account.Partner",
             ),
         ),
         migrations.AlterUniqueTogether(
@@ -117,7 +127,9 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="flexibleattribute",
             constraint=models.UniqueConstraint(
-                condition=models.Q(("program__isnull", True)), fields=("name",), name="unique_name_without_program"
+                condition=models.Q(("program__isnull", True)),
+                fields=("name",),
+                name="unique_name_without_program",
             ),
         ),
         migrations.AddConstraint(

@@ -11,6 +11,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name="registrationdataimport",
-            options={"permissions": (("rerun_rdi", "Can Rerun RDI"),), "verbose_name": "Registration data import"},
+            options={
+                "permissions": (("rerun_rdi", "Can Rerun RDI"),),
+                "verbose_name": "Registration data import",
+            },
         ),
     ]

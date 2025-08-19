@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
-from django.db.models import Q, QuerySet
-
 from constance import config
+from django.db.models import Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
@@ -21,10 +20,7 @@ from hope.apps.account.api.serializers import (
 )
 from hope.apps.account.filters import UsersFilter
 from hope.apps.account.models import Partner, User
-from hope.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    Permissions,
-)
+from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
@@ -42,15 +38,26 @@ if TYPE_CHECKING:
 
 
 class UserViewSet(
-    CustomSerializerMixin, SerializerActionMixin, PermissionActionMixin, CountActionMixin, ListModelMixin, BaseViewSet
+    CustomSerializerMixin,
+    SerializerActionMixin,
+    PermissionActionMixin,
+    CountActionMixin,
+    ListModelMixin,
+    BaseViewSet,
 ):
     permission_classes_by_action = {
         "profile": [IsAuthenticated],
     }
     permissions_by_action = {
         "list": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
-        "choices": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
-        "partner_for_grievance_choices": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
+        "partner_for_grievance_choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
     }
     queryset = User.objects.all()
 

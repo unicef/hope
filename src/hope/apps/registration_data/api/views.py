@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-from django.db import transaction
-
 from constance import config
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -26,10 +25,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
-from hope.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    to_choice_object,
-)
+from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
@@ -43,7 +39,11 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
+from hope.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
 from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
@@ -56,6 +56,7 @@ from hope.apps.registration_datahub.celery_tasks import (
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
+
 # Import moved inline to avoid circular dependency issues
 
 logger = logging.getLogger(__name__)
@@ -119,7 +120,12 @@ class RegistrationDataImportViewSet(
         permission_classes=[AllowAny],
     )
     def webhook_deduplication(
-        self, request: Request, business_area_slug: str, program_slug: str, *args: Any, **kwargs: Any
+        self,
+        request: Request,
+        business_area_slug: str,
+        program_slug: str,
+        *args: Any,
+        **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
         fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
@@ -148,7 +154,10 @@ class RegistrationDataImportViewSet(
             old_rdi,
             rdi,
         )
-        return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Merge Scheduled"})
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"message": "Registration Data Import Merge Scheduled"},
+        )
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -180,7 +189,10 @@ class RegistrationDataImportViewSet(
             old_rdi,
             rdi,
         )
-        return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Erased"})
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"message": "Registration Data Import Erased"},
+        )
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -215,7 +227,10 @@ class RegistrationDataImportViewSet(
             old_rdi,
             rdi,
         )
-        return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Refused"})
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"message": "Registration Data Import Refused"},
+        )
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -243,7 +258,10 @@ class RegistrationDataImportViewSet(
             old_rdi,
             rdi,
         )
-        return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Erased"})
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"message": "Registration Data Import Erased"},
+        )
 
     @extend_schema(
         request=RegistrationDataImportCreateSerializer,

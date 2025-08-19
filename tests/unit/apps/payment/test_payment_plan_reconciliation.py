@@ -104,7 +104,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.household_3.refresh_from_db()
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="full", description="Full individual collected", active=True, type="STANDARD"
+            code="full",
+            description="Full individual collected",
+            active=True,
+            type="STANDARD",
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
         generate_delivery_mechanisms()
@@ -262,7 +265,11 @@ class TestPaymentPlanReconciliation(APITestCase):
             received_amount=None,
         )
         import_xlsx_service = XlsxPaymentPlanImportPerFspService(pp, io.BytesIO())
-        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
+        import_xlsx_service.xlsx_headers = [
+            "payment_id",
+            "delivered_quantity",
+            "delivery_date",
+        ]
 
         import_xlsx_service.payments_dict[str(payment_1.pk)] = payment_1
         import_xlsx_service.payments_dict[str(payment_2.pk)] = payment_2
@@ -275,13 +282,28 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         import_xlsx_service._import_row(
-            [row(str(payment_1.id)), row(999), row(pytz.utc.localize(datetime.datetime(2023, 5, 12)))], 1
+            [
+                row(str(payment_1.id)),
+                row(999),
+                row(pytz.utc.localize(datetime.datetime(2023, 5, 12))),
+            ],
+            1,
         )
         import_xlsx_service._import_row(
-            [row(str(payment_2.id)), row(100), row(pytz.utc.localize(datetime.datetime(2022, 12, 14)))], 1
+            [
+                row(str(payment_2.id)),
+                row(100),
+                row(pytz.utc.localize(datetime.datetime(2022, 12, 14))),
+            ],
+            1,
         )
         import_xlsx_service._import_row(
-            [row(str(payment_3.id)), row(2999), row(pytz.utc.localize(datetime.datetime(2021, 7, 25)))], 1
+            [
+                row(str(payment_3.id)),
+                row(2999),
+                row(pytz.utc.localize(datetime.datetime(2021, 7, 25))),
+            ],
+            1,
         )
         payment_1.save()
         payment_2.save()

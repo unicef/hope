@@ -1,13 +1,10 @@
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
-from adminfilters.autocomplete import AutoCompleteFilter
-
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import (
-    SanctionListIndividualDocument,
-)
+from hope.apps.sanction_list.models import SanctionListIndividualDocument
 
 
 @admin.register(SanctionListIndividualDocument)

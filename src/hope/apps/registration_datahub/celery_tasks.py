@@ -15,9 +15,7 @@ from hope.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
 )
-from hope.apps.registration_datahub.tasks.deduplicate import (
-    HardDocumentDeduplication,
-)
+from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.registration_datahub.tasks.rdi_program_population_create import (
     RdiProgramPopulationCreateTask,
 )
@@ -86,7 +84,10 @@ def registration_xlsx_import_task(
                 )
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
-            if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
+            if rdi.status not in (
+                RegistrationDataImport.IMPORT_SCHEDULED,
+                RegistrationDataImport.IMPORT_ERROR,
+            ):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
@@ -135,7 +136,10 @@ def registration_program_population_import_task(
 
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
-            if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
+            if rdi.status not in (
+                RegistrationDataImport.IMPORT_SCHEDULED,
+                RegistrationDataImport.IMPORT_ERROR,
+            ):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
@@ -163,7 +167,11 @@ def registration_program_population_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
+    self: Any,
+    registration_data_import_id: str,
+    import_data_id: str,
+    business_area_id: str,
+    program_id: "UUID",
 ) -> None:
     try:
         from hope.apps.core.models import BusinessArea
@@ -256,9 +264,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
             return True  # pragma: no cover
         try:
             from hope.apps.registration_data.models import RegistrationDataImport
-            from hope.apps.registration_datahub.tasks.rdi_merge import (
-                RdiMergeTask,
-            )
+            from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(obj_hct.business_area.name)
@@ -288,9 +294,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hope.apps.registration_datahub.tasks.deduplicate import (
-            DeduplicateTask,
-        )
+        from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         program_id = rdi_obj.program.id

@@ -5,7 +5,6 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -27,7 +26,9 @@ class TestPermissionsBackend(TestCase):
 
         self.content_type = ContentType.objects.get_for_model(BusinessArea)
         self.permission = Permission.objects.create(
-            codename="test_permission", name="Test Permission", content_type=self.content_type
+            codename="test_permission",
+            name="Test Permission",
+            content_type=self.content_type,
         )
         self.group = Group.objects.create(name="TestGroup")
         self.group.permissions.add(self.permission)
@@ -135,7 +136,9 @@ class TestPermissionsBackend(TestCase):
     def test_get_permissions_for_program(self) -> None:
         # User's Role Assignmenmts grants
         program_empty = ProgramFactory(
-            status=Program.ACTIVE, name="Test Program Empty", business_area=self.business_area
+            status=Program.ACTIVE,
+            name="Test Program Empty",
+            business_area=self.business_area,
         )
         role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
         self.role_assignment_partner.role = role
@@ -154,7 +157,9 @@ class TestPermissionsBackend(TestCase):
 
         # no permissions for other program
         program_other = ProgramFactory(
-            status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area
+            status=Program.ACTIVE,
+            name="Test Program Other",
+            business_area=self.business_area,
         )
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
         assert set() == permissions_in_program_other
@@ -209,16 +214,24 @@ class TestPermissionsBackend(TestCase):
 
     def test_get_permissions_from_all_sources(self) -> None:
         program_for_user = ProgramFactory(
-            status=Program.ACTIVE, name="Test Program For User", business_area=self.business_area
+            status=Program.ACTIVE,
+            name="Test Program For User",
+            business_area=self.business_area,
         )
         permission1 = Permission.objects.create(
-            codename="test_permission1", name="Test Permission 1", content_type=self.content_type
+            codename="test_permission1",
+            name="Test Permission 1",
+            content_type=self.content_type,
         )
         permission2 = Permission.objects.create(
-            codename="test_permission2", name="Test Permission 2", content_type=self.content_type
+            codename="test_permission2",
+            name="Test Permission 2",
+            content_type=self.content_type,
         )
         permission3 = Permission.objects.create(
-            codename="test_permission3", name="Test Permission 3", content_type=self.content_type
+            codename="test_permission3",
+            name="Test Permission 3",
+            content_type=self.content_type,
         )
         # permission on a user group
         group_user = Group.objects.create(name="TestGroupUser")
@@ -285,7 +298,9 @@ class TestPermissionsBackend(TestCase):
 
         # permissions for other program - empty (neither partner nor user has access to this program)
         program_other = ProgramFactory(
-            status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area
+            status=Program.ACTIVE,
+            name="Test Program Other",
+            business_area=self.business_area,
         )
         permissions = self.backend.get_all_permissions(self.user, program_other)
         assert set() == permissions

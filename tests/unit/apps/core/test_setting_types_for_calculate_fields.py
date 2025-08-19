@@ -3,7 +3,6 @@ from typing import Any
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
 from parameterized import parameterized
 
 from hope.apps.core.field_attributes.fields_types import (

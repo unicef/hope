@@ -2,9 +2,8 @@ from datetime import timedelta
 from random import choice
 from typing import Optional
 
-from django.utils import timezone
-
 import pytest
+from django.utils import timezone
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard

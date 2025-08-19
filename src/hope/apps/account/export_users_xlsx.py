@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 from django.db import transaction
-
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
@@ -60,7 +59,10 @@ class ExportUsersXlsx:
         users = (
             User.objects.prefetch_related("user_roles")
             .select_related("partner")
-            .filter(is_superuser=False, role_assignments__business_area__slug=self.business_area_slug)
+            .filter(
+                is_superuser=False,
+                role_assignments__business_area__slug=self.business_area_slug,
+            )
         )
         if users.exists() is False:
             return None

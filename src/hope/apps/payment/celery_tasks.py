@@ -2,6 +2,7 @@ import datetime
 import logging
 from typing import Any
 
+from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -11,8 +12,6 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-from concurrency.api import disable_concurrency
 
 from hope.apps.account.models import User
 from hope.apps.core.celery import app
@@ -139,7 +138,10 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 @log_start_and_end
 @sentry_tags
 def create_payment_plan_payment_list_xlsx_per_fsp(
-    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: str | None = None
+    self: Any,
+    payment_plan_id: str,
+    user_id: str,
+    fsp_xlsx_template_id: str | None = None,
 ) -> None:
     try:
         from hope.apps.payment.models import PaymentPlan
@@ -243,9 +245,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
         from hope.apps.payment.models import PaymentPlan
-        from hope.apps.payment.services.payment_plan_services import (
-            PaymentPlanService,
-        )
+        from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -312,7 +312,12 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment.entitlement_date = timezone.now()
                 updates.append(payment)
             Payment.signature_manager.bulk_update_with_signature(
-                updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
+                updates,
+                [
+                    "entitlement_quantity",
+                    "entitlement_date",
+                    "entitlement_quantity_usd",
+                ],
             )
 
             payment_plan.steficon_applied_date = timezone.now()
@@ -358,9 +363,7 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     from hope.apps.payment.models import PaymentPlan
-    from hope.apps.payment.services.payment_plan_services import (
-        PaymentPlanService,
-    )
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
     cache_key = generate_cache_key(
         {
@@ -408,9 +411,7 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
         from hope.apps.payment.models import PaymentPlan
-        from hope.apps.payment.services.payment_plan_services import (
-            PaymentPlanService,
-        )
+        from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -430,7 +431,10 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluding_hh_or_ind_ids: list[str | None], exclusion_reason: str | None = ""
+    self: Any,
+    payment_plan_id: str,
+    excluding_hh_or_ind_ids: list[str | None],
+    exclusion_reason: str | None = "",
 ) -> None:
     try:
         from django.db.models import Q
@@ -491,7 +495,11 @@ def payment_plan_exclude_beneficiaries(
                 payment_plan.background_action_status_exclude_beneficiaries_error()
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
                 payment_plan.save(
-                    update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
+                    update_fields=[
+                        "exclusion_reason",
+                        "exclude_household_error",
+                        "background_action_status",
+                    ]
                 )
                 raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
 
@@ -507,14 +515,26 @@ def payment_plan_exclude_beneficiaries(
 
             payment_plan.background_action_status_none()
             payment_plan.exclude_household_error = str(info_msg or "")
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+            payment_plan.save(
+                update_fields=[
+                    "exclusion_reason",
+                    "background_action_status",
+                    "exclude_household_error",
+                ]
+            )
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
             payment_plan.background_action_status_exclude_beneficiaries_error()
 
             if error_msg:
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+            payment_plan.save(
+                update_fields=[
+                    "exclusion_reason",
+                    "background_action_status",
+                    "exclude_household_error",
+                ]
+            )
 
     except Exception as e:
         logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
@@ -570,9 +590,7 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
     try:
-        from hope.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_fsps()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -589,9 +607,7 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
     try:
-        from hope.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_account_types()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -634,9 +650,7 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
     try:
-        from hope.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_records()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -650,7 +664,11 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_payment_notification_emails(
-    self: Any, payment_plan_id: str, action: str, action_user_id: str, action_date_formatted: str
+    self: Any,
+    payment_plan_id: str,
+    action: str,
+    action_user_id: str,
+    action_date_formatted: str,
 ) -> None:
     from hope.apps.payment.notifications import PaymentNotification
 
@@ -670,9 +688,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
     try:
-        from hope.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_delivery_mechanisms()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -753,9 +769,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
-    from hope.apps.payment.services.payment_plan_services import (
-        PaymentPlanService,
-    )
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
     with cache.lock(
         f"payment_plan_full_rebuild_{payment_plan_id}",

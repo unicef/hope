@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
@@ -87,7 +86,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            reverse(
+                "admin:payment_paymentplan_restart_preparing_payment_plan",
+                args=[payment_plan.id],
+            ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
         assert response.status_code == status.HTTP_302_FOUND
@@ -107,7 +109,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            reverse(
+                "admin:payment_paymentplan_restart_preparing_payment_plan",
+                args=[payment_plan.id],
+            ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
         assert response.status_code == status.HTTP_302_FOUND
@@ -136,7 +141,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         cache.set(cache_key, True, timeout=600)
 
         response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            reverse(
+                "admin:payment_paymentplan_restart_preparing_payment_plan",
+                args=[payment_plan.id],
+            ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
         assert response.status_code == status.HTTP_302_FOUND

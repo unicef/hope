@@ -94,14 +94,21 @@ class TestProgramUpdate:
 
         self.update_url = reverse(
             "api:programs:programs-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "slug": self.program.slug,
+            },
         )
 
         # pdu fields
         self.pdu_data_to_be_removed = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=3,
-            rounds_names=["Round 1 To Be Removed", "Round 2 To Be Removed", "Round 3 To Be Removed"],
+            rounds_names=[
+                "Round 1 To Be Removed",
+                "Round 2 To Be Removed",
+                "Round 3 To Be Removed",
+            ],
         )
         self.pdu_field_to_be_removed = FlexibleAttributeForPDUFactory(
             program=self.program,
@@ -176,7 +183,11 @@ class TestProgramUpdate:
                 }
                 for pdu_field_data, pdu_field in zip(
                     self.base_payload_for_update_without_changes["pdu_fields"],
-                    [self.pdu_field_to_be_preserved, self.pdu_field_to_be_removed, self.pdu_field_to_be_updated],
+                    [
+                        self.pdu_field_to_be_preserved,
+                        self.pdu_field_to_be_removed,
+                        self.pdu_field_to_be_updated,
+                    ],
                     strict=True,
                 )
             ],
@@ -238,7 +249,10 @@ class TestProgramUpdate:
         ],
     )
     def test_update_program_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
 
@@ -261,7 +275,10 @@ class TestProgramUpdate:
 
     def test_update_program_with_no_changes(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = copy.deepcopy(self.base_payload_for_update_without_changes)
@@ -278,7 +295,10 @@ class TestProgramUpdate:
 
     def test_update_programme_code(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -300,7 +320,10 @@ class TestProgramUpdate:
 
     def test_update_programme_code_with_empty(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -322,7 +345,10 @@ class TestProgramUpdate:
 
     def test_update_programme_code_invalid(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -342,7 +368,10 @@ class TestProgramUpdate:
 
     def test_update_programme_code_existing(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         ProgramFactory(programme_code="T3ST", business_area=self.afghanistan)
 
@@ -360,7 +389,10 @@ class TestProgramUpdate:
 
     def test_update_data_collecting_type(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
 
@@ -381,10 +413,15 @@ class TestProgramUpdate:
 
     def test_update_data_collecting_type_invalid(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         dct_invalid = DataCollectingTypeFactory(
-            label="DCT_INVALID", code="dct_invalid", type=DataCollectingType.Type.STANDARD
+            label="DCT_INVALID",
+            code="dct_invalid",
+            type=DataCollectingType.Type.STANDARD,
         )
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -435,7 +472,10 @@ class TestProgramUpdate:
 
     def test_update_data_collecting_type_for_active_program(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
 
@@ -459,7 +499,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
 
@@ -488,7 +531,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -507,7 +553,10 @@ class TestProgramUpdate:
 
     def test_update_beneficiary_group(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
 
@@ -530,7 +579,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -552,7 +604,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
 
@@ -574,7 +629,10 @@ class TestProgramUpdate:
 
     def test_update_start_and_end_dates(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         program_cycle = ProgramCycle.objects.filter(program=self.program).first()
@@ -603,7 +661,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -624,7 +685,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         program_cycle = ProgramCycle.objects.filter(program=self.program).first()
@@ -651,7 +715,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         program_cycle = ProgramCycle.objects.filter(program=self.program).first()
@@ -676,7 +743,10 @@ class TestProgramUpdate:
 
     def test_update_multiple_fields(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -716,7 +786,10 @@ class TestProgramUpdate:
 
     def test_update_pdu_fields(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -740,7 +813,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                 },
             ],
@@ -782,7 +859,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                     "name": self.pdu_field_to_be_updated.name,
                 },
@@ -792,7 +873,10 @@ class TestProgramUpdate:
 
     def test_update_pdu_fields_and_add_new(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -816,7 +900,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                 },
                 # New PDU field to be added
@@ -884,7 +972,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                     "name": self.pdu_field_to_be_updated.name,
                 },
@@ -894,7 +986,10 @@ class TestProgramUpdate:
 
     def test_update_pdu_fields_invalid_data(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -915,7 +1010,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                 },
                 {
@@ -939,7 +1038,10 @@ class TestProgramUpdate:
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 2
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 To Be Updated",
+            "Round 2 To Be Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False
         assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
@@ -948,7 +1050,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         payload = {
@@ -969,7 +1074,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                 },
                 {
@@ -999,7 +1108,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         # pdu data with NEW field with name that already exists in the database but in different program -> no fail
@@ -1029,7 +1141,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                 },
                 {
@@ -1098,7 +1214,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                     "name": self.pdu_field_to_be_updated.name,
                 },
@@ -1110,7 +1230,10 @@ class TestProgramUpdate:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         # pdu data with NEW field with name that already exists in the database but in different program -> no fail
@@ -1140,7 +1263,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                 },
             ],
@@ -1172,7 +1299,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],
                     },
                     "name": self.pdu_field_to_be_updated.name,
                 },
@@ -1193,7 +1324,10 @@ class TestProgramUpdate:
     def test_update_pdu_fields_when_program_has_RDI(self, create_user_role_with_permissions: Callable) -> None:
         # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields - only possible to increase number of rounds and add names for new rounds
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
@@ -1296,7 +1430,10 @@ class TestProgramUpdate:
     ) -> None:
         # round number CANNOT be decreased for Program with RDI
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
@@ -1326,7 +1463,10 @@ class TestProgramUpdate:
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 2
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 To Be Updated",
+            "Round 2 To Be Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False
 
@@ -1335,7 +1475,10 @@ class TestProgramUpdate:
     ) -> None:
         # names for existing rounds cannot be changed for Program with RDI
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
@@ -1371,6 +1514,9 @@ class TestProgramUpdate:
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 2
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 To Be Updated",
+            "Round 2 To Be Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False

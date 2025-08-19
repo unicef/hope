@@ -12,7 +12,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="LogEntry",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("object_id", models.UUIDField(db_index=True, null=True)),
                 (
                     "action",
@@ -30,7 +38,10 @@ class Migration(migrations.Migration):
                 ),
                 ("object_repr", models.TextField(blank=True)),
                 ("changes", models.JSONField(null=True, verbose_name="change message")),
-                ("timestamp", models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="timestamp")),
+                (
+                    "timestamp",
+                    models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="timestamp"),
+                ),
             ],
             options={
                 "verbose_name": "log entry",

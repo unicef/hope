@@ -2,12 +2,11 @@ import datetime
 import json
 from typing import Any
 
+import openpyxl
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
-
-import openpyxl
 
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import Individual
@@ -174,7 +173,9 @@ class PeriodicDataUpdateImportService:
         fields_name_list = [field["field"] for field in rounds_data]
         fields_name = set(fields_name_list)
         flexible_attributes = FlexibleAttribute.objects.filter(
-            name__in=fields_name, type=FlexibleAttribute.PDU, program=self.periodic_data_update_template.program
+            name__in=fields_name,
+            type=FlexibleAttribute.PDU,
+            program=self.periodic_data_update_template.program,
         )
         if len(flexible_attributes) != len(fields_name):
             raise ValidationError("Some fields are missing in the flexible attributes")
@@ -273,7 +274,11 @@ class PeriodicDataUpdateImportService:
 
     @staticmethod
     def set_round_value(
-        individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
+        individual: Individual,
+        pdu_field_name: str,
+        round_number: int,
+        value: Any,
+        collection_date: Any,
     ) -> None:
         flex_fields_data = individual.flex_fields
         field_data = flex_fields_data[pdu_field_name]

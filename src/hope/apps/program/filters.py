@@ -1,10 +1,9 @@
 from typing import Any
 
+from _decimal import Decimal
 from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.functions import Coalesce, Lower
-
-from _decimal import Decimal
 from django_filters import (
     CharFilter,
     DateFilter,
@@ -73,7 +72,11 @@ class ProgramCycleFilter(FilterSet):
             # annotate total_delivered_quantity_usd
             queryset = queryset.annotate(
                 total_delivered_quantity=Coalesce(
-                    Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                    Sum(
+                        "payment_plans__total_delivered_quantity_usd",
+                        output_field=DecimalField(),
+                    ),
+                    Decimal(0.0),
                 )
             )
             if name == "total_delivered_quantity_usd_from":
