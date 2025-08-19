@@ -1,9 +1,8 @@
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
@@ -89,7 +88,12 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         qs = (
             self.model.objects.get_queryset()
             .select_related(
-                "registration_data_import", "business_area", "assigned_to", "created_by", "admin2", "partner"
+                "registration_data_import",
+                "business_area",
+                "assigned_to",
+                "created_by",
+                "admin2",
+                "partner",
             )
             .prefetch_related("programs")
         )

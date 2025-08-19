@@ -17,7 +17,9 @@ def handle_date_field(
     return timezone_datetime(value).date()
 
 
-def handle_simple_field(value: Any, name: str, household: Any, business_area: BusinessArea, program: Program) -> Any:
+def handle_simple_field(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> Any:
     return value
 
 
@@ -29,7 +31,9 @@ def handle_admin_field(
     return Area.objects.get(p_code=value)
 
 
-def validate_admin(value: Any, name: str, household: Any, business_area: BusinessArea, program: Program) -> str | None:
+def validate_admin(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> str | None:
     if value is None or value == "":
         return None
     countries = business_area.countries.all()
@@ -39,13 +43,21 @@ def validate_admin(value: Any, name: str, household: Any, business_area: Busines
 
 
 def validate_string(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     return None
 
 
 def validate_date(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -57,7 +69,11 @@ def validate_date(
 
 
 def validate_phone_number(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -68,7 +84,11 @@ def validate_phone_number(
 
 
 def validate_sex(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -79,6 +99,10 @@ def validate_sex(
 
 
 def validate_flex_field_string(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     return None

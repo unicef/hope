@@ -1,10 +1,9 @@
 from typing import IO, Any
 
+import openpyxl
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.forms.models import modelform_factory
-
-import openpyxl
 from xlwt import Row
 
 from hope.apps.activity_log.models import log_create
@@ -124,8 +123,14 @@ class IndividualXlsxUpdate:
         if not individuals:
             return IndividualXlsxUpdate.STATUS_NO_MATCH, self._row_report_data(row)
         if len(individuals) > 1:
-            return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (self._row_report_data(row), individuals)
-        return IndividualXlsxUpdate.STATUS_UNIQUE, (self._row_report_data(row), individuals[0])
+            return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (
+                self._row_report_data(row),
+                individuals,
+            )
+        return IndividualXlsxUpdate.STATUS_UNIQUE, (
+            self._row_report_data(row),
+            individuals[0],
+        )
 
     def _update_single_individual(self, row: Row, individual: Individual) -> Individual:
         old_individual = copy_model_object(individual)
@@ -148,6 +153,13 @@ class IndividualXlsxUpdate:
                 form.errors["phone_no"] = [f"Invalid phone number for individual {individual.unicef_id}."]
             raise ValidationError(form.errors)
         # TODO: add 'program_id' arg or None? individual.program_id
-        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, None, old_individual, individual)
+        log_create(
+            Individual.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            None,
+            old_individual,
+            individual,
+        )
 
         return individual

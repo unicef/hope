@@ -19,7 +19,10 @@ def standard_program() -> Program:
 @pytest.mark.usefixtures("login")
 class TestProgrammeLog:
     def test_smoke_program_log(
-        self, standard_program: Program, pageProgramLog: ProgramLog, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_program: Program,
+        pageProgramLog: ProgramLog,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Test Program")
         pageProgrammeDetails.getButtonFinishProgram().click()
@@ -37,7 +40,10 @@ class TestProgrammeLog:
         assert "Rows per page: 20 1–1 of 1" in pageProgramLog.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_activity_log(
-        self, standard_program: Program, pageProgramLog: ProgramLog, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_program: Program,
+        pageProgramLog: ProgramLog,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Test Program")
         pageProgrammeDetails.getButtonFinishProgram().click()

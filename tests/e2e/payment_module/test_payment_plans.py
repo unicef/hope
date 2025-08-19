@@ -7,15 +7,12 @@ import factory
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
-from selenium.common.exceptions import ElementClickInterceptedException
-
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
@@ -34,6 +31,8 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from pytz import utc
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
 from hope.apps.account.models import User
@@ -49,7 +48,11 @@ from hope.apps.steficon.models import Rule
 pytestmark = pytest.mark.django_db()
 
 
-def find_file(file_name: str, search_in_dir: str = settings.DOWNLOAD_DIRECTORY, number_of_ties: int = 1) -> str:
+def find_file(
+    file_name: str,
+    search_in_dir: str = settings.DOWNLOAD_DIRECTORY,
+    number_of_ties: int = 1,
+) -> str:
     for _ in range(number_of_ties):
         for file in os.listdir(search_in_dir):
             if file_name in file:
@@ -101,7 +104,11 @@ def create_targeting(create_test_program: Program) -> None:
 
     households = [
         create_household(
-            household_args={"size": 2, "business_area": business_area, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "program": program,
+            },
         )[0]
         for _ in range(14)
     ]
@@ -177,7 +184,9 @@ def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
 
 
 @pytest.fixture
-def create_payment_plan_lock_social_worker(social_worker_program: Program) -> PaymentPlan:
+def create_payment_plan_lock_social_worker(
+    social_worker_program: Program,
+) -> PaymentPlan:
     yield payment_plan_create(social_worker_program)
 
 
@@ -207,7 +216,10 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
     )
     hoh1 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", unicef_id="HH-17-0000.3340", head_of_household=hoh1, size=2
+        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
+        unicef_id="HH-17-0000.3340",
+        head_of_household=hoh1,
+        size=2,
     )
     IndividualFactory(
         household=household_1,
@@ -260,10 +272,16 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", unicef_id="HH-17-0000.3340", head_of_household=hoh1, size=2
+        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
+        unicef_id="HH-17-0000.3340",
+        head_of_household=hoh1,
+        size=2,
     )
     household_2 = HouseholdFactory(
-        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52", unicef_id="HH-17-0000.3341", head_of_household=hoh2, size=3
+        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
+        unicef_id="HH-17-0000.3341",
+        head_of_household=hoh2,
+        size=3,
     )
 
     # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;

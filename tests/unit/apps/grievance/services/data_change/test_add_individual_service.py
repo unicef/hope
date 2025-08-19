@@ -1,9 +1,8 @@
 from datetime import date
 
+import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import CountryFactory

@@ -3,9 +3,8 @@ import typing
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 
-from django.core.exceptions import ValidationError
-
 import xlrd
+from django.core.exceptions import ValidationError
 from graphql.execution.base import ResolveInfo
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
@@ -178,7 +177,10 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_file(
-        cls, survey_sheet: "Worksheet", choices_mapping: dict, columns_names_and_numbers_mapping: dict
+        cls,
+        survey_sheet: "Worksheet",
+        choices_mapping: dict,
+        columns_names_and_numbers_mapping: dict,
     ) -> dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):

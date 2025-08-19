@@ -39,7 +39,8 @@ def increment_area_version_cache(sender: Any, instance: Area, **kwargs: dict) ->
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         countries_version = get_or_create_cache_key(f"{business_area_slug}:{business_area_version}:country_list", 1)
         area_types_version = get_or_create_cache_key(
-            f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list", 1
+            f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list",
+            1,
         )
         version_key = f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list:{area_types_version}:area_list"
         get_or_create_cache_key(version_key, 0)

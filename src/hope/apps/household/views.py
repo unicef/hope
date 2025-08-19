@@ -31,7 +31,10 @@ def get_individual(tax_id: str, business_area_code: str | None) -> PendingIndivi
         else PendingDocument.objects.filter(
             individual__household__registration_data_import__business_area__code=business_area_code
         )
-    ).filter(type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID], document_number=tax_id)
+    ).filter(
+        type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+        document_number=tax_id,
+    )
     if pending_documents.count() > 1:
         raise ValidationError(f"Multiple imported documents ({pending_documents.count()}) with given tax_id found")
     if pending_documents.count() == 1:

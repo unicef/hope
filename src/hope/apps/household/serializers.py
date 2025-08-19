@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from hope.apps.household.models import Individual
 
 
-def get_household_status(household: Household | None) -> tuple[str, DateTimeField | None]:
+def get_household_status(
+    household: Household | None,
+) -> tuple[str, DateTimeField | None]:
     if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
     if household.rdi_merge_status == MergeStatusModel.MERGED:
@@ -36,7 +38,9 @@ def get_individual_info(individual: "Individual", tax_id: str | None) -> dict:
 
 
 def get_household_info(
-    household: Household | None, individual: Optional["Individual"] = None, tax_id: str | None = None
+    household: Household | None,
+    individual: Optional["Individual"] = None,
+    tax_id: str | None = None,
 ) -> dict[str, Any]:
     status, date = get_household_status(household)
     output: dict = {"status": status, "date": date}

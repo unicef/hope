@@ -13,7 +13,11 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="exchange_rate",
             field=models.DecimalField(
-                blank=True, decimal_places=8, help_text="Exchange Rate [sys]", max_digits=15, null=True
+                blank=True,
+                decimal_places=8,
+                help_text="Exchange Rate [sys]",
+                max_digits=15,
+                null=True,
             ),
         ),
     ]

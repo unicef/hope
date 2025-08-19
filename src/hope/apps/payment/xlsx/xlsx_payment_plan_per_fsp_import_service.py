@@ -4,11 +4,10 @@ import logging
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from django.utils import timezone
-
 import openpyxl
 import pytz
 from dateutil.parser import parse
+from django.utils import timezone
 from xlwt import Row
 
 from hope.apps.payment.models import Payment, PaymentVerification
@@ -26,6 +25,7 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+
     from hope.apps.payment.models import PaymentPlan
 
 
@@ -241,7 +241,10 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.logger.info("Finished import payment list")
 
     def _get_delivered_quantity_status_and_value(
-        self, delivered_quantity: int | float | str, entitlement_quantity: Decimal, payment_id: str
+        self,
+        delivered_quantity: int | float | str,
+        entitlement_quantity: Decimal,
+        payment_id: str,
     ) -> tuple[str, Decimal | None]:
         try:
             status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)

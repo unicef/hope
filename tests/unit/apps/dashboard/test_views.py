@@ -1,12 +1,11 @@
 from typing import Callable, Dict, Optional
 from unittest.mock import Mock, patch
 
+import pytest
 from django.core.cache import cache
 from django.http import Http404
 from django.test import RequestFactory
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
@@ -131,7 +130,10 @@ def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: M
 
 
 @pytest.mark.django_db(databases=["default"])
-@patch("hope.apps.dashboard.views.generate_dash_report_task.delay", side_effect=Exception("Unexpected error"))
+@patch(
+    "hope.apps.dashboard.views.generate_dash_report_task.delay",
+    side_effect=Exception("Unexpected error"),
+)
 def test_create_or_update_dash_report_internal_server_error(
     mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
 ) -> None:
@@ -207,7 +209,10 @@ def test_dashboard_data_view_permissions(
     url = setup_client[expected_url_key]
 
     if permission_granted:
-        role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
+        role = RoleFactory(
+            name="Dashboard Viewer",
+            permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
+        )
         assigned_area = "global" if business_area_slug == "global" else business_area
         RoleAssignment.objects.create(user=user, role=role, business_area=assigned_area)
 
@@ -276,7 +281,9 @@ def test_dashboard_report_view_global_slug(
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_dashboard_report_view_business_area_not_found_http404(rf: RequestFactory) -> None:
+def test_dashboard_report_view_business_area_not_found_http404(
+    rf: RequestFactory,
+) -> None:
     """Test DashboardReportView raises Http404 for a non-existent business_area_slug."""
     user = UserFactory()
     non_existent_slug = "absolutely-does-not-exist"

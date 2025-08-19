@@ -1,14 +1,9 @@
 from typing import Any
 
 from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
-from hope.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,

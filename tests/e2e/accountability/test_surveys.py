@@ -1,6 +1,5 @@
-from django.db import transaction
-
 import pytest
+from django.db import transaction
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
@@ -28,7 +27,11 @@ def add_household() -> Household:
     program = Program.objects.first()
     with transaction.atomic():
         household, individuals = create_household_and_individuals(
-            household_data={"business_area": program.business_area, "program": program, "residence_status": REFUGEE},
+            household_data={
+                "business_area": program.business_area,
+                "program": program,
+                "residence_status": REFUGEE,
+            },
             individuals_data=[
                 {"business_area": program.business_area, "observed_disability": []},
             ],

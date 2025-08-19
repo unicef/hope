@@ -1,8 +1,7 @@
 import logging
 
-from django.contrib import admin
-
 from adminfilters.value import ValueFilter
+from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.household.models import EntitlementCard

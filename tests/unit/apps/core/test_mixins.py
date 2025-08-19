@@ -20,7 +20,10 @@ class TestMixinBaseAPI:
 
     @pytest.fixture
     def api_instance(self, api_class: Type[BaseAPI]) -> BaseAPI:
-        with patch.dict(os.environ, {"TEST_API_KEY": "test_fake_key", "TEST_API_URL": "http://test-hope.com"}):
+        with patch.dict(
+            os.environ,
+            {"TEST_API_KEY": "test_fake_key", "TEST_API_URL": "http://test-hope.com"},
+        ):
             return api_class()
 
     def test_init_missing_credentials(self, api_class: Type[BaseAPI]) -> None:

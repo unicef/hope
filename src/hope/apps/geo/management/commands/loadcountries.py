@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.core.management import BaseCommand
-
 from django_countries import countries
 
 from hope.apps.geo.missing_countries import missing_countries

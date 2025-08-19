@@ -5,7 +5,6 @@ from django.core.management import call_command
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -201,7 +200,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         assert self.household_50_yo.pk not in [h.household.pk for h in queryset]
 
     @freeze_time("2020-09-28")
-    def test_rule_filter_age_lt_49_should_contains_person_born_in_proper_year_before_birthday(self) -> None:
+    def test_rule_filter_age_lt_49_should_contains_person_born_in_proper_year_before_birthday(
+        self,
+    ) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="LESS_THAN", field_name="age", arguments=[49]
         )
@@ -320,11 +321,16 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         # add Ind role and wallet
         hh = self.households[0]
         IndividualRoleInHousehold.objects.create(
-            individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+            individual=hh.individuals.first(),
+            household=hh,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
         AccountFactory(
-            individual=collector, data={"number": "test123"}, account_type=AccountType.objects.get(key="bank")
+            individual=collector,
+            data={"number": "test123"},
+            account_type=AccountType.objects.get(key="bank"),
         )
         payment_plan = PaymentPlanFactory(program_cycle=hh.program.cycles.first(), created_by=self.user)
         tcr = TargetingCriteriaRule(payment_plan=payment_plan)
@@ -344,7 +350,10 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         # add Ind role and wallet
         hh = self.households[2]
         IndividualRoleInHousehold.objects.create(
-            individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+            individual=hh.individuals.first(),
+            household=hh,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
         AccountFactory(individual=collector, data={"other__random_name": "test123"})
@@ -365,7 +374,10 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     def test_rule_filter_collector_without_arg(self) -> None:
         # all HH list, no collector' filter
-        payment_plan = PaymentPlanFactory(program_cycle=self.households[0].program.cycles.first(), created_by=self.user)
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.households[0].program.cycles.first(),
+            created_by=self.user,
+        )
         tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
         rule_filter = TargetingCollectorBlockRuleFilter(
@@ -381,7 +393,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
     def test_tc_rule_query_for_ind_hh_ids(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.households[0].program.cycles.first())
         tcr = TargetingCriteriaRule(
-            payment_plan=payment_plan, household_ids="HH-1, HH-2", individual_ids="IND-11, IND-22"
+            payment_plan=payment_plan,
+            household_ids="HH-1, HH-2",
+            individual_ids="IND-11, IND-22",
         )
 
         query = tcr.get_query()
@@ -416,7 +430,11 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                 "size": 1,
                 "flex_fields": {
                     "total_households_h_f": 2,
-                    "treatment_facility_h_f": ["government_health_center", "other_public", "private_doctor"],
+                    "treatment_facility_h_f": [
+                        "government_health_center",
+                        "other_public",
+                        "private_doctor",
+                    ],
                     "other_treatment_facility_h_f": "testing other",
                 },
                 "business_area": business_area,
@@ -429,14 +447,21 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                 "size": 1,
                 "flex_fields": {
                     "total_households_h_f": 4,
-                    "treatment_facility_h_f": ["government_health_center", "other_public"],
+                    "treatment_facility_h_f": [
+                        "government_health_center",
+                        "other_public",
+                    ],
                 },
                 "business_area": business_area,
             }
         )
         cls.household_total_households_4 = household
         create_household(
-            {"size": 1, "flex_fields": {"ddd": 3, "treatment_facility_h_f": []}, "business_area": business_area}
+            {
+                "size": 1,
+                "flex_fields": {"ddd": 3, "treatment_facility_h_f": []},
+                "business_area": business_area,
+            }
         )
 
     def test_rule_filter_household_total_households_4(self) -> None:
@@ -558,7 +583,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
             },
             {
                 "flex_fields": {
-                    cls.pdu_field_string.name: {"1": {"value": None}, "2": {"value": None}},
+                    cls.pdu_field_string.name: {
+                        "1": {"value": None},
+                        "2": {"value": None},
+                    },
                     cls.pdu_field_decimal.name: {"1": {"value": 2.5}},
                     cls.pdu_field_date.name: {"1": {"value": "2020-10-10"}},
                     cls.pdu_field_boolean.name: {"1": {"value": True}},
@@ -597,7 +625,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
             {
                 "flex_fields": {
                     cls.pdu_field_string.name: {
-                        "1": {"value": "different value", "collection_date": "2020-10-10"},
+                        "1": {
+                            "value": "different value",
+                            "collection_date": "2020-10-10",
+                        },
                         "2": {"value": None},
                     },
                     cls.pdu_field_decimal.name: {"1": {"value": 4}},
@@ -628,7 +659,12 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
             },
         )
         cls.individual4 = individuals[0]
-        cls.individuals = [cls.individual1, cls.individual2, cls.individual3, cls.individual4]
+        cls.individuals = [
+            cls.individual1,
+            cls.individual2,
+            cls.individual3,
+            cls.individual4,
+        ]
 
     def get_individuals_queryset(self) -> QuerySet[Household]:
         return Individual.objects.filter(pk__in=[ind.pk for ind in self.individuals])

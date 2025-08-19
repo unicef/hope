@@ -132,10 +132,12 @@ class RdiMergeTask:
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
                     PendingHousehold.objects.filter(id__in=household_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED, updated_at=timezone.now()
+                        rdi_merge_status=MergeStatusModel.MERGED,
+                        updated_at=timezone.now(),
                     )
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED, updated_at=timezone.now()
+                        rdi_merge_status=MergeStatusModel.MERGED,
+                        updated_at=timezone.now(),
                     )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
@@ -156,7 +158,8 @@ class RdiMergeTask:
                         ).deduplicate_individuals_against_population(individuals)
                         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
                         golden_record_duplicates = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                            registration_data_import=obj_hct,
+                            deduplication_golden_record_status=DUPLICATE,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
@@ -174,7 +177,8 @@ class RdiMergeTask:
                         )
 
                         needs_adjudication = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                            registration_data_import=obj_hct,
+                            deduplication_golden_record_status=NEEDS_ADJUDICATION,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
@@ -222,7 +226,10 @@ class RdiMergeTask:
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
                     )
-                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    populate_index(
+                        Household.objects.filter(registration_data_import=obj_hct),
+                        HouseholdDocument,
+                    )
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)

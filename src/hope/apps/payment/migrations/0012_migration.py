@@ -19,7 +19,12 @@ class Migration(migrations.Migration):
             model_name="payment",
             name="vulnerability_score",
             field=models.DecimalField(
-                blank=True, db_index=True, decimal_places=3, help_text="Written by Steficon", max_digits=6, null=True
+                blank=True,
+                db_index=True,
+                decimal_places=3,
+                help_text="Written by Steficon",
+                max_digits=6,
+                null=True,
             ),
         ),
         migrations.AddField(
@@ -27,7 +32,12 @@ class Migration(migrations.Migration):
             name="build_status",
             field=django_fsm.FSMField(
                 blank=True,
-                choices=[("PENDING", "Pending"), ("BUILDING", "Building"), ("FAILED", "Failed"), ("OK", "Ok")],
+                choices=[
+                    ("PENDING", "Pending"),
+                    ("BUILDING", "Building"),
+                    ("FAILED", "Failed"),
+                    ("OK", "Ok"),
+                ],
                 db_index=True,
                 default=None,
                 max_length=50,
@@ -64,7 +74,10 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="storage_file",
             field=models.OneToOneField(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="core.storagefile"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="core.storagefile",
             ),
         ),
         migrations.AddField(
@@ -82,14 +95,22 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="vulnerability_score_max",
             field=models.DecimalField(
-                blank=True, decimal_places=3, help_text="Written by a tool such as Corticon.", max_digits=6, null=True
+                blank=True,
+                decimal_places=3,
+                help_text="Written by a tool such as Corticon.",
+                max_digits=6,
+                null=True,
             ),
         ),
         migrations.AddField(
             model_name="paymentplan",
             name="vulnerability_score_min",
             field=models.DecimalField(
-                blank=True, decimal_places=3, help_text="Written by a tool such as Corticon.", max_digits=6, null=True
+                blank=True,
+                decimal_places=3,
+                help_text="Written by a tool such as Corticon.",
+                max_digits=6,
+                null=True,
             ),
         ),
         migrations.AlterField(

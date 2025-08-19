@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q
-
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import (

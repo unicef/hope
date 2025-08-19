@@ -1,6 +1,5 @@
 from django.core.management import call_command
 from django.test import TestCase
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -59,7 +58,10 @@ class TestIndividualBlockFilter(TestCase):
                 "business_area": cls.business_area,
                 "program": cls.program,
             },
-            [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
+            [
+                {"sex": "MALE", "marital_status": "SINGLE"},
+                {"sex": "FEMALE", "marital_status": "MARRIED"},
+            ],
         )
         cls.household_2_indiv = household
         cls.individual_2 = individuals[0]
@@ -323,14 +325,20 @@ class TestIndividualBlockFilter(TestCase):
         self.individual_1.flex_fields = {"pdu_field_1": {"1": {"value": None}, "2": {"value": None}}}
         self.individual_1.save()
         self.individual_2.flex_fields = {
-            "pdu_field_1": {"1": {"value": 1, "collection_date": "2021-01-01"}, "2": {"value": None}}
+            "pdu_field_1": {
+                "1": {"value": 1, "collection_date": "2021-01-01"},
+                "2": {"value": None},
+            }
         }
         self.individual_2.save()
 
         query = query.filter(payment_plan.get_query())
         assert query.count() == 0
 
-        self.individual_1.flex_fields["pdu_field_1"]["1"] = {"value": 2.5, "collection_date": "2021-01-01"}
+        self.individual_1.flex_fields["pdu_field_1"]["1"] = {
+            "value": 2.5,
+            "collection_date": "2021-01-01",
+        }
         self.individual_1.save()
 
         query = query.filter(payment_plan.get_query())
@@ -341,11 +349,16 @@ class TestIndividualBlockFilter(TestCase):
         query = Household.objects.all().order_by("unicef_id")
         hh = query.first()
         IndividualRoleInHousehold.objects.create(
-            individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+            individual=hh.individuals.first(),
+            household=hh,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
         AccountFactory(
-            individual=collector, data={"phone_number": "test123"}, account_type=AccountType.objects.get(key="mobile")
+            individual=collector,
+            data={"phone_number": "test123"},
+            account_type=AccountType.objects.get(key="mobile"),
         )
 
         # Target population

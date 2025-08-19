@@ -6,10 +6,7 @@ from django.db.models import QuerySet
 
 from hope.apps.activity_log.models import log_create
 from hope.apps.core.models import BusinessArea
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
@@ -23,19 +20,12 @@ from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
 )
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import (
-    UNIQUE,
-    UNIQUE_IN_BATCH,
-    Household,
-    Individual,
-)
+from hope.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Household, Individual
 from hope.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,
 )
-from hope.apps.registration_datahub.tasks.deduplicate import (
-    HardDocumentDeduplication,
-)
+from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
@@ -74,7 +64,11 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             unique_individual = None
             household = individual_to_remove.household
             mark_as_duplicate_individual(
-                individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
+                individual_to_remove,
+                unique_individual,
+                household,
+                user,
+                ticket_details.ticket.programs.all(),
             )
         _clear_deduplication_individuals_fields(duplicate_individuals)
         reassign_roles_on_marking_as_duplicate_individual_service(
@@ -253,14 +247,16 @@ def create_needs_adjudication_tickets(
 
     # Sometimes we have an old records in the Elasticsearch, this will resolve false positive signals if the individual is indeed unique
     Individual.objects.filter(id__in=unique_individuals).update(
-        deduplication_golden_record_status=UNIQUE, deduplication_golden_record_results={}
+        deduplication_golden_record_status=UNIQUE,
+        deduplication_golden_record_results={},
     )
     doc = get_individual_doc(business_area.slug)
     remove_elasticsearch_documents_by_matching_ids(list(individuals_to_remove_from_es), doc)
 
 
 def create_needs_adjudication_tickets_for_biometrics(
-    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair], rdi: RegistrationDataImport
+    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair],
+    rdi: RegistrationDataImport,
 ) -> None:
     if not deduplication_pairs.exists():
         return

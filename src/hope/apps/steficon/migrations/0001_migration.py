@@ -21,8 +21,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Rule",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("version", concurrency.fields.AutoIncVersionField(default=0, help_text="record revision number")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "version",
+                    concurrency.fields.AutoIncVersionField(default=0, help_text="record revision number"),
+                ),
                 (
                     "name",
                     django.contrib.postgres.fields.citext.CICharField(
@@ -49,21 +60,33 @@ class Migration(migrations.Migration):
                 ("description", models.TextField(blank=True, null=True)),
                 ("enabled", models.BooleanField(default=False)),
                 ("deprecated", models.BooleanField(default=False)),
-                ("language", models.CharField(choices=[("python", "Python")], default="python", max_length=10)),
-                ("security", models.IntegerField(choices=[(0, "Low"), (2, "Medium"), (4, "High")], default=2)),
+                (
+                    "language",
+                    models.CharField(choices=[("python", "Python")], default="python", max_length=10),
+                ),
+                (
+                    "security",
+                    models.IntegerField(choices=[(0, "Low"), (2, "Medium"), (4, "High")], default=2),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "type",
                     models.CharField(
-                        choices=[("PAYMENT_PLAN", "Payment Plan"), ("TARGETING", "Targeting")],
+                        choices=[
+                            ("PAYMENT_PLAN", "Payment Plan"),
+                            ("TARGETING", "Targeting"),
+                        ],
                         default="TARGETING",
                         help_text="Use Rule for Targeting or Payment Plan",
                         max_length=50,
                     ),
                 ),
                 ("flags", models.JSONField(blank=True, default=dict)),
-                ("allowed_business_areas", models.ManyToManyField(blank=True, to="core.BusinessArea")),
+                (
+                    "allowed_business_areas",
+                    models.ManyToManyField(blank=True, to="core.BusinessArea"),
+                ),
                 (
                     "created_by",
                     models.ForeignKey(
@@ -90,20 +113,45 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="RuleCommit",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("timestamp", models.DateTimeField(auto_now=True)),
                 ("version", models.IntegerField()),
                 ("definition", models.TextField(blank=True, default="result.value=0")),
                 ("is_release", models.BooleanField(default=False)),
                 ("enabled", models.BooleanField(default=False)),
                 ("deprecated", models.BooleanField(default=False)),
-                ("language", models.CharField(choices=[("python", "Python")], default="python", max_length=10)),
+                (
+                    "language",
+                    models.CharField(choices=[("python", "Python")], default="python", max_length=10),
+                ),
                 (
                     "affected_fields",
                     django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100), size=None),
                 ),
-                ("before", models.JSONField(default=dict, editable=False, help_text="The record before change")),
-                ("after", models.JSONField(default=dict, editable=False, help_text="The record after apply changes")),
+                (
+                    "before",
+                    models.JSONField(
+                        default=dict,
+                        editable=False,
+                        help_text="The record before change",
+                    ),
+                ),
+                (
+                    "after",
+                    models.JSONField(
+                        default=dict,
+                        editable=False,
+                        help_text="The record after apply changes",
+                    ),
+                ),
                 (
                     "rule",
                     models.ForeignKey(

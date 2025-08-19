@@ -1,23 +1,17 @@
 import logging
 from typing import TYPE_CHECKING
 
-from django.contrib import admin
-from django.contrib.postgres.fields import JSONField
-from django.http import (
-    HttpRequest,
-)
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminFiltersMixin
+from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
+from django.http import HttpRequest
 from jsoneditor.forms import JSONEditor
 
-from hope.admin.utils import (
-    SoftDeletableAdminMixin,
-)
-from hope.apps.core.models import (
-    FlexibleAttribute,
-)
+from hope.admin.utils import SoftDeletableAdminMixin
+from hope.apps.core.models import FlexibleAttribute
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet

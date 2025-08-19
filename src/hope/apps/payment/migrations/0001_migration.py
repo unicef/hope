@@ -42,15 +42,32 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
                 ("status_date", models.DateTimeField()),
-                ("start_date", models.DateTimeField(blank=True, db_index=True, null=True)),
-                ("end_date", models.DateTimeField(blank=True, db_index=True, null=True)),
-                ("exchange_rate", models.DecimalField(blank=True, decimal_places=8, max_digits=14, null=True)),
+                (
+                    "start_date",
+                    models.DateTimeField(blank=True, db_index=True, null=True),
+                ),
+                (
+                    "end_date",
+                    models.DateTimeField(blank=True, db_index=True, null=True),
+                ),
+                (
+                    "exchange_rate",
+                    models.DecimalField(blank=True, decimal_places=8, max_digits=14, null=True),
+                ),
                 (
                     "total_entitled_quantity",
                     models.DecimalField(
@@ -142,9 +159,15 @@ class Migration(migrations.Migration):
                     models.CharField(
                         choices=[
                             ("Distribution Completed", "Distribution Completed"),
-                            ("Distribution Completed with Errors", "Distribution Completed with Errors"),
+                            (
+                                "Distribution Completed with Errors",
+                                "Distribution Completed with Errors",
+                            ),
                             ("Transaction Completed", "Transaction Completed"),
-                            ("Transaction Completed with Errors", "Transaction Completed with Errors"),
+                            (
+                                "Transaction Completed with Errors",
+                                "Transaction Completed with Errors",
+                            ),
                         ],
                         db_index=True,
                         max_length=255,
@@ -172,14 +195,20 @@ class Migration(migrations.Migration):
                             ("Voucher", "Voucher"),
                             ("ATM Card", "ATM Card"),
                             ("Cash over the counter", "Cash over the counter"),
-                            ("Transfer to Digital Wallet", "Transfer to Digital Wallet"),
+                            (
+                                "Transfer to Digital Wallet",
+                                "Transfer to Digital Wallet",
+                            ),
                         ],
                         db_index=True,
                         max_length=32,
                         null=True,
                     ),
                 ),
-                ("assistance_measurement", models.CharField(db_index=True, max_length=255)),
+                (
+                    "assistance_measurement",
+                    models.CharField(db_index=True, max_length=255),
+                ),
                 ("assistance_through", models.CharField(db_index=True, max_length=255)),
                 ("vision_id", models.CharField(max_length=255, null=True)),
                 ("funds_commitment", models.CharField(max_length=255, null=True)),
@@ -189,9 +218,18 @@ class Migration(migrations.Migration):
                 ("total_persons_covered_revised", models.IntegerField(db_index=True)),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
-                ("program", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="program.program")),
+                (
+                    "program",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="program.program",
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "Cash Plan",
@@ -204,36 +242,54 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("payment_gateway_id", models.CharField(max_length=255, null=True, unique=True)),
+                (
+                    "payment_gateway_id",
+                    models.CharField(max_length=255, null=True, unique=True),
+                ),
                 ("code", models.CharField(max_length=255, unique=True)),
                 ("name", models.CharField(max_length=255, unique=True)),
                 (
                     "optional_fields",
                     django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=255), default=list, size=None
+                        base_field=models.CharField(max_length=255),
+                        default=list,
+                        size=None,
                     ),
                 ),
                 (
                     "required_fields",
                     django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=255), default=list, size=None
+                        base_field=models.CharField(max_length=255),
+                        default=list,
+                        size=None,
                     ),
                 ),
                 (
                     "unique_fields",
                     django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=255), default=list, size=None
+                        base_field=models.CharField(max_length=255),
+                        default=list,
+                        size=None,
                     ),
                 ),
                 ("is_active", models.BooleanField(default=True)),
                 (
                     "transfer_type",
                     models.CharField(
-                        choices=[("CASH", "Cash"), ("VOUCHER", "Voucher"), ("DIGITAL", "Digital")],
+                        choices=[
+                            ("CASH", "Cash"),
+                            ("VOUCHER", "Voucher"),
+                            ("DIGITAL", "Digital"),
+                        ],
                         default="CASH",
                         max_length=255,
                     ),
@@ -250,7 +306,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -261,7 +322,10 @@ class Migration(migrations.Migration):
                     hope.apps.account.models.HorizontalChoiceArrayField(
                         base_field=models.CharField(
                             choices=[
-                                ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                                (
+                                    "Cardless cash withdrawal",
+                                    "Cardless cash withdrawal",
+                                ),
                                 ("Cash", "Cash"),
                                 ("Cash by FSP", "Cash by FSP"),
                                 ("Cheque", "Cheque"),
@@ -274,7 +338,10 @@ class Migration(migrations.Migration):
                                 ("Voucher", "Voucher"),
                                 ("ATM Card", "ATM Card"),
                                 ("Cash over the counter", "Cash over the counter"),
-                                ("Transfer to Digital Wallet", "Transfer to Digital Wallet"),
+                                (
+                                    "Transfer to Digital Wallet",
+                                    "Transfer to Digital Wallet",
+                                ),
                             ],
                             max_length=32,
                         ),
@@ -297,7 +364,9 @@ class Migration(migrations.Migration):
                 (
                     "communication_channel",
                     models.CharField(
-                        choices=[("API", "API"), ("SFTP", "SFTP"), ("XLSX", "XLSX")], db_index=True, max_length=6
+                        choices=[("API", "API"), ("SFTP", "SFTP"), ("XLSX", "XLSX")],
+                        db_index=True,
+                        max_length=6,
                     ),
                 ),
                 (
@@ -310,7 +379,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("payment_gateway_id", models.CharField(max_length=255, null=True)),
-                ("allowed_business_areas", models.ManyToManyField(blank=True, to="core.BusinessArea")),
+                (
+                    "allowed_business_areas",
+                    models.ManyToManyField(blank=True, to="core.BusinessArea"),
+                ),
                 (
                     "created_by",
                     models.ForeignKey(
@@ -322,7 +394,10 @@ class Migration(migrations.Migration):
                         verbose_name="Created by",
                     ),
                 ),
-                ("delivery_mechanisms", models.ManyToManyField(to="payment.DeliveryMechanism")),
+                (
+                    "delivery_mechanisms",
+                    models.ManyToManyField(to="payment.DeliveryMechanism"),
+                ),
             ],
             options={
                 "abstract": False,
@@ -333,7 +408,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -347,11 +427,26 @@ class Migration(migrations.Migration):
                             ("individual_id", "Individual ID"),
                             ("household_size", "Household Size"),
                             ("collector_name", "Collector Name"),
-                            ("alternate_collector_full_name", "Alternate collector Full Name"),
-                            ("alternate_collector_given_name", "Alternate collector Given Name"),
-                            ("alternate_collector_middle_name", "Alternate collector Middle Name"),
-                            ("alternate_collector_phone_no", "Alternate collector phone number"),
-                            ("alternate_collector_document_numbers", "Alternate collector Document numbers"),
+                            (
+                                "alternate_collector_full_name",
+                                "Alternate collector Full Name",
+                            ),
+                            (
+                                "alternate_collector_given_name",
+                                "Alternate collector Given Name",
+                            ),
+                            (
+                                "alternate_collector_middle_name",
+                                "Alternate collector Middle Name",
+                            ),
+                            (
+                                "alternate_collector_phone_no",
+                                "Alternate collector phone number",
+                            ),
+                            (
+                                "alternate_collector_document_numbers",
+                                "Alternate collector Document numbers",
+                            ),
                             ("alternate_collector_sex", "Alternate collector Gender"),
                             ("payment_channel", "Payment Channel"),
                             ("fsp_name", "FSP Name"),
@@ -361,15 +456,24 @@ class Migration(migrations.Migration):
                             ("delivered_quantity", "Delivered Quantity"),
                             ("delivery_date", "Delivery Date"),
                             ("reference_id", "Reference id"),
-                            ("reason_for_unsuccessful_payment", "Reason for unsuccessful payment"),
+                            (
+                                "reason_for_unsuccessful_payment",
+                                "Reason for unsuccessful payment",
+                            ),
                             ("order_number", "Order Number"),
                             ("token_number", "Token Number"),
                             ("additional_collector_name", "Additional Collector Name"),
                             ("additional_document_type", "Additional Document Type"),
-                            ("additional_document_number", "Additional Document Number"),
+                            (
+                                "additional_document_number",
+                                "Additional Document Number",
+                            ),
                             ("registration_token", "Registration Token"),
                             ("status", "Status"),
-                            ("transaction_status_blockchain_link", "Transaction Status on the Blockchain"),
+                            (
+                                "transaction_status_blockchain_link",
+                                "Transaction Status on the Blockchain",
+                            ),
                         ],
                         default=[
                             "payment_id",
@@ -409,13 +513,19 @@ class Migration(migrations.Migration):
                 (
                     "core_fields",
                     hope.apps.payment.fields.DynamicChoiceArrayField(
-                        base_field=models.CharField(blank=True, max_length=255), blank=True, default=list, size=None
+                        base_field=models.CharField(blank=True, max_length=255),
+                        blank=True,
+                        default=list,
+                        size=None,
                     ),
                 ),
                 (
                     "flex_fields",
                     hope.apps.payment.models.FlexFieldArrayField(
-                        base_field=models.CharField(blank=True, max_length=255), blank=True, default=list, size=None
+                        base_field=models.CharField(blank=True, max_length=255),
+                        blank=True,
+                        default=list,
+                        size=None,
                     ),
                 ),
                 (
@@ -440,12 +550,23 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ("signature_hash", models.CharField(blank=True, editable=False, max_length=40)),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
+                (
+                    "signature_hash",
+                    models.CharField(blank=True, editable=False, max_length=40),
+                ),
                 (
                     "status",
                     models.CharField(
@@ -483,7 +604,10 @@ class Migration(migrations.Migration):
                             ("Voucher", "Voucher"),
                             ("ATM Card", "ATM Card"),
                             ("Cash over the counter", "Cash over the counter"),
-                            ("Transfer to Digital Wallet", "Transfer to Digital Wallet"),
+                            (
+                                "Transfer to Digital Wallet",
+                                "Transfer to Digital Wallet",
+                            ),
                         ],
                         max_length=32,
                         null=True,
@@ -531,13 +655,22 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("delivery_date", models.DateTimeField(blank=True, null=True)),
-                ("transaction_reference_id", models.CharField(blank=True, max_length=255, null=True)),
-                ("transaction_status_blockchain_link", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "transaction_reference_id",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "transaction_status_blockchain_link",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
                 ("conflicted", models.BooleanField(default=False)),
                 ("excluded", models.BooleanField(default=False)),
                 ("entitlement_date", models.DateTimeField(blank=True, null=True)),
                 ("is_follow_up", models.BooleanField(default=False)),
-                ("reason_for_unsuccessful_payment", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "reason_for_unsuccessful_payment",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
                 (
                     "order_number",
                     models.PositiveIntegerField(
@@ -574,19 +707,31 @@ class Migration(migrations.Migration):
                 (
                     "additional_document_type",
                     models.CharField(
-                        blank=True, help_text="Use this field for reconciliation data", max_length=128, null=True
+                        blank=True,
+                        help_text="Use this field for reconciliation data",
+                        max_length=128,
+                        null=True,
                     ),
                 ),
                 (
                     "additional_document_number",
                     models.CharField(
-                        blank=True, help_text="Use this field for reconciliation data", max_length=128, null=True
+                        blank=True,
+                        help_text="Use this field for reconciliation data",
+                        max_length=128,
+                        null=True,
                     ),
                 ),
-                ("fsp_auth_code", models.CharField(blank=True, help_text="FSP Auth Code", max_length=128, null=True)),
+                (
+                    "fsp_auth_code",
+                    models.CharField(blank=True, help_text="FSP Auth Code", max_length=128, null=True),
+                ),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "collector",
@@ -599,22 +744,34 @@ class Migration(migrations.Migration):
                 (
                     "delivery_type",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism"
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="payment.deliverymechanism",
                     ),
                 ),
                 (
                     "financial_service_provider",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.PROTECT, to="payment.financialserviceprovider"
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="payment.financialserviceprovider",
                     ),
                 ),
                 (
                     "head_of_household",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="household.individual"
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="household.individual",
                     ),
                 ),
-                ("household", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.household")),
+                (
+                    "household",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="household.household",
+                    ),
+                ),
             ],
             bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
         ),
@@ -624,16 +781,36 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 ("status_date", models.DateTimeField()),
-                ("start_date", models.DateTimeField(blank=True, db_index=True, null=True)),
-                ("end_date", models.DateTimeField(blank=True, db_index=True, null=True)),
-                ("exchange_rate", models.DecimalField(blank=True, decimal_places=8, max_digits=14, null=True)),
+                (
+                    "start_date",
+                    models.DateTimeField(blank=True, db_index=True, null=True),
+                ),
+                (
+                    "end_date",
+                    models.DateTimeField(blank=True, db_index=True, null=True),
+                ),
+                (
+                    "exchange_rate",
+                    models.DecimalField(blank=True, decimal_places=8, max_digits=14, null=True),
+                ),
                 (
                     "total_entitled_quantity",
                     models.DecimalField(
@@ -746,12 +923,24 @@ class Migration(migrations.Migration):
                             ("XLSX_EXPORTING", "Exporting XLSX file"),
                             ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
                             ("XLSX_IMPORT_ERROR", "Import XLSX file Error"),
-                            ("XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"),
-                            ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"),
+                            (
+                                "XLSX_IMPORTING_ENTITLEMENTS",
+                                "Importing Entitlements XLSX file",
+                            ),
+                            (
+                                "XLSX_IMPORTING_RECONCILIATION",
+                                "Importing Reconciliation XLSX file",
+                            ),
                             ("EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"),
-                            ("EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"),
+                            (
+                                "EXCLUDE_BENEFICIARIES_ERROR",
+                                "Exclude Beneficiaries Error",
+                            ),
                             ("SEND_TO_PAYMENT_GATEWAY", "Sending to Payment Gateway"),
-                            ("SEND_TO_PAYMENT_GATEWAY_ERROR", "Send to Payment Gateway Error"),
+                            (
+                                "SEND_TO_PAYMENT_GATEWAY_ERROR",
+                                "Send to Payment Gateway Error",
+                            ),
                         ],
                         db_index=True,
                         default=None,
@@ -957,7 +1146,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "created_by",
@@ -1007,7 +1199,13 @@ class Migration(migrations.Migration):
                         to="core.filetemp",
                     ),
                 ),
-                ("program", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="program.program")),
+                (
+                    "program",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="program.program",
+                    ),
+                ),
                 (
                     "program_cycle",
                     models.ForeignKey(
@@ -1058,7 +1256,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1081,7 +1284,9 @@ class Migration(migrations.Migration):
                 (
                     "payment_plan",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="splits", to="payment.paymentplan"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="splits",
+                        to="payment.paymentplan",
                     ),
                 ),
             ],
@@ -1094,7 +1299,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1105,7 +1315,10 @@ class Migration(migrations.Migration):
                 ("vision_id", models.CharField(max_length=255, null=True)),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
             ],
             options={
@@ -1117,14 +1330,23 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "status",
                     models.CharField(
-                        choices=[("ACTIVE", "Active"), ("FINISHED", "Finished"), ("PENDING", "Pending")],
+                        choices=[
+                            ("ACTIVE", "Active"),
+                            ("FINISHED", "Finished"),
+                            ("PENDING", "Pending"),
+                        ],
                         db_index=True,
                         default="PENDING",
                         max_length=50,
@@ -1136,7 +1358,10 @@ class Migration(migrations.Migration):
                 ("payment_plan_object_id", models.UUIDField()),
                 (
                     "payment_plan_content_type",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
                 ),
             ],
         ),
@@ -1145,12 +1370,23 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 (
                     "status",
                     models.CharField(
@@ -1170,31 +1406,51 @@ class Migration(migrations.Migration):
                 (
                     "sampling",
                     models.CharField(
-                        choices=[("FULL_LIST", "Full list"), ("RANDOM", "Random sampling")], max_length=50
+                        choices=[
+                            ("FULL_LIST", "Full list"),
+                            ("RANDOM", "Random sampling"),
+                        ],
+                        max_length=50,
                     ),
                 ),
                 (
                     "verification_channel",
                     models.CharField(
-                        choices=[("MANUAL", "MANUAL"), ("RAPIDPRO", "RAPIDPRO"), ("XLSX", "XLSX")], max_length=50
+                        choices=[
+                            ("MANUAL", "MANUAL"),
+                            ("RAPIDPRO", "RAPIDPRO"),
+                            ("XLSX", "XLSX"),
+                        ],
+                        max_length=50,
                     ),
                 ),
                 ("sample_size", models.PositiveIntegerField(blank=True, null=True)),
                 ("responded_count", models.PositiveIntegerField(blank=True, null=True)),
                 ("received_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("not_received_count", models.PositiveIntegerField(blank=True, null=True)),
-                ("received_with_problems_count", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "not_received_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "received_with_problems_count",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
                 ("confidence_interval", models.FloatField(blank=True, null=True)),
                 ("margin_of_error", models.FloatField(blank=True, null=True)),
                 ("rapid_pro_flow_id", models.CharField(blank=True, max_length=255)),
                 (
                     "rapid_pro_flow_start_uuids",
                     django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(blank=True, max_length=255), default=list, size=None
+                        base_field=models.CharField(blank=True, max_length=255),
+                        default=list,
+                        size=None,
                     ),
                 ),
                 ("age_filter", models.JSONField(blank=True, null=True)),
-                ("excluded_admin_areas_filter", models.JSONField(blank=True, null=True)),
+                (
+                    "excluded_admin_areas_filter",
+                    models.JSONField(blank=True, null=True),
+                ),
                 ("sex_filter", models.CharField(blank=True, max_length=10, null=True)),
                 ("activation_date", models.DateTimeField(null=True)),
                 ("completion_date", models.DateTimeField(null=True)),
@@ -1203,7 +1459,10 @@ class Migration(migrations.Migration):
                 ("error", models.CharField(blank=True, max_length=500, null=True)),
                 (
                     "payment_plan_content_type",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
                 ),
             ],
             options={
@@ -1216,11 +1475,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
                 ("payment_object_id", models.UUIDField()),
                 (
                     "status",
@@ -1248,7 +1515,10 @@ class Migration(migrations.Migration):
                 ("sent_to_rapid_pro", models.BooleanField(default=False)),
                 (
                     "payment_content_type",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
                 ),
                 (
                     "payment_verification_plan",
@@ -1266,11 +1536,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
                 (
                     "status",
                     models.CharField(
@@ -1308,7 +1586,10 @@ class Migration(migrations.Migration):
                             ("Voucher", "Voucher"),
                             ("ATM Card", "ATM Card"),
                             ("Cash over the counter", "Cash over the counter"),
-                            ("Transfer to Digital Wallet", "Transfer to Digital Wallet"),
+                            (
+                                "Transfer to Digital Wallet",
+                                "Transfer to Digital Wallet",
+                            ),
                         ],
                         max_length=32,
                         null=True,
@@ -1356,15 +1637,24 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("delivery_date", models.DateTimeField(blank=True, null=True)),
-                ("transaction_reference_id", models.CharField(blank=True, max_length=255, null=True)),
-                ("transaction_status_blockchain_link", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "transaction_reference_id",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "transaction_status_blockchain_link",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
                 ("ca_id", models.CharField(db_index=True, max_length=255, null=True)),
                 ("ca_hash_id", models.UUIDField(null=True, unique=True)),
                 ("full_name", models.CharField(max_length=255)),
                 ("total_persons_covered", models.IntegerField()),
                 ("distribution_modality", models.CharField(max_length=255)),
                 ("target_population_cash_assist_id", models.CharField(max_length=255)),
-                ("entitlement_card_number", models.CharField(max_length=255, null=True)),
+                (
+                    "entitlement_card_number",
+                    models.CharField(max_length=255, null=True),
+                ),
                 (
                     "entitlement_card_status",
                     models.CharField(
@@ -1379,21 +1669,34 @@ class Migration(migrations.Migration):
                 ("registration_ca_id", models.CharField(max_length=255, null=True)),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "delivery_type",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism"
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="payment.deliverymechanism",
                     ),
                 ),
                 (
                     "head_of_household",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="household.individual"
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="household.individual",
                     ),
                 ),
-                ("household", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.household")),
+                (
+                    "household",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="household.household",
+                    ),
+                ),
                 (
                     "parent",
                     models.ForeignKey(
@@ -1405,7 +1708,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "service_provider",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.serviceprovider"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="payment.serviceprovider",
+                    ),
                 ),
                 (
                     "target_population",
@@ -1424,7 +1730,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="PaymentPlanSupportingDocument",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("title", models.CharField(max_length=255)),
                 ("file", models.FileField(upload_to="")),
                 ("uploaded_at", models.DateTimeField(auto_now_add=True)),
@@ -1440,7 +1754,9 @@ class Migration(migrations.Migration):
                 (
                     "payment_plan",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="documents", to="payment.paymentplan"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="documents",
+                        to="payment.paymentplan",
                     ),
                 ),
             ],
@@ -1453,7 +1769,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1489,7 +1810,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1512,14 +1838,19 @@ class Migration(migrations.Migration):
             model_name="payment",
             name="parent",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="payment_items", to="payment.paymentplan"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payment_items",
+                to="payment.paymentplan",
             ),
         ),
         migrations.AddField(
             model_name="payment",
             name="program",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="program.program"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="program.program",
             ),
         ),
         migrations.AddField(
@@ -1538,7 +1869,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1556,7 +1892,9 @@ class Migration(migrations.Migration):
                 (
                     "delivery_mechanism",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism"
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="payment.deliverymechanism",
                     ),
                 ),
                 (
@@ -1591,12 +1929,20 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("sent_date", models.DateTimeField()),
-                ("status", django_fsm.FSMField(db_index=True, default="NOT_SENT", max_length=50)),
+                (
+                    "status",
+                    django_fsm.FSMField(db_index=True, default="NOT_SENT", max_length=50),
+                ),
                 ("delivery_mechanism_order", models.PositiveIntegerField()),
                 ("sent_to_payment_gateway", models.BooleanField(default=False)),
                 ("chosen_configuration", models.CharField(max_length=50, null=True)),
@@ -1611,7 +1957,9 @@ class Migration(migrations.Migration):
                 (
                     "delivery_mechanism",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism"
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="payment.deliverymechanism",
                     ),
                 ),
                 (
@@ -1647,24 +1995,46 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 (
                     "rdi_merge_status",
                     models.CharField(
-                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")], default="PENDING", max_length=10
+                        choices=[("PENDING", "Pending"), ("MERGED", "Merged")],
+                        default="PENDING",
+                        max_length=10,
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("signature_hash", models.CharField(blank=True, editable=False, max_length=40)),
+                (
+                    "signature_hash",
+                    models.CharField(blank=True, editable=False, max_length=40),
+                ),
                 ("data", models.JSONField(blank=True, default=dict)),
                 ("is_valid", models.BooleanField(default=False)),
                 ("validation_errors", models.JSONField(default=dict)),
-                ("unique_key", models.CharField(blank=True, editable=False, max_length=256, null=True, unique=True)),
+                (
+                    "unique_key",
+                    models.CharField(
+                        blank=True,
+                        editable=False,
+                        max_length=256,
+                        null=True,
+                        unique=True,
+                    ),
+                ),
                 (
                     "delivery_mechanism",
-                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="payment.deliverymechanism"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="payment.deliverymechanism",
+                    ),
                 ),
                 (
                     "individual",
@@ -1701,7 +2071,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1709,8 +2084,14 @@ class Migration(migrations.Migration):
                 ("sent_for_authorization_date", models.DateTimeField(null=True)),
                 ("sent_for_finance_release_date", models.DateTimeField(null=True)),
                 ("approval_number_required", models.PositiveIntegerField(default=1)),
-                ("authorization_number_required", models.PositiveIntegerField(default=1)),
-                ("finance_release_number_required", models.PositiveIntegerField(default=1)),
+                (
+                    "authorization_number_required",
+                    models.PositiveIntegerField(default=1),
+                ),
+                (
+                    "finance_release_number_required",
+                    models.PositiveIntegerField(default=1),
+                ),
                 (
                     "payment_plan",
                     models.ForeignKey(
@@ -1757,7 +2138,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1787,7 +2173,9 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],
@@ -1800,7 +2188,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -1812,8 +2205,14 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("approval_number_required", models.PositiveIntegerField(default=1)),
-                ("authorization_number_required", models.PositiveIntegerField(default=1)),
-                ("finance_release_number_required", models.PositiveIntegerField(default=1)),
+                (
+                    "authorization_number_required",
+                    models.PositiveIntegerField(default=1),
+                ),
+                (
+                    "finance_release_number_required",
+                    models.PositiveIntegerField(default=1),
+                ),
                 (
                     "business_area",
                     models.ForeignKey(
@@ -1842,7 +2241,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="paymentverificationsummary",
             index=models.Index(
-                fields=["payment_plan_content_type", "payment_plan_object_id"], name="payment_pay_payment_8b7d61_idx"
+                fields=["payment_plan_content_type", "payment_plan_object_id"],
+                name="payment_pay_payment_8b7d61_idx",
             ),
         ),
         migrations.AddConstraint(
@@ -1855,19 +2255,22 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="paymentverificationplan",
             index=models.Index(
-                fields=["payment_plan_content_type", "payment_plan_object_id"], name="payment_pay_payment_3ba67e_idx"
+                fields=["payment_plan_content_type", "payment_plan_object_id"],
+                name="payment_pay_payment_3ba67e_idx",
             ),
         ),
         migrations.AddIndex(
             model_name="paymentverification",
             index=models.Index(
-                fields=["payment_content_type", "payment_object_id"], name="payment_pay_payment_ec4a29_idx"
+                fields=["payment_content_type", "payment_object_id"],
+                name="payment_pay_payment_ec4a29_idx",
             ),
         ),
         migrations.AddConstraint(
             model_name="paymentverification",
             constraint=models.UniqueConstraint(
-                fields=("payment_content_type", "payment_object_id"), name="payment_content_type_and_payment_id"
+                fields=("payment_content_type", "payment_object_id"),
+                name="payment_content_type_and_payment_id",
             ),
         ),
         migrations.AlterUniqueTogether(
@@ -1913,14 +2316,19 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="deliverymechanismperpaymentplan",
             constraint=models.UniqueConstraint(
-                fields=("payment_plan", "delivery_mechanism", "delivery_mechanism_order"),
+                fields=(
+                    "payment_plan",
+                    "delivery_mechanism",
+                    "delivery_mechanism_order",
+                ),
                 name="unique payment_plan_delivery_mechanism",
             ),
         ),
         migrations.AddConstraint(
             model_name="deliverymechanismdata",
             constraint=models.UniqueConstraint(
-                fields=("individual", "delivery_mechanism"), name="unique_individual_delivery_mechanism"
+                fields=("individual", "delivery_mechanism"),
+                name="unique_individual_delivery_mechanism",
             ),
         ),
         migrations.RunSQL(

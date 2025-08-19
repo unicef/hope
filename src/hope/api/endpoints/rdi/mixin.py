@@ -119,7 +119,10 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
                 household_data["country_origin"] = Country.objects.get(iso_code2=country_origin)
 
             hh = PendingHousehold(
-                registration_data_import=rdi, program=rdi.program, business_area=rdi.business_area, **household_data
+                registration_data_import=rdi,
+                program=rdi.program,
+                business_area=rdi.business_area,
+                **household_data,
             )
 
             if collided_household_id := self._manage_collision(hh, rdi):

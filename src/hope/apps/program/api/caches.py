@@ -22,7 +22,13 @@ class ProgramCycleKeyConstructor(KeyConstructorMixin):
 
 class BeneficiaryGroupListVersionsKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         version = get_or_create_cache_key("beneficiary_group_list", 1)
         return str(version)
@@ -38,7 +44,13 @@ class BeneficiaryGroupKeyConstructor(KeyConstructor):
 
 class ProgramListVersionKeyBit(BusinessAreaVersionKeyBit):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = super().get_data(params, view_instance, view_method, request, args, kwargs)
@@ -49,9 +61,20 @@ class ProgramListVersionKeyBit(BusinessAreaVersionKeyBit):
 
 class AllowedProgramsKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
-        return ",".join(map(str, request.user.get_program_ids_for_business_area(view_instance.business_area.id)))
+        return ",".join(
+            map(
+                str,
+                request.user.get_program_ids_for_business_area(view_instance.business_area.id),
+            )
+        )
 
 
 class ProgramListKeyConstructor(KeyConstructorMixin):

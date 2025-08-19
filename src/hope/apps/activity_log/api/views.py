@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.db.models import QuerySet
-
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins

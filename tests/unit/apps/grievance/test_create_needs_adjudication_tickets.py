@@ -1,10 +1,9 @@
 from typing import Any
 
+import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
@@ -14,10 +13,7 @@ from rest_framework import status
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import APITestCase
 from hope.apps.core.models import BusinessArea
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
     create_needs_adjudication_tickets_for_biometrics,
@@ -274,7 +270,11 @@ class TestCreateNeedsAdjudicationTicketsBiometrics:
             status_code="200",
         )
         self.dedup_engine_similarity_pair_3 = DeduplicationEngineSimilarityPair.objects.create(
-            program=program2, individual1=self.ind5, individual2=None, similarity_score=0.0, status_code="429"
+            program=program2,
+            individual1=self.ind5,
+            individual2=None,
+            similarity_score=0.0,
+            status_code="429",
         )
 
     def test_create_na_tickets_biometrics(self) -> None:
@@ -348,7 +348,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics:
     def test_ticket_biometric_query_response(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
+            ],
             self.business_area,
             self.program,
         )
@@ -366,7 +369,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics:
         response = self.api_client.get(
             reverse(
                 "api:grievance:grievance-tickets-list",
-                kwargs={"business_area_slug": self.business_area.slug, "program_slug": self.program.slug},
+                kwargs={
+                    "business_area_slug": self.business_area.slug,
+                    "program_slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK

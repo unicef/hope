@@ -15,7 +15,13 @@ faker = Faker()
 class CountryFactory(DjangoModelFactory):
     class Meta:
         model = Country
-        django_get_or_create = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
+        django_get_or_create = (
+            "name",
+            "short_name",
+            "iso_code2",
+            "iso_code3",
+            "iso_num",
+        )
 
     name = "Afghanistan"
     short_name = "Afghanistan"
@@ -50,7 +56,13 @@ class AreaFactory(DjangoModelFactory):
 def generate_area_types() -> None:
     for country in Country.objects.all():
         parent = None
-        for area_type_name, level in [("Province", 1), ("State", 2), ("County", 3), ("Region", 4), ("District", 5)]:
+        for area_type_name, level in [
+            ("Province", 1),
+            ("State", 2),
+            ("County", 3),
+            ("Region", 4),
+            ("District", 5),
+        ]:
             parent = AreaTypeFactory(parent=parent, name=area_type_name, country=country, area_level=level)
 
 
@@ -84,7 +96,11 @@ def generate_areas(country_names: Optional[List[str]] = None) -> None:
                         area_l_4 = AreaFactory(area_type=area_type_level_4, p_code=p_code, parent=area_l_3)
                         # 5 level
                         for p_code in generate_p_code(area_l_4.p_code, 2):
-                            AreaFactory(area_type=area_type_level_5, p_code=p_code, parent=area_l_4)
+                            AreaFactory(
+                                area_type=area_type_level_5,
+                                p_code=p_code,
+                                parent=area_l_4,
+                            )
 
 
 def generate_small_areas_for_afghanistan_only() -> None:
@@ -119,7 +135,12 @@ def generate_small_areas_for_afghanistan_only() -> None:
         {"level": 2, "p_code": "AF0115", "name": "Farza", "parent_name": "Kabul"},
         {"level": 2, "p_code": "AF0113", "name": "Surobi", "parent_name": "Kabul"},
         {"level": 2, "p_code": "AF0101", "name": "Kabul", "parent_name": "Kabul"},
-        {"level": 2, "p_code": "AF0112", "name": "Khak-e-Jabbar", "parent_name": "Kabul"},
+        {
+            "level": 2,
+            "p_code": "AF0112",
+            "name": "Khak-e-Jabbar",
+            "parent_name": "Kabul",
+        },
         {"level": 2, "p_code": "AF0104", "name": "Paghman", "parent_name": "Kabul"},
         {"level": 2, "p_code": "AF0102", "name": "Dehsabz", "parent_name": "Kabul"},
         {"level": 2, "p_code": "AF0103", "name": "Shakardara", "parent_name": "Kabul"},

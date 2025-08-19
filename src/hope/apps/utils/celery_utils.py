@@ -72,7 +72,10 @@ def get_all_celery_tasks(queue_name: str) -> list:
 
 
 def get_task_in_queue_or_running(
-    name: str, all_celery_tasks: list | None = None, args: list | None = None, kwargs: dict | None = None
+    name: str,
+    all_celery_tasks: list | None = None,
+    args: list | None = None,
+    kwargs: dict | None = None,
 ) -> dict | None:
     if all_celery_tasks is None:
         all_celery_tasks = get_all_celery_tasks("default")

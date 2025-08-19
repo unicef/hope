@@ -1,27 +1,22 @@
 import logging
 from typing import TYPE_CHECKING
 
-from django.contrib.admin import register
-
-from django.http import HttpRequest
-
 from adminfilters.autocomplete import AutoCompleteFilter
-
+from django.contrib.admin import register
+from django.http import HttpRequest
+from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
-from .steficon import TestRuleMixin
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.models import User
-
-from hope.apps.steficon.forms import (
-    RuleCommitAdminForm,
-)
+from hope.apps.steficon.forms import RuleCommitAdminForm
 from hope.apps.steficon.models import Rule, RuleCommit
 from hope.apps.utils.security import is_root
-from import_export import fields
+
+from .steficon import TestRuleMixin
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -32,18 +27,36 @@ logger = logging.getLogger(__name__)
 class RuleCommitResource(ModelResource):
     rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
         model = RuleCommit
-        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
+        fields = (
+            "timestamp",
+            "rule",
+            "version",
+            "updated_by",
+            "affected_fields",
+            "is_release",
+        )
         import_id_fields = ("rule", "version")
 
 
 @register(RuleCommit)
 class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
-    list_display = ("rule", "version", "updated_by", "timestamp", "is_release", "enabled", "deprecated", "language")
+    list_display = (
+        "rule",
+        "version",
+        "updated_by",
+        "timestamp",
+        "is_release",
+        "enabled",
+        "deprecated",
+        "language",
+    )
     list_filter = (
         ("rule", AutoCompleteFilter),
         ("updated_by", AutoCompleteFilter),

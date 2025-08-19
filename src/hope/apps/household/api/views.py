@@ -1,8 +1,7 @@
 from typing import Any
 
-from django.db.models import Prefetch, Q, QuerySet
-
 from constance import config
+from django.db.models import Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -42,11 +41,7 @@ from hope.apps.household.api.serializers.individual import (
     IndividualPhotoDetailSerializer,
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
-from hope.apps.household.models import (
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
+from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program
@@ -189,11 +184,16 @@ class HouseholdViewSet(
         return Response(FieldAttributeSerializer(qs, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(responses={200: RecipientSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="all-accountability-communication-message-recipients")
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="all-accountability-communication-message-recipients",
+    )
     def all_accountability_communication_message_recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         recipients = self.filter_queryset(
             self.get_queryset().exclude(
-                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
             )
         )
 
@@ -286,7 +286,11 @@ class IndividualViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = IndividualFilter
-    admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
+    admin_area_model_fields = [
+        "household__admin1",
+        "household__admin2",
+        "household__admin3",
+    ]
 
     def get_queryset(self) -> QuerySet:
         if self.program.status == Program.DRAFT:
@@ -354,7 +358,11 @@ class IndividualGlobalViewSet(
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = IndividualFilter
-    admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
+    admin_area_model_fields = [
+        "household__admin1",
+        "household__admin2",
+        "household__admin3",
+    ]
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")

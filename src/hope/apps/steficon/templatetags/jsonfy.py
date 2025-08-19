@@ -4,8 +4,6 @@ from typing import Any
 from django import template
 from django.core import serializers
 from django.db.models import Model
-
-
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import JsonLexer, PythonLexer

@@ -10,9 +10,7 @@ from parameterized import parameterized
 from hope.apps.core.base_test_case import APITestCase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.models import Household
-from hope.apps.targeting.services.targeting_service import (
-    TargetingCriteriaQueryingBase,
-)
+from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 
 
 class TestTargetingCriteriaFlags(APITestCase):

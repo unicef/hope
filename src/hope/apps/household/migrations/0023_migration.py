@@ -87,7 +87,11 @@ class Migration(migrations.Migration):
             model_name="document",
             constraint=models.UniqueConstraint(
                 condition=models.Q(
-                    models.Q(("is_removed", False), ("status", "VALID"), ("rdi_merge_status", "MERGED"))
+                    models.Q(
+                        ("is_removed", False),
+                        ("status", "VALID"),
+                        ("rdi_merge_status", "MERGED"),
+                    )
                 ),
                 fields=("document_number", "type", "country", "program"),
                 name="unique_if_not_removed_and_valid_for_representations",

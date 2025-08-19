@@ -3,9 +3,8 @@ from typing import Dict
 from unittest import TestCase
 from unittest.mock import Mock
 
-from django.http import JsonResponse
-
 import pytest
+from django.http import JsonResponse
 
 from hope.api.endpoints.rdi.upload import RDINestedSerializer
 from hope.api.utils import humanize_errors

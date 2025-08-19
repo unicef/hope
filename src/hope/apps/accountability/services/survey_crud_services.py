@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.accountability.models import Survey
 from hope.apps.accountability.services.sampling import Sampling

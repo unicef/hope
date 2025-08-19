@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -38,11 +37,21 @@ class TestGrievanceCreateSensitiveTicket:
 
         self.household1, self.individuals1 = create_household(
             {"size": 1, "business_area": self.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         self.household2, self.individuals2 = create_household(
             {"size": 1, "business_area": self.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe Second Individual"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe Second Individual",
+            },
         )
         self.program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
         payment_plan = PaymentPlanFactory(program_cycle=self.program.cycles.first(), business_area=self.business_area)

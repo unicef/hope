@@ -34,7 +34,10 @@ class TestProgramFinish:
 
         self.finish_url = reverse(
             "api:programs:programs-finish",
-            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "slug": self.program.slug,
+            },
         )
 
         # There cannot be any active cycles for the program to finish
@@ -51,7 +54,10 @@ class TestProgramFinish:
         ],
     )
     def test_finish_program_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
 
@@ -68,7 +74,10 @@ class TestProgramFinish:
 
     def test_finish_program_already_finished(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_FINISH],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         self.program.status = Program.FINISHED
@@ -83,7 +92,10 @@ class TestProgramFinish:
 
     def test_finish_program_invalid_status_draft(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_FINISH],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         self.program.status = Program.DRAFT
@@ -98,7 +110,10 @@ class TestProgramFinish:
 
     def test_finish_program_without_end_date(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_FINISH],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         self.program.end_date = None
@@ -113,7 +128,10 @@ class TestProgramFinish:
 
     def test_finish_program_with_active_cycles(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_FINISH],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         ProgramCycleFactory(program=self.program, status=ProgramCycle.ACTIVE)
@@ -127,10 +145,16 @@ class TestProgramFinish:
 
     def test_finish_program_with_unreconciled_payment_plans(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_FINISH],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
-        PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.IN_REVIEW)
+        PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.IN_REVIEW,
+        )
 
         response = self.client.post(self.finish_url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -141,12 +165,24 @@ class TestProgramFinish:
 
     def test_finish_program_with_reconciled_payment_plans(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_FINISH],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
-        PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.ACCEPTED)
-        PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.FINISHED)
-        PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.TP_LOCKED)
+        PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.FINISHED,
+        )
+        PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.TP_LOCKED,
+        )
 
         response = self.client.post(self.finish_url)
         assert response.status_code == status.HTTP_200_OK

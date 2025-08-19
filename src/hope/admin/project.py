@@ -1,11 +1,10 @@
 from typing import Any
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
 from django import forms
 from django.contrib import admin
 from django.http import HttpRequest
-from adminfilters.autocomplete import AutoCompleteFilter
-
-from adminfilters.mixin import AdminFiltersMixin
 from smart_admin.decorators import smart_register
 
 from hope.apps.program.models import Program
@@ -15,7 +14,10 @@ from hope.contrib.aurora import models
 @smart_register(models.Project)
 class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("name", "organization", "programme")
-    list_filter = (("organization", AutoCompleteFilter), ("programme", AutoCompleteFilter))
+    list_filter = (
+        ("organization", AutoCompleteFilter),
+        ("programme", AutoCompleteFilter),
+    )
     readonly_fields = ("name", "organization")
     search_fields = ("name",)
     raw_id_fields = ("programme",)

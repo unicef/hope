@@ -5,11 +5,10 @@ from io import BytesIO
 from tempfile import _TemporaryFileWrapper
 from typing import Any
 
+import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.test import TestCase
-
-import openpyxl
 from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
@@ -129,7 +128,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_string(self) -> None:
         flexible_attribute = self.string_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -150,7 +152,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_decimal(self) -> None:
         flexible_attribute = self.decimal_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -171,7 +176,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_boolean(self) -> None:
         flexible_attribute = self.boolean_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -192,7 +200,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_boolean_1(self) -> None:
         flexible_attribute = self.boolean_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -213,7 +224,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_boolean_fail(self) -> None:
         flexible_attribute = self.boolean_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -242,7 +256,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_date(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -263,7 +280,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_date_no_collection_date(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -286,7 +306,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_date_fail_string(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -313,7 +336,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_date_fail_int(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -340,7 +366,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_read_periodic_data_update_non_form_errors(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -366,7 +395,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_data_date_format_correct(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -460,7 +492,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
             PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
     def test_read_flexible_attributes(self) -> None:
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": self.string_attribute.name,
@@ -484,7 +519,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_read_row(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -502,7 +540,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_import_cleaned_data(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -569,7 +610,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     def test_set_round_value(self) -> None:
         flexible_attribute = self.date_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,
@@ -592,7 +636,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
         pdu_data = flexible_attribute.pdu_data
         PeriodicFieldData.objects.filter(id=pdu_data.id).update(subtype="INVALID")
         flexible_attribute.refresh_from_db()
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
             [
                 {
                     "field": flexible_attribute.name,

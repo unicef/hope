@@ -2,7 +2,6 @@ import datetime
 
 from django.core.management import call_command
 from django.test import TestCase
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
@@ -191,7 +190,10 @@ class TestDetails(TestCase):
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
         payment = PaymentFactory(
-            household=household, currency="PLN", delivery_date=datetime.date.today(), delivered_quantity=1
+            household=household,
+            currency="PLN",
+            delivery_date=datetime.date.today(),
+            delivered_quantity=1,
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
