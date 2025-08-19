@@ -189,19 +189,19 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, records_ids)
 
         self.records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
-        self.assertEqual(
+        assert Record.objects.filter(id__in=records_ids, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 4
+        assert (
             PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
         # Checking only first is enough, because they all in one RDI
         registration_data_import = PendingHousehold.objects.all()[0].registration_data_import
-        self.assertEqual(registration_data_import.program, self.program)
+        assert registration_data_import.program == self.program
 
     def test_import_data_to_datahub_retry(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -209,14 +209,14 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         records_ids_all = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
+        assert Record.objects.filter(id__in=records_ids_all, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records[:2]]
         service.process_records(rdi.id, records_ids)
-        self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
+        assert Record.objects.filter(id__in=records_ids_all, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
 
     def test_import_document_validation(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -224,8 +224,8 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
 
         service.process_records(rdi.id, [x.id for x in self.bad_records])
         self.bad_records[0].refresh_from_db()
-        self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
-        self.assertEqual(PendingHousehold.objects.count(), 0)
+        assert self.bad_records[0].status == Record.STATUS_ERROR
+        assert PendingHousehold.objects.count() == 0
 
 
 class TestRegistration2024(BaseTestUkrainianRegistrationService):
@@ -255,11 +255,11 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         service.process_records(rdi.id, [self.record.id])
 
-        self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.filter(program=rdi.program).count(), 1)
-        self.assertEqual(
-            PendingIndividual.objects.get(family_name="Romaniak").flex_fields,
-            {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
-        )
+        assert Record.objects.filter(id__in=[self.record.id], ignored=False).count() == 1
+        assert PendingHousehold.objects.count() == 1
+        assert PendingIndividual.objects.count() == 1
+        assert PendingIndividual.objects.filter(program=rdi.program).count() == 1
+        assert PendingIndividual.objects.get(family_name="Romaniak").flex_fields == {
+            "low_income_hh_h_f": True,
+            "single_headed_hh_h_f": False,
+        }

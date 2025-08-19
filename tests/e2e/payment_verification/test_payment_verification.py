@@ -117,20 +117,19 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         status=PaymentPlan.Status.FINISHED,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
-    payments = []
-    for hh in households:
-        payments.append(
-            PaymentFactory(
-                parent=payment_plan,
-                business_area=BusinessArea.objects.first(),
-                household=hh,
-                head_of_household=household.head_of_household,
-                entitlement_quantity=Decimal(21.36),
-                delivered_quantity=Decimal(21.36),
-                currency="PLN",
-                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            )
+    payments = [
+        PaymentFactory(
+            parent=payment_plan,
+            business_area=BusinessArea.objects.first(),
+            household=hh,
+            head_of_household=household.head_of_household,
+            entitlement_quantity=Decimal(21.36),
+            delivered_quantity=Decimal(21.36),
+            currency="PLN",
+            status=Payment.STATUS_DISTRIBUTION_SUCCESS,
         )
+        for hh in households
+    ]
 
     PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 

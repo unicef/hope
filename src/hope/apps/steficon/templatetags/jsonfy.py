@@ -4,7 +4,7 @@ from typing import Any
 from django import template
 from django.core import serializers
 from django.db.models import Model
-from django.utils.safestring import mark_safe
+
 
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -50,8 +50,7 @@ def pretty_json(context: dict) -> str:
 
     response = json.dumps(data, sort_keys=True, indent=2)
     formatter = HtmlFormatter(style="colorful")
-    response = highlight(response, JsonLexer(), formatter)
-    return mark_safe(response)
+    return highlight(response, JsonLexer(), formatter)
 
 
 @register.filter
@@ -66,8 +65,7 @@ def smart_json(value: Any) -> str:
 @register.filter
 def pretty_python(value: Any) -> str:
     formatter = HtmlFormatter(style="xcode", linenos="table")
-    response = highlight(value, PythonLexer(), formatter)
-    return mark_safe(response)
+    return highlight(value, PythonLexer(), formatter)
 
 
 @register.filter(name="repr")

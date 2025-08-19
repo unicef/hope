@@ -41,7 +41,7 @@ class RoleAssignmentsTest(TestCase):
     def test_user_can_be_assigned_role(self) -> None:
         data = {"role": self.role_1.id, "user": self.user.id, "business_area": self.business_area_afg.id}
         form = RoleAssignmentAdminForm(data=data)
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()
 
     def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
@@ -51,18 +51,18 @@ class RoleAssignmentsTest(TestCase):
 
         data = {"role": self.role_2.id, "user": self.user.id, "business_area": self.business_area_afg.id}
         form = RoleAssignmentAdminForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("role", form.errors.keys())
-        self.assertIn(f"This role is incompatible with {self.role_1.name}", form.errors["role"])
+        assert not form.is_valid()
+        assert "role" in form.errors
+        assert f"This role is incompatible with {self.role_1.name}" in form.errors["role"]
 
         # reverse role from incompatible roles pair
         user_role.role = self.role_2
         user_role.save()
         data["role"] = self.role_1.id
         form = RoleAssignmentAdminForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("role", form.errors.keys())
-        self.assertIn(f"This role is incompatible with {self.role_2.name}", form.errors["role"])
+        assert not form.is_valid()
+        assert "role" in form.errors
+        assert f"This role is incompatible with {self.role_2.name}" in form.errors["role"]
 
     def test_assign_multiple_roles_for_user_at_the_same_time(self) -> None:
         data = {
@@ -77,7 +77,7 @@ class RoleAssignmentsTest(TestCase):
             User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet
         )
         formset = RoleAssignmentFormSet(instance=self.user, data=data)
-        self.assertTrue(formset.is_valid())
+        assert formset.is_valid()
 
     def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
@@ -94,12 +94,12 @@ class RoleAssignmentsTest(TestCase):
             User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet
         )
         formset = RoleAssignmentFormSet(instance=self.user, data=data)
-        self.assertFalse(formset.is_valid())
-        self.assertEqual(len(formset.errors), 2)
+        assert not formset.is_valid()
+        assert len(formset.errors) == 2
 
         errors: List[ErrorList] = formset.errors
         role = errors[0]["role"]  # type: ignore # mypy doesn't see that you can call __getitem__ with str on ErrorList
-        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", role)
+        assert f"{self.role_1.name} is incompatible with {self.role_2.name}." in role
 
     def test_user_role_exclude_by_expiry_date(self) -> None:
         user_not_unicef_partner = UserFactory(partner=PartnerFactory(name="Test123"))
@@ -120,36 +120,28 @@ class RoleAssignmentsTest(TestCase):
             user=user_not_unicef_partner,
         )
 
-        self.assertIn(
-            Permissions.RDI_VIEW_LIST.value,
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
+        assert Permissions.RDI_VIEW_LIST.value in user_not_unicef_partner.permissions_in_business_area(
+            self.business_area_afg.slug
         )
-        self.assertNotIn(
-            Permissions.PM_EXPORT_PDF_SUMMARY.value,
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
+        assert Permissions.PM_EXPORT_PDF_SUMMARY.value not in user_not_unicef_partner.permissions_in_business_area(
+            self.business_area_afg.slug
         )
-        self.assertIn(
-            Permissions.PM_EXPORT_PDF_SUMMARY.value,
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_ukr.slug),
+        assert Permissions.PM_EXPORT_PDF_SUMMARY.value in user_not_unicef_partner.permissions_in_business_area(
+            self.business_area_ukr.slug
         )
 
         user_role_1.expiry_date = "2024-02-02"
         user_role_1.save()
         user_role_1.refresh_from_db()
-        self.assertEqual(str(user_role_1.expiry_date), "2024-02-02")
-        self.assertEqual(str(user_role_2.expiry_date), "2024-02-16")
+        assert str(user_role_1.expiry_date) == "2024-02-02"
+        assert str(user_role_2.expiry_date) == "2024-02-16"
         # empty list
-        self.assertEqual(
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
-            set(),
+        assert user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug) == set()
+        assert Permissions.RDI_VIEW_LIST.value not in user_not_unicef_partner.permissions_in_business_area(
+            self.business_area_afg.slug
         )
-        self.assertNotIn(
-            Permissions.RDI_VIEW_LIST.value,
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
-        )
-        self.assertNotIn(
-            Permissions.PM_EXPORT_PDF_SUMMARY.value,
-            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
+        assert Permissions.PM_EXPORT_PDF_SUMMARY.value not in user_not_unicef_partner.permissions_in_business_area(
+            self.business_area_afg.slug
         )
 
     def test_unicef_partner_hq_has_permission_from_user_and_role_with_all_permissions(self) -> None:
@@ -159,9 +151,7 @@ class RoleAssignmentsTest(TestCase):
         role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
         RoleAssignment.objects.create(role=role, business_area=self.business_area_afg, user=user)
 
-        self.assertIn(
-            Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
-        )
+        assert Permissions.GRIEVANCES_CREATE.value in user.permissions_in_business_area(self.business_area_afg.slug)
 
         # assert role with all permissions
         role_with_all_permissions = RoleFactory(name="Role with all permissions")
@@ -174,11 +164,9 @@ class RoleAssignmentsTest(TestCase):
         role_with_all_permissions.save()
 
         for permission in permissions:
-            self.assertIn(permission.value, user.permissions_in_business_area(self.business_area_afg.slug))
+            assert permission.value in user.permissions_in_business_area(self.business_area_afg.slug)
 
-        self.assertNotIn(
-            Permissions.GRIEVANCES_UPDATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
-        )
+        assert Permissions.GRIEVANCES_UPDATE.value not in user.permissions_in_business_area(self.business_area_afg.slug)
 
     def test_unicef_partner_per_ba_has_permission_from_user_and_role_with_default_permissions(self) -> None:
         partner = PartnerFactory(name="UNICEF")
@@ -187,13 +175,9 @@ class RoleAssignmentsTest(TestCase):
         role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
         RoleAssignment.objects.create(role=role, business_area=self.business_area_afg, user=user)
 
-        self.assertIn(
-            Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
-        )
+        assert Permissions.GRIEVANCES_CREATE.value in user.permissions_in_business_area(self.business_area_afg.slug)
 
         for permission in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER:
-            self.assertIn(permission.value, user.permissions_in_business_area(self.business_area_afg.slug))
+            assert permission.value in user.permissions_in_business_area(self.business_area_afg.slug)
 
-        self.assertNotIn(
-            Permissions.GRIEVANCES_UPDATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
-        )
+        assert Permissions.GRIEVANCES_UPDATE.value not in user.permissions_in_business_area(self.business_area_afg.slug)

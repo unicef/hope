@@ -40,9 +40,7 @@ class StrictBooleanField(forms.Field):
 
 class StrictDateField(forms.DateField):
     def to_python(self, value: Any) -> datetime.date | None:
-        """
-        Override to cover other cases, i.e. integer value provided.
-        """
+        """Override to cover other cases, i.e. integer value provided."""
         if value in self.empty_values:
             return None
         if isinstance(value, datetime.datetime):
@@ -61,8 +59,8 @@ class RowValidationError(ValidationError):
 def validation_error_to_json(
     error: ValidationError | list[ValidationError], seen: set[int] | None = None
 ) -> Any:  # pragma: no cover
-    """
-    Recursively convert a Django ValidationError into a JSON-serializable format.
+    """Recursively convert a Django ValidationError into a JSON-serializable format.
+
     Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objects.
 
     Args:
@@ -71,6 +69,7 @@ def validation_error_to_json(
 
     Returns:
         dict or list: A JSON-serializable representation of the errors.
+
     """
     if seen is None:
         seen = set()

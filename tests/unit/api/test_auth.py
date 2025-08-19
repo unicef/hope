@@ -68,12 +68,12 @@ class ViewAuthView(HOPEApiTestCase):
         self.client.logout()
         url = reverse("api:rdi-upload", args=[self.business_area.slug])
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, str(response.json()))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, str(response.json())
 
     def test_no_perm(self) -> None:
         url = reverse("api:rdi-create", args=[self.business_area.slug])
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
+        assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
         data = response.json()
-        self.assertDictEqual(data, {"detail": "You do not have permission to perform this action. API_RDI_CREATE"})
+        assert data == {"detail": "You do not have permission to perform this action. API_RDI_CREATE"}

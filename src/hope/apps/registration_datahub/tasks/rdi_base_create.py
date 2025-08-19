@@ -76,7 +76,7 @@ class RdiBaseCreateTask:
         account_types_dict = {obj.key: obj for obj in AccountType.objects.all()}
 
         imported_delivery_mechanism_data = []
-        for _, data in self.accounts.items():
+        for data in self.accounts.values():
             individual = data.pop("individual")
             if individual._state.adding:  # if an individual is not created because it is a collided one
                 continue

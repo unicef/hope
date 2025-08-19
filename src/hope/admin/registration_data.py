@@ -10,7 +10,7 @@ from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button
@@ -171,11 +171,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     self,
                     request,
                     self.delete_rdi,
-                    mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                     <h3>All households connected to this Registration data import will be deleted</h3>
-                    """
-                    ),
+                    """,
                     "Successfully executed",
                 )
         except Exception as e:
@@ -254,14 +252,12 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     self,
                     request,
                     self.delete_rdi,
-                    mark_safe(
-                        f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                     <h3>Deleting the RDI will also result in the removal of related households, individuals, and their associated grievance tickets.</h3>
                     <h3>Consequently, these households will no longer be part of any Target Population, if they were included previously.</h3>
                     <br>
                     <h4>This action will result in removing: {number_of_households} Households, {number_of_individuals} Individuals and {number_of_household_selections} Payments</h4>
-                    """
-                    ),
+                    """,
                     "Successfully executed",
                 )
         except Exception as e:

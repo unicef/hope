@@ -5,7 +5,7 @@ from django.db.models import Q, QuerySet
 import django_filters
 from django_filters import FilterSet
 
-from hope.apps.payment.models import PaymentPlan, PaymentVerificationSummary
+from hope.apps.payment.models import PaymentPlan, PaymentVerificationSummary, DeliveryMechanism
 
 
 class PaymentPlanFilter(FilterSet):
@@ -17,22 +17,30 @@ class PaymentPlanFilter(FilterSet):
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
-    delivery_mechanism = django_filters.MultipleChoiceFilter(
+    delivery_mechanism = django_filters.ModelMultipleChoiceFilter(
         field_name="delivery_mechanism__code",
+        queryset=DeliveryMechanism.objects.all(),
+        to_field_name="code",
     )
-    payment_verification_summary_status = django_filters.ChoiceFilter(
+    payment_verification_summary_status = django_filters.MultipleChoiceFilter(
         field_name="payment_verification_summary__status",
         choices=PaymentVerificationSummary.STATUS_CHOICES,
     )
     program_cycle_start_date = django_filters.DateFilter(field_name="program_cycle__start_date", lookup_expr="gte")
     program_cycle_end_date = django_filters.DateFilter(field_name="program_cycle__end_date", lookup_expr="lte")
+    total_entitled_quantity_usd_from = django_filters.NumberFilter(
+        field_name="total_entitled_quantity_usd", lookup_expr="gte"
+    )
+    total_entitled_quantity_usd_to = django_filters.NumberFilter(
+        field_name="total_entitled_quantity_usd", lookup_expr="lte"
+    )
+    start_date = django_filters.DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
+    end_date = django_filters.DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
 
     class Meta:
         model = PaymentPlan
         fields = {
             "total_entitled_quantity": ["gte", "lte"],
-            "dispersion_start_date": ["gte"],
-            "dispersion_end_date": ["lte"],
             "is_follow_up": ["exact"],
             "updated_at": ["gte", "lte"],
         }

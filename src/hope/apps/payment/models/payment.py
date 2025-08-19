@@ -664,8 +664,9 @@ class PaymentPlan(
         return self.eligible_payments.filter(status__in=Payment.FAILED_STATUSES)
 
     def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
-        """Used for creation FPP.
-        need to call from source_payment_plan level
+        """Select unsuccessful payments to create FPP.
+
+        Need to call from source_payment_plan level
         like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
         """
         return (
@@ -753,8 +754,9 @@ class PaymentPlan(
 
     @property
     def household_list(self) -> "QuerySet":
-        """copied from TP
-        used in:
+        """Get household list.
+
+        Copied from TP and used in:
         1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
         """
         all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
@@ -839,7 +841,7 @@ class PaymentPlan(
 
     @property
     def excluded_beneficiaries_ids(self) -> list[str]:
-        """based on Program DCT return HH or Ind IDs"""
+        """Return HH or Ind IDs based on Program DCT."""
         return (
             list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
             if self.is_social_worker_program
@@ -857,7 +859,8 @@ class PaymentPlan(
 
     @property
     def has_export_file(self) -> bool:
-        """
+        """Check if export file exists.
+
         for Locked plan return export_file_entitlement file
         for Accepted and Finished export_file_per_fsp file
         """
@@ -891,7 +894,7 @@ class PaymentPlan(
 
     @property
     def imported_file_name(self) -> str:
-        """used for import entitlements"""
+        """Get file to import entitlements."""
         try:
             return self.imported_file.file.name if self.imported_file else ""
         except FileTemp.DoesNotExist:
@@ -1475,7 +1478,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 "transaction_status_blockchain_link",
             ),
             "fsp_auth_code": (payment, "fsp_auth_code"),
-            "account_data": (collector_data, "account_data"),
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
@@ -1501,6 +1503,20 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return obj.get(nested_field, "")
         # return if obj is model
         return getattr(obj, nested_field, None) or ""
+
+    @classmethod
+    def get_account_value_from_payment(cls, payment: "Payment", key_name: str) -> str | float | list | None:
+        """Get Account values from Collector's Account.data."""
+        snapshot = getattr(payment, "household_snapshot", None)
+        if not snapshot:
+            logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
+            return None
+        snapshot_data = snapshot.snapshot_data
+        collector_data = (
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
+        )
+        account_data = collector_data.get("account_data", {})
+        return account_data.get(key_name, "")
 
     @staticmethod
     def get_document_number_by_doc_type_key(snapshot_data: dict[str, Any], document_type_key: str) -> str:
@@ -2114,6 +2130,10 @@ class PaymentDataCollector(Account):
         delivery_mechanism: "DeliveryMechanism",
         collector: Individual,
     ) -> bool:
+        if not delivery_mechanism.account_type:
+            # ex. "cash" - doesn't need any validation
+            return True
+
         account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}

@@ -64,62 +64,60 @@ class TestPartnerAccessChangeSignal(TestCase):
         )
 
     def test_none_partners_access(self) -> None:
-        self.assertEqual(self.program.partner_access, Program.NONE_PARTNERS_ACCESS)
-        self.assertEqual(self.program.role_assignments.count(), 0)
-        self.assertEqual(
-            RoleAssignment.objects.filter(business_area=self.business_area, program=None).count(),
-            4,
+        assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
+        assert self.program.role_assignments.count() == 0
+        assert (
+            RoleAssignment.objects.filter(business_area=self.business_area, program=None).count() == 4
         )  # UNICEF HQ and UNICEF Partner for afghanistan
-        self.assertEqual(
+        assert (
             RoleAssignment.objects.filter(
                 business_area=self.business_area, program=None, partner__name="UNICEF HQ"
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
-        self.assertEqual(
+        assert (
             RoleAssignment.objects.filter(
                 business_area=self.business_area,
                 program=None,
                 partner__name=f"UNICEF Partner for {self.business_area.slug}",
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
-        self.assertEqual(self.program.admin_area_limits.count(), 0)
+        assert self.program.admin_area_limits.count() == 0
 
         self.program.partner_access = Program.NONE_PARTNERS_ACCESS
         self.program.save()
 
-        self.assertEqual(self.program.partner_access, Program.NONE_PARTNERS_ACCESS)
-        self.assertEqual(self.program.role_assignments.count(), 0)
-        self.assertEqual(
-            RoleAssignment.objects.filter(business_area=self.business_area, program=None).count(),
-            4,
+        assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
+        assert self.program.role_assignments.count() == 0
+        assert (
+            RoleAssignment.objects.filter(business_area=self.business_area, program=None).count() == 4
         )  # UNICEF HQ and UNICEF Partner for afghanistan
 
-        self.assertEqual(self.program.admin_area_limits.count(), 0)
+        assert self.program.admin_area_limits.count() == 0
 
     def test_all_partners_access(self) -> None:
-        self.assertEqual(self.program.role_assignments.count(), 0)
+        assert self.program.role_assignments.count() == 0
 
         self.program.partner_access = Program.ALL_PARTNERS_ACCESS
         self.program.save()
 
-        self.assertEqual(self.program.partner_access, Program.ALL_PARTNERS_ACCESS)
+        assert self.program.partner_access == Program.ALL_PARTNERS_ACCESS
 
-        self.assertEqual(self.program.role_assignments.count(), 2)
-        self.assertEqual(self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_1).count(), 1)
-        self.assertEqual(self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_2).count(), 1)
+        assert self.program.role_assignments.count() == 2
+        assert self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_1).count() == 1
+        assert self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_2).count() == 1
 
-        self.assertEqual(self.program.admin_area_limits.count(), 0)
+        assert self.program.admin_area_limits.count() == 0
 
     def test_selected_into_all_and_none_partners_access(self) -> None:
-        self.assertEqual(self.program.role_assignments.count(), 0)
+        assert self.program.role_assignments.count() == 0
 
         self.program.partner_access = Program.SELECTED_PARTNERS_ACCESS
         self.program.save()
 
-        self.assertEqual(self.program.role_assignments.count(), 0)
+        assert self.program.role_assignments.count() == 0
 
         RoleAssignment.objects.create(
             partner=self.partner_with_role_in_afg_1,
@@ -130,40 +128,39 @@ class TestPartnerAccessChangeSignal(TestCase):
         area_limits = AdminAreaLimitedTo.objects.create(partner=self.partner_with_role_in_afg_1, program=self.program)
         area_limits.areas.set([self.area_in_afg_1])
 
-        self.assertEqual(self.program.role_assignments.count(), 1)
-        self.assertEqual(self.program.admin_area_limits.count(), 1)
-        self.assertEqual(self.program.admin_area_limits.first().areas.count(), 1)
-        self.assertEqual(self.program.admin_area_limits.first().areas.first(), self.area_in_afg_1)
+        assert self.program.role_assignments.count() == 1
+        assert self.program.admin_area_limits.count() == 1
+        assert self.program.admin_area_limits.first().areas.count() == 1
+        assert self.program.admin_area_limits.first().areas.first() == self.area_in_afg_1
 
         self.program.partner_access = Program.ALL_PARTNERS_ACCESS
         self.program.save()
 
-        self.assertEqual(self.program.role_assignments.count(), 2)
+        assert self.program.role_assignments.count() == 2
 
-        self.assertEqual(self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_1).count(), 1)
-        self.assertEqual(self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_2).count(), 1)
+        assert self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_1).count() == 1
+        assert self.program.role_assignments.filter(partner=self.partner_with_role_in_afg_2).count() == 1
 
-        self.assertEqual(self.program.admin_area_limits.count(), 0)
+        assert self.program.admin_area_limits.count() == 0
 
         self.program.partner_access = Program.NONE_PARTNERS_ACCESS
         self.program.save()
 
-        self.assertEqual(self.program.role_assignments.count(), 0)
-        self.assertEqual(
-            RoleAssignment.objects.filter(business_area=self.business_area, program=None).count(),
-            4,
+        assert self.program.role_assignments.count() == 0
+        assert (
+            RoleAssignment.objects.filter(business_area=self.business_area, program=None).count() == 4
         )  # UNICEF HQ and UNICEF Partner for afghanistan
-        self.assertEqual(
+        assert (
             RoleAssignment.objects.filter(
                 business_area=self.business_area, program=None, partner__name="UNICEF HQ"
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
-        self.assertEqual(
+        assert (
             RoleAssignment.objects.filter(
                 business_area=self.business_area,
                 program=None,
                 partner__name=f"UNICEF Partner for {self.business_area.slug}",
-            ).count(),
-            1,
+            ).count()
+            == 1
         )

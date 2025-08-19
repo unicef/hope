@@ -9,11 +9,10 @@ from hope.apps.program.models import Program
 
 
 def field_label_to_field_name(input_string: str) -> str:
-    """
-    Convert a field label to a field name.
+    """Convert a field label to a field name.
+
     Change " " into "_", remove special characters and convert to lowercase.
     """
-
     input_string = input_string.replace(" ", "_")
     input_string = re.sub(r"[^\w]", "", input_string)
     input_string = re.sub(r"__+", "_", input_string)
@@ -22,9 +21,7 @@ def field_label_to_field_name(input_string: str) -> str:
 
 
 def populate_pdu_with_null_values(program: Program, current_flex_fields: dict | None = None) -> dict:
-    """
-    Populate the PDU with null values for all the flexible attributes.
-    """
+    """Populate the PDU with null values for all the flexible attributes."""
     current_flex_fields = {} if current_flex_fields is None else current_flex_fields
     periodic_data_fields = FlexibleAttribute.objects.filter(program=program, type=FlexibleAttribute.PDU).values_list(
         "name", "pdu_data__number_of_rounds"

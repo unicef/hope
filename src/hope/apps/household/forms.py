@@ -21,7 +21,7 @@ from hope.apps.registration_data.models import RegistrationDataImport
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:
-    """Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area"""
+    """Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area."""
     if separator in ["space", "tab"]:
         list_of_households = list(map(str.strip, text.split(" ")))
     elif separator == "new_line":
@@ -161,7 +161,8 @@ class CreateTargetPopulationTextForm(forms.Form):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.program = kwargs.pop("program")
-        assert self.program is not None
+        if not self.program:
+            raise forms.ValidationError("Missing programme")
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
         self.fields["program_cycle"] = forms.ModelChoiceField(

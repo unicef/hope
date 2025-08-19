@@ -39,19 +39,24 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportCreateSerializer,
     RegistrationDataImportDetailSerializer,
     RegistrationDataImportListSerializer,
+    RegistrationKoboImportSerializer,
+    RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
     rdi_deduplication_task,
+    registration_kobo_import_task,
     registration_program_population_import_task,
+    registration_xlsx_import_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
+# Import moved inline to avoid circular dependency issues
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +76,8 @@ class RegistrationDataImportViewSet(
         "refuse": RefuseRdiSerializer,
         "create": RegistrationDataImportCreateSerializer,
         "status_choices": ChoiceSerializer,
+        "registration_xlsx_import": RegistrationXlsxImportSerializer,
+        "registration_kobo_import": RegistrationKoboImportSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -88,6 +95,8 @@ class RegistrationDataImportViewSet(
         "status_choices": [
             Permissions.RDI_VIEW_LIST,
         ],
+        "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
+        "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -304,3 +313,165 @@ class RegistrationDataImportViewSet(
         status_choices = to_choice_object(RegistrationDataImport.STATUS_CHOICE)
 
         return Response(status=200, data=self.get_serializer(status_choices, many=True).data)
+
+    @extend_schema(
+        request=RegistrationXlsxImportSerializer,
+        responses=RegistrationDataImportDetailSerializer,
+    )
+    @action(detail=False, methods=["post"], url_path="registration-xlsx-import")
+    @transaction.atomic
+    def registration_xlsx_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Import registration data from an XLSX file."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if self.program.status == Program.FINISHED:
+            raise ValidationError("In order to perform this action, program status must not be finished.")
+
+        validated_data = serializer.validated_data.copy()
+        validated_data["business_area_slug"] = self.business_area.slug
+        validated_data["program_id"] = str(self.program.id)
+
+        # Validate import data exists and is finished
+        import_data_id = validated_data["import_data_id"]
+        import_data = ImportData.objects.filter(id=import_data_id).first()
+        if not import_data:
+            raise ValidationError("Import data not found")
+        if import_data.status != ImportData.STATUS_FINISHED:
+            raise ValidationError("Import data is not ready for import")
+
+        # Create RDI objects inline instead of using GraphQL mutation helpers
+        from hope.apps.core.models import BusinessArea
+
+        import_data_id = validated_data.pop("import_data_id")
+        import_data_obj = ImportData.objects.get(id=import_data_id)
+        business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
+
+        registration_data_import = RegistrationDataImport(
+            status=RegistrationDataImport.IMPORTING,
+            imported_by=request.user,
+            data_source=RegistrationDataImport.XLS,
+            number_of_individuals=import_data_obj.number_of_individuals,
+            number_of_households=import_data_obj.number_of_households,
+            business_area=business_area,
+            screen_beneficiary=validated_data.pop("screen_beneficiary", False),
+            program_id=validated_data.pop("program_id"),
+            import_data=import_data_obj,
+            **validated_data,
+        )
+
+        if self.program.biometric_deduplication_enabled:
+            registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+        registration_data_import.full_clean()
+        registration_data_import.save()
+
+        # Update status to IMPORT_SCHEDULED after save
+        registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        registration_data_import.save(update_fields=["status"])
+
+        transaction.on_commit(
+            lambda: registration_xlsx_import_task.delay(
+                registration_data_import_id=str(registration_data_import.id),
+                import_data_id=str(import_data_obj.id),
+                business_area_id=str(business_area.id),
+                program_id=str(self.program.id),
+            )
+        )
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            registration_data_import.program_id,
+            None,
+            registration_data_import,
+        )
+
+        return Response(
+            RegistrationDataImportDetailSerializer(
+                registration_data_import, context=self.get_serializer_context()
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(
+        request=RegistrationKoboImportSerializer,
+        responses=RegistrationDataImportDetailSerializer,
+    )
+    @action(detail=False, methods=["post"], url_path="registration-kobo-import")
+    @transaction.atomic
+    def registration_kobo_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Import registration data from KoBo."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if self.program.status == Program.FINISHED:
+            raise ValidationError("In order to perform this action, program status must not be finished.")
+
+        validated_data = serializer.validated_data.copy()
+        validated_data["business_area_slug"] = self.business_area.slug
+        validated_data["program_id"] = str(self.program.id)
+
+        # Validate import data exists and is finished
+        import_data_id = validated_data["import_data_id"]
+        import_data = KoboImportData.objects.filter(id=import_data_id).first()
+        if not import_data:
+            raise ValidationError("Kobo import data not found")
+        if import_data.status != ImportData.STATUS_FINISHED:
+            raise ValidationError("Kobo import data is not ready for import")
+
+        # Create RDI objects inline instead of using GraphQL mutation helpers
+        from hope.apps.core.models import BusinessArea
+
+        import_data_id = validated_data.pop("import_data_id")
+        import_data_obj = KoboImportData.objects.get(id=import_data_id)
+        business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
+
+        registration_data_import = RegistrationDataImport(
+            status=RegistrationDataImport.IMPORTING,
+            imported_by=request.user,
+            data_source=RegistrationDataImport.KOBO,
+            number_of_individuals=import_data_obj.number_of_individuals,
+            number_of_households=import_data_obj.number_of_households,
+            business_area=business_area,
+            screen_beneficiary=validated_data.pop("screen_beneficiary", False),
+            program_id=validated_data.pop("program_id"),
+            import_data=import_data_obj,
+            **validated_data,
+        )
+
+        if self.program.biometric_deduplication_enabled:
+            registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+        registration_data_import.full_clean()
+        registration_data_import.save()
+
+        # Update status to IMPORT_SCHEDULED after save
+        registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        registration_data_import.save(update_fields=["status"])
+
+        transaction.on_commit(
+            lambda: registration_kobo_import_task.delay(
+                registration_data_import_id=str(registration_data_import.id),
+                import_data_id=str(import_data_obj.id),
+                business_area_id=str(business_area.id),
+                program_id=str(self.program.id),
+            )
+        )
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            registration_data_import.program_id,
+            None,
+            registration_data_import,
+        )
+
+        return Response(
+            RegistrationDataImportDetailSerializer(
+                registration_data_import, context=self.get_serializer_context()
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )

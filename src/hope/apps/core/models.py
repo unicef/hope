@@ -52,9 +52,8 @@ class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after mi
 
 
 class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
-    """
-    BusinessArea (EPRP called Workspace, also synonym was
-    country/region) model.
+    """BusinessArea (EPRP called Workspace, also synonym was country/region) model.
+
     It's used for drop down menu in top bar in the UI. Many times
     BusinessArea means country.
     region_name is a short code for distinct business arease
@@ -458,7 +457,7 @@ class CountryCodeMap(models.Model):
 
 
 class CustomModelEntry(ModelEntry):
-    """don't update existing tasks"""
+    """Don't update existing tasks."""
 
     @classmethod
     def from_entry(cls, name: str, app: str | None = None, **entry: Any) -> "CustomModelEntry":
@@ -520,7 +519,7 @@ class StorageFile(models.Model):
 
 
 class FileTemp(TimeStampedModel):
-    """Use this model for temporary store files"""
+    """Use this model for temporary store files."""
 
     object_id = models.CharField(max_length=120, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)

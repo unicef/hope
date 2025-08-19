@@ -346,6 +346,7 @@ class TestGrievanceTicketList:
                     "zip_code": household.zip_code,
                     "residence_status": household.get_residence_status_display(),
                     "import_id": household.unicef_id,
+                    "program_slug": household.program.slug,
                 }
                 if household
                 else None
@@ -492,7 +493,7 @@ class TestGrievanceTicketList:
         assert str(self.grievance_ticket_different_program.id) not in result_ids
 
     @pytest.mark.parametrize(
-        "permissions, area_limit, expected_tickets",
+        ("permissions", "area_limit", "expected_tickets"),
         [
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], False, [0, 1, 2, 6, 7, 8]),
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], False, [0, 1, 6, 7, 8]),
@@ -570,7 +571,7 @@ class TestGrievanceTicketList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 9
-            assert len(ctx.captured_queries) == 59
+            assert len(ctx.captured_queries) == 60
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -592,7 +593,7 @@ class TestGrievanceTicketList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 54
+            assert len(ctx.captured_queries) == 55
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -603,7 +604,7 @@ class TestGrievanceTicketList:
             assert len(response.json()["results"]) == 6
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 48
+            assert len(ctx.captured_queries) == 49
 
         ticket.delete()
         with CaptureQueriesContext(connection) as ctx:

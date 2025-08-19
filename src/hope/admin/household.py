@@ -13,7 +13,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -284,7 +284,7 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
-        """Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces"""
+        """Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces."""
         return [hh_id.strip() for hh_id in re.split(r"new line|[,\|/\s]+", household_list) if hh_id]
 
     @staticmethod
@@ -481,9 +481,9 @@ class HouseholdAdmin(
     def tickets(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
-        tickets = []
-        for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all()):
-            tickets.append(entry.ticket)
+        tickets = [
+            entry.ticket for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all())
+        ]
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
@@ -562,12 +562,10 @@ class HouseholdAdmin(
             self,
             request,
             self.gdpr_remove,
-            mark_safe(
-                """<h1>Household erase</h1>
-                <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
-                <p>This operation cannot be undo.</p>
-                """
-            ),
+            """<h1>Household erase</h1>
+            <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
+            <p>This operation cannot be undo.</p>
+            """,
             "Successfully executed",
         )
 
@@ -585,11 +583,9 @@ class HouseholdAdmin(
             self,
             request,
             self.logical_delete,
-            mark_safe(
-                """<h1>Household logical delete</h1>
+            """<h1>Household logical delete</h1>
                 <p>After this operation household will be marked as logical deleted and will be hidden in the application.</p>
-                """
-            ),
+                """,
             "Successfully executed",
         )
 

@@ -971,6 +971,13 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
         )
 
 
+class PaymentChoicesSerializer(serializers.Serializer):
+    status_choices = serializers.SerializerMethodField()
+
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        return [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
+
+
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     household_id = serializers.UUIDField(read_only=True)
@@ -1038,7 +1045,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
-        """return primary_collector or alternate_collector field value or None"""
+        """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
@@ -1190,7 +1197,7 @@ class VerificationListSerializer(serializers.ModelSerializer):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
-        """return primary_collector or alternate_collector field value or None"""
+        """Return primary_collector or alternate_collector field value or None."""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (

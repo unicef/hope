@@ -64,29 +64,29 @@ class TestHousehold(TestCase):
         household.set_admin_areas()
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area1)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, None)
-        self.assertEqual(household.admin3, None)
-        self.assertEqual(household.admin4, None)
+        assert household.admin_area == self.area1
+        assert household.admin1 == self.area1
+        assert household.admin2 is None
+        assert household.admin3 is None
+        assert household.admin4 is None
 
         household.set_admin_areas(self.area4)
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area4)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, self.area2)
-        self.assertEqual(household.admin3, self.area3)
-        self.assertEqual(household.admin4, self.area4)
+        assert household.admin_area == self.area4
+        assert household.admin1 == self.area1
+        assert household.admin2 == self.area2
+        assert household.admin3 == self.area3
+        assert household.admin4 == self.area4
 
         household.set_admin_areas(self.area3)
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area3)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, self.area2)
-        self.assertEqual(household.admin3, self.area3)
-        self.assertEqual(household.admin4, None)
+        assert household.admin_area == self.area3
+        assert household.admin1 == self.area1
+        assert household.admin2 == self.area2
+        assert household.admin3 == self.area3
+        assert household.admin4 is None
 
     def test_household_set_admin_area_based_on_lowest_admin(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -98,11 +98,11 @@ class TestHousehold(TestCase):
         household.set_admin_areas()
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area4)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, self.area2)
-        self.assertEqual(household.admin3, self.area3)
-        self.assertEqual(household.admin4, self.area4)
+        assert household.admin_area == self.area4
+        assert household.admin1 == self.area1
+        assert household.admin2 == self.area2
+        assert household.admin3 == self.area3
+        assert household.admin4 == self.area4
 
     def test_remove_household(self) -> None:
         household1, _ = create_household(
@@ -112,9 +112,9 @@ class TestHousehold(TestCase):
             household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9191"}
         )
         household1.delete()
-        self.assertEqual(Household.all_objects.filter(unicef_id="HH-9090").first().is_removed, True)
+        assert Household.all_objects.filter(unicef_id="HH-9090").first().is_removed is True
         household2.delete(soft=False)
-        self.assertIsNone(Household.all_objects.filter(unicef_id="HH-9191").first())
+        assert Household.all_objects.filter(unicef_id="HH-9191").first() is None
 
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         HouseholdFactory(unicef_id="HH-123", program=self.program)
@@ -125,11 +125,11 @@ class TestHousehold(TestCase):
     def test_geopoint(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
         household.geopoint = 1.2, 0.5  # type: ignore
-        self.assertEqual(household.longitude, 1.2)
-        self.assertEqual(household.latitude, 0.5)
+        assert household.longitude == 1.2
+        assert household.latitude == 0.5
         household.geopoint = None
-        self.assertIsNone(household.longitude)
-        self.assertIsNone(household.latitude)
+        assert household.longitude is None
+        assert household.latitude is None
 
 
 class TestDocument(TestCase):
@@ -406,7 +406,4 @@ class TestIndividualModel(TestCase):
         with self.assertRaises(Exception) as error:
             ind.mark_as_distinct()
 
-        self.assertEqual(
-            str(error.exception),
-            "IND-333: Valid Document already exists: 123456ABC.",
-        )
+        assert str(error.exception) == "IND-333: Valid Document already exists: 123456ABC."

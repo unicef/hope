@@ -122,10 +122,10 @@ export function PaymentPlansFilters({
           <NumberTextField
             id="totalEntitledQuantityFromFilter"
             topLabel={t('Entitled Quantity')}
-            value={filter.totalEntitledQuantityFrom}
+            value={filter.totalEntitledQuantityUsdFrom}
             placeholder={t('From')}
             onChange={(e) =>
-              handleFilterChange('totalEntitledQuantityFrom', e.target.value)
+              handleFilterChange('totalEntitledQuantityUsdFrom', e.target.value)
             }
             data-cy="filters-total-entitled-quantity-from"
           />
@@ -133,10 +133,10 @@ export function PaymentPlansFilters({
         <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
-            value={filter.totalEntitledQuantityTo}
+            value={filter.totalEntitledQuantityUsdTo}
             placeholder={t('To')}
             onChange={(e) =>
-              handleFilterChange('totalEntitledQuantityTo', e.target.value)
+              handleFilterChange('totalEntitledQuantityUsdTo', e.target.value)
             }
             error={Boolean(
               filter.totalEntitledQuantityFrom &&

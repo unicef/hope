@@ -1,11 +1,15 @@
+import json
+from typing import Any
+
 from django.db.models import Q
 
 from rest_framework import serializers
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import get_count_and_percentage
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import ImportData, KoboImportData, RegistrationDataImport
 from hope.apps.registration_datahub.utils import get_rdi_program_population
+import contextlib
 
 
 class RegistrationDataImportListSerializer(serializers.ModelSerializer):
@@ -183,3 +187,104 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
             import_from_ids=import_from_ids,
             exclude_external_collectors=exclude_external_collectors,
         )
+
+
+# New serializers for the GraphQL mutations conversion
+
+
+class XlsxRowErrorSerializer(serializers.Serializer):
+    """Serializer for XLSX validation errors."""
+
+    row_number = serializers.IntegerField()
+    header = serializers.CharField()
+    message = serializers.CharField()
+
+
+class ImportDataSerializer(serializers.ModelSerializer):
+    xlsx_validation_errors = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ImportData
+        fields = (
+            "id",
+            "status",
+            "data_type",
+            "number_of_households",
+            "number_of_individuals",
+            "error",
+            "validation_errors",
+            "xlsx_validation_errors",
+            "created_at",
+            "business_area_slug",
+        )
+        read_only_fields = fields
+
+    def get_xlsx_validation_errors(self, obj: ImportData) -> list[dict[str, Any]]:
+        """Parse validation errors JSON into structured format."""
+        errors = []
+        if obj.validation_errors:
+            with contextlib.suppress(json.JSONDecodeError, TypeError):
+                errors.extend(json.loads(obj.validation_errors))
+        return errors
+
+
+class KoboErrorSerializer(serializers.Serializer):
+    """Serializer for Kobo validation errors."""
+
+    header = serializers.CharField()
+    message = serializers.CharField()
+
+
+class KoboImportDataSerializer(serializers.ModelSerializer):
+    kobo_validation_errors = serializers.SerializerMethodField()
+
+    class Meta:
+        model = KoboImportData
+        fields = (
+            "id",
+            "status",
+            "data_type",
+            "number_of_households",
+            "number_of_individuals",
+            "error",
+            "validation_errors",
+            "kobo_validation_errors",
+            "created_at",
+            "kobo_asset_id",
+            "only_active_submissions",
+            "pull_pictures",
+            "business_area_slug",
+        )
+        read_only_fields = fields
+
+    def get_kobo_validation_errors(self, obj: KoboImportData) -> list[dict[str, Any]]:
+        """Parse kobo validation errors JSON into structured format."""
+        if not obj.validation_errors:
+            return []
+        try:
+            return json.loads(obj.validation_errors)
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+
+class UploadXlsxFileSerializer(serializers.Serializer):
+    file = serializers.FileField(required=True)
+
+
+class SaveKoboImportDataSerializer(serializers.Serializer):
+    uid = serializers.CharField(required=True, help_text="Kobo asset ID")
+    only_active_submissions = serializers.BooleanField(required=True)
+    pull_pictures = serializers.BooleanField(required=True)
+
+
+class RegistrationXlsxImportSerializer(serializers.Serializer):
+    import_data_id = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
+    screen_beneficiary = serializers.BooleanField(required=True)
+
+
+class RegistrationKoboImportSerializer(serializers.Serializer):
+    import_data_id = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
+    pull_pictures = serializers.BooleanField(required=True)
+    screen_beneficiary = serializers.BooleanField(required=True)

@@ -67,7 +67,8 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 def invalidate_permissions_cache_on_role_assignment_change(
     sender: Any, instance: RoleAssignment, **kwargs: Any
 ) -> None:
-    """Invalidate the cache for the User/Partner's Users associated with the RoleAssignment
+    """Invalidate the cache for the User/Partner's Users associated with the RoleAssignment.
+
     when the RoleAssignment is created, updated, or deleted.
     """
     if instance.user:
@@ -80,9 +81,9 @@ def invalidate_permissions_cache_on_role_assignment_change(
 @receiver(post_save, sender=Role)
 @receiver(pre_delete, sender=Role)
 def invalidate_permissions_cache_on_role_change(sender: Any, instance: Role, **kwargs: Any) -> None:
-    """
-    Invalidate the cache for the User/Partner's Users associated with the Role through a RoleAssignment
-    when the Role is created, updated, or deleted.
+    """Invalidate the cache for the User/Partner's Users.
+
+    It applies to users associated with the Role through a RoleAssignment when the Role is created, updated, or deleted.
     """
     users = User.objects.filter(
         Q(role_assignments__role=instance) | Q(partner__role_assignments__role=instance)
@@ -132,7 +133,5 @@ def invalidate_permissions_cache_on_user_groups_change(action: str, instance: Us
 @receiver(post_save, sender=User)
 @receiver(pre_delete, sender=User)
 def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **kwargs: Any) -> None:
-    """
-    Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)
-    """
+    """Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)."""
     _invalidate_user_permissions_cache([instance])

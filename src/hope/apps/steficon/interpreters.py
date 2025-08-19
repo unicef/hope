@@ -10,7 +10,7 @@ from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-from django.utils.safestring import mark_safe
+
 
 from jinja2 import Environment
 
@@ -115,19 +115,20 @@ class PythonExec(Interpreter):
             return pts
 
     def validate(self) -> bool:
-        errors = []
-        for forbidden in [
-            "__import__",
-            "raw",
-            "connection",
-            "import",
-            "delete",
-            "save",
-            "eval",
-            "exec",
-        ]:
-            if forbidden in self.init_string:
-                errors.append(f"Code contains an invalid statement '{forbidden}'")
+        errors = [
+            f"Code contains an invalid statement '{forbidden}'"
+            for forbidden in [
+                "__import__",
+                "raw",
+                "connection",
+                "import",
+                "delete",
+                "save",
+                "eval",
+                "exec",
+            ]
+            if forbidden in self.init_string
+        ]
         if errors:
             raise ValidationError(errors)
         try:
@@ -137,7 +138,7 @@ class PythonExec(Interpreter):
             logger.warning(e)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
-            raise ValidationError(mark_safe(msg))
+            raise ValidationError(msg)
 
 
 def get_env(**options: Any) -> Environment:

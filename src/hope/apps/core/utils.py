@@ -23,7 +23,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Func, Q, Value
+from django.db.models import Func, Q, Value, F
 from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -96,8 +96,7 @@ def unique_slugify(
     queryset: Optional["QuerySet"] = None,
     slug_separator: str = "-",
 ) -> None:
-    """
-    Calculates and stores a unique slug of ``value`` for an instance.
+    """Calculate and stores a unique slug of ``value`` for an instance.
 
     ``slug_field_name`` should be a string matching the name of the field to
     store the slug in (and the field to check against for uniqueness).
@@ -407,9 +406,7 @@ class CustomOrderingFilter(OrderingFilter):
         return qs.order_by(*new_ordering)
 
     def normalize_fields(self, fields: list) -> dict:
-        """
-        Normalize the fields into an ordered map of {field name: param name}
-        """
+        """Normalize the fields into an ordered map of {field name: param name}."""
         from django.db.models.functions import Lower
         from django.utils.itercompat import is_iterable
 
@@ -418,7 +415,8 @@ class CustomOrderingFilter(OrderingFilter):
             return OrderedDict(fields)
 
         # convert iterable of values => iterable of pairs (field name, param name)
-        assert is_iterable(fields), "'fields' must be an iterable (e.g., a list, tuple, or mapping)."
+        if not is_iterable(fields):
+            raise ValueError("'fields' must be an iterable (e.g., a list, tuple, or mapping).")
 
         # fields is an iterable of field names
         assert all(
@@ -504,8 +502,7 @@ def check_concurrency_version_in_mutation(version: int | None, target: Any) -> N
 
 
 def update_labels_mapping(csv_file: str) -> None:
-    """
-    WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
+    """WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py.
 
     IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
 
@@ -712,7 +709,7 @@ def get_model_choices_fields(model: type, excluded: list | None = None) -> list[
 
 
 class SheetImageLoader:
-    """Loads all images in a sheet"""
+    """Load all images in a sheet."""
 
     _images = {}
 
@@ -732,11 +729,11 @@ class SheetImageLoader:
             self._images[f"{col}{row}"] = image._data
 
     def image_in(self, cell: "Cell") -> bool:
-        """Checks if there's an image in specified cell"""
+        """Check if there's an image in specified cell."""
         return cell in self._images
 
     def get(self, cell: "Cell") -> Any:
-        """Retrieves image data from a cell"""
+        """Retrieve image data from a cell."""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
         image = io.BytesIO(self._images[cell]())
@@ -818,7 +815,7 @@ def clear_cache_for_dashboard_totals() -> None:
 
 
 def clear_cache_for_key(key: str) -> None:
-    """remove cache if key starts with"""
+    """Remove cache if key starts with."""
     if hasattr(cache, "keys"):
         all_cache_keys = cache.keys(f"{key}*")
         for k in all_cache_keys:
@@ -923,9 +920,13 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
+    from hope.apps.core.models import BusinessArea
 
     try:
-        assets = KoboAPI(business_area_slug).get_all_projects_data()  # type: ignore
+        business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
+            slug=business_area_slug
+        )
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)  # type: ignore
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise ValidationError("Provided business area does not exist.") from e

@@ -230,7 +230,7 @@ class TestProgramUpdate:
         }
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([Permissions.PROGRAMME_UPDATE], status.HTTP_200_OK),
             ([Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], status.HTTP_403_FORBIDDEN),

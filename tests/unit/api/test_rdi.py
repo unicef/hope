@@ -51,14 +51,14 @@ class CreateRDITests(HOPEApiTestCase):
             "imported_by_email": user.email,
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         rdi = RegistrationDataImport.objects.filter(name="aaaa").first()
-        self.assertIsNotNone(rdi)
-        self.assertEqual(rdi.program, self.program)
-        self.assertEqual(rdi.status, RegistrationDataImport.LOADING)
-        self.assertEqual(rdi.imported_by, user)
-        self.assertEqual(response.json()["id"], str(rdi.id))
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert rdi is not None
+        assert rdi.program == self.program
+        assert rdi.status == RegistrationDataImport.LOADING
+        assert rdi.imported_by == user
+        assert response.json()["id"] == str(rdi.id)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
 
     def test_create_rdi_permission_denied_for_invalid_email(self) -> None:
         data = {
@@ -68,8 +68,8 @@ class CreateRDITests(HOPEApiTestCase):
             "imported_by_email": "nonexistentuser@example.com",
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
-        self.assertIn("User with this email does not exist.", str(response.json()))
+        assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
+        assert "User with this email does not exist." in str(response.json())
 
 
 class PushToRDITests(HOPEApiTestCase):
@@ -143,34 +143,34 @@ class PushToRDITests(HOPEApiTestCase):
             }
         ]
         response = self.client.post(self.url, input_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
 
         data: Dict = response.json()
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi, village="village1").first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(hh.head_of_household)
-        self.assertIsNotNone(hh.primary_collector)
-        self.assertIsNone(hh.alternate_collector)
-        self.assertEqual(hh.program_id, self.program.id)
+        assert hh is not None
+        assert hh.head_of_household is not None
+        assert hh.primary_collector is not None
+        assert hh.alternate_collector is None
+        assert hh.program_id == self.program.id
 
-        self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
-        self.assertEqual(hh.head_of_household.full_name, "James Head #1")
-        self.assertIsNotNone(hh.head_of_household.photo)
+        assert hh.primary_collector.full_name == "Mary Primary #1"
+        assert hh.head_of_household.full_name == "James Head #1"
+        assert hh.head_of_household.photo is not None
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
-        self.assertIsNotNone(account)
-        self.assertEqual(account.account_type.key, "bank")
-        self.assertEqual(account.financial_institution.id, self.fi.id)
-        self.assertEqual(account.number, "123")
-        self.assertEqual(account.data, {"field_name": "field_value"})
+        assert account is not None
+        assert account.account_type.key == "bank"
+        assert account.financial_institution.id == self.fi.id
+        assert account.number == "123"
+        assert account.data == {"field_name": "field_value"}
 
-        self.assertEqual(hh.primary_collector.program_id, self.program.id)
-        self.assertEqual(hh.head_of_household.program_id, self.program.id)
+        assert hh.primary_collector.program_id == self.program.id
+        assert hh.head_of_household.program_id == self.program.id
 
-        self.assertEqual(data["households"], 1)
-        self.assertEqual(data["individuals"], 2)
+        assert data["households"] == 1
+        assert data["individuals"] == 2
 
     def test_push_fail_if_not_loading(self) -> None:
         program = get_program_with_dct_type_and_name()
@@ -208,8 +208,8 @@ class CompleteRDITests(HOPEApiTestCase):
     def test_complete(self) -> None:
         data = {}
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, str(response.json()))
+        assert response.status_code == status.HTTP_200_OK, str(response.json())
         data = response.json()
-        self.assertDictEqual(data[0], {"id": str(self.rdi.id), "status": "IN_REVIEW"})
+        assert data[0] == {"id": str(self.rdi.id), "status": "IN_REVIEW"}
         self.rdi.refresh_from_db()
-        self.assertEqual(self.rdi.status, RegistrationDataImport.IN_REVIEW)
+        assert self.rdi.status == RegistrationDataImport.IN_REVIEW

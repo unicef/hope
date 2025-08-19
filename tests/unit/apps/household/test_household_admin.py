@@ -126,75 +126,32 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         self.grievance_ticket2.refresh_from_db()
         self.grievance_ticket_household2.refresh_from_db()
 
-        self.assertEqual(
-            self.household.withdrawn,
-            True,
-        )
-        self.assertIsNotNone(self.household.withdrawn_date)
-        self.assertEqual(
-            self.household.internal_data["withdrawn_tag"],
-            tag,
-        )
-        self.assertEqual(
-            self.individuals[0].withdrawn,
-            True,
-        )
-        self.assertIsNotNone(self.individuals[0].withdrawn_date)
-        self.assertEqual(
-            self.document.status,
-            Document.STATUS_INVALID,
-        )
-        self.assertEqual(
-            self.grievance_ticket.status,
-            GrievanceTicket.STATUS_CLOSED,
-        )
-        self.assertEqual(
-            self.grievance_ticket.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
-        )
-        self.assertEqual(
-            self.grievance_ticket2.status,
-            GrievanceTicket.STATUS_CLOSED,
-        )
-        self.assertEqual(
-            self.grievance_ticket2.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
-        )
+        assert self.household.withdrawn is True
+        assert self.household.withdrawn_date is not None
+        assert self.household.internal_data["withdrawn_tag"] == tag
+        assert self.individuals[0].withdrawn is True
+        assert self.individuals[0].withdrawn_date is not None
+        assert self.document.status == Document.STATUS_INVALID
+        assert self.grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
+        assert self.grievance_ticket.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
+        assert self.grievance_ticket2.status == GrievanceTicket.STATUS_CLOSED
+        assert self.grievance_ticket2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
 
-        self.assertEqual(
-            self.household2.withdrawn,
-            True,
-        )
-        self.assertIsNotNone(self.household2.withdrawn_date)
-        self.assertEqual(
-            self.household2.internal_data["withdrawn_tag"],
-            tag,
-        )
-        self.assertEqual(
-            self.individuals2[0].withdrawn,
-            True,
-        )
-        self.assertIsNotNone(self.individuals2[0].withdrawn_date)
-        self.assertEqual(
-            self.individuals2[1].withdrawn,
-            True,
-        )
-        self.assertIsNotNone(self.individuals2[1].withdrawn_date)
-        self.assertEqual(
-            self.grievance_ticket_household2.status,
-            GrievanceTicket.STATUS_CLOSED,
-        )
-        self.assertEqual(
-            self.grievance_ticket_household2.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
+        assert self.household2.withdrawn is True
+        assert self.household2.withdrawn_date is not None
+        assert self.household2.internal_data["withdrawn_tag"] == tag
+        assert self.individuals2[0].withdrawn is True
+        assert self.individuals2[0].withdrawn_date is not None
+        assert self.individuals2[1].withdrawn is True
+        assert self.individuals2[1].withdrawn_date is not None
+        assert self.grievance_ticket_household2.status == GrievanceTicket.STATUS_CLOSED
+        assert self.grievance_ticket_household2.extras["status_before_withdrawn"] == str(
+            GrievanceTicket.STATUS_IN_PROGRESS
         )
 
         # household from another program is not withdrawn
-        self.assertEqual(
-            self.household_other_program.withdrawn,
-            False,
-        )
-        self.assertEqual(
-            self.individuals_other_program[0].withdrawn,
-            False,
-        )
+        assert self.household_other_program.withdrawn is False
+        assert self.individuals_other_program[0].withdrawn is False
 
         # check ability to revert this action
         service = HouseholdWithdraw(self.household)
@@ -204,40 +161,19 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         self.individuals[0].refresh_from_db()
         self.grievance_ticket.refresh_from_db()
         self.grievance_ticket2.refresh_from_db()
-        self.assertEqual(
-            self.household.withdrawn,
-            False,
-        )
-        self.assertIsNone(self.household.withdrawn_date)
-        self.assertEqual(
-            self.individuals[0].withdrawn,
-            False,
-        )
-        self.assertIsNone(self.individuals[0].withdrawn_date)
-        self.assertEqual(
-            self.grievance_ticket.status,
-            GrievanceTicket.STATUS_IN_PROGRESS,
-        )
-        self.assertEqual(
-            self.grievance_ticket.extras.get("status_before_withdrawn"),
-            "",
-        )
-        self.assertEqual(
-            self.grievance_ticket2.status,
-            GrievanceTicket.STATUS_IN_PROGRESS,
-        )
-        self.assertEqual(
-            self.grievance_ticket2.extras.get("status_before_withdrawn"),
-            "",
-        )
+        assert self.household.withdrawn is False
+        assert self.household.withdrawn_date is None
+        assert self.individuals[0].withdrawn is False
+        assert self.individuals[0].withdrawn_date is None
+        assert self.grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        assert self.grievance_ticket.extras.get("status_before_withdrawn") == ""
+        assert self.grievance_ticket2.status == GrievanceTicket.STATUS_IN_PROGRESS
+        assert self.grievance_ticket2.extras.get("status_before_withdrawn") == ""
 
     def test_split_list_of_ids(self) -> None:
-        self.assertEqual(
-            HouseholdWithdrawFromListMixin.split_list_of_ids(
-                "HH-1, HH-2/HH-3|HH-4 new line HH-5        HH-6",
-            ),
-            ["HH-1", "HH-2", "HH-3", "HH-4", "HH-5", "HH-6"],
-        )
+        assert HouseholdWithdrawFromListMixin.split_list_of_ids(
+            "HH-1, HH-2/HH-3|HH-4 new line HH-5        HH-6",
+        ) == ["HH-1", "HH-2", "HH-3", "HH-4", "HH-5", "HH-6"]
 
     def test_get_and_set_context_data(self) -> None:
         request = self._request_with_post_method_and_session_ba()
@@ -251,10 +187,10 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         }
         context = {}
         HouseholdWithdrawFromListMixin.get_and_set_context_data(request, context)
-        self.assertEqual(context["program"], str(self.program.id))
-        self.assertEqual(context["household_list"], household_list)
-        self.assertEqual(context["tag"], tag)
-        self.assertEqual(context["business_area"], str(self.program.business_area.pk))
+        assert context["program"] == str(self.program.id)
+        assert context["household_list"] == household_list
+        assert context["tag"] == tag
+        assert context["business_area"] == str(self.program.business_area.pk)
 
     def test_get_request(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
@@ -265,7 +201,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         request = HttpRequest()
         request.method = "GET"
         resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
 
     def test_post_households_withdraw_from_list_step_0(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
@@ -286,7 +222,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         with self.assertNumQueries(0):
             resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
 
     def test_post_households_withdraw_from_list_step_1(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
@@ -311,7 +247,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         with self.assertNumQueries(0):
             resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
 
     def test_post_households_withdraw_from_list_step_2(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
@@ -336,4 +272,4 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         with self.assertNumQueries(3):
             resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200

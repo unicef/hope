@@ -626,7 +626,7 @@ export function prepareRestVariables(
       const householdData = values.householdDataUpdateFields
         .filter((item) => item.fieldName && !item.isFlexField)
         .reduce((prev, current) => {
-          prev[camelCase(current.fieldName)] = current.fieldValue;
+          prev[current.fieldName] = current.fieldValue;
           return prev;
         }, {});
       const flexFields = values.householdDataUpdateFields

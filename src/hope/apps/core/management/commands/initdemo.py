@@ -1,5 +1,4 @@
-"""
-Django Management Command: initdemo
+"""Django Management Command: initdemo.
 
 This command initializes demo data for the application by performing the following steps:
 
