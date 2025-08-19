@@ -71,7 +71,7 @@ export const BaseSection = ({
             <GreyText data-cy="description">{description}</GreyText>
           </Box>
         )}
-        {children}
+        <Box>{children}</Box>
       </Box>
     </Container>
   );

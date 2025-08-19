@@ -229,7 +229,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   return (
     <>
       <UniversalRestTable
-        isOnPaper={false}
+        isOnPaper={true}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
         data={templatesData}

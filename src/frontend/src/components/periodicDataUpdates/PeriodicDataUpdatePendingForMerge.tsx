@@ -1,0 +1,174 @@
+import React, { useState, ReactElement } from 'react';
+import { TableCell, Checkbox } from '@mui/material';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+// ...existing code...
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useQuery } from '@tanstack/react-query';
+
+const pendingHeadCells: HeadCell<any>[] = [
+  {
+    id: 'checkbox',
+    numeric: false,
+    disablePadding: true,
+    label: '',
+    dataCy: 'head-cell-checkbox',
+    disableSort: true,
+  },
+  {
+    id: 'templateId',
+    numeric: false,
+    disablePadding: false,
+    label: 'Template ID',
+    dataCy: 'head-cell-template-id',
+  },
+  {
+    id: 'templateName',
+    numeric: false,
+    disablePadding: false,
+    label: 'Template Name',
+    dataCy: 'head-cell-template-name',
+  },
+  {
+    id: 'numberOfRecords',
+    numeric: true,
+    disablePadding: false,
+    label: 'Number of Records',
+    dataCy: 'head-cell-number-of-records',
+  },
+  {
+    id: 'createdAt',
+    numeric: false,
+    disablePadding: false,
+    label: 'Creation Date',
+    dataCy: 'head-cell-creation-date',
+  },
+  {
+    id: 'createdBy',
+    numeric: false,
+    disablePadding: false,
+    label: 'Created by',
+    dataCy: 'head-cell-created-by',
+  },
+  {
+    id: 'details',
+    numeric: false,
+    disablePadding: false,
+    label: 'Details',
+    disableSort: true,
+    dataCy: 'head-cell-details',
+  },
+  {
+    id: 'status',
+    numeric: false,
+    disablePadding: false,
+    label: 'Status',
+    dataCy: 'head-cell-status',
+  },
+];
+
+const PeriodicDataUpdatePendingForMerge = () => {
+  const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [queryVariables, setQueryVariables] = useState({
+    ordering: 'created_at',
+    businessAreaSlug,
+    programSlug: programId,
+  });
+
+  // Replace with correct query and data model for pending approval
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'periodicDataUpdatePendingForMerge',
+      queryVariables,
+      businessAreaSlug,
+      programId,
+    ],
+    queryFn: () => Promise.resolve([]), // TODO: Replace with actual API call
+  });
+
+  const results = data || [];
+  const allIds = results.map((row: any) => row.templateId);
+  // ...existing code...
+
+  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setSelected(allIds);
+    } else {
+      setSelected([]);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const renderRow = (row: any): ReactElement => (
+    <ClickableTableRow
+      key={row.templateId}
+      data-cy={`pending-approval-row-${row.templateId}`}
+    >
+      <TableCell padding="checkbox">
+        <Checkbox
+          checked={selected.includes(row.templateId)}
+          onChange={() => handleSelectOne(row.templateId)}
+          inputProps={{ 'aria-label': `select row ${row.templateId}` }}
+        />
+      </TableCell>
+      <TableCell>{row.templateId}</TableCell>
+      <TableCell>{row.templateName}</TableCell>
+      <TableCell>{row.numberOfRecords}</TableCell>
+      <TableCell>
+        <UniversalMoment>{row.createdAt}</UniversalMoment>
+      </TableCell>
+      <TableCell>{row.createdBy}</TableCell>
+      <TableCell>{/* Details button or info here */}</TableCell>
+      <TableCell>
+        <StatusBox status={row.status} statusToColor={() => 'primary'} />
+      </TableCell>
+    </ClickableTableRow>
+  );
+
+  // Custom head renderer for EnhancedTableHead
+  const customHeadRenderer = (headCell: HeadCell<any>) => {
+    if (headCell.id === 'checkbox') {
+      return (
+        <Checkbox
+          indeterminate={
+            selected.length > 0 && selected.length < results.length
+          }
+          checked={selected.length > 0 && selected.length === results.length}
+          onChange={handleSelectAllClick}
+          inputProps={{ 'aria-label': 'select all rows' }}
+        />
+      );
+    }
+    return headCell.label;
+  };
+
+  return (
+    <UniversalRestTable
+      isOnPaper={true}
+      renderRow={renderRow}
+      headCells={pendingHeadCells}
+      data={results}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      title="Pending Periodic Data Updates for Merge"
+      onSelectAllClick={handleSelectAllClick}
+      numSelected={selected.length}
+      // @ts-ignore: EnhancedTableHead supports customHeadRenderer
+      customHeadRenderer={customHeadRenderer}
+      hidePagination={true}
+    />
+  );
+};
+
+export default PeriodicDataUpdatePendingForMerge;
