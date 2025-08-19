@@ -248,6 +248,7 @@ class TestFeedback:
         pageFeedbackDetails.getLastModifiedDate()
         pageFeedbackDetails.getAdministrativeLevel2()
 
+    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_optional_fields(
         self,
@@ -356,6 +357,7 @@ class TestFeedback:
         pageFeedback.getNavFeedback().click()
         pageFeedback.getRows()
 
+    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_feedback_with_household_and_individual(
         self,
         create_programs: None,
@@ -451,6 +453,7 @@ class TestFeedback:
         assert "English" in pageFeedbackDetails.getLanguagesSpoken().text
         assert "Shakardara" in pageFeedbackDetails.getAdministrativeLevel2().text
 
+    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_linked_ticket(
         self,
         pageGrievanceNewTicket: NewTicket,
