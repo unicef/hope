@@ -3,14 +3,15 @@ import { Box, Tab, Tabs, Fade } from '@mui/material';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
-import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
 import { useProgramContext } from 'src/programContext';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { PeriodicDataUpdatesOfflineTemplates } from './PeriodicDataUpdatesOfflineTemplates';
+import { PeriodicDataUpdatesOfflineEdits } from './PeriodicDataUpdatesOfflineEdits';
+import { PeriodicDataUpdatesOnlineEdits } from './PeriodicDataUpdatesOnlineEdits';
 
 export const PeriodicDataUpdates = (): ReactElement => {
   const [value, setValue] = useState(0);
@@ -41,42 +42,48 @@ export const PeriodicDataUpdates = (): ReactElement => {
             onChange={handleChange}
             aria-label="periodic data updates tabs"
           >
-            <Tab label="Templates" data-cy="pdu-templates" />
-            <Tab label="Updates" data-cy="pdu-updates" />
+            <Tab label="Offline Templates" data-cy="pdu-offline-templates" />
+            <Tab label="Offline Edits" data-cy="pdu-offline-edits" />
+            <Tab label="Online Edits" data-cy="pdu-online-edits" />
           </Tabs>
         </Box>
       }
-      buttons={
-        <Box display="flex" align-items="center">
-          <Box mr={2}>
-            <ButtonTooltip
-              variant="contained"
-              color="primary"
-              component={Link}
-              to={newTemplatePath}
-              startIcon={<AddIcon />}
-              data-cy="new-template-button"
-              disabled={!canCreatePDUTemplate}
-            >
-              New Template
-            </ButtonTooltip>
-          </Box>
-          <Box>
-            <PeriodDataUpdatesUploadDialog />
-          </Box>
-        </Box>
-      }
+      buttons={null}
     >
       <Fade in={true} timeout={500} key={value}>
-        {value === 0 ? (
-          <Box>
-            <PeriodicDataUpdatesTemplatesList />
-          </Box>
-        ) : (
-          <Box>
-            <PeriodicDataUpdatesUpdatesList />
-          </Box>
-        )}
+        <div>
+          {value === 0 && (
+            <Box>
+              <Box display="flex" justifyContent="flex-end" mt={4}>
+                <ButtonTooltip
+                  variant="contained"
+                  color="primary"
+                  component={Link}
+                  to={newTemplatePath}
+                  startIcon={<AddIcon />}
+                  data-cy="new-template-button"
+                  disabled={!canCreatePDUTemplate}
+                >
+                  New Template
+                </ButtonTooltip>
+              </Box>
+              <PeriodicDataUpdatesOfflineTemplates />
+            </Box>
+          )}
+          {value === 1 && (
+            <Box>
+              <Box display="flex" justifyContent="flex-end" mt={4}>
+                <PeriodDataUpdatesUploadDialog />
+              </Box>
+              <PeriodicDataUpdatesOfflineEdits />
+            </Box>
+          )}
+          {value === 2 && (
+            <Box>
+              <PeriodicDataUpdatesOnlineEdits />
+            </Box>
+          )}
+        </div>
       </Fade>
     </BaseSection>
   );

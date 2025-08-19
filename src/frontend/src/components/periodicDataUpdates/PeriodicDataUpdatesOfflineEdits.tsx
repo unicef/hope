@@ -61,7 +61,7 @@ const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   },
 ];
 
-export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
+export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
