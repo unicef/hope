@@ -96,7 +96,7 @@ class TestPDUOnlineEditUsersAvailable:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status")
         [
             (
                 [Permissions.PDU_TEMPLATE_CREATE],

@@ -211,6 +211,7 @@ class PDUOnlineEditListSerializer(serializers.ModelSerializer):
             "created_by",
             "status",
             "status_display",
+            "is_authorized",
         )
 
     def get_is_authorized(self, obj: PDUOnlineEdit) -> bool:

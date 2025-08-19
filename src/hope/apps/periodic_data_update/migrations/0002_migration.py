@@ -7,8 +7,9 @@ import django.db.models.deletion
 
 
 def migrate_celery_task_results_ids(apps, schema_editor):
-    """Migrate from curr_async_result_id to celery_tasks_results_ids,
-    using the specific task name for each model in bulk.
+    """Migrate from curr_async_result_id to celery_tasks_results_ids.
+
+    This uses the specific task name for each model in bulk.
     """
     # Migrate PDUXlsxTemplate
     PDUXlsxTemplate = apps.get_model("periodic_data_update", "PDUXlsxTemplate")
