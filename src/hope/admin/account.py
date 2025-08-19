@@ -1,12 +1,9 @@
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from adminfilters.autocomplete import AutoCompleteFilter
-
-from hope.admin.utils import (
-    HOPEModelAdminBase,
-)
+from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.core.models import BusinessArea
 from hope.apps.payment.models import (
     Account,
@@ -14,13 +11,19 @@ from hope.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismConfig,
 )
-
 from hope.apps.program.models import Program
 
 
 @admin.register(Account)
 class AccountAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "number", "get_business_area", "get_program", "account_type", "is_unique")
+    list_display = (
+        "individual",
+        "number",
+        "get_business_area",
+        "get_program",
+        "account_type",
+        "is_unique",
+    )
 
     raw_id_fields = ("account_type", "individual")
     readonly_fields = ("unique_key", "signature_hash")
@@ -41,7 +44,11 @@ class AccountAdmin(HOPEModelAdminBase):
         return (
             super()
             .get_queryset(request)
-            .select_related("individual__program__business_area", "financial_institution", "account_type")
+            .select_related(
+                "individual__program__business_area",
+                "financial_institution",
+                "account_type",
+            )
         )
 
     def get_business_area(self, obj: Account) -> BusinessArea:

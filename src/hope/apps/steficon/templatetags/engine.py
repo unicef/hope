@@ -4,8 +4,6 @@ from difflib import _mdiff
 from typing import Any, Sequence
 
 from django import template
-
-
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 
@@ -105,7 +103,11 @@ class HtmlDiff(difflib.HtmlDiff):
         else:
             header_row = ""
 
-        table = self._table_template % {"data_rows": "".join(s), "header_row": header_row, "prefix": self._prefix[1]}
+        table = self._table_template % {
+            "data_rows": "".join(s),
+            "header_row": header_row,
+            "prefix": self._prefix[1],
+        }
 
         return (
             table.replace("\0+", '<span class="diff_add">')

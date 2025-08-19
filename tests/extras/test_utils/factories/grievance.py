@@ -2,9 +2,8 @@ import random
 from io import BytesIO
 from typing import Any
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
-
 import factory
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import (
@@ -294,7 +293,8 @@ class TicketPaymentVerificationDetailsFactory(DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
     payment_verification = factory.SubFactory(
-        PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        PaymentVerificationFactory,
+        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
     )
 
 

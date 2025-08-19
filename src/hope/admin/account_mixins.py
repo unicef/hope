@@ -4,6 +4,9 @@ from functools import cached_property
 from typing import Any, Generator
 from uuid import UUID
 
+import requests
+from admin_extra_buttons.decorators import button
+from constance import config
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import unquote
@@ -13,10 +16,6 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
 from django.utils.crypto import get_random_string
-
-import requests
-from admin_extra_buttons.decorators import button
-from constance import config
 from requests import Response
 
 from hope.apps.account.models import User
@@ -63,7 +62,12 @@ class DjAdminManager:
         self.form_errors = list(self.regex.findall(res.content.decode()))
         return self.form_errors
 
-    def assert_response(self, status: int | list[int], location: str | None = None, custom_error: str = "") -> None:
+    def assert_response(
+        self,
+        status: int | list[int],
+        location: str | None = None,
+        custom_error: str = "",
+    ) -> None:
         if not isinstance(status, list | tuple):
             status = [status]
         if self._last_response.status_code not in status:

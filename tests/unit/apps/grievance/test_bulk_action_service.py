@@ -1,8 +1,7 @@
 from unittest.mock import patch
 
-from django.test import TestCase, override_settings
-
 import pytest
+from django.test import TestCase, override_settings
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from faker.generator import random
@@ -95,7 +94,9 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             assert grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id == str(self.user.id)
             assert grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id == str(self.user.id)
             BulkActionService().bulk_assign(
-                [self.grievance_ticket1.id, self.grievance_ticket2.id], self.user_two.id, self.business_area.slug
+                [self.grievance_ticket1.id, self.grievance_ticket2.id],
+                self.user_two.id,
+                self.business_area.slug,
             )
             assert mock_bulk.call_count == 2
 
@@ -140,7 +141,9 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             assert grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority == PRIORITY_NOT_SET
             assert grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority == PRIORITY_NOT_SET
             BulkActionService().bulk_set_priority(
-                [self.grievance_ticket1.id, self.grievance_ticket2.id], PRIORITY_HIGH, self.business_area.slug
+                [self.grievance_ticket1.id, self.grievance_ticket2.id],
+                PRIORITY_HIGH,
+                self.business_area.slug,
             )
             self.grievance_ticket1.refresh_from_db()
             self.grievance_ticket2.refresh_from_db()
@@ -164,7 +167,9 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             assert grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency == URGENCY_NOT_SET
             assert grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency == URGENCY_NOT_SET
             BulkActionService().bulk_set_urgency(
-                [self.grievance_ticket1.id, self.grievance_ticket2.id], URGENCY_VERY_URGENT, self.business_area.slug
+                [self.grievance_ticket1.id, self.grievance_ticket2.id],
+                URGENCY_VERY_URGENT,
+                self.business_area.slug,
             )
             self.grievance_ticket1.refresh_from_db()
             self.grievance_ticket2.refresh_from_db()
@@ -180,7 +185,10 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
         assert self.grievance_ticket1.ticket_notes.count() == 0
         assert self.grievance_ticket2.ticket_notes.count() == 0
         BulkActionService().bulk_add_note(
-            self.user, [self.grievance_ticket1.id, self.grievance_ticket2.id], "Test note", self.business_area.slug
+            self.user,
+            [self.grievance_ticket1.id, self.grievance_ticket2.id],
+            "Test note",
+            self.business_area.slug,
         )
         self.grievance_ticket1.refresh_from_db()
         self.grievance_ticket2.refresh_from_db()

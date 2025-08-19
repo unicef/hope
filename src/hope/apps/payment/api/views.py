@@ -5,12 +5,11 @@ from decimal import Decimal
 from typing import Any
 from zipfile import BadZipFile
 
+from constance import config
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
-
-from constance import config
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -42,18 +41,15 @@ from hope.apps.payment.api.caches import (
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
-from hope.apps.payment.api.filters import (
-    PaymentPlanFilter,
-    TargetPopulationFilter,
-)
+from hope.apps.payment.api.filters import PaymentPlanFilter, TargetPopulationFilter
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
     AssignFundsCommitmentsSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
-    PaymentDetailSerializer,
     PaymentChoicesSerializer,
+    PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanCreateFollowUpSerializer,
@@ -71,12 +67,12 @@ from hope.apps.payment.api.serializers import (
     PaymentVerificationPlanImportSerializer,
     PaymentVerificationPlanListSerializer,
     PaymentVerificationUpdateSerializer,
+    PendingPaymentSerializer,
     RevertMarkPaymentAsFailedSerializer,
     SplitPaymentPlanSerializer,
     TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
-    PendingPaymentSerializer,
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
@@ -196,7 +192,8 @@ class PaymentVerificationViewSet(
         return super().list(request, *args, **kwargs)
 
     @extend_schema(
-        request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanCreateSerializer,
+        responses={201: PaymentVerificationPlanDetailsSerializer},
     )
     @action(detail=True, methods=["post"], url_path="create-verification-plan")
     @transaction.atomic
@@ -222,9 +219,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanCreateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanCreateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["patch"], url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def update_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -253,9 +255,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanActivateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="activate-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="activate-verification-plan/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def activate_payment_verification_plan(
         self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
@@ -282,9 +289,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanActivateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="finish-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="finish-verification-plan/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def finish_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -312,9 +324,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanActivateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="discard-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="discard-verification-plan/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def discard_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -340,9 +357,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanActivateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="invalid-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="invalid-verification-plan/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def invalid_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -367,9 +389,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanActivateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="delete-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="delete-verification-plan/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def delete_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -395,9 +422,14 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanActivateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="export-xlsx/(?P<verification_plan_id>[^/.]+)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="export-xlsx/(?P<verification_plan_id>[^/.]+)",
+    )
     @transaction.atomic
     def export_xlsx_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -426,7 +458,10 @@ class PaymentVerificationViewSet(
 
     @extend_schema(
         request=PaymentVerificationPlanImportSerializer,
-        responses={200: PaymentVerificationPlanDetailsSerializer, 400: XlsxErrorSerializer},
+        responses={
+            200: PaymentVerificationPlanDetailsSerializer,
+            400: XlsxErrorSerializer,
+        },
     )
     @action(
         detail=True,
@@ -517,7 +552,10 @@ class PaymentVerificationRecordViewSet(
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=PaymentVerificationUpdateSerializer, responses={200: PaymentDetailSerializer})
+    @extend_schema(
+        request=PaymentVerificationUpdateSerializer,
+        responses={200: PaymentDetailSerializer},
+    )
     @transaction.atomic
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Update verification amount."""
@@ -568,7 +606,10 @@ class PaymentVerificationRecordViewSet(
         )
         payment.refresh_from_db()
 
-        return Response(PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK)
+        return Response(
+            PaymentDetailSerializer(payment, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class PaymentPlanViewSet(
@@ -664,7 +705,10 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-    @extend_schema(request=PaymentPlanCreateFollowUpSerializer, responses={201: PaymentPlanDetailSerializer})
+    @extend_schema(
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="create-follow-up")
     @transaction.atomic
     def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -706,13 +750,19 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(request=PaymentPlanExcludeBeneficiariesSerializer, responses={200: PaymentPlanDetailSerializer})
+    @extend_schema(
+        request=PaymentPlanExcludeBeneficiariesSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="exclude-beneficiaries")
     @transaction.atomic
     def exclude_beneficiaries(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
 
-        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
+        if payment_plan.status not in (
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+        ):
             raise ValidationError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
         serializer = self.get_serializer(
@@ -773,7 +823,12 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan unlocked"})
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP], url_path="lock-fsp")
+    @action(
+        detail=True,
+        methods=["get"],
+        PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        url_path="lock-fsp",
+    )
     @transaction.atomic
     def lock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -791,7 +846,12 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP locked"})
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP], url_path="unlock-fsp")
+    @action(
+        detail=True,
+        methods=["get"],
+        PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        url_path="unlock-fsp",
+    )
     @transaction.atomic
     def unlock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -809,7 +869,10 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP unlocked"})
 
-    @extend_schema(request=ApplyEngineFormulaSerializer, responses={200: PaymentPlanDetailSerializer})
+    @extend_schema(
+        request=ApplyEngineFormulaSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="apply-engine-formula")
     @transaction.atomic
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -850,7 +913,12 @@ class PaymentPlanViewSet(
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_VIEW_LIST], url_path="entitlement-export-xlsx")
+    @action(
+        detail=True,
+        methods=["get"],
+        PERMISSIONS=[Permissions.PM_VIEW_LIST],
+        url_path="entitlement-export-xlsx",
+    )
     @transaction.atomic
     def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -869,11 +937,13 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(
-        request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer}
+        request=PaymentPlanImportFileSerializer,
+        responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer},
     )
     @action(
         detail=True,
@@ -918,16 +988,23 @@ class PaymentPlanViewSet(
                 new_object=payment_plan,
             )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_SEND_FOR_APPROVAL], url_path="send-for-approval")
+    @action(
+        detail=True,
+        methods=["get"],
+        PERMISSIONS=[Permissions.PM_SEND_FOR_APPROVAL],
+        url_path="send-for-approval",
+    )
     @transaction.atomic
     def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_FOR_APPROVAL}, user=request.user
+            input_data={"action": PaymentPlan.Action.SEND_FOR_APPROVAL},
+            user=request.user,
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -938,7 +1015,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["post"])
@@ -969,7 +1047,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["post"])
@@ -989,7 +1068,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["post"])
@@ -1009,7 +1089,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["post"], url_path="mark-as-released")
@@ -1029,7 +1110,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["get"], url_path="send-to-payment-gateway")
@@ -1038,7 +1120,8 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY}, user=request.user
+            input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+            user=request.user,
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1049,7 +1132,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     # TODO:
@@ -1060,7 +1144,10 @@ class PaymentPlanViewSet(
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
 
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ]:
             raise ValidationError(
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             )
@@ -1084,7 +1171,8 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["get"], url_path="send-xlsx-password")
@@ -1093,7 +1181,8 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_XLSX_PASSWORD}, user=request.user
+            input_data={"action": PaymentPlan.Action.SEND_XLSX_PASSWORD},
+            user=request.user,
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1104,14 +1193,23 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_VIEW_LIST], url_path="reconciliation-export-xlsx")
+    @action(
+        detail=True,
+        methods=["get"],
+        PERMISSIONS=[Permissions.PM_VIEW_LIST],
+        url_path="reconciliation-export-xlsx",
+    )
     @transaction.atomic
     def reconciliation_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ]:
             raise ValidationError(
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             )
@@ -1129,17 +1227,27 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(
-        request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer}
+        request=PaymentPlanImportFileSerializer,
+        responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="reconciliation-import-xlsx", parser_classes=[DictDrfNestedParser])
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="reconciliation-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
+    )
     @transaction.atomic
     def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ]:
             raise ValidationError(
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             )
@@ -1185,7 +1293,8 @@ class PaymentPlanViewSet(
                 new_object=payment_plan,
             )
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["post"])
@@ -1213,7 +1322,8 @@ class PaymentPlanViewSet(
             payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
             payment_plan_service.split(split_type, payments_no)
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
@@ -1222,7 +1332,8 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         export_pdf_payment_plan_summary.delay(payment_plan.pk, str(request.user.pk))
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(responses={200: FSPXlsxTemplateSerializer(many=True)})
@@ -1232,9 +1343,15 @@ class PaymentPlanViewSet(
         qs = FinancialServiceProviderXlsxTemplate.objects.filter(
             financial_service_providers__allowed_business_areas__slug=self.business_area_slug
         ).order_by("name")
-        return Response(data=FSPXlsxTemplateSerializer(qs, many=True).data, status=status.HTTP_200_OK)
+        return Response(
+            data=FSPXlsxTemplateSerializer(qs, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
-    @extend_schema(request=AssignFundsCommitmentsSerializer, responses={200: PaymentPlanDetailSerializer})
+    @extend_schema(
+        request=AssignFundsCommitmentsSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="assign-funds-commitments")
     @transaction.atomic
     def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1258,7 +1375,8 @@ class PaymentPlanViewSet(
 
         payment_plan.refresh_from_db()
         return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
 
@@ -1414,7 +1532,10 @@ class TargetPopulationViewSet(
             old_object=old_tp,
             new_object=tp,
         )
-        return Response(status=status.HTTP_200_OK, data={"message": "Target Population ready for Payment Plan"})
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"message": "Target Population ready for Payment Plan"},
+        )
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -1518,7 +1639,10 @@ class TargetPopulationViewSet(
 
 
 class PaymentPlanManagerialViewSet(
-    BusinessAreaProgramsAccessMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet
+    BusinessAreaProgramsAccessMixin,
+    PaymentPlanMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
 ):
     queryset = PaymentPlan.objects.all()
     PERMISSIONS = [
@@ -1637,7 +1761,9 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
     def get_object(self) -> PaymentPlanSupportingDocument:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_plan_id"))
         return get_object_or_404(
-            PaymentPlanSupportingDocument, id=self.kwargs.get("file_id"), payment_plan=payment_plan
+            PaymentPlanSupportingDocument,
+            id=self.kwargs.get("file_id"),
+            payment_plan=payment_plan,
         )
 
     @transaction.atomic
@@ -1653,7 +1779,9 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
         response = FileResponse(
-            file.open(), as_attachment=True, content_type=file_mimetype or "application/octet-stream"
+            file.open(),
+            as_attachment=True,
+            content_type=file_mimetype or "application/octet-stream",
         )
         response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
         return response
@@ -1667,7 +1795,10 @@ class PaymentViewSet(
     BaseViewSet,
 ):
     lookup_field = "payment_id"
-    PERMISSIONS = [Permissions.PM_VIEW_DETAILS, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
+    PERMISSIONS = [
+        Permissions.PM_VIEW_DETAILS,
+        Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+    ]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
         "retrieve": PaymentDetailSerializer,
@@ -1690,14 +1821,18 @@ class PaymentViewSet(
         return Payment.objects.filter(parent_id=self.kwargs["payment_plan_id"])
 
     @action(
-        detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED], url_path="mark-as-failed"
+        detail=True,
+        methods=["get"],
+        PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED],
+        url_path="mark-as-failed",
     )
     @transaction.atomic
     def mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment = self.get_object()
         mark_as_failed(payment)
         return Response(
-            data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentDetailSerializer(payment, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(
@@ -1717,7 +1852,8 @@ class PaymentViewSet(
         delivery_date = datetime.combine(delivery_date, datetime.min.time())
         revert_mark_as_failed(payment, Decimal(delivered_quantity), delivery_date)
         return Response(
-            data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
+            data=PaymentDetailSerializer(payment, context={"request": request}).data,
+            status=status.HTTP_200_OK,
         )
 
 
@@ -1779,7 +1915,10 @@ def available_fsps_for_delivery_mechanisms(
 
     list_resp = [
         {
-            "delivery_mechanism": {"code": delivery_mechanism[0], "name": delivery_mechanism[1]},
+            "delivery_mechanism": {
+                "code": delivery_mechanism[0],
+                "name": delivery_mechanism[1],
+            },
             "fsps": get_fsps(delivery_mechanism[1]),
         }
         for delivery_mechanism in delivery_mechanisms

@@ -7,10 +7,7 @@ from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketAddIndividualDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketAddIndividualDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
 )
@@ -36,9 +33,7 @@ from hope.apps.household.models import (
     Individual,
     IndividualIdentity,
 )
-from hope.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.utils.models import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs

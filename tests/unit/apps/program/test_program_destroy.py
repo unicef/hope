@@ -20,7 +20,10 @@ class TestProgramDestroy:
         self.program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
         self.destroy_url = reverse(
             "api:programs:programs-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "slug": self.program.slug,
+            },
         )
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)

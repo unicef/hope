@@ -2,11 +2,10 @@ import logging
 from enum import auto
 from typing import TYPE_CHECKING, Any, Callable
 
+from constance import config
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
-
-from constance import config
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.grievance.models import GrievanceTicket
@@ -116,14 +115,22 @@ class GrievanceNotification:
         context["hours_ago"] = (timezone.now() - self.grievance_ticket.created_at).days * 24
         text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
         html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
-        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_overdue_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         context["days_ago"] = (timezone.now() - self.grievance_ticket.created_at).days
         text_body = render_to_string("overdue_notification_email.txt", context=context)
         html_body = render_to_string("overdue_notification_email.html", context=context)
-        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_add_note_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
@@ -144,19 +151,31 @@ class GrievanceNotification:
         context["approver"] = f"{approver.first_name} {approver.last_name}"
         text_body = render_to_string("send_back_to_in_progress_notification_email.txt", context=context)
         html_body = render_to_string("send_back_to_in_progress_notification_email.html", context=context)
-        return text_body, html_body, f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_for_approval_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("send_for_approve_notification_email.txt", context=context)
         html_body = render_to_string("send_for_approve_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("assignment_change_notification_email.txt", context=context)
         html_body = render_to_string("assignment_change_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}"
+        return (
+            text_body,
+            html_body,
+            f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}",
+        )
 
     def _prepare_assigned_to_recipient(self) -> "list[User] | None":
         if self.grievance_ticket.assigned_to is None:

@@ -2,7 +2,6 @@ from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
@@ -38,10 +37,16 @@ class ProjectListViewTests(HOPEApiTestCase):
             name="Other program",
         )
         self.organization = OrganizationFactory(
-            name="Test Organization", slug="test_organization", business_area=self.business_area, source_id=777
+            name="Test Organization",
+            slug="test_organization",
+            business_area=self.business_area,
+            source_id=777,
         )
         self.organization_2 = OrganizationFactory(
-            name="Test Organization 2", slug="slug123", business_area=self.business_area, source_id=111
+            name="Test Organization 2",
+            slug="slug123",
+            business_area=self.business_area,
+            source_id=111,
         )
         self.prj_1 = ProjectFactory.create(
             name="Test Project 1",

@@ -1,17 +1,11 @@
-from django.test import TestCase
-
 import pytest
+from django.test import TestCase
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.account.models import (
-    AdminAreaLimitedTo,
-    Role,
-    RoleAssignment,
-    User,
-)
+from hope.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo.models import Area
@@ -86,7 +80,10 @@ class UserPartnerTest(TestCase):
 
         resp_2 = self.other_user.partner.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
-            permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
+            permissions=[
+                Permissions.PROGRAMME_CREATE,
+                Permissions.PROGRAMME_FINISH,
+            ],
         )
 
         assert resp_2 == [str(self.program.pk)]
@@ -141,7 +138,9 @@ class UserPartnerTest(TestCase):
         # one role with program
         # two roles with program
         role_1_program = User.permissions_in_business_area(
-            self.other_user, business_area_slug=self.business_area.slug, program_id=self.program.pk
+            self.other_user,
+            business_area_slug=self.business_area.slug,
+            program_id=self.program.pk,
         )
         for role in ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]:
             assert role in role_1_program
@@ -149,7 +148,9 @@ class UserPartnerTest(TestCase):
         # one role with different program
         another_program = ProgramFactory.create(status=Program.DRAFT, business_area=self.business_area)
         role_1_another_program = User.permissions_in_business_area(
-            self.other_user, business_area_slug=self.business_area.slug, program_id=another_program.pk
+            self.other_user,
+            business_area_slug=self.business_area.slug,
+            program_id=another_program.pk,
         )
         assert "PROGRAMME_CREATE" in role_1_another_program
 
@@ -162,7 +163,9 @@ class UserPartnerTest(TestCase):
         )
 
         role_unicef_program = User.permissions_in_business_area(
-            self.unicef_user, business_area_slug=self.business_area.slug, program_id=self.program.pk
+            self.unicef_user,
+            business_area_slug=self.business_area.slug,
+            program_id=self.program.pk,
         )
         for role in ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]:
             assert role in role_unicef_program

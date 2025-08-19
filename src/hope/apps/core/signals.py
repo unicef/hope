@@ -6,9 +6,7 @@ from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import receiver
 
 from hope.apps.account.models import Partner, Role, RoleAssignment
-from hope.apps.account.permissions import (
-    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
-)
+from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
 from hope.apps.core.models import BusinessArea, DataCollectingType
 
 
@@ -42,7 +40,11 @@ def business_area_created(sender: Any, instance: BusinessArea, created: bool, **
         )
         unicef_subpartner.allowed_business_areas.add(instance)
         RoleAssignment.objects.create(
-            user=None, partner=unicef_subpartner, role=role_for_unicef_subpartners, business_area=instance, program=None
+            user=None,
+            partner=unicef_subpartner,
+            role=role_for_unicef_subpartners,
+            business_area=instance,
+            program=None,
         )
         unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER)
         unicef_hq.allowed_business_areas.add(instance)

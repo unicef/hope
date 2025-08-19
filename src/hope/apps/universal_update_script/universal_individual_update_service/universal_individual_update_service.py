@@ -2,20 +2,14 @@ import logging
 from io import BytesIO
 from typing import Any
 
-from django.db import transaction
-
 import openpyxl
+from django.db import transaction
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.geo.models import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
-    Document,
-    DocumentType,
-    Household,
-    Individual,
-)
+from hope.apps.household.models import Document, DocumentType, Household, Individual
 from hope.apps.payment.models import Account, AccountType
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
@@ -135,7 +129,11 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_documents(
-        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+        self,
+        row: tuple[Any, ...],
+        headers: list[str],
+        individual: Individual,
+        row_index: int,
     ) -> list[str]:
         errors = []
         for number_column_name, country_column_name in self.document_fields:
@@ -158,7 +156,11 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_accounts(
-        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+        self,
+        row: tuple[Any, ...],
+        headers: list[str],
+        individual: Individual,
+        row_index: int,
     ) -> list[str]:
         errors = []
         for account_type, account_columns_mapping in self.account_data_fields.items():
@@ -199,7 +201,9 @@ class UniversalIndividualUpdateService:
                 )
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
-                unicef_id=unicef_id, business_area=self.business_area, program=self.program
+                unicef_id=unicef_id,
+                business_area=self.business_area,
+                program=self.program,
             )
             if not individuals_queryset.exists():  # pragma: no cover
                 errors.append(f"Row: {row_index} - Individual with unicef_id {unicef_id} not found")
@@ -357,7 +361,11 @@ class UniversalIndividualUpdateService:
             individual = (
                 Individual.objects.select_related("household")
                 .prefetch_related("documents", "accounts")
-                .get(unicef_id=unicef_id, business_area=self.business_area, program=self.program)
+                .get(
+                    unicef_id=unicef_id,
+                    business_area=self.business_area,
+                    program=self.program,
+                )
             )
             individual_ids.append(str(individual.id))
             household = individual.household
@@ -365,7 +373,10 @@ class UniversalIndividualUpdateService:
             self.handle_individual_update(row, headers, individual)
             self.handle_individual_flex_update(row, headers, individual)
             self.handle_household_flex_update(row, headers, household)
-            documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
+            (
+                documents_to_update_part,
+                documents_to_create_part,
+            ) = self.handle_documents_update(row, headers, individual)
             documents_to_update.extend(documents_to_update_part)
             documents_to_create.extend(documents_to_create_part)
             self.handle_account_update(row, headers, individual)
@@ -411,7 +422,8 @@ class UniversalIndividualUpdateService:
             get_individual_doc(self.business_area.slug),
         )
         populate_index(
-            Household.objects.filter(id__in=[household.id for household in households_to_update]), HouseholdDocument
+            Household.objects.filter(id__in=[household.id for household in households_to_update]),
+            HouseholdDocument,
         )
         documents_to_update.clear()
         documents_to_create.clear()
@@ -483,7 +495,8 @@ class UniversalIndividualUpdateService:
         ws.append(columns)
 
         individuals = Individual.objects.filter(
-            program=self.universal_update.program, unicef_id__in=self.universal_update.unicef_ids.split(",")
+            program=self.universal_update.program,
+            unicef_id__in=self.universal_update.unicef_ids.split(","),
         )
         individuals_length = len(individuals)
 
@@ -521,7 +534,10 @@ class UniversalIndividualUpdateService:
         if self.deduplicate_documents:
             self.print_message("Deduplicating documents")
             HardDocumentDeduplication().deduplicate(
-                Document.objects.filter(individual__id__in=processed_individuals_ids, status=Document.STATUS_PENDING),
+                Document.objects.filter(
+                    individual__id__in=processed_individuals_ids,
+                    status=Document.STATUS_PENDING,
+                ),
                 program=self.program,
             )
 

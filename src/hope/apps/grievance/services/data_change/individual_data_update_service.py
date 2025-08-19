@@ -5,7 +5,6 @@ from typing import Any
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.utils import timezone
-
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.models import log_create
@@ -55,9 +54,7 @@ from hope.apps.household.models import (
     Individual,
     IndividualIdentity,
 )
-from hope.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.payment.models import Account
 from hope.apps.utils.phone import is_valid_phone_number
 
@@ -105,7 +102,11 @@ class IndividualDataUpdateService(DataChangeService):
             current_value = getattr(individual, field, None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
-            elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
+            elif field in (
+                "phone_no",
+                "phone_no_alternative",
+                "payment_delivery_phone_no",
+            ):
                 current_value = str(current_value)
             elif field == "role":
                 current_value = individual.role
@@ -122,7 +123,11 @@ class IndividualDataUpdateService(DataChangeService):
         ]
         accounts_with_approve_status = [{"value": account, "approve_status": False} for account in accounts]
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": individual.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         individual_data_with_approve_status["documents"] = documents_with_approve_status
@@ -178,7 +183,11 @@ class IndividualDataUpdateService(DataChangeService):
             current_value = getattr(individual, field, None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
-            elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
+            elif field in (
+                "phone_no",
+                "phone_no_alternative",
+                "payment_delivery_phone_no",
+            ):
                 current_value = str(current_value)
             elif field == "role":
                 current_value = individual.role
@@ -194,7 +203,11 @@ class IndividualDataUpdateService(DataChangeService):
             {"value": identity_id, "approve_status": False} for identity_id in identities_to_remove
         ]
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": individual.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         individual_data_with_approve_status["documents"] = documents_with_approve_status
@@ -300,7 +313,9 @@ class IndividualDataUpdateService(DataChangeService):
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
-            flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
+            flex_fields=merged_flex_fields,
+            **only_approved_data,
+            updated_at=timezone.now(),
         )
         relationship_to_head_of_household = individual_data.get("relationship")
         if (

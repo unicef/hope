@@ -1,6 +1,8 @@
 import json
 from typing import Callable
 
+import freezegun
+import pytest
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -8,9 +10,6 @@ from django.db import connection
 from django.http import FileResponse
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-
-import freezegun
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -128,8 +127,18 @@ class TestPeriodicDataUpdateTemplateViews:
                 status.HTTP_200_OK,
             ),
             ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.PDU_VIEW_LIST_AND_DETAILS], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                [],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+            (
+                [],
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
             (
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -228,8 +237,18 @@ class TestPeriodicDataUpdateTemplateViews:
                 status.HTTP_200_OK,
             ),
             ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.PDU_VIEW_LIST_AND_DETAILS], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                [],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+            (
+                [],
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
             (
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -424,7 +443,12 @@ class TestPeriodicDataUpdateTemplateViews:
                 "round_name": "February vaccination",
                 "number_of_records": 0,
             },
-            {"field": "health_records_update", "round": 4, "round_name": "April", "number_of_records": 0},
+            {
+                "field": "health_records_update",
+                "round": 4,
+                "round_name": "April",
+                "number_of_records": 0,
+            },
         ]
         response = self.client.post(self.url_create_pdu_template_program1, data=data)
         assert response.status_code == status.HTTP_201_CREATED

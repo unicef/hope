@@ -30,7 +30,10 @@ logger = logging.getLogger(__name__)
 
 def get_individual(individual_id: str) -> Individual:
     decoded_selected_individual_id = decode_id_string(individual_id)
-    return get_object_or_404(Individual.objects.select_related("household"), id=decoded_selected_individual_id)
+    return get_object_or_404(
+        Individual.objects.select_related("household"),
+        id=decoded_selected_individual_id,
+    )
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:
@@ -196,7 +199,9 @@ def filter_based_on_partner_areas_2(
 
 
 def validate_individual_for_need_adjudication(
-    partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails
+    partner: Partner,
+    individual: Individual,
+    ticket_details: TicketNeedsAdjudicationDetails,
 ) -> None:
     # Validate partner's permission
     if individual.household.admin2 and not partner.has_area_access(
@@ -217,7 +222,9 @@ def validate_individual_for_need_adjudication(
         raise ValidationError(f"The selected individual {individual.unicef_id} is not valid, must be not withdrawn")
 
 
-def validate_all_individuals_before_close_needs_adjudication(ticket_details: TicketNeedsAdjudicationDetails) -> None:
+def validate_all_individuals_before_close_needs_adjudication(
+    ticket_details: TicketNeedsAdjudicationDetails,
+) -> None:
     duplicates_qs = ticket_details.selected_individuals.filter(withdrawn=False)
     distinct_qs = ticket_details.selected_distinct.filter(withdrawn=False)
     all_possible_duplicates = list(ticket_details.possible_duplicates.all()) + [

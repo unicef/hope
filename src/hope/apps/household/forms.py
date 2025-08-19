@@ -156,7 +156,8 @@ class CreateTargetPopulationTextForm(forms.Form):
         )
     )
     criteria = forms.CharField(
-        widget=forms.Textarea, help_text=_("List of either UUID4 or UNICEF IDs separated the separator")
+        widget=forms.Textarea,
+        help_text=_("List of either UUID4 or UNICEF IDs separated the separator"),
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

@@ -1,6 +1,5 @@
-from django.test import TestCase
-
 import pytest
+from django.test import TestCase
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import (

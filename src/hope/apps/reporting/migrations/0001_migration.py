@@ -26,14 +26,22 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("file", models.FileField(blank=True, null=True, upload_to="")),
                 (
                     "status",
-                    models.IntegerField(choices=[(1, "Processing"), (2, "Generated"), (3, "Failed")], default=1),
+                    models.IntegerField(
+                        choices=[(1, "Processing"), (2, "Generated"), (3, "Failed")],
+                        default=1,
+                    ),
                 ),
                 (
                     "report_type",
@@ -55,17 +63,24 @@ class Migration(migrations.Migration):
                 ("date_from", models.DateField()),
                 ("date_to", models.DateField()),
                 ("number_of_records", models.IntegerField(blank=True, null=True)),
-                ("admin_area", models.ManyToManyField(blank=True, related_name="reports", to="geo.Area")),
+                (
+                    "admin_area",
+                    models.ManyToManyField(blank=True, related_name="reports", to="geo.Area"),
+                ),
                 (
                     "business_area",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="reports", to="core.businessarea"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reports",
+                        to="core.businessarea",
                     ),
                 ),
                 (
                     "created_by",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="reports", to=settings.AUTH_USER_MODEL
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reports",
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
@@ -88,7 +103,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -96,7 +116,8 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     models.PositiveSmallIntegerField(
-                        choices=[(1, "Processing"), (2, "Generated"), (3, "Failed")], default=1
+                        choices=[(1, "Processing"), (2, "Generated"), (3, "Failed")],
+                        default=1,
                     ),
                 ),
                 (
@@ -104,11 +125,23 @@ class Migration(migrations.Migration):
                     hope.apps.account.fields.ChoiceArrayField(
                         base_field=models.CharField(
                             choices=[
-                                ("TOTAL_TRANSFERRED_BY_COUNTRY", "Total transferred by country"),
-                                ("TOTAL_TRANSFERRED_BY_ADMIN_AREA", "Total transferred by admin area"),
+                                (
+                                    "TOTAL_TRANSFERRED_BY_COUNTRY",
+                                    "Total transferred by country",
+                                ),
+                                (
+                                    "TOTAL_TRANSFERRED_BY_ADMIN_AREA",
+                                    "Total transferred by admin area",
+                                ),
                                 ("BENEFICIARIES_REACHED", "Beneficiaries reached"),
-                                ("INDIVIDUALS_REACHED", "Individuals reached drilldown"),
-                                ("VOLUME_BY_DELIVERY_MECHANISM", "Volume by delivery mechanism"),
+                                (
+                                    "INDIVIDUALS_REACHED",
+                                    "Individuals reached drilldown",
+                                ),
+                                (
+                                    "VOLUME_BY_DELIVERY_MECHANISM",
+                                    "Volume by delivery mechanism",
+                                ),
                                 ("GRIEVANCES_AND_FEEDBACK", "Grievances and Feedback"),
                                 ("PROGRAMS", "Programmes"),
                                 ("PAYMENT_VERIFICATION", "Payment verification"),

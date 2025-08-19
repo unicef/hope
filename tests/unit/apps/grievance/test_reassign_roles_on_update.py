@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
@@ -84,7 +83,10 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         reassign_roles_on_update_service(
-            self.primary_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.primary_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         individual.refresh_from_db()
@@ -106,7 +108,10 @@ class TestReassignRolesOnUpdate(APITestCase):
 
         with self.assertRaises(ValidationError) as context:
             reassign_roles_on_update_service(
-                self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+                self.alternate_collector_individual,
+                role_reassign_data,
+                UserFactory(),
+                self.program_one,
             )
 
         assert "Cannot reassign the role" in str(context.exception)
@@ -123,7 +128,10 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         reassign_roles_on_update_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.alternate_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         assert role == ROLE_ALTERNATE
@@ -138,7 +146,10 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         reassign_roles_on_update_service(
-            self.primary_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.primary_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         role = IndividualRoleInHousehold.objects.get(
@@ -149,7 +160,9 @@ class TestReassignRolesOnUpdate(APITestCase):
         previous_role = IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first()
         assert previous_role is None
 
-    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(self) -> None:
+    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(
+        self,
+    ) -> None:
         household, _ = create_household_and_individuals(
             household_data={
                 "business_area": self.business_area,
@@ -174,7 +187,10 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         reassign_roles_on_update_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.alternate_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=self.no_role_individual).role

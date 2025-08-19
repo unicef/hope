@@ -4,11 +4,10 @@ import json
 from typing import Any
 from unittest.mock import patch
 
-from django.conf import settings
-from django.test import TestCase, override_settings
-
 import pytest
 from constance.test import override_config
+from django.conf import settings
+from django.test import TestCase, override_settings
 from extras.test_utils.factories.account import UserFactory
 from openpyxl import Workbook
 
@@ -34,7 +33,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Template",
                         "To": [
                             {
@@ -66,7 +68,8 @@ class TestMailjet(TestCase):
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(
-        EMAIL_SUBJECT_PREFIX="test", CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"]
+        EMAIL_SUBJECT_PREFIX="test",
+        CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"],
     )
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_with_catch_all(self, mocked_requests_post: Any) -> None:
@@ -84,7 +87,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Template for Catch All",
                         "To": [
                             {
@@ -132,7 +138,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with HTML and Text body",
                         "To": [
                             {
@@ -178,7 +187,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Text body",
                         "To": [
                             {
@@ -247,7 +259,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Template and Attachments",
                         "To": [
                             {

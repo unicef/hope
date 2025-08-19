@@ -19,5 +19,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(assign_targeting_criteria_for_all_payment_plans, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(
+            assign_targeting_criteria_for_all_payment_plans,
+            reverse_code=migrations.RunPython.noop,
+        ),
     ]

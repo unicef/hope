@@ -2,11 +2,10 @@ import json
 from typing import Any
 from unittest.mock import patch
 
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -15,6 +14,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
+from test_utils.factories.core import PeriodicFieldDataFactory
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import (
@@ -23,7 +23,6 @@ from hope.apps.core.models import (
     FlexibleAttributeChoice,
     PeriodicFieldData,
 )
-from test_utils.factories.core import PeriodicFieldDataFactory
 from hope.apps.core.utils import get_fields_attr_generators
 
 pytestmark = pytest.mark.django_db
@@ -220,7 +219,10 @@ class TestBusinessAreaDetail:
 class TestBusinessAreaFilter:
     @pytest.fixture(autouse=True)
     def setup(
-        self, api_client: Any, create_user_role_with_permissions: Any, create_partner_role_with_permissions: Any
+        self,
+        api_client: Any,
+        create_user_role_with_permissions: Any,
+        create_partner_role_with_permissions: Any,
     ) -> None:
         self.afghanistan = BusinessAreaFactory(slug="afghanistan", active=True)
         self.ukraine = BusinessAreaFactory(slug="ukraine", active=True)
@@ -331,7 +333,10 @@ class TestKoboAssetList:
                 "asset_type": "Type",
                 "deployment__active": True,
                 "downloads": [{"format": "xls", "url": "xlsx_url"}],
-                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
+                "settings": {
+                    "sector": {"label": "Sector 123"},
+                    "country": {"label": "Country Test"},
+                },
                 "date_modified": "2022-02-22",
             },
             {
@@ -341,13 +346,19 @@ class TestKoboAssetList:
                 "asset_type": "Type",
                 "deployment__active": True,
                 "downloads": [{"format": "xls", "url": "xlsx_url"}],
-                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
+                "settings": {
+                    "sector": {"label": "Sector 123"},
+                    "country": {"label": "Country Test"},
+                },
                 "date_modified": "2022-02-22",
             },
         ]
 
         response = self.client.post(
-            reverse("api:core:business-areas-all-kobo-projects", kwargs={"slug": self.afghanistan.slug}),
+            reverse(
+                "api:core:business-areas-all-kobo-projects",
+                kwargs={"slug": self.afghanistan.slug},
+            ),
             {"only_deployed": True},
             format="json",
         )
@@ -471,7 +482,8 @@ class TestAllFieldsAttributes:
         ]
         sorted_response_data = sorted(response_data, key=lambda x: str(x.get("id")))
         sorted_expected_attributes = sorted(
-            expected_response_flex_fields + expected_response_core_fields, key=lambda x: str(x.get("id"))
+            expected_response_flex_fields + expected_response_core_fields,
+            key=lambda x: str(x.get("id")),
         )
         assert len(response_data) == len(sorted_expected_attributes)
         assert sorted_response_data == sorted_expected_attributes
@@ -541,7 +553,8 @@ class TestAllFieldsAttributes:
         ]
         sorted_response_data = sorted(response_data, key=lambda x: str(x.get("id")))
         sorted_expected_attributes = sorted(
-            expected_response_flex_fields + expected_response_core_fields, key=lambda x: str(x.get("id"))
+            expected_response_flex_fields + expected_response_core_fields,
+            key=lambda x: str(x.get("id")),
         )
         assert len(response_data) == len(sorted_expected_attributes)
         assert sorted_response_data == sorted_expected_attributes

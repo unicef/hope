@@ -3,6 +3,7 @@ import logging
 from typing import Any, Collection
 from uuid import UUID
 
+from admin_extra_buttons.api import button
 from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
@@ -13,14 +14,9 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import get_language
 
-from admin_extra_buttons.api import button
-
 from hope.apps.payment.models import PaymentPlan
-from hope.apps.steficon.forms import (
-    RuleTestForm,
-)
+from hope.apps.steficon.forms import RuleTestForm
 from hope.apps.steficon.models import Rule, RuleCommit
-
 
 logger = logging.getLogger(__name__)
 

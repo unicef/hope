@@ -11,7 +11,9 @@ def save_referral_service(grievance_ticket: GrievanceTicket, extras: dict) -> li
 
 
 def create_new_ticket(
-    grievance_ticket: GrievanceTicket, household: Household | None, individual: Individual | None
+    grievance_ticket: GrievanceTicket,
+    household: Household | None,
+    individual: Individual | None,
 ) -> GrievanceTicket:
     TicketReferralDetails.objects.create(
         individual=individual,
@@ -35,7 +37,9 @@ def update_referral_service(grievance_ticket: GrievanceTicket, extras: dict, inp
     return grievance_ticket
 
 
-def fetch_household_and_individual(extras: dict) -> tuple[Household | None, Individual | None]:
+def fetch_household_and_individual(
+    extras: dict,
+) -> tuple[Household | None, Individual | None]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
     individual = feedback_ticket_extras.get("individual")
@@ -44,7 +48,9 @@ def fetch_household_and_individual(extras: dict) -> tuple[Household | None, Indi
 
 
 def update_ticket(
-    grievance_ticket: GrievanceTicket, household: Household | None, individual: Individual | None
+    grievance_ticket: GrievanceTicket,
+    household: Household | None,
+    individual: Individual | None,
 ) -> None:
     ticket_details = grievance_ticket.referral_ticket_details
     if individual:

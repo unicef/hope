@@ -62,7 +62,9 @@ class Migration(migrations.Migration):
             model_name="ticketnote",
             name="ticket",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="ticket_notes", to="grievance.grievanceticket"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="ticket_notes",
+                to="grievance.grievanceticket",
             ),
         ),
         migrations.AddField(
@@ -107,7 +109,10 @@ class Migration(migrations.Migration):
             model_name="ticketneedsadjudicationdetails",
             name="possible_duplicate",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, related_name="+", to="household.individual"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="household.individual",
             ),
         ),
         migrations.AddField(
@@ -124,7 +129,10 @@ class Migration(migrations.Migration):
             model_name="ticketneedsadjudicationdetails",
             name="selected_individual",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, related_name="+", to="household.individual"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="household.individual",
             ),
         ),
         migrations.AddField(
@@ -253,7 +261,9 @@ class Migration(migrations.Migration):
             model_name="ticketcomplaintdetails",
             name="payment_content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AddField(
@@ -305,7 +315,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="grievanceticket",
             name="admin2",
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="geo.area"),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="geo.area",
+            ),
         ),
         migrations.AddField(
             model_name="grievanceticket",
@@ -323,7 +338,9 @@ class Migration(migrations.Migration):
             model_name="grievanceticket",
             name="business_area",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="tickets", to="core.businessarea"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tickets",
+                to="core.businessarea",
             ),
         ),
         migrations.AddField(
@@ -363,7 +380,10 @@ class Migration(migrations.Migration):
             model_name="grievanceticket",
             name="partner",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="account.partner"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="account.partner",
             ),
         ),
         migrations.AddField(
@@ -385,7 +405,10 @@ class Migration(migrations.Migration):
             model_name="grievancedocument",
             name="created_by",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to=settings.AUTH_USER_MODEL
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
@@ -401,7 +424,8 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="grievanceticketthrough",
             constraint=models.UniqueConstraint(
-                fields=("main_ticket", "linked_ticket"), name="unique_main_linked_ticket"
+                fields=("main_ticket", "linked_ticket"),
+                name="unique_main_linked_ticket",
             ),
         ),
         migrations.RunSQL(

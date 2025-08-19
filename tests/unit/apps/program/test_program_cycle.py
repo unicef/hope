@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
@@ -123,7 +122,9 @@ class TestProgramCycleMethods(TestCase):
 
         with self.assertRaisesMessage(DjangoValidationError, "End date cannot be before start date."):
             ProgramCycleFactory(
-                program=self.program, start_date=parse_date("2021-01-05"), end_date=parse_date("2021-01-01")
+                program=self.program,
+                start_date=parse_date("2021-01-05"),
+                end_date=parse_date("2021-01-01"),
             )
 
         cycle2 = ProgramCycleFactory(program=self.program)

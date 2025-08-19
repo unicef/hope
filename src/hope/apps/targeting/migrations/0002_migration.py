@@ -30,7 +30,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -56,12 +61,20 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("field_name", models.CharField(max_length=120)),
-                ("comparison_method", models.CharField(choices=[("EQUALS", "Equals")], max_length=20)),
+                (
+                    "comparison_method",
+                    models.CharField(choices=[("EQUALS", "Equals")], max_length=20),
+                ),
                 (
                     "flex_field_classification",
                     models.CharField(
@@ -74,7 +87,10 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("arguments", models.JSONField(help_text="\n                Array of arguments\n                ")),
+                (
+                    "arguments",
+                    models.JSONField(help_text="\n                Array of arguments\n                "),
+                ),
                 (
                     "collector_block_filters",
                     models.ForeignKey(
@@ -87,6 +103,9 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(models.Model, hope.apps.targeting.services.targeting_service.TargetingCriteriaFilterBase),
+            bases=(
+                models.Model,
+                hope.apps.targeting.services.targeting_service.TargetingCriteriaFilterBase,
+            ),
         ),
     ]

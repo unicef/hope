@@ -1,7 +1,8 @@
-from django.contrib import admin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
+from django.contrib import admin
 from smart_admin.decorators import smart_register
+
 from hope.contrib.aurora import models
 
 

@@ -66,7 +66,10 @@ class DeduplicationEngineAPI(BaseAPI):
         return response_data
 
     def create_deduplication_set(self, deduplication_set: DeduplicationSet) -> dict:
-        response_data, _ = self._post(self.Endpoints.CREATE_DEDUPLICATION_SET, dataclasses.asdict(deduplication_set))
+        response_data, _ = self._post(
+            self.Endpoints.CREATE_DEDUPLICATION_SET,
+            dataclasses.asdict(deduplication_set),
+        )
         return response_data
 
     def get_deduplication_set(self, deduplication_set_id: str) -> dict:
@@ -92,7 +95,8 @@ class DeduplicationEngineAPI(BaseAPI):
 
     def process_deduplication(self, deduplication_set_id: str) -> tuple[dict, int]:
         response_data, status = self._post(
-            self.Endpoints.PROCESS_DEDUPLICATION.format(pk=deduplication_set_id), validate_response=False
+            self.Endpoints.PROCESS_DEDUPLICATION.format(pk=deduplication_set_id),
+            validate_response=False,
         )
         return response_data, status
 

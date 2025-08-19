@@ -3,12 +3,11 @@ from collections import defaultdict
 from os.path import isfile
 from typing import Any
 
+import xlrd
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 from django.utils.html import strip_tags
-
-import xlrd
 from openpyxl.worksheet.worksheet import Worksheet
 from xlwt import Row
 
@@ -84,7 +83,12 @@ class FlexibleAttributeImporter:
         }.get(object_type_to_add)
 
     def _assign_field_values(
-        self, value: Any, header_name: str, object_type_to_add: Any, row: Row, row_number: int
+        self,
+        value: Any,
+        header_name: str,
+        object_type_to_add: Any,
+        row: Row,
+        row_number: int,
     ) -> None:
         if not (model_fields := self._get_model_fields(object_type_to_add)):
             return

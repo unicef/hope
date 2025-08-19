@@ -67,5 +67,10 @@ class TestHouseholdRegistrationIdTrigger(APITestCase):
             .order_by("program_registration_id")
             .values_list("program_registration_id", flat=True)
         )
-        expected_program_registrations_ids = ["ABCD-111222#0", "ABCD-123123#0", "ABCD-123123#1", "ABCD-123123#2"]
+        expected_program_registrations_ids = [
+            "ABCD-111222#0",
+            "ABCD-123123#0",
+            "ABCD-123123#1",
+            "ABCD-123123#2",
+        ]
         assert registrations_ids == expected_program_registrations_ids

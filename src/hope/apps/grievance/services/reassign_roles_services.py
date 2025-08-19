@@ -69,7 +69,11 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             )
         if role_name == HEAD:
             reassign_head_of_household_relationship_for_need_adjudication_ticket(
-                household, individual_which_loses_role, new_individual, old_individual_to_log, user
+                household,
+                individual_which_loses_role,
+                new_individual,
+                old_individual_to_log,
+                user,
             )
             household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             continue
@@ -155,7 +159,9 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
         household.individuals.exclude(id=new_individual.id).order_by("id")
     )
     for individual_before_change, individual_after_change in zip(
-        individuals_to_change_relationship_to_unknown, updated_individuals_with_relationship_unknown, strict=True
+        individuals_to_change_relationship_to_unknown,
+        updated_individuals_with_relationship_unknown,
+        strict=True,
     ):
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,

@@ -26,7 +26,9 @@ if TYPE_CHECKING:
 
 
 def get_number_of_samples(
-    payment_records_sample_count: int, confidence_interval: int, margin_of_error: int | float
+    payment_records_sample_count: int,
+    confidence_interval: int,
+    margin_of_error: int | float,
 ) -> int:
     from statistics import NormalDist
 
@@ -92,7 +94,10 @@ def calculate_counts(payment_verification_plan: PaymentVerificationPlan) -> None
 
 
 def get_payment_items_for_dashboard(
-    year: int, business_area_slug: str, filters: dict, only_with_delivered_quantity: bool = False
+    year: int,
+    business_area_slug: str,
+    filters: dict,
+    only_with_delivered_quantity: bool = False,
 ) -> "QuerySet":
     additional_filters = {}
     if only_with_delivered_quantity:

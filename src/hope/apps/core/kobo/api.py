@@ -4,9 +4,8 @@ import typing
 from io import BytesIO
 from urllib.parse import urlparse
 
-from django.conf import settings
-
 import requests
+from django.conf import settings
 from requests import Response
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RetryError
@@ -23,7 +22,10 @@ class CountryCodeNotProvided(Exception):
 
 
 class KoboRequestsSession(requests.Session):
-    AUTH_DOMAINS = [urlparse(settings.KOBO_URL).hostname, urlparse(settings.KOBO_URL).hostname]
+    AUTH_DOMAINS = [
+        urlparse(settings.KOBO_URL).hostname,
+        urlparse(settings.KOBO_URL).hostname,
+    ]
 
     def should_strip_auth(self, old_url: str, new_url: str) -> bool:
         new_parsed = urlparse(new_url)
@@ -37,7 +39,10 @@ class KoboAPI:
     FORMAT = "json"
 
     def __init__(
-        self, kpi_url: str | None = None, token: str | None = None, project_views_id: str | None = None
+        self,
+        kpi_url: str | None = None,
+        token: str | None = None,
+        project_views_id: str | None = None,
     ) -> None:
         self._kpi_url = kpi_url or settings.KOBO_URL
         self._token = token or settings.KOBO_MASTER_API_TOKEN
@@ -47,7 +52,12 @@ class KoboAPI:
         self._set_token()
 
     def _set_token(self) -> None:
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=False)
+        retries = Retry(
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[502, 503, 504],
+            allowed_methods=False,
+        )
         self._client.mount(self._kpi_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"token {self._token}"})
 
@@ -77,7 +87,10 @@ class KoboAPI:
         return self._client.post(url=url, data=data, files=files)
 
     def create_template_from_file(
-        self, bytes_io_file: typing.IO, xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
+        self,
+        bytes_io_file: typing.IO,
+        xlsx_kobo_template_object: XLSXKoboTemplate,
+        template_id: str = "",
     ) -> tuple[dict, str] | None:  # pragma: no cover
         # TODO: not sure if this actually works
         if not template_id:

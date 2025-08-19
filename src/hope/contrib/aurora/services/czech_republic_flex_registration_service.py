@@ -265,7 +265,11 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         legal_guardian_information = [
             info for info in legal_guardian_information if info.get("legal_guardia_not_primary_carer") != "n"
         ]
-        individuals_array = [*primary_carer_info, *children_information, *legal_guardian_information]
+        individuals_array = [
+            *primary_carer_info,
+            *children_information,
+            *legal_guardian_information,
+        ]
 
         if not self._has_head(individuals_array):
             self._set_default_head_of_household(individuals_array)
@@ -273,7 +277,11 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(
-            record, household_address, consent_data, needs_assessment, registration_data_import
+            record,
+            household_address,
+            consent_data,
+            needs_assessment,
+            registration_data_import,
         )
 
         if not household_data.get("size"):
@@ -303,11 +311,15 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 if role:
                     if role.upper() == ROLE_PRIMARY:
                         PendingIndividualRoleInHousehold.objects.create(
-                            individual=individual, household=household, role=ROLE_PRIMARY
+                            individual=individual,
+                            household=household,
+                            role=ROLE_PRIMARY,
                         )
                     else:
                         PendingIndividualRoleInHousehold.objects.create(
-                            individual=individual, household=household, role=ROLE_ALTERNATE
+                            individual=individual,
+                            household=household,
+                            role=ROLE_ALTERNATE,
                         )
                 individuals.append(individual)
 

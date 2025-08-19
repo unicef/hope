@@ -1,10 +1,9 @@
 from datetime import date
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -424,7 +423,10 @@ class TestGrievanceCreateDataChangeAction:
                 "issue_type": {
                     "household_data_update_issue_type_extras": {
                         "household": str(self.household_one.id),
-                        "household_data": {"admin_area_title": self.area.p_code, "flexFields": {}},
+                        "household_data": {
+                            "admin_area_title": self.area.p_code,
+                            "flexFields": {},
+                        },
                     }
                 }
             },

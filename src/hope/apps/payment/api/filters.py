@@ -1,11 +1,14 @@
 from typing import Any
 
-from django.db.models import Q, QuerySet
-
 import django_filters
+from django.db.models import Q, QuerySet
 from django_filters import FilterSet
 
-from hope.apps.payment.models import PaymentPlan, PaymentVerificationSummary, DeliveryMechanism
+from hope.apps.payment.models import (
+    DeliveryMechanism,
+    PaymentPlan,
+    PaymentVerificationSummary,
+)
 
 
 class PaymentPlanFilter(FilterSet):
@@ -57,7 +60,8 @@ class PaymentPlanFilter(FilterSet):
 
 class TargetPopulationFilter(PaymentPlanFilter):
     status = django_filters.ChoiceFilter(
-        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+        method="filter_by_status",
+        choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")],
     )
 
     class Meta:

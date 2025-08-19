@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
             model_name="household",
             name="collision_flag",
             field=models.BooleanField(
-                default=False, help_text="Flag used to identify if the household is in collision state"
+                default=False,
+                help_text="Flag used to identify if the household is in collision state",
             ),
         ),
         migrations.AddField(
@@ -31,7 +32,10 @@ class Migration(migrations.Migration):
             model_name="household",
             name="identification_key",
             field=models.CharField(
-                blank=True, help_text="Key used to identify Collisions in the system", max_length=255, null=True
+                blank=True,
+                help_text="Key used to identify Collisions in the system",
+                max_length=255,
+                null=True,
             ),
         ),
     ]

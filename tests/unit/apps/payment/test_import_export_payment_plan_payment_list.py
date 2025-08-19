@@ -10,7 +10,6 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import DocumentFactory, create_household
@@ -93,7 +92,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         if not Household.objects.all().count():
             for n in range(1, 4):
                 create_household(
-                    {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin, "village": "TEST_VILLAGE"},
+                    {
+                        "size": n,
+                        "address": "Lorem Ipsum",
+                        "country_origin": country_origin,
+                        "village": "TEST_VILLAGE",
+                    },
                 )
 
         if FinancialServiceProvider.objects.count() < 3:
@@ -154,7 +158,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     def test_import_invalid_file(self) -> None:
         error_msg = [
             XlsxError(
-                "Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"
+                "Payment Plan - Payment List",
+                "A2",
+                "This payment id 123123 is not in Payment Plan Payment List",
             ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
@@ -166,7 +172,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert service.errors == error_msg
 
     def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="N3", message="Unexpected value")
+        error_msg = XlsxError(
+            sheet="Payment Plan - Payment List",
+            coordinates="N3",
+            message="Unexpected value",
+        )
         content = Path(
             f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_unexpected_column.xlsx"
         ).read_bytes()
@@ -408,7 +418,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert self.payment_plan.program.is_social_worker_program
 
         # add core fields
-        fsp_xlsx_template.core_fields = ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+        fsp_xlsx_template.core_fields = [
+            "age",
+            "zip_code",
+            "household_unicef_id",
+            "individual_unicef_id",
+        ]
         fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
         fsp_xlsx_template.save()
         fsp_xlsx_template.refresh_from_db()
@@ -426,7 +441,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert "household_size" not in template_column_list
         assert "individual_id" in template_column_list
         # check core fields
-        assert fsp_xlsx_template.core_fields == ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+        assert fsp_xlsx_template.core_fields == [
+            "age",
+            "zip_code",
+            "household_unicef_id",
+            "individual_unicef_id",
+        ]
         assert "age" in template_column_list
         assert "zip_code" in template_column_list
         assert "household_unicef_id" not in template_column_list
@@ -471,7 +491,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.client.login(username="admin", password="password")
         instance = FinancialServiceProviderXlsxTemplate(flex_fields=[], name="Test FSP XLSX Template")
         instance.save()
-        url = reverse("admin:payment_financialserviceproviderxlsxtemplate_change", args=[instance.pk])
+        url = reverse(
+            "admin:payment_financialserviceproviderxlsxtemplate_change",
+            args=[instance.pk],
+        )
         response: Any = self.client.get(url)
         assert response.status_code == 200
         assert "flex_fields" in response.context["adminform"].form.fields

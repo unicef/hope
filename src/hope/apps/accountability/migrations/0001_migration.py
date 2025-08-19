@@ -20,11 +20,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 (
                     "issue_type",
                     models.CharField(
@@ -56,13 +64,21 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "description",
-                    models.TextField(help_text="The content of the feedback message.", verbose_name="Description"),
+                    models.TextField(
+                        help_text="The content of the feedback message.",
+                        verbose_name="Description",
+                    ),
                 ),
             ],
             options={
@@ -75,18 +91,29 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 ("title", models.CharField(max_length=60)),
                 ("body", models.TextField(max_length=1000)),
                 ("number_of_recipients", models.PositiveIntegerField(default=0)),
                 (
                     "sampling_type",
                     models.CharField(
-                        choices=[("FULL_LIST", "Full list"), ("RANDOM", "Random sampling")],
+                        choices=[
+                            ("FULL_LIST", "Full list"),
+                            ("RANDOM", "Random sampling"),
+                        ],
                         default="FULL_LIST",
                         max_length=50,
                     ),
@@ -109,11 +136,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 ("title", models.CharField(max_length=60)),
                 ("body", models.TextField(blank=True, default="", max_length=1000)),
                 (
@@ -129,11 +164,16 @@ class Migration(migrations.Migration):
                 ),
                 ("number_of_recipients", models.PositiveIntegerField(default=0)),
                 ("sample_file", models.FileField(blank=True, null=True, upload_to="")),
-                ("sample_file_generated_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "sample_file_generated_at",
+                    models.DateTimeField(blank=True, null=True),
+                ),
                 (
                     "sampling_type",
                     models.CharField(
-                        choices=[("FULL_LIST", "Full list"), ("RANDOM", "Random")], default="FULL_LIST", max_length=50
+                        choices=[("FULL_LIST", "Full list"), ("RANDOM", "Random")],
+                        default="FULL_LIST",
+                        max_length=50,
                     ),
                 ),
                 ("full_list_arguments", models.JSONField(default=dict)),

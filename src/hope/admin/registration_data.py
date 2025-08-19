@@ -2,6 +2,12 @@ import logging
 from typing import Any
 from uuid import UUID
 
+from admin_extra_buttons.api import confirm_action
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
+from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
@@ -11,14 +17,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-
-from admin_extra_buttons.api import confirm_action
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminAutoCompleteSearchMixin
-from adminfilters.querystring import QueryStringFilter
-
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
@@ -26,9 +24,7 @@ from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.household.models import Individual, PendingIndividual
 from hope.apps.payment.models import Payment
-from hope.apps.registration_data.models import (
-    RegistrationDataImport,
-)
+from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
@@ -133,7 +129,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             self.message_user(request, "RDI Merge task has started")
         except Exception as e:
             logger.warning(e)
-            self.message_user(request, "An error occurred while processing RDI Merge task", messages.ERROR)
+            self.message_user(
+                request,
+                "An error occurred while processing RDI Merge task",
+                messages.ERROR,
+            )
 
     @staticmethod
     def _delete_rdi(rdi: RegistrationDataImport) -> None:
@@ -300,4 +300,8 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
         context["enroll_from"] = "RDI"
-        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
+        return TemplateResponse(
+            request,
+            "admin/household/household/enroll_households_to_program.html",
+            context,
+        )

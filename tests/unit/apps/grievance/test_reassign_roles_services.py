@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
@@ -83,13 +82,17 @@ class TestReassignRolesOnUpdate(APITestCase):
         reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
         assert (
             IndividualRoleInHousehold.objects.filter(
-                household=self.household, individual=self.no_role_individual, role=ROLE_PRIMARY
+                household=self.household,
+                individual=self.no_role_individual,
+                role=ROLE_PRIMARY,
             ).count()
             == 1
         )
         assert (
             IndividualRoleInHousehold.objects.filter(
-                household=self.household, individual=self.primary_collector_individual, role=ROLE_PRIMARY
+                household=self.household,
+                individual=self.primary_collector_individual,
+                role=ROLE_PRIMARY,
             ).count()
             == 0
         )
@@ -98,7 +101,9 @@ class TestReassignRolesOnUpdate(APITestCase):
         for individual in self.household.individuals.exclude(id=self.no_role_individual.id):
             assert individual.relationship == RELATIONSHIP_UNKNOWN
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(self) -> None:
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(
+        self,
+    ) -> None:
         program_two = ProgramFactory(name="Test program TWO", business_area=self.business_area)
         self.no_role_individual.program = program_two
         self.no_role_individual.save()
@@ -123,7 +128,9 @@ class TestReassignRolesOnUpdate(APITestCase):
             )
         assert str(error.exception.messages[0]) == "Cannot reassign role to individual from different program"
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(self) -> None:
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(
+        self,
+    ) -> None:
         duplicated_individuals = Individual.objects.none()
         role_reassign_data = {
             ROLE_PRIMARY: {
@@ -201,7 +208,9 @@ class TestReassignRolesOnUpdate(APITestCase):
         reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
         assert (
             IndividualRoleInHousehold.objects.filter(
-                household=self.household, individual=self.alternate_collector_individual, role=ROLE_PRIMARY
+                household=self.household,
+                individual=self.alternate_collector_individual,
+                role=ROLE_PRIMARY,
             ).count()
             == 1
         )

@@ -1,12 +1,11 @@
 import logging
 from typing import Any
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.combo import AllValuesComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.combo import AllValuesComboFilter
 
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,

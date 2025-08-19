@@ -4,7 +4,6 @@ from typing import Any, Dict
 
 from django.core.management import call_command
 from django.urls import reverse
-
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
@@ -36,7 +35,8 @@ class PushLaxToRDITests(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi = RegistrationDataImport.objects.create(

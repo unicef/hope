@@ -1,8 +1,7 @@
 import json
 
-from django.db import models
-
 import swapper
+from django.db import models
 from strategy_field.fields import StrategyField
 
 from hope.apps.registration_datahub.utils import combine_collections

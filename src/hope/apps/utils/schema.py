@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-from django.core.files.storage import default_storage
-
 import graphene
+from django.core.files.storage import default_storage
 
 from hope.apps.core.field_attributes.core_fields_attributes import TYPE_IMAGE
 from hope.apps.core.models import FlexibleAttribute

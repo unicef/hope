@@ -23,7 +23,8 @@ class ClearCacheForm(forms.Form):
         label="Household: chart_individuals_reached_by_age_and_gender", required=False
     )
     resolve_chart_individuals_with_disability_reached_by_age = forms.BooleanField(
-        label="Household: chart_individuals_with_disability_reached_by_age", required=False
+        label="Household: chart_individuals_with_disability_reached_by_age",
+        required=False,
     )
     # Payment
     exchange_rates = forms.BooleanField(label="Payment: exchange rates", required=False)
@@ -34,7 +35,8 @@ class ClearCacheForm(forms.Form):
     resolve_chart_payment = forms.BooleanField(label="Payment: chart_payment", required=False)
     resolve_section_total_transferred = forms.BooleanField(label="Payment: section_total_transferred", required=False)
     resolve_table_total_cash_transferred_by_administrative_area = forms.BooleanField(
-        label="Payment: table_total_cash_transferred_by_administrative_area", required=False
+        label="Payment: table_total_cash_transferred_by_administrative_area",
+        required=False,
     )
     resolve_chart_total_transferred_cash_by_country = forms.BooleanField(
         label="Payment: chart_total_transferred_cash_by_country", required=False

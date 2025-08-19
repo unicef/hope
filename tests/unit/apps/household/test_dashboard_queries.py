@@ -1,5 +1,4 @@
 from django.utils import timezone
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household
@@ -82,7 +81,10 @@ class TestDashboardQueries(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], cls.business_area, whole_business_area_access=True
+            cls.user,
+            [Permissions.DASHBOARD_VIEW_COUNTRY],
+            cls.business_area,
+            whole_business_area_access=True,
         )
 
         cls.program_one = ProgramFactory(

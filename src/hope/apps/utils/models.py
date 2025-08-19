@@ -5,15 +5,12 @@ import logging
 import sys
 import warnings
 from functools import cached_property
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    Sequence,
-    T,
-)
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
 
+import celery
+from celery import states
+from celery.contrib.abortable import AbortableAsyncResult
+from concurrency.fields import IntegerVersionField
 from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
@@ -21,18 +18,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
-
-import celery
-from celery import states
-from celery.contrib.abortable import AbortableAsyncResult
-from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from model_utils.models import UUIDModel
+from mptt.managers import TreeManager
+from mptt.models import MPTTModel
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
-from mptt.managers import TreeManager
-from mptt.models import MPTTModel
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -127,7 +119,12 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     all_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
 
     def delete(
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self,
+        using: Any = None,
+        keep_parents: bool = False,
+        soft: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> tuple[int, dict[str, int]]:
         """Soft delete object (set its ``is_removed`` field to True).
 
@@ -145,7 +142,10 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
 class AdminUrlMixin:
     @property
     def admin_url(self) -> str:
-        return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=[self.id])
+        return reverse(
+            "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+            args=[self.id],
+        )
 
 
 class TimeStampedModel(models.Model):
@@ -300,7 +300,12 @@ class SoftDeletableDefaultManagerModel(models.Model):
         abstract = True
 
     def delete(
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self,
+        using: Any = None,
+        keep_parents: bool = False,
+        soft: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> tuple[int, dict[str, int]]:
         """Soft delete object (set its ``is_removed`` field to True).
 
@@ -412,7 +417,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     CELERY_STATUS_REVOKED = states.REVOKED
 
     curr_async_result_id = models.CharField(
-        max_length=36, blank=True, null=True, help_text="Current (active) AsyncResult is"
+        max_length=36,
+        blank=True,
+        null=True,
+        help_text="Current (active) AsyncResult is",
     )
 
     celery_task_name: str = "<define `celery_task_name`>"
@@ -446,7 +454,12 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             for rem in revoked:
                 if rem not in pending_tasks:
                     conn.default_channel.client.srem(settings.CELERY_TASK_REVOKED_QUEUE, rem)
-            return {"size": len(tasks), "pending": pending, "canceled": canceled, "revoked": len(revoked)}
+            return {
+                "size": len(tasks),
+                "pending": pending,
+                "canceled": canceled,
+                "revoked": len(revoked),
+            }
 
     @cached_property
     def async_result(self) -> "AbortableAsyncResult|None":
@@ -554,7 +567,9 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         if self.celery_status in ["QUEUED", "PENDING"]:
             with app.pool.acquire(block=True) as conn:
                 conn.default_channel.client.sadd(
-                    settings.CELERY_TASK_REVOKED_QUEUE, self.curr_async_result_id, self.curr_async_result_id
+                    settings.CELERY_TASK_REVOKED_QUEUE,
+                    self.curr_async_result_id,
+                    self.curr_async_result_id,
                 )
         else:
             app.control.revoke(self.curr_async_result_id, terminate=True)

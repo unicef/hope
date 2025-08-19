@@ -1,8 +1,7 @@
 from typing import Any, List
 
-from django.urls import reverse
-
 import pytest
+from django.urls import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
@@ -34,7 +33,10 @@ class TestPaymentViewSet:
             created_at="2022-02-24",
         )
         self.payment = PaymentFactory(
-            parent=self.pp, status=Payment.STATUS_SUCCESS, delivered_quantity=999, entitlement_quantity=112
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=999,
+            entitlement_quantity=112,
         )
         pp_id = self.pp.pk
         url_kwargs = {
@@ -52,7 +54,8 @@ class TestPaymentViewSet:
         self.url_details = reverse("api:payments:payments-detail", kwargs=url_kwargs_with_payment)
         self.url_mark_as_failed = reverse("api:payments:payments-mark-as-failed", kwargs=url_kwargs_with_payment)
         self.url_revert_mark_as_failed = reverse(
-            "api:payments:payments-revert-mark-as-failed", kwargs=url_kwargs_with_payment
+            "api:payments:payments-revert-mark-as-failed",
+            kwargs=url_kwargs_with_payment,
         )
 
     @pytest.mark.parametrize(
@@ -62,7 +65,12 @@ class TestPaymentViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_get_list(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_get_list(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_list)
 
@@ -82,7 +90,12 @@ class TestPaymentViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_details(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_details(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_details)
 
@@ -102,7 +115,10 @@ class TestPaymentViewSet:
         ],
     )
     def test_mark_as_failed(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_mark_as_failed)
@@ -123,13 +139,17 @@ class TestPaymentViewSet:
         ],
     )
     def test_revert_mark_as_failed(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.payment.status = "Force failed"
         self.payment.save()
         response = self.client.post(
-            self.url_revert_mark_as_failed, {"delivered_quantity": "111.00", "delivery_date": "2024-01-01"}
+            self.url_revert_mark_as_failed,
+            {"delivered_quantity": "111.00", "delivery_date": "2024-01-01"},
         )
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:

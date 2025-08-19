@@ -1,13 +1,11 @@
 import csv
 import logging
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generator,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Generator, Union
 
+from admin_extra_buttons.decorators import button
+from admin_sync.mixin import SyncMixin
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import NumberFilter
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
@@ -16,11 +14,6 @@ from django.db.models import Model, QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-
-from admin_extra_buttons.decorators import button
-from admin_sync.mixin import SyncMixin
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
@@ -45,7 +38,11 @@ class ActiveRecordFilter(ListFilter):
     parameter_name = "active"
 
     def __init__(
-        self, request: "HttpRequest", params: dict[str, str], model: type[Model], model_admin: ModelAdmin
+        self,
+        request: "HttpRequest",
+        params: dict[str, str],
+        model: type[Model],
+        model_admin: ModelAdmin,
     ) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
@@ -223,18 +220,27 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                         country = country or Country.objects.get(short_name=row["Country"])
                         for area_level, area_type_name in enumerate(area_types[1:], 1):
                             area_type, _ = AreaType.objects.get_or_create(
-                                name=area_type_name, country=country, area_level=area_level
+                                name=area_type_name,
+                                country=country,
+                                area_level=area_level,
                             )
                             area, _ = Area.objects.get_or_create(
-                                name=row[area_type_name], p_code=row[admin_area[area_level]], area_type=area_type
+                                name=row[area_type_name],
+                                p_code=row[admin_area[area_level]],
+                                area_type=area_type,
                             )
                             ids = area_level - 1
                             if ids > 0:
                                 area_type.parent = AreaType.objects.get(
-                                    country=country, area_level=ids, name=area_types[ids]
+                                    country=country,
+                                    area_level=ids,
+                                    name=area_types[ids],
                                 )
                                 area_type.save()
-                                area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
+                                area.parent = Area.objects.get(
+                                    p_code=row[admin_area[ids]],
+                                    name=row[area_types[ids]],
+                                )
                                 area.save()
                     self.message_user(request, f"Updated all areas for {country}")
                     return redirect("admin:geo_area_changelist")
@@ -242,11 +248,17 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                     logger.warning(f"Integrity error: {e}")
                     if p_code := str(e).split("p_code)=(")[-1].split(")")[0]:
                         self.message_user(
-                            request, f"Area with p_code {p_code} already exists but with different data", messages.ERROR
+                            request,
+                            f"Area with p_code {p_code} already exists but with different data",
+                            messages.ERROR,
                         )
                 except Exception as e:
                     logger.warning(e)
-                    self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
+                    self.message_user(
+                        request,
+                        "Unable to load areas, please check the format",
+                        messages.ERROR,
+                    )
         else:
             form = ImportCSVForm()
         context["form"] = form

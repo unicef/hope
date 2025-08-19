@@ -190,7 +190,9 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             ModelClassForm = modelform_factory(model_class, fields=list(data.keys()) + list(files.keys()))
         else:
             ModelClassForm = modelform_factory(
-                model_class, form=model_form, fields=list(data.keys()) + list(files.keys())
+                model_class,
+                form=model_form,
+                fields=list(data.keys()) + list(files.keys()),
             )
 
         form = ModelClassForm(data=data, files=files)  # type: ignore

@@ -4,15 +4,14 @@ from functools import partial
 from itertools import groupby
 from typing import IO, TYPE_CHECKING, Callable, Union
 
+from constance import config
 from django.contrib.admin.options import get_content_type_for_model
-from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-from constance import config
 from psycopg2._psycopg import IntegrityError
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.currencies import USDC
 from hope.apps.core.models import BusinessArea, FileTemp
@@ -182,7 +181,10 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_rebuild(self) -> PaymentPlan:
-        if self.payment_plan.status not in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]:
+        if self.payment_plan.status not in [
+            PaymentPlan.Status.TP_OPEN,
+            PaymentPlan.Status.TP_LOCKED,
+        ]:
             raise ValidationError("Can only Rebuild Population for Locked or Open Population status")
 
         self.payment_plan.build_status_pending()
@@ -377,7 +379,10 @@ class PaymentPlanService:
 
             if notification_action:
                 send_payment_notification_emails.delay(
-                    self.payment_plan.id, notification_action.value, self.user.id, f"{timezone.now():%-d %B %Y}"
+                    self.payment_plan.id,
+                    notification_action.value,
+                    self.user.id,
+                    f"{timezone.now():%-d %B %Y}",
                 )
 
             self.payment_plan.save()
@@ -410,7 +415,9 @@ class PaymentPlanService:
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
                 has_valid_wallet = PaymentDataCollector.validate_account(
-                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism, collector
+                    payment_plan.financial_service_provider,
+                    payment_plan.delivery_mechanism,
+                    collector,
                 )
 
             payments_to_create.append(
@@ -537,7 +544,10 @@ class PaymentPlanService:
 
         if any(
             [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
-        ) and self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.DRAFT]:
+        ) and self.payment_plan.status not in [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.DRAFT,
+        ]:
             raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
         if name:
@@ -639,13 +649,19 @@ class PaymentPlanService:
         # prevent race between commit transaction and using in task
         transaction.on_commit(
             lambda: PaymentPlanService.rebuild_payment_plan_population(
-                should_rebuild_list, should_update_money_stats, vulnerability_filter, self.payment_plan
+                should_rebuild_list,
+                should_update_money_stats,
+                vulnerability_filter,
+                self.payment_plan,
             )
         )
         return self.payment_plan
 
     def delete(self) -> PaymentPlan:
-        if self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN]:
+        if self.payment_plan.status not in [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.TP_OPEN,
+        ]:
             raise ValidationError("Deletion is only allowed when the status is 'Open'")
 
         if self.payment_plan.status == PaymentPlan.Status.OPEN:
@@ -867,7 +883,10 @@ class PaymentPlanService:
 
     @staticmethod
     def rebuild_payment_plan_population(
-        rebuild_list: bool, should_update_money_stats: bool, vulnerability_filter: bool, payment_plan: PaymentPlan
+        rebuild_list: bool,
+        should_update_money_stats: bool,
+        vulnerability_filter: bool,
+        payment_plan: PaymentPlan,
     ) -> None:
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
         payment_plan.build_status_pending()
@@ -905,7 +924,8 @@ class PaymentPlanService:
                 hh_filter.save()
             for ind_filter_block in rule.individuals_filters_blocks.all():
                 ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
-                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                    targeting_criteria_rule=rule_copy,
+                    target_only_hoh=ind_filter_block.target_only_hoh,
                 )
                 ind_filter_block_copy.save()
                 for ind_filter in ind_filter_block.individual_block_filters.all():

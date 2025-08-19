@@ -1,6 +1,5 @@
 from django.core.management import call_command
 from django.test import TestCase
-
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
     DocumentFactory,

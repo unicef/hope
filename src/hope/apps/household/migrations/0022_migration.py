@@ -39,7 +39,9 @@ class Migration(migrations.Migration):
             model_name="household",
             constraint=models.UniqueConstraint(
                 condition=models.Q(
-                    ("is_removed", False), ("identification_key__isnull", False), ("rdi_merge_status", "MERGED")
+                    ("is_removed", False),
+                    ("identification_key__isnull", False),
+                    ("rdi_merge_status", "MERGED"),
                 ),
                 fields=("identification_key", "program"),
                 name="identification_key_unique_constraint",
@@ -49,7 +51,9 @@ class Migration(migrations.Migration):
             model_name="individual",
             constraint=models.UniqueConstraint(
                 condition=models.Q(
-                    ("is_removed", False), ("identification_key__isnull", False), ("rdi_merge_status", "MERGED")
+                    ("is_removed", False),
+                    ("identification_key__isnull", False),
+                    ("rdi_merge_status", "MERGED"),
                 ),
                 fields=("identification_key", "program"),
                 name="identification_key_ind_unique_constraint",

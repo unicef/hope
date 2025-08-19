@@ -1,9 +1,8 @@
 import datetime
 from typing import Any, Dict, List
 
-from django.core.management import call_command
-
 from dateutil.relativedelta import relativedelta
+from django.core.management import call_command
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -47,7 +46,11 @@ class TestTargetingCriteriaQuery(APITestCase):
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "REFUGEE",
+                "business_area": cls.business_area,
+            },
         )
 
         assert Household.objects.all().distinct().count() == 2
@@ -164,7 +167,14 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                 {
                     "sex": "MALE",
                     "marital_status": "MARRIED",
-                    "observed_disability": ["SEEING", "HEARING", "WALKING", "MEMORY", "SELF_CARE", "COMMUNICATING"],
+                    "observed_disability": [
+                        "SEEING",
+                        "HEARING",
+                        "WALKING",
+                        "MEMORY",
+                        "SELF_CARE",
+                        "COMMUNICATING",
+                    ],
                     "seeing_disability": "LOT_DIFFICULTY",
                     "hearing_disability": "SOME_DIFFICULTY",
                     "physical_disability": "SOME_DIFFICULTY",
@@ -230,7 +240,14 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                     [
                         {
                             "comparison_method": "CONTAINS",
-                            "arguments": ["COMMUNICATING", "HEARING", "MEMORY", "SEEING", "WALKING", "SELF_CARE"],
+                            "arguments": [
+                                "COMMUNICATING",
+                                "HEARING",
+                                "MEMORY",
+                                "SEEING",
+                                "WALKING",
+                                "SELF_CARE",
+                            ],
                             "field_name": "observed_disability",
                             "flex_field_classification": "NOT_FLEX_FIELD",
                         },
@@ -346,10 +363,18 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.hh_2, individuals = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "REFUGEE",
+                "business_area": cls.business_area,
+            },
         )
         cls.hh_3, individuals = create_household(
-            {"size": 3, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {
+                "size": 3,
+                "residence_status": "REFUGEE",
+                "business_area": cls.business_area,
+            },
         )
 
         assert Household.objects.all().distinct().count() == 3

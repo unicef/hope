@@ -1,6 +1,7 @@
 import csv
 import logging
 
+from adminactions.api import delimiters, quotes
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm, UsernameField
@@ -8,8 +9,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
-
-from adminactions.api import delimiters, quotes
 
 from hope.apps.account import models as account_models
 from hope.apps.account.models import Partner, Role
@@ -140,9 +139,15 @@ class KoboImportUsersForm(forms.Form):
 class ImportCSVForm(forms.Form):
     file = forms.FileField()
     delimiter = forms.ChoiceField(
-        label=_("Delimiter"), choices=list(zip(delimiters, delimiters, strict=True)), initial=","
+        label=_("Delimiter"),
+        choices=list(zip(delimiters, delimiters, strict=True)),
+        initial=",",
     )
-    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes, strict=True)), initial="'")
+    quotechar = forms.ChoiceField(
+        label=_("Quotechar"),
+        choices=list(zip(quotes, quotes, strict=True)),
+        initial="'",
+    )
     quoting = forms.ChoiceField(
         label=_("Quoting"),
         choices=(
@@ -178,6 +183,9 @@ class ImportCSVForm(forms.Form):
         ),
         (
             _("Options"),
-            {"classes": ["collapse"], "fields": (("delimiter", "quotechar", "quoting", "escapechar"),)},
+            {
+                "classes": ["collapse"],
+                "fields": (("delimiter", "quotechar", "quoting", "escapechar"),),
+            },
         ),
     )
