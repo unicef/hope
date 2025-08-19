@@ -103,7 +103,7 @@ export function AccountTable({
                 <TableCell align="left">{key}</TableCell>
                 <TableCell align="left">
                   {isFinancialInstitutionField
-                    ? accountFinancialInstitutionsDict[value]
+                    ? accountFinancialInstitutionsDict[value as string]
                     : String(value)}
                 </TableCell>
                 <TableCell align="left"></TableCell>
