@@ -357,14 +357,14 @@ class PDUOnlineEditViewSet(
         # Prefetch role_assignments with relevant permissions for user and partner to avoid extra queries in serializer
         users_available = users_available.prefetch_related(
             Prefetch(
-                'role_assignments',
+                "role_assignments",
                 queryset=role_assignments_with_pdu_online_edit_related_permissions,
-                to_attr='cached_relevant_role_assignments'
+                to_attr="cached_relevant_role_assignments"
             ),
             Prefetch(
-                'partner__role_assignments',
+                "partner__role_assignments",
                 queryset=role_assignments_with_pdu_online_edit_related_permissions,
-                to_attr='cached_relevant_role_assignments_partner'
+                to_attr="cached_relevant_role_assignments_partner"
             )
         )
 

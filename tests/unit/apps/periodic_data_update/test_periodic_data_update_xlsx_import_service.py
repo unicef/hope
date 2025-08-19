@@ -163,13 +163,8 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == 20.456
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
@@ -189,13 +184,8 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] is True
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
@@ -215,13 +205,8 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] is False
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
@@ -241,11 +226,7 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.FAILED)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [
                 {
@@ -274,13 +255,8 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "1996-06-21"
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
@@ -302,13 +278,8 @@ class TestPDUXlsxImportService(TestCase):
         periodic_data_update_template.save()
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "1996-06-21"
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-03-07"
@@ -328,11 +299,7 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.FAILED)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [
                 {
@@ -359,11 +326,7 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.FAILED)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [
                 {
@@ -394,11 +357,7 @@ class TestPDUXlsxImportService(TestCase):
         flexible_attribute.delete()
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.FAILED)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [],
             "non_form_errors": ["Some fields are missing in the flexible attributes"],
@@ -422,13 +381,8 @@ class TestPDUXlsxImportService(TestCase):
         )
         service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-<<<<<<< HEAD:tests/unit/apps/periodic_data_update/test_periodic_data_update_xlsx_import_service.py
-        self.assertEqual(periodic_data_update_upload.status, PDUXlsxUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-=======
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
->>>>>>> develop:tests/unit/apps/periodic_data_update/test_periodic_data_update_import_service.py
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "2021-05-02"
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"

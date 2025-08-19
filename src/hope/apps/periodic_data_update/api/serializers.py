@@ -165,8 +165,8 @@ class AuthorizedUserSerializer(serializers.ModelSerializer):
 
     def get_pdu_permissions(self, user: User) -> list[str]:
         # use cached role assignments if available - when used in "users_available" action
-        cached_user_roles = getattr(user, 'cached_relevant_role_assignments', [])
-        cached_partner_roles = getattr(user.partner, 'cached_relevant_role_assignments_partner', [])
+        cached_user_roles = getattr(user, "cached_relevant_role_assignments", [])
+        cached_partner_roles = getattr(user.partner, "cached_relevant_role_assignments_partner", [])
         cached_roles = list(cached_user_roles) + list(cached_partner_roles)
         if cached_roles:
             perms = set()

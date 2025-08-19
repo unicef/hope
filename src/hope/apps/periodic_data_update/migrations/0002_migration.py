@@ -7,8 +7,7 @@ import django.db.models.deletion
 
 
 def migrate_celery_task_results_ids(apps, schema_editor):
-    """
-    Migrate from curr_async_result_id to celery_tasks_results_ids,
+    """Migrate from curr_async_result_id to celery_tasks_results_ids,
     using the specific task name for each model in bulk.
     """
     # Migrate PDUXlsxTemplate
@@ -57,7 +56,7 @@ class Migration(migrations.Migration):
                 ("created_by", models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="pdu_online_edits_created", to=settings.AUTH_USER_MODEL)),
                 ("program", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="pdu_online_edits", to="program.program")),
                 ("approved_at", models.DateTimeField(blank=True, null=True)),
-                ("approved_by", models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pdu_online_edits_approved', to=settings.AUTH_USER_MODEL)),
+                ("approved_by", models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="pdu_online_edits_approved", to=settings.AUTH_USER_MODEL)),
                 ("edit_data", models.JSONField(blank=True, default=dict)),
             ],
         ),
@@ -126,20 +125,20 @@ class Migration(migrations.Migration):
                                     related_name="pdu_uploads", to=settings.AUTH_USER_MODEL),
         ),
         migrations.CreateModel(
-            name='PDUOnlineEditSentBackComment',
+            name="PDUOnlineEditSentBackComment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('comment', models.TextField()),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                                 related_name='sent_back_comments', to=settings.AUTH_USER_MODEL)),
-                ('pdu_online_edit',
-                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='sent_back_comment',
-                                      to='periodic_data_update.pduonlineedit')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("comment", models.TextField()),
+                ("created_by", models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                                 related_name="sent_back_comments", to=settings.AUTH_USER_MODEL)),
+                ("pdu_online_edit",
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name="sent_back_comment",
+                                      to="periodic_data_update.pduonlineedit")),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]
