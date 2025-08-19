@@ -294,7 +294,7 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        pass
+        return self.status  # TODO: PDU - implement task status handling
 
 
     @property

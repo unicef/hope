@@ -5,6 +5,7 @@ from django.db import migrations, models
 
 def migrate_task_results_ids(apps, schema_editor):
     """Migrate from curr_async_result_id to celery_tasks_results_ids for UniversalUpdate model.
+
     Assign existing results for both tasks as there was no differentiation in the previous model.
     """
     UniversalUpdate = apps.get_model("universal_update_script", "UniversalUpdate")
