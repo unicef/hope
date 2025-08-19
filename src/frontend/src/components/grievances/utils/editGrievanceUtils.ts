@@ -430,12 +430,12 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          householdDataUpdateIssueTypeExtras: {
-            householdData,
-          },
-        },
+        // linkedTickets: values.selectedLinkedTickets,
+        // extras: {
+        //   householdDataUpdateIssueTypeExtras: {
+        //     householdData,
+        //   },
+        // },
       },
     },
   };
@@ -533,5 +533,3 @@ export function prepareRestUpdateVariables(_businessArea, values, ticket) {
   );
   return prepareFunction(requiredVariables, values);
 }
-
-// REST API version for updating grievance tickets
