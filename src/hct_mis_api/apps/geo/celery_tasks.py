@@ -53,9 +53,6 @@ def import_areas_from_csv_task(csv_data: str) -> None:
         all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
         areas_cache = {a.p_code: a for a in Area.objects.filter(p_code__in=all_p_codes)}
 
-        updated_count = 0
-        created_count = 0
-
         for row in rows:
             parent_area = None
             for level, name_header in enumerate(name_headers):
@@ -85,9 +82,7 @@ def import_areas_from_csv_task(csv_data: str) -> None:
                             changed = True
                     if changed:
                         area.save()
-                        updated_count += 1
                 else:
                     area = Area.objects.create(p_code=p_code, **defaults)
-                    created_count += 1
                     areas_cache[p_code] = area
                 parent_area = area
