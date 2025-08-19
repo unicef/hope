@@ -32,6 +32,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
+from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter
 from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
 from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxTemplateCreateSerializer,
@@ -226,7 +227,7 @@ class PDUOnlineEditViewSet(
         "users_available": [Permissions.PDU_TEMPLATE_CREATE],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = UpdatedAtFilter # TODO: PDU - add custom filter for status
+    filterset_class = PDUOnlineEditFilter
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -273,7 +274,6 @@ class PDUOnlineEditViewSet(
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
-
 
     @action(detail=False, methods=["post"])
     def bulk_approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:

@@ -10,6 +10,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory
 from hope.apps.program.models import Program
+from hope.apps.periodic_data_update.models import PDUOnlineEdit
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -46,8 +47,8 @@ class TestPDUOnlineEditList:
 
         user_other = UserFactory(partner=self.partner, first_name="Charlie")
 
-        self.pdu_edit1 = PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, authorized_users=[user_other])
-        self.pdu_edit2 = PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, authorized_users=[self.user])  # Request user is authorized
+        self.pdu_edit1 = PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, authorized_users=[user_other], status=PDUOnlineEdit.Status.NEW)
+        self.pdu_edit2 = PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, authorized_users=[self.user], status=PDUOnlineEdit.Status.READY)  # Request user is authorized
         self.pdu_edit_other_program = PDUOnlineEditFactory(program=self.other_program, business_area=self.afghanistan)
 
     @pytest.mark.parametrize(
@@ -113,6 +114,61 @@ class TestPDUOnlineEditList:
                 "is_authorized": True,
             },
         ]
+
+    @pytest.mark.parametrize(
+        ("status_filter", "expected_count"),
+        [
+            (PDUOnlineEdit.Status.NEW, 2),  # self.pdu_edit1 and one created in the test
+            (PDUOnlineEdit.Status.READY, 2),  # self.pdu_edit2 and one created in the test
+            (PDUOnlineEdit.Status.APPROVED, 1),
+            (PDUOnlineEdit.Status.MERGED, 1),
+        ],
+    )
+    def test_pdu_online_edit_list_filter_by_status(
+        self, create_user_role_with_permissions: Any, status_filter: str, expected_count: int
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_VIEW_LIST_AND_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.NEW)
+        PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.READY)
+        PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.APPROVED)
+        PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.MERGED)
+
+        response = self.api_client.get(f"{self.list_url}?status={status_filter}")
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == expected_count
+        assert all(item["status"] == status_filter for item in results)
+
+    def test_pdu_online_edit_list_filter_by_status_multiple_statuses(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_VIEW_LIST_AND_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.APPROVED)
+
+        response = self.api_client.get(f"{self.list_url}?status={PDUOnlineEdit.Status.NEW}&status={PDUOnlineEdit.Status.APPROVED}")
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 2
+        statuses = {item["status"] for item in results}
+        assert {PDUOnlineEdit.Status.NEW, PDUOnlineEdit.Status.APPROVED} == statuses
+
+    def test_pdu_online_edit_list_filter_by_status_invalid_status(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_VIEW_LIST_AND_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(f"{self.list_url}?status=invalid_status")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
