@@ -27,7 +27,13 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
 
     def get_paginated_response(self, data: list[Any]) -> Response:
         return Response(
-            OrderedDict([("next", self.get_next_link()), ("previous", self.get_previous_link()), ("results", data)])
+            OrderedDict(
+                [
+                    ("next", self.get_next_link()),
+                    ("previous", self.get_previous_link()),
+                    ("results", data),
+                ]
+            )
         )
 
     def get_paginated_response_schema(self, schema: dict[str, Any]) -> dict[str, Any]:
@@ -65,7 +71,11 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         page_numbers = _get_displayed_page_numbers(current, final)
         page_links = _get_page_links(page_numbers, current, page_number_to_url)
 
-        return {"previous_url": self.get_previous_link(), "next_url": self.get_next_link(), "page_links": page_links}
+        return {
+            "previous_url": self.get_previous_link(),
+            "next_url": self.get_next_link(),
+            "page_links": page_links,
+        }
 
     def get_count(self, queryset: Any) -> int:
         return 0

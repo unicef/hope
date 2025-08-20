@@ -30,14 +30,20 @@ class Migration(migrations.Migration):
             model_name="household",
             name="detail_id",
             field=models.CharField(
-                blank=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID", max_length=150, null=True
+                blank=True,
+                help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID",
+                max_length=150,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="detail_id",
             field=models.CharField(
-                blank=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID", max_length=150, null=True
+                blank=True,
+                help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID",
+                max_length=150,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -110,7 +116,9 @@ class Migration(migrations.Migration):
             model_name="household",
             name="business_area",
             field=models.ForeignKey(
-                help_text="Household business area", on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+                help_text="Household business area",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.businessarea",
             ),
         ),
         migrations.AlterField(
@@ -122,14 +130,20 @@ class Migration(migrations.Migration):
             model_name="household",
             name="children_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household children count", null=True
+                blank=True,
+                default=None,
+                help_text="Household children count",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="children_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household children disabled count", null=True
+                blank=True,
+                default=None,
+                help_text="Household children disabled count",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -374,7 +388,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="household",
             name="deviceid",
-            field=models.CharField(blank=True, default="", help_text="Household deviceid [sys]", max_length=250),
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Household deviceid [sys]",
+                max_length=250,
+            ),
         ),
         migrations.AlterField(
             model_name="household",
@@ -385,7 +404,10 @@ class Migration(migrations.Migration):
             model_name="household",
             name="family_id",
             field=models.CharField(
-                blank=True, help_text="Family ID eDopomoga household id [sys]", max_length=100, null=True
+                blank=True,
+                help_text="Family ID eDopomoga household id [sys]",
+                max_length=100,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -397,84 +419,120 @@ class Migration(migrations.Migration):
             model_name="household",
             name="female_age_group_0_5_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 0-5", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 0-5",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_0_5_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 0-5", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 0-5",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_12_17_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 12-17", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 12-17",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_12_17_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 12-17", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 12-17",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_18_59_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 18-59", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 18-59",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_18_59_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 18-59", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 18-59",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_60_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 60", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 60",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_60_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 60", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 60",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_6_11_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 6-11", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 6-11",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_age_group_6_11_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female age group 6-11", null=True
+                blank=True,
+                default=None,
+                help_text="Household female age group 6-11",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_children_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female children count", null=True
+                blank=True,
+                default=None,
+                help_text="Household female children count",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="female_children_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household female children disabled count", null=True
+                blank=True,
+                default=None,
+                help_text="Household female children disabled count",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -491,7 +549,9 @@ class Migration(migrations.Migration):
             model_name="household",
             name="flex_registrations_record_id",
             field=models.PositiveIntegerField(
-                blank=True, help_text="Household flex registrations record [sys]", null=True
+                blank=True,
+                help_text="Household flex registrations record [sys]",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -525,13 +585,20 @@ class Migration(migrations.Migration):
             model_name="household",
             name="kobo_submission_time",
             field=models.DateTimeField(
-                blank=True, help_text="Household Kobo submission time [sys]", max_length=150, null=True
+                blank=True,
+                help_text="Household Kobo submission time [sys]",
+                max_length=150,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="kobo_submission_uuid",
-            field=models.UUIDField(default=None, help_text="Household Kobo submission uuid [sys]", null=True),
+            field=models.UUIDField(
+                default=None,
+                help_text="Household Kobo submission uuid [sys]",
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name="household",
@@ -542,84 +609,120 @@ class Migration(migrations.Migration):
             model_name="household",
             name="male_age_group_0_5_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 0-5", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 0-5",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_0_5_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 0-5", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 0-5",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_12_17_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 12-17", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 12-17",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_12_17_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 12-17", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 12-17",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_18_59_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 18-59", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 18-59",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_18_59_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 18-59", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 18-59",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_60_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 60", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 60",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_60_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 60", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 60",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_6_11_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 6-11", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 6-11",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_age_group_6_11_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male age group 6-1", null=True
+                blank=True,
+                default=None,
+                help_text="Household male age group 6-1",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_children_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male children count", null=True
+                blank=True,
+                default=None,
+                help_text="Household male children count",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="male_children_disabled_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household male children disabled count", null=True
+                blank=True,
+                default=None,
+                help_text="Household male children disabled count",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -635,7 +738,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="household",
             name="name_enumerator",
-            field=models.CharField(blank=True, default="", help_text="Household name enumerator [sys]", max_length=250),
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Household name enumerator [sys]",
+                max_length=250,
+            ),
         ),
         migrations.AlterField(
             model_name="household",
@@ -651,26 +759,40 @@ class Migration(migrations.Migration):
             model_name="household",
             name="org_name_enumerator",
             field=models.CharField(
-                blank=True, default="", help_text="Household org name enumerator [sys]", max_length=250
+                blank=True,
+                default="",
+                help_text="Household org name enumerator [sys]",
+                max_length=250,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="origin_unicef_id",
-            field=models.CharField(blank=True, help_text="Household origin unicef id [sys]", max_length=100, null=True),
+            field=models.CharField(
+                blank=True,
+                help_text="Household origin unicef id [sys]",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name="household",
             name="other_sex_group_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household other sex group count", null=True
+                blank=True,
+                default=None,
+                help_text="Household other sex group count",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="pregnant_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household pregnant count", null=True
+                blank=True,
+                default=None,
+                help_text="Household pregnant count",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -780,28 +902,43 @@ class Migration(migrations.Migration):
             model_name="household",
             name="total_cash_received",
             field=models.DecimalField(
-                blank=True, decimal_places=2, help_text="Household cash received [sys]", max_digits=64, null=True
+                blank=True,
+                decimal_places=2,
+                help_text="Household cash received [sys]",
+                max_digits=64,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="total_cash_received_usd",
             field=models.DecimalField(
-                blank=True, decimal_places=2, help_text="Household cash received usd [sys]", max_digits=64, null=True
+                blank=True,
+                decimal_places=2,
+                help_text="Household cash received usd [sys]",
+                max_digits=64,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="unhcr_id",
             field=models.CharField(
-                blank=True, db_index=True, default="", help_text="Household unhcr id", max_length=250
+                blank=True,
+                db_index=True,
+                default="",
+                help_text="Household unhcr id",
+                max_length=250,
             ),
         ),
         migrations.AlterField(
             model_name="household",
             name="unknown_sex_group_count",
             field=models.PositiveIntegerField(
-                blank=True, default=None, help_text="Household unknown sex group count", null=True
+                blank=True,
+                default=None,
+                help_text="Household unknown sex group count",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -818,7 +955,10 @@ class Migration(migrations.Migration):
             model_name="household",
             name="withdrawn_date",
             field=models.DateTimeField(
-                blank=True, db_index=True, help_text="Household withdrawn date [sys]", null=True
+                blank=True,
+                db_index=True,
+                help_text="Household withdrawn date [sys]",
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -860,7 +1000,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="biometric_deduplication_golden_record_results",
-            field=models.JSONField(blank=True, default=list, help_text="Deduplication golden record results [sys]"),
+            field=models.JSONField(
+                blank=True,
+                default=list,
+                help_text="Deduplication golden record results [sys]",
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
@@ -887,13 +1031,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="blockchain_name",
-            field=models.CharField(blank=True, default="", help_text="Cryptocurrency blockchain name", max_length=64),
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Cryptocurrency blockchain name",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="business_area",
             field=models.ForeignKey(
-                help_text="Business area", on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+                help_text="Business area",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.businessarea",
             ),
         ),
         migrations.AlterField(
@@ -940,7 +1091,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="deduplication_golden_record_results",
-            field=models.JSONField(blank=True, default=dict, help_text="Deduplication golden record results [sys]"),
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Deduplication golden record results [sys]",
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
@@ -982,7 +1137,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="disability_certificate_picture",
-            field=models.ImageField(blank=True, help_text="Disability certificate picture", null=True, upload_to=""),
+            field=models.ImageField(
+                blank=True,
+                help_text="Disability certificate picture",
+                null=True,
+                upload_to="",
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
@@ -1013,7 +1173,10 @@ class Migration(migrations.Migration):
             model_name="individual",
             name="family_name",
             field=django.contrib.postgres.fields.citext.CICharField(
-                blank=True, db_index=True, help_text="Last name of the Beneficiary", max_length=85
+                blank=True,
+                db_index=True,
+                help_text="Last name of the Beneficiary",
+                max_length=85,
             ),
         ),
         migrations.AlterField(
@@ -1050,7 +1213,10 @@ class Migration(migrations.Migration):
             model_name="individual",
             name="given_name",
             field=django.contrib.postgres.fields.citext.CICharField(
-                blank=True, db_index=True, help_text="First name of the Beneficiary", max_length=85
+                blank=True,
+                db_index=True,
+                help_text="First name of the Beneficiary",
+                max_length=85,
             ),
         ),
         migrations.AlterField(
@@ -1136,7 +1302,10 @@ class Migration(migrations.Migration):
             model_name="individual",
             name="middle_name",
             field=django.contrib.postgres.fields.citext.CICharField(
-                blank=True, db_index=True, help_text="Middle name of the Beneficiary", max_length=85
+                blank=True,
+                db_index=True,
+                help_text="Middle name of the Beneficiary",
+                max_length=85,
             ),
         ),
         migrations.AlterField(
@@ -1160,7 +1329,10 @@ class Migration(migrations.Migration):
                     ("WALKING", "Difficulty walking or climbing steps"),
                     ("MEMORY", "Difficulty remembering or concentrating"),
                     ("SELF_CARE", "Difficulty with self care (washing, dressing)"),
-                    ("COMMUNICATING", "Difficulty communicating (e.g understanding or being understood)"),
+                    (
+                        "COMMUNICATING",
+                        "Difficulty communicating (e.g understanding or being understood)",
+                    ),
                 ],
                 default="NONE",
                 help_text="Observed disability status",
@@ -1170,40 +1342,63 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="origin_unicef_id",
-            field=models.CharField(blank=True, help_text="Original unicef_id [sys]", max_length=100, null=True),
+            field=models.CharField(
+                blank=True,
+                help_text="Original unicef_id [sys]",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="payment_delivery_phone_no",
             field=phonenumber_field.modelfields.PhoneNumberField(
-                blank=True, help_text="Beneficiary contact phone number", max_length=128, null=True, region=None
+                blank=True,
+                help_text="Beneficiary contact phone number",
+                max_length=128,
+                null=True,
+                region=None,
             ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="phone_no",
             field=phonenumber_field.modelfields.PhoneNumberField(
-                blank=True, db_index=True, help_text="Beneficiary phone number", max_length=128, region=None
+                blank=True,
+                db_index=True,
+                help_text="Beneficiary phone number",
+                max_length=128,
+                region=None,
             ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="phone_no_alternative",
             field=phonenumber_field.modelfields.PhoneNumberField(
-                blank=True, db_index=True, help_text="Beneficiary phone number alternative", max_length=128, region=None
+                blank=True,
+                db_index=True,
+                help_text="Beneficiary phone number alternative",
+                max_length=128,
+                region=None,
             ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="phone_no_alternative_valid",
             field=models.BooleanField(
-                db_index=True, help_text="Beneficiary phone number alternative valid [sys]", null=True
+                db_index=True,
+                help_text="Beneficiary phone number alternative valid [sys]",
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="phone_no_valid",
-            field=models.BooleanField(db_index=True, help_text="Beneficiary phone number valid [sys]", null=True),
+            field=models.BooleanField(
+                db_index=True,
+                help_text="Beneficiary phone number valid [sys]",
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
@@ -1297,12 +1492,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="sanction_list_confirmed_match",
-            field=models.BooleanField(db_index=True, default=False, help_text="Sanction list confirmed match [sys]"),
+            field=models.BooleanField(
+                db_index=True,
+                default=False,
+                help_text="Sanction list confirmed match [sys]",
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="sanction_list_possible_match",
-            field=models.BooleanField(db_index=True, default=False, help_text="Sanction list possible match [sys]"),
+            field=models.BooleanField(
+                db_index=True,
+                default=False,
+                help_text="Sanction list possible match [sys]",
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
@@ -1360,17 +1563,31 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="individual",
             name="wallet_address",
-            field=models.CharField(blank=True, default="", help_text="Cryptocurrency wallet address", max_length=128),
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Cryptocurrency wallet address",
+                max_length=128,
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="wallet_name",
-            field=models.CharField(blank=True, default="", help_text="Cryptocurrency wallet name", max_length=64),
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Cryptocurrency wallet name",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
             model_name="individual",
             name="who_answers_alt_phone",
-            field=models.CharField(blank=True, help_text="Who answers alternative phone number", max_length=150),
+            field=models.CharField(
+                blank=True,
+                help_text="Who answers alternative phone number",
+                max_length=150,
+            ),
         ),
         migrations.AlterField(
             model_name="individual",

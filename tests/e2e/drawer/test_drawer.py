@@ -2,14 +2,13 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from selenium.common.exceptions import NoSuchElementException
-
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
+from selenium.common.exceptions import NoSuchElementException
 
 from hope.apps.core.models import DataCollectingType
 from hope.apps.program.models import BeneficiaryGroup, Program
@@ -63,7 +62,10 @@ def get_program_with_dct_type_and_name(
 
 
 def get_social_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.ACTIVE
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.SOCIAL,
+    status: str = Program.ACTIVE,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()

@@ -22,18 +22,9 @@ from hope.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.registration_datahub.apis.deduplication_engine import (
-    SimilarityPair,
-)
-from hope.apps.utils.models import (
-    AdminUrlMixin,
-    ConcurrencyModel,
-    TimeStampedUUIDModel,
-)
-from hope.apps.utils.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
+from hope.apps.utils.models import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +139,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
     deduplication_engine_status = models.CharField(
-        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
+        max_length=255,
+        choices=DEDUP_ENGINE_STATUS_CHOICE,
+        blank=True,
+        null=True,
+        default=None,
     )
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     # TODO: set to not nullable Program and on_delete=models.PROTECT
@@ -272,7 +267,12 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             registration_data_import_id=self.id,
             deduplication_golden_record_status=NEEDS_ADJUDICATION,
         ).count()
-        self.save(update_fields=["golden_record_duplicates", "golden_record_possible_duplicates"])
+        self.save(
+            update_fields=[
+                "golden_record_duplicates",
+                "golden_record_possible_duplicates",
+            ]
+        )
 
     def bulk_update_household_size(self) -> None:
         # AB#208387
@@ -391,13 +391,23 @@ class DeduplicationEngineSimilarityPair(models.Model):
         STATUS_500 = "500", "Generic error"
 
     program = models.ForeignKey(
-        "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
+        "program.Program",
+        related_name="deduplication_engine_similarity_pairs",
+        on_delete=models.CASCADE,
     )
     individual1 = models.ForeignKey(
-        "household.Individual", related_name="biometric_duplicates_1", on_delete=models.CASCADE, null=True, blank=True
+        "household.Individual",
+        related_name="biometric_duplicates_1",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     individual2 = models.ForeignKey(
-        "household.Individual", related_name="biometric_duplicates_2", on_delete=models.CASCADE, null=True, blank=True
+        "household.Individual",
+        related_name="biometric_duplicates_2",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     similarity_score = models.DecimalField(
         max_digits=5,
@@ -411,7 +421,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
             # Prevent an Individual from being marked as a duplicate of itself
             # Enforce a consistent ordering to avoid duplicate entries in reverse
             models.CheckConstraint(
-                check=models.Q(individual1__lt=models.F("individual2")), name="individual1_lt_individual2"
+                check=models.Q(individual1__lt=models.F("individual2")),
+                name="individual1_lt_individual2",
             ),
         ]
 
@@ -458,7 +469,10 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 cls.objects.bulk_create(duplicates, ignore_conflicts=True)
 
     def serialize_for_ticket(self) -> dict[str, Any]:
-        results = {"similarity_score": float(self.similarity_score), "status_code": self.get_status_code_display()}
+        results = {
+            "similarity_score": float(self.similarity_score),
+            "status_code": self.get_status_code_display(),
+        }
         for i, ind in enumerate([self.individual1, self.individual2]):
             results[f"individual{i + 1}"] = {
                 "id": str(ind.id) if ind else "",

@@ -6,12 +6,11 @@ from pathlib import Path
 from time import sleep
 from typing import Any
 
-from django.conf import settings
-from django.core.cache import cache
-
 import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from django.conf import settings
+from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
@@ -70,7 +69,12 @@ def pytest_configure(config: Config) -> None:
     from django.conf import settings
 
     settings.DEBUG = True
-    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+    settings.ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "10.0.2.2",
+        os.getenv("DOMAIN", ""),
+    ]
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
@@ -113,7 +117,11 @@ def pytest_configure(config: Config) -> None:
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+            "graphql": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
@@ -230,7 +238,12 @@ def register_custom_sql_signal() -> None:
                     all_sqls.append(stmt)  # noqa
 
     def pre_migration_custom_sql(
-        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+        sender: Any,
+        app_config: Any,
+        verbosity: Any,
+        interactive: Any,
+        using: Any,
+        **kwargs: Any,
     ) -> None:
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
@@ -239,7 +252,12 @@ def register_custom_sql_signal() -> None:
         conn.cursor().execute(pre_sql)
 
     def post_migration_custom_sql(
-        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+        sender: Any,
+        app_config: Any,
+        verbosity: Any,
+        interactive: Any,
+        using: Any,
+        **kwargs: Any,
     ) -> None:
         app_label = app_config.label
         if app_label not in apps:
@@ -251,8 +269,16 @@ def register_custom_sql_signal() -> None:
         for stmt in all_sqls:
             conn.cursor().execute(stmt)
 
-    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
-    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)
+    pre_migrate.connect(
+        pre_migration_custom_sql,
+        dispatch_uid="tests.pre_migrationc_custom_sql",
+        weak=False,
+    )
+    post_migrate.connect(
+        post_migration_custom_sql,
+        dispatch_uid="tests.post_migration_custom_sql",
+        weak=False,
+    )
 
 
 @pytest.fixture(autouse=True)

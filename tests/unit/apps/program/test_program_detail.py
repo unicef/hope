@@ -30,7 +30,9 @@ class TestProgramDetail:
     def setup(self, api_client: Any, create_partner_role_with_permissions: Any) -> None:
         self.afghanistan = create_afghanistan()
         self.program = ProgramFactory(
-            business_area=self.afghanistan, status=Program.ACTIVE, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
         self.detail_url_name = "api:programs:programs-detail"
 
@@ -53,7 +55,10 @@ class TestProgramDetail:
         # partner with area limits
         self.partner_with_area_limits = PartnerFactory(name="PartnerWithAreaLimits")
         create_partner_role_with_permissions(
-            self.partner_with_area_limits, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, self.program
+            self.partner_with_area_limits,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            self.program,
         )
 
         country = CountryFactory()
@@ -81,24 +86,38 @@ class TestProgramDetail:
         ],
     )
     def test_program_detail_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         response = self.client.get(
             reverse(
-                self.detail_url_name, kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug}
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == expected_status
 
     def test_program_detail(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, self.program
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            self.program,
         )
 
         response = self.client.get(
             reverse(
-                self.detail_url_name, kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug}
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK

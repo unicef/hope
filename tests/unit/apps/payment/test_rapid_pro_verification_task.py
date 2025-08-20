@@ -4,7 +4,6 @@ from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -37,7 +36,10 @@ class TestRapidProVerificationTask(TestCase):
         {
             "id": 1202235952,
             "uuid": "5b6f30ee-010b-4bd5-a510-e78f062af448",
-            "flow": {"uuid": "0331293b-9e47-4766-9b78-37a9a702fd95", "name": "Payment Verification"},
+            "flow": {
+                "uuid": "0331293b-9e47-4766-9b78-37a9a702fd95",
+                "name": "Payment Verification",
+            },
             "contact": {
                 "uuid": "875cf5d1-ab56-48f4-97e5-1d757d75a06a",
                 "urn": "telegram:1241420989",
@@ -46,11 +48,26 @@ class TestRapidProVerificationTask(TestCase):
             "start": {"uuid": START_UUID},
             "responded": True,
             "path": [
-                {"node": "f511ccc6-b380-453a-9901-d8cb9c672d72", "time": "2020-08-10T13:24:37.813876Z"},
-                {"node": "2b541238-e1fb-4d75-aa83-6e5946382734", "time": "2020-08-10T13:24:37.813947Z"},
-                {"node": "0532a470-e128-48a6-aa9f-c5bdffd0f61a", "time": "2020-08-10T14:51:18.515192Z"},
-                {"node": "8952391d-89fc-404a-8c34-4569aa5fb947", "time": "2020-08-10T14:51:18.515221Z"},
-                {"node": "d4af6004-268a-468d-897a-c4f93cff34fc", "time": "2020-08-10T14:51:22.493086Z"},
+                {
+                    "node": "f511ccc6-b380-453a-9901-d8cb9c672d72",
+                    "time": "2020-08-10T13:24:37.813876Z",
+                },
+                {
+                    "node": "2b541238-e1fb-4d75-aa83-6e5946382734",
+                    "time": "2020-08-10T13:24:37.813947Z",
+                },
+                {
+                    "node": "0532a470-e128-48a6-aa9f-c5bdffd0f61a",
+                    "time": "2020-08-10T14:51:18.515192Z",
+                },
+                {
+                    "node": "8952391d-89fc-404a-8c34-4569aa5fb947",
+                    "time": "2020-08-10T14:51:18.515221Z",
+                },
+                {
+                    "node": "d4af6004-268a-468d-897a-c4f93cff34fc",
+                    "time": "2020-08-10T14:51:22.493086Z",
+                },
             ],
             "values": {
                 "cash_received_amount": {
@@ -181,7 +198,10 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.payment.head_of_household.phone_no
         )
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -206,7 +226,10 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -235,7 +258,10 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.payment.head_of_household.phone_no
         )
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -258,7 +284,10 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()

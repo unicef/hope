@@ -1,27 +1,20 @@
 from typing import TYPE_CHECKING
 
-from django.contrib import admin, messages
-from django.http import HttpRequest, HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-
-
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
+from django.contrib import admin, messages
+from django.http import HttpRequest, HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hope.admin.utils import (
-    HOPEModelAdminBase,
-)
-from hope.apps.payment.models import (
-    PaymentVerificationPlan,
-)
+from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.payment.models import PaymentVerificationPlan
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-
 
 if TYPE_CHECKING:
     from uuid import UUID

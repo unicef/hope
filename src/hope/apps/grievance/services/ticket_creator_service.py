@@ -12,9 +12,7 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
 )
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.grievance.services.data_change_services import (
-    save_data_change_extras,
-)
+from hope.apps.grievance.services.data_change_services import save_data_change_extras
 from hope.apps.grievance.services.payment_verification_services import (
     update_payment_verification_service,
 )
@@ -117,7 +115,12 @@ class TicketCreatorService:
     def _create_details(self, extras: dict, grievance_ticket: GrievanceTicket) -> list[GrievanceTicket]:
         return self._details_creator.create(grievance_ticket, extras)
 
-    def _create_documents(self, documents: list[dict], grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
+    def _create_documents(
+        self,
+        documents: list[dict],
+        grievance_ticket: GrievanceTicket,
+        user: AbstractUser,
+    ) -> None:
         if not documents:
             return
         validate_grievance_documents_size(grievance_ticket.id, documents)

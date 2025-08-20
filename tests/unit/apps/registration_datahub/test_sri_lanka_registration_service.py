@@ -3,7 +3,6 @@ import datetime
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -65,7 +64,12 @@ class TestSriLankaRegistrationService(TestCase):
         admin2.save()
         admin3 = geo_models.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
         admin3.save()
-        admin4 = geo_models.Area(name="SriLanka admin4", p_code="LK1163020", area_type=area_type4, parent=admin3)
+        admin4 = geo_models.Area(
+            name="SriLanka admin4",
+            p_code="LK1163020",
+            area_type=area_type4,
+            parent=admin3,
+        )
         admin4.save()
         geo_models.Area.objects.rebuild()
 

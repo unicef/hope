@@ -5,7 +5,6 @@ from uuid import UUID
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
-
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -179,11 +178,13 @@ class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(
-        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+        method="filter_by_status",
+        choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")],
     )
     status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
     verification_status = MultipleChoiceFilter(
-        method="filter_verification_status", choices=PaymentVerificationSummary.STATUS_CHOICES
+        method="filter_verification_status",
+        choices=PaymentVerificationSummary.STATUS_CHOICES,
     )
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")

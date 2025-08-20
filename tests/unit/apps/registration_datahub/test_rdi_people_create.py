@@ -2,13 +2,12 @@ from datetime import date
 from io import BytesIO
 from pathlib import Path
 
+import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
-
-import pytest
 from django_countries.fields import Country
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
@@ -60,9 +59,14 @@ class TestRdiXlsxPeople(TestCase):
             number_of_households=0,
             number_of_individuals=4,
         )
-        cls.program = ProgramFactory(status=Program.ACTIVE, data_collecting_type__type=DataCollectingType.Type.SOCIAL)
+        cls.program = ProgramFactory(
+            status=Program.ACTIVE,
+            data_collecting_type__type=DataCollectingType.Type.SOCIAL,
+        )
         cls.registration_data_import = RegistrationDataImportFactory(
-            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
+            business_area=cls.business_area,
+            program=cls.program,
+            import_data=cls.import_data,
         )
         cls.string_attribute = create_pdu_flexible_attribute(
             label="PDU String Attribute",
@@ -77,7 +81,10 @@ class TestRdiXlsxPeople(TestCase):
 
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(
-            self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
         )
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
@@ -131,7 +138,10 @@ class TestRdiXlsxPeople(TestCase):
         assert dmd1.rdi_merge_status == MergeStatusModel.PENDING
         assert dmd2.rdi_merge_status == MergeStatusModel.PENDING
         assert dmd3.rdi_merge_status == MergeStatusModel.PENDING
-        assert dmd1.data == {"card_number": "164260858", "card_expiry_date": "1995-06-03T00:00:00"}
+        assert dmd1.data == {
+            "card_number": "164260858",
+            "card_expiry_date": "1995-06-03T00:00:00",
+        }
         assert dmd2.data == {
             "card_number": "1975549730",
             "card_expiry_date": "2022-02-17T00:00:00",

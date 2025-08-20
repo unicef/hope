@@ -1,13 +1,14 @@
 import logging
 from typing import Any
 
+from constance import config
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Q, Prefetch, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, status
@@ -24,11 +25,7 @@ from hope.api.caches import etag_decorator
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.core.api.mixins import (
-    BaseViewSet,
-    ProgramMixin,
-    SerializerActionMixin, CountActionMixin,
-)
+from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor

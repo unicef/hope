@@ -1,7 +1,6 @@
 from datetime import date, datetime
 
 from django.contrib.auth.models import AbstractUser
-
 from django_countries.fields import Country
 
 from hope.apps.activity_log.models import log_create
@@ -9,10 +8,7 @@ from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
 from hope.apps.geo import models as geo_models
 from hope.apps.geo.models import Area
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketHouseholdDataUpdateDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
 )
@@ -23,9 +19,7 @@ from hope.apps.grievance.services.data_change.utils import (
     verify_flex_fields,
 )
 from hope.apps.household.models import Household
-from hope.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 
 
 class HouseholdDataUpdateService(DataChangeService):
@@ -61,7 +55,11 @@ class HouseholdDataUpdateService(DataChangeService):
             household_data_with_approve_status["admin_area_title"] = admin_area_title
 
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": household.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
@@ -109,7 +107,11 @@ class HouseholdDataUpdateService(DataChangeService):
             household_data_with_approve_status["admin_area_title"] = admin_area_title
 
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": household.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status

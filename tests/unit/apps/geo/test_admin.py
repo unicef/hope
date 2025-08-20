@@ -2,7 +2,6 @@ from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
-
 from django_webtest import WebTest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -33,7 +32,8 @@ class TestGeoApp(WebTest):
         unicef_partner, _ = Partner.objects.get_or_create(name="UNICEF")
         self.client.force_login(
             User.objects.get_or_create(
-                username="testuser", partner=Partner.objects.get_or_create(name="UNICEF HQ", parent=unicef_partner)[0]
+                username="testuser",
+                partner=Partner.objects.get_or_create(name="UNICEF HQ", parent=unicef_partner)[0],
             )[0]
         )
 

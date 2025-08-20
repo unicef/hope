@@ -18,7 +18,6 @@ from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
-
 from model_utils.models import SoftDeletableModel
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from strategy_field.fields import StrategyField
@@ -37,10 +36,7 @@ from hope.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-from hope.apps.utils.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
 class ProgramPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
@@ -83,7 +79,13 @@ class BeneficiaryGroup(TimeStampedUUIDModel):
         return self.name
 
 
-class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
+class Program(
+    SoftDeletableModel,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    AdminUrlMixin,
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -170,7 +172,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
     partners = models.ManyToManyField(
-        to="account.Partner", through=ProgramPartnerThrough, related_name="programs", help_text="Program partners"
+        to="account.Partner",
+        through=ProgramPartnerThrough,
+        related_name="programs",
+        help_text="Program partners",
     )
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
     name = CICharField(
@@ -236,7 +241,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     collision_detection_enabled = models.BooleanField(default=False, help_text="don't create duplicated")
     collision_detector = StrategyField(
-        registry=collision_detectors_registry, null=True, blank=True, help_text="Object which detects collisions"
+        registry=collision_detectors_registry,
+        null=True,
+        blank=True,
+        help_text="Object which detects collisions",
     )
     # System fields
     is_visible = models.BooleanField(default=True, help_text="Program is visible in UI [sys]")
@@ -246,7 +254,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
 
     sanction_lists = models.ManyToManyField(
-        SanctionList, blank=True, related_name="programs", help_text="Program sanction lists"
+        SanctionList,
+        blank=True,
+        related_name="programs",
+        help_text="Program sanction lists",
     )
     objects = SoftDeletableIsVisibleManager()
 
@@ -287,7 +298,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.programme_code.lower()
 
     @staticmethod
-    def get_total_number_of_households_from_payments(qs: models.QuerySet[PaymentPlan]) -> int:
+    def get_total_number_of_households_from_payments(
+        qs: models.QuerySet[PaymentPlan],
+    ) -> int:
         return (
             qs.filter(payment_items__delivered_quantity__gt=0)
             .distinct("payment_items__household__unicef_id")
@@ -386,7 +399,13 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         (ACTIVE, _("Active")),
         (FINISHED, _("Finished")),
     )
-    title = models.CharField(_("Title"), max_length=255, null=True, blank=True, default="Default Programme Cycle")
+    title = models.CharField(
+        _("Title"),
+        max_length=255,
+        null=True,
+        blank=True,
+        default="Default Programme Cycle",
+    )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, default=DRAFT)
     start_date = models.DateField()  # first from program

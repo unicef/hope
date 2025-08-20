@@ -48,7 +48,10 @@ def update_recent_dashboard_figures(self: Any) -> None:
             set_sentry_business_area_tag(ba.slug)
             DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
         except Exception as e:
-            logger.error(f"Error refreshing recent dashboard data for {ba.slug}: {e}", exc_info=True)
+            logger.error(
+                f"Error refreshing recent dashboard data for {ba.slug}: {e}",
+                exc_info=True,
+            )
 
     try:
         set_sentry_business_area_tag("global")

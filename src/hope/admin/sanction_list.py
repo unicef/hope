@@ -1,12 +1,9 @@
+from admin_extra_buttons.api import button, confirm_action
 from django.contrib import admin, messages
 from django.http import HttpRequest, HttpResponseRedirect
 
-from admin_extra_buttons.api import button, confirm_action
-
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import (
-    SanctionList,
-)
+from hope.apps.sanction_list.models import SanctionList
 
 
 @admin.register(SanctionList)

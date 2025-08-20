@@ -5,12 +5,11 @@ from contextlib import suppress
 from datetime import datetime
 from typing import Any
 
-from django.conf import settings
-
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from django.conf import settings
 from e2e.page_object.accountability.communication import AccountabilityCommunication
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
@@ -113,7 +112,10 @@ def clear_default_cache() -> None:
 
 
 def pytest_configure(config) -> None:  # type: ignore
-    config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
+    config.addinivalue_line(
+        "markers",
+        "night: This marker is intended for e2e tests conducted during the night on CI",
+    )
     # delete all old screenshots
 
     env = Env()
@@ -128,7 +130,12 @@ def pytest_configure(config) -> None:  # type: ignore
         os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     settings.DEBUG = True
-    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+    settings.ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "10.0.2.2",
+        os.getenv("DOMAIN", ""),
+    ]
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
@@ -161,7 +168,11 @@ def pytest_configure(config) -> None:  # type: ignore
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+            "graphql": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
@@ -513,7 +524,10 @@ def business_area(create_unicef_partner: Any, create_role_with_all_permissions: 
         active=True,
     )
     FlagState.objects.get_or_create(
-        name="ALLOW_ACCOUNTABILITY_MODULE", condition="boolean", value="True", required=False
+        name="ALLOW_ACCOUNTABILITY_MODULE",
+        condition="boolean",
+        value="True",
+        required=False,
     )
     yield business_area
 
@@ -728,7 +742,12 @@ def register_custom_sql_signal() -> None:
                     all_sqls.append(stmt)  # noqa
 
     def pre_migration_custom_sql(
-        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+        sender: Any,
+        app_config: Any,
+        verbosity: Any,
+        interactive: Any,
+        using: Any,
+        **kwargs: Any,
     ) -> None:
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
@@ -737,7 +756,12 @@ def register_custom_sql_signal() -> None:
         conn.cursor().execute(pre_sql)
 
     def post_migration_custom_sql(
-        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+        sender: Any,
+        app_config: Any,
+        verbosity: Any,
+        interactive: Any,
+        using: Any,
+        **kwargs: Any,
     ) -> None:
         app_label = app_config.label
         if app_label not in apps:
@@ -749,5 +773,13 @@ def register_custom_sql_signal() -> None:
         for stmt in all_sqls:
             conn.cursor().execute(stmt)
 
-    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
-    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)
+    pre_migrate.connect(
+        pre_migration_custom_sql,
+        dispatch_uid="tests.pre_migrationc_custom_sql",
+        weak=False,
+    )
+    post_migrate.connect(
+        post_migration_custom_sql,
+        dispatch_uid="tests.post_migration_custom_sql",
+        weak=False,
+    )

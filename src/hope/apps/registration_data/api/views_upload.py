@@ -1,18 +1,19 @@
-from hope.apps.core.api.mixins import BaseViewSet, ProgramMixin, SerializerActionMixin
+from django.db import transaction
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.api.mixins import BaseViewSet, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.registration_data.models import ImportData, KoboImportData
 from hope.apps.registration_data.api.serializers import (
     ImportDataSerializer,
     KoboImportDataSerializer,
-    UploadXlsxFileSerializer,
     SaveKoboImportDataSerializer,
+    UploadXlsxFileSerializer,
 )
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
-from django.db import transaction
-from drf_spectacular.utils import extend_schema
+from hope.apps.registration_data.models import ImportData, KoboImportData
 
 
 class ImportDataUploadViewSet(
@@ -37,11 +38,18 @@ class ImportDataUploadViewSet(
         request=UploadXlsxFileSerializer,
         responses=ImportDataSerializer,
     )
-    @action(detail=False, methods=["post"], url_path="upload-xlsx-file", parser_classes=[DictDrfNestedParser])
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="upload-xlsx-file",
+        parser_classes=[DictDrfNestedParser],
+    )
     @transaction.atomic
     def upload_xlsx_file(self, request, *args, **kwargs):
         """Upload an XLSX file asynchronously for registration data import."""
-        from hope.apps.registration_datahub.celery_tasks import validate_xlsx_import_task
+        from hope.apps.registration_datahub.celery_tasks import (
+            validate_xlsx_import_task,
+        )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -94,7 +102,9 @@ class KoboImportDataUploadViewSet(
     @transaction.atomic
     def save_kobo_import_data(self, request, *args, **kwargs):
         """Save KoBo project import data asynchronously."""
-        from hope.apps.registration_datahub.celery_tasks import pull_kobo_submissions_task
+        from hope.apps.registration_datahub.celery_tasks import (
+            pull_kobo_submissions_task,
+        )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

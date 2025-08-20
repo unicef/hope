@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -127,7 +126,10 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             },
         }
         reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.alternate_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         assert role == ROLE_ALTERNATE
@@ -146,7 +148,10 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         reassign_roles_on_disable_individual_service(
-            self.primary_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.primary_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         role = IndividualRoleInHousehold.objects.get(
@@ -157,7 +162,9 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         previous_role = IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first()
         assert previous_role is None
 
-    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(self) -> None:
+    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(
+        self,
+    ) -> None:
         household, _ = create_household_and_individuals(
             household_data={
                 "business_area": self.business_area,
@@ -182,7 +189,10 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.alternate_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=self.no_role_individual).role

@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING, Any
 
 from admin_cursor_paginator import CursorPaginatorAdmin
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -8,21 +12,14 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
-
-from hope.apps.payment.models import PaymentHouseholdSnapshot, Payment, PaymentPlanSupportingDocument
-from hope.admin.utils import (
-    HOPEModelAdminBase,
-    PaymentPlanCeleryTasksMixin,
-)
+from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import (
+    Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanSupportingDocument,
 )
-
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
 
@@ -123,9 +120,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            from hope.apps.payment.services.payment_gateway import (
-                PaymentGatewayService,
-            )
+            from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
             PaymentGatewayService().sync_payment_plan(payment_plan)
@@ -146,9 +141,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            from hope.apps.payment.services.payment_gateway import (
-                PaymentGatewayService,
-            )
+            from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
             PaymentGatewayService().add_missing_records_to_payment_instructions(payment_plan)
@@ -256,9 +249,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            from hope.apps.payment.services.payment_gateway import (
-                PaymentGatewayService,
-            )
+            from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment = Payment.objects.get(pk=pk)
             PaymentGatewayService().sync_record(payment)

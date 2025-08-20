@@ -64,7 +64,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="paymentverification",
             name="payment_fk",
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.payment"),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="payment.payment",
+            ),
         ),
         migrations.RunPython(migrate_onetoone_to_foreignkey, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
@@ -80,7 +84,9 @@ class Migration(migrations.Migration):
             model_name="paymentverification",
             name="payment",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="payment_verifications", to="payment.payment"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payment_verifications",
+                to="payment.payment",
             ),
         ),
     ]

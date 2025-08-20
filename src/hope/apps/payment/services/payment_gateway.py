@@ -3,9 +3,8 @@ import logging
 from enum import Enum
 from typing import Any
 
-from django.utils.timezone import now
-
 from _decimal import Decimal
+from django.utils.timezone import now
 from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
@@ -210,9 +209,10 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
         def get_transferred_status_based_on_delivery_amount() -> str:
             try:
-                _hope_status, _quantity = get_payment_delivered_quantity_status_and_value(
-                    self.payout_amount, entitlement_quantity
-                )
+                (
+                    _hope_status,
+                    _quantity,
+                ) = get_payment_delivered_quantity_status_and_value(self.payout_amount, entitlement_quantity)
             except Exception:
                 logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
                 _hope_status = Payment.STATUS_ERROR

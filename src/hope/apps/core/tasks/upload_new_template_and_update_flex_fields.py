@@ -1,9 +1,8 @@
 import logging
 from io import BytesIO
 
-from django.utils import timezone
-
 import requests
+from django.utils import timezone
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hope.apps.core.kobo.api import KoboAPI
@@ -19,7 +18,11 @@ class KoboRetriableError(Exception):
 
 class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
     def _save_message_status_template_id(
-        self, xlsx_kobo_template_object: XLSXKoboTemplate, message: str, status: str, template_id: str = ""
+        self,
+        xlsx_kobo_template_object: XLSXKoboTemplate,
+        message: str,
+        status: str,
+        template_id: str = "",
     ) -> None:
         xlsx_kobo_template_object.error_description = message
         xlsx_kobo_template_object.status = status
@@ -53,7 +56,10 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             if response_status == "error" or response_details:
                 error_message = response.get("messages", "") if response_status == "error" else response_details
                 self._save_message_status_template_id(
-                    xlsx_kobo_template_object, error_message, XLSXKoboTemplate.UNSUCCESSFUL, asset_uid
+                    xlsx_kobo_template_object,
+                    error_message,
+                    XLSXKoboTemplate.UNSUCCESSFUL,
+                    asset_uid,
                 )
                 return
 
@@ -64,7 +70,10 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             logger.warning("Import template to Kobo Exception")
             if e.response is not None and 400 <= e.response.status_code < 500:
                 self._save_message_status_template_id(
-                    xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
+                    xlsx_kobo_template_object,
+                    str(e),
+                    XLSXKoboTemplate.UNSUCCESSFUL,
+                    template_id,
                 )
             else:
                 xlsx_kobo_template_object.status = XLSXKoboTemplate.CONNECTION_FAILED
@@ -75,7 +84,10 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 raise KoboRetriableError(xlsx_kobo_template_object)
         except Exception as e:
             self._save_message_status_template_id(
-                xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
+                xlsx_kobo_template_object,
+                str(e),
+                XLSXKoboTemplate.UNSUCCESSFUL,
+                template_id,
             )
             logger.warning(e)
             raise e

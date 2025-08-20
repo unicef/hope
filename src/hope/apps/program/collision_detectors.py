@@ -3,14 +3,9 @@ from typing import TYPE_CHECKING, Any
 from django.db import models
 from django.db.transaction import atomic
 from django.forms.models import model_to_dict
-
 from strategy_field.registry import Registry
 
-from hope.apps.household.models import (
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
+from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold
 
 # only for typing purposes
 if TYPE_CHECKING:
@@ -135,7 +130,10 @@ class AbstractCollisionDetector:
         self._update_db_instance(individual_source, individual_destination, exclude)
 
     def _update_household(
-        self, household_destination: Household, household_source: Household, head_of_household: Individual
+        self,
+        household_destination: Household,
+        household_source: Household,
+        head_of_household: Individual,
     ) -> None:
         exclude = {
             "id",
@@ -313,11 +311,14 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             for key, role in role_by_identification_key.items()
         ]
         self._update_roles_in_household(
-            household_id_destination=old_household_id, roles_by_id={ind.id: role for ind, role in roles_list}
+            household_id_destination=old_household_id,
+            roles_by_id={ind.id: role for ind, role in roles_list},
         )
         # 12. Update the household with the new data
         self._update_household(
-            Household.objects.get(id=old_household_id), household_to_merge, updated_head_of_household
+            Household.objects.get(id=old_household_id),
+            household_to_merge,
+            updated_head_of_household,
         )
 
 

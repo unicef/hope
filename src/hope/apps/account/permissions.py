@@ -2,19 +2,11 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    Optional,
-    Union,
-)
-
-from django.core.exceptions import PermissionDenied
-from django.db.models import Model
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional, Union
 
 import graphene
+from django.core.exceptions import PermissionDenied
+from django.db.models import Model
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
@@ -576,7 +568,8 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
-                business_area_slug=filter_kwargs.get("business_area"), program_id=program_id
+                business_area_slug=filter_kwargs.get("business_area"),
+                program_id=program_id,
             )
         qs = super().resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs

@@ -33,10 +33,14 @@ class UniversalUpdate(
         help_text="Selected Household Flex Fields which can be updated",
     )
     document_types = models.ManyToManyField(
-        DocumentType, blank=True, help_text="Selected Document Types of which Documents can be updated"
+        DocumentType,
+        blank=True,
+        help_text="Selected Document Types of which Documents can be updated",
     )
     account_types = models.ManyToManyField(
-        AccountType, blank=True, help_text="Selected Account Types of which Wallets data can be updated"
+        AccountType,
+        blank=True,
+        help_text="Selected Account Types of which Wallets data can be updated",
     )
     template_file = models.FileField(
         blank=True,
@@ -57,9 +61,16 @@ class UniversalUpdate(
         help_text="Backup Snapshot File, contains data before update. File updated on each start of update process.",
     )
     saved_logs = models.TextField(
-        blank=True, null=True, default="", help_text="Logs of the update process, saved in db"
+        blank=True,
+        null=True,
+        default="",
+        help_text="Logs of the update process, saved in db",
     )
-    unicef_ids = models.TextField(blank=True, null=True, help_text="Unicef IDs used only to generate template file")
+    unicef_ids = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Unicef IDs used only to generate template file",
+    )
 
     celery_task_names = {
         "generate_universal_individual_update_template": "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template",
@@ -69,7 +80,10 @@ class UniversalUpdate(
     class Meta:
         permissions = [
             ("can_run_universal_update", "Can run universal update"),
-            ("can_generate_universal_update_template", "Can generate universal update template"),
+            (
+                "can_generate_universal_update_template",
+                "Can generate universal update template",
+            ),
         ]
 
     @property

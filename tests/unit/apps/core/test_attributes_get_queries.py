@@ -1,10 +1,9 @@
 import datetime as dt
 import uuid
 
+from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-
-from dateutil.relativedelta import relativedelta
 
 from hope.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -69,12 +68,20 @@ class TestAttributesGetQueries(APITestCase):
     def test_age_to_birth_date_query_equals(self) -> None:
         q = age_to_birth_date_query("EQUALS", [30])
         expected_date = self.today - relativedelta(years=30)
-        assert q == Q(birth_date__lte=expected_date, birth_date__gt=expected_date - relativedelta(years=1))
+        assert q == Q(
+            birth_date__lte=expected_date,
+            birth_date__gt=expected_date - relativedelta(years=1),
+        )
 
     def test_age_to_birth_date_query_not_equals(self) -> None:
         q = age_to_birth_date_query("NOT_EQUALS", [30])
         expected_date = self.today - relativedelta(years=30)
-        assert q == ~(Q(birth_date__lte=expected_date, birth_date__gt=expected_date - relativedelta(years=1)))
+        assert q == ~(
+            Q(
+                birth_date__lte=expected_date,
+                birth_date__gt=expected_date - relativedelta(years=1),
+            )
+        )
 
     def test_age_to_birth_date_query_range(self) -> None:
         q = age_to_birth_date_query("RANGE", [20, 30])
@@ -210,7 +217,10 @@ class TestAttributesGetQueries(APITestCase):
         assert result == expected
 
         # With social worker prefix
-        expected = Q(individuals__identities__partner__name=WFP, individuals__identities__number="123456")
+        expected = Q(
+            individuals__identities__partner__name=WFP,
+            individuals__identities__number="123456",
+        )
         result = get_scope_id_number_query(None, ["123456"], True)
         assert result == expected
 
@@ -221,7 +231,10 @@ class TestAttributesGetQueries(APITestCase):
         assert result == expected
 
         # With social worker prefix
-        expected = Q(individuals__identities__partner__name=WFP, individuals__identities__country__iso_code3="KEN")
+        expected = Q(
+            individuals__identities__partner__name=WFP,
+            individuals__identities__country__iso_code3="KEN",
+        )
         result = get_scope_id_issuer_query(None, ["KEN"], True)
         assert result == expected
 
@@ -232,7 +245,10 @@ class TestAttributesGetQueries(APITestCase):
         assert result == expected
 
         # With social worker prefix
-        expected = Q(individuals__identities__partner__name=UNHCR, individuals__identities__number="987654")
+        expected = Q(
+            individuals__identities__partner__name=UNHCR,
+            individuals__identities__number="987654",
+        )
         result = get_unhcr_id_number_query(None, ["987654"], True)
         assert result == expected
 
@@ -242,27 +258,42 @@ class TestAttributesGetQueries(APITestCase):
         result = get_unhcr_id_issuer_query(None, ["UGA"])
         assert result == expected
 
-        expected = Q(individuals__identities__partner__name=UNHCR, individuals__identities__country__iso_code3="UGA")
+        expected = Q(
+            individuals__identities__partner__name=UNHCR,
+            individuals__identities__country__iso_code3="UGA",
+        )
         result = get_unhcr_id_issuer_query(None, ["UGA"], True)
         assert result == expected
 
     def test_get_national_id_issuer_query(self) -> None:
-        expected = Q(documents__type__type="NATIONAL_ID", documents__type__country__iso_code3="USA")
+        expected = Q(
+            documents__type__type="NATIONAL_ID",
+            documents__type__country__iso_code3="USA",
+        )
         result = get_national_id_issuer_query(None, ["USA"])
         assert result == expected
 
     def test_get_national_passport_issuer_query(self) -> None:
-        expected = Q(documents__type__type="NATIONAL_PASSPORT", documents__type__country__iso_code3="GBR")
+        expected = Q(
+            documents__type__type="NATIONAL_PASSPORT",
+            documents__type__country__iso_code3="GBR",
+        )
         result = get_national_passport_issuer_query(None, ["GBR"])
         assert result == expected
 
     def test_get_electoral_card_issuer_query(self) -> None:
-        expected = Q(documents__type__type="ELECTORAL_CARD", documents__type__country__iso_code3="IND")
+        expected = Q(
+            documents__type__type="ELECTORAL_CARD",
+            documents__type__country__iso_code3="IND",
+        )
         result = get_electoral_card_issuer_query(None, ["IND"])
         assert result == expected
 
     def test_get_documents_issuer_query(self) -> None:
-        expected = Q(documents__type__type="GENERIC_TYPE", documents__type__country__iso_code3="FRA")
+        expected = Q(
+            documents__type__type="GENERIC_TYPE",
+            documents__type__country__iso_code3="FRA",
+        )
         result = get_documents_issuer_query("GENERIC_TYPE", "FRA")
         assert result == expected
 
@@ -272,7 +303,10 @@ class TestAttributesGetQueries(APITestCase):
         assert result == expected
 
     def test_get_receiver_poi_issuer_query(self) -> None:
-        expected = Q(documents__type__type="receiver_poi", documents__type__country__iso_code3="CAN")
+        expected = Q(
+            documents__type__type="receiver_poi",
+            documents__type__country__iso_code3="CAN",
+        )
         result = get_receiver_poi_issuer_query(None, ["CAN"])
         assert result == expected
 
@@ -293,25 +327,37 @@ class TestAttributesGetQueries(APITestCase):
     def test_get_birth_certificate_issuer_query(self) -> None:
         country_code = "USA"
         result = get_birth_certificate_issuer_query(None, [country_code])
-        expected = Q(documents__type__type="BIRTH_CERTIFICATE", documents__type__country__iso_code3=country_code)
+        expected = Q(
+            documents__type__type="BIRTH_CERTIFICATE",
+            documents__type__country__iso_code3=country_code,
+        )
         assert result == expected
 
     def test_get_tax_id_issuer_query(self) -> None:
         country_code = "GBR"
         result = get_tax_id_issuer_query(None, [country_code])
-        expected = Q(documents__type__type="TAX_ID", documents__type__country__iso_code3=country_code)
+        expected = Q(
+            documents__type__type="TAX_ID",
+            documents__type__country__iso_code3=country_code,
+        )
         assert result == expected
 
     def test_get_drivers_licensee_issuer_query(self) -> None:
         country_code = "CAN"
         result = get_drivers_licensee_issuer_query(None, [country_code])
-        expected = Q(documents__type__type="DRIVERS_LICENSE", documents__type__country__iso_code3=country_code)
+        expected = Q(
+            documents__type__type="DRIVERS_LICENSE",
+            documents__type__country__iso_code3=country_code,
+        )
         assert result == expected
 
     def test_get_other_issuer_query(self) -> None:
         country_code = "AUS"
         result = get_other_issuer_query(None, [country_code])
-        expected = Q(documents__type__type="OTHER", documents__type__country__iso_code3=country_code)
+        expected = Q(
+            documents__type__type="OTHER",
+            documents__type__country__iso_code3=country_code,
+        )
         assert result == expected
 
     def test_get_extra_rdis_query(self) -> None:

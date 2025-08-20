@@ -13,7 +13,12 @@ if TYPE_CHECKING:
 
 
 class Sampling:
-    def __init__(self, input_data: dict, payment_plan: "PaymentPlan", payment_records: QuerySet["Payment"]) -> None:
+    def __init__(
+        self,
+        input_data: dict,
+        payment_plan: "PaymentPlan",
+        payment_records: QuerySet["Payment"],
+    ) -> None:
         self.input_data = input_data
         self.payment_plan = payment_plan
         self.payment_records = payment_records

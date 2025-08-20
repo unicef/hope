@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
-
-from django.core.management import call_command
+from typing import TYPE_CHECKING, Any
 
 import pytest
+from django.core.management import call_command
 
 from hope.apps.sanction_list.models import (
     SanctionList,

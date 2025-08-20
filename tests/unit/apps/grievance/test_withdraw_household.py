@@ -1,8 +1,7 @@
 from typing import Any
 
-from django.core.management import call_command
-
 import pytest
+from django.core.management import call_command
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -57,7 +56,10 @@ class TestWithdrawHousehold:
     ) -> None:
         create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            ],
             self.business_area,
             self.program,
         )
@@ -98,7 +100,10 @@ class TestWithdrawHousehold:
 
         url = reverse(
             "api:grievance-tickets:grievance-tickets-global-status-change",
-            kwargs={"business_area_slug": self.business_area.slug, "pk": str(ticket.id)},
+            kwargs={
+                "business_area_slug": self.business_area.slug,
+                "pk": str(ticket.id),
+            },
         )
         response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED

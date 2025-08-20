@@ -1,15 +1,14 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
+import freezegun
+import pytest
+from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-
-import freezegun
-import pytest
-from constance.test import override_config
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -88,11 +87,17 @@ class TestIndividualList:
 
         self.list_url = reverse(
             "api:households:individuals-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         self.count_url = reverse(
             "api:households:individuals-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
 
         self.partner = PartnerFactory(name="TestPartner")
@@ -106,8 +111,20 @@ class TestIndividualList:
         self.area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
         self.area2 = AreaFactory(parent=self.area1, p_code="AF0101", area_type=admin_type_2)
 
-        self.household1, (self.individual1_1, self.individual1_2) = self._create_household(self.program)
-        self.household2, (self.individual2_1, self.individual2_2) = self._create_household(self.program)
+        (
+            self.household1,
+            (
+                self.individual1_1,
+                self.individual1_2,
+            ),
+        ) = self._create_household(self.program)
+        (
+            self.household2,
+            (
+                self.individual2_1,
+                self.individual2_2,
+            ),
+        ) = self._create_household(self.program)
         (
             self.household_from_different_program,
             (
@@ -216,7 +233,12 @@ class TestIndividualList:
         assert str(self.individual2_2.id) in response_ids
 
         for i, individual in enumerate(
-            [self.individual1_1, self.individual1_2, self.individual2_1, self.individual2_2]
+            [
+                self.individual1_1,
+                self.individual1_2,
+                self.individual2_1,
+                self.individual2_2,
+            ]
         ):
             individual_result = response_results[i]
             assert individual_result["id"] == str(individual.id)
@@ -269,7 +291,10 @@ class TestIndividualList:
         program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
         list_url = reverse(
             "api:households:individuals-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": program.slug,
+            },
         )
         create_user_role_with_permissions(
             user=self.user,
@@ -285,7 +310,9 @@ class TestIndividualList:
         assert len(response.data["results"]) == 0
 
     def test_individual_list_with_admin_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -309,9 +336,13 @@ class TestIndividualList:
             individuals_data=[{}, {}],
         )
         area_different = AreaFactory(parent=None, p_code="AF05", area_type=self.area1.area_type)
-        household_different_areas, (individual_different_areas1, individual_different_areas2) = self._create_household(
-            self.program
-        )
+        (
+            household_different_areas,
+            (
+                individual_different_areas1,
+                individual_different_areas2,
+            ),
+        ) = self._create_household(self.program)
         household_different_areas.admin1 = area_different
         household_different_areas.admin2 = area_different
         household_different_areas.save()
@@ -332,7 +363,9 @@ class TestIndividualList:
         assert str(individual_different_areas2.id) not in response_ids
 
     def test_individual_list_caching(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -386,7 +419,12 @@ class TestIndividualList:
             assert response.has_header("etag")
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
-            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
+            assert etag_fourth_call not in [
+                etag,
+                etag_second_call,
+                etag_third_call,
+                etag_changed_areas,
+            ]
             assert len(ctx.captured_queries) == 27
 
         with CaptureQueriesContext(connection) as ctx:
@@ -443,7 +481,10 @@ class TestIndividualList:
         program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
         list_url = reverse(
             "api:households:individuals-all-flex-fields-attributes",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": program.slug,
+            },
         )
         create_user_role_with_permissions(
             user=self.user,
@@ -488,7 +529,13 @@ class TestIndividualDetail:
         self.registration_data_import = RegistrationDataImportFactory(
             imported_by=self.user, business_area=self.afghanistan, program=self.program
         )
-        self.household, (self.individual1, self.individual2) = create_household_and_individuals(
+        (
+            self.household,
+            (
+                self.individual1,
+                self.individual2,
+            ),
+        ) = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
                 "admin2": self.area2,
@@ -1145,7 +1192,10 @@ class TestIndividualGlobalViewSet:
             whole_business_area_access=True,
         )
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == expected_status
 
@@ -1158,14 +1208,20 @@ class TestIndividualGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 4
 
         response_count = self.api_client.get(
-            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_count_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response_count.status_code == status.HTTP_200_OK
         assert response_count.json()["count"] == 4
@@ -1250,7 +1306,10 @@ class TestIndividualGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
@@ -1265,7 +1324,9 @@ class TestIndividualGlobalViewSet:
         assert str(self.individual_ukraine_2.id) not in result_ids
 
     def test_individual_global_list_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -1307,7 +1368,10 @@ class TestIndividualGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
@@ -1378,7 +1442,10 @@ class TestIndividualFilter:
         self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
         self.list_url = reverse(
             "api:households:individuals-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
@@ -1610,14 +1677,56 @@ class TestIndividualFilter:
 
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
     @pytest.mark.parametrize(
-        ("filters", "individual1_data", "individual2_data", "household1_data", "household2_data"),
+        (
+            "filters",
+            "individual1_data",
+            "individual2_data",
+            "household1_data",
+            "household2_data",
+        ),
         [
-            ({"search": "IND-123"}, {"unicef_id": "IND-321"}, {"unicef_id": "IND-123"}, {}, {}),
-            ({"search": "HH-123"}, {}, {}, {"unicef_id": "HH-321"}, {"unicef_id": "HH-123"}),
-            ({"search": "John Root"}, {"full_name": "Jack Root"}, {"full_name": "John Root"}, {}, {}),
-            ({"search": "+48010101010"}, {"phone_no": "+48 609 456 008"}, {"phone_no": "+48 010 101 010"}, {}, {}),
-            ({"search": "HOPE-123"}, {"detail_id": "HOPE-321"}, {"detail_id": "HOPE-123"}, {}, {}),
-            ({"search": "456"}, {"program_registration_id": "123"}, {"program_registration_id": "456"}, {}, {}),
+            (
+                {"search": "IND-123"},
+                {"unicef_id": "IND-321"},
+                {"unicef_id": "IND-123"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HH-123"},
+                {},
+                {},
+                {"unicef_id": "HH-321"},
+                {"unicef_id": "HH-123"},
+            ),
+            (
+                {"search": "John Root"},
+                {"full_name": "Jack Root"},
+                {"full_name": "John Root"},
+                {},
+                {},
+            ),
+            (
+                {"search": "+48010101010"},
+                {"phone_no": "+48 609 456 008"},
+                {"phone_no": "+48 010 101 010"},
+                {},
+                {},
+            ),
+            (
+                {"search": "HOPE-123"},
+                {"detail_id": "HOPE-321"},
+                {"detail_id": "HOPE-123"},
+                {},
+                {},
+            ),
+            (
+                {"search": "456"},
+                {"program_registration_id": "123"},
+                {"program_registration_id": "456"},
+                {},
+                {},
+            ),
         ],
     )
     def test_search(

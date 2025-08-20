@@ -14,7 +14,10 @@ class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "household_list"
 
     def _get_queryset(
-        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
+        self,
+        business_area_slug: Any | None,
+        program_slug: Any | None,
+        view_instance: Any | None,
     ) -> QuerySet:
         return Household.all_merge_status_objects.filter(
             program__slug=program_slug,
@@ -26,7 +29,10 @@ class IndividualListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "individual_list"
 
     def _get_queryset(
-        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
+        self,
+        business_area_slug: Any | None,
+        program_slug: Any | None,
+        view_instance: Any | None,
     ) -> QuerySet:
         return Individual.all_merge_status_objects.filter(
             program__slug=program_slug,

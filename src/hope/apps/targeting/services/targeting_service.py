@@ -5,7 +5,6 @@ from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
-
 from model_utils import Choices
 
 from hope.apps.core.field_attributes.fields_types import (
@@ -146,7 +145,9 @@ class TargetingCriteriaRuleQueryingBase:
 
 class TargetingIndividualRuleFilterBlockBase:
     def __init__(
-        self, individual_block_filters: Any | None = None, target_only_hoh: list[Household] | None = None
+        self,
+        individual_block_filters: Any | None = None,
+        target_only_hoh: list[Household] | None = None,
     ) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
@@ -379,7 +380,9 @@ class TargetingCriteriaFilterBase:
         get_query = core_field_attr.get("get_query")
         if get_query:
             return get_query(
-                self.comparison_method, self.arguments, is_social_worker_query=self.is_social_worker_program
+                self.comparison_method,
+                self.arguments,
+                is_social_worker_query=self.is_social_worker_program,
             )
         lookup = core_field_attr.get("lookup")
         if not lookup:

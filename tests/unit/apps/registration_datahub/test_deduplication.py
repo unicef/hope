@@ -1,7 +1,6 @@
+import pytest
 from django.core.management import call_command
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
@@ -27,10 +26,7 @@ from hope.apps.registration_data.models import (
     ImportData,
 )
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.utils.elasticsearch_utils import (
-    populate_index,
-    rebuild_search_index,
-)
+from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
 from hope.apps.utils.querysets import evaluate_qs
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

@@ -4,7 +4,6 @@ from typing import Any
 from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
 from django.db.models.functions import Coalesce, Lower
-
 from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
@@ -55,7 +54,11 @@ class ProgramCycleFilter(UpdatedAtFilter):
         if value:
             queryset = queryset.annotate(
                 total_delivered_q_usd=Coalesce(
-                    Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                    Sum(
+                        "payment_plans__total_delivered_quantity_usd",
+                        output_field=DecimalField(),
+                    ),
+                    Decimal(0.0),
                 )
             )
             filter_dict = {filter_mapping.get(name): value}
@@ -70,7 +73,11 @@ class ProgramCycleFilter(UpdatedAtFilter):
         if value:
             queryset = queryset.annotate(
                 total_entitled_q_usd=Coalesce(
-                    Sum("payment_plans__total_entitled_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                    Sum(
+                        "payment_plans__total_entitled_quantity_usd",
+                        output_field=DecimalField(),
+                    ),
+                    Decimal(0.0),
                 )
             )
             filter_dict = {filter_mapping.get(name): value}
@@ -109,7 +116,15 @@ class ProgramFilter(UpdatedAtFilter):
         )
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "number_of_households", "budget")
+        fields=(
+            Lower("name"),
+            "status",
+            "start_date",
+            "end_date",
+            "sector",
+            "number_of_households",
+            "budget",
+        )
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: slice) -> QuerySet:

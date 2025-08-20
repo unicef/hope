@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.management import call_command
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 
 from hope.apps.core.languages import LANGUAGES, Languages
@@ -53,7 +52,8 @@ class TestChoicesViewSet:
         response_data = response.data
         assert len(response_data) == len(LANGUAGES)
         expected_data_full = sorted(
-            [{"name": lang.english, "value": lang.code} for lang in LANGUAGES], key=lambda x: x["name"].lower()
+            [{"name": lang.english, "value": lang.code} for lang in LANGUAGES],
+            key=lambda x: x["name"].lower(),
         )
         assert sorted(response_data, key=lambda x: x["name"].lower()) == expected_data_full
 
@@ -64,7 +64,8 @@ class TestChoicesViewSet:
         assert len(response_data_en) < len(response_data)
         filtered_langs_en = Languages.filter_by_code("en")
         expected_data_en = sorted(
-            [{"name": lang.english, "value": lang.code} for lang in filtered_langs_en], key=lambda x: x["name"].lower()
+            [{"name": lang.english, "value": lang.code} for lang in filtered_langs_en],
+            key=lambda x: x["name"].lower(),
         )
         assert len(response_data_en) == len(expected_data_en)
         assert sorted(response_data_en, key=lambda x: x["name"].lower()) == expected_data_en
@@ -78,7 +79,8 @@ class TestChoicesViewSet:
         assert len(response_data_pl) == 1
         filtered_langs_pl = Languages.filter_by_code("Pols")
         expected_data_pl = sorted(
-            [{"name": lang.english, "value": lang.code} for lang in filtered_langs_pl], key=lambda x: x["name"].lower()
+            [{"name": lang.english, "value": lang.code} for lang in filtered_langs_pl],
+            key=lambda x: x["name"].lower(),
         )
         assert len(response_data_pl) == len(expected_data_pl)
         assert sorted(response_data_pl, key=lambda x: x["name"].lower()) == expected_data_pl

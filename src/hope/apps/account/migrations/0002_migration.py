@@ -20,42 +20,54 @@ class Migration(migrations.Migration):
             model_name="userrole",
             name="business_area",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_roles", to="core.businessarea"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_roles",
+                to="core.businessarea",
             ),
         ),
         migrations.AddField(
             model_name="userrole",
             name="role",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_roles", to="account.role"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_roles",
+                to="account.role",
             ),
         ),
         migrations.AddField(
             model_name="userrole",
             name="user",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_roles", to=settings.AUTH_USER_MODEL
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_roles",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
             model_name="usergroup",
             name="business_area",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to="core.businessarea"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_groups",
+                to="core.businessarea",
             ),
         ),
         migrations.AddField(
             model_name="usergroup",
             name="group",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to="auth.group"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_groups",
+                to="auth.group",
             ),
         ),
         migrations.AddField(
             model_name="usergroup",
             name="user",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="user_groups", to=settings.AUTH_USER_MODEL
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_groups",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AlterUniqueTogether(
@@ -82,14 +94,18 @@ class Migration(migrations.Migration):
             model_name="incompatibleroles",
             name="role_one",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="incompatible_roles_one", to="account.role"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="incompatible_roles_one",
+                to="account.role",
             ),
         ),
         migrations.AddField(
             model_name="incompatibleroles",
             name="role_two",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="incompatible_roles_two", to="account.role"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="incompatible_roles_two",
+                to="account.role",
             ),
         ),
         migrations.AddField(
@@ -107,7 +123,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="user",
             name="partner",
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to="account.partner"),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="account.partner",
+            ),
         ),
         migrations.AddField(
             model_name="user",

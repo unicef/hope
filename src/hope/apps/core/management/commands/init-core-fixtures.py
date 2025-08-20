@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.core.management import BaseCommand
-
 from extras.test_utils.factories.core import (
     generate_business_areas,
     generate_country_codes,
@@ -24,5 +23,8 @@ def initialize_core_fixtures() -> None:
     generate_data_collecting_types()
 
     FlagState.objects.get_or_create(
-        name="ALLOW_ACCOUNTABILITY_MODULE", condition="boolean", value="True", required=False
+        name="ALLOW_ACCOUNTABILITY_MODULE",
+        condition="boolean",
+        value="True",
+        required=False,
     )

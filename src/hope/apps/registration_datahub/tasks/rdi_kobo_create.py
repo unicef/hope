@@ -3,11 +3,10 @@ import logging
 from collections import defaultdict
 from typing import Any
 
+from dateutil.parser import parse
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
-
-from dateutil.parser import parse
 from django_countries.fields import Country
 
 from hope.apps.activity_log.models import log_create
@@ -41,9 +40,7 @@ from hope.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.registration_datahub.tasks.rdi_base_create import (
-    RdiBaseCreateTask,
-)
+from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
 from hope.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
     find_attachment_in_kobo,
@@ -343,7 +340,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._handle_exception("Household", i_field, e)
                         elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
                             self._handle_delivery_mechanism_fields(
-                                i_value, i_field, int(f"{household_count}{ind_count}"), individual_obj
+                                i_value,
+                                i_field,
+                                int(f"{household_count}{ind_count}"),
+                                individual_obj,
                             )
                         else:
                             try:
@@ -355,9 +355,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individual_obj.program = self.registration_data_import.program
                     individual_obj.business_area = self.business_area
                     individual_obj.age_at_registration = calculate_age_at_registration(
-                        self.registration_data_import.created_at, str(individual_obj.birth_date)
+                        self.registration_data_import.created_at,
+                        str(individual_obj.birth_date),
                     )
-                    populate_pdu_with_null_values(self.registration_data_import.program, individual_obj.flex_fields)
+                    populate_pdu_with_null_values(
+                        self.registration_data_import.program,
+                        individual_obj.flex_fields,
+                    )
 
                     if individual_obj.relationship == HEAD:
                         head_of_households_mapping[household_obj] = individual_obj

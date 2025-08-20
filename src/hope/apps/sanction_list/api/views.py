@@ -14,10 +14,7 @@ from hope.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.registration_datahub.validators import (
-    XlsxException,
-    XLSXValidator,
-)
+from hope.apps.registration_datahub.validators import XlsxException, XLSXValidator
 from hope.apps.sanction_list.api.serializers import (
     CheckAgainstSanctionListCreateSerializer,
     CheckAgainstSanctionListSerializer,
@@ -25,10 +22,7 @@ from hope.apps.sanction_list.api.serializers import (
 )
 from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_task
 from hope.apps.sanction_list.filters import SanctionListIndividualFilter
-from hope.apps.sanction_list.models import (
-    SanctionListIndividual,
-    UploadedXLSXFile,
-)
+from hope.apps.sanction_list.models import SanctionListIndividual, UploadedXLSXFile
 
 
 class SanctionListIndividualViewSet(
@@ -62,7 +56,8 @@ class SanctionListIndividualViewSet(
     )
 
     @extend_schema(
-        request=CheckAgainstSanctionListCreateSerializer, responses={202: CheckAgainstSanctionListSerializer}
+        request=CheckAgainstSanctionListCreateSerializer,
+        responses={202: CheckAgainstSanctionListSerializer},
     )
     @action(detail=False, methods=["post"], url_path="check-against-sanction-list")
     def check_against_sanction_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -85,5 +80,6 @@ class SanctionListIndividualViewSet(
             original_file_name=file.name,
         )
         return Response(
-            CheckAgainstSanctionListSerializer({"ok": False, "errors": []}).data, status=status.HTTP_202_ACCEPTED
+            CheckAgainstSanctionListSerializer({"ok": False, "errors": []}).data,
+            status=status.HTTP_202_ACCEPTED,
         )

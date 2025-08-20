@@ -18,12 +18,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="UniversalUpdate",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "curr_async_result_id",
-                    models.CharField(blank=True, help_text="Current (active) AsyncResult is", max_length=36, null=True),
+                    models.CharField(
+                        blank=True,
+                        help_text="Current (active) AsyncResult is",
+                        max_length=36,
+                        null=True,
+                    ),
                 ),
                 (
                     "individual_fields",
@@ -91,12 +104,19 @@ class Migration(migrations.Migration):
                 (
                     "saved_logs",
                     models.TextField(
-                        blank=True, default="", help_text="Logs of the update process, saved in db", null=True
+                        blank=True,
+                        default="",
+                        help_text="Logs of the update process, saved in db",
+                        null=True,
                     ),
                 ),
                 (
                     "unicef_ids",
-                    models.TextField(blank=True, help_text="Unicef IDs used only to generate template file", null=True),
+                    models.TextField(
+                        blank=True,
+                        help_text="Unicef IDs used only to generate template file",
+                        null=True,
+                    ),
                 ),
                 (
                     "delivery_mechanisms",
@@ -114,12 +134,21 @@ class Migration(migrations.Migration):
                         to="household.DocumentType",
                     ),
                 ),
-                ("program", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="program.program")),
+                (
+                    "program",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="program.program",
+                    ),
+                ),
             ],
             options={
                 "permissions": [
                     ("can_run_universal_update", "Can run universal update"),
-                    ("can_generate_universal_update_template", "Can generate universal update template"),
+                    (
+                        "can_generate_universal_update_template",
+                        "Can generate universal update template",
+                    ),
                 ],
             },
         ),

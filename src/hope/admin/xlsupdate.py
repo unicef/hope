@@ -1,5 +1,6 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin, messages
 from django.db import transaction
 from django.db.models.query import QuerySet
@@ -8,13 +9,8 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from adminfilters.autocomplete import AutoCompleteFilter
-
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.household.forms import (
-    UpdateByXlsxStage1Form,
-    UpdateByXlsxStage2Form,
-)
+from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
 from hope.apps.household.models import XlsxUpdateFile
 from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
@@ -93,7 +89,12 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
-    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: dict | None = None) -> Any:
+    def add_view(
+        self,
+        request: HttpRequest,
+        form_url: str = "",
+        extra_context: dict | None = None,
+    ) -> Any:
         return self.xlsx_update(request)
 
     def xlsx_update(self, request: HttpRequest) -> Any:

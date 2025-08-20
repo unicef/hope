@@ -11,7 +11,10 @@ def import_program_population(
     import_from_program_id: str, import_to_program_id: str, rdi: RegistrationDataImport
 ) -> None:
     copy_from_households, copy_from_individuals = get_rdi_program_population(
-        import_from_program_id, import_to_program_id, rdi.import_from_ids, rdi.exclude_external_collectors
+        import_from_program_id,
+        import_to_program_id,
+        rdi.import_from_ids,
+        rdi.exclude_external_collectors,
     )
     import_to_program = get_object_or_404(Program, pk=import_to_program_id)
 

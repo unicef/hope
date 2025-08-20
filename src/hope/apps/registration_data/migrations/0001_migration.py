@@ -30,7 +30,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -43,7 +48,10 @@ class Migration(migrations.Migration):
                             ("FINISHED", "Finished"),
                             ("ERROR", "Error"),
                             ("VALIDATION_ERROR", "Validation Error"),
-                            ("DELIVERY_MECHANISMS_VALIDATION_ERROR", "Delivery Mechanisms Validation Error"),
+                            (
+                                "DELIVERY_MECHANISMS_VALIDATION_ERROR",
+                                "Delivery Mechanisms Validation Error",
+                            ),
                         ],
                         default="FINISHED",
                         max_length=40,
@@ -54,7 +62,11 @@ class Migration(migrations.Migration):
                 (
                     "data_type",
                     models.CharField(
-                        choices=[("XLSX", "XLSX File"), ("JSON", "JSON File"), ("FLEX", "Flex Registration")],
+                        choices=[
+                            ("XLSX", "XLSX File"),
+                            ("JSON", "JSON File"),
+                            ("FLEX", "Flex Registration"),
+                        ],
                         default="XLSX",
                         max_length=4,
                     ),
@@ -98,7 +110,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -139,11 +156,19 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
                 (
                     "name",
                     django.contrib.postgres.fields.citext.CICharField(
@@ -213,19 +238,43 @@ class Migration(migrations.Migration):
                 ("batch_possible_duplicates", models.PositiveIntegerField(default=0)),
                 ("batch_unique", models.PositiveIntegerField(default=0)),
                 ("golden_record_duplicates", models.PositiveIntegerField(default=0)),
-                ("golden_record_possible_duplicates", models.PositiveIntegerField(default=0)),
+                (
+                    "golden_record_possible_duplicates",
+                    models.PositiveIntegerField(default=0),
+                ),
                 ("golden_record_unique", models.PositiveIntegerField(default=0)),
-                ("dedup_engine_batch_duplicates", models.PositiveIntegerField(default=0)),
-                ("dedup_engine_golden_record_duplicates", models.PositiveIntegerField(default=0)),
-                ("datahub_id", models.UUIDField(blank=True, db_index=True, default=None, null=True)),
+                (
+                    "dedup_engine_batch_duplicates",
+                    models.PositiveIntegerField(default=0),
+                ),
+                (
+                    "dedup_engine_golden_record_duplicates",
+                    models.PositiveIntegerField(default=0),
+                ),
+                (
+                    "datahub_id",
+                    models.UUIDField(blank=True, db_index=True, default=None, null=True),
+                ),
                 ("error_message", models.TextField(blank=True)),
-                ("sentry_id", models.CharField(blank=True, default="", max_length=100, null=True)),
+                (
+                    "sentry_id",
+                    models.CharField(blank=True, default="", max_length=100, null=True),
+                ),
                 ("pull_pictures", models.BooleanField(default=True)),
                 ("screen_beneficiary", models.BooleanField(default=False)),
-                ("excluded", models.BooleanField(default=False, help_text="Exclude RDI in UI")),
+                (
+                    "excluded",
+                    models.BooleanField(default=False, help_text="Exclude RDI in UI"),
+                ),
                 ("erased", models.BooleanField(default=False, help_text="Abort RDI")),
-                ("refuse_reason", models.CharField(blank=True, max_length=100, null=True)),
-                ("allow_delivery_mechanisms_validation_errors", models.BooleanField(default=False)),
+                (
+                    "refuse_reason",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                (
+                    "allow_delivery_mechanisms_validation_errors",
+                    models.BooleanField(default=False),
+                ),
                 (
                     "deduplication_engine_status",
                     models.CharField(
@@ -246,7 +295,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "business_area",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "import_data",
@@ -287,8 +340,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="KoboImportedSubmission",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, db_index=True, null=True),
+                ),
                 ("kobo_submission_uuid", models.UUIDField()),
                 ("kobo_asset_id", models.CharField(max_length=150)),
                 ("kobo_submission_time", models.DateTimeField()),
@@ -296,7 +360,10 @@ class Migration(migrations.Migration):
                 (
                     "imported_household",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="household.household"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="household.household",
                     ),
                 ),
                 (
@@ -313,8 +380,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="DeduplicationEngineSimilarityPair",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("similarity_score", models.DecimalField(decimal_places=2, max_digits=5)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "similarity_score",
+                    models.DecimalField(decimal_places=2, max_digits=5),
+                ),
                 (
                     "individual1",
                     models.ForeignKey(

@@ -33,7 +33,10 @@ def fake_migrations(excluded_migrations):
     call_command("migrate", "--fake")
     with connection.cursor() as cursor:
         for app, name in excluded_migrations:
-            cursor.execute("DELETE FROM django_migrations WHERE app = %s AND name = %s", [app, name])
+            cursor.execute(
+                "DELETE FROM django_migrations WHERE app = %s AND name = %s",
+                [app, name],
+            )
 
 
 def apply_migrations():

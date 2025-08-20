@@ -4,7 +4,6 @@ from typing import Any
 from django.db.models import Count, F, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
-
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -17,15 +16,10 @@ from hope.apps.core.models import (
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hope.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    to_choice_object,
-)
+from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.models import Household
 from hope.apps.payment.models import PaymentPlan
-from hope.apps.periodic_data_update.api.serializers import (
-    PeriodicFieldSerializer,
-)
+from hope.apps.periodic_data_update.api.serializers import PeriodicFieldSerializer
 from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
@@ -497,7 +491,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True
+            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            many=True,
         ).data
         return representation
 
@@ -608,7 +603,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True
+            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            many=True,
         ).data
         return representation
 

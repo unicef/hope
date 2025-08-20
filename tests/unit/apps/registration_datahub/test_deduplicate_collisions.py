@@ -8,9 +8,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 
 from hope.apps.geo.models import Country
 from hope.apps.household.models import Household, PendingIndividual
-from hope.apps.program.collision_detectors import (
-    IdentificationKeyCollisionDetector,
-)
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -28,7 +26,9 @@ def program(poland: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland)
     program = ProgramFactory.create(
-        name="Test Program for Deduplication", status=Program.ACTIVE, business_area=business_area
+        name="Test Program for Deduplication",
+        status=Program.ACTIVE,
+        business_area=business_area,
     )
     program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
@@ -39,14 +39,18 @@ def program(poland: Country) -> Program:
 @pytest.fixture
 def importing_registration_data_import(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory.create(
-        program=program, business_area=program.business_area, status=RegistrationDataImport.IMPORTING
+        program=program,
+        business_area=program.business_area,
+        status=RegistrationDataImport.IMPORTING,
     )
 
 
 @pytest.fixture
 def registration_data_import_merged(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory.create(
-        program=program, business_area=program.business_area, status=RegistrationDataImport.MERGED
+        program=program,
+        business_area=program.business_area,
+        status=RegistrationDataImport.MERGED,
     )
 
 

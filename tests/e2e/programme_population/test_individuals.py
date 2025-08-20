@@ -69,7 +69,10 @@ def add_household() -> Household:
 @pytest.mark.usefixtures("login")
 class TestSmokeIndividuals:
     def test_smoke_page_individuals(
-        self, create_programs: None, add_household: Household, pageIndividuals: Individuals
+        self,
+        create_programs: None,
+        add_household: Household,
+        pageIndividuals: Individuals,
     ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()

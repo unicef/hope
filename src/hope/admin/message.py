@@ -1,11 +1,10 @@
 from typing import Any, Sequence
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.accountability.models import Message

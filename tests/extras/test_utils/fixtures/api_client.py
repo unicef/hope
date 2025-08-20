@@ -38,7 +38,9 @@ class ReauthenticateAPIClient(APIClient):
 
 @pytest.fixture
 def api_client() -> Callable:
-    def _api_client(user_account: Optional[UserFactory] = None) -> ReauthenticateAPIClient:
+    def _api_client(
+        user_account: Optional[UserFactory] = None,
+    ) -> ReauthenticateAPIClient:
         if not user_account:
             user_account = UserFactory()
         client = ReauthenticateAPIClient()

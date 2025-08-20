@@ -5,7 +5,6 @@ from typing import Any
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
-
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
@@ -104,14 +103,21 @@ def init_clear(seed: str) -> None:
 
 def init_payment_plan(seed: str) -> None:
     afghanistan = BusinessArea.objects.get(name="Afghanistan")
-    addresses = [f"PaymentPlanVille-{seed}-1", f"PaymentPlanVille-{seed}-2", f"PaymentPlanVille-{seed}-3"]
+    addresses = [
+        f"PaymentPlanVille-{seed}-1",
+        f"PaymentPlanVille-{seed}-2",
+        f"PaymentPlanVille-{seed}-3",
+    ]
     root = User.objects.get(username="root")
 
     create_household_with_individual_for_payment_plan(address=addresses[0])
     create_household_with_individual_for_payment_plan(address=addresses[1])
     create_household_with_individual_for_payment_plan(address=addresses[2])
     program = ProgramFactory(
-        name=f"PaymentPlanProgram-{seed}", status=Program.ACTIVE, start_date="2022-12-12", end_date="2042-12-12"
+        name=f"PaymentPlanProgram-{seed}",
+        status=Program.ACTIVE,
+        start_date="2022-12-12",
+        end_date="2042-12-12",
     )
     payment_plan = PaymentPlan.objects.create(
         name=f"PaymentPlanTargetPopulation-{seed}",
@@ -167,6 +173,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
-        {"targeting": init_targeting, "payment_plan": init_payment_plan, "init_clear": init_clear}[options["scenario"]](
-            options["seed"]
-        )
+        {
+            "targeting": init_targeting,
+            "payment_plan": init_payment_plan,
+            "init_clear": init_clear,
+        }[options["scenario"]](options["seed"])

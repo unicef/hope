@@ -13,7 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="deliverymechanismdata",
             name="data",
-            field=models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                encoder=django.core.serializers.json.DjangoJSONEncoder,
+            ),
         ),
         migrations.AlterField(
             model_name="paymentverificationplan",

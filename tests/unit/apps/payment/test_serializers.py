@@ -2,7 +2,6 @@ from typing import Any, List
 from unittest.mock import Mock
 
 from django.test import TestCase
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
@@ -117,7 +116,8 @@ class PaymentListSerializerTest(TestCase):
     def test_get_auth_code(self) -> None:
         user_1 = UserFactory()
         role, created = Role.objects.update_or_create(
-            name="Role with Permissions", defaults={"permissions": [Permissions.PM_VIEW_FSP_AUTH_CODE.value]}
+            name="Role with Permissions",
+            defaults={"permissions": [Permissions.PM_VIEW_FSP_AUTH_CODE.value]},
         )
         request = Mock()
         request.user = user_1
@@ -135,7 +135,9 @@ class PaymentListSerializerTest(TestCase):
             "alternate_collector": {},
         }
         PaymentHouseholdSnapshot.objects.create(
-            payment=self.payment, snapshot_data=household_data, household_id=self.payment.household.id
+            payment=self.payment,
+            snapshot_data=household_data,
+            household_id=self.payment.household.id,
         )
         payment_qs = Payment.objects.filter(id=self.payment.id)
         serializer = PaymentListSerializer(payment_qs, many=True, context={"request": Mock(user=self.user)})
@@ -151,7 +153,10 @@ class PaymentPlanListSerializerTest(TestCase):
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
         cls.pp = PaymentPlanFactory(
-            created_by=cls.user, business_area=cls.business_area, dispersion_start_date=None, dispersion_end_date=None
+            created_by=cls.user,
+            business_area=cls.business_area,
+            dispersion_start_date=None,
+            dispersion_end_date=None,
         )
 
     def test_created_by(self) -> None:
@@ -167,7 +172,10 @@ class PaymentPlanDetailSerializerTest(TestCase):
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
         cls.pp = PaymentPlanFactory(
-            created_by=cls.user, business_area=cls.business_area, dispersion_start_date=None, dispersion_end_date=None
+            created_by=cls.user,
+            business_area=cls.business_area,
+            dispersion_start_date=None,
+            dispersion_end_date=None,
         )
         cls.program = cls.pp.program_cycle.program
         admin2 = AreaFactory(name="New for PP details")
@@ -266,11 +274,22 @@ class ApprovalProcessSerializerTest(TestCase):
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
         cls.pp = PaymentPlanFactory(
-            created_by=cls.user, business_area=cls.business_area, dispersion_start_date=None, dispersion_end_date=None
+            created_by=cls.user,
+            business_area=cls.business_area,
+            dispersion_start_date=None,
+            dispersion_end_date=None,
         )
         cls.approval_process = ApprovalProcessFactory(payment_plan=cls.pp)
-        ApprovalFactory(approval_process=cls.approval_process, type=Approval.APPROVAL, created_by=None)
-        ApprovalFactory(approval_process=cls.approval_process, type=Approval.REJECT, created_by=cls.user)
+        ApprovalFactory(
+            approval_process=cls.approval_process,
+            type=Approval.APPROVAL,
+            created_by=None,
+        )
+        ApprovalFactory(
+            approval_process=cls.approval_process,
+            type=Approval.REJECT,
+            created_by=cls.user,
+        )
 
     def test_all_fields(self) -> None:
         user_name_str = f"{self.user.first_name} {self.user.last_name}"
@@ -294,7 +313,11 @@ class ApprovalProcessSerializerTest(TestCase):
 
     def test_rejected_on(self) -> None:
         approval_process = ApprovalProcessFactory(payment_plan=self.pp, sent_for_approval_date="2025-11-12")
-        ApprovalFactory(approval_process=approval_process, type=Approval.REJECT, created_by=self.user)
+        ApprovalFactory(
+            approval_process=approval_process,
+            type=Approval.REJECT,
+            created_by=self.user,
+        )
         data = ApprovalProcessSerializer(instance=approval_process).data
         assert data["rejected_on"] == "IN_APPROVAL"
 

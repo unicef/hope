@@ -9,10 +9,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.apps.core.utils import (
-    decode_id_string,
-    resolve_flex_fields_choices_to_string,
-)
+from hope.apps.core.utils import decode_id_string, resolve_flex_fields_choices_to_string
 from hope.apps.geo.models import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
@@ -399,7 +396,8 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     @extend_schema_field(AccountSerializer(many=True))
     def get_accounts(self, obj: Individual) -> dict:
         if self.context["request"].user.has_perm(
-            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value, obj.program
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
+            obj.program,
         ):
             queryset = obj.accounts(manager="all_objects").all()
         else:
