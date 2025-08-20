@@ -210,18 +210,18 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
 
 class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
+        PENDING_CREATE = "PENDING_CREATE", "Pending create"
         NEW = "NEW", "New"
         READY = "READY", "Ready"  # sent for approval
         APPROVED = "APPROVED", "Approved"
+        PENDING_MERGE = "PENDING_MERGE", "Pending merge"
         MERGED = "MERGED", "Merged"
 
         # tasks statuses
-        PENDING_CREATE = "PENDING_CREATE", "Pending create"
         NOT_SCHEDULED_CREATE = "NOT_SCHEDULED_CREATE", "Not scheduled create"
         CREATING = "CREATING", "Creating"
         FAILED_CREATE = "FAILED_CREATE", "Failed create"
         CANCELED_CREATE = "CANCELED_CREATE", "Canceled create"
-        PENDING_MERGE = "PENDING_MERGE", "Pending merge"
         NOT_SCHEDULED_MERGE = "NOT_SCHEDULED_MERGE", "Not scheduled merge"
         MERGING = "MERGING", "Processing"
         FAILED_MERGE = "FAILED_MERGE", "Failed merge"
@@ -280,8 +280,8 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
     ordering = ["-created_at"]
 
     celery_task_names = {
-        "generate_edit_data": "hope.apps.periodic_data_update.celery_tasks.generate_edit_data",
-        "merge": "hope.apps.periodic_data_update.celery_tasks.merge",
+        "generate_edit_data": "hope.apps.periodic_data_update.celery_tasks.generate_pdu_online_edit_data_task",
+        "merge": "hope.apps.periodic_data_update.celery_tasks.merge_pdu_online_edit_task",
     }
 
     class Meta:
@@ -294,7 +294,39 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        return self.status  # TODO: PDU - implement task status handling
+        status_create = self.get_celery_status(task_name="generate_edit_data")
+        status_merge = self.get_celery_status(task_name="merge")
+
+        if (
+            self.status in [self.Status.NEW, self.Status.READY, self.Status.APPROVED, self.Status.MERGED, self.Status.FAILED_CREATE, self.Status.FAILED_MERGE]
+            or status_create == self.CELERY_STATUS_SUCCESS
+            or status_merge == self.CELERY_STATUS_SUCCESS
+        ):
+            return self.status
+
+        if status_create == self.CELERY_STATUS_RECEIVED or status_create == self.CELERY_STATUS_RETRY:
+            return self.Status.PENDING_CREATE
+        if status_create == self.CELERY_STATUS_STARTED:
+            return self.Status.CREATING
+        if status_create == self.CELERY_STATUS_FAILURE:
+            return self.Status.FAILED_CREATE
+        if status_create == self.CELERY_STATUS_NOT_SCHEDULED:
+            return self.Status.NOT_SCHEDULED_CREATE
+        if status_create == self.CELERY_STATUS_REVOKED or status_create == self.CELERY_STATUS_CANCELED:
+            return self.Status.CANCELED_CREATE
+
+        if status_merge == self.CELERY_STATUS_RECEIVED or status_merge == self.CELERY_STATUS_RECEIVED:
+            return self.Status.PENDING_MERGE
+        if status_merge == self.CELERY_STATUS_STARTED:
+            return self.Status.MERGING
+        if status_merge == self.CELERY_STATUS_FAILURE:
+            return self.Status.FAILED_MERGE
+        if status_merge == self.CELERY_STATUS_NOT_SCHEDULED:
+            return self.Status.NOT_SCHEDULED_MERGE
+        if status_merge == self.CELERY_STATUS_REVOKED or status_merge == self.CELERY_STATUS_CANCELED:
+            return self.Status.CANCELED_MERGE
+
+        return self.status
 
 
     @property
