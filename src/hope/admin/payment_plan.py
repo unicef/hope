@@ -6,12 +6,13 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from hope.apps.payment.forms import TemplateSelectForm
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import (
@@ -164,6 +165,40 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             request=request,
             action=self.sync_missing_records_with_payment_gateway,
             message="Do you confirm to Sync with Payment Gateway missing Records?",
+        )
+
+    @button(
+        visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
+        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
+            request, payment_plan
+        ),
+    )
+    def regenerate_export_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        payment_plan = PaymentPlan.objects.get(pk=pk)
+
+        if request.method == "POST":
+            from hope.apps.payment.services.payment_plan_services import (
+                PaymentPlanService,
+            )
+
+            form = TemplateSelectForm(request.POST, payment_plan=payment_plan)
+            if form.is_valid():
+                template_obj = form.cleaned_data.get("template")
+                fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
+                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.pk, fsp_xlsx_template_id)
+                messages.success(request, "Celery task for export regenerate file successfully started.")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        else:
+            form = TemplateSelectForm(payment_plan=payment_plan)
+
+        return render(
+            request,
+            "admin/payment/regenerate_export_xlsx_form.html",
+            {
+                "form": form,
+                "payment_plan": payment_plan,
+                "title": "Select a template if you want the export to include the FSP Auth Code",
+            },
         )
 
     @button(permission="payment.view_paymentplan")
