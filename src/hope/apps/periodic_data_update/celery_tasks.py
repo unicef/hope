@@ -79,16 +79,21 @@ def generate_pdu_online_edit_data_task(self: Any, pdu_online_edit_id: int, filte
 @sentry_tags
 def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> bool:
     """Celery task to merge the edit_data for a PDUOnlineEdit instance."""
-    pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
-    try:
-        service = PDUOnlineEditMergeService(pdu_online_edit)
-        service.merge_edit_data()
-        pdu_online_edit.status = PDUOnlineEdit.Status.MERGED
-        pdu_online_edit.save(update_fields=["status"])
-    except Exception:
-        pdu_online_edit.status = PDUOnlineEdit.Status.FAILED_MERGE
-        pdu_online_edit.save(update_fields=["status"])
-    return True
+    with cache.lock(
+        "pdu_online_edit_merge",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
+        try:
+            service = PDUOnlineEditMergeService(pdu_online_edit)
+            service.merge_edit_data()
+            pdu_online_edit.status = PDUOnlineEdit.Status.MERGED
+            pdu_online_edit.save(update_fields=["status"])
+        except Exception:
+            pdu_online_edit.status = PDUOnlineEdit.Status.FAILED_MERGE
+            pdu_online_edit.save(update_fields=["status"])
+        return True
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
