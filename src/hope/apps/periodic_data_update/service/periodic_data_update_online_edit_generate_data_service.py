@@ -23,7 +23,7 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
             )
         }
 
-        individuals = self.get_individuals_queryset()
+        individuals = self._get_individuals_queryset()
         edit_data = []
 
         for individual in individuals:
@@ -42,12 +42,13 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
 
                 if round_value is None:
                     is_individual_allowed = True
-                    pdu_fields[pdu_field_name] = {
-                        "round_number": round_number,
-                        "round_name": round_info["round_name"],
-                        "value": None,
-                        "subtype": subtype,
-                    }
+                pdu_fields[pdu_field_name] = {
+                    "round_number": round_number,
+                    "round_name": round_info["round_name"],
+                    "value": round_value,
+                    "subtype": subtype,
+                    "is_editable": round_value is None,
+                }
 
             if is_individual_allowed:
                 edit_data.append(

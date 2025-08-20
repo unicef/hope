@@ -248,7 +248,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
                 raise ValidationError(
                     f"Value already exists for field {field_name} for round {round_number} and individual {individual_unicef_id}"
                 )
-            self._set_round_value(
+            self.set_round_value(
                 individual,
                 field_name,
                 round_number,

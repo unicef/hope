@@ -28,12 +28,13 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
 
                 for pdu_field_name, field_data in item.get("pdu_fields", {}).items():
                     value = field_data.get("value")
-                    if value is None:
+                    is_editable = field_data.get("is_editable")
+                    if value is None or not is_editable:
                         continue
 
                     expected_type = field_data.get("subtype")
                     self._validate_value(value, expected_type, pdu_field_name)
-                    self._set_round_value(
+                    self.set_round_value(
                         individual=individual,
                         pdu_field_name=pdu_field_name,
                         round_number=field_data["round_number"],
