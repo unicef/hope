@@ -124,7 +124,11 @@ class TargetingCriteriaInputValidator:
 
             is_empty_rules = all(
                 len(rule.get(key, [])) == 0
-                for key in ["households_filters_blocks", "individuals_filters_blocks", "collectors_filters_blocks"]
+                for key in [
+                    "households_filters_blocks",
+                    "individuals_filters_blocks",
+                    "collectors_filters_blocks",
+                ]
             )
 
             if is_empty_rules and not household_ids and not individual_ids:

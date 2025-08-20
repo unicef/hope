@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 
-from django.utils import timezone
-
 import pytz
+from django.utils import timezone
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from parameterized import parameterized
@@ -85,7 +84,10 @@ class APICountriesTests(HOPEApiTestCase):
         for filter_data, expected_result in [
             ({"valid_from_before": "2019-01-02"}, [self.country_afghanistan]),
             ({"valid_from_after": "2019-01-02"}, [self.country_poland]),
-            ({"valid_until_before": "2022-01-01"}, [self.country_poland, self.country_afghanistan]),
+            (
+                {"valid_until_before": "2022-01-01"},
+                [self.country_poland, self.country_afghanistan],
+            ),
             ({"valid_until_after": "2021-12-30"}, [self.country_afghanistan]),
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
@@ -414,19 +416,25 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
         assert results[0]["name"] == expected_name
         assert results[0]["type"] == institution_type
 
-    def test_get_financial_institution_list_filter_by_invalid_type_returns_empty(self) -> None:
+    def test_get_financial_institution_list_filter_by_invalid_type_returns_empty(
+        self,
+    ) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"type": "invalid_type"})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_get_financial_institution_list_filter_by_future_date_returns_empty(self) -> None:
+    def test_get_financial_institution_list_filter_by_future_date_returns_empty(
+        self,
+    ) -> None:
         future_date = timezone.now() + timedelta(days=365)
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"updated_at_after": future_date.strftime("%Y-%m-%d")})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 0
 
-    def test_get_financial_institution_list_filter_by_past_date_returns_all(self) -> None:
+    def test_get_financial_institution_list_filter_by_past_date_returns_all(
+        self,
+    ) -> None:
         past_date = timezone.now() - timedelta(days=365)
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url, {"updated_at_before": past_date.strftime("%Y-%m-%d")})

@@ -4,7 +4,6 @@ import json
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -41,7 +40,10 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         country = geo_models.Country.objects.create(name="Nigeria")
         area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)
         area_type_2 = AreaType.objects.create(
-            name="Local government area", area_level=2, country=country, parent=area_type_1
+            name="Local government area",
+            area_level=2,
+            country=country,
+            parent=area_type_1,
         )
         area_type_3 = AreaType.objects.create(name="Ward", area_level=3, country=country, parent=area_type_2)
         area_1 = Area.objects.create(name="Borno", p_code="NG002", area_type=area_type_1)
@@ -53,7 +55,9 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
         cls.program = ProgramFactory(
-            status="ACTIVE", data_collecting_type=cls.data_collecting_type, biometric_deduplication_enabled=True
+            status="ACTIVE",
+            data_collecting_type=cls.data_collecting_type,
+            biometric_deduplication_enabled=True,
         )
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
@@ -77,9 +81,19 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                 source_id=1,
                 files=json.dumps(files).encode(),
                 fields={
-                    "household-info": [{"admin1_h_c": "NG002", "admin2_h_c": "NG002001", "admin3_h_c": "NG002001007"}],
+                    "household-info": [
+                        {
+                            "admin1_h_c": "NG002",
+                            "admin2_h_c": "NG002001",
+                            "admin3_h_c": "NG002001007",
+                        }
+                    ],
                     "intro-and-consent": [
-                        {"consent_h_c": True, "enumerator_code": "SHEAbi5350", "who_to_register": "myself"}  # ff  # ff
+                        {
+                            "consent_h_c": True,
+                            "enumerator_code": "SHEAbi5350",
+                            "who_to_register": "myself",
+                        }  # ff  # ff
                     ],
                     "individual-details": [
                         {
@@ -125,7 +139,10 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert household.country_origin == geo_models.Country.objects.get(iso_code2="NG")
         assert household.head_of_household == PendingIndividual.objects.get(given_name="Giulio")
         assert household.rdi_merge_status == "PENDING"
-        assert household.flex_fields == {"enumerator_code": "SHEAbi5350", "who_to_register": "myself"}
+        assert household.flex_fields == {
+            "enumerator_code": "SHEAbi5350",
+            "who_to_register": "myself",
+        }
 
         registration_data_import = household.registration_data_import
         assert registration_data_import.program == self.program

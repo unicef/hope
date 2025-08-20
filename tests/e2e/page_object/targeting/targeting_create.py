@@ -241,7 +241,9 @@ class TargetingCreate(BaseComponents):
         return self.wait_for(self.datePickerFilter)
 
     def getSelectIndividualsiFltersBlocksRoundNumber(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.selectIndividualsFiltersBlocksRoundNumber.format(
@@ -256,7 +258,9 @@ class TargetingCreate(BaseComponents):
         return self.wait_for(self.selectRoundOption.format(round_number))
 
     def getSelectIndividualsiFltersBlocksIsNull(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.selectIndividualsFiltersBlocksIsNull.format(
@@ -265,7 +269,9 @@ class TargetingCreate(BaseComponents):
         )
 
     def getInputIndividualsFiltersBlocksValueFrom(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.inputIndividualsFiltersBlocksValueFrom.format(
@@ -274,7 +280,9 @@ class TargetingCreate(BaseComponents):
         )
 
     def getInputIndividualsFiltersBlocksValueTo(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.inputIndividualsFiltersBlocksValueTo.format(
@@ -283,7 +291,9 @@ class TargetingCreate(BaseComponents):
         )
 
     def getInputDateIndividualsFiltersBlocksValueFrom(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.inputDateIndividualsFiltersBlocksValueFrom.format(
@@ -292,7 +302,9 @@ class TargetingCreate(BaseComponents):
         )
 
     def getInputDateIndividualsFiltersBlocksValueTo(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.inputDateIndividualsFiltersBlocksValueTo.format(
@@ -301,7 +313,9 @@ class TargetingCreate(BaseComponents):
         )
 
     def getInputIndividualsFiltersBlocksValue(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.inputIndividualsFiltersBlocksValue.format(
@@ -310,7 +324,9 @@ class TargetingCreate(BaseComponents):
         )
 
     def getSelectIndividualsFiltersBlocksValue(
-        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+        self,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
     ) -> WebElement:
         return self.wait_for(
             self.selectIndividualsFiltersBlocksValue.format(

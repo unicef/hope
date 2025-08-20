@@ -1,9 +1,8 @@
 from contextlib import contextmanager
 from typing import Callable, Generator
 
-from django.db import DEFAULT_DB_ALIAS, connections
-
 import pytest
+from django.db import DEFAULT_DB_ALIAS, connections
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
@@ -14,7 +13,11 @@ from hope.apps.household.models import MALE, Household, Individual
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch, pytest.mark.django_db]
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.elasticsearch,
+    pytest.mark.django_db,
+]
 
 
 @contextmanager
@@ -53,7 +56,11 @@ def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
 @pytest.fixture
@@ -196,16 +203,20 @@ def test_merge_rdi_with_collision(
 
     # Enable collision detection in the program
     program.collision_detection_enabled = True
-    from hope.apps.program.collision_detectors import (
-        IdentificationKeyCollisionDetector,
-    )
+    from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
 
     # Get the initial state before merging
     pending_household_obj, pending_individual = pending_household
-    merged_household_obj, (merged_individual_to_remove, merged_individual) = merged_household
+    (
+        merged_household_obj,
+        (
+            merged_individual_to_remove,
+            merged_individual,
+        ),
+    ) = merged_household
 
     # Store original values for later comparison
     pending_household_id = pending_household_obj.id

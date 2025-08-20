@@ -1,5 +1,9 @@
 from typing import Any
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
 from django.db.models import Q, QuerySet
@@ -7,12 +11,7 @@ from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminAutoCompleteSearchMixin
+from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
     HOPEModelAdminBase,
@@ -30,12 +29,18 @@ from hope.apps.registration_datahub.services.biometric_deduplication import (
 )
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.apps.utils.elasticsearch_utils import populate_index
-from mptt.forms import TreeNodeMultipleChoiceField
 
 
 @admin.register(ProgramCycle)
 class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("title", "program", "status", "start_date", "end_date", "created_by")
+    list_display = (
+        "title",
+        "program",
+        "status",
+        "start_date",
+        "end_date",
+        "created_by",
+    )
     date_hierarchy = "start_date"
     list_filter = (
         ("program__business_area", AutoCompleteFilter),
@@ -68,12 +73,19 @@ class ProgramCycleAdminInline(admin.TabularInline):
 class PartnerAreaLimitForm(forms.Form):
     partner = forms.ModelChoiceField(queryset=Partner.objects.all(), required=True)
     areas = TreeNodeMultipleChoiceField(
-        queryset=Area.objects.filter(area_type__area_level__lte=3), widget=CheckboxSelectMultiple(), required=True
+        queryset=Area.objects.filter(area_type__area_level__lte=3),
+        widget=CheckboxSelectMultiple(),
+        required=True,
     )
 
 
 @admin.register(Program)
-class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
+class ProgramAdmin(
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    AdminAutoCompleteSearchMixin,
+    HOPEModelAdminBase,
+):
     list_display = (
         "name",
         "programme_code",
@@ -106,7 +118,12 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         "is_visible",
     )
     search_fields = ("name", "programme_code")
-    raw_id_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
+    raw_id_fields = (
+        "business_area",
+        "data_collecting_type",
+        "beneficiary_group",
+        "admin_areas",
+    )
     filter_horizontal = ("admin_areas", "partners")
 
     inlines = (ProgramCycleAdminInline,)
@@ -159,7 +176,11 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             )
 
         context["form"] = form
-        return TemplateResponse(request, "admin/program/program/create_target_population_from_text.html", context)
+        return TemplateResponse(
+            request,
+            "admin/program/program/create_target_population_from_text.html",
+            context,
+        )
 
     @button(permission="account.can_change_area_limits")
     def area_limits(self, request: HttpRequest, pk: int) -> TemplateResponse | HttpResponseRedirect:
@@ -185,7 +206,10 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
                     form = partner_area_form.cleaned_data
                     if form and not form["DELETE"]:
                         areas_ids = [str(area.id) for area in form["areas"]]
-                        program_partner, _ = AdminAreaLimitedTo.objects.update_or_create(
+                        (
+                            program_partner,
+                            _,
+                        ) = AdminAreaLimitedTo.objects.update_or_create(
                             partner=form["partner"],
                             program=program,
                         )
@@ -219,6 +243,9 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             Individual.all_merge_status_objects.filter(program=program),
             get_individual_doc(program.business_area.slug),
         )
-        populate_index(Household.all_merge_status_objects.filter(program=program), HouseholdDocument)
+        populate_index(
+            Household.all_merge_status_objects.filter(program=program),
+            HouseholdDocument,
+        )
         messages.success(request, f"Program {program.name} reindexed.")
         return HttpResponseRedirect(reverse("admin:program_program_changelist"))

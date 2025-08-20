@@ -3,6 +3,7 @@ import re
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Optional
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
@@ -23,8 +24,6 @@ from django.db.models import (
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
@@ -416,7 +415,9 @@ class Household(
         ]
     )
     business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE, help_text="Household business area"
+        "core.BusinessArea",
+        on_delete=models.CASCADE,
+        help_text="Household business area",
     )
     program = models.ForeignKey(
         "program.Program",
@@ -449,7 +450,11 @@ class Household(
         related_name="represented_households",
     )
     storage_obj = models.ForeignKey(
-        StorageFile, on_delete=models.SET_NULL, blank=True, null=True, help_text="Household storage object"
+        StorageFile,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        help_text="Household storage object",
     )
     copied_from = models.ForeignKey(
         "self",
@@ -516,14 +521,21 @@ class Household(
         help_text="Household head of household",
     )
     consent_sign = ImageField(
-        validators=[validate_image_file_extension], blank=True, help_text="Household consent sign image"
+        validators=[validate_image_file_extension],
+        blank=True,
+        help_text="Household consent sign image",
     )
     consent = models.BooleanField(null=True, help_text="Household consent")
     consent_sharing = MultiSelectField(
-        choices=DATA_SHARING_CHOICES, default=BLANK, help_text="Household consent sharing"
+        choices=DATA_SHARING_CHOICES,
+        default=BLANK,
+        help_text="Household consent sharing",
     )
     residence_status = models.CharField(
-        max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True, help_text="Household residence status"
+        max_length=254,
+        choices=RESIDENCE_STATUS_CHOICE,
+        blank=True,
+        help_text="Household residence status",
     )
 
     address = CICharField(max_length=1024, blank=True, help_text="Household address")
@@ -537,10 +549,16 @@ class Household(
         default=None, null=True, blank=True, help_text="Household female age group 6-11"
     )
     female_age_group_12_17_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household female age group 12-17"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household female age group 12-17",
     )
     female_age_group_18_59_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household female age group 18-59"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household female age group 18-59",
     )
     female_age_group_60_count = models.PositiveIntegerField(
         default=None, null=True, blank=True, help_text="Household female age group 60"
@@ -570,10 +588,16 @@ class Household(
         default=None, null=True, blank=True, help_text="Household female age group 6-11"
     )
     female_age_group_12_17_disabled_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household female age group 12-17"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household female age group 12-17",
     )
     female_age_group_18_59_disabled_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household female age group 18-59"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household female age group 18-59",
     )
     female_age_group_60_disabled_count = models.PositiveIntegerField(
         default=None, null=True, blank=True, help_text="Household female age group 60"
@@ -603,31 +627,55 @@ class Household(
         default=None, null=True, blank=True, help_text="Household female children count"
     )
     children_disabled_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household children disabled count"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household children disabled count",
     )
     male_children_disabled_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household male children disabled count"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household male children disabled count",
     )
     female_children_disabled_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household female children disabled count"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household female children disabled count",
     )
     other_sex_group_count = models.PositiveIntegerField(
         default=None, null=True, blank=True, help_text="Household other sex group count"
     )  # OTHER
     unknown_sex_group_count = models.PositiveIntegerField(
-        default=None, null=True, blank=True, help_text="Household unknown sex group count"
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Household unknown sex group count",
     )  # NOT_COLLECTED
 
     returnee = models.BooleanField(null=True, help_text="Household returnee status")
     fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
     child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
-    currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK, help_text="Household currency")
+    currency = models.CharField(
+        max_length=250,
+        choices=CURRENCY_CHOICES,
+        default=BLANK,
+        help_text="Household currency",
+    )
     unhcr_id = models.CharField(
-        max_length=250, blank=True, default=BLANK, db_index=True, help_text="Household unhcr id"
+        max_length=250,
+        blank=True,
+        default=BLANK,
+        db_index=True,
+        help_text="Household unhcr id",
     )
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID",
     )
     start = models.DateTimeField(blank=True, null=True, help_text="Data collection start date")
 
@@ -639,10 +687,16 @@ class Household(
         help_text="Household registration method [sys]",
     )
     family_id = models.CharField(
-        max_length=100, blank=True, null=True, help_text="Family ID eDopomoga household id [sys]"
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Family ID eDopomoga household id [sys]",
     )
     origin_unicef_id = models.CharField(
-        max_length=100, blank=True, null=True, help_text="Household origin unicef id [sys]"
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Household origin unicef id [sys]",
     )
     is_migration_handled = models.BooleanField(default=False, help_text="Household migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Household migrated at [sys]")
@@ -687,17 +741,29 @@ class Household(
     latitude = models.FloatField(blank=True, null=True, help_text="Household latitude [sys]")
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household deviceid [sys]")
     name_enumerator = models.CharField(
-        max_length=250, blank=True, default=BLANK, help_text="Household name enumerator [sys]"
+        max_length=250,
+        blank=True,
+        default=BLANK,
+        help_text="Household name enumerator [sys]",
     )
     org_enumerator = models.CharField(
-        max_length=250, choices=ORG_ENUMERATOR_CHOICES, default=BLANK, help_text="Household org enumerator [sys]"
+        max_length=250,
+        choices=ORG_ENUMERATOR_CHOICES,
+        default=BLANK,
+        help_text="Household org enumerator [sys]",
     )
     org_name_enumerator = models.CharField(
-        max_length=250, blank=True, default=BLANK, help_text="Household org name enumerator [sys]"
+        max_length=250,
+        blank=True,
+        default=BLANK,
+        help_text="Household org name enumerator [sys]",
     )
     kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
     kobo_submission_time = models.DateTimeField(
-        max_length=150, blank=True, null=True, help_text="Household Kobo submission time [sys]"
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Household Kobo submission time [sys]",
     )
     enumerator_rec_id = models.PositiveIntegerField(
         blank=True, null=True, help_text="Household enumerator record [sys]"
@@ -713,10 +779,15 @@ class Household(
         help_text="This relation is filed when collision of Household happens.",
     )
     identification_key = models.CharField(
-        null=True, blank=True, max_length=255, db_index=True, help_text="Key used to identify Collisions in the system"
+        null=True,
+        blank=True,
+        max_length=255,
+        db_index=True,
+        help_text="Key used to identify Collisions in the system",
     )
     collision_flag = models.BooleanField(
-        default=False, help_text="Flag used to identify if the household is in collision state"
+        default=False,
+        help_text="Flag used to identify if the household is in collision state",
     )
 
     class Meta:
@@ -1138,12 +1209,35 @@ class Individual(
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = CICharField(
-        max_length=255, validators=[MinLengthValidator(2)], db_index=True, help_text="Full Name of the Beneficiary"
+        max_length=255,
+        validators=[MinLengthValidator(2)],
+        db_index=True,
+        help_text="Full Name of the Beneficiary",
     )
-    given_name = CICharField(max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary")
-    middle_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary")
-    family_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary")
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True, help_text="Beneficiary gender")
+    given_name = CICharField(
+        max_length=85,
+        blank=True,
+        db_index=True,
+        help_text="First name of the Beneficiary",
+    )
+    middle_name = CICharField(
+        max_length=85,
+        blank=True,
+        db_index=True,
+        help_text="Middle name of the Beneficiary",
+    )
+    family_name = CICharField(
+        max_length=85,
+        blank=True,
+        db_index=True,
+        help_text="Last name of the Beneficiary",
+    )
+    sex = models.CharField(
+        max_length=255,
+        choices=SEX_CHOICE,
+        db_index=True,
+        help_text="Beneficiary gender",
+    )
     birth_date = models.DateField(db_index=True, help_text="Beneficiary date of birth")
     estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date flag")
     marital_status = models.CharField(
@@ -1176,31 +1270,54 @@ class Individual(
     fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
     disability = models.CharField(
-        max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
+        max_length=20,
+        choices=DISABILITY_CHOICES,
+        default=NOT_DISABLED,
+        help_text="Disability status",
     )
     observed_disability = MultiSelectField(
-        choices=OBSERVED_DISABILITY_CHOICE, default=NONE, help_text="Observed disability status"
+        choices=OBSERVED_DISABILITY_CHOICE,
+        default=NONE,
+        help_text="Observed disability status",
     )
     disability_certificate_picture = models.ImageField(
         blank=True, null=True, help_text="Disability certificate picture"
     )
     seeing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Seeing disability"
+        max_length=50,
+        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        blank=True,
+        help_text="Seeing disability",
     )
     hearing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Hearing disability"
+        max_length=50,
+        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        blank=True,
+        help_text="Hearing disability",
     )
     physical_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Physical disability"
+        max_length=50,
+        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        blank=True,
+        help_text="Physical disability",
     )
     memory_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Memory disability"
+        max_length=50,
+        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        blank=True,
+        help_text="Memory disability",
     )
     selfcare_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Selfcare disability"
+        max_length=50,
+        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        blank=True,
+        help_text="Selfcare disability",
     )
     comms_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Comms disability"
+        max_length=50,
+        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        blank=True,
+        help_text="Comms disability",
     )
 
     who_answers_phone = models.CharField(max_length=150, blank=True, help_text="Who answers phone number")
@@ -1208,14 +1325,26 @@ class Individual(
         max_length=150, blank=True, help_text="Who answers alternative phone number"
     )
     preferred_language = models.CharField(
-        max_length=6, choices=Languages.get_tuple(), null=True, blank=True, help_text="Preferred language"
+        max_length=6,
+        choices=Languages.get_tuple(),
+        null=True,
+        blank=True,
+        help_text="Preferred language",
     )
     relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
     wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Cryptocurrency wallet name")
     blockchain_name = models.CharField(
-        max_length=64, blank=True, default="", help_text="Cryptocurrency blockchain name"
+        max_length=64,
+        blank=True,
+        default="",
+        help_text="Cryptocurrency blockchain name",
     )
-    wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Cryptocurrency wallet address")
+    wallet_address = models.CharField(
+        max_length=128,
+        blank=True,
+        default="",
+        help_text="Cryptocurrency wallet address",
+    )
 
     # System fields
     duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
@@ -1223,11 +1352,16 @@ class Individual(
     withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
     withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Withdrawn date [sys]")
     flex_fields = JSONField(
-        default=dict, blank=True, encoder=FlexFieldsEncoder, help_text="FlexFields JSON representation [sys]"
+        default=dict,
+        blank=True,
+        encoder=FlexFieldsEncoder,
+        help_text="FlexFields JSON representation [sys]",
     )
     phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
     phone_no_alternative_valid = models.BooleanField(
-        null=True, db_index=True, help_text="Beneficiary phone number alternative valid [sys]"
+        null=True,
+        db_index=True,
+        help_text="Beneficiary phone number alternative valid [sys]",
     )
     first_registration_date = models.DateField(help_text="First registration date [sys]")
     last_registration_date = models.DateField(help_text="Last registration date [sys]")
@@ -1278,7 +1412,10 @@ class Individual(
         default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
     )
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]"
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]",
     )
     program_registration_id = CICharField(
         max_length=100,
@@ -1292,7 +1429,11 @@ class Individual(
     is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
     identification_key = models.CharField(
-        null=True, blank=True, max_length=255, db_index=True, help_text="Key used to identify Collisions in the system"
+        null=True,
+        blank=True,
+        max_length=255,
+        db_index=True,
+        help_text="Key used to identify Collisions in the system",
     )
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
@@ -1436,7 +1577,10 @@ class Individual(
         should_be_disabled = self.disability == DISABLED
         for field in disability_fields:
             value = getattr(self, field, None)
-            should_be_disabled = should_be_disabled or value in [CANNOT_DO, LOT_DIFFICULTY]
+            should_be_disabled = should_be_disabled or value in [
+                CANNOT_DO,
+                LOT_DIFFICULTY,
+            ]
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
 
         if save:

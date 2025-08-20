@@ -3,7 +3,6 @@ from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest, HttpResponse
-
 from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
@@ -29,7 +28,12 @@ def social_details(backend: Any, details: dict, response: HttpRequest, *args: An
 
 
 def user_details(
-    strategy: Any, details: dict, backend: Any, user: Any | None = None, *args: Any, **kwargs: Any
+    strategy: Any,
+    details: dict,
+    backend: Any,
+    user: Any | None = None,
+    *args: Any,
+    **kwargs: Any,
 ) -> HttpResponse:
     logger.debug(f"user_details for user {user} details:\n{details}")
     # social_core_user.user_details use details dict to override some fields on User instance
@@ -49,7 +53,12 @@ def user_details(
 
 
 def require_email(
-    strategy: Any, details: dict, user: User | None = None, is_new: bool = False, *args: Any, **kwargs: Any
+    strategy: Any,
+    details: dict,
+    user: User | None = None,
+    is_new: bool = False,
+    *args: Any,
+    **kwargs: Any,
 ) -> None:
     if user and user.email:
         return
@@ -59,7 +68,12 @@ def require_email(
 
 
 def create_user(
-    strategy: Any, details: dict, backend: Any, user: bool | User, *args: Any, **kwargs: Any
+    strategy: Any,
+    details: dict,
+    backend: Any,
+    user: bool | User,
+    *args: Any,
+    **kwargs: Any,
 ) -> dict[str, bool | User] | None:
     if user:
         return {"is_new": False}

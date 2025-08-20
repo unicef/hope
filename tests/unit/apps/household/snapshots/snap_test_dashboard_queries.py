@@ -12,9 +12,18 @@ snapshots[
     "data": {
         "chartIndividualsWithDisabilityReachedByAge": {
             "datasets": [
-                {"data": [4.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0], "label": "with disability"},
-                {"data": [4.0, 4.0, 4.0, 2.0, 4.0, 0.0, 4.0, 0.0, 4.0, 2.0], "label": "without disability"},
-                {"data": [8.0, 4.0, 4.0, 4.0, 4.0, 0.0, 4.0, 0.0, 4.0, 6.0], "label": "total"},
+                {
+                    "data": [4.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0],
+                    "label": "with disability",
+                },
+                {
+                    "data": [4.0, 4.0, 4.0, 2.0, 4.0, 0.0, 4.0, 0.0, 4.0, 2.0],
+                    "label": "without disability",
+                },
+                {
+                    "data": [8.0, 4.0, 4.0, 4.0, 4.0, 0.0, 4.0, 0.0, 4.0, 6.0],
+                    "label": "total",
+                },
             ],
             "labels": [
                 "Females 0-5",
@@ -38,9 +47,18 @@ snapshots[
     "data": {
         "chartPeopleWithDisabilityReachedByAge": {
             "datasets": [
-                {"data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "label": "with disability"},
-                {"data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "label": "without disability"},
-                {"data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "label": "total"},
+                {
+                    "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    "label": "with disability",
+                },
+                {
+                    "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    "label": "without disability",
+                },
+                {
+                    "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    "label": "total",
+                },
             ],
             "labels": [
                 "Females 0-5",

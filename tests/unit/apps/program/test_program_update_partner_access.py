@@ -1,8 +1,7 @@
 from typing import Any, Callable
 
-from django.db.models import Q
-
 import pytest
+from django.db.models import Q
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -56,7 +55,10 @@ class TestProgramUpdatePartnerAccess:
 
         self.update_partner_access_url = reverse(
             "api:programs:programs-update-partner-access",
-            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "slug": self.program.slug,
+            },
         )
 
         self.base_expected_response = {
@@ -117,8 +119,16 @@ class TestProgramUpdatePartnerAccess:
 
         # TODO: the below code is needed due to the temporary solution on the partners access in program actions
         RoleAssignmentFactory(partner=self.partner, business_area=self.afghanistan, program=None)
-        RoleAssignmentFactory(partner=self.partner1_for_assignment, business_area=self.afghanistan, program=None)
-        RoleAssignmentFactory(partner=self.partner2_for_assignment, business_area=self.afghanistan, program=None)
+        RoleAssignmentFactory(
+            partner=self.partner1_for_assignment,
+            business_area=self.afghanistan,
+            program=None,
+        )
+        RoleAssignmentFactory(
+            partner=self.partner2_for_assignment,
+            business_area=self.afghanistan,
+            program=None,
+        )
         # TODO: remove the above code when the partners access in program actions is implemented properly
         # TODO: also add tests for cases when partner is not allowed in BA - also in test create program
 
@@ -131,7 +141,10 @@ class TestProgramUpdatePartnerAccess:
         ],
     )
     def test_update_partner_access_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
@@ -158,7 +171,10 @@ class TestProgramUpdatePartnerAccess:
 
     def test_update_partner_access(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
@@ -329,7 +345,10 @@ class TestProgramUpdatePartnerAccess:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
@@ -356,7 +375,10 @@ class TestProgramUpdatePartnerAccess:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
@@ -383,7 +405,10 @@ class TestProgramUpdatePartnerAccess:
         self, create_user_role_with_permissions: Callable
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
@@ -409,7 +434,10 @@ class TestProgramUpdatePartnerAccess:
 
     def test_update_partner_access_all_partners_refresh(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0

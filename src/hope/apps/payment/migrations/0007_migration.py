@@ -15,7 +15,10 @@ class Migration(migrations.Migration):
             model_name="financialserviceproviderxlsxtemplate",
             name="document_types",
             field=hope.apps.payment.fields.DynamicChoiceArrayField(
-                base_field=models.CharField(blank=True, max_length=255), blank=True, default=list, size=None
+                base_field=models.CharField(blank=True, max_length=255),
+                blank=True,
+                default=list,
+                size=None,
             ),
         ),
     ]

@@ -1,12 +1,11 @@
 from typing import List
 
+import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
-
-import pytest
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,
@@ -16,10 +15,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo import models as geo_models
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.models import (
     FEMALE,
     HEAD,
@@ -29,9 +25,7 @@ from hope.apps.household.models import (
     Document,
     DocumentType,
 )
-from hope.apps.registration_datahub.tasks.deduplicate import (
-    HardDocumentDeduplication,
-)
+from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.apps.utils.models import MergeStatusModel
 
@@ -240,7 +234,8 @@ class TestGoldenRecordDeduplication(TestCase):
 
     def test_hard_documents_deduplication(self) -> None:
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
+            self.get_documents_query([self.document2, self.document3, self.document4]),
+            self.registration_data_import,
         )
         self.refresh_all_documents()
         assert self.document1.status == Document.STATUS_VALID
@@ -273,17 +268,26 @@ class TestGoldenRecordDeduplication(TestCase):
 
     def test_should_create_one_ticket(self) -> None:
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
+            self.get_documents_query([self.document2, self.document3, self.document4]),
+            self.registration_data_import,
         )
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
+            self.get_documents_query([self.document2, self.document3, self.document4]),
+            self.registration_data_import,
         )
         assert GrievanceTicket.objects.count() == 1
 
     def test_hard_documents_deduplication_number_of_queries(self) -> None:
         documents1 = self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         documents2 = self.get_documents_query(
-            [self.document2, self.document3, self.document4, self.document5, self.document7, self.document8]
+            [
+                self.document2,
+                self.document3,
+                self.document4,
+                self.document5,
+                self.document7,
+                self.document8,
+            ]
         )
         context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
         with context:
@@ -428,7 +432,8 @@ class TestGoldenRecordDeduplication(TestCase):
         assert new_document_from_other_program.status == Document.STATUS_PENDING
 
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([new_document_from_other_program]), self.registration_data_import
+            self.get_documents_query([new_document_from_other_program]),
+            self.registration_data_import,
         )
         new_document_from_other_program.refresh_from_db()
         assert new_document_from_other_program.status == Document.STATUS_VALID
@@ -523,7 +528,9 @@ class TestGoldenRecordDeduplication(TestCase):
         tax_id.refresh_from_db()
         assert tax_id.status == Document.STATUS_VALID
 
-    def test_ticket_creation_for_the_same_ind_and_across_other_inds_doc_numbers(self) -> None:
+    def test_ticket_creation_for_the_same_ind_and_across_other_inds_doc_numbers(
+        self,
+    ) -> None:
         passport = Document.objects.create(
             country=self.country,  # the same country
             type=self.dt,
@@ -617,7 +624,9 @@ class TestGoldenRecordDeduplication(TestCase):
         assert passport2.status == Document.STATUS_VALID
         assert GrievanceTicket.objects.all().count() == 0
 
-    def test_ticket_creation_for_the_same_ind_doc_numbers_different_doc_type(self) -> None:
+    def test_ticket_creation_for_the_same_ind_doc_numbers_different_doc_type(
+        self,
+    ) -> None:
         Document.objects.all().delete()
         passport = Document.objects.create(
             country=self.country,  # the same country

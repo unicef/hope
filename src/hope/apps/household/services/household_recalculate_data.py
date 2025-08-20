@@ -1,7 +1,6 @@
+from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Count, Q
-
-from dateutil.relativedelta import relativedelta
 
 from hope.apps.household.models import (
     DISABLED,

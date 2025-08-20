@@ -1,5 +1,6 @@
 from typing import Any, Callable, Optional, Sequence
 
+from concurrency.fields import AutoIncVersionField
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
@@ -9,16 +10,11 @@ from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
-from concurrency.fields import AutoIncVersionField
-
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
 from hope.apps.steficon.interpreters import Interpreter, interpreters, mapping
 from hope.apps.steficon.result import Result
-from hope.apps.steficon.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hope.apps.steficon.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 MONITORED_FIELDS = ("name", "enabled", "deprecated", "language", "definition")
 
@@ -61,7 +57,10 @@ class Rule(LimitBusinessAreaModelMixin):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     type = models.CharField(
-        choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
+        choices=TYPE_CHOICES,
+        max_length=50,
+        default=TYPE_TARGETING,
+        help_text="Use Rule for Targeting or Payment Plan",
     )
     flags = JSONField(default=dict, blank=True)
 
@@ -183,7 +182,12 @@ class Rule(LimitBusinessAreaModelMixin):
         func: type[Interpreter] = mapping[self.language]
         return func(self.definition)
 
-    def execute(self, context: dict | None = None, only_release: bool = True, only_enabled: bool = True) -> Result:
+    def execute(
+        self,
+        context: dict | None = None,
+        only_release: bool = True,
+        only_enabled: bool = True,
+    ) -> Result:
         if self.pk:
             qs = self.history
             if only_release:

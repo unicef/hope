@@ -1,7 +1,6 @@
 from unittest import mock
 
 from django.core.management import call_command
-
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 

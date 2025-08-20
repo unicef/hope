@@ -15,9 +15,7 @@ from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import Account, AccountType
-from hope.apps.program.collision_detectors import (
-    IdentificationKeyCollisionDetector,
-)
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -38,7 +36,11 @@ def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
 @pytest.fixture
@@ -94,7 +96,10 @@ def source_household(program: Program, admin1: Area, account_type: AccountType) 
     ind = individuals[0]
 
     Account.objects.create(
-        individual=ind, number="ACC-123456", rdi_merge_status=Individual.MERGED, account_type=account_type
+        individual=ind,
+        number="ACC-123456",
+        rdi_merge_status=Individual.MERGED,
+        account_type=account_type,
     )
 
     ind.flex_fields = {"muac": 0}
@@ -143,7 +148,12 @@ def destination_household(program: Program, admin1: Area, account_type: AccountT
     )
 
     ind = individuals[0]
-    Account.objects.create(individual=ind, number="999", rdi_merge_status=Individual.MERGED, account_type=account_type)
+    Account.objects.create(
+        individual=ind,
+        number="999",
+        rdi_merge_status=Individual.MERGED,
+        account_type=account_type,
+    )
     ind.flex_fields = {"muac": 10}
     ind.save()
     household.flex_fields = {"eggs": "DESTINATION"}
@@ -187,15 +197,24 @@ def test_update_individual_identities_with_fixture_households(
     partner = Partner.objects.create(name="Test Partner")
 
     IndividualIdentity.objects.create(
-        individual=source_individual, partner=partner, country=poland, number="SOURCE-ID-123"
+        individual=source_individual,
+        partner=partner,
+        country=poland,
+        number="SOURCE-ID-123",
     )
 
     IndividualIdentity.objects.create(
-        individual=source_individual, partner=partner, country=poland, number="SOURCE-ID-456"
+        individual=source_individual,
+        partner=partner,
+        country=poland,
+        number="SOURCE-ID-456",
     )
 
     dest_identity = IndividualIdentity.objects.create(
-        individual=destination_individual, partner=partner, country=poland, number="DEST-ID-789"
+        individual=destination_individual,
+        partner=partner,
+        country=poland,
+        number="DEST-ID-789",
     )
 
     program.collision_detection_enabled = True
@@ -498,7 +517,9 @@ def test_update_household_collision(
     destination_household_obj.save()
 
     IndividualRoleInHousehold.objects.create(
-        individual=destination_individual, household=destination_household_obj, role="PRIMARY"
+        individual=destination_individual,
+        household=destination_household_obj,
+        role="PRIMARY",
     )
     IndividualRoleInHousehold.objects.create(
         individual=source_individual, household=source_household_obj, role="PRIMARY"
@@ -532,7 +553,9 @@ def test_update_household_collision(
     additional_individual.save()
 
     IndividualRoleInHousehold.objects.create(
-        individual=additional_individual, household=source_household_obj, role="ALTERNATE"
+        individual=additional_individual,
+        household=source_household_obj,
+        role="ALTERNATE",
     )
 
     source_household_obj.head_of_household = source_individual

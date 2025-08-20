@@ -2,9 +2,8 @@ import logging
 from functools import cached_property
 from typing import Any
 
-from django.db.models import QuerySet
-
 from celery import Task
+from django.db.models import QuerySet
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.registration_data.models import RegistrationDataImport
@@ -88,13 +87,15 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
     @property
     def pending_queryset(self) -> QuerySet:
         return RegistrationDataImport.objects.filter(
-            status=RegistrationDataImport.IMPORT_SCHEDULED, data_source=RegistrationDataImport.XLS
+            status=RegistrationDataImport.IMPORT_SCHEDULED,
+            data_source=RegistrationDataImport.XLS,
         )
 
     @property
     def in_progress_queryset(self) -> QuerySet:
         return RegistrationDataImport.objects.filter(
-            status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
+            status=RegistrationDataImport.IMPORTING,
+            data_source=RegistrationDataImport.XLS,
         )
 
     @cached_property

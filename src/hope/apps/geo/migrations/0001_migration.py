@@ -22,13 +22,24 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("original_id", models.UUIDField(blank=True, null=True)),
-                ("name", django.contrib.postgres.fields.citext.CICharField(db_index=True, max_length=255)),
-                ("short_name", django.contrib.postgres.fields.citext.CICharField(db_index=True, max_length=255)),
+                (
+                    "name",
+                    django.contrib.postgres.fields.citext.CICharField(db_index=True, max_length=255),
+                ),
+                (
+                    "short_name",
+                    django.contrib.postgres.fields.citext.CICharField(db_index=True, max_length=255),
+                ),
                 ("iso_code2", models.CharField(max_length=2, unique=True)),
                 ("iso_code3", models.CharField(max_length=3, unique=True)),
                 ("iso_num", models.CharField(max_length=4, unique=True)),
@@ -61,12 +72,20 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("original_id", models.UUIDField(blank=True, null=True)),
-                ("name", django.contrib.postgres.fields.citext.CICharField(db_index=True, max_length=255)),
+                (
+                    "name",
+                    django.contrib.postgres.fields.citext.CICharField(db_index=True, max_length=255),
+                ),
                 ("area_level", models.PositiveIntegerField(default=1)),
                 ("valid_from", models.DateTimeField(auto_now_add=True, null=True)),
                 ("valid_until", models.DateTimeField(blank=True, null=True)),
@@ -75,7 +94,10 @@ class Migration(migrations.Migration):
                 ("rght", models.PositiveIntegerField(editable=False)),
                 ("tree_id", models.PositiveIntegerField(db_index=True, editable=False)),
                 ("level", models.PositiveIntegerField(editable=False)),
-                ("country", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="geo.country")),
+                (
+                    "country",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="geo.country"),
+                ),
                 (
                     "parent",
                     mptt.fields.TreeForeignKey(
@@ -97,13 +119,21 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("original_id", models.UUIDField(blank=True, null=True)),
                 ("name", models.CharField(max_length=255)),
-                ("p_code", models.CharField(blank=True, max_length=32, null=True, verbose_name="P Code")),
+                (
+                    "p_code",
+                    models.CharField(blank=True, max_length=32, null=True, verbose_name="P Code"),
+                ),
                 ("valid_from", models.DateTimeField(auto_now_add=True, null=True)),
                 ("valid_until", models.DateTimeField(blank=True, null=True)),
                 ("extras", models.JSONField(blank=True, default=dict)),
@@ -111,7 +141,10 @@ class Migration(migrations.Migration):
                 ("rght", models.PositiveIntegerField(editable=False)),
                 ("tree_id", models.PositiveIntegerField(db_index=True, editable=False)),
                 ("level", models.PositiveIntegerField(editable=False)),
-                ("area_type", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="geo.areatype")),
+                (
+                    "area_type",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="geo.areatype"),
+                ),
                 (
                     "parent",
                     mptt.fields.TreeForeignKey(

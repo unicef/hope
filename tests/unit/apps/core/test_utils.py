@@ -4,9 +4,7 @@ from django.test import TestCase
 
 from hope.apps.core.utils import get_count_and_percentage
 from hope.apps.payment.models import Payment
-from hope.apps.payment.utils import (
-    get_payment_delivered_quantity_status_and_value,
-)
+from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
 
 
 class TestCoreUtils(TestCase):
@@ -22,8 +20,14 @@ class TestCoreUtils(TestCase):
             get_payment_delivered_quantity_status_and_value(None, Decimal(10.00))
         with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value("", Decimal(10.00))
-        assert get_payment_delivered_quantity_status_and_value(-1, Decimal(10.00)) == (Payment.STATUS_ERROR, None)
-        assert get_payment_delivered_quantity_status_and_value(0, Decimal(10.00)) == (Payment.STATUS_NOT_DISTRIBUTED, 0)
+        assert get_payment_delivered_quantity_status_and_value(-1, Decimal(10.00)) == (
+            Payment.STATUS_ERROR,
+            None,
+        )
+        assert get_payment_delivered_quantity_status_and_value(0, Decimal(10.00)) == (
+            Payment.STATUS_NOT_DISTRIBUTED,
+            0,
+        )
         assert get_payment_delivered_quantity_status_and_value(5.00, Decimal(10.00)) == (
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Decimal(5.00),

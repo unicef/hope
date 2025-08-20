@@ -2,14 +2,6 @@ import logging
 from typing import Any, Iterable
 from uuid import UUID
 
-from django.contrib import admin, messages
-from django.db.models import JSONField, QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
-
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
@@ -17,6 +9,13 @@ from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
+from django.contrib import admin, messages
+from django.db.models import JSONField, QuerySet
+from django.http import HttpRequest, HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
@@ -99,7 +98,14 @@ class IndividualAdmin(
         ("business_area__name", "business area"),
     )
 
-    search_fields = ("family_name", "unicef_id", "household__unicef_id", "given_name", "family_name", "full_name")
+    search_fields = (
+        "family_name",
+        "unicef_id",
+        "household__unicef_id",
+        "given_name",
+        "family_name",
+        "full_name",
+    )
     readonly_fields = ("created_at", "updated_at", "registration_data_import")
     exclude = ("created_at", "updated_at")
     list_filter = (
@@ -109,7 +115,10 @@ class IndividualAdmin(
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
+        (
+            "registration_data_import",
+            LinkedAutoCompleteFilter.factory(parent="program"),
+        ),
         "sex",
         "relationship",
         "marital_status",
@@ -169,7 +178,11 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
-    actions = ["count_queryset", "revalidate_phone_number_sync", "revalidate_phone_number_async"]
+    actions = [
+        "count_queryset",
+        "revalidate_phone_number_sync",
+        "revalidate_phone_number_async",
+    ]
     inlines = [IndividualAccountInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -177,7 +190,11 @@ class IndividualAdmin(
             super()
             .get_queryset(request)
             .select_related(
-                "household", "registration_data_import", "individual_collection", "program", "business_area"
+                "household",
+                "registration_data_import",
+                "individual_collection",
+                "program",
+                "business_area",
             )
         )
 
@@ -248,7 +265,10 @@ class BusinessAreaSlugFilter(InputFilter):
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(
-    SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    HOPEModelAdminBase,
+    RdiMergeStatusAdminMixin,
 ):
     search_fields = ("individual__unicef_id", "household__unicef_id")
     list_display = ("individual", "household", "role", "copied_from", "is_removed")

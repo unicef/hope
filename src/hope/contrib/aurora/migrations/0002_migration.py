@@ -19,7 +19,10 @@ class Migration(migrations.Migration):
             model_name="registration",
             name="steficon_rule",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="steficon.rulecommit"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="steficon.rulecommit",
             ),
         ),
         migrations.AddField(
@@ -31,14 +34,20 @@ class Migration(migrations.Migration):
             model_name="project",
             name="programme",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="program.program"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="program.program",
             ),
         ),
         migrations.AddField(
             model_name="organization",
             name="business_area",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.businessarea",
             ),
         ),
     ]

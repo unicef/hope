@@ -4,10 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.apps.core.utils import (
-    resolve_flex_fields_choices_to_string,
-    to_choice_object,
-)
+from hope.apps.core.utils import resolve_flex_fields_choices_to_string, to_choice_object
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.registration_data_import import (

@@ -3,7 +3,6 @@ from typing import Iterator
 
 from django.core.cache import cache
 from django.urls import reverse
-
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,

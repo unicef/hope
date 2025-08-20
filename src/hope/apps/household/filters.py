@@ -2,11 +2,10 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
+from constance import config
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 from django.utils import timezone
-
-from constance import config
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -86,7 +85,10 @@ class HouseholdFilter(UpdatedAtFilter):
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
     sex = CharFilter(field_name="head_of_household__sex")
-    phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
+    phone_no = CharFilter(
+        field_name="head_of_household__phone_no",
+        lookup_expr=["exact", "icontains", "istartswith"],
+    )
     last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
@@ -145,11 +147,13 @@ class HouseholdFilter(UpdatedAtFilter):
         """
         if value is True:
             return qs.exclude(
-                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
             )
         if value is False:
             return qs.filter(
-                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
             )
         return qs
 
@@ -435,7 +439,10 @@ class IndividualFilter(UpdatedAtFilter):
                 raise SearchException("The search value for a given search type should be a number")
             return qs.filter(detail_id__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
-            return qs.filter(documents__type__key=search_type, documents__document_number__icontains=search)
+            return qs.filter(
+                documents__type__key=search_type,
+                documents__document_number__icontains=search,
+            )
         raise SearchException(f"Invalid search key '{search_type}'")
 
     def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
@@ -444,7 +451,10 @@ class IndividualFilter(UpdatedAtFilter):
     def document_number_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         document_number = value.strip()
         document_type = self.data.get("document_type")
-        return qs.filter(documents__type__key=document_type, documents__document_number__icontains=document_number)
+        return qs.filter(
+            documents__type__key=document_type,
+            documents__document_number__icontains=document_number,
+        )
 
     def status_filter(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         q_obj = Q()

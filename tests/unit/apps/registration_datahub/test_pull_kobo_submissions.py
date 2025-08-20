@@ -3,9 +3,8 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-from django.conf import settings
-
 import pytest
+from django.conf import settings
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 

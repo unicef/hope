@@ -2,10 +2,9 @@ import operator
 from typing import Tuple
 from unittest import mock
 
+import openpyxl
 from django.conf import settings
 from django.core.management import call_command
-
-import openpyxl
 from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
@@ -679,7 +678,10 @@ class TestXLSXValidatorsMethods(APITestCase):
             rounds_names=["May"],
             program=self.program,
         )
-        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        header_row = [
+            "pdu_flex_attribute_round_1_value",
+            "pdu_flex_attribute_round_1_collection_date",
+        ]
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.append(header_row)
@@ -703,7 +705,10 @@ class TestXLSXValidatorsMethods(APITestCase):
             rounds_names=["May"],
             program=self.program,
         )
-        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        header_row = [
+            "pdu_flex_attribute_round_1_value",
+            "pdu_flex_attribute_round_1_collection_date",
+        ]
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.append(header_row)
@@ -727,7 +732,10 @@ class TestXLSXValidatorsMethods(APITestCase):
             rounds_names=["May"],
             program=self.program,
         )
-        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        header_row = [
+            "pdu_flex_attribute_round_1_value",
+            "pdu_flex_attribute_round_1_collection_date",
+        ]
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.append(header_row)

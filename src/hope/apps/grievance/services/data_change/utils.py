@@ -229,7 +229,11 @@ def handle_add_identity(identity: dict, individual: Individual) -> IndividualIde
         raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
     return IndividualIdentity(
-        number=number, individual=individual, partner=partner, country=country, rdi_merge_status=MergeStatusModel.MERGED
+        number=number,
+        individual=individual,
+        partner=partner,
+        country=country,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
 
@@ -295,7 +299,9 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
     return account_instance
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status: list[dict]) -> dict[str, dict]:
+def prepare_previous_documents(
+    documents_to_remove_with_approve_status: list[dict],
+) -> dict[str, dict]:
     previous_documents: dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = document_data.get("value")
@@ -351,7 +357,9 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status: list[dict]) -> dict[str, Any]:
+def prepare_previous_identities(
+    identities_to_remove_with_approve_status: list[dict],
+) -> dict[str, Any]:
     previous_identities: dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
@@ -452,10 +460,18 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
         ticket_details.programs.all(),
         info,
     )
-    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all())
+    withdraw_individual(
+        individual_to_remove,
+        info,
+        old_individual,
+        household,
+        ticket_details.ticket.programs.all(),
+    )
 
 
-def get_data_from_role_data(role_data: dict) -> tuple[Any | None, Individual, Individual, Household]:
+def get_data_from_role_data(
+    role_data: dict,
+) -> tuple[Any | None, Individual, Individual, Household]:
     role_name = role_data.get("role")
 
     individual_id = role_data.get("individual")
@@ -468,7 +484,9 @@ def get_data_from_role_data(role_data: dict) -> tuple[Any | None, Individual, In
     return role_name, old_individual, new_individual, household
 
 
-def get_data_from_role_data_new_ticket(role_data: dict) -> tuple[Any | None, Individual, Individual, Household]:
+def get_data_from_role_data_new_ticket(
+    role_data: dict,
+) -> tuple[Any | None, Individual, Individual, Household]:
     role_name, old_individual, _, household = get_data_from_role_data(role_data)
     new_individual_id = role_data.get("new_individual")
     new_individual = get_object_or_404(Individual, id=new_individual_id)
@@ -560,7 +578,10 @@ def reassign_roles_on_disable_individual(
 
 
 def reassign_roles_on_update(
-    individual: Individual, role_reassign_data: dict, program_id: "UUID", info: Any | None = None
+    individual: Individual,
+    role_reassign_data: dict,
+    program_id: "UUID",
+    info: Any | None = None,
 ) -> None:
     roles_to_bulk_update = []
     roles_to_delete = []
@@ -644,7 +665,11 @@ def mark_as_duplicate_individual(
 ) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
-        individual_to_remove, info, old_individual_to_remove, removed_individual_household, program_id
+        individual_to_remove,
+        info,
+        old_individual_to_remove,
+        removed_individual_household,
+        program_id,
     )
 
 

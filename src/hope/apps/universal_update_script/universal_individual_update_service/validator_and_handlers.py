@@ -2,7 +2,6 @@ from datetime import date
 from typing import Any, Callable
 
 from django.db.models import Model
-
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.core.models import BusinessArea
@@ -49,7 +48,11 @@ def handle_admin_field(
 
 
 def validate_admin(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -60,12 +63,22 @@ def validate_admin(
 
 
 def validate_string(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     return None
 
 
-def validate_date(value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program) -> str | None:
+def validate_date(
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
+) -> str | None:
     if value is None or value == "":
         return None
     try:
@@ -76,7 +89,11 @@ def validate_date(value: Any, name: str, model_class: Any, business_area: Busine
 
 
 def validate_integer(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -88,7 +105,11 @@ def validate_integer(
 
 
 def validate_phone_number(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -106,7 +127,11 @@ def _get_field_choices_values(model_class: type[Model], field_name: str) -> list
 
 
 def validate_choices(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -117,7 +142,11 @@ def validate_choices(
 
 
 def validate_boolean(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -129,7 +158,11 @@ def validate_boolean(
 
 
 def validate_flex_field_string(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> str | None:
     return None
 

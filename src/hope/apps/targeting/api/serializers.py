@@ -76,7 +76,8 @@ class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
     def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
         if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
-                obj.field_name, obj.individuals_filters_block.targeting_criteria_rule.payment_plan
+                obj.field_name,
+                obj.individuals_filters_block.targeting_criteria_rule.payment_plan,
             )
             result = filter_choices(field_attribute, obj.arguments)
             return FieldAttributeSerializer(result).data

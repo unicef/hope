@@ -2,12 +2,11 @@ import datetime
 import json
 from typing import Any
 
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
@@ -25,10 +24,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
-from hope.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    Permissions,
-)
+from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.accountability.models import Message
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_choice_object
@@ -76,33 +72,71 @@ class TestUserProfile:
         )
 
         self.user = UserFactory(
-            partner=self.partner, last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d"))
+            partner=self.partner,
+            last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
         )
         self.api_client = api_client(self.user)
 
         self.role1 = RoleFactory(
             name="TestRole1",
-            permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value, Permissions.PROGRAMME_FINISH.value],
+            permissions=[
+                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value,
+                Permissions.PROGRAMME_FINISH.value,
+            ],
         )
-        self.role2 = RoleFactory(name="TestRole2", permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value])
+        self.role2 = RoleFactory(
+            name="TestRole2",
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value],
+        )
         self.role3 = RoleFactory(name="TestRole3", permissions=[Permissions.TARGETING_VIEW_LIST.value])
-        self.role4 = RoleFactory(name="TestRole4", permissions=[Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE.value])
-        self.role_p1 = RoleFactory(
-            name="TestRoleP1", permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value]
+        self.role4 = RoleFactory(
+            name="TestRole4",
+            permissions=[Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE.value],
         )
-        self.role_p2 = RoleFactory(name="TestRoleP2", permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value])
-        self.role_p3 = RoleFactory(name="TestRoleP3", permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST.value])
+        self.role_p1 = RoleFactory(
+            name="TestRoleP1",
+            permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value],
+        )
+        self.role_p2 = RoleFactory(
+            name="TestRoleP2",
+            permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value],
+        )
+        self.role_p3 = RoleFactory(
+            name="TestRoleP3",
+            permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST.value],
+        )
 
         RoleAssignmentFactory(user=self.user, business_area=self.afghanistan, role=self.role1)
-        RoleAssignmentFactory(user=self.user, business_area=self.afghanistan, program=self.program1, role=self.role2)
-        RoleAssignmentFactory(user=self.user, business_area=self.afghanistan, program=self.program2, role=self.role3)
-        RoleAssignmentFactory(user=self.user, business_area=self.afghanistan, program=self.program3, role=self.role4)
-        RoleAssignmentFactory(partner=self.partner, business_area=self.afghanistan, role=self.role_p1)
         RoleAssignmentFactory(
-            partner=self.partner, business_area=self.afghanistan, program=self.program1, role=self.role_p2
+            user=self.user,
+            business_area=self.afghanistan,
+            program=self.program1,
+            role=self.role2,
         )
         RoleAssignmentFactory(
-            partner=self.partner, business_area=self.afghanistan, program=self.program2, role=self.role_p3
+            user=self.user,
+            business_area=self.afghanistan,
+            program=self.program2,
+            role=self.role3,
+        )
+        RoleAssignmentFactory(
+            user=self.user,
+            business_area=self.afghanistan,
+            program=self.program3,
+            role=self.role4,
+        )
+        RoleAssignmentFactory(partner=self.partner, business_area=self.afghanistan, role=self.role_p1)
+        RoleAssignmentFactory(
+            partner=self.partner,
+            business_area=self.afghanistan,
+            program=self.program1,
+            role=self.role_p2,
+        )
+        RoleAssignmentFactory(
+            partner=self.partner,
+            business_area=self.afghanistan,
+            program=self.program2,
+            role=self.role_p3,
         )
 
         # role in different BA
@@ -110,7 +144,12 @@ class TestUserProfile:
         self.ukraine.active = True
         self.ukraine.save()
         self.program_u = ProgramFactory(business_area=self.ukraine, status=Program.ACTIVE)
-        RoleAssignmentFactory(user=self.user, business_area=self.ukraine, program=self.program_u, role=self.role1)
+        RoleAssignmentFactory(
+            user=self.user,
+            business_area=self.ukraine,
+            program=self.program_u,
+            role=self.role1,
+        )
         RoleAssignmentFactory(partner=self.partner, business_area=self.ukraine, role=self.role_p1)
 
     def test_user_profile_in_scope_business_area(self) -> None:
@@ -411,12 +450,20 @@ class TestUserList:
         self.user = UserFactory(partner=self.partner, first_name="Alice")
         self.api_client = api_client(self.user)
 
-        role = RoleFactory(name="TestRole", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value])
+        role = RoleFactory(
+            name="TestRole",
+            permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value],
+        )
         self.user1 = UserFactory(partner=self.partner, first_name="Bob")
         RoleAssignmentFactory(user=self.user1, business_area=self.afghanistan, role=role)
 
         self.user2 = UserFactory(partner=self.partner, first_name="Carol")
-        RoleAssignmentFactory(user=self.user2, business_area=self.afghanistan, program=self.program, role=role)
+        RoleAssignmentFactory(
+            user=self.user2,
+            business_area=self.afghanistan,
+            program=self.program,
+            role=role,
+        )
 
         partner_with_role_1 = PartnerFactory(name="TestPartner1")
         RoleAssignmentFactory(partner=partner_with_role_1, business_area=self.afghanistan, role=role)
@@ -424,7 +471,10 @@ class TestUserList:
 
         partner_with_role_2 = PartnerFactory(name="TestPartner2")
         RoleAssignmentFactory(
-            partner=partner_with_role_2, business_area=self.afghanistan, program=self.program, role=role
+            partner=partner_with_role_2,
+            business_area=self.afghanistan,
+            program=self.program,
+            role=role,
         )
         self.user4 = UserFactory(partner=partner_with_role_2, first_name="Eve")
 
@@ -514,7 +564,9 @@ class TestUserList:
             assert response.json()["count"] == 5
 
     def test_user_list_caching(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -560,7 +612,12 @@ class TestUserList:
             assert response.has_header("etag")
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 4
-            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_third_call]
+            assert etag_fourth_call not in [
+                etag,
+                etag_second_call,
+                etag_third_call,
+                etag_third_call,
+            ]
             assert len(ctx.captured_queries) == 5
 
         # no change - use cache
@@ -592,14 +649,24 @@ class TestProgramUsers:
 
         self.role1 = RoleFactory(
             name="TestRole1",
-            permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value, Permissions.PROGRAMME_FINISH.value],
+            permissions=[
+                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value,
+                Permissions.PROGRAMME_FINISH.value,
+            ],
         )
-        self.role2 = RoleFactory(name="TestRole2", permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value])
+        self.role2 = RoleFactory(
+            name="TestRole2",
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value],
+        )
         self.role3 = RoleFactory(name="TestRole3", permissions=[Permissions.TARGETING_VIEW_LIST.value])
         self.role_p1 = RoleFactory(
-            name="TestRoleP1", permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value]
+            name="TestRoleP1",
+            permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value],
         )
-        self.role_p2 = RoleFactory(name="TestRoleP2", permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value])
+        self.role_p2 = RoleFactory(
+            name="TestRoleP2",
+            permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value],
+        )
 
         self.user1 = UserFactory(
             partner=self.partner,
@@ -609,20 +676,37 @@ class TestProgramUsers:
         RoleAssignmentFactory(user=self.user1, business_area=self.afghanistan, role=self.role1)
 
         self.user2 = UserFactory(partner=self.partner, first_name="Carol")
-        RoleAssignmentFactory(user=self.user2, business_area=self.afghanistan, program=self.program, role=self.role2)
+        RoleAssignmentFactory(
+            user=self.user2,
+            business_area=self.afghanistan,
+            program=self.program,
+            role=self.role2,
+        )
 
         partner_with_role_1 = PartnerFactory(name="TestPartner1")
-        RoleAssignmentFactory(partner=partner_with_role_1, business_area=self.afghanistan, role=self.role_p1)
+        RoleAssignmentFactory(
+            partner=partner_with_role_1,
+            business_area=self.afghanistan,
+            role=self.role_p1,
+        )
         self.user3 = UserFactory(partner=partner_with_role_1, first_name="Dave")
 
         partner_with_role_2 = PartnerFactory(name="TestPartner2")
         RoleAssignmentFactory(
-            partner=partner_with_role_2, business_area=self.afghanistan, program=self.program, role=self.role_p2
+            partner=partner_with_role_2,
+            business_area=self.afghanistan,
+            program=self.program,
+            role=self.role_p2,
         )
         self.user4 = UserFactory(partner=partner_with_role_2, first_name="Eve")
 
         self.user5 = UserFactory(partner=partner_with_role_2, first_name="Frank")
-        RoleAssignmentFactory(user=self.user5, business_area=self.afghanistan, program=self.program, role=self.role3)
+        RoleAssignmentFactory(
+            user=self.user5,
+            business_area=self.afghanistan,
+            program=self.program,
+            role=self.role3,
+        )
 
         self.user_without_role = UserFactory(partner=self.partner, first_name="Gina")
 
@@ -822,22 +906,37 @@ class TestUserFilter:
             role=self.role_with_user_management_permissions,
         )
 
-        self.role1 = RoleFactory(name="TestRole1", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value])
+        self.role1 = RoleFactory(
+            name="TestRole1",
+            permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value],
+        )
         self.role2 = RoleFactory(name="TestRole2", permissions=[Permissions.PROGRAMME_REMOVE.value])
 
         self.user1 = UserFactory(partner=self.partner, first_name="Bob")
         RoleAssignmentFactory(user=self.user1, business_area=self.afghanistan, role=self.role1)
 
         self.user2 = UserFactory(partner=self.partner, first_name="Carol")
-        RoleAssignmentFactory(user=self.user2, business_area=self.afghanistan, program=self.program1, role=self.role2)
+        RoleAssignmentFactory(
+            user=self.user2,
+            business_area=self.afghanistan,
+            program=self.program1,
+            role=self.role2,
+        )
 
         self.partner_with_role_1 = PartnerFactory(name="TestPartner1")
-        RoleAssignmentFactory(partner=self.partner_with_role_1, business_area=self.afghanistan, role=self.role1)
+        RoleAssignmentFactory(
+            partner=self.partner_with_role_1,
+            business_area=self.afghanistan,
+            role=self.role1,
+        )
         self.user3 = UserFactory(partner=self.partner_with_role_1, first_name="Dave")
 
         self.partner_with_role_2 = PartnerFactory(name="TestPartner2")
         RoleAssignmentFactory(
-            partner=self.partner_with_role_2, business_area=self.afghanistan, program=self.program1, role=self.role2
+            partner=self.partner_with_role_2,
+            business_area=self.afghanistan,
+            program=self.program1,
+            role=self.role2,
         )
         self.user4 = UserFactory(partner=self.partner_with_role_2, first_name="Eve")
 
@@ -1005,7 +1104,11 @@ class TestUserChoices:
             "status_choices": to_choice_object(USER_STATUS_CHOICES),
             "partner_choices": [
                 {"name": partner.name, "value": partner.id}
-                for partner in [self.partner, self.unicef_hq, self.unicef_partner_in_afghanistan]
+                for partner in [
+                    self.partner,
+                    self.unicef_hq,
+                    self.unicef_partner_in_afghanistan,
+                ]
             ],
             # TODO: below assert can be removed after temporary solution is removed for partners
             "partner_choices_temp": [
@@ -1024,7 +1127,9 @@ class TestPartnerForGrievanceChoices:
         self.program = ProgramFactory(name="Test Program", status=Program.DRAFT, business_area=self.afghanistan)
 
         self.program_for_household = ProgramFactory(
-            name="Test Program for Household", status=Program.DRAFT, business_area=self.afghanistan
+            name="Test Program for Household",
+            status=Program.DRAFT,
+            business_area=self.afghanistan,
         )
         self.household, individuals = create_household_and_individuals(
             household_data={
@@ -1064,7 +1169,10 @@ class TestPartnerForGrievanceChoices:
             name="Partner with access to Test Program for Household"
         )
         create_partner_role_with_permissions(
-            self.partner_with_access_to_test_program_for_hh, [], self.afghanistan, self.program_for_household
+            self.partner_with_access_to_test_program_for_hh,
+            [],
+            self.afghanistan,
+            self.program_for_household,
         )
 
         # partner with access to all programs - should be returned if neither program nor household/individual is passed
@@ -1072,7 +1180,10 @@ class TestPartnerForGrievanceChoices:
         # (because it has access to all programs in this BA)
         self.partner_with_access_to_all_programs = PartnerFactory(name="Partner with access to All Programs")
         create_partner_role_with_permissions(
-            self.partner_with_access_to_all_programs, [], self.afghanistan, whole_business_area_access=True
+            self.partner_with_access_to_all_programs,
+            [],
+            self.afghanistan,
+            whole_business_area_access=True,
         )
 
         # partner without access to any program in this BA - should not be returned in any case
@@ -1086,7 +1197,10 @@ class TestPartnerForGrievanceChoices:
             whole_business_area_access=True,
         )
         response = self.api_client.get(
-            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug}),
+            reverse(
+                self.partner_for_grievance_choices_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
             {"program": self.program.slug},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -1100,7 +1214,10 @@ class TestPartnerForGrievanceChoices:
                 "value": self.partner_with_access_to_test_program.id,
             },
             {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
-            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+            {
+                "name": self.unicef_partner_for_afghanistan.name,
+                "value": self.unicef_partner_for_afghanistan.id,
+            },
         ]
 
     def test_get_partner_for_grievance_choices_for_household(self, create_user_role_with_permissions: Any) -> None:
@@ -1111,7 +1228,10 @@ class TestPartnerForGrievanceChoices:
             whole_business_area_access=True,
         )
         response = self.api_client.get(
-            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug}),
+            reverse(
+                self.partner_for_grievance_choices_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
             {"household": self.household.pk},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -1125,7 +1245,10 @@ class TestPartnerForGrievanceChoices:
                 "value": self.partner_with_access_to_test_program_for_hh.id,
             },
             {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
-            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+            {
+                "name": self.unicef_partner_for_afghanistan.name,
+                "value": self.unicef_partner_for_afghanistan.id,
+            },
         ]
 
     def test_get_partner_for_grievance_choices_for_individual(self, create_user_role_with_permissions: Any) -> None:
@@ -1136,7 +1259,10 @@ class TestPartnerForGrievanceChoices:
             whole_business_area_access=True,
         )
         response = self.api_client.get(
-            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug}),
+            reverse(
+                self.partner_for_grievance_choices_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
             {"individual": self.individual.pk},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -1150,7 +1276,10 @@ class TestPartnerForGrievanceChoices:
                 "value": self.partner_with_access_to_test_program_for_hh.id,
             },
             {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
-            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+            {
+                "name": self.unicef_partner_for_afghanistan.name,
+                "value": self.unicef_partner_for_afghanistan.id,
+            },
         ]
 
     def test_get_partner_for_grievance_choices_without_params(self, create_user_role_with_permissions: Any) -> None:
@@ -1161,7 +1290,10 @@ class TestPartnerForGrievanceChoices:
             whole_business_area_access=True,
         )
         response = self.api_client.get(
-            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.partner_for_grievance_choices_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.data == [
@@ -1178,5 +1310,8 @@ class TestPartnerForGrievanceChoices:
                 "value": self.partner_with_access_to_test_program_for_hh.id,
             },
             {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
-            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+            {
+                "name": self.unicef_partner_for_afghanistan.name,
+                "value": self.unicef_partner_for_afghanistan.id,
+            },
         ]

@@ -1,14 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from django.utils import timezone
-
 import pytest
 from dateutil.relativedelta import relativedelta
-from selenium.common.exceptions import NoSuchElementException
-
+from django.utils import timezone
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
-from selenium.webdriver.common.by import By
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import (
@@ -16,6 +12,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 
 from hope.apps.account.models import Partner, User
 from hope.apps.core.models import BusinessArea, DataCollectingType
@@ -94,7 +92,9 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
 class TestSmokeManagerialConsole:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_managerial_console_smoke_test(
-        self, pageManagerialConsole: ManagerialConsole, create_active_test_program: Program
+        self,
+        pageManagerialConsole: ManagerialConsole,
+        create_active_test_program: Program,
     ) -> None:
         pageManagerialConsole.getNavManagerialConsole().click()
         pageManagerialConsole.getSelectAllApproval()

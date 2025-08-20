@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Any, Callable
 
-from django.utils import timezone
-
 import pytest
+from django.utils import timezone
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -15,10 +14,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
@@ -288,14 +284,20 @@ class TestGrievanceTicketGlobalList:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 9
 
         response_count = self.api_client.get(
-            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_count_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response_count.status_code == status.HTTP_200_OK
         assert response_count.json()["count"] == 9
@@ -423,12 +425,18 @@ class TestGrievanceTicketGlobalList:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         response_count = self.api_client.get(
-            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_count_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
 
@@ -455,20 +463,28 @@ class TestGrievanceTicketGlobalList:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 10
 
         response_count = self.api_client.get(
-            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_count_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response_count.status_code == status.HTTP_200_OK
         assert response_count.json()["count"] == 10
 
     def test_grievance_ticket_global_list_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -489,7 +505,10 @@ class TestGrievanceTicketGlobalList:
         # Only grievance tickets with area1 in program1 and area2 in program2 should be returned.
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
@@ -526,7 +545,10 @@ class TestGrievanceTicketGlobalList:
         # Only grievance tickets in program1 should be returned.
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
@@ -546,38 +568,75 @@ class TestGrievanceTicketGlobalList:
     @pytest.mark.parametrize(
         ("permissions", "program", "area_limit", "expected_tickets"),
         [
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], 1, False, [0, 2, 6, 8]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], 1, False, [0, 6, 8]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER], 1, False, [0, 2, 6, 8]),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                1,
+                False,
+                [0, 2, 6, 8],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR],
+                1,
+                False,
+                [0, 6, 8],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER],
+                1,
+                False,
+                [0, 2, 6, 8],
+            ),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], 1, False, [4]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR], 1, False, []),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER], 1, False, [4]),
             (
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
                 1,
                 False,
                 [0, 2, 4, 6, 8],
             ),
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], 2, False, [1, 7]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], 2, False, [1, 7]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER], 2, False, [7]),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR],
+                2,
+                False,
+                [1, 7],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER],
+                2,
+                False,
+                [7],
+            ),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], 2, False, [3, 5]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR], 2, False, [3, 5]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER], 2, False, [3]),
             (
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
                 2,
                 False,
                 [1, 3, 5, 7],
             ),
             (
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
                 1,
                 True,
                 [0, 4, 6, 8],
             ),
             (
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
                 2,
                 True,
                 [1, 7],
@@ -604,14 +663,20 @@ class TestGrievanceTicketGlobalList:
             set_admin_area_limits_in_program(self.partner, program, [self.area1])
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == len(expected_tickets)
 
         response_count = self.api_client.get(
-            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_count_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response_count.status_code == status.HTTP_200_OK
         assert response_count.json()["count"] == len(expected_tickets)

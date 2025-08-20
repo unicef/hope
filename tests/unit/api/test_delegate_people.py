@@ -2,7 +2,6 @@ from typing import List
 from uuid import UUID
 
 from django.core.management import call_command
-
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
@@ -32,7 +31,8 @@ class TestDelegatePeople(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         data_collecting_type = DataCollectingTypeFactory(
             label="Full",
@@ -42,7 +42,9 @@ class TestDelegatePeople(HOPEApiTestCase):
             type=DataCollectingType.Type.SOCIAL.value,
         )
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
         )
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,

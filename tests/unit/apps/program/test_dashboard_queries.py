@@ -1,5 +1,4 @@
 from django.utils import timezone
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household
@@ -71,7 +70,10 @@ class TestDashboardQueries(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], cls.business_area, whole_business_area_access=True
+            cls.user,
+            [Permissions.DASHBOARD_VIEW_COUNTRY],
+            cls.business_area,
+            whole_business_area_access=True,
         )
         generate_delivery_mechanisms()
 
@@ -87,13 +89,33 @@ class TestDashboardQueries(APITestCase):
         payment_plan1 = PaymentPlanFactory(program_cycle=program1.cycles.first())
         payment_plan2 = PaymentPlanFactory(program_cycle=program2.cycles.first())
         delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
-        PaymentFactory(parent=payment_plan1, delivery_date=delivery_date, household=household, currency="PLN")
-        PaymentFactory(parent=payment_plan2, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentFactory(
+            parent=payment_plan1,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=payment_plan2,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
 
         payment_plan3 = PaymentPlanFactory(program_cycle=program3.cycles.first())
         payment_plan4 = PaymentPlanFactory(program_cycle=program4.cycles.first())
-        PaymentFactory(parent=payment_plan3, delivery_date=delivery_date, household=household, currency="PLN")
-        PaymentFactory(parent=payment_plan4, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentFactory(
+            parent=payment_plan3,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=payment_plan4,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
 
         self.snapshot_graphql_request(
             request_string=QUERY_CHART_PROGRAMMES_BY_SECTOR,

@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
@@ -23,9 +22,7 @@ from hope.apps.household.models import (
     NON_BENEFICIARY,
     Household,
 )
-from hope.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 
 
 class TestRecalculateData(TestCase):

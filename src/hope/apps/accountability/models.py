@@ -51,7 +51,11 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     # Recipients Lookup criteria
     households = models.ManyToManyField("household.Household", related_name="messages", blank=True)
     payment_plan = models.ForeignKey(
-        "payment.PaymentPlan", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
+        "payment.PaymentPlan",
+        related_name="messages",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
@@ -61,12 +65,20 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         on_delete=models.SET_NULL,
     )
     # Sampling (storing sampling params might not be needed)
-    sampling_type = models.CharField(max_length=50, choices=SamplingChoices.choices, default=SamplingChoices.FULL_LIST)
+    sampling_type = models.CharField(
+        max_length=50,
+        choices=SamplingChoices.choices,
+        default=SamplingChoices.FULL_LIST,
+    )
     full_list_arguments = models.JSONField(blank=True, null=True)
     random_sampling_arguments = models.JSONField(blank=True, null=True)
     sample_size = models.PositiveIntegerField(default=0)
     program = models.ForeignKey(
-        "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
+        "program.Program",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="messages",
     )
     copied_from = models.ForeignKey(
         "self",
@@ -236,7 +248,11 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     )
     recipients = models.ManyToManyField("household.Household", related_name="surveys", blank=True)
     payment_plan = models.ForeignKey(
-        "payment.PaymentPlan", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
+        "payment.PaymentPlan",
+        related_name="surveys",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
     program = models.ForeignKey(
         "program.Program",

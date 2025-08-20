@@ -2,10 +2,9 @@ import uuid
 from typing import Dict
 from unittest.mock import MagicMock, patch
 
+import requests
 from django.core.cache import cache
 from django.test import TestCase
-
-import requests
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -153,8 +152,14 @@ class TestPhoneNumberVerification(TestCase):
 
         post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+                post_request_mock,
+            ),
         ):
             try:
                 VerificationPlanStatusChangeServices(self.verification).activate()
@@ -169,13 +174,15 @@ class TestPhoneNumberVerification(TestCase):
 
         assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count()
             == self.payment_record_amount
         )
         assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.other_verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count()
             == self.payment_record_amount
         )
@@ -215,8 +222,14 @@ class TestPhoneNumberVerification(TestCase):
         post_request_mock = MagicMock()
         post_request_mock.side_effect = [first_flow, create_flow_response()]
         with (
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+                post_request_mock,
+            ),
         ):
             VerificationPlanStatusChangeServices(self.verification).activate()
 
@@ -226,13 +239,15 @@ class TestPhoneNumberVerification(TestCase):
 
         assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count()
             == self.payment_record_amount
         )
         assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.other_verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count()
             == self.payment_record_amount
         )

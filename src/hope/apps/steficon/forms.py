@@ -13,10 +13,7 @@ from hope.apps.payment.models import PaymentPlan
 from hope.apps.steficon.config import config
 from hope.apps.steficon.interpreters import Interpreter, mapping
 from hope.apps.steficon.models import Rule, RuleCommit
-from hope.apps.steficon.widget import (
-    ContentTypeChoiceField,
-    PythonFormatterEditor,
-)
+from hope.apps.steficon.widget import ContentTypeChoiceField, PythonFormatterEditor
 
 if TYPE_CHECKING:
     from django.contrib.contenttypes.models import ContentType
@@ -47,9 +44,15 @@ escapechars = " \\"
 
 class CSVOptionsForm(forms.Form):
     delimiter = forms.ChoiceField(
-        label=_("Delimiter"), choices=list(zip(delimiters, delimiters, strict=True)), initial=","
+        label=_("Delimiter"),
+        choices=list(zip(delimiters, delimiters, strict=True)),
+        initial=",",
     )
-    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes, strict=True)), initial="'")
+    quotechar = forms.ChoiceField(
+        label=_("Quotechar"),
+        choices=list(zip(quotes, quotes, strict=True)),
+        initial="'",
+    )
     quoting = forms.ChoiceField(
         label=_("Quoting"),
         choices=(

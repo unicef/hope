@@ -1,13 +1,13 @@
 from typing import Any, Sequence
 
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.forms import CheckboxSelectMultiple, ModelForm
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
-
-from adminfilters.autocomplete import AutoCompleteFilter
+from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
@@ -15,7 +15,6 @@ from hope.apps.account import models as account_models
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo.models import Area
 from hope.apps.program.models import Program
-from mptt.forms import TreeNodeMultipleChoiceField
 
 
 def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) -> bool:

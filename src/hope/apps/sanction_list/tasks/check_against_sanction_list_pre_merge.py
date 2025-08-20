@@ -1,23 +1,16 @@
 import logging
 from typing import Any, Iterable
 
+from constance import config
 from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 
-from constance import config
-
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketSystemFlaggingDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    Individual,
-)
+from hope.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID, Individual
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.sanction_list.models import SanctionListIndividual
@@ -197,7 +190,11 @@ def check_against_sanction_list_pre_merge(
     cache.set("sanction_list_last_check", timezone.now(), None)
 
     possible_matches_individuals = evaluate_qs(
-        Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False, program_id=program.id)
+        Individual.objects.filter(
+            id__in=possible_matches,
+            sanction_list_possible_match=False,
+            program_id=program.id,
+        )
         .select_for_update()
         .order_by("pk")
     )

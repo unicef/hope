@@ -2,10 +2,9 @@ from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
 
+import pytest
 from django.core.cache import cache
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,

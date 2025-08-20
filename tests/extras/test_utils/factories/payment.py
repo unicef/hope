@@ -6,9 +6,8 @@ from random import randint
 from typing import Any, Optional
 from uuid import UUID
 
-from django.utils import timezone
-
 import factory
+from django.utils import timezone
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.geo import CountryFactory
@@ -303,7 +302,9 @@ class PaymentFactory(DjangoModelFactory):
         lambda o: (
             o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
             or IndividualRoleInHouseholdFactory(
-                household=o.household, individual=o.household.head_of_household, role=ROLE_PRIMARY
+                household=o.household,
+                individual=o.household.head_of_household,
+                role=ROLE_PRIMARY,
             )
         ).individual
     )
@@ -746,8 +747,18 @@ def generate_delivery_mechanisms() -> None:
             "account_type": account_types["bank"],
         },
         {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": None},
-        {"code": "cash_by_fsp", "name": "Cash by FSP", "transfer_type": "CASH", "account_type": account_types["bank"]},
-        {"code": "cheque", "name": "Cheque", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {
+            "code": "cash_by_fsp",
+            "name": "Cash by FSP",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
+        {
+            "code": "cheque",
+            "name": "Cheque",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
         {
             "code": "deposit_to_card",
             "name": "Deposit to Card",
@@ -771,8 +782,18 @@ def generate_delivery_mechanisms() -> None:
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
         },
-        {"code": "referral", "name": "Referral", "transfer_type": "CASH", "account_type": account_types["bank"]},
-        {"code": "transfer", "name": "Transfer", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {
+            "code": "referral",
+            "name": "Referral",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
+        {
+            "code": "transfer",
+            "name": "Transfer",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
         {
             "code": "transfer_to_account",
             "name": "Transfer to Account",
@@ -780,7 +801,12 @@ def generate_delivery_mechanisms() -> None:
             "account_type": account_types["bank"],
             "required_fields": ["name", "number", "code"],
         },
-        {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
+        {
+            "code": "voucher",
+            "name": "Voucher",
+            "transfer_type": "VOUCHER",
+            "account_type": account_types["bank"],
+        },
         {
             "code": "cash_over_the_counter",
             "name": "Cash over the counter",
@@ -817,7 +843,9 @@ def generate_delivery_mechanisms() -> None:
         )
         for fsp in FinancialServiceProvider.objects.all():
             DeliveryMechanismConfig.objects.get_or_create(
-                fsp=fsp, delivery_mechanism=delivery_mechanism, required_fields=dm.get("required_fields", [])
+                fsp=fsp,
+                delivery_mechanism=delivery_mechanism,
+                required_fields=dm.get("required_fields", []),
             )
         FinancialServiceProvider.objects.get_or_create(
             name="United Bank for Africa - Nigeria",

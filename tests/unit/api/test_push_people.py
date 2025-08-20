@@ -42,7 +42,8 @@ class TestPushPeople(HOPEApiTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         data_collecting_type = DataCollectingTypeFactory(
             label="Full",
@@ -52,7 +53,9 @@ class TestPushPeople(HOPEApiTestCase):
             type=DataCollectingType.Type.SOCIAL.value,
         )
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
         )
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
@@ -248,7 +251,10 @@ class TestPushPeople(HOPEApiTestCase):
                 ],
                 "type": ["This field is required."],
             },
-            {"birth_date": ["This field is required."], "type": ["This field is required."]},
+            {
+                "birth_date": ["This field is required."],
+                "type": ["This field is required."],
+            },
         ]
 
     @parameterized.expand(
@@ -256,7 +262,12 @@ class TestPushPeople(HOPEApiTestCase):
             ("invalid_phone_no", "phone_no", "invalid", False),
             ("invalid_phone_no_alternative", "phone_no", "invalid", False),
             ("valid_phone_no", "phone_no_alternative", "+48 632 215 789", True),
-            ("valid_phone_no_alternative", "phone_no_alternative", "+48 632 215 789", True),
+            (
+                "valid_phone_no_alternative",
+                "phone_no_alternative",
+                "+48 632 215 789",
+                True,
+            ),
             ("phone_no_alternative_as_null", "phone_no_alternative", None, False),
             ("phone_no_as_null", "phone_no", None, False),
         ]

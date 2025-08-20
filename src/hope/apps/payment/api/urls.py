@@ -1,15 +1,14 @@
 from django.urls import include, path
-
 from rest_framework_nested.routers import NestedSimpleRouter
 
 from hope.apps.core.api.urls import get_business_area_nested_router
 from hope.apps.payment.api.views import (
+    PaymentGlobalViewSet,
     PaymentPlanManagerialViewSet,
     PaymentPlanSupportingDocumentViewSet,
     PaymentPlanViewSet,
     PaymentVerificationRecordViewSet,
     PaymentVerificationViewSet,
-    PaymentGlobalViewSet,
     PaymentViewSet,
     TargetPopulationViewSet,
     available_fsps_for_delivery_mechanisms,
@@ -20,7 +19,9 @@ app_name = "payment"
 
 business_area_nested_router = get_business_area_nested_router()
 business_area_nested_router.register(
-    r"payments/payment-plans-managerial", PaymentPlanManagerialViewSet, basename="payment-plans-managerial"
+    r"payments/payment-plans-managerial",
+    PaymentPlanManagerialViewSet,
+    basename="payment-plans-managerial",
 )
 business_area_nested_router.register(r"payments", PaymentGlobalViewSet, basename="payments-global")
 

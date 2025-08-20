@@ -1,10 +1,9 @@
 from typing import Any
 from unittest import mock
 
+from constance.test import override_config
 from django.core.management import call_command
 from django.test import TestCase, override_settings
-
-from constance.test import override_config
 from extras.test_utils.factories.account import (
     RoleAssignmentFactory,
     RoleFactory,
