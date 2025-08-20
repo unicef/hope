@@ -331,14 +331,6 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Reconciliation Import File",
     )
-    ftp_invoice_file = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Invoice File",
-    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -2280,3 +2272,49 @@ class PaymentPlanSupportingDocument(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class WesternUnionQCFFile(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    file = models.ForeignKey(
+        FileTemp,
+        related_name="+",
+        help_text="WU QCF File",
+        on_delete=models.DO_NOTHING,
+        null=True,
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = "Western Union QCF File"
+        verbose_name_plural = "Western Union QCF Files"
+
+
+class WesternUnionQCFFileReport(models.Model):
+    qcf_file = models.ForeignKey(
+        WesternUnionQCFFile,
+        related_name="reports",
+        help_text="WU QCF File",
+        on_delete=models.DO_NOTHING,
+    )
+    report_file = models.ForeignKey(
+        FileTemp,
+        related_name="+",
+        help_text="WU QCF Report File",
+        on_delete=models.DO_NOTHING,
+    )
+    payment_plan = models.ForeignKey(
+        PaymentPlan,
+        related_name="qcf_reports",
+        on_delete=models.CASCADE,
+    )
+    sent = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.report_file.name} - sent: {self.sent}"
+
+    class Meta:
+        verbose_name = "Western Union QCF File Report"
+        verbose_name_plural = "Western Union QCF File Reports"
