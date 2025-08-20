@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 
 class CeleryConnectionException(Exception):
@@ -72,11 +72,8 @@ def get_all_celery_tasks(queue_name: str) -> list:
 
 
 def get_task_in_queue_or_running(
-    name: str,
-    all_celery_tasks: list | None = None,
-    args: list | None = None,
-    kwargs: dict | None = None,
-) -> dict | None:
+    name: str, all_celery_tasks: Optional[list] = None, args: Optional[list] = None, kwargs: Optional[dict] = None
+) -> Optional[dict]:
     if all_celery_tasks is None:
         all_celery_tasks = get_all_celery_tasks("default")
     for task in all_celery_tasks:
@@ -85,10 +82,11 @@ def get_task_in_queue_or_running(
         if args is not None:
             if len(args) != len(task.get("args", [])):
                 continue
-            if not all(a == b for a, b in zip(args, task.get("args", []), strict=True)):
+            if not all(a == b for a, b in zip(args, task.get("args", []))):
                 continue
-        if kwargs is not None and not all(task.get("kwargs", {}).get(key) == value for key, value in kwargs.items()):
-            continue
+        if kwargs is not None:
+            if not all(task.get("kwargs", {}).get(key) == value for key, value in kwargs.items()):
+                continue
         return task
 
     return None
