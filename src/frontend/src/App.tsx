@@ -2,7 +2,6 @@ import { DefaultRoute } from '@containers/DefaultRoute';
 import { PageNotFound } from '@containers/pages/404/PageNotFound';
 import { AccessDenied } from '@containers/pages/accessDenied/AccessDenied';
 import { LoginPage } from '@containers/pages/core/LoginPage';
-import { ProfilePage } from '@containers/pages/core/ProfilePage';
 import { MaintenancePage } from '@containers/pages/maintenance/MaintenancePage';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 import { AllProgramsRoutesSwitch } from '@containers/routers/AllProgramsRoutesSwitch';
@@ -52,7 +51,6 @@ const Root: FC = () => (
         </button>
       }
     />
-    <Route path="/accounts/profile/" element={<ProfilePage />} />
     <Route element={<BaseHomeRouter />}>
       <Route
         path="/:businessArea/programs/all/*"
