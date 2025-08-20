@@ -93,6 +93,7 @@ const Icon = styled(FindInPageIcon)`
 `;
 
 interface TableRestComponentProps<T extends { [key: string]: any }> {
+  customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
   data: T[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
@@ -136,6 +137,7 @@ export function TableRestComponent<T>({
   actions = [],
   numSelected = 0,
   hidePagination = false,
+  customHeadRenderer,
 }: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
@@ -192,17 +194,35 @@ export function TableRestComponent<T>({
         </StyledBox>
 
         <StyledTable>
-          <EnhancedTableHead<T>
-            order={order}
-            headCells={headCells}
-            orderBy={orderBy}
-            onRequestSort={handleRequestSort}
-            rowCount={data.length}
-            allowSort={allowSort}
-            onSelectAllClick={onSelectAllClick}
-            data={data}
-            numSelected={numSelected}
-          />
+          {customHeadRenderer ? (
+            typeof customHeadRenderer === 'function' ? (
+              customHeadRenderer({
+                order,
+                headCells,
+                orderBy,
+                onRequestSort: handleRequestSort,
+                rowCount: data.length,
+                allowSort,
+                onSelectAllClick,
+                data,
+                numSelected,
+              })
+            ) : (
+              customHeadRenderer
+            )
+          ) : (
+            <EnhancedTableHead<T>
+              order={order}
+              headCells={headCells}
+              orderBy={orderBy}
+              onRequestSort={handleRequestSort}
+              rowCount={data.length}
+              allowSort={allowSort}
+              onSelectAllClick={onSelectAllClick}
+              data={data}
+              numSelected={numSelected}
+            />
+          )}
           <MuiTableBody>{body}</MuiTableBody>
         </StyledTable>
       </StyledTableContainer>

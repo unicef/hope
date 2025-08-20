@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PeriodicDataUpdateTemplateCreate = {
+export type PDUXlsxTemplateDetail = {
     readonly id: number;
+    name?: string | null;
     roundsData: any;
-    filters?: any;
 };
 

@@ -1,27 +1,31 @@
+import { BlackLink } from '@components/core/BlackLink';
+import { periodicDataUpdatesOnlineEditsStatusToColor } from 'src/utils/utils';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { TableCell } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 
 const onlineEditsHeadCells: HeadCell<any>[] = [
   {
-    id: 'templateId',
+    id: 'id',
     numeric: false,
     disablePadding: false,
-    label: 'Template ID',
-    dataCy: 'head-cell-template-id',
+    label: 'ID',
+    dataCy: 'head-cell-id',
   },
   {
-    id: 'templateName',
+    id: 'name',
     numeric: false,
     disablePadding: false,
-    label: 'Template Name',
-    dataCy: 'head-cell-template-name',
+    label: 'Name',
+    dataCy: 'head-cell-name',
   },
   {
     id: 'numberOfRecords',
@@ -45,14 +49,6 @@ const onlineEditsHeadCells: HeadCell<any>[] = [
     dataCy: 'head-cell-created-by',
   },
   {
-    id: 'details',
-    numeric: false,
-    disablePadding: false,
-    label: 'Details',
-    disableSort: true,
-    dataCy: 'head-cell-details',
-  },
-  {
     id: 'status',
     numeric: false,
     disablePadding: false,
@@ -69,39 +65,62 @@ const onlineEditsHeadCells: HeadCell<any>[] = [
 ];
 
 const NewPeriodicDataUpdates = (): ReactElement => {
+  const { baseUrl } = useBaseUrl();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
-  const [queryVariables, setQueryVariables] = useState({
-    ordering: 'created_at',
-    businessAreaSlug,
-    programSlug: programId,
-  });
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug,
+      programSlug: programId,
+      ordering: 'created_at',
+      status: ['NEW' as const],
+    }),
+    [businessAreaSlug, programId],
+  );
 
-  // Replace with correct query and data model for online edits
-  const { data, isLoading, error } = useQuery({
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
       'periodicDataUpdateOnlineEdits',
       queryVariables,
       businessAreaSlug,
       programId,
     ],
-    queryFn: () => Promise.resolve([]), // TODO: Replace with actual API call
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
+        businessAreaSlug,
+        programSlug: programId,
+        ordering: queryVariables.ordering,
+        status: queryVariables.status,
+      }),
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
+  console.log('data', data);
+
   const renderRow = (row: any): ReactElement => (
-    <ClickableTableRow
-      key={row.templateId}
-      data-cy={`online-edit-row-${row.templateId}`}
-    >
-      <TableCell>{row.templateId}</TableCell>
-      <TableCell>{row.templateName}</TableCell>
+    <ClickableTableRow key={row.id} data-cy={`online-edit-row-${row.id}`}>
+      <TableCell>
+        <BlackLink
+          to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
+        >
+          {row.id}
+        </BlackLink>
+      </TableCell>
+      <TableCell>{row.name}</TableCell>
       <TableCell>{row.numberOfRecords}</TableCell>
       <TableCell>
         <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell>{row.createdBy}</TableCell>
-      <TableCell>{/* Details button or info here */}</TableCell>
       <TableCell>
-        <StatusBox status={row.status} statusToColor={() => 'primary'} />
+        <StatusBox
+          status={row.status}
+          statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
+        />
       </TableCell>
       <TableCell />
     </ClickableTableRow>
@@ -112,7 +131,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
       isOnPaper={true}
       renderRow={renderRow}
       headCells={onlineEditsHeadCells}
-      data={data}
+      data={data ?? []}
       isLoading={isLoading}
       error={error}
       queryVariables={queryVariables}

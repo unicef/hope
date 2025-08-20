@@ -1,22 +1,18 @@
 import React, { useState, ReactElement } from 'react';
-import { TableCell, Checkbox } from '@mui/material';
+import { TableCell } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
+import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
 
 const mergedHeadCells: HeadCell<any>[] = [
-  {
-    id: 'checkbox',
-    numeric: false,
-    disablePadding: true,
-    label: '',
-    dataCy: 'head-cell-checkbox',
-    disableSort: true,
-  },
   {
     id: 'templateId',
     numeric: false,
@@ -53,14 +49,6 @@ const mergedHeadCells: HeadCell<any>[] = [
     dataCy: 'head-cell-created-by',
   },
   {
-    id: 'details',
-    numeric: false,
-    disablePadding: false,
-    label: 'Details',
-    disableSort: true,
-    dataCy: 'head-cell-details',
-  },
-  {
     id: 'status',
     numeric: false,
     disablePadding: false,
@@ -70,83 +58,61 @@ const mergedHeadCells: HeadCell<any>[] = [
 ];
 
 const MergedPeriodicDataUpdates = () => {
-  const { businessArea: businessAreaSlug, programId } = useBaseUrl();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [queryVariables, setQueryVariables] = useState({
+  const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
+  const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
     programSlug: programId,
-  });
+    status: ['MERGED' as const],
+  };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  // Replace with correct query and data model for merged updates
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
       'mergedPeriodicDataUpdates',
       queryVariables,
       businessAreaSlug,
       programId,
     ],
-    queryFn: () => Promise.resolve([]), // TODO: Replace with actual API call
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
+        businessAreaSlug,
+        programSlug: programId,
+        ordering: queryVariables.ordering,
+        status: queryVariables.status,
+      }),
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
-  const results = data || [];
-  const allIds = results.map((row: any) => row.templateId);
-
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      setSelected(allIds);
-    } else {
-      setSelected([]);
-    }
-  };
-
-  const handleSelectOne = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
+  const results = data?.results ?? [];
 
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
       key={row.templateId}
       data-cy={`merged-row-${row.templateId}`}
     >
-      <TableCell padding="checkbox">
-        <Checkbox
-          checked={selected.includes(row.templateId)}
-          onChange={() => handleSelectOne(row.templateId)}
-          inputProps={{ 'aria-label': `select row ${row.templateId}` }}
-        />
+      <TableCell>
+        <BlackLink
+          to={`/${baseUrl}/online-templates/${row.templateId}`}
+          data-cy={`template-id-link-${row.templateId}`}
+        >
+          {row.templateId}
+        </BlackLink>
       </TableCell>
-      <TableCell>{row.templateId}</TableCell>
       <TableCell>{row.templateName}</TableCell>
       <TableCell>{row.numberOfRecords}</TableCell>
       <TableCell>
         <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell>{row.createdBy}</TableCell>
-      <TableCell>{/* Details button or info here */}</TableCell>
       <TableCell>
-        <StatusBox status={row.status} statusToColor={() => 'primary'} />
+        <StatusBox
+          status={row.status}
+          statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
+        />
       </TableCell>
     </ClickableTableRow>
   );
-
-  const customHeadRenderer = (headCell: HeadCell<any>) => {
-    if (headCell.id === 'checkbox') {
-      return (
-        <Checkbox
-          indeterminate={
-            selected.length > 0 && selected.length < results.length
-          }
-          checked={selected.length > 0 && selected.length === results.length}
-          onChange={handleSelectAllClick}
-          inputProps={{ 'aria-label': 'select all rows' }}
-        />
-      );
-    }
-    return headCell.label;
-  };
 
   return (
     <UniversalRestTable
@@ -159,10 +125,6 @@ const MergedPeriodicDataUpdates = () => {
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       title="Merged Periodic Data Updates"
-      onSelectAllClick={handleSelectAllClick}
-      numSelected={selected.length}
-      // @ts-ignore: EnhancedTableHead supports customHeadRenderer
-      customHeadRenderer={customHeadRenderer}
       hidePagination={true}
     />
   );

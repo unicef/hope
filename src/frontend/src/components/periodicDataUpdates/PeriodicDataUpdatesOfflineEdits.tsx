@@ -11,11 +11,11 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
-import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaginatedPeriodicDataUpdateUploadListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateUploadListList';
+import { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedPDUXlsxUploadListList';
+import { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
 
-const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
+const updatesHeadCells: HeadCell<PDUXlsxUploadList>[] = [
   {
     id: 'id',
     numeric: false,
@@ -84,7 +84,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     data: updatesData,
     isLoading,
     error,
-  } = useQuery<PaginatedPeriodicDataUpdateUploadListList>({
+  } = useQuery<PaginatedPDUXlsxUploadListList>({
     queryKey: [
       'periodicDataUpdateUploads',
       queryVariables,
@@ -112,7 +112,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     setSelectedUploadId(null);
   };
 
-  const renderUpdateRow = (row: PeriodicDataUpdateUploadList): ReactElement => (
+  const renderUpdateRow = (row: PDUXlsxUploadList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
       <TableCell data-cy={`update-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`update-template-${row.id}`}>
@@ -157,7 +157,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         isOnPaper={true}
         renderRow={renderUpdateRow}
         headCells={updatesHeadCells}
-        data={updatesData}
+        data={updatesData?.results ?? []}
         isLoading={isLoading}
         error={error}
         queryVariables={queryVariables}

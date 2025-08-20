@@ -14,6 +14,7 @@ import { isEqual } from 'lodash';
 
 //TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
+  customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
   rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
@@ -65,6 +66,7 @@ export const UniversalRestTable = <T, K>({
   itemsCount,
   initialRowsPerPage,
   hidePagination,
+  customHeadRenderer,
 }: UniversalRestTableProps<T, K>): ReactElement => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(
@@ -164,6 +166,7 @@ export const UniversalRestTable = <T, K>({
       numSelected={numSelected}
       allowSort={allowSort}
       hidePagination={hidePagination}
+      customHeadRenderer={customHeadRenderer}
     />
   );
 };

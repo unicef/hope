@@ -1,13 +1,16 @@
 import React, { useState, ReactElement } from 'react';
 import { TableCell, Checkbox } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-// ...existing code...
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
+import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -54,14 +57,6 @@ const pendingHeadCells: HeadCell<any>[] = [
     dataCy: 'head-cell-created-by',
   },
   {
-    id: 'details',
-    numeric: false,
-    disablePadding: false,
-    label: 'Details',
-    disableSort: true,
-    dataCy: 'head-cell-details',
-  },
-  {
     id: 'status',
     numeric: false,
     disablePadding: false,
@@ -71,28 +66,35 @@ const pendingHeadCells: HeadCell<any>[] = [
 ];
 
 const PeriodicDataUpdatePendingForMerge = () => {
-  const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+  const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
-  const [queryVariables, setQueryVariables] = useState({
+  const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
     programSlug: programId,
-  });
+    status: ['APPROVED' as const],
+  };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  // Replace with correct query and data model for pending approval
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
       'periodicDataUpdatePendingForMerge',
       queryVariables,
       businessAreaSlug,
       programId,
     ],
-    queryFn: () => Promise.resolve([]), // TODO: Replace with actual API call
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
+        businessAreaSlug,
+        programSlug: programId,
+        ordering: queryVariables.ordering,
+        status: queryVariables.status,
+      }),
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
-  const results = data || [];
+  const results = data?.results ?? [];
   const allIds = results.map((row: any) => row.templateId);
-  // ...existing code...
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -120,36 +122,59 @@ const PeriodicDataUpdatePendingForMerge = () => {
           inputProps={{ 'aria-label': `select row ${row.templateId}` }}
         />
       </TableCell>
-      <TableCell>{row.templateId}</TableCell>
+      <TableCell>
+        <BlackLink
+          to={`/${baseUrl}/online-templates/${row.templateId}`}
+          data-cy={`template-id-link-${row.templateId}`}
+        >
+          {row.templateId}
+        </BlackLink>
+      </TableCell>
       <TableCell>{row.templateName}</TableCell>
       <TableCell>{row.numberOfRecords}</TableCell>
       <TableCell>
         <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell>{row.createdBy}</TableCell>
-      <TableCell>{/* Details button or info here */}</TableCell>
       <TableCell>
-        <StatusBox status={row.status} statusToColor={() => 'primary'} />
+        <StatusBox
+          status={row.status}
+          statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
+        />
       </TableCell>
     </ClickableTableRow>
   );
 
   // Custom head renderer for EnhancedTableHead
-  const customHeadRenderer = (headCell: HeadCell<any>) => {
-    if (headCell.id === 'checkbox') {
-      return (
-        <Checkbox
-          indeterminate={
-            selected.length > 0 && selected.length < results.length
-          }
-          checked={selected.length > 0 && selected.length === results.length}
-          onChange={handleSelectAllClick}
-          inputProps={{ 'aria-label': 'select all rows' }}
-        />
-      );
-    }
-    return headCell.label;
-  };
+  const customHeadRenderer = ({
+    headCells,
+  }: {
+    headCells: HeadCell<any>[];
+  }) => (
+    <tr>
+      {headCells.map((headCell) => (
+        <TableCell
+          key={String(headCell.id)}
+          padding={headCell.id === 'checkbox' ? 'checkbox' : undefined}
+        >
+          {headCell.id === 'checkbox' ? (
+            <Checkbox
+              indeterminate={
+                selected.length > 0 && selected.length < results.length
+              }
+              checked={
+                selected.length > 0 && selected.length === results.length
+              }
+              onChange={handleSelectAllClick}
+              inputProps={{ 'aria-label': 'select all rows' }}
+            />
+          ) : (
+            headCell.label
+          )}
+        </TableCell>
+      ))}
+    </tr>
+  );
 
   return (
     <UniversalRestTable
@@ -164,7 +189,6 @@ const PeriodicDataUpdatePendingForMerge = () => {
       title="Pending Periodic Data Updates for Merge"
       onSelectAllClick={handleSelectAllClick}
       numSelected={selected.length}
-      // @ts-ignore: EnhancedTableHead supports customHeadRenderer
       customHeadRenderer={customHeadRenderer}
       hidePagination={true}
     />

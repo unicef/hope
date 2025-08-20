@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PeriodicDataUpdateUpload = {
-    file: string;
+export type Bulk = {
+    ids: Array<number>;
 };
 

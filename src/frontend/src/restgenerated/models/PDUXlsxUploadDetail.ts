@@ -2,13 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PeriodicDataUpdateTemplateList = {
+export type PDUXlsxUploadDetail = {
     readonly id: number;
-    numberOfRecords?: number | null;
+    template: number;
     readonly createdAt: string;
     createdBy?: string;
     status: string;
     statusDisplay: string;
-    canExport: boolean;
+    errorsInfo: any;
 };
 

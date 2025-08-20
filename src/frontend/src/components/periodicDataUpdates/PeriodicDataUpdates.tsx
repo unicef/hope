@@ -11,7 +11,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { PeriodicDataUpdatesOfflineTemplates } from './PeriodicDataUpdatesOfflineTemplates';
 import { PeriodicDataUpdatesOfflineEdits } from './PeriodicDataUpdatesOfflineEdits';
-import { PeriodicDataUpdatesOnlineEdits } from './PeriodicDataUpdatesOnlineEdits';
+import PeriodicDataUpdatesOnlineEdits from './PeriodicDataUpdatesOnlineEdits';
 
 export const PeriodicDataUpdates = (): ReactElement => {
   const [value, setValue] = useState(0);
