@@ -832,7 +832,9 @@ class Query(graphene.ObjectType):
         return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
 
     def resolve_account_financial_institution_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return [{"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()]
+        business_area_slug = info.context.headers.get("Business-Area")
+        fis = FinancialInstitution.objects.filter(country__business_areas__slug=business_area_slug).distinct()
+        return [{"name": x.name, "value": x.id} for x in fis]
 
     def resolve_countries_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])

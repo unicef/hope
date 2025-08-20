@@ -134,33 +134,52 @@ export function AccountField({
         </>
       ) : (
         <>
-          {Object.entries(dataFields).map(([key, value]) => (
-            <Fragment key={key}>
-              <Grid size={{ xs: 4 }}>
-                <LabelizedField
-                  label={t('Account Item')}
-                  value={String(key)}
-                />
-              </Grid>
-              <Grid size={{ xs: 4 }}>
-                <LabelizedField
-                  label={t('Current Value')}
-                  value={String(value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                <Field
-                  name={`${accountFieldName}.${key}`}
-                  fullWidth
-                  variant="outlined"
-                  label={t('New Value')}
-                  component={FormikTextField}
-                  required={!isEditTicket}
-                  disabled={isEditTicket}
-                />
-              </Grid>
-            </Fragment>
-          ))}
+          {Object.entries(dataFields).map(([key, value]) => {
+              let displayValue = String(value);
+              const isFinancialInstitutionField = key === 'financial_institution';
+              if (
+                isFinancialInstitutionField &&
+                Array.isArray(accountFinancialInstitutionChoices)
+              ) {
+                const choice = accountFinancialInstitutionChoices.find(
+                  (c: any) => c.value === value,
+                );
+                displayValue = choice ? choice.name : String(value);
+              }
+              const fieldProps = {
+                component: isFinancialInstitutionField ? FormikSelectField : FormikTextField,
+                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices } : {}),
+              };
+
+              return (
+                <Fragment key={key}>
+                  <Grid size={{ xs: 4 }}>
+                    <LabelizedField
+                      label={t('Account Item')}
+                      value={String(key)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 4 }}>
+                    <LabelizedField
+                      label={t('Current Value')}
+                      value={displayValue}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 3 }}>
+                    <Field
+                      name={`${accountFieldName}.${key}`}
+                      fullWidth
+                      variant="outlined"
+                      label={t('New Value')}
+                      required={!isEditTicket}
+                      disabled={isEditTicket}
+                      {...fieldProps}
+                    />
+                  </Grid>
+                </Fragment>
+              );
+            },
+          )}
         </>
       )
       }
