@@ -54,14 +54,8 @@ class TestPDUOnlineEditList:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            (
-                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
-                status.HTTP_200_OK,
-            ),
-            (
-                [Permissions.PROGRAMME_UPDATE],
-                status.HTTP_403_FORBIDDEN,
-            ),
+            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], status.HTTP_200_OK),
+            ([Permissions.PROGRAMME_UPDATE], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_pdu_online_edit_list_permissions(

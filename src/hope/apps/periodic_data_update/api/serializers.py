@@ -223,6 +223,7 @@ class PDUOnlineEditListSerializer(serializers.ModelSerializer):
 class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
     sent_back_comment = PDUOnlineEditSentBackCommentSerializer()
     authorized_users = AuthorizedUserSerializer(many=True)
+    approved_by = serializers.CharField(source="approved_by.get_full_name", default="")
 
     class Meta:
         model = PDUOnlineEdit
