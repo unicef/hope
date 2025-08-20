@@ -7,6 +7,7 @@ import PeoplePage from '@containers/pages/people/PeoplePage';
 import PopulationHouseholdDetailsPage from '@containers/pages/population/PopulationHouseholdDetailsPage';
 import PopulationHouseholdPage from '@containers/pages/population/PopulationHouseholdPage';
 import PopulationIndividualsDetailsPage from '@containers/pages/population/PopulationIndividualsDetailsPage';
+import PeriodicDataUpdatesOnlineEditsTemplateDetailsPage from '@components/periodicDataUpdates/PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
 
 export const PopulationRoutes = (): ReactElement => {
   const populationRoutes = [
@@ -41,6 +42,10 @@ export const PopulationRoutes = (): ReactElement => {
     {
       path: 'population/people/new-template',
       element: <NewTemplatePage />,
+    },
+    {
+      path: 'population/individuals/online-templates/:id',
+      element: <PeriodicDataUpdatesOnlineEditsTemplateDetailsPage />,
     },
   ];
 
