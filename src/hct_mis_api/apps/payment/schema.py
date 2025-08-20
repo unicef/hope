@@ -547,6 +547,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_create_xlsx_with_fsp_auth_code = graphene.Boolean()
     fsp_communication_channel = graphene.String()
     can_export_xlsx = graphene.Boolean()
+    can_regenerate_export_file_per_fsp = graphene.Boolean()
     can_download_xlsx = graphene.Boolean()
     can_send_xlsx_password = graphene.Boolean()
     failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
@@ -733,6 +734,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
                 return cls._has_fsp_delivery_mechanism_xlsx_template(parent)
 
         return False
+
+    @staticmethod
+    def resolve_can_regenerate_export_file_per_fsp(parent: PaymentPlan, info: Any) -> bool:
+        return parent.can_regenerate_export_file_per_fsp
 
     @staticmethod
     def resolve_can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:

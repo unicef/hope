@@ -73,10 +73,15 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    "DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE": (
+        5000,
+        "Batch size for image upload",
+        "positive_integers",
+    ),
     "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
     "KOBO_ADMIN_CREDENTIALS": (
         "",
-        "Kobo superuser credentislas in format user:password",
+        "Kobo superuser credentials in format user:password",
         str,
     ),
     "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED": (

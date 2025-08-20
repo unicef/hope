@@ -1,7 +1,12 @@
+from typing import Any
+
 from django import forms
 from django.contrib.postgres.forms import DecimalRangeField
 
-from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
+from hct_mis_api.apps.payment.models import (
+    AcceptanceProcessThreshold,
+    FinancialServiceProviderXlsxTemplate,
+)
 
 
 class AcceptanceProcessThresholdForm(forms.ModelForm):
@@ -20,3 +25,16 @@ class AcceptanceProcessThresholdForm(forms.ModelForm):
             "authorization_number_required",
             "finance_release_number_required",
         ]
+
+
+class TemplateSelectForm(forms.Form):
+    template = forms.ModelChoiceField(
+        queryset=FinancialServiceProviderXlsxTemplate.objects.none(), label="Select FSP XLSX Template", required=False
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        payment_plan = kwargs.pop("payment_plan")
+        super().__init__(*args, **kwargs)
+        self.fields["template"].queryset = FinancialServiceProviderXlsxTemplate.objects.filter(
+            financial_service_providers__allowed_business_areas__slug=payment_plan.business_area.slug
+        ).distinct()
