@@ -3,9 +3,8 @@ import json
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
-
 import graphene
+from django.db.models import QuerySet
 from graphene import Connection
 from graphene.relay import PageInfo
 from graphene_django import DjangoConnectionField
@@ -40,7 +39,11 @@ class DjangoFastConnectionField(DjangoConnectionField):
 
     @classmethod
     def resolve_connection(
-        cls, connection: Connection, args: dict, iterable: QuerySet | list, max_limit: int | None = None
+        cls,
+        connection: Connection,
+        args: dict,
+        iterable: QuerySet | list,
+        max_limit: int | None = None,
     ) -> Connection:
         # Remove the offset parameter and convert it to an after cursor.
         offset = args.pop("offset", None)

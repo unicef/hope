@@ -1,9 +1,8 @@
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.combo import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
-from adminfilters.combo import ChoicesFieldComboFilter
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.periodic_data_update.models import (
@@ -26,7 +25,14 @@ class PeriodicDataUpdateUploadInline(admin.TabularInline):
 
 @admin.register(PeriodicDataUpdateTemplate)
 class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
-    list_display = ("id", "status", "business_area", "program", "created_by", "created_at")
+    list_display = (
+        "id",
+        "status",
+        "business_area",
+        "program",
+        "created_by",
+        "created_at",
+    )
     list_filter = (
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),

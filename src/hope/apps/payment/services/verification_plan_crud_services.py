@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
-
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.payment.models import PaymentVerificationPlan
@@ -10,9 +9,7 @@ from hope.apps.payment.services.create_payment_verifications import (
 )
 from hope.apps.payment.services.process_verification import ProcessVerification
 from hope.apps.payment.services.sampling import Sampling
-from hope.apps.payment.services.verifiers import (
-    PaymentVerificationArgumentVerifier,
-)
+from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 from hope.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
@@ -59,7 +56,8 @@ class VerificationPlanCrudServices:
             raise ValidationError("You can only edit PENDING Payment Plan Verification")
 
         payment_records = get_payment_records(
-            payment_verification_plan.payment_plan, payment_verification_plan.verification_channel
+            payment_verification_plan.payment_plan,
+            payment_verification_plan.verification_channel,
         )
         sampling = Sampling(input_data, payment_verification_plan.payment_plan, payment_records)
         pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)

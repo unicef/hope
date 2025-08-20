@@ -79,7 +79,9 @@ class Migration(migrations.Migration):
             model_name="paymentverification",
             name="payment_content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AlterField(
@@ -91,7 +93,9 @@ class Migration(migrations.Migration):
             model_name="paymentverificationplan",
             name="payment_plan_content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AlterField(
@@ -103,7 +107,9 @@ class Migration(migrations.Migration):
             model_name="paymentverificationsummary",
             name="payment_plan_content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AlterField(

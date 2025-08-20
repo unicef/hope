@@ -2,11 +2,10 @@ import os
 from typing import Any
 from unittest.mock import patch
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -20,7 +19,10 @@ from hope.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 @pytest.fixture(autouse=True)
 def mock_payment_gateway_env_vars() -> None:
-    with patch.dict(os.environ, {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"}):
+    with patch.dict(
+        os.environ,
+        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
+    ):
         yield
 
 
@@ -48,7 +50,10 @@ class SyncWithPaymentGatewayTest(TestCase):
     @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_payment_plan")
     @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
     def test_payment_plan_post_sync_with_payment_gateway(self: Any, mock_perm: Any, mock_sync: Any) -> None:
-        url = reverse("admin:payment_paymentplan_sync_with_payment_gateway", args=[self.payment_plan.pk])
+        url = reverse(
+            "admin:payment_paymentplan_sync_with_payment_gateway",
+            args=[self.payment_plan.pk],
+        )
         response = self.client.post(url)
 
         mock_sync.assert_called_once_with(self.payment_plan)
@@ -57,7 +62,10 @@ class SyncWithPaymentGatewayTest(TestCase):
 
     @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
     def test_payment_plan_get_sync_with_payment_gateway_confirmation(self: Any, mock_perm: Any) -> None:
-        url = reverse("admin:payment_paymentplan_sync_with_payment_gateway", args=[self.payment_plan.pk])
+        url = reverse(
+            "admin:payment_paymentplan_sync_with_payment_gateway",
+            args=[self.payment_plan.pk],
+        )
         response = self.client.get(url)
 
         assert response.status_code == 200
@@ -93,7 +101,8 @@ class SyncWithPaymentGatewayTest(TestCase):
     @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
     def test_payment_post_sync_missing_records_with_payment_gateway(self: Any, mock_perm: Any, mock_sync: Any) -> None:
         url = reverse(
-            "admin:payment_paymentplan_sync_missing_records_with_payment_gateway", args=[self.payment_plan.pk]
+            "admin:payment_paymentplan_sync_missing_records_with_payment_gateway",
+            args=[self.payment_plan.pk],
         )
         response = self.client.post(url)
 
@@ -104,7 +113,8 @@ class SyncWithPaymentGatewayTest(TestCase):
     @patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
     def test_payment_get_sync_missing_records_with_payment_gateway(self: Any, mock_perm: Any) -> None:
         url = reverse(
-            "admin:payment_paymentplan_sync_missing_records_with_payment_gateway", args=[self.payment_plan.pk]
+            "admin:payment_paymentplan_sync_missing_records_with_payment_gateway",
+            args=[self.payment_plan.pk],
         )
         response = self.client.get(url)
 

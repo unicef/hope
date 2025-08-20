@@ -18,12 +18,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="PeriodicDataUpdateTemplate",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "curr_async_result_id",
-                    models.CharField(blank=True, help_text="Current (active) AsyncResult is", max_length=36, null=True),
+                    models.CharField(
+                        blank=True,
+                        help_text="Current (active) AsyncResult is",
+                        max_length=36,
+                        null=True,
+                    ),
                 ),
                 (
                     "status",
@@ -42,7 +55,10 @@ class Migration(migrations.Migration):
                 ),
                 ("filters", models.JSONField(blank=True, default=dict, null=True)),
                 ("rounds_data", models.JSONField()),
-                ("number_of_records", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "number_of_records",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
                 (
                     "business_area",
                     models.ForeignKey(
@@ -87,12 +103,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="PeriodicDataUpdateUpload",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 (
                     "curr_async_result_id",
-                    models.CharField(blank=True, help_text="Current (active) AsyncResult is", max_length=36, null=True),
+                    models.CharField(
+                        blank=True,
+                        help_text="Current (active) AsyncResult is",
+                        max_length=36,
+                        null=True,
+                    ),
                 ),
                 (
                     "status",

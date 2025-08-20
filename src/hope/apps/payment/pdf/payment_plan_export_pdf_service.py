@@ -72,7 +72,10 @@ class PaymentPlanPDFExportService:
 
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
-            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            pending_usd=Sum(
+                "entitlement_quantity_usd",
+                filter=Q(status__in=Payment.PENDING_STATUSES),
+            ),
             pending_local=Sum("entitlement_quantity", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
             reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=Payment.PENDING_STATUSES)),

@@ -43,7 +43,9 @@ class GrievanceDashboard(BaseComponents):
     def getTotalNumberOfTicketsTopNumber(self) -> WebElement:
         return self.wait_for(self.totalNumberOfTicketsTopNumber)
 
-    def getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated(self) -> WebElement:
+    def getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated(
+        self,
+    ) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerTotalNumberOfTicketsSystemGenerated)
 
     def getLabelSystemGenerated(self) -> WebElement:
@@ -58,17 +60,25 @@ class GrievanceDashboard(BaseComponents):
     def getTotalNumberOfClosedTicketsTopNumber(self) -> WebElement:
         return self.wait_for(self.totalNumberOfClosedTicketsTopNumber)
 
-    def getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated(self) -> WebElement:
+    def getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated(
+        self,
+    ) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated)
 
-    def getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated(self) -> WebElement:
+    def getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated(
+        self,
+    ) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated)
 
     def getTicketsAverageResolutionTopNumber(self) -> WebElement:
         return self.wait_for(self.ticketsAverageResolutionTopNumber)
 
-    def getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated(self) -> WebElement:
+    def getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated(
+        self,
+    ) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerTicketsAverageResolutionSystemGenerated)
 
-    def getLabelizedFieldContainerTicketsAverageResolutionUserGenerated(self) -> WebElement:
+    def getLabelizedFieldContainerTicketsAverageResolutionUserGenerated(
+        self,
+    ) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerTicketsAverageResolutionUserGenerated)

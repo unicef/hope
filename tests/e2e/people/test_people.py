@@ -1,17 +1,15 @@
 from datetime import datetime
 from typing import List
 
-from django.db import transaction
-
 import pytest
 from dateutil.relativedelta import relativedelta
+from django.db import transaction
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     create_household,
@@ -19,6 +17,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+from selenium.webdriver.common.by import By
 
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.household.models import HOST, SEEING, Individual
@@ -40,7 +39,11 @@ def add_people(social_worker_program: Program) -> List:
     ba = social_worker_program.business_area
     with transaction.atomic():
         household, individuals = create_household(
-            household_args={"business_area": ba, "program": social_worker_program, "residence_status": HOST},
+            household_args={
+                "business_area": ba,
+                "program": social_worker_program,
+                "residence_status": HOST,
+            },
             individual_args={
                 "full_name": "Stacey Freeman",
                 "given_name": "Stacey",
@@ -80,7 +83,10 @@ def add_people_with_payment_record(add_people: List) -> Payment:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.DRAFT,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
@@ -96,7 +102,10 @@ def get_program_with_dct_type_and_name(
 
 
 def get_social_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.DRAFT
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.SOCIAL,
+    status: str = Program.DRAFT,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()

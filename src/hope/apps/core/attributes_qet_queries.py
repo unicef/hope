@@ -2,10 +2,9 @@ import datetime as dt
 import logging
 from typing import Any
 
+from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-
-from dateutil.relativedelta import relativedelta
 
 from hope.apps.core.countries import Countries
 from hope.apps.household.models import (
@@ -24,7 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 def age_to_birth_date_range_query(
-    field_name: str, age_min: int | None, age_max: int | None, is_social_worker_query: bool = False
+    field_name: str,
+    age_min: int | None,
+    age_max: int | None,
+    is_social_worker_query: bool = False,
 ) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     query_dict = {}
@@ -63,7 +65,12 @@ def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_
         )
     if comparison_method == "NOT_EQUALS":
         return ~(
-            age_to_birth_date_range_query(field_name, args[0], args[0], is_social_worker_query=is_social_worker_query)
+            age_to_birth_date_range_query(
+                field_name,
+                args[0],
+                args[0],
+                is_social_worker_query=is_social_worker_query,
+            )
         )
     if comparison_method == "GREATER_THAN":
         return age_to_birth_date_range_query(field_name, args[0], None, is_social_worker_query=is_social_worker_query)
@@ -75,42 +82,58 @@ def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_
 
 def get_birth_certificate_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
-        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_tax_id_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
-        IDENTIFICATION_TYPE_TAX_ID, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_TAX_ID,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_drivers_license_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
-        IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_DRIVERS_LICENSE,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_national_id_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
-        IDENTIFICATION_TYPE_NATIONAL_ID, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_NATIONAL_ID,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_national_passport_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
-        IDENTIFICATION_TYPE_NATIONAL_PASSPORT, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_electoral_card_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
-        IDENTIFICATION_TYPE_ELECTORAL_CARD, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_ELECTORAL_CARD,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_other_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    return get_documents_number_query(IDENTIFICATION_TYPE_OTHER, args[0], is_social_worker_query=is_social_worker_query)
+    return get_documents_number_query(
+        IDENTIFICATION_TYPE_OTHER,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
+    )
 
 
 def get_documents_number_query(document_type: str, number: str, is_social_worker_query: bool = False) -> Q:
@@ -125,42 +148,58 @@ def get_documents_number_query(document_type: str, number: str, is_social_worker
 
 def get_birth_certificate_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
-        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_tax_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
-        IDENTIFICATION_TYPE_TAX_ID, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_TAX_ID,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_drivers_licensee_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
-        IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_DRIVERS_LICENSE,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_national_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
-        IDENTIFICATION_TYPE_NATIONAL_ID, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_NATIONAL_ID,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_national_passport_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
-        IDENTIFICATION_TYPE_NATIONAL_PASSPORT, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_electoral_card_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
-        IDENTIFICATION_TYPE_ELECTORAL_CARD, args[0], is_social_worker_query=is_social_worker_query
+        IDENTIFICATION_TYPE_ELECTORAL_CARD,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
     )
 
 
 def get_other_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    return get_documents_issuer_query(IDENTIFICATION_TYPE_OTHER, args[0], is_social_worker_query=is_social_worker_query)
+    return get_documents_issuer_query(
+        IDENTIFICATION_TYPE_OTHER,
+        args[0],
+        is_social_worker_query=is_social_worker_query,
+    )
 
 
 def get_documents_issuer_query(document_type: str, country_alpha3: str, is_social_worker_query: bool = False) -> Q:
@@ -180,19 +219,32 @@ def get_role_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q
 
 def get_scope_id_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
-    return Q(**{f"{lookup_prefix}identities__partner__name": WFP, f"{lookup_prefix}identities__number": args[0]})
+    return Q(
+        **{
+            f"{lookup_prefix}identities__partner__name": WFP,
+            f"{lookup_prefix}identities__number": args[0],
+        }
+    )
 
 
 def get_scope_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
-        **{f"{lookup_prefix}identities__partner__name": WFP, f"{lookup_prefix}identities__country__iso_code3": args[0]}
+        **{
+            f"{lookup_prefix}identities__partner__name": WFP,
+            f"{lookup_prefix}identities__country__iso_code3": args[0],
+        }
     )
 
 
 def get_unhcr_id_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
-    return Q(**{f"{lookup_prefix}identities__partner__name": UNHCR, f"{lookup_prefix}identities__number": args[0]})
+    return Q(
+        **{
+            f"{lookup_prefix}identities__partner__name": UNHCR,
+            f"{lookup_prefix}identities__number": args[0],
+        }
+    )
 
 
 def get_unhcr_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
@@ -249,12 +301,20 @@ def country_generic_query(comparison_method: str, args: Any, lookup: Any, is_soc
 
 
 def country_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
-    return country_generic_query(comparison_method, args, "country", is_social_worker_query=is_social_worker_query)
+    return country_generic_query(
+        comparison_method,
+        args,
+        "country",
+        is_social_worker_query=is_social_worker_query,
+    )
 
 
 def country_origin_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
     return country_generic_query(
-        comparison_method, args, "country_origin", is_social_worker_query=is_social_worker_query
+        comparison_method,
+        args,
+        "country_origin",
+        is_social_worker_query=is_social_worker_query,
     )
 
 

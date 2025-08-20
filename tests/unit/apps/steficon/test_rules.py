@@ -7,7 +7,6 @@ from extras.test_utils.factories.household import HouseholdFactory
 
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
-
 from hope.apps.account.models import User
 from hope.apps.household.models import Household
 from hope.apps.steficon.models import Rule
@@ -93,7 +92,13 @@ def test_history() -> None:
     assert history[1].version == 1
     assert history[1].before == {}
     assert history[1].after["definition"] == "result.value=1"
-    assert sorted(history[1].affected_fields) == ["definition", "deprecated", "enabled", "language", "name"]
+    assert sorted(history[1].affected_fields) == [
+        "definition",
+        "deprecated",
+        "enabled",
+        "language",
+        "name",
+    ]
 
 
 @pytest.mark.django_db
@@ -139,7 +144,9 @@ def test_nested_rule(basic_rule_setup: Tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
     rule2 = Rule.objects.create(
-        name="Rule2", definition=f"result.value=invoke({rule1.pk}, context).value", enabled=True
+        name="Rule2",
+        definition=f"result.value=invoke({rule1.pk}, context).value",
+        enabled=True,
     )
     rule1.release()
     rule2.release()
@@ -151,7 +158,9 @@ def test_nested_rule(basic_rule_setup: Tuple[User, Household]) -> None:
 @pytest.mark.django_db
 def test_modules() -> None:
     rule = Rule.objects.create(
-        name="Rule1", definition="age1=dateutil.relativedelta.relativedelta(years=17)", enabled=True
+        name="Rule1",
+        definition="age1=dateutil.relativedelta.relativedelta(years=17)",
+        enabled=True,
     )
     is_valid = rule.interpreter.validate()
     assert is_valid

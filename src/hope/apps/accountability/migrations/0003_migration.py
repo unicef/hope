@@ -128,7 +128,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="feedback",
             name="admin2",
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="geo.area"),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="geo.area",
+            ),
         ),
         migrations.AddField(
             model_name="feedback",
@@ -199,7 +204,10 @@ class Migration(migrations.Migration):
             model_name="feedback",
             name="program",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="program.program"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="program.program",
             ),
         ),
         # message

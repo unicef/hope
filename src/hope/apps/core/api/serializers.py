@@ -8,9 +8,7 @@ from hope.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
-from hope.apps.periodic_data_update.api.serializers import (
-    PeriodicFieldDataSerializer,
-)
+from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 
 
 class BusinessAreaSerializer(serializers.ModelSerializer):

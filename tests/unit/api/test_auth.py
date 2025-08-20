@@ -2,7 +2,6 @@ from unittest.mock import MagicMock, Mock
 
 from django.test import TestCase
 from django.urls import reverse
-
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
@@ -40,7 +39,10 @@ class HOPEPermissionTest(TestCase):
 
         assert p.has_permission(
             Mock(auth=self.token),
-            Mock(selected_business_area=self.business_area, permission=Grant.API_RDI_UPLOAD),
+            Mock(
+                selected_business_area=self.business_area,
+                permission=Grant.API_RDI_UPLOAD,
+            ),
         )
 
 

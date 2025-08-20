@@ -152,7 +152,8 @@ def add_household() -> None:
 
 
 def payment_verification_creator(
-    channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL, payment_plan_id: str = "PP-0060-22-11223344"
+    channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+    payment_plan_id: str = "PP-0060-22-11223344",
 ) -> PV:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
@@ -431,7 +432,10 @@ class TestSmokeFilters:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_filters_all_programs(self, create_programs: None, filters: Filters) -> None:
         all_programs = {
-            "Country Dashboard": [filters.globalProgramFilter, filters.globalProgramFilterContainer],
+            "Country Dashboard": [
+                filters.globalProgramFilter,
+                filters.globalProgramFilterContainer,
+            ],
             "Programmes": [
                 filters.filtersDataCollectingType,
                 filters.filtersBudgetMax,
@@ -501,12 +505,23 @@ class TestSmokeFilters:
     @pytest.mark.parametrize(
         "module",
         [
-            pytest.param([["Registration Data Import"], "filter-search", "Test"], id="Registration Data Import"),
+            pytest.param(
+                [["Registration Data Import"], "filter-search", "Test"],
+                id="Registration Data Import",
+            ),
             pytest.param([["Targeting"], "filters-search", "Test"], id="Targeting"),
-            pytest.param([["Payment Verification"], "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
+            pytest.param(
+                [["Payment Verification"], "filter-search", "PP-0000-00-11223344"],
+                id="Payment Verification",
+            ),
             pytest.param([["Grievance"], "filters-search", "GRV-0000123"], id="Grievance"),
             pytest.param(
-                [["Payment Module", "Payment Plans"], "filter-search", "PP-0060-22-11223344"], id="Payment Module"
+                [
+                    ["Payment Module", "Payment Plans"],
+                    "filter-search",
+                    "PP-0060-22-11223344",
+                ],
+                id="Payment Module",
             ),
             # TODO: uncomment after fix bug: 206395
             # pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),

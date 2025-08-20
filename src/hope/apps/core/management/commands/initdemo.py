@@ -52,12 +52,11 @@ import time
 from argparse import ArgumentParser
 from typing import Any
 
+import elasticsearch
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
-
-import elasticsearch
 from extras.test_utils.factories.account import (
     create_superuser,
     generate_unicef_partners,
@@ -156,7 +155,9 @@ class Command(BaseCommand):
         role_with_all_perms = Role.objects.get(name="Role with all permissions")
         for ba_name in ["Global", "Afghanistan"]:
             RoleAssignment.objects.get_or_create(
-                user=user, role=role_with_all_perms, business_area=BusinessArea.objects.get(name=ba_name)
+                user=user,
+                role=role_with_all_perms,
+                business_area=BusinessArea.objects.get(name=ba_name),
             )
         # Create role for WFP and UNHCR in Afghanistan
         role_planner = Role.objects.get(name="Planner")
@@ -176,7 +177,10 @@ class Command(BaseCommand):
         generate_data_collecting_types()
         # set accountability flag
         FlagState.objects.get_or_create(
-            name="ALLOW_ACCOUNTABILITY_MODULE", condition="boolean", value="True", required=False
+            name="ALLOW_ACCOUNTABILITY_MODULE",
+            condition="boolean",
+            value="True",
+            required=False,
         )
         generate_beneficiary_groups()
 

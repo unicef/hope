@@ -197,7 +197,11 @@ def generate_people_program() -> None:
     )
     # add one individual
     household, individuals = create_household(
-        household_args={"business_area": ba, "program": people_program, "residence_status": HOST},
+        household_args={
+            "business_area": ba,
+            "program": people_program,
+            "residence_status": HOST,
+        },
         individual_args={
             "full_name": "Stacey Freeman",
             "given_name": "Stacey",

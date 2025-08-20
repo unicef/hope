@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any
 from django.db import models
 from django.db.models import JSONField, Q
 from django.utils.translation import gettext_lazy as _
-
 from model_utils import Choices
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory

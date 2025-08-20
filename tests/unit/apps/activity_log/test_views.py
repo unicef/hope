@@ -1,9 +1,8 @@
 from typing import Any, List
 from urllib.parse import urlencode
 
-from django.urls import reverse
-
 import pytest
+from django.urls import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
@@ -30,10 +29,14 @@ class TestLogEntryView:
         self.user_without_perms = UserFactory(partner=self.partner_2)
 
         self.program_1 = ProgramFactory(
-            name="Program 1", business_area=self.afghanistan, pk="ad17c53d-11b0-4e9b-8407-2e034f03fd31"
+            name="Program 1",
+            business_area=self.afghanistan,
+            pk="ad17c53d-11b0-4e9b-8407-2e034f03fd31",
         )
         self.program_2 = ProgramFactory(
-            name="Program 2", business_area=self.afghanistan, pk="c74612a1-212c-4148-be5b-4b41d20e623c"
+            name="Program 2",
+            business_area=self.afghanistan,
+            pk="c74612a1-212c-4148-be5b-4b41d20e623c",
         )
         self.grv = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -106,11 +109,17 @@ class TestLogEntryView:
         # per Program
         self.url_list_per_program = reverse(
             "api:activity-logs:activity-logs-per-program-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_1.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_1.slug,
+            },
         )
         self.url_count_per_program = reverse(
             "api:activity-logs:activity-logs-per-program-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_1.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_1.slug,
+            },
         )
         self.url_choices_per_program = reverse(
             "api:activity-logs:activity-logs-per-program-log-entry-action-choices",
@@ -131,7 +140,10 @@ class TestLogEntryView:
         ],
     )
     def test_activity_logs_list(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_1)
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
@@ -172,7 +184,10 @@ class TestLogEntryView:
         ],
     )
     def test_feedback_get_count(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_1)
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
@@ -196,7 +211,10 @@ class TestLogEntryView:
         ],
     )
     def test_activity_logs_list_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_1)
         response = self.client.get(self.url_list_per_program)
@@ -231,7 +249,10 @@ class TestLogEntryView:
         ],
     )
     def test_feedback_get_count_per_program(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_1)
         response = self.client.get(self.url_count_per_program)

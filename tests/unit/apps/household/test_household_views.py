@@ -1,14 +1,13 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
+import pytest
+from constance.test import override_config
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-
-import pytest
-from constance.test import override_config
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
@@ -59,11 +58,17 @@ class TestHouseholdList:
 
         self.list_url = reverse(
             "api:households:households-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         self.count_url = reverse(
             "api:households:households-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
 
         self.partner = PartnerFactory(name="TestPartner")
@@ -132,7 +137,10 @@ class TestHouseholdList:
             assert household_result["id"] == str(household.id)
             assert household_result["unicef_id"] == household.unicef_id
             assert household_result["head_of_household"] == household.head_of_household.full_name
-            assert household_result["admin1"] == {"id": str(household.admin1.id), "name": household.admin1.name}
+            assert household_result["admin1"] == {
+                "id": str(household.admin1.id),
+                "name": household.admin1.name,
+            }
             assert household_result["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
@@ -203,7 +211,10 @@ class TestHouseholdList:
         program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
         list_url = reverse(
             "api:households:households-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": program.slug,
+            },
         )
         create_user_role_with_permissions(
             user=self.user,
@@ -219,7 +230,9 @@ class TestHouseholdList:
         assert len(response.data["results"]) == 0
 
     def test_household_list_with_admin_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -257,7 +270,9 @@ class TestHouseholdList:
         assert str(household_different_areas.id) not in response_ids
 
     def test_household_list_caching(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -313,7 +328,12 @@ class TestHouseholdList:
             assert response.has_header("etag")
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 1
-            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
+            assert etag_fourth_call not in [
+                etag,
+                etag_second_call,
+                etag_third_call,
+                etag_changed_areas,
+            ]
             assert len(ctx.captured_queries) == 17
 
         # no change - use cache
@@ -329,7 +349,10 @@ class TestHouseholdList:
         program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
         list_url = reverse(
             "api:households:households-all-flex-fields-attributes",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": program.slug,
+            },
         )
         create_user_role_with_permissions(
             user=self.user,
@@ -361,7 +384,10 @@ class TestHouseholdList:
 
         list_url = reverse(
             "api:households:households-all-accountability-communication-message-recipients",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         create_user_role_with_permissions(
             user=self.user,
@@ -402,7 +428,10 @@ class TestHouseholdList:
     def test_household_recipients(self, create_user_role_with_permissions: Any) -> None:
         list_url = reverse(
             "api:households:households-recipients",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         create_user_role_with_permissions(
             user=self.user,
@@ -419,7 +448,11 @@ class TestHouseholdList:
 
         # filter by 'recipient_id'
         response = self.api_client.get(
-            list_url, {"message_id": str(msg_obj.pk), "recipient_id": str(self.household1.head_of_household.pk)}
+            list_url,
+            {
+                "message_id": str(msg_obj.pk),
+                "recipient_id": str(self.household1.head_of_household.pk),
+            },
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
@@ -529,10 +562,22 @@ class TestHouseholdDetail:
             "id": str(self.individuals[0].id),
             "full_name": self.individuals[0].full_name,
         }
-        assert data["admin1"] == {"id": str(self.household.admin1.id), "name": self.household.admin1.name}
-        assert data["admin2"] == {"id": str(self.household.admin2.id), "name": self.household.admin2.name}
-        assert data["admin3"] == {"id": str(self.household.admin3.id), "name": self.household.admin3.name}
-        assert data["admin4"] == {"id": str(self.household.admin4.id), "name": self.household.admin4.name}
+        assert data["admin1"] == {
+            "id": str(self.household.admin1.id),
+            "name": self.household.admin1.name,
+        }
+        assert data["admin2"] == {
+            "id": str(self.household.admin2.id),
+            "name": self.household.admin2.name,
+        }
+        assert data["admin3"] == {
+            "id": str(self.household.admin3.id),
+            "name": self.household.admin3.name,
+        }
+        assert data["admin4"] == {
+            "id": str(self.household.admin4.id),
+            "name": self.household.admin4.name,
+        }
         assert data["program"] == self.household.program.name
         assert data["country"] == self.household.country.name
         assert data["country_origin"] == self.household.country_origin.name
@@ -698,7 +743,13 @@ class TestHouseholdMembers:
         self.user = UserFactory(partner=self.partner)
         self.api_client = api_client(self.user)
 
-        self.household1, (self.individual1_1, self.individual1_2) = create_household_and_individuals(
+        (
+            self.household1,
+            (
+                self.individual1_1,
+                self.individual1_2,
+            ),
+        ) = create_household_and_individuals(
             household_data={
                 "program": self.program,
                 "business_area": self.afghanistan,
@@ -714,7 +765,13 @@ class TestHouseholdMembers:
                 },
             ],
         )
-        self.household2, (self.individual2_1, self.individual2_2) = create_household_and_individuals(
+        (
+            self.household2,
+            (
+                self.individual2_1,
+                self.individual2_2,
+            ),
+        ) = create_household_and_individuals(
             household_data={
                 "program": self.program,
                 "business_area": self.afghanistan,
@@ -1006,14 +1063,20 @@ class TestHouseholdGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 2
 
         response_count = self.api_client.get(
-            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_count_url,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response_count.status_code == status.HTTP_200_OK
         assert response_count.json()["count"] == 2
@@ -1065,7 +1128,10 @@ class TestHouseholdGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
@@ -1094,12 +1160,17 @@ class TestHouseholdGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_household_global_list_area_limits(
-        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+        self,
+        create_user_role_with_permissions: Any,
+        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -1133,7 +1204,10 @@ class TestHouseholdGlobalViewSet:
         )
 
         response = self.api_client.get(
-            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
         )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
@@ -1187,7 +1261,10 @@ class TestHouseholdFilter:
         self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
         self.list_url = reverse(
             "api:households:households-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
         )
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
@@ -1305,9 +1382,21 @@ class TestHouseholdFilter:
             individuals_data=[{}, {}],
         )
         hoh_household_id_card = individuals_id_card[0]
-        DocumentFactory(individual=hoh_household_passport1, type=document_passport, document_number="123")
-        DocumentFactory(individual=hoh_household_passport2, type=document_passport, document_number="456")
-        DocumentFactory(individual=hoh_household_id_card, type=document_id_card, document_number="123")
+        DocumentFactory(
+            individual=hoh_household_passport1,
+            type=document_passport,
+            document_number="123",
+        )
+        DocumentFactory(
+            individual=hoh_household_passport2,
+            type=document_passport,
+            document_number="456",
+        )
+        DocumentFactory(
+            individual=hoh_household_id_card,
+            type=document_id_card,
+            document_number="123",
+        )
         response = self.api_client.get(self.list_url, {"document_number": "123", "document_type": "passport"})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
@@ -1449,10 +1538,34 @@ class TestHouseholdFilter:
     @pytest.mark.parametrize(
         ("filters", "household1_data", "household2_data", "hoh_1_data", "hoh_2_data"),
         [
-            ({"search": "HH-123"}, {"unicef_id": "HH-123"}, {"unicef_id": "HH-321"}, {}, {}),
-            ({"search": "John"}, {}, {}, {"full_name": "John Doe"}, {"full_name": "Jane Doe"}),
-            ({"search": "IND-123"}, {}, {}, {"unicef_id": "IND-123"}, {"unicef_id": "IND-321"}),
-            ({"search": "123456789"}, {}, {}, {"phone_no": "123456789"}, {"phone_no": "987654321"}),
+            (
+                {"search": "HH-123"},
+                {"unicef_id": "HH-123"},
+                {"unicef_id": "HH-321"},
+                {},
+                {},
+            ),
+            (
+                {"search": "John"},
+                {},
+                {},
+                {"full_name": "John Doe"},
+                {"full_name": "Jane Doe"},
+            ),
+            (
+                {"search": "IND-123"},
+                {},
+                {},
+                {"unicef_id": "IND-123"},
+                {"unicef_id": "IND-321"},
+            ),
+            (
+                {"search": "123456789"},
+                {},
+                {},
+                {"phone_no": "123456789"},
+                {"phone_no": "987654321"},
+            ),
             (
                 {"search": "123456789"},
                 {},
@@ -1460,12 +1573,29 @@ class TestHouseholdFilter:
                 {"phone_no_alternative": "123 456 789"},
                 {"phone_no_alternative": "987 654 321"},
             ),
-            ({"search": "HOPE-123"}, {"detail_id": "HOPE-123"}, {"detail_id": "HOPE-321"}, {}, {}),
-            ({"search": "456"}, {"program_registration_id": "456"}, {"program_registration_id": "123"}, {}, {}),
+            (
+                {"search": "HOPE-123"},
+                {"detail_id": "HOPE-123"},
+                {"detail_id": "HOPE-321"},
+                {},
+                {},
+            ),
+            (
+                {"search": "456"},
+                {"program_registration_id": "456"},
+                {"program_registration_id": "123"},
+                {},
+                {},
+            ),
         ],
     )
     def test_1_search(
-        self, filters: Dict, household1_data: Dict, household2_data: Dict, hoh_1_data: Dict, hoh_2_data: Dict
+        self,
+        filters: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
+        hoh_1_data: Dict,
+        hoh_2_data: Dict,
     ) -> None:
         household1, household2 = self._create_test_households(
             household1_data=household1_data,

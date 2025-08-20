@@ -357,7 +357,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 },
             ],
         )
-        household_already_in_program, individuals_already_in_program = create_household_and_individuals(
+        (
+            household_already_in_program,
+            individuals_already_in_program,
+        ) = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.rdi_other,
                 "program": self.program_from,
@@ -369,7 +372,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 }
             ],
         )
-        household_already_in_program_repr, individuals_already_in_program_repr = create_household_and_individuals(
+        (
+            household_already_in_program_repr,
+            individuals_already_in_program_repr,
+        ) = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.rdi_other,
                 "program": self.program_to,
@@ -643,7 +649,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
         assert (
             Account.all_objects.filter(
-                rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_without_import_from_ids
+                rdi_merge_status=MergeStatusModel.PENDING,
+                individual__program=program_to_without_import_from_ids,
             ).count()
             == 1
         )
@@ -672,7 +679,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
         assert (
             Account.all_objects.filter(
-                rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_import_from_ids
+                rdi_merge_status=MergeStatusModel.PENDING,
+                individual__program=program_to_import_from_ids,
             ).count()
             == 1
         )
@@ -827,7 +835,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )  # 3 primary roles from households + 1 alternate role from household_1 (alternate from household_2 is excluded)
         assert (
             Account.all_objects.filter(
-                rdi_merge_status=MergeStatusModel.PENDING, individual__program=program_to_exclude_external_collectors
+                rdi_merge_status=MergeStatusModel.PENDING,
+                individual__program=program_to_exclude_external_collectors,
             ).count()
             == 1
         )

@@ -2,7 +2,6 @@ import logging
 from typing import TYPE_CHECKING
 
 from django.core.cache import cache
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 

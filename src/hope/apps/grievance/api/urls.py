@@ -17,7 +17,9 @@ program_nested_router.register(
 )
 business_area_nested_router = get_business_area_nested_router()
 business_area_nested_router.register(
-    "grievance-tickets", GrievanceTicketGlobalViewSet, basename="grievance-tickets-global"
+    "grievance-tickets",
+    GrievanceTicketGlobalViewSet,
+    basename="grievance-tickets-global",
 )
 
 

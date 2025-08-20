@@ -2,16 +2,15 @@ from datetime import timedelta
 from random import choice
 from typing import Callable
 
-from django.utils import timezone
-
 import factory
 import pytest
+from django.utils import timezone
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
-from selenium.webdriver.common.by import By
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+from selenium.webdriver.common.by import By
 
 from hope.apps.dashboard.services import DashboardDataCache
 from hope.apps.program.models import BeneficiaryGroup
@@ -24,7 +23,14 @@ class ModifiedPaymentFactory(PaymentFactory):
     """
 
     parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
-    status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
+    status = factory.Iterator(
+        [
+            "Transaction Successful",
+            "Distribution Successful",
+            "Partially Distributed",
+            "Pending",
+        ]
+    )
     delivered_quantity = factory.Faker("random_int", min=100, max=500)
     delivered_quantity_usd = factory.Faker("random_int", min=100, max=200)
     delivery_date = factory.Faker("date_time_this_month", before_now=True)
@@ -38,7 +44,11 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     household_args = {
         "business_area": business_area,
-        "program": ProgramFactory(business_area=business_area, status="Active", beneficiary_group=beneficiary_group),
+        "program": ProgramFactory(
+            business_area=business_area,
+            status="Active",
+            beneficiary_group=beneficiary_group,
+        ),
         "size": 5,
         "children_count": 2,
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),

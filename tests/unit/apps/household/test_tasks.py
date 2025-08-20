@@ -1,6 +1,5 @@
-from django.test import TestCase
-
 import pytest
+from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -25,10 +24,14 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         user = UserFactory()
         cls.str_user_id = str(user.pk)
         cls.program_source = ProgramFactory(
-            status=Program.ACTIVE, name="Program source", business_area=cls.business_area
+            status=Program.ACTIVE,
+            name="Program source",
+            business_area=cls.business_area,
         )
         cls.program_target = ProgramFactory(
-            status=Program.ACTIVE, name="Program target", business_area=cls.business_area
+            status=Program.ACTIVE,
+            name="Program target",
+            business_area=cls.business_area,
         )
 
         cls.household1, individuals1 = create_household_and_individuals(
@@ -69,7 +72,10 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
                 },
             ],
         )
-        cls.household2_repr_in_target_program, individuals2_repr = create_household_and_individuals(
+        (
+            cls.household2_repr_in_target_program,
+            individuals2_repr,
+        ) = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
                 "program": cls.program_target,

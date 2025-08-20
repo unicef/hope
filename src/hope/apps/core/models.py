@@ -1,5 +1,6 @@
 from typing import Any, Optional
 
+import mptt
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
@@ -8,22 +9,20 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
-
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from fernet_fields import EncryptedCharField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
+from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 
-import mptt
 from hope.apps.core.utils import unique_slugify
 from hope.apps.utils.models import (
     SoftDeletionTreeManager,
     SoftDeletionTreeModel,
     TimeStampedUUIDModel,
 )
-from mptt.fields import TreeForeignKey
 
 
 class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
@@ -82,11 +81,17 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True,
     )
     partners = models.ManyToManyField(
-        to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
+        to="account.Partner",
+        through=BusinessAreaPartnerThrough,
+        related_name="business_areas",
     )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
     office_country = models.ForeignKey(
-        "geo.Country", related_name="business_area", null=True, blank=True, on_delete=models.SET_NULL
+        "geo.Country",
+        related_name="business_area",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     payment_countries = models.ManyToManyField("geo.Country", related_name="payment_business_areas")
 
@@ -220,7 +225,11 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
     name = models.CharField(max_length=255)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
+        "core.FlexibleAttributeGroup",
+        on_delete=models.CASCADE,
+        related_name="flex_attributes",
+        null=True,
+        blank=True,
     )
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
@@ -246,7 +255,9 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         constraints = [
             models.UniqueConstraint(fields=("name", "program"), name="unique_name_program"),
             models.UniqueConstraint(
-                fields=("name",), condition=Q(program__isnull=True), name="unique_name_without_program"
+                fields=("name",),
+                condition=Q(program__isnull=True),
+                name="unique_name_without_program",
             ),
         ]
 
@@ -530,7 +541,8 @@ class DataCollectingType(TimeStampedModel):
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     deprecated = models.BooleanField(
-        default=False, help_text="Cannot be used in new programs, totally hidden in UI, only admin have access"
+        default=False,
+        help_text="Cannot be used in new programs, totally hidden in UI, only admin have access",
     )
     individual_filters_available = models.BooleanField(default=False)
     household_filters_available = models.BooleanField(default=True)

@@ -82,7 +82,11 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
     def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
-            individual_args={"full_name": "John Wilson", "given_name": "John", "family_name": "Wilson"},
+            individual_args={
+                "full_name": "John Wilson",
+                "given_name": "John",
+                "family_name": "Wilson",
+            },
         )
         individual = individuals[0]
 

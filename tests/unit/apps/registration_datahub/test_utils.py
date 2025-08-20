@@ -4,9 +4,7 @@ from pathlib import Path
 from django.conf import settings
 from django.test import TestCase
 
-from hope.apps.registration_datahub.utils import (
-    calculate_hash_for_kobo_submission,
-)
+from hope.apps.registration_datahub.utils import calculate_hash_for_kobo_submission
 
 
 class TestRdiUtils(TestCase):

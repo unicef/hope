@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
-
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
 from hope.apps.account.models import USER_STATUS_CHOICES, Partner, Role
@@ -74,9 +73,15 @@ class UsersFilter(FilterSet):
         business_area = Program.objects.get(slug=value).business_area
         return qs.filter(
             Q(partner__role_assignments__program__slug=value)
-            | Q(partner__role_assignments__program=None, partner__role_assignments__business_area=business_area)
+            | Q(
+                partner__role_assignments__program=None,
+                partner__role_assignments__business_area=business_area,
+            )
             | Q(role_assignments__program__slug=value)
-            | Q(role_assignments__program=None, role_assignments__business_area=business_area)
+            | Q(
+                role_assignments__program=None,
+                role_assignments__business_area=business_area,
+            )
         )
 
     def partners_filter(self, qs: "QuerySet", name: str, values: list["UUID"]) -> "QuerySet[User]":

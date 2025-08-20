@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Any, Callable
 
-from django.utils import timezone
-
 import pytest
+from django.utils import timezone
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -70,7 +69,10 @@ class TestGrievanceTicketFilters:
         )
         self.list_url = reverse(
             "api:grievance:grievance-tickets-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_afghanistan1.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_afghanistan1.slug,
+            },
         )
 
         self.partner = PartnerFactory(name="TestPartner")
@@ -95,7 +97,10 @@ class TestGrievanceTicketFilters:
         self.country = CountryFactory()
         self.admin_type = AreaTypeFactory(country=self.country, area_level=1)
         self.area1 = AreaFactory(
-            parent=None, p_code="AF01", area_type=self.admin_type, id="d19f0e24-a411-4f0e-9404-3d54b5a5c578"
+            parent=None,
+            p_code="AF01",
+            area_type=self.admin_type,
+            id="d19f0e24-a411-4f0e-9404-3d54b5a5c578",
         )
         self.area2 = AreaFactory(parent=self.area1, p_code="AF0101", area_type=self.admin_type)
         self.area2_2 = AreaFactory(parent=None, p_code="AF010101", area_type=self.admin_type)
@@ -567,7 +572,12 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        ("filter_value1", "filter_value2", "expected_count_for_program", "expected_count_for_global"),
+        (
+            "filter_value1",
+            "filter_value2",
+            "expected_count_for_program",
+            "expected_count_for_global",
+        ),
         [
             ("drivers_license", "111222333", 2, 5),
             ("birth_certificate", "55555555", 2, 5),
@@ -584,10 +594,12 @@ class TestGrievanceTicketFilters:
         expected_count_for_global: int,
     ) -> None:
         response_for_global = self.api_client.get(
-            self.list_global_url, {"document_type": filter_value1, "document_number": filter_value2}
+            self.list_global_url,
+            {"document_type": filter_value1, "document_number": filter_value2},
         )
         response_for_program = self.api_client.get(
-            self.list_url, {"document_type": filter_value1, "document_number": filter_value2}
+            self.list_url,
+            {"document_type": filter_value1, "document_number": filter_value2},
         )
         for response, expected_count in [
             (response_for_program, expected_count_for_program),
@@ -703,7 +715,11 @@ class TestGrievanceTicketFilters:
     @pytest.mark.parametrize(
         ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
-            ("f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6,f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0", 1, 1),
+            (
+                "f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6,f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0",
+                1,
+                1,
+            ),
             ("f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0", 0, 0),
         ],
     )
@@ -876,7 +892,12 @@ class TestGrievanceTicketFilters:
         )
 
     @pytest.mark.parametrize(
-        ("filter_expression", "filter_value", "expected_count_for_program", "expected_count_for_global"),
+        (
+            "filter_expression",
+            "filter_value",
+            "expected_count_for_program",
+            "expected_count_for_global",
+        ),
         [
             ("created_at_after", "2020-07-15", 3, 5),
             ("created_at_before", "2020-07-15", 3, 4),
@@ -965,15 +986,24 @@ class TestGrievanceTicketFilters:
             )
         if not has_full_area_access:
             set_admin_area_limits_in_program(
-                self.partner, self.program_afghanistan1, [self.area1, self.area2, self.area2_2]
+                self.partner,
+                self.program_afghanistan1,
+                [self.area1, self.area2, self.area2_2],
             )
 
         response_for_program = self.api_client.get(
-            self.list_url, {"is_cross_area": filter_value, "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION}
+            self.list_url,
+            {
+                "is_cross_area": filter_value,
+                "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            },
         )
         response_for_global = self.api_client.get(
             self.list_global_url,
-            {"is_cross_area": filter_value, "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION},
+            {
+                "is_cross_area": filter_value,
+                "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            },
         )
 
         for response, is_filtered in [
@@ -993,7 +1023,11 @@ class TestGrievanceTicketFilters:
                 assert str(self.grievance_tickets[1].id) in result_ids
 
     def _test_filter(
-        self, filter_name: str, filter_value: Any, expected_count_for_program: int, expected_count_for_global: int
+        self,
+        filter_name: str,
+        filter_value: Any,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
     ) -> None:
         response_for_global = self.api_client.get(self.list_global_url, {filter_name: filter_value})
         response_for_program = self.api_client.get(self.list_url, {filter_name: filter_value})

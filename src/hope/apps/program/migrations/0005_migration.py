@@ -14,7 +14,10 @@ class Migration(migrations.Migration):
             model_name="program",
             name="sanction_lists",
             field=models.ManyToManyField(
-                blank=True, help_text="Program sanction lists", related_name="programs", to="sanction_list.SanctionList"
+                blank=True,
+                help_text="Program sanction lists",
+                related_name="programs",
+                to="sanction_list.SanctionList",
             ),
         ),
     ]

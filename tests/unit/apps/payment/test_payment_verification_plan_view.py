@@ -2,12 +2,11 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, List, Optional
 
+import pytest
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -48,7 +47,9 @@ def generate_valid_xlsx_file(
     wb.save(file_stream)
     file_stream.seek(0)
     return SimpleUploadedFile(
-        name, file_stream.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        name,
+        file_stream.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -121,31 +122,40 @@ class TestPaymentVerificationViewSet:
         )
         self.url_details = reverse("api:payments:payment-verifications-detail", kwargs=url_kwargs)
         self.url_create = reverse(
-            "api:payments:payment-verifications-create-payment-verification-plan", kwargs=url_kwargs
+            "api:payments:payment-verifications-create-payment-verification-plan",
+            kwargs=url_kwargs,
         )
         self.url_update = reverse(
-            "api:payments:payment-verifications-update-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-update-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_activate = reverse(
-            "api:payments:payment-verifications-activate-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-activate-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_finish = reverse(
-            "api:payments:payment-verifications-finish-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-finish-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_discard = reverse(
-            "api:payments:payment-verifications-discard-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-discard-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_invalid = reverse(
-            "api:payments:payment-verifications-invalid-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-invalid-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_delete = reverse(
-            "api:payments:payment-verifications-delete-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-delete-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_export_xlsx = reverse(
-            "api:payments:payment-verifications-export-xlsx-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-export-xlsx-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
         self.url_import_xlsx = reverse(
-            "api:payments:payment-verifications-import-xlsx-payment-verification-plan", kwargs=url_kwargs_id
+            "api:payments:payment-verifications-import-xlsx-payment-verification-plan",
+            kwargs=url_kwargs_id,
         )
 
     @pytest.mark.parametrize(
@@ -155,7 +165,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_get_list(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_get_list(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_list)
 
@@ -174,7 +189,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_details(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_details(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.get(self.url_details)
 
@@ -200,9 +220,19 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_create_pvp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_create_pvp(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-        PaymentFactory(parent=self.pp, status=Payment.STATUS_SUCCESS, delivered_quantity=111, entitlement_quantity=112)
+        PaymentFactory(
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=111,
+            entitlement_quantity=112,
+        )
         response = self.client.post(
             self.url_create,
             {
@@ -234,7 +264,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_update_pvp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_update_pvp(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.patch(
             self.url_update,
@@ -268,7 +303,10 @@ class TestPaymentVerificationViewSet:
         ],
     )
     def test_pvp_activate(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(self.url_activate, {"version": self.pvp.version}, format="json")
@@ -287,7 +325,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pvp_finish(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pvp_finish(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
         self.pvp.save()
@@ -302,7 +345,10 @@ class TestPaymentVerificationViewSet:
 
     def test_pvp_finish_validation_error(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PAYMENT_VERIFICATION_FINISH], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PAYMENT_VERIFICATION_FINISH],
+            self.afghanistan,
+            self.program_active,
         )
         response = self.client.post(self.url_finish, {"version": self.pvp.version}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -315,7 +361,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pvp_discard(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pvp_discard(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
         self.pvp.save()
@@ -335,7 +386,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pvp_invalid(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pvp_invalid(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
         self.pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
@@ -357,7 +413,12 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pvp_delete(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pvp_delete(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         response = self.client.post(self.url_delete, {"version": self.pvp.version}, format="json")
         assert response.status_code == expected_status
@@ -375,7 +436,10 @@ class TestPaymentVerificationViewSet:
         ],
     )
     def test_pvp_export_xlsx(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
@@ -402,7 +466,10 @@ class TestPaymentVerificationViewSet:
         ],
     )
     def test_pvp_import_xlsx(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
@@ -412,7 +479,9 @@ class TestPaymentVerificationViewSet:
         file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/unordered_columns_1.xlsx").read_bytes())
         file.name = "unordered_columns_1.xlsx"
         response = self.client.post(
-            self.url_import_xlsx, {"version": self.pvp.version, "file": file}, format="multipart"
+            self.url_import_xlsx,
+            {"version": self.pvp.version, "file": file},
+            format="multipart",
         )
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
@@ -430,7 +499,10 @@ class TestPaymentVerificationViewSet:
         ],
     )
     def test_verifications_list(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         url = reverse(
             "api:payments:verification-records-list",
@@ -464,7 +536,10 @@ class TestPaymentVerificationViewSet:
         ],
     )
     def test_verification_details(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         url = reverse(
             "api:payments:verification-records-detail",
@@ -492,12 +567,21 @@ class TestPaymentVerificationViewSet:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST], status.HTTP_200_OK),
+            (
+                [
+                    Permissions.PAYMENT_VERIFICATION_VERIFY,
+                    Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
+                ],
+                status.HTTP_200_OK,
+            ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_update_verification(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         url = reverse(
             "api:payments:verification-records-detail",
@@ -515,7 +599,11 @@ class TestPaymentVerificationViewSet:
 
         response = self.client.patch(
             url,
-            {"version": self.verification_1.version, "received_amount": 123.22, "received": True},
+            {
+                "version": self.verification_1.version,
+                "received_amount": 123.22,
+                "received": True,
+            },
             format="multipart",
         )
         assert response.status_code == expected_status

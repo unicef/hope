@@ -1,10 +1,9 @@
 import datetime
 
+import pytz
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
-import pytz
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -61,7 +60,9 @@ class TestCzechRepublicRegistrationService(TestCase):
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
         cls.program = ProgramFactory(
-            status="ACTIVE", data_collecting_type=cls.data_collecting_type, biometric_deduplication_enabled=True
+            status="ACTIVE",
+            data_collecting_type=cls.data_collecting_type,
+            biometric_deduplication_enabled=True,
         )
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)

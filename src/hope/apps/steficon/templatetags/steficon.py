@@ -2,8 +2,6 @@ import json
 from typing import Any
 
 from django import template
-
-
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 

@@ -1,7 +1,4 @@
-from hope.api.caches import (
-    BusinessAreaAndProgramKeyBitMixin,
-    KeyConstructorMixin,
-)
+from hope.api.caches import BusinessAreaAndProgramKeyBitMixin, KeyConstructorMixin
 
 
 class RDIListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):

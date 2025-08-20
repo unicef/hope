@@ -1,6 +1,10 @@
 import logging
 from typing import Any
 
+from admin_extra_buttons.decorators import button
+from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
+from adminactions.export import ForeignKeysCollector
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
 from django.contrib.auth import get_user_model
@@ -11,11 +15,6 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
-
-from admin_extra_buttons.decorators import button
-from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
-from adminactions.export import ForeignKeysCollector
-from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
@@ -122,5 +121,8 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+            collector.data,
+            use_natural_foreign_keys=True,
+            use_natural_primary_keys=True,
+            indent=3,
         )

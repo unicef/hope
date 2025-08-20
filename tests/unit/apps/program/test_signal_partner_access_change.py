@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -56,11 +55,15 @@ class TestPartnerAccessChangeSignal(TestCase):
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
         cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+            name="Area not in AFG",
+            area_type=cls.area_type_other,
+            p_code="AREA-NOT-IN-AFG",
         )
 
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.NONE_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            partner_access=Program.NONE_PARTNERS_ACCESS,
         )
 
     def test_none_partners_access(self) -> None:
@@ -71,7 +74,9 @@ class TestPartnerAccessChangeSignal(TestCase):
         )  # UNICEF HQ and UNICEF Partner for afghanistan
         assert (
             RoleAssignment.objects.filter(
-                business_area=self.business_area, program=None, partner__name="UNICEF HQ"
+                business_area=self.business_area,
+                program=None,
+                partner__name="UNICEF HQ",
             ).count()
             == 1
         )
@@ -152,7 +157,9 @@ class TestPartnerAccessChangeSignal(TestCase):
         )  # UNICEF HQ and UNICEF Partner for afghanistan
         assert (
             RoleAssignment.objects.filter(
-                business_area=self.business_area, program=None, partner__name="UNICEF HQ"
+                business_area=self.business_area,
+                program=None,
+                partner__name="UNICEF HQ",
             ).count()
             == 1
         )

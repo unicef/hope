@@ -2,32 +2,28 @@ import json
 from decimal import Decimal
 from typing import Any
 
+from django.db import transaction
 from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema_field
-
 from rest_framework import serializers
-from django.db import transaction
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.currencies import CURRENCY_CHOICES
-from hope.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    to_choice_object,
-)
+from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdSmallSerializer,
 )
 from hope.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
+    IndividualIdNameSerializer,
     IndividualListSerializer,
     IndividualSmallSerializer,
-    IndividualIdNameSerializer,
 )
 from hope.apps.household.models import (
     STATUS_ACTIVE,
@@ -88,7 +84,10 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
-        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]:
+        if payment_plan.status not in [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+        ]:
             raise serializers.ValidationError("Payment plan must be within status OPEN or LOCKED.")
 
         if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
@@ -854,7 +853,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         group = (
             FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
             .distinct()
-            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+            .prefetch_related(
+                Prefetch(
+                    "funds_commitment_items",
+                    queryset=available_items_qs,
+                    to_attr="filtered_items",
+                )
+            )
         ).first()
 
         if group:
@@ -875,7 +880,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         groups = (
             FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
             .distinct()
-            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+            .prefetch_related(
+                Prefetch(
+                    "funds_commitment_items",
+                    queryset=available_items_qs,
+                    to_attr="filtered_items",
+                )
+            )
         )
 
         return [

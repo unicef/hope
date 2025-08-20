@@ -1,17 +1,14 @@
 import logging
 from typing import TYPE_CHECKING
 
+from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import messages
 from django.db import transaction
 from django.db.transaction import atomic
 from django.template.response import TemplateResponse
 
-from admin_extra_buttons.decorators import button
-
-from hope.apps.payment.celery_tasks import (
-    payment_plan_apply_steficon_hh_selection,
-)
+from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.steficon.debug import get_error_info
 
@@ -41,7 +38,10 @@ try:  # pragma: no cover
         number_of_records = forms.IntegerField(help_text="Only test # records")
 
     class SteficonExecutorMixin:
-        @button(visible=lambda o, r: o.status == PaymentPlan.Status.TP_STEFICON_ERROR, permission="steficon.rerun_rule")
+        @button(
+            visible=lambda o, r: o.status == PaymentPlan.Status.TP_STEFICON_ERROR,
+            permission="steficon.rerun_rule",
+        )
         def re_run_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             tp = context["original"]
@@ -64,7 +64,11 @@ try:  # pragma: no cover
             if request.method == "GET":
                 context["title"] = "Test Steficon rule"
                 context["form"] = RuleTestForm(
-                    initial={"number_of_records": 100, "dry_run": True, "rule": self.object.steficon_rule}
+                    initial={
+                        "number_of_records": 100,
+                        "dry_run": True,
+                        "rule": self.object.steficon_rule,
+                    }
                 )
             else:
                 form = RuleTestForm(request.POST)
@@ -80,7 +84,12 @@ try:  # pragma: no cover
                         entries = self.object.selections.all()[:records]
                         if entries:
                             for entry in entries:
-                                result = rule.execute({"household": entry.household, "payment_plan": self.object})
+                                result = rule.execute(
+                                    {
+                                        "household": entry.household,
+                                        "payment_plan": self.object,
+                                    }
+                                )
                                 entry.vulnerability_score = result.value
                                 elements.append(entry)
                             with atomic():

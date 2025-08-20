@@ -1,12 +1,7 @@
 import calendar
 import json
 from collections import defaultdict
-from typing import (
-    Any,
-    Protocol,
-    TypedDict,
-    cast,
-)
+from typing import Any, Protocol, TypedDict, cast
 from uuid import UUID
 
 from django.core.cache import cache
@@ -118,7 +113,14 @@ class DashboardCacheBase(Protocol):
                 conflicted=False,
                 excluded=False,
             )
-            .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
+            .exclude(
+                status__in=[
+                    "Transaction Erroneous",
+                    "Not Distributed",
+                    "Force failed",
+                    "Manually Cancelled",
+                ]
+            )
         )
 
         if business_area:
@@ -136,14 +138,21 @@ class DashboardCacheBase(Protocol):
 
         return base_queryset.annotate(
             payment_quantity_usd=Coalesce(
-                F("delivered_quantity_usd"), F("entitlement_quantity_usd"), Value(0.0), output_field=DecimalField()
+                F("delivered_quantity_usd"),
+                F("entitlement_quantity_usd"),
+                Value(0.0),
+                output_field=DecimalField(),
             ),
             payment_quantity=Coalesce(
-                F("delivered_quantity"), F("entitlement_quantity"), Value(0.0), output_field=DecimalField()
+                F("delivered_quantity"),
+                F("entitlement_quantity"),
+                Value(0.0),
+                output_field=DecimalField(),
             ),
             total_planned_usd_for_this_payment=models.Case(
                 models.When(
-                    parent__status__in=PLANNED_STATUSES, then=Coalesce(F("entitlement_quantity_usd"), Value(0.0))
+                    parent__status__in=PLANNED_STATUSES,
+                    then=Coalesce(F("entitlement_quantity_usd"), Value(0.0)),
                 ),
                 default=Value(0.0),
                 output_field=DecimalField(),
@@ -154,8 +163,16 @@ class DashboardCacheBase(Protocol):
             region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             currency_code=Coalesce(F("currency"), Value("UNK")),
             admin1_name=Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
-            program_name=Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
-            sector_name=Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
+            program_name=Coalesce(
+                F("program__name"),
+                F("household__program__name"),
+                Value("Unknown Program"),
+            ),
+            sector_name=Coalesce(
+                F("program__sector"),
+                F("household__program__sector"),
+                Value("Unknown Sector"),
+            ),
             fsp_name=Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
             delivery_type_name=Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
             payment_status=Coalesce(F("status"), Value("Unknown Status")),
@@ -237,8 +254,16 @@ class DashboardCacheBase(Protocol):
             "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             "currency_code": Coalesce(F("currency"), Value("UNK")),
             "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
-            "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
-            "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
+            "program_name": Coalesce(
+                F("program__name"),
+                F("household__program__name"),
+                Value("Unknown Program"),
+            ),
+            "sector_name": Coalesce(
+                F("program__sector"),
+                F("household__program__sector"),
+                Value("Unknown Sector"),
+            ),
             "fsp_name": Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
             "delivery_type_name": Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
             "payment_status": Coalesce(F("status"), Value("Unknown Status")),
@@ -312,7 +337,10 @@ class DashboardDataCache(DashboardCacheBase):
 
         if not household_ids:
             final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
-            serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_result_list, many=True).data)
+            serialized_data = cast(
+                "list[dict[str, Any]]",
+                DashboardBaseSerializer(final_result_list, many=True).data,
+            )
             cls.store_data(business_area_slug, serialized_data)
             return serialized_data
 
@@ -320,7 +348,10 @@ class DashboardDataCache(DashboardCacheBase):
 
         if not base_payments_qs.exists() and is_partial_refresh_attempt:
             final_result_list = existing_data_for_other_years
-            serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_result_list, many=True).data)
+            serialized_data = cast(
+                "list[dict[str, Any]]",
+                DashboardBaseSerializer(final_result_list, many=True).data,
+            )
             cls.store_data(business_area_slug, serialized_data)
             return serialized_data
 
@@ -408,7 +439,17 @@ class DashboardDataCache(DashboardCacheBase):
                 current_summary["_seen_households"].add(household_id)
 
         newly_processed_result_list = []
-        for (year, month, admin1, program, sector, fsp, delivery_type, status, currency), totals in summary.items():
+        for (
+            year,
+            month,
+            admin1,
+            program,
+            sector,
+            fsp,
+            delivery_type,
+            status,
+            currency,
+        ), totals in summary.items():
             month_name = "Unknown"
             if month and 1 <= month <= 12:
                 month_name = calendar.month_name[month]
@@ -442,7 +483,10 @@ class DashboardDataCache(DashboardCacheBase):
         if is_partial_refresh_attempt:
             final_result_list.extend(existing_data_for_other_years)
 
-        serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_result_list, many=True).data)
+        serialized_data = cast(
+            "list[dict[str, Any]]",
+            DashboardBaseSerializer(final_result_list, many=True).data,
+        )
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
 
@@ -614,6 +658,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         else:
             final_data_to_cache = all_newly_processed_data
 
-        serialized_data = cast("list[dict[str, Any]]", DashboardBaseSerializer(final_data_to_cache, many=True).data)
+        serialized_data = cast(
+            "list[dict[str, Any]]",
+            DashboardBaseSerializer(final_data_to_cache, many=True).data,
+        )
         cls.store_data(identifier, serialized_data)
         return serialized_data

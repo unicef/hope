@@ -1,8 +1,8 @@
-from django.contrib import admin
-from django.db.models import JSONField
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
+from django.contrib import admin
+from django.db.models import JSONField
 from jsoneditor.forms import JSONEditor
 from smart_admin.decorators import smart_register
 

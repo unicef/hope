@@ -3,10 +3,9 @@ from pathlib import Path
 from typing import Any, List
 from unittest.mock import patch
 
+import pytest
 from django.conf import settings
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
@@ -32,14 +31,19 @@ class TestSanctionListIndividualViewSet:
         )
 
         self.url_list = reverse(
-            "api:sanction-list:sanction-list-list", kwargs={"business_area_slug": self.afghanistan.slug}
+            "api:sanction-list:sanction-list-list",
+            kwargs={"business_area_slug": self.afghanistan.slug},
         )
         self.url_list_count = reverse(
-            "api:sanction-list:sanction-list-count", kwargs={"business_area_slug": self.afghanistan.slug}
+            "api:sanction-list:sanction-list-count",
+            kwargs={"business_area_slug": self.afghanistan.slug},
         )
         self.url_details = reverse(
             "api:sanction-list:sanction-list-detail",
-            kwargs={"pk": str(sanction_list_individual.pk), "business_area_slug": self.afghanistan.slug},
+            kwargs={
+                "pk": str(sanction_list_individual.pk),
+                "business_area_slug": self.afghanistan.slug,
+            },
         )
         self.url_check = reverse(
             "api:sanction-list:sanction-list-check-against-sanction-list",
@@ -54,7 +58,10 @@ class TestSanctionListIndividualViewSet:
         ],
     )
     def test_get_sanction_list(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan)
         response = self.client.get(self.url_list)
@@ -79,7 +86,10 @@ class TestSanctionListIndividualViewSet:
         ],
     )
     def test_get_sanction_list_count(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan)
         response = self.client.get(self.url_list_count)
@@ -97,7 +107,10 @@ class TestSanctionListIndividualViewSet:
         ],
     )
     def test_get_sanction_list_details(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan)
         response = self.client.get(self.url_details)
@@ -120,7 +133,10 @@ class TestSanctionListIndividualViewSet:
         ],
     )
     def test_check_against_sanction_list(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan)
 
@@ -142,7 +158,11 @@ class TestSanctionListIndividualViewSet:
 
         error_payload = [{"header": "name", "message": "Invalid value name for user22"}]
 
-        with patch.object(SanctionListIndividualViewSet, "validate", side_effect=XlsxException(error_payload)):
+        with patch.object(
+            SanctionListIndividualViewSet,
+            "validate",
+            side_effect=XlsxException(error_payload),
+        ):
             response = self.client.post(self.url_check, {"file": file}, format="multipart")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST

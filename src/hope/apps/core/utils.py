@@ -9,27 +9,18 @@ from collections.abc import MutableMapping
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generator,
-    Iterable,
-    Optional,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional, Union
 
+import pytz
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Func, Q, Value, F
+from django.db.models import F, Func, Q, Value
 from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
-
-import pytz
-from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
 from rest_framework.exceptions import ValidationError
@@ -39,7 +30,6 @@ from hope.apps.utils.exceptions import log_and_raise
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
     from django.http import HttpHeaders
-
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -244,14 +234,20 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
 
 
 def get_combined_attributes() -> dict:
-    from hope.apps.core.field_attributes.core_fields_attributes import (
-        FieldFactory,
-    )
+    from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import Scope
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
+        **FieldFactory.from_scopes(
+            [
+                Scope.GLOBAL,
+                Scope.XLSX,
+                Scope.KOBO_IMPORT,
+                Scope.HOUSEHOLD_ID,
+                Scope.COLLECTOR,
+            ]
+        )
         .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
@@ -266,7 +262,10 @@ def get_attr_value(name: str, obj: Any, default: Any | None = None) -> Any:
 
 
 def to_choice_object(choices: Iterable) -> list[dict[str, Any]]:
-    return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
+    return sorted(
+        [{"name": name, "value": value} for value, name in choices],
+        key=lambda choice: choice["name"],
+    )
 
 
 def rename_dict_keys(obj: dict | list | Any, convert_func: Callable) -> Any:
@@ -317,7 +316,11 @@ def encode_ids(results: Any, model_name: str, key: str) -> list[dict]:
     return results
 
 
-def to_dict(instance: "Model", fields: list | tuple | None = None, dict_fields: dict | None = None) -> dict[str, Any]:
+def to_dict(
+    instance: "Model",
+    fields: list | tuple | None = None,
+    dict_fields: dict | None = None,
+) -> dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -382,7 +385,6 @@ def build_flex_arg_dict_from_list_if_exists(data_dict: dict, flex_list: list) ->
 class CustomOrderingFilter(OrderingFilter):
     def filter(self, qs: "QuerySet", value: Any) -> "QuerySet":
         from django.db.models.functions import Lower
-
         from django_filters.constants import EMPTY_VALUES
 
         if value in EMPTY_VALUES:
@@ -512,9 +514,7 @@ def update_labels_mapping(csv_file: str) -> None:
     import json
     import re
 
-    from hope.apps.core.field_attributes.core_fields_attributes import (
-        FieldFactory,
-    )
+    from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import Scope
 
     with open(csv_file, newline="") as csv_file_ptr:
@@ -644,7 +644,9 @@ def chart_filters_decoder(filters: dict) -> dict:
 
 
 def chart_create_filter_query(
-    filters: dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+    filters: dict,
+    program_id_path: str = "id",
+    administrative_area_path: str = "admin_areas",
 ) -> dict:
     filter_query = {}
     if program := filters.get("program"):
@@ -659,7 +661,9 @@ def chart_create_filter_query(
 
 
 def chart_create_filter_query_for_payment_verification_gfk(
-    filters: dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+    filters: dict,
+    program_id_path: str = "id",
+    administrative_area_path: str = "admin_areas",
 ) -> Q:
     filter_query = Q()
     if program := filters.get("program"):
@@ -781,7 +785,10 @@ def timezone_datetime(value: Any) -> datetime:
 
 
 def save_data_in_cache(
-    cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Callable | None = None
+    cache_key: str,
+    data_lambda: Callable,
+    timeout: int = 60 * 60 * 24,
+    cache_condition: Callable | None = None,
 ) -> Any:
     cache_data = cache.get(cache_key, "NOT_CACHED")
     if cache_data == "NOT_CACHED":
@@ -912,7 +919,14 @@ class JSONBSet(Func):
     function = "jsonb_set"
     template = "%(function)s(%(expressions)s)"
 
-    def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
+    def __init__(
+        self,
+        expression: Any,
+        path: Any,
+        new_value: Any,
+        create_missing: bool = True,
+        **extra: Any,
+    ) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
 
@@ -938,15 +952,12 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
 
 
 def get_fields_attr_generators(
-    flex_field: bool | None = None, business_area_slug: str | None = None, program_id: str | None = None
+    flex_field: bool | None = None,
+    business_area_slug: str | None = None,
+    program_id: str | None = None,
 ) -> Generator:
-    from hope.apps.core.field_attributes.core_fields_attributes import (
-        FieldFactory,
-    )
-    from hope.apps.core.field_attributes.fields_types import (
-        FILTERABLE_TYPES,
-        Scope,
-    )
+    from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
+    from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
     from hope.apps.core.models import FlexibleAttribute
     from hope.apps.program.models import Program
 

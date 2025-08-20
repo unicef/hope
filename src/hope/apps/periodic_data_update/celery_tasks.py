@@ -56,7 +56,8 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
         with transaction.atomic():
             days = datetime.datetime.now() - datetime.timedelta(days=expiration_days)
             file_qs = FileTemp.objects.filter(
-                content_type=get_content_type_for_model(PeriodicDataUpdateTemplate), created__lt=days
+                content_type=get_content_type_for_model(PeriodicDataUpdateTemplate),
+                created__lt=days,
             )
             if file_qs:
                 # update status

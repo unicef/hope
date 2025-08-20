@@ -1,8 +1,7 @@
 from typing import Any, Callable, Iterable, List, Optional
 
-from django.conf import settings
-
 import pytest
+from django.conf import settings
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.program import ProgramFactory
 
@@ -57,7 +56,9 @@ def create_partner_role_with_permissions() -> Callable:
 
 
 @pytest.fixture
-def create_user_role_with_permissions(set_admin_area_limits_in_program: Any) -> Callable:
+def create_user_role_with_permissions(
+    set_admin_area_limits_in_program: Any,
+) -> Callable:
     def _create_user_role_with_permissions(
         user: User,
         permissions: Iterable,

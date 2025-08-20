@@ -31,12 +31,20 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
                 (
                     "name",
                     django.contrib.postgres.fields.citext.CICharField(
@@ -64,7 +72,11 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     models.CharField(
-                        choices=[("ACTIVE", "Active"), ("DRAFT", "Draft"), ("FINISHED", "Finished")],
+                        choices=[
+                            ("ACTIVE", "Active"),
+                            ("DRAFT", "Draft"),
+                            ("FINISHED", "Finished"),
+                        ],
                         db_index=True,
                         max_length=10,
                     ),
@@ -105,7 +117,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "frequency_of_payments",
-                    models.CharField(choices=[("ONE_OFF", "One-off"), ("REGULAR", "Regular")], max_length=50),
+                    models.CharField(
+                        choices=[("ONE_OFF", "One-off"), ("REGULAR", "Regular")],
+                        max_length=50,
+                    ),
                 ),
                 (
                     "sector",
@@ -127,7 +142,10 @@ class Migration(migrations.Migration):
                     "scope",
                     models.CharField(
                         blank=True,
-                        choices=[("FOR_PARTNERS", "For partners"), ("UNICEF", "Unicef")],
+                        choices=[
+                            ("FOR_PARTNERS", "For partners"),
+                            ("UNICEF", "Unicef"),
+                        ],
                         max_length=50,
                         null=True,
                     ),
@@ -148,7 +166,10 @@ class Migration(migrations.Migration):
                 ("is_visible", models.BooleanField(default=True)),
                 ("household_count", models.PositiveIntegerField(default=0)),
                 ("individual_count", models.PositiveIntegerField(default=0)),
-                ("programme_code", models.CharField(blank=True, max_length=4, null=True)),
+                (
+                    "programme_code",
+                    models.CharField(blank=True, max_length=4, null=True),
+                ),
                 (
                     "partner_access",
                     models.CharField(
@@ -166,10 +187,16 @@ class Migration(migrations.Migration):
                     models.BooleanField(default=False, help_text="Enable Deduplication of Face Images"),
                 ),
                 ("deduplication_set_id", models.UUIDField(blank=True, null=True)),
-                ("admin_areas", models.ManyToManyField(blank=True, related_name="programs", to="geo.Area")),
+                (
+                    "admin_areas",
+                    models.ManyToManyField(blank=True, related_name="programs", to="geo.Area"),
+                ),
                 (
                     "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "data_collecting_type",
@@ -191,12 +218,24 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("full_area_access", models.BooleanField(default=False)),
-                ("areas", models.ManyToManyField(blank=True, related_name="program_partner_through", to="geo.Area")),
+                (
+                    "areas",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="program_partner_through",
+                        to="geo.Area",
+                    ),
+                ),
                 (
                     "partner",
                     models.ForeignKey(
@@ -220,22 +259,41 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("version", concurrency.fields.IntegerVersionField(default=0, help_text="record revision number")),
-                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "version",
+                    concurrency.fields.IntegerVersionField(default=0, help_text="record revision number"),
+                ),
+                (
+                    "unicef_id",
+                    models.CharField(blank=True, db_index=True, max_length=255, null=True),
+                ),
                 (
                     "title",
                     models.CharField(
-                        blank=True, default="Default Programme Cycle", max_length=255, null=True, verbose_name="Title"
+                        blank=True,
+                        default="Default Programme Cycle",
+                        max_length=255,
+                        null=True,
+                        verbose_name="Title",
                     ),
                 ),
                 (
                     "status",
                     models.CharField(
-                        choices=[("DRAFT", "Draft"), ("ACTIVE", "Active"), ("FINISHED", "Finished")],
+                        choices=[
+                            ("DRAFT", "Draft"),
+                            ("ACTIVE", "Active"),
+                            ("FINISHED", "Finished"),
+                        ],
                         db_index=True,
                         default="DRAFT",
                         max_length=10,
@@ -257,7 +315,9 @@ class Migration(migrations.Migration):
                 (
                     "program",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="cycles", to="program.program"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cycles",
+                        to="program.program",
                     ),
                 ),
             ],
@@ -271,7 +331,9 @@ class Migration(migrations.Migration):
             model_name="program",
             name="partners",
             field=models.ManyToManyField(
-                related_name="programs", through="program.ProgramPartnerThrough", to="account.Partner"
+                related_name="programs",
+                through="program.ProgramPartnerThrough",
+                to="account.Partner",
             ),
         ),
         migrations.AddConstraint(
@@ -281,7 +343,8 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="programcycle",
             constraint=models.UniqueConstraint(
-                fields=("title", "program"), name="program_cycle_title_unique_per_program"
+                fields=("title", "program"),
+                name="program_cycle_title_unique_per_program",
             ),
         ),
         migrations.AddConstraint(

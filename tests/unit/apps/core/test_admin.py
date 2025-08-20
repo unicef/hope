@@ -3,7 +3,6 @@ from typing import List, Optional, Type
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
-
 from django_webtest import WebTest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import (
@@ -13,12 +12,8 @@ from extras.test_utils.factories.core import (
 from parameterized import parameterized
 from rest_framework import status
 
-from hope.admin.business_area import (
-    AcceptanceProcessThresholdFormset,
-)
-from hope.admin.data_collecting_type import (
-    DataCollectingTypeForm,
-)
+from hope.admin.business_area import AcceptanceProcessThresholdFormset
+from hope.admin.data_collecting_type import DataCollectingTypeForm
 from hope.apps.account.models import RoleAssignment
 from hope.apps.core.models import DataCollectingType
 
@@ -27,18 +22,35 @@ class TestAcceptanceProcessThreshold(TestCase):
     @parameterized.expand(
         [
             ([[12, 24]], ValidationError, "Ranges need to start from 0"),
-            ([[0, None], [10, 100]], ValidationError, "Provided ranges overlap [0, ∞) [10, 100)"),
-            ([[0, 10], [8, 100]], ValidationError, "Provided ranges overlap [0, 10) [8, 100)"),
+            (
+                [[0, None], [10, 100]],
+                ValidationError,
+                "Provided ranges overlap [0, ∞) [10, 100)",
+            ),
+            (
+                [[0, 10], [8, 100]],
+                ValidationError,
+                "Provided ranges overlap [0, 10) [8, 100)",
+            ),
             (
                 [[0, 10], [20, 100]],
                 ValidationError,
                 "Whole range of [0 , ∞] is not covered, please cover range between [0, 10) [20, 100)",
             ),
-            ([[0, 24], [24, 100]], ValidationError, "Last range should cover ∞ (please leave empty value)"),
+            (
+                [[0, 24], [24, 100]],
+                ValidationError,
+                "Last range should cover ∞ (please leave empty value)",
+            ),
             ([[0, 24], [24, 100], [100, None]], None, ""),
         ]
     )
-    def test_validate_ranges(self, ranges: List[List[Optional[int]]], exc: Optional[Type[Exception]], msg: str) -> None:
+    def test_validate_ranges(
+        self,
+        ranges: List[List[Optional[int]]],
+        exc: Optional[Type[Exception]],
+        msg: str,
+    ) -> None:
         if exc:
             with self.assertRaisesMessage(exc, msg):
                 AcceptanceProcessThresholdFormset.validate_ranges(ranges)
@@ -164,7 +176,9 @@ class BusinessAreaAdminTest(WebTest):
         assert self.business_area not in self.partner2.allowed_business_areas.all()  # Removed
         assert self.business_area in self.partner3.allowed_business_areas.all()  # Added
 
-    def test_allowed_partners_post_request_prevent_removal_due_to_role_assignment(self) -> None:
+    def test_allowed_partners_post_request_prevent_removal_due_to_role_assignment(
+        self,
+    ) -> None:
         """Ensure a partner with an existing role assignment cannot be removed"""
         self.check_initial_state()
 

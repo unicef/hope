@@ -40,7 +40,9 @@ def from_input_to_targeting_criteria(
             individual_ids = get_existing_unicef_ids(individual_ids, Individual, program)
 
         tc_rule = TargetingCriteriaRule(
-            payment_plan=payment_plan, household_ids=household_ids, individual_ids=individual_ids
+            payment_plan=payment_plan,
+            household_ids=household_ids,
+            individual_ids=individual_ids,
         )
         tc_rule.save()
         for hh_filter in households_filters_blocks:

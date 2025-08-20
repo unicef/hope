@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory
 
 from hope.apps.account.models import Partner
@@ -13,7 +12,10 @@ class TestSignalCreateBusinessArea(TestCase):
 
         cls.partner_unicef = PartnerFactory(name="UNICEF")
         RoleFactory(
-            name="Role for UNICEF Partners", subsystem="HOPE", is_visible_on_ui=False, is_available_for_partner=False
+            name="Role for UNICEF Partners",
+            subsystem="HOPE",
+            is_visible_on_ui=False,
+            is_available_for_partner=False,
         )
         cls.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=cls.partner_unicef)
 

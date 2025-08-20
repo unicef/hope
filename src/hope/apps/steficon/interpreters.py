@@ -10,8 +10,6 @@ from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-
-
 from jinja2 import Environment
 
 from hope.apps.steficon.config import config

@@ -8,14 +8,13 @@ from functools import reduce
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
+import factory
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory
-
-import factory
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.program import ProgramFactory
 from graphene.test import Client
@@ -57,7 +56,10 @@ class APITestCase(SnapshotTestTestCase):
         super().tearDown()
 
     def snapshot_graphql_request(
-        self, request_string: str, context: dict | None = None, variables: dict | None = None
+        self,
+        request_string: str,
+        context: dict | None = None,
+        variables: dict | None = None,
     ) -> None:
         if context is None:
             context = {}
@@ -70,7 +72,12 @@ class APITestCase(SnapshotTestTestCase):
             )
         )
 
-    def graphql_request(self, request_string: str, context: dict | None = None, variables: dict | None = None) -> dict:
+    def graphql_request(
+        self,
+        request_string: str,
+        context: dict | None = None,
+        variables: dict | None = None,
+    ) -> dict:
         if context is None:
             context = {}
 
@@ -81,11 +88,17 @@ class APITestCase(SnapshotTestTestCase):
         )
 
     def generate_context(
-        self, user: Optional["User"] = None, files: dict | None = None, headers: dict[str, str] | None = None
+        self,
+        user: Optional["User"] = None,
+        files: dict | None = None,
+        headers: dict[str, str] | None = None,
     ) -> WSGIRequest:
         request = RequestFactory()
         prepared_headers: dict = reduce(
-            lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
+            lambda prev_headers, curr_header: {
+                **prev_headers,
+                f"HTTP_{curr_header[0]}": curr_header[1],
+            },
             (headers or {}).items(),
             {},
         )
@@ -192,7 +205,12 @@ class UploadDocumentsBase(APITestCase):
     @staticmethod
     def create_fixture_file(name: str, size: int, content_type: str) -> InMemoryUploadedFile:
         return InMemoryUploadedFile(
-            name=name, file=BytesIO(b"xxxxxxxxxxx"), charset=None, field_name="0", size=size, content_type=content_type
+            name=name,
+            file=BytesIO(b"xxxxxxxxxxx"),
+            charset=None,
+            field_name="0",
+            size=size,
+            content_type=content_type,
         )
 
     @classmethod

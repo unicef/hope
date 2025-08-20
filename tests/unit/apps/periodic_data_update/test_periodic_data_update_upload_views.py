@@ -1,13 +1,12 @@
 import json
 from typing import Callable
 
+import freezegun
+import pytest
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-
-import freezegun
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -90,8 +89,18 @@ class TestPeriodicDataUpdateUploadViews:
                 status.HTTP_200_OK,
             ),
             ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.PDU_VIEW_LIST_AND_DETAILS], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                [],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+            (
+                [],
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
             (
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],

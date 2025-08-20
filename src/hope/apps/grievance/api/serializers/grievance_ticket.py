@@ -13,14 +13,8 @@ from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hope.apps.grievance.models import (
-    GrievanceDocument,
-    GrievanceTicket,
-    TicketNote,
-)
-from hope.apps.household.api.serializers.household import (
-    HouseholdForTicketSerializer,
-)
+from hope.apps.grievance.models import GrievanceDocument, GrievanceTicket, TicketNote
+from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
@@ -394,7 +388,8 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     who_answers_alt_phone = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     documents_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()), required=False
+        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()),
+        required=False,
     )
     documents_to_edit = EditIndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentityGTSerializer(many=True, required=False)
@@ -441,7 +436,8 @@ class GrievanceComplaintTicketExtras(serializers.Serializer):
     household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all(), allow_null=True)
     individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all(), allow_null=True)
     payment_record = serializers.ListField(
-        required=False, child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all())
+        required=False,
+        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()),
     )
 
 
@@ -458,7 +454,8 @@ class SensitiveGrievanceTicketExtras(serializers.Serializer):
     household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
     individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
     payment_record = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()), required=False
+        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()),
+        required=False,
     )
 
 
@@ -654,13 +651,16 @@ class GrievanceNeedsAdjudicationApproveSerializer(serializers.Serializer):
         queryset=Individual.objects.all(), required=False, allow_null=True
     )
     duplicate_individual_ids = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
+        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()),
+        required=False,
     )
     distinct_individual_ids = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
+        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()),
+        required=False,
     )
     clear_individual_ids = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
+        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()),
+        required=False,
     )
     version = serializers.IntegerField(required=False)
 
