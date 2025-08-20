@@ -3,7 +3,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 
@@ -228,6 +228,16 @@ class PDUOnlineEditViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = PDUOnlineEditFilter
+
+    def get_queryset(self) -> QuerySet[PDUOnlineEdit]:
+        return (
+            super()
+            .get_queryset()
+            .select_related("created_by", "approved_by")
+            .prefetch_related(
+                Prefetch("authorized_users", queryset=User.objects.order_by("first_name", "last_name", "username")),
+            )
+        )
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
