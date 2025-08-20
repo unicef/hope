@@ -216,7 +216,19 @@ class QCFReportsService:
         return content_file
 
     def send_notification_emails(self, report: WesternUnionQCFFileReport) -> None:
+        """
+        # TODO refactor to 'dev' new perms
+        role_assignments = RoleAssignment.objects.filter(
+            role__permissions__contains=[Permissions.RECEIVE_PARSED_WU_QCF.name],
+            business_area=business_area,
+        ).exclude(expiry_date__lt=timezone.now())
+        users = User.objects.filter(
+            Q(role_assignments__in=role_assignments) |
+            Q(partner__role_assignments__in=role_assignments)
+        ).distinct()
         business_area = report.payment_plan.business_area
+        """
+
         users = [
             user
             for user in User.objects.all()
