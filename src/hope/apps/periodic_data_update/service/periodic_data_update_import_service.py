@@ -15,6 +15,7 @@ from hope.apps.periodic_data_update.models import (
     PDUXlsxTemplate,
     PDUXlsxUpload,
 )
+from hope.apps.periodic_data_update.service.periodic_data_update_base_service import PDURoundValueMixin
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
@@ -91,7 +92,7 @@ def validation_error_to_json(
     return error.messages if hasattr(error, "messages") else str(error)
 
 
-class PDUXlsxImportService:
+class PDUXlsxImportService(PDURoundValueMixin):
     def __init__(self, periodic_data_update_upload: PDUXlsxUpload) -> None:
         self.periodic_data_update_upload = periodic_data_update_upload
         self.periodic_data_update_template = self.periodic_data_update_upload.template
@@ -247,7 +248,7 @@ class PDUXlsxImportService:
                 raise ValidationError(
                     f"Value already exists for field {field_name} for round {round_number} and individual {individual_unicef_id}"
                 )
-            self.set_round_value(
+            self._set_round_value(
                 individual,
                 field_name,
                 round_number,
@@ -259,27 +260,6 @@ class PDUXlsxImportService:
                 ),
             )
         return individual
-
-    def _get_round_value(
-        self, individual: Individual, pdu_field_name: str, round_number: int
-    ) -> str | int | float | bool | None:
-        flex_fields_data = individual.flex_fields
-        field_data = flex_fields_data.get(pdu_field_name)
-        if field_data:
-            round_data = field_data.get(str(round_number))
-            if round_data:
-                return round_data.get("value")
-        return None
-
-    @staticmethod
-    def set_round_value(
-        individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
-    ) -> None:
-        flex_fields_data = individual.flex_fields
-        field_data = flex_fields_data[pdu_field_name]
-        round_data = field_data.get(str(round_number))
-        round_data["value"] = value
-        round_data["collection_date"] = collection_date
 
     def _build_form(self) -> type[forms.Form]:
         form_fields_dict: dict[str, forms.Field] = {}
