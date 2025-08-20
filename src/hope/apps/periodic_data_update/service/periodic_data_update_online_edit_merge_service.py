@@ -54,7 +54,9 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
             raise ValidationError(f"Invalid type for field {field_name}. Expected number, got {type(value).__name__}.")
         if expected_type == PeriodicFieldData.DATE:
             if not isinstance(value, str):
-                raise ValidationError(f"Invalid type for field {field_name}. Expected string for date, got {type(value).__name__}.")
+                raise ValidationError(
+                    f"Invalid type for field {field_name}. Expected string for date, got {type(value).__name__}."
+                )
             try:
                 datetime.date.fromisoformat(value)
             except (TypeError, ValueError):

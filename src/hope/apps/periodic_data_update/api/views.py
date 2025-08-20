@@ -167,10 +167,8 @@ class PDUXlsxUploadViewSet(
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
             try:
-                serializer.validated_data["template"] = (
-                    PDUXlsxImportService.read_periodic_data_update_template_object(
-                        serializer.validated_data["file"]
-                    )
+                serializer.validated_data["template"] = PDUXlsxImportService.read_periodic_data_update_template_object(
+                    serializer.validated_data["file"]
                 )
             except DjangoValidationError as e:
                 return Response(
@@ -205,7 +203,7 @@ class PDUOnlineEditViewSet(
         "retrieve": PDUOnlineEditDetailSerializer,
         "create": PDUOnlineEditCreateSerializer,
         "update_authorized_users": PDUOnlineEditUpdateAuthorizedUsersSerializer,
-        "save_data": PDUOnlineEditSaveDataSerializer, # TODO: PDU - handle the update of edit_data
+        "save_data": PDUOnlineEditSaveDataSerializer,  # TODO: PDU - handle the update of edit_data
         "send_back": PDUOnlineEditSendBackSerializer,
         "bulk_approve": BulkSerializer,
         "bulk_merge": BulkSerializer,
@@ -323,9 +321,7 @@ class PDUOnlineEditViewSet(
         pdu_edits = self.get_queryset().filter(pk__in=serializer.validated_data["ids"])
 
         if pdu_edits.exclude(status=PDUOnlineEdit.Status.APPROVED).exists():
-            raise ValidationError(
-                "PDU Online Edit is not in the 'Approved' status and cannot be merged."
-            )
+            raise ValidationError("PDU Online Edit is not in the 'Approved' status and cannot be merged.")
 
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
@@ -349,8 +345,7 @@ class PDUOnlineEditViewSet(
         responses={200: AuthorizedUserSerializer(many=True)},
     )
     @action(detail=False, methods=["get"])
-    def users_available(self, request: Request, *args: Any, **kwargs: Any
-    ) -> Response:
+    def users_available(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         business_area_slug = self.kwargs.get("business_area_slug")
         program_slug = self.kwargs.get("program_slug")
         permissions_to_check = [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
@@ -367,23 +362,27 @@ class PDUOnlineEditViewSet(
             business_area__slug=business_area_slug,
             program__slug=program_slug,
         ).exclude(expiry_date__lt=timezone.now())
-        users_available = User.objects.filter(
-            Q(role_assignments__in=role_assignments_with_pdu_online_edit_related_permissions) |
-            Q(partner__role_assignments__in=role_assignments_with_pdu_online_edit_related_permissions)
-        ).distinct().order_by("first_name", "last_name", "username")
+        users_available = (
+            User.objects.filter(
+                Q(role_assignments__in=role_assignments_with_pdu_online_edit_related_permissions)
+                | Q(partner__role_assignments__in=role_assignments_with_pdu_online_edit_related_permissions)
+            )
+            .distinct()
+            .order_by("first_name", "last_name", "username")
+        )
 
         # Prefetch role_assignments with relevant permissions for user and partner to avoid extra queries in serializer
         users_available = users_available.prefetch_related(
             Prefetch(
                 "role_assignments",
                 queryset=role_assignments_with_pdu_online_edit_related_permissions,
-                to_attr="cached_relevant_role_assignments"
+                to_attr="cached_relevant_role_assignments",
             ),
             Prefetch(
                 "partner__role_assignments",
                 queryset=role_assignments_with_pdu_online_edit_related_permissions,
-                to_attr="cached_relevant_role_assignments_partner"
-            )
+                to_attr="cached_relevant_role_assignments_partner",
+            ),
         )
 
         serializer = self.get_serializer(users_available, many=True)

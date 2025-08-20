@@ -123,7 +123,10 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
             return self.Status.TO_EXPORT
         if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.TO_EXPORT
-        if self.get_celery_status() == self.CELERY_STATUS_REVOKED or self.get_celery_status() == self.CELERY_STATUS_CANCELED:
+        if (
+            self.get_celery_status() == self.CELERY_STATUS_REVOKED
+            or self.get_celery_status() == self.CELERY_STATUS_CANCELED
+        ):
             return self.Status.CANCELED
         return self.status
 
@@ -171,9 +174,7 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
 
     ordering = ["-created_at"]
 
-    celery_task_names = {
-        "import": "hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
-    }
+    celery_task_names = {"import": "hope.apps.periodic_data_update.celery_tasks.import_periodic_data_update"}
 
     @property
     def errors(self) -> dict | None:
@@ -197,7 +198,10 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
             return self.Status.PENDING
         if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.PENDING
-        if self.get_celery_status() == self.CELERY_STATUS_REVOKED or self.get_celery_status() == self.CELERY_STATUS_CANCELED:
+        if (
+            self.get_celery_status() == self.CELERY_STATUS_REVOKED
+            or self.get_celery_status() == self.CELERY_STATUS_CANCELED
+        ):
             return self.Status.CANCELED
 
         return self.status
@@ -298,7 +302,15 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         status_merge = self.get_celery_status(task_name="merge")
 
         if (
-            self.status in [self.Status.NEW, self.Status.READY, self.Status.APPROVED, self.Status.MERGED, self.Status.FAILED_CREATE, self.Status.FAILED_MERGE]
+            self.status
+            in [
+                self.Status.NEW,
+                self.Status.READY,
+                self.Status.APPROVED,
+                self.Status.MERGED,
+                self.Status.FAILED_CREATE,
+                self.Status.FAILED_MERGE,
+            ]
             or status_create == self.CELERY_STATUS_SUCCESS
             or status_merge == self.CELERY_STATUS_SUCCESS
         ):
@@ -327,7 +339,6 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
             return self.Status.CANCELED_MERGE
 
         return self.status
-
 
     @property
     def combined_status_display(self) -> str:

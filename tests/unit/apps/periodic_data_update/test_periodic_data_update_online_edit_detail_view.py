@@ -51,7 +51,11 @@ class TestPDUOnlineEditDetail:
         )
         self.user_can_all = UserFactory(partner=self.partner_empty, first_name="David")
         can_all_role = RoleFactory(
-            permissions=[Permissions.PDU_ONLINE_SAVE_DATA.value, Permissions.PDU_ONLINE_APPROVE.value, Permissions.PDU_ONLINE_MERGE.value]
+            permissions=[
+                Permissions.PDU_ONLINE_SAVE_DATA.value,
+                Permissions.PDU_ONLINE_APPROVE.value,
+                Permissions.PDU_ONLINE_MERGE.value,
+            ]
         )
         RoleAssignmentFactory(
             user=self.user_can_all,
@@ -69,7 +73,6 @@ class TestPDUOnlineEditDetail:
             program=self.program,
         )
 
-
         self.pdu_edit = PDUOnlineEditFactory(
             program=self.program,
             business_area=self.afghanistan,
@@ -79,7 +82,7 @@ class TestPDUOnlineEditDetail:
             number_of_records=100,
             created_by=self.user,
             approved_by=self.user_can_approve,
-            approved_at=timezone.make_aware(datetime(year=2024, month=8, day=20))
+            approved_at=timezone.make_aware(datetime(year=2024, month=8, day=20)),
         )
         PDUOnlineEditSentBackCommentFactory(
             pdu_online_edit=self.pdu_edit,
@@ -89,7 +92,11 @@ class TestPDUOnlineEditDetail:
 
         self.detail_url = reverse(
             "api:periodic-data-update:periodic-data-update-online-edits-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug, "pk": self.pdu_edit.pk},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+                "pk": self.pdu_edit.pk,
+            },
         )
 
     @pytest.mark.parametrize(

@@ -19,8 +19,12 @@ from hope.apps.periodic_data_update.service.periodic_data_update_export_template
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PDUXlsxImportService,
 )
-from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_merge_service import PDUOnlineEditMergeService
-from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import PDUOnlineEditGenerateDataService
+from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_merge_service import (
+    PDUOnlineEditMergeService,
+)
+from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import (
+    PDUOnlineEditGenerateDataService,
+)
 from hope.apps.periodic_data_update.signals import (
     increment_periodic_data_update_template_version_cache_function,
 )

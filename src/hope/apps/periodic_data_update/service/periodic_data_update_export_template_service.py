@@ -10,8 +10,10 @@ from openpyxl.packaging.custom import StringProperty
 from hope.apps.core.models import FileTemp
 from hope.apps.household.models import Individual
 from hope.apps.periodic_data_update.models import PDUXlsxTemplate
-from hope.apps.periodic_data_update.service.periodic_data_update_base_service import PDUDataExtractionService, \
-    PDURoundValueMixin
+from hope.apps.periodic_data_update.service.periodic_data_update_base_service import (
+    PDUDataExtractionService,
+    PDURoundValueMixin,
+)
 
 
 class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin):
@@ -122,4 +124,3 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
         if not is_individual_allowed:
             return None
         return row
-

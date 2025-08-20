@@ -48,10 +48,8 @@ def populate_pdu_new_rounds_with_null_values(program: Program) -> None:
         individuals.append(ind)
     Individual.all_merge_status_objects.bulk_update(individuals, ["flex_fields"])
 
-def update_rounds_covered_for_template(
-        pdu_template: PDUXlsxTemplate | PDUOnlineEdit,
-        rounds_data: list[dict]
-    ) -> None:
+
+def update_rounds_covered_for_template(pdu_template: PDUXlsxTemplate | PDUOnlineEdit, rounds_data: list[dict]) -> None:
     field_to_round_map = {item["field"]: item["round"] for item in rounds_data}
     field_names = field_to_round_map.keys()
 
@@ -64,7 +62,7 @@ def update_rounds_covered_for_template(
         pdu_data = field.pdu_data
         if new_round <= pdu_data.rounds_covered:
             raise ValidationError(
-                f"Template for round {new_round} of field '{(field.label.get("English(EN)") or field.name)}' has already been created."
+                f"Template for round {new_round} of field '{(field.label.get('English(EN)') or field.name)}' has already been created."
             )
         pdu_data.rounds_covered = new_round
         pdu_data.save(update_fields=["rounds_covered"])

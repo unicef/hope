@@ -128,7 +128,9 @@ class PDUDataExtractionService:
 
 class PDURoundValueMixin:
     @staticmethod
-    def _get_round_value(individual: Individual, pdu_field_name: str, round_number: int) -> str | int | float | bool | None:
+    def _get_round_value(
+        individual: Individual, pdu_field_name: str, round_number: int
+    ) -> str | int | float | bool | None:
         flex_fields_data = individual.flex_fields
         field_data = flex_fields_data.get(pdu_field_name)
         if field_data:
