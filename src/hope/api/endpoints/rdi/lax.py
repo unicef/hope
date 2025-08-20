@@ -39,6 +39,7 @@ from hope.apps.payment.models import (
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.utils.phone import calculate_phone_numbers_validity
+import contextlib
 
 if TYPE_CHECKING:
     from hope.apps.core.models import BusinessArea
@@ -321,10 +322,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 
         except Exception:
             for field_file in self.staging.saved_file_fields:
-                try:
+                with contextlib.suppress(Exception):
                     field_file.delete(save=False)
-                except Exception:
-                    pass
             raise
 
         return Response(response_payload, status=status.HTTP_201_CREATED)
