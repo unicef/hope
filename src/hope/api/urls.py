@@ -167,6 +167,16 @@ urlpatterns = [
                     endpoints.rdi.PushLaxToRDIView().as_view(),
                     name="rdi-push-lax",
                 ),
+                path(
+                    "rdi/<uuid:rdi>/push/lax/individuals",
+                    endpoints.rdi.CreateLaxIndividuals().as_view(),
+                    name="rdi-push-lax-individuals",
+                ),
+                path(
+                    "rdi/<uuid:rdi>/push/lax/households",
+                    endpoints.rdi.CreateLaxHouseholds().as_view(),
+                    name="rdi-push-lax-households",
+                ),
             ]
         ),
     ),
