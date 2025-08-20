@@ -16,16 +16,16 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.models import Grant
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     PendingDocument,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.payment.models import AccountType
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class CreateLaxIndividualsTests(HOPEApiTestCase):
@@ -329,7 +329,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     raise RuntimeError("forced failure for cleanup test")
 
                 with patch(
-                    "hct_mis_api.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                    "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                     side_effect=fail_after_files_exist,
                 ):
                     with self.assertRaises(RuntimeError):

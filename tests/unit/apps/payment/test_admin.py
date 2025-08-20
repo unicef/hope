@@ -15,11 +15,11 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from hope.apps.payment.admin import (
+from hope.admin.payment_plan import (
     can_regenerate_export_file_per_fsp,
     can_sync_with_payment_gateway,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
+from hope.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 
 @pytest.fixture(autouse=True)

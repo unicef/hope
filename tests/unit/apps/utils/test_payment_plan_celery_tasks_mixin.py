@@ -17,7 +17,7 @@ from hope.apps.account.models import User
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.core.models import FileTemp
-from hope.apps.utils.admin import PaymentPlanCeleryTasksMixin
+from hope.admin.utils import PaymentPlanCeleryTasksMixin
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):
@@ -190,7 +190,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         payment_plan.save()
         payment_plan.refresh_from_db()
 
-        with mock.patch("hct_mis_api.apps.utils.admin.get_task_in_queue_or_running", return_value=None):
+        with mock.patch("hope.apps.utils.admin.get_task_in_queue_or_running", return_value=None):
             response = self.client.post(
                 reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
                 HTTP_X_ROOT_TOKEN="test-token123",
