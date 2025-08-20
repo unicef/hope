@@ -11,7 +11,6 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IconButton, TableCell, Tooltip } from '@mui/material';
-import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
@@ -21,9 +20,10 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
-import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
+import { PaginatedPDUXlsxTemplateListList } from '@restgenerated/models/PaginatedPDUXlsxTemplateListList';
+import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
 
-const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
+const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
   {
     id: 'id',
     numeric: false,
@@ -106,7 +106,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     });
   };
 
-  const handleDialogOpen = (template: PeriodicDataUpdateTemplateList) => {
+  const handleDialogOpen = (template: PDUXlsxTemplateList) => {
     setSelectedTemplateId(template.id);
     setIsDialogOpen(true);
   };
@@ -134,7 +134,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     data: templatesData,
     isLoading,
     error,
-  } = useQuery<PaginatedPeriodicDataUpdateTemplateListList>({
+  } = useQuery<PaginatedPDUXlsxTemplateListList>({
     queryKey: [
       'periodicDataUpdateTemplates',
       queryVariables,
@@ -161,9 +161,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     permissions,
   );
 
-  const renderTemplateRow = (
-    row: PeriodicDataUpdateTemplateList,
-  ): ReactElement => (
+  const renderTemplateRow = (row: PDUXlsxTemplateList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">
@@ -232,7 +230,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
         isOnPaper={true}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
-        data={templatesData}
+        data={templatesData?.results ?? []}
         isLoading={isLoading}
         error={error}
         queryVariables={queryVariables}

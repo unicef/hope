@@ -1,3 +1,19 @@
+// Status color for periodic data updates online edits
+export function periodicDataUpdatesOnlineEditsStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'NEW':
+      return theme.hctPalette.gray;
+    case 'READY':
+      return theme.hctPalette.orange;
+    case 'APPROVED':
+      return theme.hctPalette.green;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { ChoiceObject } from '@generated/graphql';
 import { Choice } from '@restgenerated/models/Choice';
