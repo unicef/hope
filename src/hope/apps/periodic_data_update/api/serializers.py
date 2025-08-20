@@ -272,7 +272,6 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         validated_data["created_by"] = request.user
         validated_data["business_area"] = business_area
         validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-        validated_data["status"] = PDUOnlineEdit.Status.PENDING_CREATE
 
         # Pop fields that are not on the model before creating the instance
         validated_data.pop("filters", None)

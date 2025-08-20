@@ -34,7 +34,7 @@ class PDUDataExtractionService:
         self.admin2_filter = self.filters.get("admin2")
         self.received_assistance_filter = self.filters.get("received_assistance")
 
-    def get_individuals_queryset(self) -> QuerySet[Individual]:
+    def _get_individuals_queryset(self) -> QuerySet[Individual]:
         queryset = Individual.objects.filter(program=self.program)
         if self.registration_data_import_id_filter:
             queryset = queryset.filter(registration_data_import_id=self.registration_data_import_id_filter)
@@ -135,7 +135,7 @@ class PDURoundValueMixin:
         return None
 
     @staticmethod
-    def _set_round_value(
+    def set_round_value(
         individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
     ) -> None:
         flex_fields_data = individual.flex_fields

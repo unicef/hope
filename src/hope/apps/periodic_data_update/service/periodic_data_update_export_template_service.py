@@ -37,7 +37,7 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
                 for round_info_data in self.rounds_data:
                     round_info_data["number_of_records"] = 0
                 self.periodic_data_update_template.number_of_records = 0
-                queryset = self.get_individuals_queryset()
+                queryset = self._get_individuals_queryset()
                 for individual in queryset:
                     row = self._generate_row(individual)
                     if row:
