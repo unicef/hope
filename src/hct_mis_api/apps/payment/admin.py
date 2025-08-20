@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
@@ -23,6 +23,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.forms import TemplateSelectForm
 from hct_mis_api.apps.payment.models import (
     Account,
     AccountType,
@@ -252,12 +253,24 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED  # pragma: no cover
+    return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED
+
+
+def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_regenerate_export_file_per_fsp
 
 
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
     return request.user.has_permission(
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
+        payment_plan.business_area,
+        payment_plan.program_cycle.program_id,
+    )
+
+
+def has_payment_plan_export_per_fsp_permission(request: Any, payment_plan: PaymentPlan) -> bool:
+    return request.user.has_permission(
+        Permissions.PM_VIEW_LIST.value,
         payment_plan.business_area,
         payment_plan.program_cycle.program_id,
     )
@@ -356,6 +369,40 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 action=self.sync_missing_records_with_payment_gateway,
                 message="Do you confirm to Sync with Payment Gateway missing Records?",
             )
+
+    @button(
+        visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
+        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
+            request, payment_plan
+        ),
+    )
+    def regenerate_export_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        payment_plan = PaymentPlan.objects.get(pk=pk)
+
+        if request.method == "POST":
+            from hct_mis_api.apps.payment.services.payment_plan_services import (
+                PaymentPlanService,
+            )
+
+            form = TemplateSelectForm(request.POST, payment_plan=payment_plan)
+            if form.is_valid():
+                template_obj = form.cleaned_data.get("template")
+                fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
+                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.pk, fsp_xlsx_template_id)
+                messages.success(request, "Celery task for export regenerate file successfully started.")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        else:
+            form = TemplateSelectForm(payment_plan=payment_plan)
+
+        return render(
+            request,
+            "admin/payment/regenerate_export_xlsx_form.html",
+            {
+                "form": form,
+                "payment_plan": payment_plan,
+                "title": "Select a template if you want the export to include the FSP Auth Code",
+            },
+        )
 
     @button(permission="payment.view_paymentplan")
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:

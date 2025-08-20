@@ -47,26 +47,6 @@ snapshots['TestPaymentPlanReconciliation::test_apply_steficon_rule_with_wrong_pa
     ]
 }
 
-snapshots['TestPaymentPlanReconciliation::test_assign_fsp_mutation_payment_plan_wrong_status 1'] = {
-    'data': {
-        'assignFspToDeliveryMechanism': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 5,
-                    'line': 3
-                }
-            ],
-            'message': 'Payment plan must be locked to assign FSP to delivery mechanism',
-            'path': [
-                'assignFspToDeliveryMechanism'
-            ]
-        }
-    ]
-}
-
 snapshots['TestPaymentPlanReconciliation::test_correct_message_displayed_when_file_is_protected 1'] = {
     'data': {
         'importXlsxPaymentPlanPaymentListPerFsp': None
@@ -169,22 +149,15 @@ snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 2']
 
 snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 3'] = {
     'data': {
-        'exportXlsxPaymentPlanPaymentListPerFsp': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 5,
-                    'line': 3
-                }
-            ],
-            'message': 'Export failed: Payment Plan already has created exported file.',
-            'path': [
-                'exportXlsxPaymentPlanPaymentListPerFsp'
-            ]
+        'exportXlsxPaymentPlanPaymentListPerFsp': {
+            'paymentPlan': {
+                'canCreateXlsxWithFspAuthCode': True,
+                'canRegenerateExportFilePerFsp': True,
+                'hasPaymentListExportFile': True,
+                'status': 'ACCEPTED'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_code 1'] = {
@@ -199,7 +172,7 @@ snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_cod
                     'line': 3
                 }
             ],
-            'message': "Export failed: There could be not Pending Payments and FSP communication channel should be set to API.",
+            'message': 'Export failed: There could be not Pending Payments and FSP communication channel should be set to API.',
             'path': [
                 'exportXlsxPaymentPlanPaymentListPerFsp'
             ]
@@ -212,6 +185,7 @@ snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_cod
         'exportXlsxPaymentPlanPaymentListPerFsp': {
             'paymentPlan': {
                 'canCreateXlsxWithFspAuthCode': True,
+                'canRegenerateExportFilePerFsp': True,
                 'hasPaymentListExportFile': True,
                 'status': 'FINISHED'
             }
