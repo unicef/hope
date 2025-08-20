@@ -248,7 +248,7 @@ class PDUOnlineEditViewSet(
             "filters": filters,
             "rounds_data": rounds_data,
         }
-        pdu_online_edit.queue(task_name="generate_edit_data", task_kwargs=task_kwargs)
+        pdu_online_edit.queue(task_name="generate_edit_data", **task_kwargs)
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
