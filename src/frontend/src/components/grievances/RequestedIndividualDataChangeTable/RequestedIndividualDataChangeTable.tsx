@@ -103,6 +103,11 @@ export function RequestedIndividualDataChangeTable({
     'value',
     'name',
   );
+  const accountFinancialInstitutionsDict = useArrayToDict(
+    data?.accountFinancialInstitutionChoices,
+    'value',
+    'name',
+  );
 
   if (
     loading ||
@@ -112,7 +117,7 @@ export function RequestedIndividualDataChangeTable({
     !countriesDict ||
     !documentTypeDict ||
     !identityTypeDict ||
-    individualLoading
+    !accountFinancialInstitutionsDict
   ) {
     return <LoadingComponent />;
   }
@@ -185,19 +190,18 @@ export function RequestedIndividualDataChangeTable({
             />
           ))
         : null}
-      {accounts?.length
-        ? accounts.map((account, index) => (
-            <AccountTable
-              key={account.id}
-              values={values}
-              isEdit={isEdit}
-              ticket={ticket}
-              setFieldValue={setFieldValue}
-              index={index}
-              account={account}
-            />
-          ))
-        : null}
+      {accounts?.length ? accounts.map((account, index) => (
+        <AccountTable
+          key={account.id}
+          values={values}
+          isEdit={isEdit}
+          ticket={ticket}
+          setFieldValue={setFieldValue}
+          index={index}
+          account={account}
+          accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
+        />
+      )) : null}
       {accountsToEdit?.length
         ? accountsToEdit.map((account, index) => (
             <AccountToEditTable
@@ -208,6 +212,7 @@ export function RequestedIndividualDataChangeTable({
               setFieldValue={setFieldValue}
               index={index}
               account={account}
+              accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
             />
           ))
         : null}

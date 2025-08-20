@@ -77,9 +77,12 @@ class PaymentPlanPDFExportService:
                 filter=Q(status__in=Payment.PENDING_STATUSES),
             ),
             pending_local=Sum("entitlement_quantity", filter=Q(status__in=Payment.PENDING_STATUSES)),
-            reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
-            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=Payment.PENDING_STATUSES)),
-            reconciled_local=Sum("delivered_quantity", filter=~Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=Q(status__in=Payment.DELIVERED_STATUSES)),  # Redeemed
+            reconciled_usd=Sum("delivered_quantity_usd", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
+            reconciled_local=Sum("delivered_quantity", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
+            failed=Count("id", filter=Q(status__in=Payment.FAILED_STATUSES)),  # Unredeemed
+            failed_usd=Sum("delivered_quantity_usd", filter=Q(status__in=Payment.FAILED_STATUSES)),
+            failed_local=Sum("delivered_quantity", filter=Q(status__in=Payment.FAILED_STATUSES)),
         )
 
         pdf_context_data = {

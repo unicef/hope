@@ -1,10 +1,12 @@
 import dataclasses
 import os
 import uuid
+from itertools import batched, repeat
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
+from constance.test import override_config
 from django.test import TestCase
 
 from hope.apps.registration_datahub.apis.deduplication_engine import (
@@ -62,8 +64,36 @@ class DeduplicationEngineApiTest(TestCase):
 
         get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/")
 
+    @override_config(DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE=1)
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images(self, mock_post: mock.Mock) -> None:
+        api = DeduplicationEngineAPI()
+        deduplication_set_id = str(uuid.uuid4())
+        images = [
+            DeduplicationImage(
+                reference_pk=str(uuid.uuid4()),
+                filename=f"test{i}.jpg",
+            )
+            for i in range(2)
+        ]
+        batches = [list(batch) for batch in batched(images, 1)]
+
+        mock_post.side_effect = zip(batches, repeat(200))
+
+        assert api.bulk_upload_images(deduplication_set_id, images) == images
+
+        mock_post.assert_has_calls(
+            [
+                call(
+                    f"deduplication_sets/{deduplication_set_id}/images_bulk/",
+                    [dataclasses.asdict(image) for image in batch],
+                )
+                for batch in batches
+            ]
+        )
+
+    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    def test_bulk_upload_images_json_parsing_error(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
         images = [
@@ -72,15 +102,8 @@ class DeduplicationEngineApiTest(TestCase):
                 filename="test.jpg",
             )
         ]
-
         mock_post.return_value = {}, 200
-
-        api.bulk_upload_images(deduplication_set_id, images)
-
-        mock_post.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/images_bulk/",
-            [dataclasses.asdict(image) for image in images],
-        )
+        assert api.bulk_upload_images(deduplication_set_id, images) == []
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete")
     def test_bulk_delete_images(self, mock_delete: mock.Mock) -> None:

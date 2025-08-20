@@ -65,14 +65,26 @@ export function EditAccountRow({
           value={String(account.accountType)}
         />
       </Grid>
-    {Object.entries(dataFields).map(([key, value]) => (
-      <Grid size={{ xs: 4 }} key={key}>
-        <LabelizedField
-          label={key}
-          value={String(value)}
-        />
-      </Grid>
-    ))}
+
+    {Object.entries(dataFields).map(([key, value]) => {
+      let displayValue = String(value);
+
+      if (
+        key === 'financial_institution' &&
+        Array.isArray(addIndividualFieldsData.accountFinancialInstitutionChoices)
+      ) {
+        const choice = addIndividualFieldsData.accountFinancialInstitutionChoices.find(
+          (c: any) => c.value === value,
+        );
+        displayValue = choice ? choice.name : String(value);
+      }
+
+      return (
+        <Grid size={{ xs: 4 }} key={key}>
+          <LabelizedField label={key} value={displayValue} />
+        </Grid>
+      );
+    })}
     <Grid  size={{ xs: 1 }}>
       <Box display="flex" alignItems="center">
         <IconButton

@@ -32,16 +32,18 @@ export interface AccountsTableProps {
   setFieldValue;
   index;
   account;
+  accountFinancialInstitutionsDict;
 }
 
 export function AccountTable({
-  values,
-  isEdit,
-  ticket,
-  setFieldValue,
-  index,
-  account,
-}: AccountsTableProps): ReactElement {
+                                values,
+                                isEdit,
+                                ticket,
+                                setFieldValue,
+                                index,
+                                account,
+                                accountFinancialInstitutionsDict,
+                              }: AccountsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedAccounts } = values;
 
@@ -87,15 +89,22 @@ export function AccountTable({
             <TableCell align="left">{t('Value')}</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
-          {Object.entries(account.value.data_fields).map(([key, value]) => (
-            <TableRow key={key}>
-              <TableCell align="left"></TableCell>
-              <TableCell align="left">{key}</TableCell>
-              <TableCell align="left">{String(value)}</TableCell>
-              <TableCell align="left"></TableCell>
-            </TableRow>
-          ))}
+       <TableBody>
+          {Object.entries(account.value.data_fields).map(([key, value]) => {
+            const isFinancialInstitutionField = key === 'financial_institution';
+            return (
+              <TableRow key={key}>
+                <TableCell align="left"></TableCell>
+                <TableCell align="left">{key}</TableCell>
+                <TableCell align="left">
+                  {isFinancialInstitutionField
+                    ? accountFinancialInstitutionsDict[value as string]
+                    : String(value)}
+                </TableCell>
+                <TableCell align="left"></TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </StyledTable>
     </>

@@ -10,6 +10,7 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
 from pytz import utc
 
 from hope.apps.core.base_test_case import APITestCase
@@ -50,10 +51,19 @@ class TestDeliveryDate(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
+        cls.program = ProgramFactory(
+            business_area=cls.business_area,
+            status="ACTIVE",
+            start_date=datetime(2011, 1, 1).date(),
+            end_date=datetime(2099, 1, 1).date(),
+        )
+        cycle = cls.program.cycles.first()
+
         cls.payment_plan = PaymentPlanFactory(
             dispersion_start_date=datetime(2020, 8, 10).date(),
             dispersion_end_date=datetime(2020, 12, 10).date(),
             created_by=cls.user,
+            program_cycle=cycle,
         )
 
         hoh1 = IndividualFactory(household=None)
