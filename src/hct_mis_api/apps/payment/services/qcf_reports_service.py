@@ -230,17 +230,13 @@ class QCFReportsService:
         text_template = "payment/qcf_report_email.txt"
         html_template = "payment/qcf_report_email.html"
 
-        msg = (
-            f"Payment Plan {report.payment_plan.unicef_id} Payment List export file's Passwords.\n"
-            f"Western Union QCF Report file: {report.report_file.file.url}\n"
-        )
         context = {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
-            "message": msg,
+            "message": f"Payment Plan {report.payment_plan.unicef_id} Payment List export file's Passwords.",
             "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
-            "link": "",
+            "link": f"Western Union QCF Report file: {report.report_file.file.url}",
         }
 
         user.email_user(
