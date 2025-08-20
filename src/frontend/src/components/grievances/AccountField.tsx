@@ -4,11 +4,11 @@ import { useLocation } from 'react-router-dom';
 import { Field, FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
 import React, { Fragment, ReactElement } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { Account } from '@restgenerated/models/Account';
 
 
 export interface AccountProps {
@@ -16,10 +16,10 @@ export interface AccountProps {
   baseName: string;
   onDelete;
   isEdited?: boolean;
-  account?: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts']['edges'][number]['node'];
+  account?: Account;
   values;
-  accountTypeChoices: AllAddIndividualFieldsQuery['accountTypeChoices'];
-  accountFinancialInstitutionChoices: AllAddIndividualFieldsQuery['accountFinancialInstitutionChoices'];
+  accountTypeChoices: Record<string, any>[];
+  accountFinancialInstitutionChoices: Record<string, any>[];
 }
 
 export function AccountField({
@@ -41,7 +41,7 @@ export function AccountField({
 
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const dataFields = account?.dataFields ? JSON.parse(account.dataFields) : {};
+  const dataFields = account?.data ? JSON.parse(account.data) : {};
 
   const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
 
@@ -69,13 +69,13 @@ export function AccountField({
             <Grid size={{ xs: 4 }}>
               <LabelizedField
                 label={t('Current Value')}
-                value={account?.name || ''}
+                value={account?.accountType || ''}
               />
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField
                 label={t('New Value')}
-                value={account?.name || ''}
+                value={account?.accountType || ''}
               />
             </Grid>
           </>
