@@ -92,7 +92,7 @@ class DeduplicationEngineApiTest(TestCase):
             ]
         )
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images_json_parsing_error(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())

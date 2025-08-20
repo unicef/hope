@@ -58,9 +58,21 @@ def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED  # pragma: no cover
 
 
+def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_regenerate_export_file_per_fsp
+
+
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
     return request.user.has_permission(
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
+        payment_plan.business_area,
+        payment_plan.program_cycle.program_id,
+    )
+
+
+def has_payment_plan_export_per_fsp_permission(request: Any, payment_plan: PaymentPlan) -> bool:
+    return request.user.has_permission(
+        Permissions.PM_VIEW_LIST.value,
         payment_plan.business_area,
         payment_plan.program_cycle.program_id,
     )
