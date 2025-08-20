@@ -190,7 +190,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         payment_plan.save()
         payment_plan.refresh_from_db()
 
-        with mock.patch("hope.apps.utils.admin.get_task_in_queue_or_running", return_value=None):
+        with mock.patch("hope.apps.utils.celery_utils.get_task_in_queue_or_running", return_value=None):
             response = self.client.post(
                 reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
                 HTTP_X_ROOT_TOKEN="test-token123",
