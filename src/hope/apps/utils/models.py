@@ -574,10 +574,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         except Exception as e:
             return str(e)
 
-    def queue(self, task_name: str | None = None) -> str | None:
+    def queue(self, task_name: str | None = None, *args: Any, **kwargs: Any) -> str | None:
         task_name = self._get_task_name(task_name)
         if self.get_celery_status(task_name) not in self.CELERY_STATUS_SCHEDULED:
-            res = self.task_handlers[task_name].delay(self.pk)
+            res = self.task_handlers[task_name].delay(self.pk, *args, **kwargs)
             self.celery_tasks_results_ids[task_name] = res.id
             self.save(update_fields=["celery_tasks_results_ids"])
             return res
