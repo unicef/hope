@@ -27,7 +27,6 @@ from hope.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
-    ROLE_NO_ROLE,
     Document,
     Household,
     Individual,
@@ -95,7 +94,7 @@ class AddIndividualService(DataChangeService):
         individual_data = details.individual_data
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
-        role = individual_data.pop("role", ROLE_NO_ROLE)
+        role = individual_data.pop("role", None)
         individual_data["flex_fields"] = populate_pdu_with_null_values(
             household.program, individual_data.get("flex_fields", None)
         )

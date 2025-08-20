@@ -189,7 +189,6 @@ ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
 ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    (ROLE_NO_ROLE, "None"),
     (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_PRIMARY, "Primary collector"),
 )
@@ -1072,7 +1071,6 @@ class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDMo
     )
     role = models.CharField(
         max_length=255,
-        blank=True,
         choices=ROLE_CHOICE,
     )
     copied_from = models.ForeignKey(
