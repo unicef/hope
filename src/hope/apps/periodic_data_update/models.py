@@ -251,7 +251,7 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.NEW,
+        default=Status.PENDING_CREATE,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
