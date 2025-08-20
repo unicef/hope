@@ -99,8 +99,6 @@ const NewPeriodicDataUpdates = (): ReactElement => {
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
-  console.log('data', data);
-
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`online-edit-row-${row.id}`}>
       <TableCell>

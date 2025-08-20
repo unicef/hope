@@ -84,8 +84,6 @@ const MergedPeriodicDataUpdates = () => {
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
-  const results = data?.results ?? [];
-
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
       key={row.templateId}
@@ -119,7 +117,7 @@ const MergedPeriodicDataUpdates = () => {
       isOnPaper={true}
       renderRow={renderRow}
       headCells={mergedHeadCells}
-      data={results}
+      data={data ?? []}
       isLoading={isLoading}
       error={error}
       queryVariables={queryVariables}
