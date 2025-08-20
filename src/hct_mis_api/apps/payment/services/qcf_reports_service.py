@@ -226,9 +226,8 @@ class QCFReportsService:
             Q(role_assignments__in=role_assignments) |
             Q(partner__role_assignments__in=role_assignments)
         ).distinct()
-        business_area = report.payment_plan.business_area
         """
-
+        business_area = report.payment_plan.business_area
         users = [
             user
             for user in User.objects.all()
