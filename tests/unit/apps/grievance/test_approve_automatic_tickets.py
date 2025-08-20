@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import Any
 
+import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -162,7 +161,10 @@ class TestGrievanceApproveAutomaticTickets:
 
     def test_approve_system_flagging(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR], self.business_area, self.program_one
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR],
+            self.business_area,
+            self.program_one,
         )
 
         response = self.api_client.post(
@@ -173,7 +175,10 @@ class TestGrievanceApproveAutomaticTickets:
                     "pk": str(self.system_flagging_grievance_ticket.id),
                 },
             ),
-            {"approve_status": False, "version": self.system_flagging_grievance_ticket.version},
+            {
+                "approve_status": False,
+                "version": self.system_flagging_grievance_ticket.version,
+            },
             format="json",
         )
         resp_data = response.json()
@@ -183,7 +188,10 @@ class TestGrievanceApproveAutomaticTickets:
 
     def test_approve_needs_adjudication(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            self.business_area,
+            self.program_one,
         )
 
         response = self.api_client.post(
@@ -209,7 +217,10 @@ class TestGrievanceApproveAutomaticTickets:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            self.business_area,
+            self.program_one,
         )
 
         response = self.api_client.post(
@@ -220,7 +231,10 @@ class TestGrievanceApproveAutomaticTickets:
                     "pk": str(self.needs_adjudication_grievance_ticket.id),
                 },
             ),
-            {"selected_individual_id": None, "version": self.needs_adjudication_grievance_ticket.version},
+            {
+                "selected_individual_id": None,
+                "version": self.needs_adjudication_grievance_ticket.version,
+            },
             format="json",
         )
         resp_data = response.json()
@@ -232,7 +246,10 @@ class TestGrievanceApproveAutomaticTickets:
         return self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
-                kwargs={"business_area_slug": self.business_area.slug, "pk": str(grievance_ticket.id)},
+                kwargs={
+                    "business_area_slug": self.business_area.slug,
+                    "pk": str(grievance_ticket.id),
+                },
             ),
             {
                 "duplicate_individual_ids": [
@@ -244,7 +261,9 @@ class TestGrievanceApproveAutomaticTickets:
             format="json",
         )
 
-    def test_approve_needs_adjudication_allows_multiple_selected_individuals_without_permission(self) -> None:
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals_without_permission(
+        self,
+    ) -> None:
         response = self.approve_multiple_needs_adjudication_ticket(self.needs_adjudication_grievance_ticket)
         resp_data = response.json()
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -254,7 +273,10 @@ class TestGrievanceApproveAutomaticTickets:
         self, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            self.business_area,
+            self.program_one,
         )
 
         response = self.approve_multiple_needs_adjudication_ticket(self.needs_adjudication_grievance_ticket)
@@ -268,7 +290,10 @@ class TestGrievanceApproveAutomaticTickets:
 
     def test_approve_needs_adjudication_new_input_fields(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            self.business_area,
+            self.program_one,
         )
 
         url = reverse(

@@ -1,14 +1,14 @@
 from django.test import TestCase
-from rest_framework.test import APIRequestFactory
-
 from extras.test_utils.factories.core import (
-    create_afghanistan,
-    PeriodicFieldDataFactory,
     FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from hope.apps.core.models import PeriodicFieldData, FlexibleAttribute
+from rest_framework.test import APIRequestFactory
+from test_utils.factories.program import ProgramFactory
 
+from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hope.apps.targeting.models import (
@@ -17,7 +17,6 @@ from hope.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from test_utils.factories.program import ProgramFactory
 
 
 class TargetingCriteriaSerializerTest(TestCase):

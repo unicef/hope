@@ -10,7 +10,11 @@ from hope.apps.payment.models import (
 
 
 class CreatePaymentVerifications:
-    def __init__(self, payment_verification_plan: PaymentVerificationPlan, payment_records: Iterable[Payment]) -> None:
+    def __init__(
+        self,
+        payment_verification_plan: PaymentVerificationPlan,
+        payment_records: Iterable[Payment],
+    ) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.payment_records = payment_records
 

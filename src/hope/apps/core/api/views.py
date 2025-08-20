@@ -1,11 +1,10 @@
 from typing import Any
 
+from constance import config
 from django.db.models import Q, QuerySet
 from django.utils import timezone
-
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -116,11 +115,17 @@ class BusinessAreaViewSet(
             200: KoboAssetObjectSerializer(many=True),
         },
     )
-    @action(detail=True, methods=["post"], url_path="all-kobo-projects", pagination_class=None)
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="all-kobo-projects",
+        pagination_class=None,
+    )
     def all_kobo_projects(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Return all Kobo projects/assets."""
         assets_list = resolve_assets_list(
-            business_area_slug=self.kwargs["slug"], only_deployed=request.data.get("only_deployed", False)
+            business_area_slug=self.kwargs["slug"],
+            only_deployed=request.data.get("only_deployed", False),
         )
         return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
 

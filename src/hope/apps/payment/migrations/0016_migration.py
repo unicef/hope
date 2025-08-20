@@ -68,7 +68,10 @@ class Migration(migrations.Migration):
                     ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
                     ("XLSX_IMPORT_ERROR", "Import XLSX file Error"),
                     ("XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"),
-                    ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"),
+                    (
+                        "XLSX_IMPORTING_RECONCILIATION",
+                        "Importing Reconciliation XLSX file",
+                    ),
                     ("EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"),
                     ("EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"),
                     ("SEND_TO_PAYMENT_GATEWAY", "Sending to Payment Gateway"),
@@ -86,7 +89,12 @@ class Migration(migrations.Migration):
             name="build_status",
             field=django_fsm.FSMField(
                 blank=True,
-                choices=[("PENDING", "Pending"), ("BUILDING", "Building"), ("FAILED", "Failed"), ("OK", "Ok")],
+                choices=[
+                    ("PENDING", "Pending"),
+                    ("BUILDING", "Building"),
+                    ("FAILED", "Failed"),
+                    ("OK", "Ok"),
+                ],
                 db_index=True,
                 default=None,
                 help_text="Build Status for celery task [sys]",
@@ -103,7 +111,9 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="business_area",
             field=models.ForeignKey(
-                help_text="Business Area", on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+                help_text="Business Area",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.businessarea",
             ),
         ),
         migrations.AlterField(
@@ -310,7 +320,11 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="exchange_rate",
             field=models.DecimalField(
-                blank=True, decimal_places=8, help_text="Exchange Rate [sys]", max_digits=14, null=True
+                blank=True,
+                decimal_places=8,
+                help_text="Exchange Rate [sys]",
+                max_digits=14,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -463,7 +477,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="paymentplan",
             name="start_date",
-            field=models.DateTimeField(blank=True, db_index=True, help_text="Payment Plan start date", null=True),
+            field=models.DateTimeField(
+                blank=True,
+                db_index=True,
+                help_text="Payment Plan start date",
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name="paymentplan",
@@ -532,7 +551,9 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="steficon_targeting_applied_date",
             field=models.DateTimeField(
-                blank=True, help_text="Engine Formula applied date for targeting [sys]", null=True
+                blank=True,
+                help_text="Engine Formula applied date for targeting [sys]",
+                null=True,
             ),
         ),
         migrations.AlterField(

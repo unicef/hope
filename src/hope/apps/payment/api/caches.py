@@ -28,7 +28,13 @@ class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area = BusinessArea.objects.get(slug=kwargs.get("business_area_slug"))
         program_ids = request.user.get_program_ids_for_permissions_in_business_area(

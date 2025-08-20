@@ -1,10 +1,9 @@
-from typing import Any, Dict, Iterable, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Tuple
 
+import factory
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse
-
-import factory
 from django_webtest import WebTest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan

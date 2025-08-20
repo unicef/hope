@@ -3,11 +3,10 @@ import time
 from argparse import ArgumentParser
 from decimal import Decimal
 from functools import partial
-from typing import Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
-
 from extras.test_utils.factories.account import UserFactory, create_superuser
 from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
@@ -158,7 +157,10 @@ class Command(BaseCommand):
                     switch_dict: dict[str, Callable[[], GrievanceTicket]] = {
                         "feedback": partial(
                             GrievanceTicketFactory,
-                            admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)
+                            admin2=Area.objects.filter(
+                                area_type__business_area=business_area,
+                                area_type__area_level=2,
+                            )
                             .order_by("?")
                             .first()
                             .name,

@@ -1,10 +1,10 @@
 from tempfile import NamedTemporaryFile
 
+import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.db import transaction
 
-import openpyxl
 from openpyxl.packaging.custom import StringProperty
 
 from hope.apps.core.models import FileTemp
@@ -77,7 +77,10 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
         self.ws_meta["A1"] = "Periodic Data Update Template ID"
         self.ws_meta[self.META_ID_ADDRESS] = self.periodic_data_update_template.pk
         self.wb.custom_doc_props.append(
-            StringProperty(name=self.PROPERTY_ID_NAME, value=str(self.periodic_data_update_template.pk))
+            StringProperty(
+                name=self.PROPERTY_ID_NAME,
+                value=str(self.periodic_data_update_template.pk),
+            )
         )
 
     def _generate_header(self) -> list[str]:
@@ -119,3 +122,4 @@ class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin)
         if not is_individual_allowed:
             return None
         return row
+

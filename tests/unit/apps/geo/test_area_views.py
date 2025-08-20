@@ -1,11 +1,10 @@
 import json
 from typing import Any, Callable
 
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-
-import pytest
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -51,22 +50,34 @@ class TestAreaViews:
         self.area_type_afg_2 = AreaTypeFactory(name="Area Type in Afg 2", country=self.country_2_afg, area_level=1)
 
         self.area_1_area_type_1 = AreaFactory(
-            name="Area 1 Area Type 1", area_type=self.area_type_1_afg, p_code="AREA1-ARTYPE1"
+            name="Area 1 Area Type 1",
+            area_type=self.area_type_1_afg,
+            p_code="AREA1-ARTYPE1",
         )
         self.area_2_area_type_1 = AreaFactory(
-            name="Area 2 Area Type 1", area_type=self.area_type_1_afg, p_code="AREA2-ARTYPE1"
+            name="Area 2 Area Type 1",
+            area_type=self.area_type_1_afg,
+            p_code="AREA2-ARTYPE1",
         )
         self.area_1_area_type_2 = AreaFactory(
-            name="Area 1 Area Type 2", area_type=self.area_type_2_afg, p_code="AREA1-ARTYPE2"
+            name="Area 1 Area Type 2",
+            area_type=self.area_type_2_afg,
+            p_code="AREA1-ARTYPE2",
         )
         self.area_2_area_type_2 = AreaFactory(
-            name="Area 2 Area Type 2", area_type=self.area_type_2_afg, p_code="AREA2-ARTYPE2"
+            name="Area 2 Area Type 2",
+            area_type=self.area_type_2_afg,
+            p_code="AREA2-ARTYPE2",
         )
         self.area_1_area_type_afg_2 = AreaFactory(
-            name="Area 1 Area Type Afg 2", area_type=self.area_type_afg_2, p_code="AREA1-ARTYPE-AFG2"
+            name="Area 1 Area Type Afg 2",
+            area_type=self.area_type_afg_2,
+            p_code="AREA1-ARTYPE-AFG2",
         )
         self.area_2_area_type_afg_2 = AreaFactory(
-            name="Area 2 Area Type Afg 2", area_type=self.area_type_afg_2, p_code="AREA2-ARTYPE-AFG2"
+            name="Area 2 Area Type Afg 2",
+            area_type=self.area_type_afg_2,
+            p_code="AREA2-ARTYPE-AFG2",
         )
 
         self.business_area_other = BusinessAreaFactory(name="Other")
@@ -94,7 +105,11 @@ class TestAreaViews:
             ([], [], status.HTTP_403_FORBIDDEN),
             ([Permissions.GEO_VIEW_LIST], [], status.HTTP_200_OK),
             ([], [Permissions.GEO_VIEW_LIST], status.HTTP_200_OK),
-            ([Permissions.GEO_VIEW_LIST], [Permissions.GEO_VIEW_LIST], status.HTTP_200_OK),
+            (
+                [Permissions.GEO_VIEW_LIST],
+                [Permissions.GEO_VIEW_LIST],
+                status.HTTP_200_OK,
+            ),
         ],
     )
     def test_areas_permission(
@@ -353,7 +368,10 @@ class TestAreaViews:
             assert etag_call_with_filter != etag_call_after_update_second_call
 
     def test_areas_tree(
-        self, api_client: Callable, afghanistan: BusinessAreaFactory, create_user_role_with_permissions: Any
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Any,
     ) -> None:
         self.set_up(api_client, afghanistan)
         # call_command("init-geo-fixtures")
@@ -377,15 +395,29 @@ class TestAreaViews:
         # 1 level
         area_l_1 = AreaFactory(area_type=area_type_level_1, p_code=f"{p_code_prefix}11", name="City1")
         area_l_2 = AreaFactory(
-            area_type=area_type_level_2, p_code=f"{p_code_prefix}1122", parent=area_l_1, name="City2"
+            area_type=area_type_level_2,
+            p_code=f"{p_code_prefix}1122",
+            parent=area_l_1,
+            name="City2",
         )
         area_l_3 = AreaFactory(
-            area_type=area_type_level_3, p_code=f"{p_code_prefix}112233", parent=area_l_2, name="City3"
+            area_type=area_type_level_3,
+            p_code=f"{p_code_prefix}112233",
+            parent=area_l_2,
+            name="City3",
         )
         area_l_4 = AreaFactory(
-            area_type=area_type_level_4, p_code=f"{p_code_prefix}11223344", parent=area_l_3, name="City4"
+            area_type=area_type_level_4,
+            p_code=f"{p_code_prefix}11223344",
+            parent=area_l_3,
+            name="City4",
         )
-        AreaFactory(area_type=area_type_level_5, p_code=f"{p_code_prefix}1122334455", parent=area_l_4, name="City5")
+        AreaFactory(
+            area_type=area_type_level_5,
+            p_code=f"{p_code_prefix}1122334455",
+            parent=area_l_4,
+            name="City5",
+        )
 
         Area.objects.rebuild()
         AreaType.objects.rebuild()

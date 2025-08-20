@@ -1,22 +1,15 @@
 from io import BytesIO
 
-from django.core.files.base import ContentFile
-
 import openpyxl
 import pytest
+from django.core.files.base import ContentFile
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import (
-    FEMALE,
-    MALE,
-    Document,
-    DocumentType,
-    Individual,
-)
+from hope.apps.household.models import FEMALE, MALE, Document, DocumentType, Individual
 from hope.apps.payment.models import Account, AccountType, FinancialInstitution
 from hope.apps.program.models import Program
 from hope.apps.universal_update_script.models import UniversalUpdate
@@ -62,7 +55,11 @@ def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
 @pytest.fixture
@@ -133,7 +130,8 @@ def individual(
 @pytest.fixture
 def wallet(individual: Individual, account_type: AccountType) -> Account:
     financial_institution = FinancialInstitution.objects.create(
-        name="Test Financial Institution", type=FinancialInstitution.FinancialInstitutionType.TELCO
+        name="Test Financial Institution",
+        type=FinancialInstitution.FinancialInstitutionType.TELCO,
     )
 
     return Account.objects.create(
@@ -195,7 +193,12 @@ class TestUniversalIndividualUpdateService:
         document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
-        universal_update.individual_fields = ["given_name", "sex", "birth_date", "phone_no"]
+        universal_update.individual_fields = [
+            "given_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+        ]
         universal_update.individual_flex_fields_fields = ["muac"]
         universal_update.household_flex_fields_fields = ["eggs"]
         universal_update.household_fields = ["address", "admin1", "size", "returnee"]
@@ -287,7 +290,12 @@ Update successful
         document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
-        universal_update.individual_fields = ["given_name", "sex", "birth_date", "phone_no"]
+        universal_update.individual_fields = [
+            "given_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+        ]
         universal_update.individual_flex_fields_fields = ["muac"]
         universal_update.household_flex_fields_fields = ["eggs"]
         universal_update.household_fields = ["address", "admin1", "size", "returnee"]
@@ -370,7 +378,12 @@ Update successful
         document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
-        universal_update.individual_fields = ["given_name", "sex", "birth_date", "phone_no"]
+        universal_update.individual_fields = [
+            "given_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+        ]
         universal_update.individual_flex_fields_fields = ["muac"]
         universal_update.household_flex_fields_fields = ["eggs"]
         universal_update.household_fields = ["address", "admin1", "size", "returnee"]
@@ -498,7 +511,11 @@ Update successful
         universal_update.document_types.add(DocumentType.objects.first())
         universal_update.account_types.add(AccountType.objects.first())
         service = UniversalIndividualUpdateService(universal_update)
-        headers = ["unicef_id", "account__mobile__financial_institution_pk", "account__mobile__number"]
+        headers = [
+            "unicef_id",
+            "account__mobile__financial_institution_pk",
+            "account__mobile__number",
+        ]
         row = (
             individual.unicef_id,
             wallet.financial_institution.id,

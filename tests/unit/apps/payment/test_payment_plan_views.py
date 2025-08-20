@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Callable, List
 from unittest.mock import patch
 
+import pytest
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
@@ -11,9 +12,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-
-import pytest
-
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -36,6 +34,7 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from openpyxl import Workbook
 from rest_framework import status
 from rest_framework.reverse import reverse
+from test_utils.factories.household import create_household_and_individuals
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FileTemp
@@ -50,7 +49,6 @@ from hope.apps.payment.models import (
 from hope.apps.program.models import Program, ProgramCycle
 from hope.apps.steficon.models import Rule
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
-from test_utils.factories.household import create_household_and_individuals
 
 pytestmark = pytest.mark.django_db()
 
@@ -64,7 +62,9 @@ def generate_valid_xlsx_file(name: str = "unit_test.xlsx", worksheet_title: str 
     wb.save(file_stream)
     file_stream.seek(0)
     return SimpleUploadedFile(
-        name, file_stream.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        name,
+        file_stream.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -103,7 +103,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         super().set_up(api_client, afghanistan)
         self.url = reverse(
-            "api:payments:payment-plans-managerial-list", kwargs={"business_area_slug": self.afghanistan.slug}
+            "api:payments:payment-plans-managerial-list",
+            kwargs={"business_area_slug": self.afghanistan.slug},
         )
 
     @pytest.mark.parametrize(
@@ -147,9 +148,18 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             assert response.status_code == status.HTTP_200_OK
             response_json = response.json()["results"]
             assert len(response_json) == 2
-            assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-            assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-            assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            assert self.payment_plan1.unicef_id in [
+                response_json[0]["unicef_id"],
+                response_json[1]["unicef_id"],
+            ]
+            assert self.payment_plan2.unicef_id in [
+                response_json[0]["unicef_id"],
+                response_json[1]["unicef_id"],
+            ]
+            assert self.payment_plan3.unicef_id not in [
+                response_json[0]["unicef_id"],
+                response_json[1]["unicef_id"],
+            ]
             return response
 
         self.set_up(api_client, afghanistan)
@@ -336,9 +346,18 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     @pytest.mark.parametrize(
         ("action_name", "result"),
         [
-            (PaymentPlan.Action.APPROVE.name, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name),
-            (PaymentPlan.Action.AUTHORIZE.name, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name),
-            (PaymentPlan.Action.REVIEW.name, Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name),
+            (
+                PaymentPlan.Action.APPROVE.name,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
+            ),
+            (
+                PaymentPlan.Action.AUTHORIZE.name,
+                Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
+            ),
+            (
+                PaymentPlan.Action.REVIEW.name,
+                Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
+            ),
             ("Some other action name", None),
         ],
     )
@@ -370,11 +389,17 @@ class TestPaymentPlanList:
         )
         self.pp_list_url = reverse(
             "api:payments:payment-plans-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.pp_count_url = reverse(
             "api:payments:payment-plans-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.client = api_client(self.user)
 
@@ -550,7 +575,11 @@ class TestPaymentPlanDetail:
         pp_id = str(self.pp.id)
         self.pp_detail_url = reverse(
             "api:payments:payment-plans-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": pp_id},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": pp_id,
+            },
         )
         self.client = api_client(self.user)
 
@@ -562,7 +591,10 @@ class TestPaymentPlanDetail:
         ],
     )
     def test_payment_plan_detail_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
 
@@ -571,7 +603,10 @@ class TestPaymentPlanDetail:
 
     def test_payment_plan_detail(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         response = self.client.get(self.pp_detail_url)
         assert response.status_code == status.HTTP_200_OK
@@ -620,7 +655,10 @@ class TestPaymentPlanDetail:
 
     def test_has_fsp_delivery_mechanism_xlsx_template(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         xlsx_temp = FinancialServiceProviderXlsxTemplateFactory()
         dm = DeliveryMechanismFactory()
@@ -646,7 +684,10 @@ class TestPaymentPlanDetail:
 
     def test_can_create_follow_up(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         self.pp.is_follow_up = True
         self.pp.save()
@@ -658,7 +699,10 @@ class TestPaymentPlanDetail:
 
     def test_get_can_split(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
         self.pp.status = PaymentPlan.Status.ACCEPTED
@@ -692,7 +736,10 @@ class TestPaymentPlanFilter:
         )
         self.list_url = reverse(
             "api:payments:payment-plans-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.partner = PartnerFactory(name="ABC")
         self.user = UserFactory(partner=self.partner)
@@ -785,7 +832,8 @@ class TestPaymentPlanFilter:
             total_entitled_quantity=200,
         )
         response = self.client.get(
-            self.list_url, {"total_entitled_quantity__gte": "99", "total_entitled_quantity__lte": 201}
+            self.list_url,
+            {"total_entitled_quantity__gte": "99", "total_entitled_quantity__lte": 201},
         )
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
@@ -870,11 +918,17 @@ class TestTargetPopulationList:
         )
         self.tp_list_url = reverse(
             "api:payments:target-populations-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.tp_count_url = reverse(
             "api:payments:target-populations-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.client = api_client(self.user)
 
@@ -994,7 +1048,11 @@ class TestTargetPopulationDetail:
         tp_id = str(self.tp.id)
         self.tp_detail_url = reverse(
             "api:payments:target-populations-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": tp_id,
+            },
         )
         self.client = api_client(self.user)
 
@@ -1006,7 +1064,10 @@ class TestTargetPopulationDetail:
         ],
     )
     def test_target_population_detail_permissions(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
 
@@ -1015,7 +1076,10 @@ class TestTargetPopulationDetail:
 
     def test_target_population_detail(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.TARGETING_VIEW_DETAILS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.TARGETING_VIEW_DETAILS],
+            self.afghanistan,
+            self.program_active,
         )
         response = self.client.get(self.tp_detail_url)
         assert response.status_code == status.HTTP_200_OK
@@ -1072,7 +1136,10 @@ class TestTargetPopulationFilter:
         )
         self.list_url = reverse(
             "api:payments:target-populations-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.partner = PartnerFactory(name="ABC")
         self.user = UserFactory(partner=self.partner)
@@ -1135,7 +1202,8 @@ class TestTargetPopulationFilter:
             total_households_count=200,
         )
         response = self.client.get(
-            self.list_url, {"total_households_count__gte": "99", "total_households_count__lte": 201}
+            self.list_url,
+            {"total_households_count__gte": "99", "total_households_count__lte": 201},
         )
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
@@ -1170,7 +1238,10 @@ class TestTargetPopulationFilter:
         tp_1.save()
         tp_2.created_at = "2022-01-01"
         tp_2.save()
-        response = self.client.get(self.list_url, {"created_at__gte": "2022-02-23", "created_at__lte": "2022-03-04"})
+        response = self.client.get(
+            self.list_url,
+            {"created_at__gte": "2022-02-23", "created_at__lte": "2022-03-04"},
+        )
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -1201,7 +1272,10 @@ class TestTargetPopulationCreateUpdate:
 
         self.create_url = reverse(
             "api:payments:target-populations-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
         )
         self.update_url = reverse(
             "api:payments:target-populations-detail",
@@ -1237,7 +1311,10 @@ class TestTargetPopulationCreateUpdate:
         ],
     )
     def test_create_payment_plan_success(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         data = {
@@ -1262,7 +1339,10 @@ class TestTargetPopulationCreateUpdate:
 
     def test_create_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.TARGETING_CREATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.TARGETING_CREATE],
+            self.afghanistan,
+            self.program_active,
         )
         invalid_data = {
             "name": "",
@@ -1283,7 +1363,10 @@ class TestTargetPopulationCreateUpdate:
         ],
     )
     def test_update_payment_plan_success(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
 
@@ -1304,7 +1387,10 @@ class TestTargetPopulationCreateUpdate:
 
     def test_update_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.TARGETING_UPDATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.TARGETING_UPDATE],
+            self.afghanistan,
+            self.program_active,
         )
         invalid_update_data = {
             "name": "",
@@ -1353,7 +1439,12 @@ class TestTargetPopulationActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_lock(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
 
         response = self.client.get(self.url_lock)
@@ -1369,7 +1460,12 @@ class TestTargetPopulationActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_unlock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_unlock(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.target_population.status = PaymentPlan.Status.TP_LOCKED
         self.target_population.save()
@@ -1386,7 +1482,12 @@ class TestTargetPopulationActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_rebuild(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_rebuild(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
 
         response = self.client.get(self.url_rebuild)
@@ -1398,11 +1499,19 @@ class TestTargetPopulationActions:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND], status.HTTP_200_OK),
+            (
+                [Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND],
+                status.HTTP_200_OK,
+            ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_mark_ready(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_mark_ready(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.target_population.financial_service_provider = FinancialServiceProviderFactory()
         self.target_population.delivery_mechanism = DeliveryMechanismFactory()
@@ -1421,7 +1530,12 @@ class TestTargetPopulationActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_copy_tp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_copy_tp(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         data = {"name": "Copied TP test 123", "program_cycle_id": self.cycle.pk}
         response = self.client.post(self.url_copy, data, format="json")
@@ -1435,7 +1549,10 @@ class TestTargetPopulationActions:
 
     def test_copy_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.TARGETING_DUPLICATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.TARGETING_DUPLICATE],
+            self.afghanistan,
+            self.program_active,
         )
         cycle = ProgramCycleFactory(program=self.program_active, status=ProgramCycle.ACTIVE, title="Cycle123")
         PaymentPlanFactory(
@@ -1477,7 +1594,10 @@ class TestTargetPopulationActions:
         ],
     )
     def test_apply_engine_formula_tp(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11).rule
@@ -1498,7 +1618,10 @@ class TestTargetPopulationActions:
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.TARGETING_UPDATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.TARGETING_UPDATE],
+            self.afghanistan,
+            self.program_active,
         )
         rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=False, version=22).rule
         self.target_population.status = PaymentPlan.Status.TP_STEFICON_ERROR
@@ -1535,7 +1658,12 @@ class TestTargetPopulationActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_tp_delete(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_tp_delete(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         tp = PaymentPlanFactory(
             name="TP_to_delete",
@@ -1547,7 +1675,11 @@ class TestTargetPopulationActions:
         tp_id = tp.pk
         delete_url = reverse(
             "api:payments:target-populations-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": tp_id,
+            },
         )
         response = self.client.delete(delete_url)
 
@@ -1571,7 +1703,13 @@ class TestPendingPaymentsAction:
         self.cycle = self.program.cycles.first()
         self.api_client = api_client(self.user)
 
-        self.household1, (self.individual1_1, self.individual1_2) = create_household_and_individuals(
+        (
+            self.household1,
+            (
+                self.individual1_1,
+                self.individual1_2,
+            ),
+        ) = create_household_and_individuals(
             household_data={
                 "program": self.program,
                 "business_area": self.afghanistan,
@@ -1691,7 +1829,8 @@ class TestPaymentPlanActions:
         )
 
         self.url_export_pdf_payment_plan_summary = reverse(
-            "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
+            "api:payments:payment-plans-export-pdf-payment-plan-summary",
+            kwargs=url_kwargs,
         )
         self.url_generate_xlsx_with_auth_code = reverse(
             "api:payments:payment-plans-generate-xlsx-with-auth-code", kwargs=url_kwargs
@@ -1714,7 +1853,12 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_create_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_create_pp(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         data = {
             "dispersion_start_date": "2025-02-01",
@@ -1747,7 +1891,12 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pp_lock(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.OPEN
         self.pp.save()
@@ -1765,7 +1914,12 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pp_unlock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pp_unlock(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED
         self.pp.save()
@@ -1783,7 +1937,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_payment_plan_delete(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         pp = PaymentPlanFactory(
@@ -1796,7 +1953,11 @@ class TestPaymentPlanActions:
         pp_id = str(pp.pk)
         delete_url = reverse(
             "api:payments:payment-plans-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": pp_id},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": pp_id,
+            },
         )
         response = self.client.delete(delete_url)
 
@@ -1809,12 +1970,18 @@ class TestPaymentPlanActions:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], status.HTTP_200_OK),
+            (
+                [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+                status.HTTP_200_OK,
+            ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_exclude_beneficiaries(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED
@@ -1834,7 +2001,10 @@ class TestPaymentPlanActions:
 
     def test_exclude_beneficiaries_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+            self.afghanistan,
+            self.program_active,
         )
 
         response_1 = self.client.post(self.url_exclude_hh, {"excluded_households_ids": ["HH-1"]}, format="json")
@@ -1843,7 +2013,11 @@ class TestPaymentPlanActions:
 
         self.pp.status = PaymentPlan.Status.LOCKED
         self.pp.save()
-        response_2 = self.client.post(self.url_exclude_hh, {"excluded_households_ids": ["HH-1", "HH-1"]}, format="json")
+        response_2 = self.client.post(
+            self.url_exclude_hh,
+            {"excluded_households_ids": ["HH-1", "HH-1"]},
+            format="json",
+        )
         assert response_2.status_code == status.HTTP_400_BAD_REQUEST
         assert "Duplicate IDs are not allowed." in response_2.data["excluded_households_ids"][0]
 
@@ -1854,12 +2028,18 @@ class TestPaymentPlanActions:
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
-            ([Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS], status.HTTP_200_OK),
+            (
+                [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
+                status.HTTP_200_OK,
+            ),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
     def test_apply_engine_formula_pp(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, version=11).rule
@@ -1921,7 +2101,12 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pp_fsp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pp_fsp_lock(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED
         self.pp.financial_service_provider = FinancialServiceProviderFactory()
@@ -1942,7 +2127,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_pp_fsp_unlock(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED_FSP
@@ -1961,7 +2149,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_pp_entitlement_export_xlsx(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED
@@ -1985,7 +2176,10 @@ class TestPaymentPlanActions:
     @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_pp_entitlement_import_xlsx(self, mock_exchange_rate: Any, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+            self.afghanistan,
+            self.program_active,
         )
         self.pp.status = PaymentPlan.Status.LOCKED
         self.pp.save()
@@ -2019,7 +2213,10 @@ class TestPaymentPlanActions:
         self.pp.status = PaymentPlan.Status.OPEN
         self.pp.save()
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+            self.afghanistan,
+            self.program_active,
         )
         test_file = SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")
         response = self.client.post(self.url_import_entitlement_xlsx, {"file": test_file}, format="multipart")
@@ -2035,7 +2232,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_send_for_approval(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED_FSP
@@ -2060,7 +2260,10 @@ class TestPaymentPlanActions:
                 PaymentPlan.Status.IN_AUTHORIZATION,
             ),
             (
-                [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW, Permissions.PM_VIEW_LIST],
+                [
+                    Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+                    Permissions.PM_VIEW_LIST,
+                ],
                 status.HTTP_200_OK,
                 PaymentPlan.Status.IN_REVIEW,
             ),
@@ -2094,7 +2297,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_approval_process_approve(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         ApprovalProcessFactory(payment_plan=self.pp)
@@ -2116,7 +2322,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_approval_process_authorize(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         ApprovalProcessFactory(payment_plan=self.pp)
@@ -2138,13 +2347,20 @@ class TestPaymentPlanActions:
         ],
     )
     def test_approval_process_mark_as_released(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_REVIEW
         self.pp.save()
-        response = self.client.post(self.url_approval_process_mark_as_released, {"comment": "test123"}, format="json")
+        response = self.client.post(
+            self.url_approval_process_mark_as_released,
+            {"comment": "test123"},
+            format="json",
+        )
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "ACCEPTED"
@@ -2157,11 +2373,15 @@ class TestPaymentPlanActions:
         ],
     )
     def test_pp_send_to_payment_gateway(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         fsp = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
         )
         PaymentPlanSplitFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.ACCEPTED
@@ -2182,22 +2402,30 @@ class TestPaymentPlanActions:
         ],
     )
     def test_generate_xlsx_with_auth_code(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         fsp_xlsx_template_id = FinancialServiceProviderXlsxTemplateFactory().pk
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         test_file = FileTemp.objects.create(
-            object_id=self.pp.pk, content_type=get_content_type_for_model(self.pp), created_by=self.user
+            object_id=self.pp.pk,
+            content_type=get_content_type_for_model(self.pp),
+            created_by=self.user,
         )
         fsp = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
         )
         PaymentPlanSplitFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_APPROVAL
         self.pp.financial_service_provider = fsp
         self.pp.save()
         response = self.client.post(
-            self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+            self.url_generate_xlsx_with_auth_code,
+            {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+            format="json",
         )
 
         if expected_status == status.HTTP_200_OK:
@@ -2210,7 +2438,9 @@ class TestPaymentPlanActions:
             self.pp.export_file_per_fsp = test_file
             self.pp.save()
             response_2 = self.client.post(
-                self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+                self.url_generate_xlsx_with_auth_code,
+                {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+                format="json",
             )
 
             assert response_2.status_code == status.HTTP_400_BAD_REQUEST
@@ -2220,7 +2450,9 @@ class TestPaymentPlanActions:
             self.pp.save()
             payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_PENDING)
             response_3 = self.client.post(
-                self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+                self.url_generate_xlsx_with_auth_code,
+                {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+                format="json",
             )
 
             assert response_3.status_code == status.HTTP_400_BAD_REQUEST
@@ -2233,7 +2465,9 @@ class TestPaymentPlanActions:
             payment.status = Payment.STATUS_SENT_TO_PG
             payment.save()
             response_ok = self.client.post(
-                self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+                self.url_generate_xlsx_with_auth_code,
+                {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+                format="json",
             )
 
             assert response_ok.status_code == status.HTTP_200_OK
@@ -2246,7 +2480,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_send_xlsx_password(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.ACCEPTED
@@ -2263,7 +2500,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_reconciliation_export_xlsx(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.ACCEPTED
@@ -2294,7 +2534,10 @@ class TestPaymentPlanActions:
         self.pp.status = PaymentPlan.Status.OPEN
         self.pp.save()
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+            self.afghanistan,
+            self.program_active,
         )
         test_file = SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")
         response = self.client.post(self.url_reconciliation_import_xlsx, {"file": test_file}, format="multipart")
@@ -2305,7 +2548,8 @@ class TestPaymentPlanActions:
         )
 
         fsp_api = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
         )
         self.pp.status = PaymentPlan.Status.ACCEPTED
         self.pp.financial_service_provider = fsp_api
@@ -2324,10 +2568,16 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_split(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_split(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         fsp = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
         )
         split = PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
         self.pp.status = PaymentPlan.Status.IN_APPROVAL
@@ -2350,16 +2600,22 @@ class TestPaymentPlanActions:
             self.pp.save()
             self.pp.eligible_payments.delete()
             response_3 = self.client.post(
-                self.url_pp_split, {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS}, format="json"
+                self.url_pp_split,
+                {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
+                format="json",
             )
             assert response_3.status_code == status.HTTP_400_BAD_REQUEST
             assert "Payment Number is required for split by records" in response_3.data
 
             fsp_api = FinancialServiceProviderFactory(
-                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                payment_gateway_id="123",
             )
             PaymentFactory.create_batch(
-                51, parent=self.pp, status=Payment.STATUS_PENDING, financial_service_provider=fsp_api
+                51,
+                parent=self.pp,
+                status=Payment.STATUS_PENDING,
+                financial_service_provider=fsp_api,
             )
             response_4 = self.client.post(self.url_pp_split, data, format="json")
             assert response_4.status_code == status.HTTP_400_BAD_REQUEST
@@ -2368,7 +2624,10 @@ class TestPaymentPlanActions:
             # success
             response_ok = self.client.post(
                 self.url_pp_split,
-                {"payments_no": 30, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
+                {
+                    "payments_no": 30,
+                    "split_type": PaymentPlanSplit.SplitType.BY_RECORDS,
+                },
                 format="json",
             )
             assert response_ok.status_code == status.HTTP_200_OK
@@ -2382,7 +2641,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_export_pdf_payment_plan_summary(
-        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED
@@ -2402,14 +2664,20 @@ class TestPaymentPlanActions:
         ],
     )
     def test_create_follow_up(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         PaymentFactory(parent=self.pp, status=Payment.STATUS_FORCE_FAILED)
 
         response = self.client.post(
             self.url_create_follow_up,
-            {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2026-01-01"},
+            {
+                "dispersion_start_date": "2024-01-01",
+                "dispersion_end_date": "2026-01-01",
+            },
             format="json",
         )
         assert response.status_code == expected_status
@@ -2431,7 +2699,10 @@ class TestPaymentPlanActions:
         ],
     )
     def test_assign_funds_commitments(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.IN_REVIEW
@@ -2461,7 +2732,10 @@ class TestPaymentPlanActions:
 
     def test_assign_funds_commitments_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+            self.afghanistan,
+            self.program_active,
         )
 
         response = self.client.post(
@@ -2512,7 +2786,10 @@ class TestPaymentPlanActions:
 
     def test_fsp_xlsx_template_list(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.PM_EXPORT_XLSX_FOR_FSP], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.PM_EXPORT_XLSX_FOR_FSP],
+            self.afghanistan,
+            self.program_active,
         )
 
         xlsx_1 = FinancialServiceProviderXlsxTemplateFactory(name="XLSX_1")
@@ -2527,7 +2804,10 @@ class TestPaymentPlanActions:
         fsp_2.xlsx_templates.set([xlsx_3])
 
         response = self.client.get(
-            reverse("api:payments:payment-plans-fsp-xlsx-template-list", kwargs=self.url_kwargs_ba_program),
+            reverse(
+                "api:payments:payment-plans-fsp-xlsx-template-list",
+                kwargs=self.url_kwargs_ba_program,
+            ),
             {"fund_commitment_items_ids": ["333"]},
             format="json",
         )

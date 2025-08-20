@@ -1,11 +1,10 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
-
-from django.core.management import call_command
-from django.utils import timezone
+from typing import TYPE_CHECKING, Any
 
 import pytest
+from django.core.management import call_command
+from django.utils import timezone
 from extras.test_utils.factories.core import create_afghanistan
 from strategy_field.utils import fqn
 

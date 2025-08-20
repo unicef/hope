@@ -4,12 +4,9 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
-
-from rest_framework.exceptions import ValidationError
+from aniso8601 import parse_date
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-
-from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -34,6 +31,7 @@ from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from flaky import flaky
 from freezegun import freeze_time
 from pytz import utc
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import APITestCase
@@ -65,7 +63,10 @@ class TestPaymentPlanServices(APITestCase):
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PM_CREATE], cls.business_area, whole_business_area_access=True
+            cls.user,
+            [Permissions.PM_CREATE],
+            cls.business_area,
+            whole_business_area_access=True,
         )
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
         cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
@@ -86,7 +87,9 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_tp_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.TP_OPEN, program_cycle=program.cycles.first(), created_by=self.user
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=program.cycles.first(),
+            created_by=self.user,
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
@@ -96,7 +99,9 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first(), created_by=self.user
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program.cycles.first(),
+            created_by=self.user,
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
@@ -113,7 +118,9 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first(), created_by=self.user
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program.cycles.first(),
+            created_by=self.user,
         )
         program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp.program)
         pp.program_cycle = program_cycle
@@ -132,9 +139,15 @@ class TestPaymentPlanServices(APITestCase):
         program = ProgramFactory(status=Program.ACTIVE)
         program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
         pp_1: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program_cycle,
+            created_by=self.user,
         )
-        PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
+        PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program_cycle,
+            created_by=self.user,
+        )
 
         assert pp_1.program_cycle.status == ProgramCycle.ACTIVE
 
@@ -178,28 +191,37 @@ class TestPaymentPlanServices(APITestCase):
         }
 
         with self.assertRaisesMessage(
-            ValidationError, f"Target Population with name: TEST_123 and program: {program.name} already exists."
+            ValidationError,
+            f"Target Population with name: TEST_123 and program: {program.name} already exists.",
         ):
             PaymentPlanFactory(program_cycle=program_cycle, name="TEST_123", created_by=self.user)
             PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=create_input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
         with self.assertRaisesMessage(
-            ValidationError, "Impossible to create Target Population for Programme within not Active status"
+            ValidationError,
+            "Impossible to create Target Population for Programme within not Active status",
         ):
             program.status = Program.FINISHED
             program.save()
             program.refresh_from_db()
             PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=create_input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
         with self.assertRaisesMessage(
-            ValidationError, "Impossible to create Target Population for Programme Cycle within Finished status"
+            ValidationError,
+            "Impossible to create Target Population for Programme Cycle within Finished status",
         ):
             program_cycle.status = ProgramCycle.FINISHED
             program_cycle.save()
             PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=create_input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
         program_cycle.status = ProgramCycle.ACTIVE
         program_cycle.save()
@@ -208,7 +230,9 @@ class TestPaymentPlanServices(APITestCase):
         # create PP
         create_input_data["name"] = "TEST"
         pp = PaymentPlanService.create(
-            input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+            input_data=create_input_data,
+            user=self.user,
+            business_area_slug=self.business_area.slug,
         )
         pp.status = PaymentPlan.Status.TP_OPEN
         pp.save()
@@ -226,7 +250,8 @@ class TestPaymentPlanServices(APITestCase):
         pp.status = PaymentPlan.Status.DRAFT
         pp.save()
         with self.assertRaisesMessage(
-            ValidationError, f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date"
+            ValidationError,
+            f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date",
         ):
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
@@ -290,7 +315,9 @@ class TestPaymentPlanServices(APITestCase):
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
-                    input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                    input_data=input_data,
+                    user=self.user,
+                    business_area_slug=self.business_area.slug,
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
@@ -332,7 +359,8 @@ class TestPaymentPlanServices(APITestCase):
         pp.save()
 
         with self.assertRaisesMessage(
-            ValidationError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
+            ValidationError,
+            f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date",
         ):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
@@ -351,7 +379,10 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN"
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
             )
             payments.append(payment)
 
@@ -359,7 +390,8 @@ class TestPaymentPlanServices(APITestCase):
         dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
 
         with self.assertRaisesMessage(
-            ValidationError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
+            ValidationError,
+            "Cannot create a follow-up for a payment plan with no unsuccessful payments",
         ):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
@@ -406,9 +438,12 @@ class TestPaymentPlanServices(APITestCase):
         assert follow_up_pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
 
         assert follow_up_pp.payment_items.count() == 4
-        assert {p_error.id, p_not_distributed.id, p_force_failed.id, p_manually_cancelled.id} == set(
-            follow_up_pp.payment_items.values_list("source_payment_id", flat=True)
-        )
+        assert {
+            p_error.id,
+            p_not_distributed.id,
+            p_force_failed.id,
+            p_manually_cancelled.id,
+        } == set(follow_up_pp.payment_items.values_list("source_payment_id", flat=True))
 
         follow_up_payment = follow_up_pp.payment_items.first()
         assert follow_up_payment.status == Payment.STATUS_PENDING
@@ -497,7 +532,11 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
+                collector=collector,
             )
             payments.append(payment)
 
@@ -512,7 +551,11 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
+                collector=collector,
             )
             payments.append(payment)
 
@@ -523,7 +566,11 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
+                collector=collector,
             )
             payments.append(payment)
 
@@ -531,7 +578,8 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=None)
 
         with self.assertRaisesMessage(
-            ValidationError, "Payment Parts number should be between 2 and total number of payments"
+            ValidationError,
+            "Payment Parts number should be between 2 and total number of payments",
         ):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
 
@@ -671,12 +719,20 @@ class TestPaymentPlanServices(APITestCase):
         ):
             cycle.status = ProgramCycle.FINISHED
             cycle.save()
-            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
+            PaymentPlanService.create(
+                input_data=input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
+            )
 
         cycle.status = ProgramCycle.DRAFT
         cycle.end_date = None
         cycle.save()
-        PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
+        PaymentPlanService.create(
+            input_data=input_data,
+            user=self.user,
+            business_area_slug=self.business_area.slug,
+        )
         cycle.refresh_from_db()
         # open PP will update cycle' status into Active
         assert cycle.status == ProgramCycle.DRAFT
@@ -720,7 +776,9 @@ class TestPaymentPlanServices(APITestCase):
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
-                    input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                    input_data=input_data,
+                    user=self.user,
+                    business_area_slug=self.business_area.slug,
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
@@ -786,7 +844,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_tp_lock_invalid_pp_status(self) -> None:
         payment_plan = PaymentPlanFactory(
-            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
         )
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_lock()
@@ -794,7 +854,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_tp_unlock(self) -> None:
         payment_plan = PaymentPlanFactory(
-            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
         )
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_unlock()
@@ -905,13 +967,22 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False, should_update_money_stats=True, vulnerability_filter=False, payment_plan=pp
+            rebuild_list=False,
+            should_update_money_stats=True,
+            vulnerability_filter=False,
+            payment_plan=pp,
         )
         PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=True, should_update_money_stats=False, vulnerability_filter=False, payment_plan=pp
+            rebuild_list=True,
+            should_update_money_stats=False,
+            vulnerability_filter=False,
+            payment_plan=pp,
         )
         PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False, should_update_money_stats=False, vulnerability_filter=True, payment_plan=pp
+            rebuild_list=False,
+            should_update_money_stats=False,
+            vulnerability_filter=True,
+            payment_plan=pp,
         )
 
         self.payment_plan.refresh_from_db(fields=("build_status",))
@@ -974,7 +1045,10 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_update_pp_vulnerability_score(self) -> None:
         PaymentPlanService(self.payment_plan).update(
-            {"vulnerability_score_min": "11.229222", "vulnerability_score_max": "77.889777"}
+            {
+                "vulnerability_score_min": "11.229222",
+                "vulnerability_score_max": "77.889777",
+            }
         )
         self.payment_plan.refresh_from_db(fields=("vulnerability_score_min", "vulnerability_score_max"))
         assert self.payment_plan.vulnerability_score_min == Decimal("11.229")
@@ -1014,7 +1088,8 @@ class TestPaymentPlanServices(APITestCase):
             financial_service_provider=self.fsp,
         )
         with self.assertRaisesMessage(
-            ValidationError, "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+            ValidationError,
+            "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned.",
         ):
             PaymentPlanService(payment_plan).update({"currency": "PLN"})
 
@@ -1075,7 +1150,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_export_xlsx(self) -> None:
         payment_plan = PaymentPlanFactory(
-            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.LOCKED,
         )
         assert FileTemp.objects.all().count() == 0
 

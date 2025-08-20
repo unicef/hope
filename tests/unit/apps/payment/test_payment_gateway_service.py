@@ -57,7 +57,10 @@ from hope.apps.payment.services.payment_household_snapshot_service import (
 
 @pytest.fixture(autouse=True)
 def mock_payment_gateway_env_vars() -> None:
-    with mock.patch.dict(os.environ, {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"}):
+    with mock.patch.dict(
+        os.environ,
+        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
+    ):
         yield
 
 
@@ -163,7 +166,10 @@ class TestPaymentGatewayService(APITestCase):
     )
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
-    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch(
+        "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+        return_value=100.00,
+    )
     def test_sync_records_for_split(
         self,
         get_quantity_in_usd_mock: Any,
@@ -240,7 +246,10 @@ class TestPaymentGatewayService(APITestCase):
     )
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
-    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch(
+        "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+        return_value=100.00,
+    )
     def test_sync_records_error_messages(
         self,
         get_quantity_in_usd_mock: Any,
@@ -348,7 +357,10 @@ class TestPaymentGatewayService(APITestCase):
     )
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
-    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch(
+        "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+        return_value=100.00,
+    )
     def test_sync_payment_plan(
         self,
         get_quantity_in_usd_mock: Any,
@@ -420,7 +432,10 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
-    @mock.patch("hope.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch(
+        "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+        return_value=100.00,
+    )
     def test_sync_record(
         self,
         get_quantity_in_usd_mock: Any,
@@ -482,7 +497,9 @@ class TestPaymentGatewayService(APITestCase):
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_records_to_payment_instructions_for_split(
-        self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
+        self,
+        change_payment_instruction_status_mock: Any,
+        add_records_to_payment_instruction_mock: Any,
     ) -> None:
         self.pp_split_1.sent_to_payment_gateway = False
         self.pp_split_2.sent_to_payment_gateway = False
@@ -521,7 +538,9 @@ class TestPaymentGatewayService(APITestCase):
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_records_to_payment_instructions_for_split_error(
-        self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
+        self,
+        change_payment_instruction_status_mock: Any,
+        add_records_to_payment_instruction_mock: Any,
     ) -> None:
         self.pp_split_1.sent_to_payment_gateway = False
         self.pp_split_2.sent_to_payment_gateway = False
@@ -732,7 +751,12 @@ class TestPaymentGatewayService(APITestCase):
             "destination_currency": self.payments[0].currency,
             "delivery_mechanism": "transfer_to_account",
             "account_type": "bank",
-            "account": {"number": "123", "name": "ABC", "code": "456", "service_provider_code": "456"},
+            "account": {
+                "number": "123",
+                "name": "ABC",
+                "code": "456",
+                "service_provider_code": "456",
+            },
         }
         expected_body = {
             "remote_id": str(self.payments[0].id),
@@ -757,10 +781,14 @@ class TestPaymentGatewayService(APITestCase):
             type=FinancialInstitution.FinancialInstitutionType.BANK,
         )
         FinancialInstitutionMapping.objects.create(
-            financial_institution=financial_institution, financial_service_provider=uba_fsp, code="456"
+            financial_institution=financial_institution,
+            financial_service_provider=uba_fsp,
+            code="456",
         )
         FinancialInstitutionMapping.objects.create(
-            financial_institution=financial_institution, financial_service_provider=self.pg_fsp, code="789"
+            financial_institution=financial_institution,
+            financial_service_provider=self.pg_fsp,
+            code="789",
         )
 
         PaymentHouseholdSnapshot.objects.all().delete()
@@ -933,7 +961,13 @@ class TestPaymentGatewayService(APITestCase):
         dm_cash.save()
 
         get_delivery_mechanisms_mock.return_value = [
-            DeliveryMechanismData(id=33, code="new_dm", name="New DM", transfer_type="CASH", account_type="123"),
+            DeliveryMechanismData(
+                id=33,
+                code="new_dm",
+                name="New DM",
+                transfer_type="CASH",
+                account_type="123",
+            ),
             DeliveryMechanismData(id=2, code="cash", name="Cash", transfer_type="CASH", account_type="123"),
         ]
 
@@ -1015,7 +1049,10 @@ class TestPaymentGatewayService(APITestCase):
 
         fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
         assert fsp_new.payment_gateway_id == "33"
-        assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter", "transfer"]
+        assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == [
+            "cash_over_the_counter",
+            "transfer",
+        ]
 
         assert FspNameMapping.objects.count() == 6
         fsp_name_mapping = FspNameMapping.objects.get(external_name="field1")
@@ -1072,6 +1109,9 @@ class TestPaymentGatewayService(APITestCase):
             assert get_record_mock.call_count == 2
 
             # check call arguments
-            called_payments, called_split = mock_add_records.call_args[0][0], mock_add_records.call_args[0][1]
+            called_payments, called_split = (
+                mock_add_records.call_args[0][0],
+                mock_add_records.call_args[0][1],
+            )
             assert called_payments == list(Payment.objects.filter(pk=self.payments[1].pk))
             assert called_split == self.pp_split_2.pk

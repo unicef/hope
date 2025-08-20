@@ -3,13 +3,11 @@ from typing import Any, Optional, Union
 from unittest.mock import MagicMock
 from urllib.parse import unquote
 
+import pytest
 from django.contrib.admin.sites import AdminSite
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-
-import pytest
-from hope.admin.partner import PartnerAdmin
 from django_webtest import DjangoTestApp
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
@@ -20,10 +18,8 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 
-from hope.admin.user_role import (
-    RoleAssignmentAdmin,
-    RoleAssignmentInline,
-)
+from hope.admin.partner import PartnerAdmin
+from hope.admin.user_role import RoleAssignmentAdmin, RoleAssignmentInline
 from hope.apps.account.models import Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db()

@@ -1,10 +1,9 @@
 import logging
 from typing import Any
 
+import requests
 from django.conf import settings
 from django.http import Http404
-
-import requests
 
 from hope.apps.utils.exceptions import log_and_raise
 

@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
@@ -10,9 +12,6 @@ from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.api.models import APIToken
@@ -142,7 +141,11 @@ class APITokenAdmin(SmartModelAdmin):
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:
-            self.message_user(request, f"Unable to send notification email to {obj.user.email}", messages.ERROR)
+            self.message_user(
+                request,
+                f"Unable to send notification email to {obj.user.email}",
+                messages.ERROR,
+            )
 
     @button(permission=is_root)
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
@@ -159,7 +162,11 @@ class APITokenAdmin(SmartModelAdmin):
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailableError:
-            self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
+            self.message_user(
+                request,
+                "User do not have any Business Areas assigned to him",
+                messages.ERROR,
+            )
             return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))  # type: ignore # str vs SafeString
 
     def log_addition(self, request: HttpRequest, obj: Any, message: str) -> LogEntry:

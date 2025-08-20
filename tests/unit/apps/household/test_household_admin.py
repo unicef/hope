@@ -3,7 +3,6 @@ from typing import Any
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from django.test import TestCase
-
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import (
@@ -48,7 +47,10 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             individuals_data=[{}, {}],
         )
 
-        cls.household_other_program, cls.individuals_other_program = create_household_and_individuals(
+        (
+            cls.household_other_program,
+            cls.individuals_other_program,
+        ) = create_household_and_individuals(
             household_data={
                 "business_area": business_area,
                 "program": cls.program_other,

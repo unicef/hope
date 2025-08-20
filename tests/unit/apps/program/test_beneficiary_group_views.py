@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.cache import cache
 from django.urls import reverse
-
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import BeneficiaryGroupFactory

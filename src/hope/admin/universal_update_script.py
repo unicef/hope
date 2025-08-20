@@ -1,5 +1,7 @@
 from typing import Any, Iterator
 
+from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -8,15 +10,9 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
-from admin_extra_buttons.buttons import Button
-from admin_extra_buttons.decorators import button
-
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.payment.models import AccountType
-from hope.apps.universal_update_script.models import (
-    DocumentType,
-    UniversalUpdate,
-)
+from hope.apps.universal_update_script.models import DocumentType, UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
     get_individual_flex_fields,
@@ -192,7 +188,10 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         universal_update = get_object_or_404(UniversalUpdate, pk=btn.request.resolver_match.kwargs["object_id"])
         return bool(universal_update.update_file)
 
-    @button(label="Generate Excel Template", permision="universal_update_script.can_generate_universal_update_template")
+    @button(
+        label="Generate Excel Template",
+        permision="universal_update_script.can_generate_universal_update_template",
+    )
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
         universal_update.queue("generate_universal_individual_update_template")

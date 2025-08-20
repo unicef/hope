@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
@@ -16,19 +15,25 @@ class TestCrossAreaTickets(TestCase):
         individual1_from_area1 = IndividualFactory(business_area=business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=business_area, household=None)
         household1_from_area1 = HouseholdFactory(
-            business_area=business_area, admin2=admin_area1, head_of_household=individual1_from_area1
+            business_area=business_area,
+            admin2=admin_area1,
+            head_of_household=individual1_from_area1,
         )
         individual1_from_area1.household = household1_from_area1
         individual1_from_area1.save()
         household2_from_area1 = HouseholdFactory(
-            business_area=business_area, admin2=admin_area1, head_of_household=individual2_from_area1
+            business_area=business_area,
+            admin2=admin_area1,
+            head_of_household=individual2_from_area1,
         )
         individual2_from_area1.household = household2_from_area1
         individual2_from_area1.save()
 
         individual_from_area2 = IndividualFactory(business_area=business_area, household=None)
         household_from_area2 = HouseholdFactory(
-            business_area=business_area, admin2=admin_area2, head_of_household=individual_from_area2
+            business_area=business_area,
+            admin2=admin_area2,
+            head_of_household=individual_from_area2,
         )
         individual_from_area2.household = household_from_area2
         individual_from_area2.save()

@@ -1,9 +1,8 @@
 import uuid
 
+import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
@@ -47,7 +46,9 @@ class TestUpdateIndividualDataService(TestCase):
         cls.household, _ = create_household({"program": cls.program})
 
         cls.individual = IndividualFactory(
-            household=cls.household, business_area=cls.business_area, program=cls.program
+            household=cls.household,
+            business_area=cls.business_area,
+            program=cls.program,
         )
 
         cls.document_type_unique_for_individual = DocumentTypeFactory(
@@ -361,7 +362,11 @@ class TestUpdateIndividualDataService(TestCase):
             {
                 "approve_status": True,
                 "data_fields": [
-                    {"name": "field", "previous_value": "value", "value": "updated_value"},
+                    {
+                        "name": "field",
+                        "previous_value": "value",
+                        "value": "updated_value",
+                    },
                     {"name": "new_field", "previous_value": None, "value": "new_value"},
                     {"name": "number", "previous_value": "123", "value": "123123"},
                     {
@@ -399,7 +404,13 @@ class TestUpdateIndividualDataService(TestCase):
 
     def test_update_people_individual_hh_fields(self) -> None:
         pl = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
-        CountryFactory(name="Other Country", short_name="Oth", iso_code2="O", iso_code3="OTH", iso_num="111")
+        CountryFactory(
+            name="Other Country",
+            short_name="Oth",
+            iso_code2="O",
+            iso_code3="OTH",
+            iso_num="111",
+        )
         area_type_1 = AreaTypeFactory(area_level=1, country=pl)
         area_type_2 = AreaTypeFactory(area_level=2, country=pl)
         area1 = AreaFactory(area_type=area_type_1, p_code="PL22", name="Test Area Parent")
@@ -445,7 +456,11 @@ class TestUpdateIndividualDataService(TestCase):
                 ),
             }
         # add admin_area_title > HH.admin_area
-        ind_data["admin_area_title"] = {"value": "PL22M33", "approve_status": True, "previous_value": None}
+        ind_data["admin_area_title"] = {
+            "value": "PL22M33",
+            "approve_status": True,
+            "previous_value": None,
+        }
         self.ticket.individual_data_update_ticket_details.individual_data = ind_data
         self.ticket.individual_data_update_ticket_details.save()
 

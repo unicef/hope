@@ -61,19 +61,28 @@ class TestExcludeHouseholds(APITestCase):
         hoh1 = IndividualFactory(household=None)
         cls.household_1 = HouseholdFactory(head_of_household=hoh1)
         cls.payment_1 = PaymentFactory(
-            parent=cls.payment_plan, household=cls.household_1, excluded=False, currency="PLN"
+            parent=cls.payment_plan,
+            household=cls.household_1,
+            excluded=False,
+            currency="PLN",
         )
 
         hoh2 = IndividualFactory(household=None)
         cls.household_2 = HouseholdFactory(head_of_household=hoh2)
         cls.payment_2 = PaymentFactory(
-            parent=cls.payment_plan, household=cls.household_2, excluded=False, currency="PLN"
+            parent=cls.payment_plan,
+            household=cls.household_2,
+            excluded=False,
+            currency="PLN",
         )
 
         hoh3 = IndividualFactory(household=None)
         cls.household_3 = HouseholdFactory(head_of_household=hoh3)
         cls.payment_3 = PaymentFactory(
-            parent=cls.payment_plan, household=cls.household_3, excluded=False, currency="PLN"
+            parent=cls.payment_plan,
+            household=cls.household_3,
+            excluded=False,
+            currency="PLN",
         )
         cls.individual_1 = IndividualFactory(household=cls.household_1, program=cls.program)
         cls.individual_2 = IndividualFactory(household=cls.household_2, program=cls.program)
@@ -82,7 +91,10 @@ class TestExcludeHouseholds(APITestCase):
         hoh4 = IndividualFactory(household=None)
         cls.household_4 = HouseholdFactory(head_of_household=hoh4)
         cls.payment_4 = PaymentFactory(
-            parent=cls.another_payment_plan, household=cls.household_4, excluded=False, currency="PLN"
+            parent=cls.another_payment_plan,
+            household=cls.household_4,
+            excluded=False,
+            currency="PLN",
         )
 
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -146,7 +158,12 @@ class TestExcludeHouseholds(APITestCase):
             program_cycle=self.program_cycle,
             created_by=self.user,
         )
-        PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False, currency="PLN")
+        PaymentFactory(
+            parent=finished_payment_plan,
+            household=self.household_1,
+            excluded=False,
+            currency="PLN",
+        )
 
         self.payment_1.excluded = True
         self.payment_1.save()
@@ -157,7 +174,9 @@ class TestExcludeHouseholds(APITestCase):
         assert self.payment_plan.exclusion_reason is None
 
         payment_plan_exclude_beneficiaries(
-            payment_plan_id=self.payment_plan.pk, excluding_hh_or_ind_ids=[], exclusion_reason="Undo HH_1"
+            payment_plan_id=self.payment_plan.pk,
+            excluding_hh_or_ind_ids=[],
+            exclusion_reason="Undo HH_1",
         )
 
         assert set(self.payment_plan.excluded_beneficiaries_ids) == {self.payment_1.household.unicef_id}
@@ -194,7 +213,10 @@ class TestExcludeHouseholds(APITestCase):
         assert self.payment_plan.background_action_status is None
 
         # excluded hh_1, hh_2
-        assert set(self.payment_plan.excluded_beneficiaries_ids) == {hh_unicef_id_1, hh_unicef_id_2}
+        assert set(self.payment_plan.excluded_beneficiaries_ids) == {
+            hh_unicef_id_1,
+            hh_unicef_id_2,
+        }
 
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_individuals_people_program(self, get_exchange_rate_mock: Any) -> None:
@@ -225,4 +247,7 @@ class TestExcludeHouseholds(APITestCase):
         assert self.payment_plan.background_action_status is None
 
         # excluded ind_1, ind_2
-        assert set(self.payment_plan.excluded_beneficiaries_ids) == {ind_unicef_id_1, ind_unicef_id_2}
+        assert set(self.payment_plan.excluded_beneficiaries_ids) == {
+            ind_unicef_id_1,
+            ind_unicef_id_2,
+        }

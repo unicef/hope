@@ -7,7 +7,6 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
     PDUXlsxTemplates,
     PDUXlsxTemplatesDetails,
 )
-from selenium.webdriver.common.by import By
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
@@ -15,6 +14,7 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from selenium.webdriver.common.by import By
 
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import Individual
@@ -50,7 +50,10 @@ def program() -> Program:
         master_detail=True,
     )
     return ProgramFactory(
-        name="Test Program", status=Program.ACTIVE, business_area=business_area, beneficiary_group=beneficiary_group
+        name="Test Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        beneficiary_group=beneficiary_group,
     )
 
 
@@ -98,7 +101,11 @@ def date_attribute(program: Program) -> FlexibleAttribute:
 
 
 def create_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str,
+    subtype: str,
+    number_of_rounds: int,
+    rounds_names: list[str],
+    program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(

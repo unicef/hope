@@ -4,7 +4,6 @@ from typing import Any
 
 from django.db import transaction
 from django.db.models import QuerySet
-
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -42,22 +41,13 @@ from hope.apps.accountability.filters import (
     MessagesFilter,
     SurveyFilter,
 )
-from hope.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    Survey,
-)
+from hope.apps.accountability.models import Feedback, FeedbackMessage, Message, Survey
 from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
-from hope.apps.accountability.services.message_crud_services import (
-    MessageCrudServices,
-)
+from hope.apps.accountability.services.message_crud_services import MessageCrudServices
 from hope.apps.accountability.services.sampling import Sampling
-from hope.apps.accountability.services.survey_crud_services import (
-    SurveyCrudServices,
-)
+from hope.apps.accountability.services.survey_crud_services import SurveyCrudServices
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.mixins import (
@@ -101,7 +91,10 @@ class FeedbackViewSet(
     mixins.UpdateModelMixin,
     BaseViewSet,
 ):
-    PERMISSIONS = [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS]
+    PERMISSIONS = [
+        Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+        Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+    ]
     queryset = Feedback.objects.all()
     http_method_names = ["get", "post", "patch"]
     serializer_classes_by_action = {
@@ -112,8 +105,14 @@ class FeedbackViewSet(
         "message": FeedbackMessageCreateSerializer,
     }
     permissions_by_action = {
-        "list": [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
-        "retrieve": [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+        "list": [
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+        ],
+        "retrieve": [
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+        ],
         "create": [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE],
         "partial_update": [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
         "message": [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE],
@@ -156,7 +155,10 @@ class FeedbackViewSet(
             not program_slug
             and program
             and not check_permissions(
-                self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=business_area,
+                program=program.slug,
             )
         ):
             raise PermissionDenied
@@ -175,7 +177,11 @@ class FeedbackViewSet(
         )
         headers = self.get_success_headers(serializer.data)
 
-        return Response(FeedbackDetailSerializer(feedback).data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            FeedbackDetailSerializer(feedback).data,
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
 
     @transaction.atomic
     @extend_schema(
@@ -200,7 +206,10 @@ class FeedbackViewSet(
 
         # additional check for global scope - check if user has permission in the target program
         if program and not check_permissions(
-            self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
+            self.request.user,
+            self.get_permissions_for_action(),
+            business_area=business_area,
+            program=program.slug,
         ):
             raise PermissionDenied
 
@@ -240,9 +249,14 @@ class FeedbackViewSet(
             raise PermissionDenied
 
         feedback_message = FeedbackMessage.objects.create(
-            feedback=feedback, description=serializer.validated_data["description"], created_by=request.user
+            feedback=feedback,
+            description=serializer.validated_data["description"],
+            created_by=request.user,
         )
-        return Response(FeedbackMessageSerializer(feedback_message).data, status=status.HTTP_201_CREATED)
+        return Response(
+            FeedbackMessageSerializer(feedback_message).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class MessageViewSet(
@@ -297,7 +311,14 @@ class MessageViewSet(
 
         message = MessageCrudServices.create(request.user, business_area, input_data)
 
-        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, str(self.program.id), None, message)
+        log_create(
+            Message.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            str(self.program.id),
+            None,
+            message,
+        )
         serializer = MessageDetailSerializer(instance=message)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -316,7 +337,12 @@ class MessageViewSet(
         sampling = Sampling(input_data, households)
         number_of_recipients, sample_size = sampling.generate_sampling()
         return Response(
-            SampleSizeSerializer({"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
+            SampleSizeSerializer(
+                {
+                    "number_of_recipients": number_of_recipients,
+                    "sample_size": sample_size,
+                }
+            ).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -330,7 +356,10 @@ class SurveyViewSet(
     mixins.CreateModelMixin,
     BaseViewSet,
 ):
-    PERMISSIONS = [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS]
+    PERMISSIONS = [
+        Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+        Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
+    ]
     http_method_names = ["get", "post"]
     serializer_classes_by_action = {
         "list": SurveySerializer,
@@ -341,7 +370,10 @@ class SurveyViewSet(
     }
     permissions_by_action = {
         "list": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
-        "retrieve": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+        "retrieve": [
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
+        ],
         "create": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
         "export_sample": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
         "sample_size": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
@@ -434,6 +466,11 @@ class SurveyViewSet(
         sampling = Sampling(input_data, households)
         number_of_recipients, sample_size = sampling.generate_sampling()
         return Response(
-            SampleSizeSerializer({"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
+            SampleSizeSerializer(
+                {
+                    "number_of_recipients": number_of_recipients,
+                    "sample_size": sample_size,
+                }
+            ).data,
             status=status.HTTP_202_ACCEPTED,
         )

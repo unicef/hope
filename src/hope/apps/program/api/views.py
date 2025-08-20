@@ -2,10 +2,9 @@ import copy
 import logging
 from typing import Any
 
+from constance import config
 from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
-
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -27,10 +26,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
-from hope.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    Permissions,
-)
+from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
@@ -96,7 +92,10 @@ class ProgramViewSet(
 ):
     permissions_by_action = {
         "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-        "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "list": [
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
         "create": [Permissions.PROGRAMME_CREATE],
         "update": [Permissions.PROGRAMME_UPDATE],
         "activate": [Permissions.PROGRAMME_ACTIVATE],
@@ -141,7 +140,12 @@ class ProgramViewSet(
                     output_field=IntegerField(),
                 )
             )
-            .prefetch_related(Prefetch("pdu_fields", queryset=FlexibleAttribute.objects.order_by("created_at")))
+            .prefetch_related(
+                Prefetch(
+                    "pdu_fields",
+                    queryset=FlexibleAttribute.objects.order_by("created_at"),
+                )
+            )
             .select_related("beneficiary_group", "data_collecting_type")
             .order_by("custom_order", "start_date")
         )
@@ -162,7 +166,14 @@ class ProgramViewSet(
         program.status = Program.ACTIVE
         program.save(update_fields=["status"])
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            program.pk,
+            old_program,
+            program,
+        )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Activated."})
 
@@ -197,7 +208,14 @@ class ProgramViewSet(
         if program.biometric_deduplication_enabled:
             BiometricDeduplicationService().delete_deduplication_set(program)
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            program.pk,
+            old_program,
+            program,
+        )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Finished."})
 
@@ -235,7 +253,14 @@ class ProgramViewSet(
         if pdu_fields:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, None, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            program.pk,
+            None,
+            program,
+        )
 
         serializer.instance = program
 
@@ -262,7 +287,14 @@ class ProgramViewSet(
             FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
             populate_pdu_new_rounds_with_null_values_task.delay(str(program.id))
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            program.pk,
+            old_program,
+            program,
+        )
 
         serializer.instance = program
 
@@ -290,7 +322,14 @@ class ProgramViewSet(
             remove_program_partner_access(partners_data, program)
         program.save()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            program.pk,
+            old_program,
+            program,
+        )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Partner access updated."})
 
@@ -326,7 +365,14 @@ class ProgramViewSet(
         if pdu_fields:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, None, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            program.pk,
+            None,
+            program,
+        )
 
         return Response(
             status=status.HTTP_201_CREATED,
@@ -339,7 +385,14 @@ class ProgramViewSet(
             raise ValidationError("Only Draft Program can be deleted.")
 
         instance.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, instance.pk, old_program, instance)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            self.request.user,
+            instance.pk,
+            old_program,
+            instance,
+        )
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
@@ -459,13 +512,21 @@ class ProgramCycleViewSet(
 
         program_cycle.delete()
 
-    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE])
+    @action(
+        detail=True,
+        methods=["post"],
+        PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE],
+    )
     def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
         program_cycle.set_finish()
         return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Finished"})
 
-    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE])
+    @action(
+        detail=True,
+        methods=["post"],
+        PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE],
+    )
     def reactivate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
         program_cycle.set_active()

@@ -1,21 +1,15 @@
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
-
-from django.db.transaction import atomic
-from django.utils import timezone
 
 import coreapi
 from constance import config
 from coreapi import codecs
 from coreapi.exceptions import NoCodecAvailable
+from django.db.transaction import atomic
+from django.utils import timezone
 
-from hope.contrib.aurora.models import (
-    Organization,
-    Project,
-    Record,
-    Registration,
-)
+from hope.contrib.aurora.models import Organization, Project, Record, Registration
 
 if TYPE_CHECKING:
     from django.db.models.options import Options

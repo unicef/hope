@@ -14,7 +14,10 @@ class GrievanceTicketListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "grievance_ticket_list"
 
     def _get_queryset(
-        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
+        self,
+        business_area_slug: Any | None,
+        program_slug: Any | None,
+        view_instance: Any | None,
     ) -> QuerySet:
         return GrievanceTicket.objects.filter(
             ignored=False,

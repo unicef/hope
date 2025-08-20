@@ -1,12 +1,7 @@
 import json
 import logging
 
-from hope.apps.steficon.config import (
-    SAFETY_HIGH,
-    SAFETY_NONE,
-    SAFETY_STANDARD,
-    config,
-)
+from hope.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD, config
 
 logger = logging.getLogger(__name__)
 

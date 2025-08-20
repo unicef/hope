@@ -2,13 +2,10 @@ from typing import Any
 
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
-
 from django_filters import CharFilter, DateFromToRangeFilter, RangeFilter
 
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.core.filters import (
-    IntegerFilter,
-)
+from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.apps.registration_data.models import RegistrationDataImport
 

@@ -7,7 +7,10 @@ from rest_framework.parsers import DataAndFiles, MultiPartParser
 
 class DictDrfNestedParser(MultiPartParser):
     def parse(
-        self, stream: IO, media_type: str | None = None, parser_context: Mapping[str, Any] | None = None
+        self,
+        stream: IO,
+        media_type: str | None = None,
+        parser_context: Mapping[str, Any] | None = None,
     ) -> DataAndFiles:
         clsDataAndFile = super().parse(stream, media_type, parser_context)
 

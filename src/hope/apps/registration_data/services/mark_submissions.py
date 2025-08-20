@@ -25,12 +25,18 @@ class MarkSubmissions:
         # Exclude submissions for merged rdi
         submissions = self._get_submissions(submission_ids)
         if not submissions:
-            return {"message": "No suitable (unmerged) Submissions found", "submissions": 0}
+            return {
+                "message": "No suitable (unmerged) Submissions found",
+                "submissions": 0,
+            }
 
         # Mark as amended
         with transaction.atomic():
             rows = submissions.update(amended=True)
-            return {"message": f"{rows} submissions successfully amended", "submissions": rows}
+            return {
+                "message": f"{rows} submissions successfully amended",
+                "submissions": rows,
+            }
 
     def _get_submissions(self, submission_ids: list[UUID]) -> QuerySet[KoboImportedSubmission]:
         return KoboImportedSubmission.objects.exclude(kobo_submission_uuid__in=list(submission_ids))

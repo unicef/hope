@@ -57,7 +57,10 @@ class PDUDataExtractionService:
                 queryset = queryset.filter(first_registration_date__lte=registration_date_to)
             else:
                 queryset = queryset.filter(
-                    first_registration_date__range=[registration_date_from, registration_date_to]
+                    first_registration_date__range=[
+                        registration_date_from,
+                        registration_date_to,
+                    ]
                 )
 
         if self.admin1_filter:
@@ -136,7 +139,11 @@ class PDURoundValueMixin:
 
     @staticmethod
     def set_round_value(
-        individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
+        individual: Individual,
+        pdu_field_name: str,
+        round_number: int,
+        value: Any,
+        collection_date: Any,
     ) -> None:
         flex_fields_data = individual.flex_fields
         if pdu_field_name not in flex_fields_data:
@@ -147,5 +154,3 @@ class PDURoundValueMixin:
         round_data = field_data.get(str(round_number))
         round_data["value"] = value
         round_data["collection_date"] = collection_date
-
-

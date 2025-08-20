@@ -5,7 +5,6 @@ from typing import Union
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -73,7 +72,11 @@ class TestGenericRegistrationService(TestCase):
                 "disability_id_i_c": "document.disability_certificate-document_number",
                 "disability_id_photo_i_c": "document.disability_certificate-photo",
             },
-            "flex_fields": ["marketing.can_unicef_contact_you", "enumerators", "macioce"],
+            "flex_fields": [
+                "marketing.can_unicef_contact_you",
+                "enumerators",
+                "macioce",
+            ],
             "household_constances": {"zip_code": "00126"},
             "individual_constances": {"pregnant": True},
         }
@@ -206,19 +209,28 @@ class TestGenericRegistrationService(TestCase):
             Record(
                 **self.defaults,
                 source_id=2,
-                fields={"household": self.household, "individuals": [self.individual_with_bank_account_and_tax]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_with_bank_account_and_tax],
+                },
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **self.defaults,
                 source_id=3,
-                fields={"household": self.household, "individuals": [self.individual_with_no_tax]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_with_no_tax],
+                },
                 files=json.dumps(self.files).encode(),
             ),
             Record(
                 **self.defaults,
                 source_id=4,
-                fields={"household": self.household, "individuals": [self.individual_without_bank_account]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_without_bank_account],
+                },
                 files=json.dumps(self.files).encode(),
             ),
         ]
@@ -226,7 +238,10 @@ class TestGenericRegistrationService(TestCase):
             Record(
                 **self.defaults,
                 source_id=1,
-                fields={"household": self.household, "individuals": [self.individual_with_tax_id_which_is_too_long]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_with_tax_id_which_is_too_long],
+                },
                 files=json.dumps(self.files).encode(),
             ),
         ]
@@ -243,7 +258,8 @@ class TestGenericRegistrationService(TestCase):
         assert PendingHousehold.objects.filter(program=rdi.program).count() == 4
         assert (
             PendingDocument.objects.filter(
-                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+                document_number="TESTID",
+                type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             ).count()
             == 1
         )

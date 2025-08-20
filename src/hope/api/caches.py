@@ -4,7 +4,6 @@ from typing import Any, Callable
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Max, QuerySet
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_extensions.key_constructor import bits
@@ -59,7 +58,13 @@ def get_or_create_cache_key(key: str, default: Any) -> Any:
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -78,7 +83,13 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -92,7 +103,13 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -115,12 +132,21 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     specific_view_cache_key = ""
 
     def _get_queryset(
-        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
+        self,
+        business_area_slug: Any | None,
+        program_slug: Any | None,
+        view_instance: Any | None,
     ) -> QuerySet:
         return view_instance.get_queryset()
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -140,7 +166,13 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
 
 class AreaLimitKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         return ",".join(
             map(

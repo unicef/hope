@@ -3,10 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 from unittest import mock
 
+import requests_mock
 from django.test import TestCase, override_settings
 from django.utils import timezone
-
-import requests_mock
 from parameterized import parameterized
 
 from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
@@ -196,9 +195,18 @@ class TestExchangeRatesAPI(TestCase):
 
     @parameterized.expand(
         [
-            (ExchangeRateClientAPI.HISTORY_MODE_PARAM_LONG, EXCHANGE_RATES_WITH_HISTORICAL_DATA),
-            (ExchangeRateClientAPI.HISTORY_MODE_PARAM_SHORT, EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA),
-            (ExchangeRateClientAPI.HISTORY_MODE_PARAM_LATEST_12, EXCHANGE_RATES_WITH_LATEST_12_HISTORICAL_DATA),
+            (
+                ExchangeRateClientAPI.HISTORY_MODE_PARAM_LONG,
+                EXCHANGE_RATES_WITH_HISTORICAL_DATA,
+            ),
+            (
+                ExchangeRateClientAPI.HISTORY_MODE_PARAM_SHORT,
+                EXCHANGE_RATES_WITH_SHORT_HISTORICAL_DATA,
+            ),
+            (
+                ExchangeRateClientAPI.HISTORY_MODE_PARAM_LATEST_12,
+                EXCHANGE_RATES_WITH_LATEST_12_HISTORICAL_DATA,
+            ),
             (None, EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA),
         ]
     )
@@ -269,7 +277,11 @@ class TestExchangeRates(TestCase):
         ]
     )
     def test_get_exchange_rate_for_currency_code(
-        self, _: Any, currency_code: str, dispersion_date: datetime, expected_result: Any
+        self,
+        _: Any,
+        currency_code: str,
+        dispersion_date: datetime,
+        expected_result: Any,
     ) -> None:
         with requests_mock.Mocker() as adapter:
             adapter.register_uri(

@@ -1,9 +1,8 @@
 import io
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
-
 import openpyxl
+from django.core.exceptions import ValidationError
 from openpyxl.utils import get_column_letter
 from xlwt import Row, Worksheet
 
@@ -41,7 +40,10 @@ class XlsxVerificationImportService(XlsxImportBaseService):
     @staticmethod
     def get_columns_from_worksheet(ws: Worksheet) -> dict:
         return {
-            cell.value: {"letter": get_column_letter(cell.column), "number": cell.column - 1}
+            cell.value: {
+                "letter": get_column_letter(cell.column),
+                "number": cell.column - 1,
+            }
             for cell in ws[1]
             if cell.value
         }

@@ -6,12 +6,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo.models import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
-    Document,
-    DocumentType,
-    Household,
-    Individual,
-)
+from hope.apps.household.models import Document, DocumentType, Household, Individual
 from hope.apps.payment.models import Account, AccountType
 from hope.apps.program.models import Program
 from hope.apps.registration_datahub.tasks.deduplicate import (
@@ -50,12 +45,17 @@ class UniversalIndividualUpdateScript:
         self.deduplicate_documents = deduplicate_documents
         document_types = DocumentType.objects.filter()
         self.countries = {country.name: country for country in Country.objects.all()}
-        self.document_types = {f"{document_type.key}_no_i_c": document_type for document_type in document_types}
+        self.document_types = {
+            f"{document_type.key}_no_i_c": document_type
+            for document_type in document_types
+        }
         self.delivery_mechanisms_account_types = {}
         if deliver_mechanism_data_fields is not None:
             self.delivery_mechanisms_account_types = {
                 account_type.key: account_type
-                for account_type in AccountType.objects.filter(key__in=self.deliver_mechanism_data_fields.keys())
+                for account_type in AccountType.objects.filter(
+                    key__in=self.deliver_mechanism_data_fields.keys()
+                )
             }
         self.batch_size = batch_size
 
@@ -73,7 +73,11 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_individual_fields(
-        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+        self,
+        row: tuple[Any, ...],
+        headers: list[str],
+        individual: Individual,
+        row_index: int,
     ) -> list[str]:
         if self.individual_fields is None:
             return []
@@ -86,7 +90,11 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_individual_flex_fields(
-        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+        self,
+        row: tuple[Any, ...],
+        headers: list[str],
+        individual: Individual,
+        row_index: int,
     ) -> list[str]:
         errors = []
         if self.individual_flex_fields is None:
@@ -99,7 +107,11 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_documents(
-        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+        self,
+        row: tuple[Any, ...],
+        headers: list[str],
+        individual: Individual,
+        row_index: int,
     ) -> list[str]:
         if self.document_fields is None:
             return []
@@ -116,9 +128,15 @@ class UniversalIndividualUpdateScript:
                     f"Row: {row_index} - Country not found for field {country_column_name} and value {country_text}"
                 )
             if document_type is None:
-                errors.append(f"Row: {row_index} - Document type not found for field {number_column_name}")
-            if individual.documents.filter(type=document_type).count() > 1:  # pragma: no cover
-                errors.append(f"Row: {row_index} - Multiple documents with document type {document_type} found")
+                errors.append(
+                    f"Row: {row_index} - Document type not found for field {number_column_name}"
+                )
+            if (
+                individual.documents.filter(type=document_type).count() > 1
+            ):  # pragma: no cover
+                errors.append(
+                    f"Row: {row_index} - Multiple documents with document type {document_type} found"
+                )
         return errors
 
     def validate(self, sheet: Worksheet, headers: list[str]) -> list[str]:
@@ -127,55 +145,91 @@ class UniversalIndividualUpdateScript:
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
-                print(f"Validating row {row_index - 2} to {row_index - 2 + self.batch_size} Indivduals")
+                print(
+                    f"Validating row {row_index - 2} to {row_index - 2 + self.batch_size} Indivduals"
+                )
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
-                unicef_id=unicef_id, business_area=self.business_area, program=self.program
+                unicef_id=unicef_id,
+                business_area=self.business_area,
+                program=self.program,
             )
             if not individuals_queryset.exists():  # pragma: no cover
-                errors.append(f"Row: {row_index} - Individual with unicef_id {unicef_id} not found")
+                errors.append(
+                    f"Row: {row_index} - Individual with unicef_id {unicef_id} not found"
+                )
                 continue
             if individuals_queryset.count() > 1:  # pragma: no cover
-                errors.append(f"Row: {row_index} - Multiple individuals with unicef_id {unicef_id} found")
+                errors.append(
+                    f"Row: {row_index} - Multiple individuals with unicef_id {unicef_id} found"
+                )
                 continue
             individual: Individual = individuals_queryset.first()  # type: ignore
             household = individual.household
             if household is None:  # pragma: no cover
-                errors.append(f"Row: {row_index} - Household not found for individual with unicef_id {unicef_id}")
+                errors.append(
+                    f"Row: {row_index} - Household not found for individual with unicef_id {unicef_id}"
+                )
                 continue
-            errors.extend(self.validate_household_fields(row, headers, household, row_index))
-            errors.extend(self.validate_individual_fields(row, headers, individual, row_index))
-            errors.extend(self.validate_individual_flex_fields(row, headers, individual, row_index))
+            errors.extend(
+                self.validate_household_fields(row, headers, household, row_index)
+            )
+            errors.extend(
+                self.validate_individual_fields(row, headers, individual, row_index)
+            )
+            errors.extend(
+                self.validate_individual_flex_fields(
+                    row, headers, individual, row_index
+                )
+            )
             errors.extend(self.validate_documents(row, headers, individual, row_index))
         return errors
 
-    def handle_household_update(self, row: tuple[Any, ...], headers: list[str], household: Any) -> None:
+    def handle_household_update(
+        self, row: tuple[Any, ...], headers: list[str], household: Any
+    ) -> None:
         if self.household_fields is None:
             return
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            handled_value = handler(value, field, household, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            handled_value = handler(
+                value, field, household, self.business_area, self.program
+            )
+            if self.ignore_empty_values and (
+                handled_value is None or handled_value == ""
+            ):  # pragma: no cover
                 continue
             setattr(household, _name, handled_value)
 
-    def handle_individual_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
+    def handle_individual_update(
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual
+    ) -> None:
         if self.individual_fields is None:
             return
         for field, (_name, _validator, handler) in self.individual_fields.items():
             value = row[headers.index(field)]
-            handled_value = handler(value, field, individual, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            handled_value = handler(
+                value, field, individual, self.business_area, self.program
+            )
+            if self.ignore_empty_values and (
+                handled_value is None or handled_value == ""
+            ):  # pragma: no cover
                 continue
             setattr(individual, _name, handled_value)
 
-    def handle_individual_flex_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
+    def handle_individual_flex_update(
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual
+    ) -> None:
         if self.individual_flex_fields is None:
             return
         for field, (name, _validator, handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
-            handled_value = handler(value, field, individual, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            handled_value = handler(
+                value, field, individual, self.business_area, self.program
+            )
+            if self.ignore_empty_values and (
+                handled_value is None or handled_value == ""
+            ):  # pragma: no cover
                 continue
             individual.flex_fields[name] = handled_value
 
@@ -190,7 +244,9 @@ class UniversalIndividualUpdateScript:
             document_type = self.document_types.get(number_column_name)
             document_number = row[headers.index(number_column_name)]
             document_country = row[headers.index(country_column_name)]
-            if self.ignore_empty_values and (document_number is None or document_number == ""):  # pragma: no cover
+            if self.ignore_empty_values and (
+                document_number is None or document_number == ""
+            ):  # pragma: no cover
                 continue
             country = self.countries[document_country]
             document = None
@@ -221,10 +277,19 @@ class UniversalIndividualUpdateScript:
         if self.deliver_mechanism_data_fields is None:
             return
         individual_accounts = individual.accounts.all()
-        for account_type, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
-            account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
+        for (
+            account_type,
+            delivery_mechanism_columns_mapping,
+        ) in self.deliver_mechanism_data_fields.items():
+            account_type_instance = self.delivery_mechanisms_account_types.get(
+                account_type
+            )
             single_data_object = next(
-                (d for d in individual_accounts if str(d.account_type.key) == str(account_type)),
+                (
+                    d
+                    for d in individual_accounts
+                    if str(d.account_type.key) == str(account_type)
+                ),
                 None,
             )
 
@@ -251,9 +316,13 @@ class UniversalIndividualUpdateScript:
         individual_fields_to_update = ["flex_fields"]
         document_fields_to_update = ["document_number", "status", "country"]
         if self.household_fields:
-            household_fields_to_update.extend([field for _, (field, _, _) in self.household_fields.items()])
+            household_fields_to_update.extend(
+                [field for _, (field, _, _) in self.household_fields.items()]
+            )
         if self.individual_fields:
-            individual_fields_to_update.extend([field for _, (field, _, _) in self.individual_fields.items()])
+            individual_fields_to_update.extend(
+                [field for _, (field, _, _) in self.individual_fields.items()]
+            )
         individuals_to_update = []
         households_to_update = []
         documents_to_update = []
@@ -261,19 +330,28 @@ class UniversalIndividualUpdateScript:
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
-                print(f"Updating row {row_index - 2} to {row_index - 2 + self.batch_size} Individuals")
+                print(
+                    f"Updating row {row_index - 2} to {row_index - 2 + self.batch_size} Individuals"
+                )
             unicef_id = row[headers.index("unicef_id")]
             individual = (
                 Individual.objects.select_related("household")
                 .prefetch_related("documents", "accounts")
-                .get(unicef_id=unicef_id, business_area=self.business_area, program=self.program)
+                .get(
+                    unicef_id=unicef_id,
+                    business_area=self.business_area,
+                    program=self.program,
+                )
             )
             individual_ids.append(str(individual.id))
             household = individual.household
             self.handle_household_update(row, headers, household)
             self.handle_individual_update(row, headers, individual)
             self.handle_individual_flex_update(row, headers, individual)
-            documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
+            (
+                documents_to_update_part,
+                documents_to_create_part,
+            ) = self.handle_documents_update(row, headers, individual)
             documents_to_update.extend(documents_to_update_part)
             documents_to_create.extend(documents_to_create_part)
             self.handle_delivery_mechanism_data_update(row, headers, individual)
@@ -313,13 +391,20 @@ class UniversalIndividualUpdateScript:
         Document.objects.bulk_update(documents_to_update, document_fields_to_update)
         Document.objects.bulk_create(documents_to_create)
         Household.objects.bulk_update(households_to_update, household_fields_to_update)
-        Individual.objects.bulk_update(individuals_to_update, individual_fields_to_update)
+        Individual.objects.bulk_update(
+            individuals_to_update, individual_fields_to_update
+        )
         populate_index(
-            Individual.objects.filter(id__in=[individual.id for individual in individuals_to_update]),
+            Individual.objects.filter(
+                id__in=[individual.id for individual in individuals_to_update]
+            ),
             get_individual_doc(self.business_area.slug),
         )
         populate_index(
-            Household.objects.filter(id__in=[household.id for household in households_to_update]), HouseholdDocument
+            Household.objects.filter(
+                id__in=[household.id for household in households_to_update]
+            ),
+            HouseholdDocument,
         )
         documents_to_update.clear()
         documents_to_create.clear()
@@ -340,13 +425,18 @@ class UniversalIndividualUpdateScript:
         processed_individuals_ids = self.handle_update(sheet, headers)
         if self.deduplicate_es:
             print("Deduplicating individuals Elasticsearch")
-            DeduplicateTask(self.business_area.slug, self.program.id).deduplicate_individuals_against_population(
+            DeduplicateTask(
+                self.business_area.slug, self.program.id
+            ).deduplicate_individuals_against_population(
                 Individual.objects.filter(id__in=processed_individuals_ids)
             )
         if self.deduplicate_documents:
             print("Deduplicating documents")
             HardDocumentDeduplication().deduplicate(
-                Document.objects.filter(individual__id__in=processed_individuals_ids, status=Document.STATUS_PENDING),
+                Document.objects.filter(
+                    individual__id__in=processed_individuals_ids,
+                    status=Document.STATUS_PENDING,
+                ),
                 program=self.program,
             )
 

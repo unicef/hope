@@ -49,7 +49,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -82,7 +87,9 @@ class Migration(migrations.Migration):
             model_name="program",
             name="beneficiary_group",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, related_name="programs", to="program.beneficiarygroup"
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="programs",
+                to="program.beneficiarygroup",
             ),
         ),
     ]

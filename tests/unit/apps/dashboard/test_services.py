@@ -3,10 +3,9 @@ import json
 from decimal import Decimal
 from typing import Any, Callable, Dict, Optional, Type
 
+import pytest
 from django.core.cache import cache
 from django.utils import timezone
-
-import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.payment import (
@@ -166,7 +165,10 @@ def test_refresh_data(
 TEST_CASES = [
     (
         "delivered_quantity_usd prioritized",
-        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "delivered_quantity_usd": Decimal("100.0"),
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("500.0"),
         DashboardDataCache,
     ),
@@ -184,13 +186,20 @@ TEST_CASES = [
     ),
     (
         "Pending status with null delivered_quantity_usd",
-        {"status": "Pending", "delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "status": "Pending",
+            "delivered_quantity_usd": None,
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("250.0"),
         DashboardDataCache,
     ),
     (
         "global cache prioritizes delivered_quantity_usd",
-        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "delivered_quantity_usd": Decimal("100.0"),
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("500.0"),
         DashboardGlobalDataCache,
     ),
@@ -457,20 +466,34 @@ def test_payment_plan_counts() -> None:
     user = UserFactory()
 
     create_payment_verification_plan_with_status(
-        payment_plan=pp2, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+        payment_plan=pp2,
+        user=user,
+        business_area=ba,
+        program=prog_a_sector_x,
+        status="FINISHED",
     )
     create_payment_verification_plan_with_status(
-        payment_plan=pp4, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+        payment_plan=pp4,
+        user=user,
+        business_area=ba,
+        program=prog_a_sector_x,
+        status="FINISHED",
     )
 
     PaymentFactory(
-        parent=pp1, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
+        parent=pp1,
+        program=prog_a_sector_x,
+        delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc),
     )
     PaymentFactory(
-        parent=pp3, program=prog_b_sector_y, delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
+        parent=pp3,
+        program=prog_b_sector_y,
+        delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc),
     )
     PaymentFactory(
-        parent=pp5, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
+        parent=pp5,
+        program=prog_a_sector_x,
+        delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc),
     )
     Payment.objects.filter(parent=pp1, business_area=ba).update(
         delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
@@ -538,7 +561,14 @@ def test_refresh_data_no_payments_ba(afghanistan: BusinessArea) -> None:
         is_removed=False,
         conflicted=False,
         excluded=False,
-    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+    ).exclude(
+        status__in=[
+            "Transaction Erroneous",
+            "Not Distributed",
+            "Force failed",
+            "Manually Cancelled",
+        ]
+    ).delete()
 
     cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)
     cache.delete(cache_key)
@@ -560,7 +590,14 @@ def test_refresh_data_no_payments_global() -> None:
         is_removed=False,
         conflicted=False,
         excluded=False,
-    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+    ).exclude(
+        status__in=[
+            "Transaction Erroneous",
+            "Not Distributed",
+            "Force failed",
+            "Manually Cancelled",
+        ]
+    ).delete()
 
     cache_key = DashboardGlobalDataCache.get_cache_key("global")
     cache.delete(cache_key)
@@ -871,7 +908,12 @@ def test_base_queryset_filter_payment_status() -> None:
     prog = ProgramFactory.create(business_area=ba)
 
     included_status = "Transaction Successful"
-    excluded_statuses = ["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]
+    excluded_statuses = [
+        "Transaction Erroneous",
+        "Not Distributed",
+        "Force failed",
+        "Manually Cancelled",
+    ]
 
     payment_included, _ = _create_test_payment_for_queryset(prog, ba, payment_status=included_status)
     qs_included = DashboardCacheBase._get_base_payment_queryset(business_area=ba)

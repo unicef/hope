@@ -8,7 +8,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import View
-
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
@@ -57,7 +56,9 @@ class UploadFile(UploadFilePermissionMixin, View):
         form = StorageFileForm(request.POST, request.FILES, user=user)
         if form.is_valid():
             new_file = StorageFile(
-                created_by=user, file=request.FILES["file"], business_area_id=request.POST["business_area"]
+                created_by=user,
+                file=request.FILES["file"],
+                business_area_id=request.POST["business_area"],
             )
             new_file.save()
             messages.success(request, f"File {new_file.file.name} has been successfully uploaded.")

@@ -2,8 +2,8 @@ import logging
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
-from rest_framework.exceptions import ValidationError
 from django.db.models import Q, QuerySet
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from hope.apps.accountability.models import Message
@@ -21,7 +21,12 @@ logger = logging.getLogger(__name__)
 
 class MessageCrudServices:
     @classmethod
-    def create(cls, user: AbstractBaseUser | AnonymousUser, business_area: BusinessArea, input_data: dict) -> Message:
+    def create(
+        cls,
+        user: AbstractBaseUser | AnonymousUser,
+        business_area: BusinessArea,
+        input_data: dict,
+    ) -> Message:
         verifier = MessageArgumentVerifier(input_data)
         verifier.verify()
 

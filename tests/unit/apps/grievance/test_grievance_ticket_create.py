@@ -1,10 +1,9 @@
 from datetime import date
 from typing import Any
 
+import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -180,7 +179,10 @@ class TestGrievanceTicketCreate:
         create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(
-            self.user, permissions, self.afghanistan, self.program if create_perm_for_program else self.program_2
+            self.user,
+            permissions,
+            self.afghanistan,
+            self.program if create_perm_for_program else self.program_2,
         )
         data = {
             "description": "Test",

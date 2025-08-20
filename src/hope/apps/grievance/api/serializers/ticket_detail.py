@@ -24,9 +24,7 @@ from hope.apps.household.api.serializers.individual import (
 from hope.apps.household.models import Individual
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
 from hope.apps.program.models import Program
-from hope.apps.sanction_list.api.serializers import (
-    SanctionListIndividualSerializer,
-)
+from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):

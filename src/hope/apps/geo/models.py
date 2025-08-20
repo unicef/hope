@@ -7,14 +7,13 @@ from django.contrib.postgres.fields import CICharField
 from django.db import models
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
-
-from natural_keys import NaturalKeyModel
-
-from hope.apps.utils.models import TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 from mptt.querysets import TreeQuerySet
+from natural_keys import NaturalKeyModel
+
+from hope.apps.utils.models import TimeStampedUUIDModel
 
 
 class ValidityQuerySet(TreeQuerySet):
@@ -139,7 +138,11 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     @classmethod
     def get_admin_areas_as_choices(
-        cls, admin_level: int | None = None, business_area_slug: str | None = None, *args: Any, **kwargs: Any
+        cls,
+        admin_level: int | None = None,
+        business_area_slug: str | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> list[dict[str, Any]]:
         params: dict[str, Any] = {}
         if admin_level:

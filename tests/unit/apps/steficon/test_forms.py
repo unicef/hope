@@ -49,7 +49,10 @@ class TestRuleForm(APITestCase):
     def test_clean_method_for_update_allowed_business_areas(self) -> None:
         # update only 'allowed_business_areas' field
         rule = RuleFactory(
-            name="Rule_1", type=Rule.TYPE_TARGETING, language="python", flags={"individual_data_needed": False}
+            name="Rule_1",
+            type=Rule.TYPE_TARGETING,
+            language="python",
+            flags={"individual_data_needed": False},
         )
         rule.refresh_from_db()
         assert rule.allowed_business_areas.all().count() == 0

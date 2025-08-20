@@ -2,10 +2,9 @@ import json
 from io import BytesIO
 from typing import Callable, Tuple
 
-from django.core.files.base import ContentFile
-
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from django.core.files.base import ContentFile
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
@@ -58,7 +57,11 @@ def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
 @pytest.fixture
@@ -143,7 +146,9 @@ def test_snapshot_json_too_many_unicef_ids(program: Program, individuals: Tuple[
     log_message: Callable[[str], None] = lambda message_log: None
     with pytest.raises(Exception) as exc_info:
         create_snapshot_content(
-            log_message, str(program.id), ["IND-00-0000.0022", "IND-00-0000.0033", "IND-00-0000.0044"]
+            log_message,
+            str(program.id),
+            ["IND-00-0000.0022", "IND-00-0000.0033", "IND-00-0000.0044"],
         )
     assert "Some unicef ids are not in the program" in str(exc_info.value)
 

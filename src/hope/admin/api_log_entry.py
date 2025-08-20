@@ -1,9 +1,8 @@
 from typing import Any
 
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.api.models import APILogEntry

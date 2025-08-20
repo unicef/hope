@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse
-
 from smart_admin.console.email import (
     concurrent,
     logger,
@@ -60,7 +59,11 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
                     return_value = future.result()
                     logs.append([timezone.now(), f"Thread completed {return_value}"])
                     if return_value == 1:
-                        messages.add_message(request, messages.SUCCESS, f"Email sent to {request.user.email}")
+                        messages.add_message(
+                            request,
+                            messages.SUCCESS,
+                            f"Email sent to {request.user.email}",
+                        )
         except Exception as e:
             logger.warning(e)
             messages.add_message(request, messages.ERROR, f"{e.__class__.__name__}: {e}")

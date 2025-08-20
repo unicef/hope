@@ -1,6 +1,9 @@
 import logging
 from typing import TYPE_CHECKING, Any, Callable
 
+import xlrd
+from admin_extra_buttons.api import button
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.contrib.messages import ERROR
@@ -14,22 +17,13 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
-
-import xlrd
-from admin_extra_buttons.api import button
-from adminfilters.autocomplete import AutoCompleteFilter
 from xlrd import XLRDError
 
-from hope.admin.utils import (
-    HOPEModelAdminBase,
-    SoftDeletableAdminMixin,
-)
+from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from hope.apps.core.models import (
-    XLSXKoboTemplate,
-)
+from hope.apps.core.models import XLSXKoboTemplate
 from hope.apps.core.validators import KoboTemplateValidator
 
 if TYPE_CHECKING:
@@ -76,7 +70,13 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def get_form(self, request: HttpRequest, obj: Any | None = None, change: bool = False, **kwargs: Any) -> Any:
+    def get_form(
+        self,
+        request: HttpRequest,
+        obj: Any | None = None,
+        change: bool = False,
+        **kwargs: Any,
+    ) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
@@ -108,7 +108,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return redirect(".")
 
     def add_view(
-        self, request: HttpRequest, form_url: str = "", extra_context: dict | None = None
+        self,
+        request: HttpRequest,
+        form_url: str = "",
+        extra_context: dict | None = None,
     ) -> HttpResponsePermanentRedirect | TemplateResponse:
         if not self.has_add_permission(request):
             logger.warning("The user did not have permission to do that")
@@ -170,9 +173,17 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: dict[str, Any] | None = None
+        self,
+        request: HttpRequest,
+        object_id: str,
+        form_url: str = "",
+        extra_context: dict[str, Any] | None = None,
     ) -> HttpResponse:
-        extra_context = {"show_save": False, "show_save_and_continue": False, "show_delete": True}
+        extra_context = {
+            "show_save": False,
+            "show_save_and_continue": False,
+            "show_delete": True,
+        }
         has_add_permission: Callable = self.has_add_permission
         self.has_add_permission: Callable = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)

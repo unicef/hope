@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-from django.conf import settings
-
 import pytz
+from django.conf import settings
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory

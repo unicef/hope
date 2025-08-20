@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -20,7 +19,10 @@ class MassEnrollFormTest(TestCase):
             business_areas=[afg],
         )
         self.program = ProgramFactory(
-            name="Test Program 333", business_area_id=afg.id, status=Program.ACTIVE, data_collecting_type=partial
+            name="Test Program 333",
+            business_area_id=afg.id,
+            status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
         self.household = HouseholdFactory(
             program=self.program,

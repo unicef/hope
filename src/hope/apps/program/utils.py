@@ -5,12 +5,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.apps.account.models import (
-    AdminAreaLimitedTo,
-    Partner,
-    RoleAssignment,
-    User,
-)
+from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.geo.models import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -204,7 +199,9 @@ class CopyProgramPopulation:
         return roles_in_household
 
     @staticmethod
-    def copy_entitlement_cards_per_household(new_household: Household) -> list[EntitlementCard]:
+    def copy_entitlement_cards_per_household(
+        new_household: Household,
+    ) -> list[EntitlementCard]:
         entitlement_cards_in_household = []
         old_entitlement_cards = new_household.copied_from.entitlement_cards.all()
         for entitlement_card in old_entitlement_cards:

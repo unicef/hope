@@ -8,11 +8,7 @@ from rest_framework import serializers
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.periodic_data_update.models import (
     PDUXlsxTemplate,
     PDUXlsxUpload,

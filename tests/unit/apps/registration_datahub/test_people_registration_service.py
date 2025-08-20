@@ -5,7 +5,6 @@ from typing import Union
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -68,7 +67,11 @@ class TestPeopleRegistrationService(TestCase):
                 "disability_id_i_c": "document.disability_certificate-document_number",
                 "disability_id_photo_i_c": "document.disability_certificate-photo",
             },
-            "flex_fields": ["marketing.can_unicef_contact_you", "enumerators", "macioce"],
+            "flex_fields": [
+                "marketing.can_unicef_contact_you",
+                "enumerators",
+                "macioce",
+            ],
             "household_constances": {"zip_code": "00126"},
             "individual_constances": {"pregnant": True},
         }

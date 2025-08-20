@@ -10,11 +10,10 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 from zipfile import BadZipfile
 
-from django.core import validators as django_core_validators
-
 import openpyxl
 import phonenumbers
 from dateutil import parser
+from django.core import validators as django_core_validators
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
@@ -26,15 +25,8 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
 )
 from hope.apps.core.field_attributes.fields_types import _INDIVIDUAL, Scope
-from hope.apps.core.kobo.common import (
-    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
-    get_field_name,
-)
-from hope.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hope.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
+from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
@@ -97,7 +89,13 @@ class XLSXValidator(BaseValidator):
             try:
                 load_workbook(xlsx_file, data_only=True)
             except BadZipfile:
-                return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
+                return [
+                    {
+                        "row_number": 1,
+                        "header": f"{xlsx_file.name}",
+                        "message": "Invalid .xlsx file",
+                    }
+                ]
 
             return []
         except Exception as e:
@@ -189,7 +187,11 @@ class ImportDataInstanceValidator:
                     issuing_countries = [None] * len(values["validation_data"])
                 if key == "other_id_type_i_c":
                     for name, value, validation_data, issuing_country in zip(
-                        values["names"], values["numbers"], values["validation_data"], issuing_countries, strict=False
+                        values["names"],
+                        values["numbers"],
+                        values["validation_data"],
+                        issuing_countries,
+                        strict=False,
                     ):
                         row_number = validation_data.get("row_number")
                         if not name and value:
@@ -653,14 +655,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
 
-                    people_admin_columns = ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c")
+                    people_admin_columns = (
+                        "pp_admin1_i_c",
+                        "pp_admin2_i_c",
+                        "pp_admin3_i_c",
+                    )
                     hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
                     admin_columns_all = people_admin_columns + hh_admin_columns
                     if header.value in admin_columns_all:
                         if cell.value:
                             admin_area_code_tuples.append((row_number, header.value, cell.value))
                         # admin3 is not required for now
-                        elif not cell.value and header.value not in ("admin3_h_c", "pp_admin3_i_c"):
+                        elif not cell.value and header.value not in (
+                            "admin3_h_c",
+                            "pp_admin3_i_c",
+                        ):
                             invalid_rows.append(
                                 {
                                     "row_number": row_number,
@@ -683,7 +692,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
                         )
-                        invalid_rows.append({"row_number": cell.row, "header": header.value, "message": message})
+                        invalid_rows.append(
+                            {
+                                "row_number": cell.row,
+                                "header": header.value,
+                                "message": message,
+                            }
+                        )
 
                     header_value_doc = header.value.removeprefix("pp_")
                     if header_value_doc in documents_numbers:
@@ -707,7 +722,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 if current_household_id and current_household_id not in self.household_ids:
                     message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
-                    invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
+                    invalid_rows.append(
+                        {
+                            "row_number": row_number,
+                            "header": "relationship_i_c",
+                            "message": message,
+                        }
+                    )
 
                 for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
                     documents_or_identity_dict = (
@@ -722,10 +743,22 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         message = (
                             f"Sheet: 'Individuals', Household with id: {household_id} has to have a head of household"
                         )
-                        invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
+                        invalid_rows.append(
+                            {
+                                "row_number": 0,
+                                "header": "relationship_i_c",
+                                "message": message,
+                            }
+                        )
                     elif count > 1:
                         message = f"Sheet: 'Individuals', There are multiple head of households for household with id: {household_id}"
-                        invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
+                        invalid_rows.append(
+                            {
+                                "row_number": 0,
+                                "header": "relationship_i_c",
+                                "message": message,
+                            }
+                        )
 
             if sheet.title in ("Households", "People"):
                 admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
@@ -745,7 +778,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def validate_admin_areas(
-        self, admin_area_code_tuples: list[tuple[int, str, str]], business_area_slug: str | None
+        self,
+        admin_area_code_tuples: list[tuple[int, str, str]],
+        business_area_slug: str | None,
     ) -> list[dict[str, Any]]:
         invalid_rows = []
         if admin_area_code_tuples:
@@ -763,7 +798,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         f"Sheet: 'Households': Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
                     )
                 if message:
-                    invalid_rows.append({"row_number": row_number, "header": header_name, "message": message})
+                    invalid_rows.append(
+                        {
+                            "row_number": row_number,
+                            "header": header_name,
+                            "message": message,
+                        }
+                    )
         return invalid_rows
 
     def validate_file_with_template(self, wb: Workbook) -> None:
@@ -773,7 +814,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             for name, fields in combined_fields.items():
                 if name.capitalize() not in wb.sheetnames:  # pragma: no cover
                     self.errors.append(
-                        {"row_number": 0, "header": "File", "message": f"Worksheet {name.capitalize()} does not exist."}
+                        {
+                            "row_number": 0,
+                            "header": "File",
+                            "message": f"Worksheet {name.capitalize()} does not exist.",
+                        }
                     )
                     return
 
@@ -791,7 +836,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if columns_difference:  # pragma: no cover
                     self.errors.extend(
                         [
-                            {"row_number": 1, "header": col, "message": f"Missing column name {col}"}
+                            {
+                                "row_number": 1,
+                                "header": col,
+                                "message": f"Missing column name {col}",
+                            }
                             for col in columns_difference
                         ]
                     )
@@ -825,7 +874,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             try:
                 wb = openpyxl.load_workbook(xlsx_file, data_only=True)
             except BadZipfile:
-                return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
+                return [
+                    {
+                        "row_number": 1,
+                        "header": f"{xlsx_file.name}",
+                        "message": "Invalid .xlsx file",
+                    }
+                ]
 
             self.validate_file_with_template(wb)
             if self.errors:  # pragma: no cover
@@ -892,7 +947,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             erroneous_collectors_ids = [item for item, count in ids_counter.items() if count > 1]
             message = "Household can contain only one primary and one alternate collector"
             errors.extend(
-                {"row_number": 1, "header": header, "message": f"{message}, erroneous id: {hh_id}"}
+                {
+                    "row_number": 1,
+                    "header": header,
+                    "message": f"{message}, erroneous id: {hh_id}",
+                }
                 for hh_id in erroneous_collectors_ids
             )
             return errors
@@ -971,7 +1030,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         index_id_col = int(header.column)
 
                 index_ids = list(
-                    people_sheet.iter_cols(min_col=index_id_col, max_col=index_id_col, min_row=3, values_only=True)
+                    people_sheet.iter_cols(
+                        min_col=index_id_col,
+                        max_col=index_id_col,
+                        min_row=3,
+                        values_only=True,
+                    )
                 )[0]
                 duplicates = list({i for i in index_ids if index_ids.count(i) > 1 and i is not None})
                 if duplicates:
@@ -998,20 +1062,31 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if header.value == "pp_index_id":
                     index_id_col = int(header.column)
                     index_ids = list(
-                        people_sheet.iter_cols(min_col=index_id_col, max_col=index_id_col, min_row=3, values_only=True)
+                        people_sheet.iter_cols(
+                            min_col=index_id_col,
+                            max_col=index_id_col,
+                            min_row=3,
+                            values_only=True,
+                        )
                     )[0]
                 if header.value == "pp_primary_collector_id":
                     pr_collector_id_col = int(header.column)
                     primary_collector_ids = list(
                         people_sheet.iter_cols(
-                            min_col=pr_collector_id_col, max_col=pr_collector_id_col, min_row=3, values_only=True
+                            min_col=pr_collector_id_col,
+                            max_col=pr_collector_id_col,
+                            min_row=3,
+                            values_only=True,
                         )
                     )[0]
                 if header.value == "pp_relationship_i_c":
                     relationship_col = int(header.column)
                     relationship_column = list(
                         people_sheet.iter_cols(
-                            min_col=relationship_col, max_col=relationship_col, min_row=3, values_only=True
+                            min_col=relationship_col,
+                            max_col=relationship_col,
+                            min_row=3,
+                            values_only=True,
                         )
                     )[0]
             pr_ids = [int(i) for i in primary_collector_ids if i is not None]
@@ -1212,7 +1287,18 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # Important! if value == 0 or 1 it's also evaluated to True
                 # checking for int values even tho Kobo returns everything as str
                 # to no not break import if they start returning integers
-                if value in ("True", "False", True, False, "0", "1", "TRUE", "FALSE", "true", "false"):
+                if value in (
+                    "True",
+                    "False",
+                    True,
+                    False,
+                    "0",
+                    "1",
+                    "TRUE",
+                    "FALSE",
+                    "true",
+                    "false",
+                ):
                     return None
                 return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
         except Exception as e:  # pragma: no cover
@@ -1333,7 +1419,11 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def _get_field_type_error(
-        self, field: str, value: Any, attachments: list, skip_validate_pictures: bool | None = False
+        self,
+        field: str,
+        value: Any,
+        attachments: list,
+        skip_validate_pictures: bool | None = False,
     ) -> dict | None:
         try:
             field_dict = self.all_fields.get(field)
@@ -1352,7 +1442,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
             if complex_type_fn:
                 message = complex_type_fn(
-                    field=field, value=value, attachments=attachments, skip_validate_pictures=skip_validate_pictures
+                    field=field,
+                    value=value,
+                    attachments=attachments,
+                    skip_validate_pictures=skip_validate_pictures,
                 )
                 if message is not None:
                     return {
@@ -1395,7 +1488,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         return None
 
     def validate_everything(
-        self, submissions: list, business_area: BusinessArea, skip_validate_pictures: bool | None = False
+        self,
+        submissions: list,
+        business_area: BusinessArea,
+        skip_validate_pictures: bool | None = False,
     ) -> list:
         try:
             reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
@@ -1406,8 +1502,18 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             # thx again
 
             identities_numbers = {
-                "unhcr_id_no_i_c": {"partner": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
-                "scope_id_no_i_c": {"partner": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "unhcr_id_no_i_c": {
+                    "partner": "UNHCR",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "scope_id_no_i_c": {
+                    "partner": "WFP",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
             }
             documents_numbers: dict[str, dict[str, Any]] = {
                 "birth_certificate_no_i_c": {
@@ -1535,7 +1641,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
                                 expected_i_fields.discard(i_field)
                                 error = self._get_field_type_error(
-                                    i_field, i_value, attachments, skip_validate_pictures
+                                    i_field,
+                                    i_value,
+                                    attachments,
+                                    skip_validate_pictures,
                                 )
                                 if error:
                                     errors.append(error)
@@ -1543,7 +1652,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                             docs_and_identities_to_validate.append(current_individual_docs_and_identities)
 
                             i_expected_field_errors = [
-                                {"header": field, "message": f"Missing individual required field {field}"}
+                                {
+                                    "header": field,
+                                    "message": f"Missing individual required field {field}",
+                                }
                                 for field in expected_i_fields
                             ]
                             errors.extend(i_expected_field_errors)
@@ -1563,14 +1675,25 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 }
                             )
                         if primary_collector_counter == 0:
-                            errors.append({"header": "role_i_c", "message": "Household must have a primary collector"})
+                            errors.append(
+                                {
+                                    "header": "role_i_c",
+                                    "message": "Household must have a primary collector",
+                                }
+                            )
                         if primary_collector_counter > 1:
                             errors.append(
-                                {"header": "role_i_c", "message": "Only one person can be a primary collector"}
+                                {
+                                    "header": "role_i_c",
+                                    "message": "Only one person can be a primary collector",
+                                }
                             )
                         if alternate_collector_counter > 1:
                             errors.append(
-                                {"header": "role_i_c", "message": "Only one person can be a alternate collector"}
+                                {
+                                    "header": "role_i_c",
+                                    "message": "Only one person can be a alternate collector",
+                                }
                             )
                     else:
                         error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
@@ -1579,7 +1702,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 if collectors_error := self.validate_collectors_unique(household_collectors_data):
                     errors.append(collectors_error)
                 hh_expected_field_errors = [
-                    {"header": field, "message": f"Missing household required field {field}"}
+                    {
+                        "header": field,
+                        "message": f"Missing household required field {field}",
+                    }
                     for field in expected_hh_fields
                 ]
                 errors.extend(hh_expected_field_errors)

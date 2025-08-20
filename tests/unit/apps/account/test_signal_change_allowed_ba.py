@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.program import ProgramFactory
@@ -30,13 +29,19 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         cls.partner.allowed_business_areas.add(cls.business_area_ukr)
 
         cls.program_afg = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_afg, partner_access=Program.ALL_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_afg,
+            partner_access=Program.ALL_PARTNERS_ACCESS,
         )
         cls.program_ukr = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_ukr, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_ukr,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
         cls.program_ukr_2 = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_ukr, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_ukr,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
 
         RoleAssignment.objects.create(

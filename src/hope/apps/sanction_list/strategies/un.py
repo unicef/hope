@@ -6,13 +6,12 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.request import urlopen
 
+import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils import timezone
 from django.utils.functional import cached_property
-
-import dateutil.parser
 from elasticsearch.exceptions import NotFoundError
 
 from hope.apps.core.countries import SanctionListCountries as Countries

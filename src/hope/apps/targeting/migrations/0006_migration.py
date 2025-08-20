@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            remove_targeting_criteria_rules_without_payment_plan, reverse_code=migrations.RunPython.noop
+            remove_targeting_criteria_rules_without_payment_plan,
+            reverse_code=migrations.RunPython.noop,
         ),
     ]

@@ -4,10 +4,9 @@ from decimal import Decimal
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from django.conf import settings
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -579,8 +578,18 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean"))
 
         results_data = [
-            {"first": {"reference_pk": "1"}, "second": {"reference_pk": "2"}, "score": 0.9, "status_code": "200"},
-            {"first": {"reference_pk": "3"}, "second": {"reference_pk": "4"}, "score": 0.8, "status_code": "200"},
+            {
+                "first": {"reference_pk": "1"},
+                "second": {"reference_pk": "2"},
+                "score": 0.9,
+                "status_code": "200",
+            },
+            {
+                "first": {"reference_pk": "3"},
+                "second": {"reference_pk": "4"},
+                "score": 0.8,
+                "status_code": "200",
+            },
         ]
         service.get_deduplication_set_results = mock.Mock(return_value=results_data)
         service.store_similarity_pairs = mock.Mock()

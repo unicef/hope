@@ -23,7 +23,10 @@ class Migration(migrations.Migration):
                     ("quick_links", "Can see quick links in admin"),
                     ("restrict_help_desk", "Limit fields to be editable for help desk"),
                     ("can_reindex_programs", "Can reindex programs"),
-                    ("can_add_business_area_to_partner", "Can add business area to partner"),
+                    (
+                        "can_add_business_area_to_partner",
+                        "Can add business area to partner",
+                    ),
                     ("can_import_fixture", "Can import fixture"),
                 )
             },

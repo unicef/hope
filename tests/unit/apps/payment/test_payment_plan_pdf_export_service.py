@@ -2,7 +2,6 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
-
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
     ApprovalFactory,

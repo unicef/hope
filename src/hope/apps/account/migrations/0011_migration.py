@@ -168,7 +168,11 @@ def migrate_partner_roles_and_access(apps, schema_editor):
                 partner.allowed_business_areas.add(business_area)
                 new_assignments.extend(
                     RoleAssignment(
-                        user=None, partner=partner, role=role, business_area=business_area, program_id=program
+                        user=None,
+                        partner=partner,
+                        role=role,
+                        business_area=business_area,
+                        program_id=program,
                     )
                     for role in roles
                     for program in programs

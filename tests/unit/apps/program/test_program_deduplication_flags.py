@@ -50,7 +50,10 @@ class TestProgramDeduplicationFlagsSerializer:
         response = self.client.get(
             reverse(
                 self.deduplication_flags_url_name,
-                kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK
@@ -78,7 +81,10 @@ class TestProgramDeduplicationFlagsSerializer:
         response = self.client.get(
             reverse(
                 self.deduplication_flags_url_name,
-                kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK
@@ -107,7 +113,10 @@ class TestProgramDeduplicationFlagsSerializer:
         response = self.client.get(
             reverse(
                 self.deduplication_flags_url_name,
-                kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK
@@ -139,7 +148,10 @@ class TestProgramDeduplicationFlagsSerializer:
         response = self.client.get(
             reverse(
                 self.deduplication_flags_url_name,
-                kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK
@@ -167,7 +179,10 @@ class TestProgramDeduplicationFlagsSerializer:
         response = self.client.get(
             reverse(
                 self.deduplication_flags_url_name,
-                kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
             )
         )
         assert response.status_code == status.HTTP_200_OK

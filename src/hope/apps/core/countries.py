@@ -22,7 +22,10 @@ class Countries:
             logger.warning(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
         return [
-            {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3}
+            {
+                "label": {"English(EN)": name},
+                "value": alpha2 if output_code == "alpha2" else alpha3,
+            }
             for name, alpha2, alpha3 in cls.get_countries()
         ]
 
@@ -1280,7 +1283,10 @@ class SanctionListCountries:
             logger.warning(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
         return [
-            {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3}
+            {
+                "label": {"English(EN)": name},
+                "value": alpha2 if output_code == "alpha2" else alpha3,
+            }
             for name, alpha2, alpha3 in cls.COUNTRIES
         ]
 

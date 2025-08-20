@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
-
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -53,7 +52,11 @@ class DashboardDataView(APIView):
                 has_permission = True
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
-            if check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj):
+            if check_permissions(
+                request.user,
+                [Permissions.DASHBOARD_VIEW_COUNTRY],
+                business_area=business_area_obj,
+            ):
                 has_permission = True
 
         if not has_permission:
@@ -103,7 +106,9 @@ class CreateOrUpdateDashReportView(APIView):
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
             if request.user.is_superuser or check_permissions(
-                request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj
+                request.user,
+                [Permissions.DASHBOARD_VIEW_COUNTRY],
+                business_area=business_area_obj,
             ):
                 has_permission = True
 
@@ -120,7 +125,8 @@ class CreateOrUpdateDashReportView(APIView):
             generate_dash_report_task.delay(task_identifier)
 
             return Response(
-                {"detail": _("DashReport generation task has been triggered.")}, status=status.HTTP_202_ACCEPTED
+                {"detail": _("DashReport generation task has been triggered.")},
+                status=status.HTTP_202_ACCEPTED,
             )
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -144,7 +150,9 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
             if check_permissions(
-                self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj
+                self.request.user,
+                [Permissions.DASHBOARD_VIEW_COUNTRY],
+                business_area=business_area_obj,
             ):
                 has_permission = True
 
