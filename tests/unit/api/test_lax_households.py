@@ -46,7 +46,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
             status=RegistrationDataImport.LOADING,
             program=self.program,
         )
-        self.url = reverse("api:rdi-push-lax-households", args=[self.business_area.slug, str(self.rdi.id)])
+        self.url = reverse("api:rdi-push-lax", args=[self.business_area.slug, str(self.rdi.id)])
         self.head_of_household = PendingIndividualFactory(
             individual_id="IND001",
             registration_data_import=self.rdi,

@@ -126,7 +126,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         assert response.status_code == 200
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway missing Records?")
 
-    @patch("hope.apps.payment.admin.has_payment_plan_export_per_fsp_permission", return_value=True)
+    @patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
     def test_get_regenerate_export_xlsx_form(self, mock_perm: Any) -> None:
         url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[self.payment_plan.pk])
         response = self.client.get(url)
@@ -135,7 +135,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         assert "form" in response.context
 
     @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
-    @patch("hope.apps.payment.admin.has_payment_plan_export_per_fsp_permission", return_value=True)
+    @patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
     def test_post_regenerate_export_xlsx_without_template(self, mock_perm: Any, mock_export: Any) -> None:
         url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[self.payment_plan.pk])
         response = self.client.post(url, {"template": ""})  # no template selected
@@ -145,7 +145,7 @@ class SyncWithPaymentGatewayTest(TestCase):
         assert reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]) in response["Location"]
 
     @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
-    @patch("hope.apps.payment.admin.has_payment_plan_export_per_fsp_permission", return_value=True)
+    @patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
     def test_post_regenerate_export_xlsx_with_template(self, mock_perm: Any, mock_export: Any) -> None:
         self.client.force_login(self.admin_user)
         template = FinancialServiceProviderXlsxTemplateFactory(name="Test Template AAA")
