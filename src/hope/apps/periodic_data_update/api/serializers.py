@@ -267,10 +267,16 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         program_slug = request.parser_context["kwargs"]["program_slug"]
-        validated_data["created_by"] = request.user
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+
+        validated_data["created_by"] = request.user
         validated_data["business_area"] = business_area
         validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
+        validated_data["status"] = PDUOnlineEdit.Status.PENDING_CREATE
+
+        # Pop fields that are not on the model before creating the instance
+        validated_data.pop("filters", None)
+        validated_data.pop("rounds_data", None)
 
         authorized_users = validated_data.pop("authorized_users", [])
 
@@ -279,8 +285,6 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
 
         if authorized_users:
             pdu_online_edit.authorized_users.set(authorized_users)
-
-        # TODO: PDU - add logic to populate pdu_data for the fields in the template; call the task
 
         return pdu_online_edit
 

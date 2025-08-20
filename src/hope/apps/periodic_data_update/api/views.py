@@ -206,12 +206,12 @@ class PDUOnlineEditViewSet(
     serializer_classes_by_action = {
         "list": PDUOnlineEditListSerializer,
         "retrieve": PDUOnlineEditDetailSerializer,
-        "create": PDUOnlineEditCreateSerializer,  # TODO: PDU - task
+        "create": PDUOnlineEditCreateSerializer,
         "update_authorized_users": PDUOnlineEditUpdateAuthorizedUsersSerializer,
         "save_data": PDUOnlineEditSaveDataSerializer, # TODO: PDU - handle the update of edit_data
         "send_back": PDUOnlineEditSendBackSerializer,
         "bulk_approve": BulkSerializer,
-        "bulk_merge": BulkSerializer,  # TODO: PDU - task
+        "bulk_merge": BulkSerializer,
         "users_available": AuthorizedUserSerializer,
     }
     permissions_by_action = {
@@ -238,6 +238,17 @@ class PDUOnlineEditViewSet(
                 Prefetch("authorized_users", queryset=User.objects.order_by("first_name", "last_name", "username")),
             )
         )
+
+    def perform_create(self, serializer: BaseSerializer) -> None:
+        filters = serializer.validated_data.get("filters", {})
+        rounds_data = serializer.validated_data.get("rounds_data", [])
+        pdu_online_edit = serializer.save()
+        task_kwargs = {
+            "pdu_online_edit_id": pdu_online_edit.id,
+            "filters": filters,
+            "rounds_data": rounds_data,
+        }
+        pdu_online_edit.queue(task_name="generate_edit_data", task_kwargs=task_kwargs)
 
     @action(detail=True, methods=["post"])
     def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -319,13 +330,13 @@ class PDUOnlineEditViewSet(
                 "PDU Online Edit is not in the 'Approved' status and cannot be merged."
             )
 
-        merged_count = pdu_edits.update(
-            status=PDUOnlineEdit.Status.MERGED,
-        )
-        # TODO: PDU - handle the merging of edit_data; update status in the task instead of here
+        pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
+
+        for pdu_edit in pdu_edits:
+            pdu_edit.queue(task_name="merge")
 
         return Response(
-            status=status.HTTP_200_OK, data={"message": f"{merged_count} PDU Online Edits merged successfully."}
+            status=status.HTTP_200_OK, data={"message": f"{pdu_edits.count()} PDU Online Edits queued for merging."}
         )
 
     @extend_schema(
