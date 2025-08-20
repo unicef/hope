@@ -3,16 +3,18 @@ import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
-import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
 import {
-  Table,
-  Grid2 as Grid,
-  TableRow,
-  TableCell,
-  TableHead,
-  TableBody,
-  TextField,
-} from '@mui/material';
+  periodicDataUpdatesOnlineEditsStatusToColor,
+  showApiErrorMessages,
+} from '@utils/utils';
+import Table from '@mui/material/Table';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 // StickyHeaderCell component for sticky table header cells
@@ -41,11 +43,13 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useParams } from 'react-router-dom';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useTranslation } from 'react-i18next';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { id } = useParams();
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
 
   const numericId = id ? parseInt(id, 10) : undefined;
   const { data, isLoading } = useQuery({
@@ -100,6 +104,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     }));
   });
 
+  // Track which rows are in edit mode
+  const [editingRows, setEditingRows] = useState<Set<number>>(new Set());
+
   useEffect(() => {
     setEditRows(
       individuals.map((ind) => ({
@@ -107,7 +114,34 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         pduFields: ind.pduFields ? ind.pduFields.map((f) => ({ ...f })) : [],
       })),
     );
+    setEditingRows(new Set()); // Reset edit mode on data change
   }, [individuals]);
+
+  // Save handler: call API and exit edit mode for row
+  const handleSaveRow = async (rowIdx: number) => {
+    const rowData = editRows[rowIdx];
+    try {
+      await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: numericId,
+          ...rowData,
+        },
+      );
+      setEditingRows((prev) => {
+        const updated = new Set(prev);
+        updated.delete(rowIdx);
+        return updated;
+      });
+    } catch (e) {
+      showApiErrorMessages(
+        e,
+        showMessage,
+        'An error occurred while updating the data',
+      );
+    }
+  };
 
   if (isLoading) return <LoadingComponent />;
   if (!data) return null;
@@ -127,7 +161,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       <PageHeader title={`Online Edits Template Details: ${name}`} />
       <BaseSection title="Details">
         <Grid container spacing={2}>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField label={t('Status')}>
               <StatusBox
                 status={status}
@@ -135,24 +169,24 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               />
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField label={t('Template Name')} value={name} />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField label={t('Creation Date')}>
               <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField
               label={t('Number of Records')}
               value={numberOfRecords}
             />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField label={t('Created By')} value={createdBy} />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField
               label={t('Authorized Users')}
               value={
@@ -162,7 +196,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               }
             />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField label={t('Approval Date')}>
               {approvedAt ? (
                 <UniversalMoment>{approvedAt}</UniversalMoment>
@@ -171,7 +205,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               )}
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid xs={3}>
             <LabelizedField
               label={t('Approved By')}
               value={approvedBy || t('-')}
@@ -243,105 +277,156 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  editRows.map((individual, idx) => (
-                    <TableRow key={individual.individualUuid || idx}>
-                      <TableCell>
-                        {individual.individualUuid ? (
-                          <BlackLink
-                            to={`/population/individuals/${individual.individualUuid}`}
-                          >
-                            {individual.individualUuid}
-                          </BlackLink>
-                        ) : (
-                          t('-')
-                        )}
-                      </TableCell>
-                      <TableCell>{individual.firstName}</TableCell>
-                      <TableCell>{individual.lastName}</TableCell>
-                      {allPduFields.map((col) => {
-                        // Find the matching pduField for this column
-                        const fieldIdx = individual.pduFields
-                          ? individual.pduFields.findIndex(
-                              (f) =>
-                                `${f.subtype}|${f.roundNumber}|${f.roundName}|${f.columnName || f.subtype}` ===
-                                col.key,
-                            )
-                          : -1;
-                        const field =
-                          fieldIdx !== -1
-                            ? individual.pduFields[fieldIdx]
-                            : null;
-                        return (
-                          <TableCell key={col.key}>
-                            {field ? (
-                              field.subtype === 'date' ? (
-                                <DatePicker
-                                  value={field.value || null}
-                                  disabled={!field.isEditable}
-                                  onChange={(newValue) => {
-                                    setEditRows((prev) => {
-                                      const updated = [...prev];
-                                      updated[idx] = {
-                                        ...updated[idx],
-                                        pduFields: updated[idx].pduFields.map(
-                                          (f, i) =>
-                                            i === fieldIdx
-                                              ? { ...f, value: newValue }
-                                              : f,
-                                        ),
-                                      };
-                                      return updated;
-                                    });
-                                  }}
-                                  slotProps={{
-                                    textField: {
-                                      variant: 'outlined',
-                                      fullWidth: true,
-                                      size: 'small',
-                                    },
-                                  }}
-                                />
-                              ) : (
-                                <TextField
-                                  variant="outlined"
-                                  fullWidth
-                                  size="small"
-                                  type={
-                                    field.subtype === 'number'
-                                      ? 'number'
-                                      : 'text'
-                                  }
-                                  value={field.value ?? ''}
-                                  disabled={!field.isEditable}
-                                  onChange={(e) => {
-                                    const newValue =
-                                      field.subtype === 'number'
-                                        ? Number(e.target.value)
-                                        : e.target.value;
-                                    setEditRows((prev) => {
-                                      const updated = [...prev];
-                                      updated[idx] = {
-                                        ...updated[idx],
-                                        pduFields: updated[idx].pduFields.map(
-                                          (f, i) =>
-                                            i === fieldIdx
-                                              ? { ...f, value: newValue }
-                                              : f,
-                                        ),
-                                      };
-                                      return updated;
-                                    });
-                                  }}
-                                />
+                  editRows.map((individual, idx) => {
+                    const isEditing = editingRows.has(idx);
+                    return (
+                      <TableRow key={individual.individualUuid || idx}>
+                        <TableCell>
+                          {individual.individualUuid ? (
+                            <BlackLink
+                              to={`/population/individuals/${individual.individualUuid}`}
+                            >
+                              {individual.unicefId}
+                            </BlackLink>
+                          ) : (
+                            t('-')
+                          )}
+                        </TableCell>
+                        <TableCell>{individual.firstName}</TableCell>
+                        <TableCell>{individual.lastName}</TableCell>
+                        {allPduFields.map((col) => {
+                          // Find the matching pduField for this column
+                          const fieldIdx = individual.pduFields
+                            ? individual.pduFields.findIndex(
+                                (f) =>
+                                  `${f.subtype}|${f.roundNumber}|${f.roundName}|${f.columnName || f.subtype}` ===
+                                  col.key,
                               )
-                            ) : (
-                              <span style={{ color: '#aaa' }}>{t('-')}</span>
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))
+                            : -1;
+                          const field =
+                            fieldIdx !== -1
+                              ? individual.pduFields[fieldIdx]
+                              : null;
+                          return (
+                            <TableCell key={col.key}>
+                              {field ? (
+                                isEditing && field.isEditable ? (
+                                  field.subtype === 'date' ? (
+                                    <DatePicker
+                                      value={field.value || null}
+                                      onChange={(newValue) => {
+                                        setEditRows((prev) => {
+                                          const updated = [...prev];
+                                          updated[idx] = {
+                                            ...updated[idx],
+                                            pduFields: updated[
+                                              idx
+                                            ].pduFields.map((f, i) =>
+                                              i === fieldIdx
+                                                ? { ...f, value: newValue }
+                                                : f,
+                                            ),
+                                          };
+                                          return updated;
+                                        });
+                                      }}
+                                      slotProps={{
+                                        textField: {
+                                          variant: 'outlined',
+                                          fullWidth: true,
+                                          size: 'small',
+                                        },
+                                      }}
+                                    />
+                                  ) : (
+                                    <TextField
+                                      variant="outlined"
+                                      fullWidth
+                                      size="small"
+                                      type={
+                                        field.subtype === 'number'
+                                          ? 'number'
+                                          : 'text'
+                                      }
+                                      value={field.value ?? ''}
+                                      onChange={(e) => {
+                                        const newValue =
+                                          field.subtype === 'number'
+                                            ? Number(e.target.value)
+                                            : e.target.value;
+                                        setEditRows((prev) => {
+                                          const updated = [...prev];
+                                          updated[idx] = {
+                                            ...updated[idx],
+                                            pduFields: updated[
+                                              idx
+                                            ].pduFields.map((f, i) =>
+                                              i === fieldIdx
+                                                ? { ...f, value: newValue }
+                                                : f,
+                                            ),
+                                          };
+                                          return updated;
+                                        });
+                                      }}
+                                    />
+                                  )
+                                ) : // Display mode: show value as plain text
+                                field.subtype === 'date' ? (
+                                  field.value ? (
+                                    <UniversalMoment>
+                                      {field.value}
+                                    </UniversalMoment>
+                                  ) : (
+                                    <span style={{ color: '#aaa' }}>
+                                      {t('-')}
+                                    </span>
+                                  )
+                                ) : field.value !== undefined &&
+                                  field.value !== null &&
+                                  field.value !== '' ? (
+                                  String(field.value)
+                                ) : (
+                                  <span style={{ color: '#aaa' }}>
+                                    {t('-')}
+                                  </span>
+                                )
+                              ) : (
+                                <span style={{ color: '#aaa' }}>{t('-')}</span>
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell>
+                          {isEditing ? (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => handleSaveRow(idx)}
+                            >
+                              {t('Save')}
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              onClick={() =>
+                                setEditingRows((prev) => {
+                                  const updated = new Set(prev);
+                                  updated.add(idx);
+                                  return updated;
+                                })
+                              }
+                            >
+                              {t('Edit')}
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
