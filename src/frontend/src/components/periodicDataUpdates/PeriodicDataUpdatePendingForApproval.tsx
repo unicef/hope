@@ -179,7 +179,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
       isOnPaper={true}
       renderRow={renderRow}
       headCells={pendingHeadCells}
-      data={results}
+      data={data ?? []}
       isLoading={isLoading}
       error={error}
       queryVariables={queryVariables}
