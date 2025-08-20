@@ -47,8 +47,18 @@ class TestPDUOnlineEditList:
 
         user_other = UserFactory(partner=self.partner, first_name="Charlie")
 
-        self.pdu_edit1 = PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, authorized_users=[user_other], status=PDUOnlineEdit.Status.NEW)
-        self.pdu_edit2 = PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, authorized_users=[self.user], status=PDUOnlineEdit.Status.READY)  # Request user is authorized
+        self.pdu_edit1 = PDUOnlineEditFactory(
+            program=self.program,
+            business_area=self.afghanistan,
+            authorized_users=[user_other],
+            status=PDUOnlineEdit.Status.NEW,
+        )
+        self.pdu_edit2 = PDUOnlineEditFactory(
+            program=self.program,
+            business_area=self.afghanistan,
+            authorized_users=[self.user],
+            status=PDUOnlineEdit.Status.READY,
+        )  # Request user is authorized
         self.pdu_edit_other_program = PDUOnlineEditFactory(program=self.other_program, business_area=self.afghanistan)
 
     @pytest.mark.parametrize(
@@ -59,7 +69,7 @@ class TestPDUOnlineEditList:
         ],
     )
     def test_pdu_online_edit_list_permissions(
-            self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -138,7 +148,9 @@ class TestPDUOnlineEditList:
         assert len(results) == expected_count
         assert all(item["status"] == status_filter for item in results)
 
-    def test_pdu_online_edit_list_filter_by_status_multiple_statuses(self, create_user_role_with_permissions: Any) -> None:
+    def test_pdu_online_edit_list_filter_by_status_multiple_statuses(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
         create_user_role_with_permissions(
             user=self.user,
             permissions=[Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -147,7 +159,9 @@ class TestPDUOnlineEditList:
         )
         PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.APPROVED)
 
-        response = self.api_client.get(f"{self.list_url}?status={PDUOnlineEdit.Status.NEW}&status={PDUOnlineEdit.Status.APPROVED}")
+        response = self.api_client.get(
+            f"{self.list_url}?status={PDUOnlineEdit.Status.NEW}&status={PDUOnlineEdit.Status.APPROVED}"
+        )
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 2
@@ -171,7 +185,9 @@ class TestPDUOnlineEditList:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_pdu_online_edit_count(self, permissions: list, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_pdu_online_edit_count(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
         create_user_role_with_permissions(
             user=self.user,
             permissions=permissions,

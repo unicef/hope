@@ -142,9 +142,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
         wb = openpyxl.load_workbook(file)  # type: ignore
         ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
         try:
-            periodic_data_update_template_id = wb.custom_doc_props[
-                PDUXlsxExportTemplateService.PROPERTY_ID_NAME
-            ]
+            periodic_data_update_template_id = wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
         except KeyError:
             periodic_data_update_template_id = None
         if periodic_data_update_template_id:
@@ -162,9 +160,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
         if type(periodic_data_update_template_id) is not int:
             raise ValidationError("Periodic Data Update Template ID must be an integer")
 
-        periodic_data_update_template = PDUXlsxTemplate.objects.filter(
-            id=periodic_data_update_template_id
-        ).first()
+        periodic_data_update_template = PDUXlsxTemplate.objects.filter(id=periodic_data_update_template_id).first()
         if not periodic_data_update_template:
             raise ValidationError(f"Periodic Data Update Template with ID {periodic_data_update_template_id} not found")
         return periodic_data_update_template

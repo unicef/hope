@@ -13,9 +13,9 @@ def populate_rounds_covered(apps, schema_editor):
     pdu_data_updates = {}
 
     for program in Program.objects.filter(pdu_xlsx_templates__isnull=False).distinct().iterator():
-        pdu_fields = FlexibleAttribute.objects.filter(
-            program=program, pdu_data__isnull=False
-        ).select_related("pdu_data")
+        pdu_fields = FlexibleAttribute.objects.filter(program=program, pdu_data__isnull=False).select_related(
+            "pdu_data"
+        )
 
         field_name_to_pdu_map = {attr.name: attr.pdu_data.id for attr in pdu_fields}
 
@@ -50,7 +50,6 @@ def populate_rounds_covered(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0010_migration"),
         ("periodic_data_update", "0002_migration"),
@@ -60,13 +59,18 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="periodicfielddata",
             name="rounds_names",
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=255), default=list, size=None),
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(blank=True, max_length=255), default=list, size=None
+            ),
         ),
         migrations.AddField(
             model_name="periodicfielddata",
             name="rounds_covered",
-            field=models.PositiveSmallIntegerField(blank=True, default=0, help_text="Number of rounds already used in templates and cannot be used again in template creation again."),
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                default=0,
+                help_text="Number of rounds already used in templates and cannot be used again in template creation again.",
+            ),
         ),
         migrations.RunPython(populate_rounds_covered, reverse_code=migrations.RunPython.noop),
     ]
-

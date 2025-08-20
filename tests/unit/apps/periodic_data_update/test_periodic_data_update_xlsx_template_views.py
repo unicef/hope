@@ -124,7 +124,13 @@ class TestPDUXlsxTemplateViews:
         pdu_data_vaccination = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=5,
-            rounds_names=["January vaccination", "February vaccination", "March vaccination", "April vaccination", "May vaccination"],
+            rounds_names=[
+                "January vaccination",
+                "February vaccination",
+                "March vaccination",
+                "April vaccination",
+                "May vaccination",
+            ],
         )
         self.pdu_field_vaccination = FlexibleAttributeForPDUFactory(
             program=self.program1,
@@ -258,10 +264,10 @@ class TestPDUXlsxTemplateViews:
         } not in response_json
 
     def test_count_periodic_data_update_templates(
-            self,
-            api_client: Callable,
-            afghanistan: BusinessAreaFactory,
-            create_user_role_with_permissions: Callable,
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -618,7 +624,9 @@ class TestPDUXlsxTemplateViews:
         response_2 = self.client.post(self.url_create_pdu_template_program1, data=data_2)
         assert response_2.status_code == status.HTTP_400_BAD_REQUEST
         response_json_2 = response_2.json()
-        assert response_json_2 == ["Template for round 2 of field 'Vaccination Records Update' has already been created."]
+        assert response_json_2 == [
+            "Template for round 2 of field 'Vaccination Records Update' has already been created."
+        ]
 
     @pytest.mark.parametrize(
         ("permissions", "partner_permissions", "access_to_program", "expected_status"),

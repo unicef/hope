@@ -32,9 +32,7 @@ def increment_periodic_data_update_template_version_cache_function(business_area
 
 @receiver(post_save, sender=PDUXlsxUpload)
 @receiver(pre_delete, sender=PDUXlsxUpload)
-def increment_periodic_data_update_upload_version_cache(
-    sender: Any, instance: PDUXlsxUpload, **kwargs: dict
-) -> None:
+def increment_periodic_data_update_upload_version_cache(sender: Any, instance: PDUXlsxUpload, **kwargs: dict) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
     program_slug = instance.template.program.slug

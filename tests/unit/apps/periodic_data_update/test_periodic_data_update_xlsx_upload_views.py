@@ -53,12 +53,8 @@ class TestPDUXlsxUploadViews:
         pdu_template2_program1 = PDUXlsxTemplateFactory(program=self.program1)
         pdu_template_program2 = PDUXlsxTemplateFactory(program=self.program2)
 
-        self.pdu_upload1_program1 = PDUXlsxUploadFactory(
-            template=pdu_template1_program1, created_by=self.user
-        )
-        self.pdu_upload2_program1 = PDUXlsxUploadFactory(
-            template=pdu_template2_program1, created_by=self.user
-        )
+        self.pdu_upload1_program1 = PDUXlsxUploadFactory(template=pdu_template1_program1, created_by=self.user)
+        self.pdu_upload2_program1 = PDUXlsxUploadFactory(template=pdu_template2_program1, created_by=self.user)
         self.pdu_upload_program2 = PDUXlsxUploadFactory(template=pdu_template_program2, created_by=self.user)
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
@@ -215,10 +211,10 @@ class TestPDUXlsxUploadViews:
             assert etag_second_call == etag
 
     def test_count_periodic_data_update_uploads(
-            self,
-            api_client: Callable,
-            afghanistan: BusinessAreaFactory,
-            create_user_role_with_permissions: Callable,
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(

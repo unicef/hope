@@ -204,8 +204,7 @@ class TestPeriodicDataTemplates:
         pagePDUXlsxTemplates.getPduTemplatesBtn().click()
         assert str(index) in pagePDUXlsxTemplates.getTemplateId(index).text
         assert (
-            str(periodic_data_update_template.number_of_records)
-            in pagePDUXlsxTemplates.getTemplateRecords(index).text
+            str(periodic_data_update_template.number_of_records) in pagePDUXlsxTemplates.getTemplateRecords(index).text
         )
         assert (
             f"{periodic_data_update_template.created_at:%-d %b %Y}"
@@ -261,10 +260,7 @@ class TestPeriodicDataTemplates:
         assert string_attribute.label["English(EN)"] in pagePDUXlsxTemplates.getTemplateField(0).text
         assert str(rounds_data[0]["round"]) in pagePDUXlsxTemplates.getTemplateRoundNumber(0).text
         assert rounds_data[0]["round_name"] in pagePDUXlsxTemplates.getTemplateRoundName(0).text
-        assert (
-            str(rounds_data[0]["number_of_records"])
-            in pagePDUXlsxTemplates.getTemplateNumberOfIndividuals(0).text
-        )
+        assert str(rounds_data[0]["number_of_records"]) in pagePDUXlsxTemplates.getTemplateNumberOfIndividuals(0).text
 
     @pytest.mark.night
     def test_periodic_data_template_create_and_download(

@@ -22,7 +22,6 @@ def migrate_task_results_ids(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("universal_update_script", "0003_migration"),
     ]
@@ -31,7 +30,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="universalupdate",
             name="celery_tasks_results_ids",
-            field=models.JSONField(blank=True, default=dict, help_text="Current (active) AsyncResult ids for celery tasks."),
+            field=models.JSONField(
+                blank=True, default=dict, help_text="Current (active) AsyncResult ids for celery tasks."
+            ),
         ),
         migrations.RunPython(migrate_task_results_ids, migrations.RunPython.noop),
         migrations.RemoveField(

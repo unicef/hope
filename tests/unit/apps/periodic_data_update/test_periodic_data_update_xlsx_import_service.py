@@ -436,10 +436,8 @@ class TestPDUXlsxImportService(TestCase):
         service = PDUXlsxExportTemplateService(periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
-        periodic_data_update_template_from_xlsx = (
-            PDUXlsxImportService.read_periodic_data_update_template_object(
-                periodic_data_update_template.file.file
-            )
+        periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(
+            periodic_data_update_template.file.file
         )
         assert periodic_data_update_template_from_xlsx.pk == periodic_data_update_template.pk
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
@@ -447,8 +445,8 @@ class TestPDUXlsxImportService(TestCase):
         tmp_file = BytesIO()
         wb.save(tmp_file)
         tmp_file.seek(0)
-        periodic_data_update_template_from_xlsx = (
-            PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
+        periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(
+            tmp_file
         )
         assert periodic_data_update_template_from_xlsx.pk == periodic_data_update_template.pk
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)

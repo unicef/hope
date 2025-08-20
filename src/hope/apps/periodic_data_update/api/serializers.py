@@ -24,6 +24,7 @@ PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
     Permissions.PDU_ONLINE_MERGE,
 ]
 
+
 class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
@@ -167,18 +168,27 @@ class AuthorizedUserSerializer(serializers.ModelSerializer):
         if cached_roles:
             perms = set()
             for ra in cached_roles:
-                perms.update(p for p in ra.role.permissions if p in [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS])
+                perms.update(
+                    p for p in ra.role.permissions if p in [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
+                )
             return sorted(perms)
 
-        permissions_from_roles = RoleAssignment.objects.filter(
-            Q(user=user) | Q(partner=user.partner),
-            business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"],
-            program__slug=self.context["request"].parser_context["kwargs"]["program_slug"],
-            role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS],
-        ).exclude(expiry_date__lt=timezone.now()).values_list("role__permissions", flat=True)
+        permissions_from_roles = (
+            RoleAssignment.objects.filter(
+                Q(user=user) | Q(partner=user.partner),
+                business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"],
+                program__slug=self.context["request"].parser_context["kwargs"]["program_slug"],
+                role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS],
+            )
+            .exclude(expiry_date__lt=timezone.now())
+            .values_list("role__permissions", flat=True)
+        )
 
         pdu_online_related_permissions = {
-            permission for permission_list in permissions_from_roles for permission in permission_list if permission in [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
+            permission
+            for permission_list in permissions_from_roles
+            for permission in permission_list
+            if permission in [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
         }
         return sorted(pdu_online_related_permissions)
 
@@ -235,9 +245,7 @@ class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
 class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
     filters = serializers.JSONField(write_only=True)
     rounds_data = serializers.ListField(child=serializers.DictField(), write_only=True)
-    authorized_users = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=User.objects.all(), required=False
-    )
+    authorized_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
 
     class Meta:
         model = PDUOnlineEdit
@@ -299,5 +307,4 @@ class PDUOnlineEditSendBackSerializer(serializers.Serializer):
 
 
 class BulkSerializer(serializers.Serializer):
-
     ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=False)

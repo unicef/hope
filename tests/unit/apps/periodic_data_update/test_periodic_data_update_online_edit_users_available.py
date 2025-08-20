@@ -66,7 +66,11 @@ class TestPDUOnlineEditUsersAvailable:
         # User with all PDU permissions
         self.user_can_all = UserFactory(partner=self.partner_empty, first_name="David")
         can_all_role = RoleFactory(
-            permissions=[Permissions.PDU_ONLINE_SAVE_DATA.value, Permissions.PDU_ONLINE_APPROVE.value, Permissions.PDU_ONLINE_MERGE.value]
+            permissions=[
+                Permissions.PDU_ONLINE_SAVE_DATA.value,
+                Permissions.PDU_ONLINE_APPROVE.value,
+                Permissions.PDU_ONLINE_MERGE.value,
+            ]
         )
         RoleAssignmentFactory(
             user=self.user_can_all,
@@ -96,8 +100,7 @@ class TestPDUOnlineEditUsersAvailable:
         )
 
     @pytest.mark.parametrize(
-        ("permissions", "expected_status")
-        [
+        ("permissions", "expected_status")[
             (
                 [Permissions.PDU_TEMPLATE_CREATE],
                 status.HTTP_200_OK,
@@ -109,7 +112,7 @@ class TestPDUOnlineEditUsersAvailable:
         ],
     )
     def test_users_available_permissions(
-            self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
