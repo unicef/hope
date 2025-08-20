@@ -733,7 +733,7 @@ class PaymentPlan(
     ) -> QuerySet:
         from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION)
 
         if payment_verification_plan:
             params &= Q(
