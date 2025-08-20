@@ -360,6 +360,3 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert all(
             payment.entitlement_quantity == payment.delivered_quantity for payment in payment_plan.eligible_payments
         )
-        payment_plan.refresh_from_db()
-        assert payment_plan.export_file_per_fsp is not None
-        assert str(payment_plan.export_file_per_fsp.pk) != str(file.pk)

@@ -324,10 +324,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             with override_settings(MEDIA_ROOT=media_root):
 
                 def fail_after_files_exist(*args: list[Any]) -> None:
-                    pre_cleanup_files = []
-                    for root, _, files in os.walk(media_root):
-                        for f in files:
-                            pre_cleanup_files.append(os.path.join(root, f))
+                    pre_cleanup_files = [os.path.join(root, f) for root, _, files in os.walk(media_root) for f in files]
                     assert len(pre_cleanup_files) > 0
                     raise RuntimeError("forced failure for cleanup test")
 
@@ -338,8 +335,5 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     with self.assertRaises(RuntimeError):
                         self.client.post(self.url, [individual_data], format="json")
 
-                leftover_files = []
-                for root, _, files in os.walk(media_root):
-                    for f in files:
-                        leftover_files.append(os.path.join(root, f))
+                leftover_files = [os.path.join(root, f) for root, _, files in os.walk(media_root) for f in files]
                 assert leftover_files == []
