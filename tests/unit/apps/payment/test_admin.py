@@ -10,11 +10,16 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
 
-from hope.apps.payment.models import FinancialServiceProvider, PaymentPlan
+from hope.apps.payment.admin import (
+    can_regenerate_export_file_per_fsp,
+    can_sync_with_payment_gateway,
+)
+from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 
 @pytest.fixture(autouse=True)
@@ -120,3 +125,42 @@ class SyncWithPaymentGatewayTest(TestCase):
 
         assert response.status_code == 200
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway missing Records?")
+
+    @patch("hope.apps.payment.admin.has_payment_plan_export_per_fsp_permission", return_value=True)
+    def test_get_regenerate_export_xlsx_form(self, mock_perm: Any) -> None:
+        url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[self.payment_plan.pk])
+        response = self.client.get(url)
+        assert response.status_code == 200
+        self.assertContains(response, "Select a template if you want the export to include the FSP Auth Code")
+        assert "form" in response.context
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
+    @patch("hope.apps.payment.admin.has_payment_plan_export_per_fsp_permission", return_value=True)
+    def test_post_regenerate_export_xlsx_without_template(self, mock_perm: Any, mock_export: Any) -> None:
+        url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[self.payment_plan.pk])
+        response = self.client.post(url, {"template": ""})  # no template selected
+
+        mock_export.assert_called_once_with(self.admin_user.pk, None)
+        assert response.status_code == 302
+        assert reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]) in response["Location"]
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
+    @patch("hope.apps.payment.admin.has_payment_plan_export_per_fsp_permission", return_value=True)
+    def test_post_regenerate_export_xlsx_with_template(self, mock_perm: Any, mock_export: Any) -> None:
+        self.client.force_login(self.admin_user)
+        template = FinancialServiceProviderXlsxTemplateFactory(name="Test Template AAA")
+        fsp = FinancialServiceProviderFactory()
+        fsp.allowed_business_areas.add(self.payment_plan.business_area)
+        fsp.xlsx_templates.add(template)
+        url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[self.payment_plan.pk])
+        response = self.client.post(url, {"template": template.id})
+
+        mock_export.assert_called_once_with(self.admin_user.pk, str(template.id))
+        assert response.status_code == 302
+        assert reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]) in response["Location"]
+
+    def test_can_sync_with_payment_gateway(self) -> None:
+        assert not can_sync_with_payment_gateway(self.payment_plan)
+
+    def test_can_regenerate_export_file_per_fsp(self) -> None:
+        assert not can_regenerate_export_file_per_fsp(self.payment_plan)
