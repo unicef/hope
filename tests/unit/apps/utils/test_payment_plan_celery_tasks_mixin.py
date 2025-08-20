@@ -175,7 +175,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         )
         assert response.status_code == status.HTTP_302_FOUND
 
-        assert list(messages.get_messages(response.wsgi_request))[-1].message == "There is no reconciliation_import_file for this payment plan"
+        assert (
+            list(messages.get_messages(response.wsgi_request))[-1].message
+            == "There is no reconciliation_import_file for this payment plan"
+        )
 
         file_temp = FileTemp.objects.create(
             object_id=payment_plan.pk,
@@ -193,4 +196,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
                 HTTP_X_ROOT_TOKEN="test-token123",
             )
             assert response.status_code == status.HTTP_302_FOUND
-            assert list(messages.get_messages(response.wsgi_request))[-1].message == f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx} for this payment plan"
+            assert (
+                list(messages.get_messages(response.wsgi_request))[-1].message
+                == f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx} for this payment plan"
+            )
