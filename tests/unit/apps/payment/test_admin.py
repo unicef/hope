@@ -147,14 +147,12 @@ class SyncWithPaymentGatewayTest(TestCase):
     @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
     @patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
     def test_post_regenerate_export_xlsx_with_template(self, mock_perm: Any, mock_export: Any) -> None:
-        self.client.force_login(self.admin_user)
         template = FinancialServiceProviderXlsxTemplateFactory(name="Test Template AAA")
         fsp = FinancialServiceProviderFactory()
         fsp.allowed_business_areas.add(self.payment_plan.business_area)
         fsp.xlsx_templates.add(template)
         url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[self.payment_plan.pk])
         response = self.client.post(url, {"template": template.id})
-
         mock_export.assert_called_once_with(self.admin_user.pk, str(template.id))
         assert response.status_code == 302
         assert reverse("admin:payment_paymentplan_change", args=[self.payment_plan.pk]) in response["Location"]
