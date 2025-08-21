@@ -851,7 +851,7 @@ class TestProgramUpdate:
                         "subtype": self.pdu_data_to_be_preserved.subtype,
                         "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
                         "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
-                        "rounds_covered":  self.pdu_data_to_be_preserved.rounds_covered,
+                        "rounds_covered": self.pdu_data_to_be_preserved.rounds_covered,
                     },
                     "name": self.pdu_field_to_be_preserved.name,
                 },

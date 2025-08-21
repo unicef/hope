@@ -182,6 +182,7 @@ class TestPDUOnlineEditCreate:
                         "round_number": 2,
                         "round_name": "February vaccination",
                         "value": None,
+                        "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": True,
                     },
@@ -189,6 +190,7 @@ class TestPDUOnlineEditCreate:
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
+                        "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": True,
                     },
@@ -236,6 +238,7 @@ class TestPDUOnlineEditCreate:
                         "round_number": 2,
                         "round_name": "February vaccination",
                         "value": None,
+                        "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": True,
                     },
@@ -243,6 +246,7 @@ class TestPDUOnlineEditCreate:
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
+                        "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": True,
                     },
@@ -461,8 +465,11 @@ class TestPDUOnlineEditCreate:
 
         pdu_online_edit = PDUOnlineEdit.objects.first()
         assert pdu_online_edit.edit_data[0]["pdu_fields"]["vaccination_records_update"]["value"] == 1.0
+        assert pdu_online_edit.edit_data[0]["pdu_fields"]["vaccination_records_update"]["collection_date"] is None
         assert pdu_online_edit.edit_data[0]["pdu_fields"]["vaccination_records_update"]["is_editable"] is False
+
         assert pdu_online_edit.edit_data[0]["pdu_fields"]["health_records_update"]["value"] is None
+        assert pdu_online_edit.edit_data[0]["pdu_fields"]["health_records_update"]["collection_date"] is None
         assert pdu_online_edit.edit_data[0]["pdu_fields"]["health_records_update"]["is_editable"] is True
 
     def test_create_pdu_online_edit_with_covered_individual(
