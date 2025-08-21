@@ -1,5 +1,5 @@
 import { DividerLine } from '@components/core/DividerLine';
-import { IndividualNode } from '@generated/graphql';
+import { HouseholdChoiceDataQuery, IndividualNode } from '@generated/graphql';
 import { Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { Title } from '@core/Title';
 import { t } from 'i18next';
@@ -10,9 +10,11 @@ import { renderSomethingOrDash } from '@utils/utils';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 
 interface IndividualAccountsProps {
   individual: IndividualNode;
+  choicesData: HouseholdChoiceDataQuery;
 }
 
 const Overview = styled(Paper)`
@@ -24,6 +26,7 @@ const Overview = styled(Paper)`
 
 export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   individual,
+  choicesData,
 }) => {
   const permissions = usePermissions();
   const canViewDeliveryMechanisms = hasPermissions(
@@ -32,6 +35,11 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const accountFinancialInstitutionsDict = useArrayToDict(
+    choicesData.accountFinancialInstitutionChoices,
+    'value',
+    'name',
+  );
 
   if (!individual?.accounts?.edges?.length || !canViewDeliveryMechanisms) {
     return null;
@@ -50,13 +58,18 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
             <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.node.name}</Typography>
               <Grid container spacing={3}>
-                {Object.entries(tabData).map(([key, value], idx) => (
+                {Object.entries(tabData).map(([key, value], idx) => {
+                  if (key === 'financial_institution') {
+                    value = accountFinancialInstitutionsDict[value as string];
+                  }
+                  return (
                   <Grid key={idx} size={{ xs: 3 }}>
                     <LabelizedField label={key.replace(/_/g, ' ')}>
                       {renderSomethingOrDash(value)}
                     </LabelizedField>
                   </Grid>
-                ))}
+                );
+                })}
               </Grid>
               {index < individual.accounts.edges.length - 1 && <DividerLine />}
             </Grid>
