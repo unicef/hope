@@ -1,6 +1,6 @@
 import { BlackLink } from '@components/core/BlackLink';
 import React, { useState, ReactElement } from 'react';
-import { TableCell, Checkbox } from '@mui/material';
+import { TableCell, Checkbox, Button } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -12,6 +12,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -68,8 +69,14 @@ const pendingHeadCells: HeadCell<any>[] = [
 
 const PeriodicDataUpdatePendingForApproval = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
+  const handleApprove = () => {
+    // TODO: Implement approve logic for selected rows
+    // Example: console.log('Approve', selected);
+    alert(`Approved template IDs: ${selected.join(', ')}`);
+  };
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
@@ -197,6 +204,18 @@ const PeriodicDataUpdatePendingForApproval = () => {
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
       hidePagination={true}
+      actions={[
+        <Button
+          key="approve-selected"
+          variant="contained"
+          color="primary"
+          onClick={handleApprove}
+          disabled={selected.length === 0}
+          sx={{ mr: 1 }}
+        >
+          {t('Approve')}
+        </Button>,
+      ]}
     />
   );
 };

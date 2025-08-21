@@ -1,3 +1,11 @@
+type PduField = {
+  value: any;
+  subtype: string;
+  roundName: string;
+  isEditable: boolean;
+  roundNumber: number;
+  columnName?: string;
+};
 import { BaseSection } from '@components/core/BaseSection';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -84,7 +92,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     const fields = [];
     individuals.forEach((ind) => {
       if (ind.pduFields) {
-        ind.pduFields.forEach((field) => {
+        Object.values(ind.pduFields).forEach((_field) => {
+          const field = _field as PduField;
           const key = `${field.subtype}|${field.roundNumber}|${field.roundName}|${field.columnName || field.subtype}`;
           if (!fields.some((f) => f.key === key)) {
             fields.push({
@@ -104,7 +113,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const [editRows, setEditRows] = useState(() => {
     return individuals.map((ind) => ({
       ...ind,
-      pduFields: ind.pduFields ? ind.pduFields.map((f) => ({ ...f })) : [],
+      pduFields: ind.pduFields ? { ...ind.pduFields } : {},
     }));
   });
 
@@ -115,7 +124,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     setEditRows(
       individuals.map((ind) => ({
         ...ind,
-        pduFields: ind.pduFields ? ind.pduFields.map((f) => ({ ...f })) : [],
+        pduFields: ind.pduFields ? { ...ind.pduFields } : {},
       })),
     );
     setEditingRows(new Set()); // Reset edit mode on data change
@@ -294,6 +303,12 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 ) : (
                   editRows.map((individual, idx) => {
                     const isEditing = editingRows.has(idx);
+                    // Only show Edit button if at least one PDU field is editable
+                    const hasEditableField =
+                      individual.pduFields &&
+                      Object.values(individual.pduFields).some(
+                        (f: any) => f.isEditable,
+                      );
                     return (
                       <TableRow key={individual.individualUuid || idx}>
                         <TableCell>
@@ -311,17 +326,18 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                         <TableCell>{individual.lastName}</TableCell>
                         {allPduFields.map((col) => {
                           // Find the matching pduField for this column
-                          const fieldIdx = individual.pduFields
-                            ? individual.pduFields.findIndex(
-                                (f) =>
-                                  `${f.subtype}|${f.roundNumber}|${f.roundName}|${f.columnName || f.subtype}` ===
-                                  col.key,
+                          const pduFieldArr: PduField[] = individual.pduFields
+                            ? Object.values(individual.pduFields).map(
+                                (f) => f as PduField,
                               )
-                            : -1;
+                            : [];
+                          const fieldIdx = pduFieldArr.findIndex(
+                            (f) =>
+                              `${f.subtype}|${f.roundNumber}|${f.roundName}|${f.columnName || f.subtype}` ===
+                              col.key,
+                          );
                           const field =
-                            fieldIdx !== -1
-                              ? individual.pduFields[fieldIdx]
-                              : null;
+                            fieldIdx !== -1 ? pduFieldArr[fieldIdx] : null;
                           return (
                             <TableCell key={col.key}>
                               {field ? (
@@ -332,25 +348,23 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                                       onChange={(newValue) => {
                                         setEditRows((prev) => {
                                           const updated = [...prev];
-                                          updated[idx] = {
-                                            ...updated[idx],
-                                            pduFields: updated[
-                                              idx
-                                            ].pduFields.map((f, i) =>
-                                              i === fieldIdx
-                                                ? { ...f, value: newValue }
-                                                : f,
-                                            ),
+                                          const pduFieldsObj = {
+                                            ...updated[idx].pduFields,
                                           };
+                                          const fieldKey =
+                                            Object.keys(pduFieldsObj)[fieldIdx];
+                                          if (fieldKey) {
+                                            pduFieldsObj[fieldKey] = {
+                                              ...pduFieldsObj[fieldKey],
+                                              value: newValue,
+                                            };
+                                            updated[idx] = {
+                                              ...updated[idx],
+                                              pduFields: pduFieldsObj,
+                                            };
+                                          }
                                           return updated;
                                         });
-                                      }}
-                                      slotProps={{
-                                        textField: {
-                                          variant: 'outlined',
-                                          fullWidth: true,
-                                          size: 'small',
-                                        },
                                       }}
                                     />
                                   ) : (
@@ -371,22 +385,27 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                                             : e.target.value;
                                         setEditRows((prev) => {
                                           const updated = [...prev];
-                                          updated[idx] = {
-                                            ...updated[idx],
-                                            pduFields: updated[
-                                              idx
-                                            ].pduFields.map((f, i) =>
-                                              i === fieldIdx
-                                                ? { ...f, value: newValue }
-                                                : f,
-                                            ),
+                                          const pduFieldsObj = {
+                                            ...updated[idx].pduFields,
                                           };
+                                          const fieldKey =
+                                            Object.keys(pduFieldsObj)[fieldIdx];
+                                          if (fieldKey) {
+                                            pduFieldsObj[fieldKey] = {
+                                              ...pduFieldsObj[fieldKey],
+                                              value: newValue,
+                                            };
+                                            updated[idx] = {
+                                              ...updated[idx],
+                                              pduFields: pduFieldsObj,
+                                            };
+                                          }
                                           return updated;
                                         });
                                       }}
                                     />
                                   )
-                                ) : // Display mode: show value as plain text
+                                ) : // Display mode: show value as plain text for non-editable fields, and for editable fields when not editing
                                 field.subtype === 'date' ? (
                                   field.value ? (
                                     <UniversalMoment>
@@ -413,31 +432,33 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                           );
                         })}
                         <TableCell>
-                          {isEditing ? (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => handleSaveRow(idx)}
-                            >
-                              {t('Save')}
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              size="small"
-                              onClick={() =>
-                                setEditingRows((prev) => {
-                                  const updated = new Set(prev);
-                                  updated.add(idx);
-                                  return updated;
-                                })
-                              }
-                            >
-                              {t('Edit')}
-                            </Button>
-                          )}
+                          {hasEditableField ? (
+                            isEditing ? (
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => handleSaveRow(idx)}
+                              >
+                                {t('Save')}
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() =>
+                                  setEditingRows((prev) => {
+                                    const updated = new Set(prev);
+                                    updated.add(idx);
+                                    return updated;
+                                  })
+                                }
+                              >
+                                {t('Edit')}
+                              </Button>
+                            )
+                          ) : null}
                         </TableCell>
                       </TableRow>
                     );
