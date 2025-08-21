@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Iterable
 
 import xlrd
 from django.core.exceptions import ValidationError
-from graphql.execution.base import ResolveInfo
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import (
@@ -69,20 +68,6 @@ class BaseValidator:
         if errors_list:
             logger.warning(", ".join(errors_list))
             raise Exception(", ".join(errors_list))
-
-
-class CommonValidator(BaseValidator):
-    @classmethod
-    def validate_start_end_date(cls, *args: Any, **kwargs: Any) -> None:
-        start_date = kwargs.get("start_date")
-        end_date = kwargs.get("end_date")
-        if start_date and end_date and start_date > end_date:
-            logger.info(
-                f"Start date cannot be greater than the end date, "
-                f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
-                f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
-            )
-            raise ValidationError("Start date cannot be greater than the end date.")
 
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list[str]]:
@@ -314,82 +299,3 @@ class KoboTemplateValidator:
 
         return validation_errors
 
-
-class DataCollectingTypeValidator(BaseValidator):
-    @classmethod
-    def validate_data_collecting_type(cls, *args: Any, **kwargs: Any) -> None:
-        data_collecting_type = kwargs.get("data_collecting_type")
-        program = kwargs.get("program")
-        business_area = kwargs.get("business_area") or getattr(program, "business_area", None)
-
-        # validate program BA and DCT.limit_to
-        if (
-            data_collecting_type
-            and business_area
-            and data_collecting_type.limit_to.exists()
-            and business_area not in data_collecting_type.limit_to.all()
-        ):
-            raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
-
-        # user can update the program and don't update data collecting type
-        if data_collecting_type:
-            # can't update for draft program
-            if (
-                program
-                and program.data_collecting_type.code != data_collecting_type.code
-                and program.status != Program.DRAFT
-            ):
-                raise ValidationError("The Data Collection Type for this programme cannot be edited.")
-            # can update for draft program and without population
-            if (
-                program
-                and program.data_collecting_type.code != data_collecting_type.code
-                and program.status == Program.DRAFT
-                and Household.objects.filter(program=program).exists()
-            ):
-                raise ValidationError("DataCollectingType can be updated only for Program without any households")
-            if not data_collecting_type.active:
-                raise ValidationError("Only active DataCollectingType can be used in Program")
-            if data_collecting_type.deprecated:
-                raise ValidationError("Avoid using the deprecated DataCollectingType in Program")
-
-
-class PartnersDataValidator(BaseValidator):
-    @classmethod
-    def validate_partners_data(cls, *args: Any, **kwargs: Any) -> None:
-        partners_data = kwargs.get("partners_data")
-        partner_access = kwargs.get("partner_access")
-        partner = kwargs.get("partner")
-        partners_ids = [int(partner["partner"]) for partner in partners_data]
-
-        if (
-            partner_access == Program.SELECTED_PARTNERS_ACCESS
-            and not partner.is_unicef_subpartner
-            and partner.id not in partners_ids
-        ):
-            raise ValidationError("Please assign access to your partner before saving the programme.")
-        if partners_ids and partner_access != Program.SELECTED_PARTNERS_ACCESS:
-            raise ValidationError("You cannot specify partners for the chosen access type")
-
-
-def raise_program_status_is(status: str) -> typing.Callable:
-    def decorator(func: typing.Callable) -> typing.Callable:
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            if len(args) >= 3 and isinstance(args[2], ResolveInfo):
-                info = args[2]
-                inputs = kwargs.get("input", {})
-            else:
-                raise Exception("ResolveInfo object missing")
-
-            encoded_program_id = inputs.get("program") or info.context.headers.get("Program")
-            if encoded_program_id and encoded_program_id != "all":
-                program = Program.objects.get(id=decode_id_string_required(encoded_program_id))
-
-                if program.status == status:
-                    raise ValidationError(f"In order to proceed this action, program status must not be {status}")
-
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator

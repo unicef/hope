@@ -10,7 +10,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models
@@ -21,7 +21,7 @@ from hope.apps.household.models import (
 )
 
 
-class TestGrievanceTicketRelatedTickets(APITestCase):
+class TestGrievanceTicketRelatedTickets(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

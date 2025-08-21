@@ -141,7 +141,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         });
         showMessage(t('Funds commitment items assigned successfully'));
       } catch (error: any) {
-        const errorMessages = error?.graphQLErrors?.map(
+        const errorMessages = error?.data.state.data?.map(
           (x: any) => x.message,
         ) || [t('An error occurred while assigning funds commitments')];
         errorMessages.forEach((message) => showMessage(message));

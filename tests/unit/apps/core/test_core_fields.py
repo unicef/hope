@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
@@ -8,7 +8,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
 from hope.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
 
 
-class TestCoreFields(APITestCase):
+class TestCoreFields(BaseTestCase):
     def setUp(self) -> None:
         self.scopes = [Scope.GLOBAL, Scope.XLSX_PEOPLE]
         super().setUp()
