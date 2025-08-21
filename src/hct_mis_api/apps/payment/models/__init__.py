@@ -22,6 +22,8 @@ from hct_mis_api.apps.payment.models.payment import (
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PendingAccount,
+    WesternUnionQCFFile,
+    WesternUnionQCFFileReport,
 )
 from hct_mis_api.apps.payment.models.verification import (
     PaymentVerification,
@@ -56,4 +58,6 @@ __all__ = [
     "FinancialInstitution",
     "FinancialInstitutionMapping",
     "PaymentDataCollector",
+    "WesternUnionQCFFile",
+    "WesternUnionQCFFileReport",
 ]

@@ -2324,6 +2324,7 @@ class WesternUnionQCFFileReport(models.Model):
         related_name="+",
         help_text="WU QCF Report File",
         on_delete=models.DO_NOTHING,
+        null=True,
     )
     payment_plan = models.ForeignKey(
         PaymentPlan,
@@ -2333,7 +2334,7 @@ class WesternUnionQCFFileReport(models.Model):
     sent = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f"{self.report_file.name} - sent: {self.sent}"
+        return f"{self.payment_plan.name} - sent: {self.sent}"
 
     class Meta:
         verbose_name = "Western Union QCF File Report"

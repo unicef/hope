@@ -41,6 +41,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSupportingDocument,
     PaymentVerification,
     PaymentVerificationPlan,
+    WesternUnionQCFFile,
+    WesternUnionQCFFileReport,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
@@ -847,3 +849,51 @@ class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
         ("financial_service_provider", AutoCompleteFilter),
     )
     raw_id_fields = ("financial_institution", "financial_service_provider")
+
+
+class WesternUnionQCFFileReportInline(admin.TabularInline):
+    model = WesternUnionQCFFileReport
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    readonly_fields = ["payment_plan", "sent", "report_file"]
+
+    def has_add_permission(self, request: HttpRequest, obj: Optional[WesternUnionQCFFileReport] = None) -> bool:
+        return False
+
+
+@admin.register(WesternUnionQCFFile)
+class WesternUnionQCFFileAdmin(admin.ModelAdmin):
+    inlines = [WesternUnionQCFFileReportInline]
+    list_display = ["name", "payment_plans_list"]
+
+    search_fields = ["name", "reports__payment_plan__unicef_id", "reports__payment_plan__name"]
+
+    readonly_fields = ["download_link"]
+
+    def download_link(self, obj: WesternUnionQCFFile) -> str:
+        if not obj.file:
+            return "-"
+        return format_html('<a href="{}" target="_blank">Download</a>', obj.file.file.url)
+
+    download_link.short_description = "File"
+    download_link.admin_order_field = None
+
+    def payment_plans_list(self, obj: WesternUnionQCFFile) -> str:
+        return ", ".join(str(r.payment_plan) for r in obj.reports.all().select_related("payment_plan"))
+
+    payment_plans_list.short_description = "Payment Plans"
+
+
+@admin.register(WesternUnionQCFFileReport)
+class WesternUnionQCFFileReportAdmin(admin.ModelAdmin):
+    list_display = ["id", "qcf_file", "payment_plan"]
+    readonly_fields = ["download_link"]
+
+    def download_link(self, obj: WesternUnionQCFFileReport) -> str:
+        if not obj.report_file:
+            return "-"
+        return format_html('<a href="{}" target="_blank">Download</a>', obj.report_file.file.url)
+
+    download_link.short_description = "File"
+    download_link.admin_order_field = None
