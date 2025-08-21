@@ -91,16 +91,14 @@ export function AccountTable({
         </TableHead>
        <TableBody>
           {Object.entries(account.value.data_fields).map(([key, value]) => {
-            const isFinancialInstitutionField = key === 'financial_institution';
+            if (key === 'financial_institution') {
+              value = accountFinancialInstitutionsDict[value as string];
+            }
             return (
               <TableRow key={key}>
                 <TableCell align="left"></TableCell>
                 <TableCell align="left">{key}</TableCell>
-                <TableCell align="left">
-                  {isFinancialInstitutionField
-                    ? accountFinancialInstitutionsDict[value as string]
-                    : String(value)}
-                </TableCell>
+                <TableCell align="left">{String(value)}</TableCell>
                 <TableCell align="left"></TableCell>
               </TableRow>
             );

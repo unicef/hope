@@ -1275,7 +1275,6 @@ type GenericPaymentPlanNode {
   id: String
   objType: String
   paymentVerificationSummary: PaymentVerificationSummaryNode
-  availablePaymentRecordsCount: Int
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int, programId: String): PaymentVerificationPlanNodeConnection
   statusDate: DateTime
   status: String
