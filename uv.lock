@@ -1801,7 +1801,7 @@ wheels = [
 
 [[package]]
 name = "hope"
-version = "3.4.1"
+version = "3.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "black" },
@@ -1900,6 +1900,7 @@ dependencies = [
     { name = "swapper" },
     { name = "tblib" },
     { name = "tomli" },
+    { name = "types-paramiko" },
     { name = "update" },
     { name = "urllib3" },
     { name = "weasyprint" },
@@ -2085,6 +2086,7 @@ requires-dist = [
     { name = "swapper", specifier = ">=1.3.0,<2.0.0" },
     { name = "tblib", specifier = ">=1.7.0,<2.0.0" },
     { name = "tomli", specifier = ">=2.0.1,<3.0.0" },
+    { name = "types-paramiko", specifier = ">=4.0.0.20250821" },
     { name = "update", specifier = ">=0.0.1,<1.0.0" },
     { name = "urllib3", specifier = ">=1.26.9,<2.0.0" },
     { name = "weasyprint", specifier = ">=59.0,<60.0" },
@@ -4353,6 +4355,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/0d/d3/5fa81c99f0d169ade1f96822c5b327821c0357663e3b6d8782c870457a2d/types_markdown-3.8.0.20250415.tar.gz", hash = "sha256:98ab13587d1177769d93e55586d3dc97047df75bc6e37ce4074666f5dd4212ba", size = 18265 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9d/03/3a6ea34260eb8358aaeaa5c2eac8000aa5d1f71778d706848fc91698d5ee/types_markdown-3.8.0.20250415-py3-none-any.whl", hash = "sha256:b41abed474a303ba300e3a4cf6f27eda339219124a59d529a158203570007776", size = 23695 },
+]
+
+[[package]]
+name = "types-paramiko"
+version = "4.0.0.20250821"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/31/b8/c35b42d9e1b9276e378066811531a53bc034d563e21385367f5b5f37d7de/types_paramiko-4.0.0.20250821.tar.gz", hash = "sha256:ba3ae973de77126c2d0a1b2741398e34157b7e2a422ab4e2747f7cecea1e22ab", size = 28711 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/af/19/f2f7d0a28051a56ae6ed34b95a1730ab15ba6e09ec8664cb2d8fdbc7538b/types_paramiko-4.0.0.20250821-py3-none-any.whl", hash = "sha256:cf036f3ba9f13c8a44f6bf61ae7e89045be6bbff01c85b29347e3baae1373530", size = 38818 },
 ]
 
 [[package]]
