@@ -36,3 +36,4 @@ coverage:
     - "if TYPE_CHECKING"
     - "^\\s*(import\\s.+|from\\s+.+import\\s+.+)"
     - "logger.exception(e)"
+    - "src/hope/config/fragments/sentry.py"
