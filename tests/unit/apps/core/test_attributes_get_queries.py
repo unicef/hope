@@ -1,6 +1,7 @@
 import datetime as dt
 import uuid
 
+import pytest
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -38,16 +39,16 @@ from hope.apps.core.attributes_qet_queries import (
     get_unhcr_id_number_query,
     registration_data_import_query,
 )
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.countries import Countries
 from hope.apps.household.models import UNHCR, WFP
 
 
-class TestAttributesGetQueries(APITestCase):
+class TestAttributesGetQueries:
+    @pytest.fixture(autouse=True)
     def setUp(self) -> None:
         self.today = dt.date.today()
         self.social_worker_prefix = "individuals__"
-        super().setUp()
 
     def test_age_to_birth_date_range_query_min_only(self) -> None:
         q = age_to_birth_date_range_query("birth_date", 30, None)

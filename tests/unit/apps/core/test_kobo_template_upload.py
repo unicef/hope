@@ -17,7 +17,7 @@ from django.utils import timezone
 from extras.test_utils.factories.account import UserFactory
 
 from hope.admin.kobo_template import XLSXKoboTemplateAdmin
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import XLSXKoboTemplate
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
@@ -50,7 +50,7 @@ def raise_as_func(exception: BaseException) -> Callable:
     return _raise
 
 
-class TestKoboTemplateUpload(APITestCase):
+class TestKoboTemplateUpload(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -134,7 +134,7 @@ class TestKoboTemplateUpload(APITestCase):
         )
 
 
-class TestKoboErrorHandling(APITestCase):
+class TestKoboErrorHandling(BaseTestCase):
     def generate_empty_template(self) -> XLSXKoboTemplate:
         with NamedTemporaryFile(mode="w+b") as tmp_file:
             tmp_file.write(b"abcdefg")

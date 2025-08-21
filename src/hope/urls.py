@@ -35,8 +35,6 @@ api_patterns = [
     path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
     path("_health", homepage),
     path("explorer/", include("explorer.urls")),
-    path("graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
-    path("graphql/schema.graphql", schema),
     path("logout", logout_view, name="logout"),
     path("sentry-debug/", trigger_error),
     path(
