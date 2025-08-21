@@ -1,5 +1,4 @@
 import logging
-import typing
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -19,14 +18,12 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
-from hope.apps.core.utils import decode_id_string_required, xlrd_rows_iterator
+from hope.apps.core.utils import xlrd_rows_iterator
 from hope.apps.household.models import (
     BLANK,
     NOT_PROVIDED,
     RELATIONSHIP_UNKNOWN,
-    Household,
 )
-from hope.apps.program.models import Program
 
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
@@ -298,4 +295,3 @@ class KoboTemplateValidator:
                 validation_errors.extend(field_choices_errors)
 
         return validation_errors
-
