@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class QCFReportPaymentRowData:
+    payment_unicef_id: str
     mtcn: str
     payment_plan_unicef_id: str
     programme: str
@@ -175,6 +176,7 @@ class QCFReportsService:
 
             payments_data.append(
                 QCFReportPaymentRowData(
+                    payment_unicef_id=payment.unicef_id,
                     mtcn=fields[1],
                     payment_plan_unicef_id=payment_plan.unicef_id,
                     programme=payment_plan.program_cycle.program.name,
@@ -196,7 +198,7 @@ class QCFReportsService:
         ws = wb.active
         ws.title = f"QCF Report - {report_data.payment_plan_unicef_id}"
 
-        headers = ["MTCN", "Payment Plan ID", "Programme", "FC", "Principal Amount", "Charges Amount", "Refund Amount"]
+        headers = ["Payment ID", "MTCN", "Payment Plan ID", "Programme", "FC", "Principal Amount", "Charges Amount", "Refund Amount"]
         ws.append(headers)
         for cell in ws[1]:
             cell.font = Font(bold=True)
@@ -204,6 +206,7 @@ class QCFReportsService:
         for p in report_data.payments_data:
             ws.append(
                 [
+                    p.payment_unicef_id,
                     p.mtcn,
                     p.payment_plan_unicef_id,
                     p.programme,
