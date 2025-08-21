@@ -1,6 +1,9 @@
 from django.test import TestCase
-from extras.test_utils.factories.core import create_afghanistan, PeriodicFieldDataFactory, \
-    FlexibleAttributeForPDUFactory
+from extras.test_utils.factories.core import (
+    create_afghanistan,
+    PeriodicFieldDataFactory,
+    FlexibleAttributeForPDUFactory,
+)
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
