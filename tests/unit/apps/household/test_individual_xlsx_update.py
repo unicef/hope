@@ -9,7 +9,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import (
     FEMALE,
@@ -48,7 +48,7 @@ def invalid_phone_no_file() -> File:
     return File(BytesIO(content), name="invalid_updated_phone_no_test_file.xlsx")
 
 
-class TestIndividualXlsxUpdate(APITestCase):
+class TestIndividualXlsxUpdate(BaseTestCase):
     databases = "__all__"
 
     @classmethod

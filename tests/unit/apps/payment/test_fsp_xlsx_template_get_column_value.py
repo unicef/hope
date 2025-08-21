@@ -16,7 +16,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.models import (
     DeliveryMechanism,
@@ -29,7 +29,7 @@ from hope.apps.payment.services.payment_household_snapshot_service import (
 )
 
 
-class FinancialServiceProviderXlsxTemplateTest(APITestCase):
+class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
