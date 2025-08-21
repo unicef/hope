@@ -550,7 +550,7 @@ class TestPDUXlsxTemplateViews:
                 {
                     "field": "vaccination_records_update",
                     "round": 4,
-                    "round_name": "April",
+                    "round_name": "April vaccination",
                 },
             ],
             "filters": {
@@ -586,7 +586,7 @@ class TestPDUXlsxTemplateViews:
                 {
                     "field": "health_records_update",
                     "round": 4,
-                    "round_name": "April vaccination",
+                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -614,7 +614,7 @@ class TestPDUXlsxTemplateViews:
                 {
                     "field": "health_records_update",
                     "round": 5,  # This round is not covered by the first template
-                    "round_name": "April vaccination",
+                    "round_name": "April",
                 },
             ],
             "filters": {

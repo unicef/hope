@@ -26,15 +26,6 @@ class TestPDUOnlineEditList:
 
         self.other_program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
 
-        self.list_url = reverse(
-            "api:periodic-data-update:periodic-data-update-online-edits-list",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
-        )
-        self.count_url = reverse(
-            "api:periodic-data-update:periodic-data-update-online-edits-count",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
-        )
-
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         RoleAssignmentFactory(
@@ -61,6 +52,15 @@ class TestPDUOnlineEditList:
         )  # Request user is authorized
         self.pdu_edit_other_program = PDUOnlineEditFactory(program=self.other_program, business_area=self.afghanistan)
 
+        self.url_list = reverse(
+            "api:periodic-data-update:periodic-data-update-online-edits-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        self.url_count = reverse(
+            "api:periodic-data-update:periodic-data-update-online-edits-count",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -77,7 +77,7 @@ class TestPDUOnlineEditList:
             business_area=self.afghanistan,
             program=self.program,
         )
-        response = self.api_client.get(self.list_url)
+        response = self.api_client.get(self.url_list)
         assert response.status_code == expected_status
 
     def test_pdu_online_edit_list(self, create_user_role_with_permissions: Any) -> None:
@@ -87,7 +87,7 @@ class TestPDUOnlineEditList:
             business_area=self.afghanistan,
             program=self.program,
         )
-        response = self.api_client.get(self.list_url)
+        response = self.api_client.get(self.url_list)
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 2
@@ -142,7 +142,7 @@ class TestPDUOnlineEditList:
         PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.APPROVED)
         PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.MERGED)
 
-        response = self.api_client.get(f"{self.list_url}?status={status_filter}")
+        response = self.api_client.get(f"{self.url_list}?status={status_filter}")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == expected_count
@@ -160,7 +160,7 @@ class TestPDUOnlineEditList:
         PDUOnlineEditFactory(program=self.program, business_area=self.afghanistan, status=PDUOnlineEdit.Status.APPROVED)
 
         response = self.api_client.get(
-            f"{self.list_url}?status={PDUOnlineEdit.Status.NEW}&status={PDUOnlineEdit.Status.APPROVED}"
+            f"{self.url_list}?status={PDUOnlineEdit.Status.NEW}&status={PDUOnlineEdit.Status.APPROVED}"
         )
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -175,7 +175,7 @@ class TestPDUOnlineEditList:
             business_area=self.afghanistan,
             program=self.program,
         )
-        response = self.api_client.get(f"{self.list_url}?status=invalid_status")
+        response = self.api_client.get(f"{self.url_list}?status=invalid_status")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.parametrize(
@@ -194,7 +194,7 @@ class TestPDUOnlineEditList:
             business_area=self.afghanistan,
             program=self.program,
         )
-        response = self.api_client.get(self.count_url)
+        response = self.api_client.get(self.url_count)
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["count"] == 2
