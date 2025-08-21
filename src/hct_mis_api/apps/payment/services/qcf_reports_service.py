@@ -168,11 +168,11 @@ class QCFReportsService:
         payments_data: List[QCFReportPaymentRowData] = []
         for payment, fields in payment_raw_data:
             mtcn = fields[1]
-            if mtcn != payment.fsp_auth_code:
-                # TODO should we raise it and expose mtcn?
-                raise self.QCFReportsServiceException(
-                    f"MTCN {mtcn} does not match payment fsp_auth_code for payment {payment.unicef_id}: {payment.fsp_auth_code}"
-                )
+            # if mtcn != payment.fsp_auth_code:
+            #     # TODO should we raise it and expose mtcn?
+            #     raise self.QCFReportsServiceException(
+            #         f"MTCN {mtcn} does not match payment fsp_auth_code for payment {payment.unicef_id}: {payment.fsp_auth_code}"
+            #     )
 
             payments_data.append(
                 QCFReportPaymentRowData(
@@ -183,7 +183,7 @@ class QCFReportsService:
                     fc=funds_commitments_str,
                     principal_amount=float(fields[10]),
                     charges_amount=float(fields[11]),
-                    refund_amount=float(fields[0]),
+                    refund_amount=float(fields[0]), # TODO which column contains refund values?
                 )
             )
 
@@ -198,7 +198,16 @@ class QCFReportsService:
         ws = wb.active
         ws.title = f"QCF Report - {report_data.payment_plan_unicef_id}"
 
-        headers = ["Payment ID", "MTCN", "Payment Plan ID", "Programme", "FC", "Principal Amount", "Charges Amount", "Refund Amount"]
+        headers = [
+            "Payment ID",
+            "MTCN",
+            "Payment Plan ID",
+            "Programme",
+            "FC",
+            "Principal Amount",
+            "Charges Amount",
+            "Refund Amount",
+        ]
         ws.append(headers)
         for cell in ws[1]:
             cell.font = Font(bold=True)
