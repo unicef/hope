@@ -123,7 +123,13 @@ class KoboTemplateValidator:
         "deviceid": TYPE_STRING,
     }
     EXPECTED_REQUIRED_FIELDS = (
-        "country_h_csize_h_crelationship_i_crole_i_cfull_name_i_cgender_i_cbirth_date_i_cestimated_birth_date_i_c"
+        "country_h_c",
+        "size_h_c",
+        "relationship_i_c",
+        "full_name_i_c",
+        "gender_i_c",
+        "birth_date_i_c",
+        "estimated_birth_date_i_c",
     )
     FIELDS_EXCLUDED_FROM_CHOICE_CHECK = (
         # temporarily disabled from checking
