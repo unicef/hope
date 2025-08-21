@@ -24,7 +24,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from parameterized import parameterized
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import DataCollectingType
 from hope.apps.household.models import ROLE_PRIMARY
 from hope.apps.payment.models import (
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from hope.apps.household.models import Household, Individual
 
 
-class TestPaymentPlanReconciliation(APITestCase):
+class TestPaymentPlanReconciliation(BaseTestCase):
     @classmethod
     def create_household_and_individual(cls, program: Program) -> Tuple["Household", "Individual"]:
         household, individuals = create_household_and_individuals(

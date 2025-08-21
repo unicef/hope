@@ -51,53 +51,8 @@ class SentryFilter:
             return False
         return not exc_text and exc_text not in getattr(log_record, "exc_text", "")
 
-    def filter_exceptions(self, hint: dict) -> bool:
-        return self.is_graphql_permission_denied_exception(hint["exc_info"])
-
-    def filter_logs(self, hint: dict, url: str | None = None) -> bool:
-        return self.is_graphql_permission_denied_log_error(hint, url)
-
     def before_send(self, event: dict, hint: dict) -> dict | None:
         url = event.get("transaction")
         if url and url in self.IGNORABLE_URLS:
             return None
-
-        if "log_record" in hint and self.filter_logs(hint, url):
-            return None
-        if "exc_info" in hint and self.filter_exceptions(hint):
-            return None
-
         return event
-
-    def is_graphql_permission_denied_log_error(self, hint: dict, url: str | None = None) -> bool:
-        if not url:
-            return False
-        if not url.startswith("/api/graphql"):
-            return False
-
-        return any(
-            [
-                self.filter_log(
-                    hint["log_record"],
-                    "hope.apps.utils.exceptions",
-                    "ERROR",
-                    "Permission Denied",
-                ),
-                self.filter_log(
-                    hint["log_record"],
-                    "graphql.execution.executor",
-                    "ERROR",
-                    "An error occurred while resolving field",
-                    "Permission Denied",
-                ),
-            ]
-        )
-
-    def is_graphql_permission_denied_exception(self, exc_info: dict) -> bool:
-        from graphql import GraphQLError
-        from graphql.error import GraphQLLocatedError
-
-        results = [
-            self.filter_exception(exc_info, exc, "Permission Denied") for exc in [GraphQLError, GraphQLLocatedError]
-        ]
-        return any(results)
