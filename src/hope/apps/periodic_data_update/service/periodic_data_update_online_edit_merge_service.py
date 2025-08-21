@@ -34,10 +34,19 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
 
                     expected_type = field_data.get("subtype")
                     self._validate_value(value, expected_type, pdu_field_name)
+                    round_number = field_data["round_number"]
+
+                    # Safety check if the value already exists for this round and individual - but should not reach this point as the is_editable flag should be False
+                    current_value = self._get_round_value(individual, pdu_field_name, round_number)
+                    if current_value:
+                        raise ValidationError(
+                            f"Value already exists for field {pdu_field_name} for round {round_number} and individual {individual.unicef_id}"
+                        )
+
                     self.set_round_value(
                         individual=individual,
                         pdu_field_name=pdu_field_name,
-                        round_number=field_data["round_number"],
+                        round_number=round_number,
                         value=value,
                         collection_date=field_data["collection_date"],
                     )

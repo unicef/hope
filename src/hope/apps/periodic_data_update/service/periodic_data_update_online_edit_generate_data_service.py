@@ -39,13 +39,13 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
 
                 round_number = round_info["round"]
                 round_value = self._get_round_value(individual, pdu_field_name, round_number)
-
                 if round_value is None:
                     is_individual_allowed = True
                 pdu_fields[pdu_field_name] = {
                     "round_number": round_number,
                     "round_name": round_info["round_name"],
                     "value": round_value,
+                    "collection_date": None,
                     "subtype": subtype,
                     "is_editable": round_value is None,
                 }
