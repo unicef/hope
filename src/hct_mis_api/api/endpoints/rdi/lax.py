@@ -14,13 +14,13 @@ from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
-from hct_mis_api.api.endpoints.rdi.mixin import PhotoMixin
-from hct_mis_api.api.endpoints.rdi.upload import BirthDateValidator
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.models import (
+from hope.api.endpoints.base import HOPEAPIBusinessAreaView
+from hope.api.endpoints.rdi.mixin import PhotoMixin
+from hope.api.endpoints.rdi.upload import BirthDateValidator
+from hope.api.models import Grant
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo.models import Area, Country
+from hope.apps.household.models import (
     DATA_SHARING_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
@@ -31,17 +31,18 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     AccountType,
     FinancialInstitution,
     PendingAccount,
 )
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.utils.phone import calculate_phone_numbers_validity
+import contextlib
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.core.models import BusinessArea
+    from hope.apps.core.models import BusinessArea
 
 
 BATCH_SIZE = 100
@@ -321,10 +322,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 
         except Exception:
             for field_file in self.staging.saved_file_fields:
-                try:
+                with contextlib.suppress(Exception):
                     field_file.delete(save=False)
-                except Exception:
-                    pass
             raise
 
         return Response(response_payload, status=status.HTTP_201_CREATED)
