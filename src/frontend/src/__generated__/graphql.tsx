@@ -1863,7 +1863,6 @@ export type GenericPaymentNode = {
 
 export type GenericPaymentPlanNode = {
   __typename?: 'GenericPaymentPlanNode';
-  availablePaymentRecordsCount?: Maybe<Scalars['Int']['output']>;
   bankReconciliationError?: Maybe<Scalars['Int']['output']>;
   bankReconciliationSuccess?: Maybe<Scalars['Int']['output']>;
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']['output']>;
@@ -9460,7 +9459,7 @@ export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 
 export type HouseholdChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, accountFinancialInstitutionChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type HouseholdFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18749,6 +18748,10 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  accountFinancialInstitutionChoices {
+    name
+    value
+  }
 }
     `;
 
@@ -23516,7 +23519,6 @@ export type GenericPaymentNodeResolvers<ContextType = any, ParentType extends Re
 };
 
 export type GenericPaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GenericPaymentPlanNode'] = ResolversParentTypes['GenericPaymentPlanNode']> = {
-  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;

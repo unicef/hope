@@ -33,6 +33,7 @@ function PaymentVerificationTable({
     startDate: dateToIsoString(filter.startDate, 'startOfDay'),
     endDate: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,
+    isPaymentPlan: true,
   };
   return (
     <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
