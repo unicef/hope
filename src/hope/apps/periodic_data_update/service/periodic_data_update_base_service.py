@@ -35,7 +35,7 @@ class PDUDataExtractionService:
         self.received_assistance_filter = self.filters.get("received_assistance")
 
     def _get_individuals_queryset(self) -> QuerySet[Individual]:
-        queryset = Individual.objects.filter(program=self.program)
+        queryset = Individual.objects.filter(program=self.program).order_by("unicef_id")
         if self.registration_data_import_id_filter:
             queryset = queryset.filter(registration_data_import_id=self.registration_data_import_id_filter)
         if self.target_population_id_filter:
