@@ -14,7 +14,7 @@ import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import { Grid2 as Grid } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 // StickyHeaderCell component for sticky table header cells
@@ -44,12 +44,16 @@ import { useParams } from 'react-router-dom';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useProgramContext } from 'src/programContext';
 
 const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { id } = useParams();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const numericId = id ? parseInt(id, 10) : undefined;
   const { data, isLoading } = useQuery({
@@ -156,12 +160,23 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     approvedAt,
     createdBy,
   } = data;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: `${beneficiaryGroup?.memberLabelPlural}`,
+      to: `/${baseUrl}/population/individuals`,
+    },
+  ];
+
   return (
     <>
-      <PageHeader title={`Online Edits Template Details: ${name}`} />
+      <PageHeader
+        title={`Online Edits Template Details: ${name}`}
+        breadCrumbs={breadCrumbsItems}
+      />
       <BaseSection title="Details">
-        <Grid container spacing={2}>
-          <Grid xs={3}>
+        <Grid container spacing={6}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Status')}>
               <StatusBox
                 status={status}
@@ -169,24 +184,24 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               />
             </LabelizedField>
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Template Name')} value={name} />
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Creation Date')}>
               <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Number of Records')}
               value={numberOfRecords}
             />
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Created By')} value={createdBy} />
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Authorized Users')}
               value={
@@ -196,7 +211,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               }
             />
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Approval Date')}>
               {approvedAt ? (
                 <UniversalMoment>{approvedAt}</UniversalMoment>
@@ -205,7 +220,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               )}
             </LabelizedField>
           </Grid>
-          <Grid xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Approved By')}
               value={approvedBy || t('-')}

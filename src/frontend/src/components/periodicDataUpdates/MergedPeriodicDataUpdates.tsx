@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 const mergedHeadCells: HeadCell<any>[] = [
   {
@@ -58,6 +59,7 @@ const mergedHeadCells: HeadCell<any>[] = [
 ];
 
 const MergedPeriodicDataUpdates = () => {
+  const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const initialQueryVariables = {
     ordering: 'created_at',
@@ -86,18 +88,24 @@ const MergedPeriodicDataUpdates = () => {
 
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
-      key={row.templateId}
-      data-cy={`merged-row-${row.templateId}`}
+      key={row.id}
+      data-cy={`merged-row-${row.id}`}
+      onClick={() =>
+        navigate(
+          `/${baseUrl}/population/individuals/online-templates/${row.id}`,
+        )
+      }
+      style={{ cursor: 'pointer' }}
     >
       <TableCell>
         <BlackLink
-          to={`/${baseUrl}/online-templates/${row.templateId}`}
-          data-cy={`template-id-link-${row.templateId}`}
+          to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
+          data-cy={`template-id-link-${row.id}`}
         >
-          {row.templateId}
+          {row.id}
         </BlackLink>
       </TableCell>
-      <TableCell>{row.templateName}</TableCell>
+      <TableCell>{row.name}</TableCell>
       <TableCell>{row.numberOfRecords}</TableCell>
       <TableCell>
         <UniversalMoment>{row.createdAt}</UniversalMoment>

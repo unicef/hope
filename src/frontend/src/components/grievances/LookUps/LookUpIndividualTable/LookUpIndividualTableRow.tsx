@@ -42,7 +42,7 @@ export function LookUpIndividualTableRow({
           }}
           value={individual.id}
           name="radio-button-household"
-          inputProps={{ 'aria-label': individual.id }}
+          slotProps={{ input: { 'aria-label': individual.id } }}
         />
       </TableCell>
       <TableCell align="left">

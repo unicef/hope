@@ -1,9 +1,9 @@
-import { BlackLink } from '@components/core/BlackLink';
 import { periodicDataUpdatesOnlineEditsStatusToColor } from 'src/utils/utils';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { TableCell } from '@mui/material';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
@@ -99,30 +99,33 @@ const NewPeriodicDataUpdates = (): ReactElement => {
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
-  const renderRow = (row: any): ReactElement => (
-    <ClickableTableRow key={row.id} data-cy={`online-edit-row-${row.id}`}>
-      <TableCell>
-        <BlackLink
-          to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
-        >
-          {row.id}
-        </BlackLink>
-      </TableCell>
-      <TableCell>{row.name}</TableCell>
-      <TableCell>{row.numberOfRecords}</TableCell>
-      <TableCell>
-        <UniversalMoment>{row.createdAt}</UniversalMoment>
-      </TableCell>
-      <TableCell>{row.createdBy}</TableCell>
-      <TableCell>
-        <StatusBox
-          status={row.status}
-          statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
-        />
-      </TableCell>
-      <TableCell />
-    </ClickableTableRow>
-  );
+  const navigate = useNavigate();
+  const renderRow = (row: any): ReactElement => {
+    const url = `/${baseUrl}/population/individuals/online-templates/${row.id}`;
+    return (
+      <ClickableTableRow
+        key={row.id}
+        data-cy={`online-edit-row-${row.id}`}
+        onClick={() => navigate(url)}
+        style={{ cursor: 'pointer' }}
+      >
+        <TableCell>{row.id}</TableCell>
+        <TableCell>{row.name}</TableCell>
+        <TableCell>{row.numberOfRecords}</TableCell>
+        <TableCell>
+          <UniversalMoment>{row.createdAt}</UniversalMoment>
+        </TableCell>
+        <TableCell>{row.createdBy}</TableCell>
+        <TableCell>
+          <StatusBox
+            status={row.status}
+            statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
+          />
+        </TableCell>
+        <TableCell />
+      </ClickableTableRow>
+    );
+  };
 
   return (
     <UniversalRestTable

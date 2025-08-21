@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -22,18 +23,18 @@ const pendingHeadCells: HeadCell<any>[] = [
     disableSort: true,
   },
   {
-    id: 'templateId',
+    id: 'id',
     numeric: false,
     disablePadding: false,
     label: 'Template ID',
-    dataCy: 'head-cell-template-id',
+    dataCy: 'head-cell-id',
   },
   {
-    id: 'templateName',
+    id: 'name',
     numeric: false,
     disablePadding: false,
     label: 'Template Name',
-    dataCy: 'head-cell-template-name',
+    dataCy: 'head-cell-name',
   },
   {
     id: 'numberOfRecords',
@@ -66,6 +67,7 @@ const pendingHeadCells: HeadCell<any>[] = [
 ];
 
 const PeriodicDataUpdatePendingForMerge = () => {
+  const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
   const initialQueryVariables = {
@@ -94,7 +96,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
   });
 
   const results = data?.results ?? [];
-  const allIds = results.map((row: any) => row.templateId);
+  const allIds = results.map((row: any) => row.id);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -112,25 +114,31 @@ const PeriodicDataUpdatePendingForMerge = () => {
 
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
-      key={row.templateId}
-      data-cy={`pending-approval-row-${row.templateId}`}
+      key={row.id}
+      data-cy={`pending-approval-row-${row.id}`}
+      onClick={() =>
+        navigate(
+          `/${baseUrl}/population/individuals/online-templates/${row.id}`,
+        )
+      }
+      style={{ cursor: 'pointer' }}
     >
       <TableCell padding="checkbox">
         <Checkbox
-          checked={selected.includes(row.templateId)}
-          onChange={() => handleSelectOne(row.templateId)}
-          inputProps={{ 'aria-label': `select row ${row.templateId}` }}
+          checked={selected.includes(row.id)}
+          onChange={() => handleSelectOne(row.id)}
+          slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
         />
       </TableCell>
       <TableCell>
         <BlackLink
-          to={`/${baseUrl}/online-templates/${row.templateId}`}
-          data-cy={`template-id-link-${row.templateId}`}
+          to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
+          data-cy={`template-id-link-${row.id}`}
         >
-          {row.templateId}
+          {row.id}
         </BlackLink>
       </TableCell>
-      <TableCell>{row.templateName}</TableCell>
+      <TableCell>{row.name}</TableCell>
       <TableCell>{row.numberOfRecords}</TableCell>
       <TableCell>
         <UniversalMoment>{row.createdAt}</UniversalMoment>
@@ -166,7 +174,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
                 selected.length > 0 && selected.length === results.length
               }
               onChange={handleSelectAllClick}
-              inputProps={{ 'aria-label': 'select all rows' }}
+              slotProps={{ input: { 'aria-label': 'select all rows' } }}
             />
           ) : (
             headCell.label
