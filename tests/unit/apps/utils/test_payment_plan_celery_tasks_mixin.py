@@ -161,7 +161,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             == f"Task is already running for Payment Plan {payment_plan.unicef_id}."
         )
 
-    @pytest.mark.xfail(reason="just for test")
+    @pytest.mark.xfail(reason="Failing after last merge develop")
     @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_importing_reconciliation_xlsx_file(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
