@@ -1,23 +1,7 @@
-import base64
-import os
-import random
-import shutil
-import time
-from contextlib import suppress
-from functools import reduce
-from io import BytesIO
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
-import factory
-from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
-from django.contrib.contenttypes.models import ContentType
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.handlers.wsgi import WSGIRequest
-from django.test import RequestFactory
-from extras.test_utils.factories.account import PartnerFactory
+from django.test import TestCase
 from extras.test_utils.factories.program import ProgramFactory
-from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hope.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -30,8 +14,7 @@ if TYPE_CHECKING:  # pragma: no_cover
     from hope.apps.program.models import Program
 
 
-class BaseTestCase:
-
+class BaseTestCase(TestCase):
     @classmethod
     def generate_document_types_for_all_countries(cls) -> None:
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
