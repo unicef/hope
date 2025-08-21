@@ -246,6 +246,7 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
     filters = serializers.JSONField(write_only=True)
     rounds_data = serializers.ListField(child=serializers.DictField(), write_only=True)
     authorized_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
+    created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
         model = PDUOnlineEdit
@@ -279,12 +280,12 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
 
         # Pop fields that are not on the model before creating the instance
         validated_data.pop("filters", None)
-        validated_data.pop("rounds_data", None)
+        rounds_data = validated_data.pop("rounds_data", None)
 
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
-        update_rounds_covered_for_template(pdu_online_edit, validated_data["rounds_data"])
+        update_rounds_covered_for_template(pdu_online_edit, rounds_data)
 
         if authorized_users:
             pdu_online_edit.authorized_users.set(authorized_users)

@@ -51,11 +51,12 @@ class TestPDUOnlineEditDetail:
         )
         self.user_can_all = UserFactory(partner=self.partner_empty, first_name="David")
         can_all_role = RoleFactory(
+            name="Can All",
             permissions=[
                 Permissions.PDU_ONLINE_SAVE_DATA.value,
                 Permissions.PDU_ONLINE_APPROVE.value,
                 Permissions.PDU_ONLINE_MERGE.value,
-            ]
+            ],
         )
         RoleAssignmentFactory(
             user=self.user_can_all,
@@ -90,7 +91,7 @@ class TestPDUOnlineEditDetail:
             created_by=self.user_can_approve,
         )
 
-        self.detail_url = reverse(
+        self.url_detail = reverse(
             "api:periodic-data-update:periodic-data-update-online-edits-detail",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
@@ -115,7 +116,7 @@ class TestPDUOnlineEditDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        response = self.api_client.get(self.detail_url)
+        response = self.api_client.get(self.url_detail)
         assert response.status_code == expected_status
 
     def test_pdu_online_edit_detail(self, create_user_role_with_permissions: Any) -> None:
@@ -125,7 +126,7 @@ class TestPDUOnlineEditDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        response = self.api_client.get(self.detail_url)
+        response = self.api_client.get(self.url_detail)
         assert response.status_code == status.HTTP_200_OK
         result = response.json()
         assert result["id"] == self.pdu_edit.id

@@ -239,7 +239,6 @@ class PDUOnlineEditViewSet(
         rounds_data = serializer.validated_data.get("rounds_data", [])
         pdu_online_edit = serializer.save()
         task_kwargs = {
-            "pdu_online_edit_id": pdu_online_edit.id,
             "filters": filters,
             "rounds_data": rounds_data,
         }

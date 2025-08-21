@@ -25,7 +25,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.apps.periodic_data_update.test_periodic_data_update_import_service import (
+from unit.apps.periodic_data_update.test_periodic_data_update_xlsx_import_service import (
     add_pdu_data_to_xlsx,
 )
 
