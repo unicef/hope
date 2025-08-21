@@ -517,6 +517,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
+                        "rounds_covered": 0,
                     },
                 },
                 {
@@ -527,6 +528,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
+                        "rounds_covered": 0,
                     },
                 },
             ],
@@ -675,6 +677,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
+                        "rounds_covered": 0,
                     },
                 },
                 {
@@ -685,6 +688,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
+                        "rounds_covered": 0,
                     },
                 },
             ],
