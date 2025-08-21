@@ -33,6 +33,7 @@ function PaymentVerificationTable({
       deliveryMechanism: filter.deliveryTypes,
       startDate: filter.startDate,
       endDate: filter.endDate,
+      isPaymentPlan: true,
     }),
     [
       programId,

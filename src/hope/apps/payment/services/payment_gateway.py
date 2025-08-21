@@ -612,7 +612,6 @@ class PaymentGatewayService:
                         payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
-                    # TODO: MB to check if we need it here
                     payment_plan.status_finished()
                     payment_plan.save()
                     for instruction in payment_instructions:

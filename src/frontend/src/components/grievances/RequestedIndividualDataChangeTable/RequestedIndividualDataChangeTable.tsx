@@ -108,6 +108,11 @@ export function RequestedIndividualDataChangeTable({
     'value',
     'name',
   );
+  const accountFinancialInstitutionsDict = useArrayToDict(
+    data?.accountFinancialInstitutionChoices,
+    'value',
+    'name',
+  );
 
   if (
     loading ||
