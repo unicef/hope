@@ -35,9 +35,11 @@ import type { GrievanceReassignRole } from '../models/GrievanceReassignRole';
 import type { GrievanceStatusChange } from '../models/GrievanceStatusChange';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
+import type { Household } from '../models/Household';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { ImportData } from '../models/ImportData';
+import type { Individual } from '../models/Individual';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { IndividualPhotoDetail } from '../models/IndividualPhotoDetail';
@@ -367,6 +369,56 @@ export class RestService {
                 'business_area': businessArea,
                 'rdi': rdi,
             },
+        });
+    }
+    /**
+     * API to import households with selected RDI.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restRdiPushLaxHouseholdsCreate({
+        businessArea,
+        rdi,
+        requestBody,
+    }: {
+        businessArea: string,
+        rdi: string,
+        requestBody: Array<Household>,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/{business_area}/rdi/{rdi}/push/lax/households',
+            path: {
+                'business_area': businessArea,
+                'rdi': rdi,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * API to import individuals with selected RDI.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restRdiPushLaxIndividualsCreate({
+        businessArea,
+        rdi,
+        requestBody,
+    }: {
+        businessArea: string,
+        rdi: string,
+        requestBody: Array<Individual>,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/{business_area}/rdi/{rdi}/push/lax/individuals',
+            path: {
+                'business_area': businessArea,
+                'rdi': rdi,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
