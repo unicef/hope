@@ -19,6 +19,15 @@ wheels = [
 ]
 
 [[package]]
+name = "aniso8601"
+version = "10.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8b/8d/52179c4e3f1978d3d9a285f98c706642522750ef343e9738286130423730/aniso8601-10.0.1.tar.gz", hash = "sha256:25488f8663dd1528ae1f54f94ac1ea51ae25b4d531539b8bc707fed184d16845", size = 47190, upload-time = "2025-04-18T17:29:42.995Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/75/e0e10dc7ed1408c28e03a6cb2d7a407f99320eb953f229d008a7a6d05546/aniso8601-10.0.1-py2.py3-none-any.whl", hash = "sha256:eb19717fd4e0db6de1aab06f12450ab92144246b257423fe020af5748c0cb89e", size = 52848, upload-time = "2025-04-18T17:29:41.492Z" },
+]
+
+[[package]]
 name = "argh"
 version = "0.31.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1760,6 +1769,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "aniso8601" },
     { name = "argh" },
     { name = "coverage" },
     { name = "django-stubs" },
@@ -1939,6 +1949,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "aniso8601", specifier = ">=10.0.1" },
     { name = "argh", specifier = ">=0.28,<1" },
     { name = "coverage", specifier = ">=7.3.2,<8" },
     { name = "django-stubs", specifier = "~=1.12.0" },

@@ -478,14 +478,6 @@ def decode_and_get_object_required(encoded_id: str, model: type) -> Any:
     return decode_and_get_object(encoded_id, model, required=True)
 
 
-def dict_to_camel_case(dictionary: dict) -> dict:
-    from graphene.utils.str_converters import to_camel_case
-
-    if isinstance(dictionary, dict):
-        return {to_camel_case(key): value for key, value in dictionary.items()}
-    return {}
-
-
 def to_snake_case(camel_case_string: str) -> str:
     if "_" in camel_case_string:
         return camel_case_string

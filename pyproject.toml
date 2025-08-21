@@ -120,6 +120,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "aniso8601>=10.0.1",
   "argh>=0.28,<1",
   "coverage>=7.3.2,<8",
   "django-stubs~=1.12.0",
