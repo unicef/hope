@@ -21,11 +21,12 @@ const Error = styled.div`
 `;
 
 const UploadIcon = styled(Publish)`
-  color: #043f91;
+  color: #fff;
 `;
 
 const DisabledUploadIcon = styled(Publish)`
-  color: #00000042;
+  color: #fff;
+  opacity: 0.5;
 `;
 
 export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
@@ -45,7 +46,6 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
       setIsLoading(true);
       setError(null);
       try {
-
         await RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate(
           {
             businessAreaSlug: businessArea,
@@ -79,6 +79,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
     <>
       <Box key="import">
         <ButtonTooltip
+          variant="contained"
           startIcon={!isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />}
           color="primary"
           data-cy="button-import"

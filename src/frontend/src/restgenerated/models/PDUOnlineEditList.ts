@@ -2,12 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PeriodicDataUpdateUploadList = {
+export type PDUOnlineEditList = {
     readonly id: number;
-    template: number;
+    name?: string | null;
+    numberOfRecords?: number | null;
     readonly createdAt: string;
     createdBy?: string;
     status: string;
     statusDisplay: string;
+    readonly isAuthorized: boolean;
 };
 

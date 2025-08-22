@@ -3,8 +3,8 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
-import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
+import { FieldsToUpdateOffline } from '@components/periodicDataUpdates/FieldsToUpdateOffline';
+import { FilterIndividualsOffline } from '@components/periodicDataUpdates/FilterIndividualsOffline';
 import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -20,7 +20,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
-export const NewTemplatePage = (): ReactElement => {
+const NewOfflineTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
@@ -82,7 +82,8 @@ export const NewTemplatePage = (): ReactElement => {
     }
     return data.results.map((item) => {
       const { name, pduData, label } = item;
-      const { roundsNames } = pduData;
+      const { roundsNames, roundsCovered } = pduData;
+      const initialRoundNumber = (roundsCovered || 0) + 1;
       return {
         field: name,
         label,
@@ -91,8 +92,9 @@ export const NewTemplatePage = (): ReactElement => {
           roundName: roundsNames[roundIndex],
         })),
         numberOfRounds: roundsNames.length,
-        roundNumber: 1,
-        roundName: roundsNames[0],
+        roundsCovered: roundsCovered || 0,
+        roundNumber: initialRoundNumber,
+        roundName: roundsNames[initialRoundNumber - 1],
       };
     });
   };
@@ -152,23 +154,18 @@ export const NewTemplatePage = (): ReactElement => {
     };
 
     const isEmpty = (value) => {
-      if (value == null) return true;
-      if (typeof value === 'string' && value.trim() === '') return true;
-      if (Array.isArray(value) && value.length === 0) return true;
-      if (
-        typeof value === 'object' &&
-        !Array.isArray(value) &&
-        Object.keys(value).length === 0
-      )
-        return true;
-      if (
-        typeof value === 'object' &&
-        !Array.isArray(value) &&
-        !value.from &&
-        !value.to
-      )
-        return true;
-      return false;
+      return (
+        value == null ||
+        (typeof value === 'string' && value.trim() === '') ||
+        (Array.isArray(value) && value.length === 0) ||
+        (typeof value === 'object' &&
+          !Array.isArray(value) &&
+          Object.keys(value).length === 0) ||
+        (typeof value === 'object' &&
+          !Array.isArray(value) &&
+          !value.from &&
+          !value.to)
+      );
     };
 
     const filtersToSend = Object.fromEntries(
@@ -209,7 +206,11 @@ export const NewTemplatePage = (): ReactElement => {
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      enableReinitialize
+    >
       {({ values, setFieldValue, submitForm }) => {
         const roundsDataToSend = values.roundsData
           .filter((el) => checkedFields[el.field] === true)
@@ -244,14 +245,14 @@ export const NewTemplatePage = (): ReactElement => {
                 ))}
               </Stepper>
               {activeStep === 0 && (
-                <FilterIndividuals
+                <FilterIndividualsOffline
                   isOnPaper={false}
                   filter={filter}
                   setFilter={setFilter}
                 />
               )}
               {activeStep === 1 && (
-                <FieldsToUpdate
+                <FieldsToUpdateOffline
                   values={values}
                   setFieldValue={setFieldValue}
                   checkedFields={checkedFields}
@@ -309,4 +310,8 @@ export const NewTemplatePage = (): ReactElement => {
     </Formik>
   );
 };
-export default withErrorBoundary(NewTemplatePage, 'NewTemplatePage');
+
+export default withErrorBoundary(
+  NewOfflineTemplatePage,
+  'NewOfflineTemplatePage',
+);

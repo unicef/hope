@@ -167,6 +167,7 @@ class TestProgramDetail:
                     "subtype": self.pdu_field1.pdu_data.subtype,
                     "number_of_rounds": self.pdu_field1.pdu_data.number_of_rounds,
                     "rounds_names": self.pdu_field1.pdu_data.rounds_names,
+                    "rounds_covered": 0,
                 },
             },
             {
@@ -177,6 +178,7 @@ class TestProgramDetail:
                     "subtype": self.pdu_field2.pdu_data.subtype,
                     "number_of_rounds": self.pdu_field2.pdu_data.number_of_rounds,
                     "rounds_names": self.pdu_field2.pdu_data.rounds_names,
+                    "rounds_covered": 0,
                 },
             },
         ]

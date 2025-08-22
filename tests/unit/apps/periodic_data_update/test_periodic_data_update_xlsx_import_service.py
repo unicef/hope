@@ -19,24 +19,24 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 
 from hope.apps.core.models import PeriodicFieldData
 from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
+    PDUXlsxExportTemplateService,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
-    PeriodicDataUpdateImportService,
+    PDUXlsxImportService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.program.models import Program
 
 
 def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]
+    periodic_data_update_template: PDUXlsxTemplate, rows: list[list[Any]]
 ) -> _TemporaryFileWrapper:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-    ws_pdu = wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
+    ws_pdu = wb[PDUXlsxExportTemplateService.PDU_SHEET]
     for row_index, row in enumerate(rows):
         for col_index, value in enumerate(row):
             ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
@@ -46,7 +46,7 @@ def add_pdu_data_to_xlsx(
     return tmp_file
 
 
-class TestPeriodicDataUpdateImportService(TestCase):
+class TestPDUXlsxImportService(TestCase):
     rdi = None
     business_area = None
     program = None
@@ -106,17 +106,17 @@ class TestPeriodicDataUpdateImportService(TestCase):
         cls.individual.save()
 
     def prepare_test_data(self, rounds_data: list, rows: list) -> tuple:
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        periodic_data_update_template = PDUXlsxTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
             filters={},
             rounds_data=rounds_data,
         )
-        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(periodic_data_update_template, rows)
-        periodic_data_update_upload = PeriodicDataUpdateUpload(
+        periodic_data_update_upload = PDUXlsxUpload(
             template=periodic_data_update_template,
             created_by=periodic_data_update_template.created_by,
         )
@@ -142,9 +142,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["Test Value", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
@@ -166,9 +166,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["20.456", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == 20.456
@@ -190,9 +190,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [[True, "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] is True
@@ -214,9 +214,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [[False, "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] is False
@@ -238,9 +238,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["Yes", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [
                 {
@@ -270,9 +270,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["1996-06-21", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "1996-06-21"
@@ -296,9 +296,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         periodic_data_update_template.created_at = datetime.datetime(2021, 3, 7)
         periodic_data_update_template.save()
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "1996-06-21"
@@ -320,9 +320,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["bla bla", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [
                 {
@@ -350,9 +350,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [[58, "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [
                 {
@@ -380,13 +380,13 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["2021-05-02", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
         flexible_attribute.delete()
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
         errors = {
             "form_errors": [],
             "non_form_errors": ["Some fields are missing in the flexible attributes"],
@@ -411,16 +411,16 @@ class TestPeriodicDataUpdateImportService(TestCase):
                 [datetime.datetime(2021, 5, 2), datetime.datetime(2021, 5, 2)],
             ],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service.import_data()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         self.individual.refresh_from_db()
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["value"] == "2021-05-02"
         assert self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
 
     def test_read_periodic_data_update_template_object(self) -> None:
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        periodic_data_update_template = PDUXlsxTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
             filters={},
@@ -433,63 +433,61 @@ class TestPeriodicDataUpdateImportService(TestCase):
                 }
             ],
         )
-        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
-        periodic_data_update_template_from_xlsx = (
-            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
-                periodic_data_update_template.file.file
-            )
+        periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(
+            periodic_data_update_template.file.file
         )
         assert periodic_data_update_template_from_xlsx.pk == periodic_data_update_template.pk
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
         tmp_file = BytesIO()
         wb.save(tmp_file)
         tmp_file.seek(0)
-        periodic_data_update_template_from_xlsx = (
-            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+        periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(
+            tmp_file
         )
         assert periodic_data_update_template_from_xlsx.pk == periodic_data_update_template.pk
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = ""
+        del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
+        ws_meta[PDUXlsxExportTemplateService.META_ID_ADDRESS] = ""
         tmp_file = BytesIO()
         wb.save(tmp_file)
         tmp_file.seek(0)
         with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID is missing in the file"):
-            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+            PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = "abc"
+        del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
+        ws_meta[PDUXlsxExportTemplateService.META_ID_ADDRESS] = "abc"
         tmp_file = BytesIO()
         wb.save(tmp_file)
         tmp_file.seek(0)
         with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be a number"):
-            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+            PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = True
+        del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
+        ws_meta[PDUXlsxExportTemplateService.META_ID_ADDRESS] = True
         tmp_file = BytesIO()
         wb.save(tmp_file)
         tmp_file.seek(0)
         with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be an integer"):
-            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+            PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = -1
+        del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
+        ws_meta[PDUXlsxExportTemplateService.META_ID_ADDRESS] = -1
         tmp_file = BytesIO()
         wb.save(tmp_file)
         tmp_file.seek(0)
         with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template with ID -1 not found"):
-            PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+            PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
 
     def test_read_flexible_attributes(self) -> None:
         (
@@ -512,7 +510,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["1996-06-21", "2021-05-02"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service._open_workbook()
         with self.assertRaisesMessage(ValidationError, "Some fields are missing in the flexible attributes"):
             service._read_flexible_attributes()
@@ -533,7 +531,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["-", "-"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service._open_workbook()
         service._read_flexible_attributes()
         service._read_rows()
@@ -554,7 +552,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["-", "-"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service._open_workbook()
         service._read_flexible_attributes()
         cleaned_data = {
@@ -624,7 +622,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["-", "-"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         service._open_workbook()
         service._read_flexible_attributes()
         service.set_round_value(self.individual, flexible_attribute.name, 1, "1996-06-21", "2021-05-02")
@@ -650,7 +648,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
             [["-", "-"]],
         )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service = PDUXlsxImportService(periodic_data_update_upload)
         with self.assertRaisesMessage(
             ValidationError,
             f"Invalid subtype for field {flexible_attribute.name}",

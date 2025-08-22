@@ -51,11 +51,11 @@ from e2e.page_object.programme_population.households_details import HouseholdsDe
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
+    PDUXlsxTemplates,
+    PDUXlsxTemplatesDetails,
 )
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
+    PDUXlsxUploads,
 )
 from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
@@ -223,7 +223,7 @@ def download_path(worker_id: str) -> str:
 @pytest.fixture
 def driver(download_path: str) -> Chrome:
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
@@ -374,21 +374,21 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
-def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
-    yield PeriodicDatUpdateTemplates(browser)
+def pagePDUXlsxTemplates(request: FixtureRequest, browser: Chrome) -> PDUXlsxTemplates:
+    yield PDUXlsxTemplates(browser)
 
 
 @pytest.fixture
-def pagePeriodicDataUpdateTemplatesDetails(
+def pagePDUXlsxTemplatesDetails(
     request: FixtureRequest,
     browser: Chrome,
-) -> PeriodicDatUpdateTemplatesDetails:
-    yield PeriodicDatUpdateTemplatesDetails(browser)
+) -> PDUXlsxTemplatesDetails:
+    yield PDUXlsxTemplatesDetails(browser)
 
 
 @pytest.fixture
-def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
-    yield PeriodicDataUpdateUploads(browser)
+def pagePDUXlsxUploads(request: FixtureRequest, browser: Chrome) -> PDUXlsxUploads:
+    yield PDUXlsxUploads(browser)
 
 
 @pytest.fixture

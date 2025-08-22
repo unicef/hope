@@ -20,6 +20,7 @@ interface Field {
     round_name: string;
   }[];
   numberOfRounds: number;
+  roundsCovered: number;
   roundNumber: number;
   roundName: string;
   checked?: boolean;
@@ -30,7 +31,7 @@ interface SelectedField extends Field {
   label: string;
 }
 
-interface FieldsToUpdateProps {
+interface FieldsToUpdateOfflineProps {
   values: {
     roundsData: SelectedField[];
   };
@@ -39,7 +40,7 @@ interface FieldsToUpdateProps {
   setCheckedFields?: (checkedFields: Record<string, boolean>) => void;
 }
 
-export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
+export const FieldsToUpdateOffline: FC<FieldsToUpdateOfflineProps> = ({
   values,
   setFieldValue,
   checkedFields,
@@ -132,10 +133,16 @@ export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
                       }}
                     >
                       {Array.from(
-                        { length: field.numberOfRounds },
+                        {
+                          length:
+                            field.numberOfRounds - (field.roundsCovered || 0),
+                        },
                         (_, num) => (
-                          <MenuItem key={num + 1} value={num + 1}>
-                            {num + 1}
+                          <MenuItem
+                            key={num + 1 + (field.roundsCovered || 0)}
+                            value={num + 1 + (field.roundsCovered || 0)}
+                          >
+                            {num + 1 + (field.roundsCovered || 0)}
                           </MenuItem>
                         ),
                       )}

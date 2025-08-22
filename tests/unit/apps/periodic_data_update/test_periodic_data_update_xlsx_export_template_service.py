@@ -6,7 +6,7 @@ from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
+    PDUXlsxTemplateFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
@@ -28,12 +28,12 @@ from hope.apps.grievance.models import (
 from hope.apps.household.models import FEMALE, MALE
 from hope.apps.payment.models import Payment
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
+    PDUXlsxExportTemplateService,
 )
 from hope.apps.program.models import Program
 
 
-class TestPeriodicDataUpdateExportTemplateService(TestCase):
+class TestPDUXlsxExportTemplateService(TestCase):
     rdi = None
     business_area = None
     program = None
@@ -63,7 +63,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
                 },
             ],
         )
-        cls.periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+        cls.periodic_data_update_template = PDUXlsxTemplateFactory(
             program=cls.program,
             business_area=cls.business_area,
             rounds_data=[
@@ -85,7 +85,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
     def test_generate_workbook(
         self,
     ) -> None:
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         wb = service.generate_workbook()
         assert wb is not None
         assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
@@ -96,7 +96,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         assert pdu_sheet.max_row == 3
 
     def test_save_xlsx_file(self) -> None:
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
         self.periodic_data_update_template.refresh_from_db()
@@ -105,7 +105,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
 
     def test_generate_header(self) -> None:
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         test_header = [
             "individual__uuid",
             "individual_unicef_id",
@@ -123,7 +123,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         assert service._generate_header() == test_header
 
     def test_generate_row_empty_flex_fields_individual(self) -> None:
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         individual = self.individuals[0]
         row = service._generate_row(individual)
         expected_row = [
@@ -143,7 +143,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         assert row == expected_row
 
     def test_generate_row_half_filled_flex_fields_individual(self) -> None:
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         individual = self.individuals[0]
         individual.flex_fields = {
             "muac": {
@@ -172,7 +172,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         assert row == expected_row
 
     def test_generate_row_fully_filled_flex_fields_individual(self) -> None:
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         individual = self.individuals[0]
         individual.flex_fields = {
             "muac": {
@@ -199,7 +199,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         individual.save()
         self.periodic_data_update_template.filters = {"registration_data_import_id": str(rdi1.pk)}
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual
@@ -228,7 +228,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.filters = {"target_population_id": str(pp.pk)}
         PaymentFactory(parent=pp, household=self.household)
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 2
         assert set(queryset) == set(self.individuals)
@@ -242,7 +242,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         female.save()
         self.periodic_data_update_template.filters = {"gender": FEMALE}
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == female
@@ -257,7 +257,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         individual29yo.save()
         self.periodic_data_update_template.filters = {"age": {"from": 30, "to": 32}}
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual32yo
@@ -271,7 +271,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         individual2020.save()
         self.periodic_data_update_template.filters = {"registration_date": {"from": "2023-10-16", "to": "2023-10-16"}}
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual2023
@@ -324,7 +324,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.household.save()
         self.periodic_data_update_template.filters = {"admin1": [str(area1a.pk)]}
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 2
         assert set(queryset) == set(self.individuals)
@@ -333,7 +333,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.household.save()
         self.periodic_data_update_template.filters = {"admin2": [str(area2a.pk)]}
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 2
         assert set(queryset) == set(self.individuals)
@@ -352,7 +352,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -372,7 +372,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": False,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_without_ticket
@@ -391,7 +391,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -410,7 +410,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -453,7 +453,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 2
         assert set(queryset) == {individual_with_ticket, possible_duplicate}
@@ -477,7 +477,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -497,7 +497,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -517,7 +517,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -537,7 +537,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -557,7 +557,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "has_grievance_ticket": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 1
         assert queryset.first() == individual_with_ticket
@@ -590,7 +590,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "received_assistance": True,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 2
         assert set(queryset) == set(self.individuals)
@@ -599,7 +599,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "received_assistance": False,
         }
         self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
         assert queryset.count() == 2
         assert set(queryset) == set(individuals_without_payment)

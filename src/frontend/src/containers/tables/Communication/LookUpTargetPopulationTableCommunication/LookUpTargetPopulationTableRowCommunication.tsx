@@ -53,7 +53,7 @@ export function LookUpTargetPopulationTableRowCommunication({
             }}
             value={targetPopulation.id}
             name="radio-button-household"
-            inputProps={{ 'aria-label': targetPopulation.id }}
+            slotProps={{ input: { 'aria-label': targetPopulation.id } }}
           />
         </TableCell>
       )}

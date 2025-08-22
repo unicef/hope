@@ -14,8 +14,8 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
-import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { PDUXlsxTemplateDetail } from '@restgenerated/models/PDUXlsxTemplateDetail';
+import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
   onClose: () => void;
-  template: PeriodicDataUpdateTemplateList;
+  template: PDUXlsxTemplateList;
 }
 
 export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
@@ -33,9 +33,9 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { data: templateDetailsData, isLoading } =
-    useQuery<PeriodicDataUpdateTemplateDetail>({
+    useQuery<PDUXlsxTemplateDetail>({
       queryKey: [
-        'periodicDataUpdateTemplateDetails',
+        'PDUXlsxTemplateDetails',
         businessArea,
         programId,
         template.id,
