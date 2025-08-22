@@ -1,16 +1,18 @@
 from typing import Any, Iterable
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Q
-from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save
+from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.models import Partner, Role, RoleAssignment, User
+from hope.apps.account.profile_cache import profile_cache
 from hope.apps.core.models import BusinessArea
 
 
@@ -135,3 +137,37 @@ def invalidate_permissions_cache_on_user_groups_change(action: str, instance: Us
 def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **kwargs: Any) -> None:
     """Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)."""
     _invalidate_user_permissions_cache([instance])
+
+
+
+
+# Profile cache
+User = get_user_model()
+
+# invalidate every UserProfile (Global)
+@receiver(post_save, sender=Role)
+@receiver(post_delete, sender=Role)
+@receiver(post_save, sender=Group)
+@receiver(post_delete, sender=Group)
+@receiver(post_save, sender=Permission)
+@receiver(post_delete, sender=Permission)
+@receiver(post_save, sender=RoleAssignment)
+@receiver(post_delete, sender=RoleAssignment)
+def _authz_global_changed(*args, **kwargs):
+    transaction.on_commit(profile_cache.bump_global)
+
+@receiver(m2m_changed, sender=Group.permissions.through)
+def _group_permissions_changed(action, **kwargs):
+    if action in {"post_add", "post_remove", "post_clear"}:
+        transaction.on_commit(profile_cache.bump_global)
+
+# Invalidate only the UserProfile associated with the User
+@receiver(post_save, sender=User)
+@receiver(post_delete, sender=User)
+def _user_changed(instance: User, **kwargs):
+    transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))
+
+@receiver(m2m_changed, sender=User.groups.through)
+def _user_groups_changed(instance: User, action, **kwargs):
+    if action in {"post_add", "post_remove", "post_clear"}:
+        transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))

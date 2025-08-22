@@ -11,35 +11,60 @@ from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
 
 
-def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool = True) -> Callable:
-    """Decorate operating on ViewSet methods.
+def _inm_matches(etag: str, inm_header: str | None) -> bool:
+    if not inm_header:
+        return False
+    # If-None-Match can be a comma-separated list, possibly with W/ weak tags
+    tokens = [t.strip() for t in inm_header.split(",") if t.strip()]
+    if "*" in tokens:
+        return True
 
-    It expects for the first argument to be a view instance and for the second to be a request like:
-        def view_function(self, request, *args, **kwargs)
-    It calculates etag based on the KeyConstructor (key_constructor_class) and adds it to the response.
-    If compare_etags is True it compares calculated etag with If-None_match header from the request.
-    If they are the same, it returns 304 status code without any data.
+    def norm(s: str) -> str:
+        s = s.strip()
+        if s.startswith("W/"):
+            s = s[2:].strip()
+        return s
+
+    n_etag = norm(etag)
+    return any(n_etag == norm(t) for t in tokens)
+
+def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool = True, safe_only: bool = True) -> Callable:
+    """
+    Decorate ViewSet methods. Computes ETag from a KeyConstructor and:
+    - For GET/HEAD: returns 304 when If-None-Match matches (weak compare).
+    - Otherwise: sets ETag header on the response.
     """
 
     def inner(function: Callable) -> Callable:
         @functools.wraps(function)
-        def wrapper(*args: dict, **kwargs: dict) -> Response:
-            # in view methods first argument is always self, second is request
-            request = args[1]
+        def wrapper(*args: Any, **kwargs: Any) -> Response:
+            view_instance, request = args[0], args[1]
+
+            if safe_only and request.method not in ("GET", "HEAD"):
+                return function(*args, **kwargs)
+
             etag = key_constructor_class()(
-                view_instance=args[0],
+                view_instance=view_instance,
                 view_method=function,
                 request=request,
                 args=args[2:],
                 kwargs=kwargs,
             )
 
-            # If etag from header and calculated are the same,
-            # return 304 status code as request consists of the same data already (cached on client side)
-            if compare_etags and request.headers.get("If-None-Match") == etag and not settings.DEBUG:
-                return Response(status=status.HTTP_304_NOT_MODIFIED, headers={"ETAG": etag})
+            if compare_etags and not settings.DEBUG and _inm_matches(etag, request.headers.get("If-None-Match")):
+                return Response(
+                    status=status.HTTP_304_NOT_MODIFIED,
+                    headers={
+                        "ETag": etag,
+                        "Cache-Control": "private, no-cache",
+                        "Vary": "Authorization, Cookie",
+                    },
+                )
+
             res = function(*args, **kwargs)
-            res.headers["ETAG"] = etag
+            res.headers["ETag"] = etag
+            res.headers.setdefault("Cache-Control", "private, no-cache")
+            res.headers.setdefault("Vary", "Authorization, Cookie")
             return res
 
         return wrapper
