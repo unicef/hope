@@ -363,6 +363,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 export const roleDisplayMap = {
   PRIMARY: 'Primary Collector',
   ALTERNATE: 'Alternate Collector',
+  NO_ROLE: 'No Role',
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

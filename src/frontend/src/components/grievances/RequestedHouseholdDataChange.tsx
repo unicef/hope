@@ -112,7 +112,9 @@ export function RequestedHouseholdDataChange({
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
   const shouldShowEditButton = (vals): boolean =>
-    (vals.selected.length || vals.selectedFlexFields.length) &&
+    (vals.selected.length ||
+      vals.selectedFlexFields.length ||
+      vals.selectedRoles.length) &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
