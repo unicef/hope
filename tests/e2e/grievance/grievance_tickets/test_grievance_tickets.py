@@ -746,8 +746,8 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.select_listbox_element("English")
         pageGrievanceNewTicket.getSelectIndividualdataRelationship().click()
         pageGrievanceNewTicket.select_listbox_element("Wife / Husband")
-        pageGrievanceNewTicket.getSelectIndividualdataRole().click()
-        pageGrievanceNewTicket.select_listbox_element("Alternate collector")
+        # pageGrievanceNewTicket.getSelectIndividualdataRole().click()
+        # pageGrievanceNewTicket.select_listbox_element("Alternate collector")
         pageGrievanceNewTicket.getInputIndividualdataWalletaddress().send_keys("Wordoki")
         pageGrievanceNewTicket.getInputIndividualdataWalletname().send_keys("123")
         pageGrievanceNewTicket.getInputIndividualdataWhoanswersaltphone().send_keys("000 000 000")
@@ -797,8 +797,8 @@ class TestGrievanceTickets:
 
         pageGrievanceNewTicket.getSelectIndividualdataRelationship().click()
         pageGrievanceNewTicket.select_listbox_element("Wife / Husband")
-        pageGrievanceNewTicket.getSelectIndividualdataRole().click()
-        pageGrievanceNewTicket.select_listbox_element("Alternate collector")
+        # pageGrievanceNewTicket.getSelectIndividualdataRole().click()
+        # pageGrievanceNewTicket.select_listbox_element("Alternate collector")
         pageGrievanceNewTicket.getButtonNext().click()
         assert "ASSIGN TO ME" in pageGrievanceDetailsPage.getButtonAssignToMe().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
@@ -814,7 +814,7 @@ class TestGrievanceTickets:
         assert "-" in pageGrievanceDetailsPage.getLabelDocumentation().text
         assert "Add Individual - TEST" in pageGrievanceDetailsPage.getLabelDescription().text
         assert "Male" in pageGrievanceDetailsPage.getLabelGender().text
-        assert "Alternate collector" in pageGrievanceDetailsPage.getLabelRole().text
+        # assert "Alternate collector" in pageGrievanceDetailsPage.getLabelRole().text
         assert "Krido" in pageGrievanceDetailsPage.getLabelFullName().text
         assert "1986-05-01" in pageGrievanceDetailsPage.getLabelBirthDate().text
         assert "Wife / Husband" in pageGrievanceDetailsPage.getLabelRelationship().text

@@ -187,6 +187,7 @@ const CreateGrievancePage = (): ReactElement => {
     linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
+    roles: [],
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
