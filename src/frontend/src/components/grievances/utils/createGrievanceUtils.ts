@@ -359,6 +359,13 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 }
 
+// Map role values for display
+export const roleDisplayMap = {
+  PRIMARY: 'Primary Collector',
+  ALTERNATE: 'Alternate Collector',
+  NO_ROLE: 'No Role',
+};
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
   const householdData = values.householdDataUpdateFields
@@ -375,6 +382,19 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
       prev[current.fieldName] = current.fieldValue;
       return prev;
     }, {});
+  const householdDataUpdateIssueTypeExtras = {
+    household: values.selectedHousehold?.id,
+    householdData: { ...householdData, flexFields },
+  } as {
+    household: any;
+    householdData: any;
+    roles?: any;
+  };
+  if (Array.isArray(values.roles) && values.roles.length > 0) {
+    householdDataUpdateIssueTypeExtras.householdData.roles = values.roles;
+  } else if (householdDataUpdateIssueTypeExtras.householdData.roles) {
+    delete householdDataUpdateIssueTypeExtras.householdData.roles;
+  }
   return {
     variables: {
       input: {
@@ -383,10 +403,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
-            householdDataUpdateIssueTypeExtras: {
-              household: values.selectedHousehold?.id,
-              householdData: { ...householdData, flexFields },
-            },
+            householdDataUpdateIssueTypeExtras,
           },
         },
       },
@@ -636,10 +653,41 @@ export function prepareRestVariables(
           return prev;
         }, {});
 
+      // Add roles if present and valid
+      if (Array.isArray(values.roles) && values.roles.length > 0) {
+        // Accept both newRole and new_role, always map to new_role for backend
+        const validRoles = values.roles
+          .filter((role) => {
+            const roleValue = role.new_role || role.newRole;
+            return (
+              roleValue &&
+              typeof roleValue === 'string' &&
+              roleValue.trim() !== ''
+            );
+          })
+          .map((role) => ({
+            ...role,
+            new_role: role.new_role || role.newRole,
+          }));
+        if (validRoles.length > 0) {
+          householdData.roles = validRoles;
+        } else if (householdData.roles) {
+          delete householdData.roles;
+        }
+      } else if (householdData.roles) {
+        delete householdData.roles;
+      }
       extras.issueType = {
         householdDataUpdateIssueTypeExtras: {
           household: values.selectedHousehold?.id,
-          householdData: { ...householdData, flexFields },
+          householdData: {
+            ...householdData,
+            flexFields,
+            ...(Array.isArray(householdData.roles) &&
+            householdData.roles.length > 0
+              ? { roles: householdData.roles }
+              : {}),
+          },
         },
       };
     }

@@ -17,9 +17,8 @@ import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividua
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
-
 const BoxWithBorders = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  border-bottom: 1px solid #d8d8d8;
   padding: 15px 0;
 `;
 
@@ -204,7 +203,12 @@ function EditPeopleDataChange({
             individual={fullIndividual.individual}
             addIndividualFieldsData={editPeopleFieldsData}
           />
-          {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={editPeopleFieldsData}/>}
+          {!isEditTicket && (
+            <NewAccountFieldArray
+              values={values}
+              addIndividualFieldsData={editPeopleFieldsData}
+            />
+          )}
         </Box>
       </BoxWithBorders> */}
     </>
