@@ -40,7 +40,8 @@ class TargetingCriteriaQueryingBase:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self) -> Q:
-        return Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
+        key_filter = "unicef_id__in" if not self.is_social_worker_program else "individuals__unicef_id__in"
+        return Q(withdrawn=False) & ~Q(**{key_filter: self.get_excluded_household_ids()})
 
     def apply_targeting_criteria_exclusion_flags(self) -> Q:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()
