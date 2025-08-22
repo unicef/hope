@@ -24,13 +24,17 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
+    periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
+    send_qcf_report_email_notifications,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
+    WesternUnionQCFFile,
+    WesternUnionQCFFileReport,
 )
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.steficon.models import Rule
@@ -313,3 +317,32 @@ class TestPaymentCeleryTask(TestCase):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
+
+
+class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
+    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_runs_service_process_files_since(self, mock_service_cls: Mock) -> None:
+        mock_service = mock_service_cls.return_value
+        periodic_sync_payment_plan_invoices_western_union_ftp()
+        mock_service.process_files_since.assert_called_once()
+
+
+class SendQCFReportEmailNotificationsTests(TestCase):
+    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_sends_email_and_marks_sent(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        create_afghanistan()
+        wu_qcf_file = WesternUnionQCFFile.objects.create(
+            name="TEST",
+        )
+        qcf_report = WesternUnionQCFFileReport.objects.create(
+            qcf_file=wu_qcf_file,
+            payment_plan=PaymentPlanFactory(),
+        )
+        mock_service = mock_service_cls.return_value
+        send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
+        mock_service.send_notification_emails.assert_called_once_with(qcf_report)
+        qcf_report.refresh_from_db()
+        self.assertTrue(qcf_report.sent)
