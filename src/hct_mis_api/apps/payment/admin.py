@@ -851,6 +851,7 @@ class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
     raw_id_fields = ("financial_institution", "financial_service_provider")
 
 
+# TODO move new admin to new dev structure
 class WesternUnionQCFFileReportInline(admin.TabularInline):
     model = WesternUnionQCFFileReport
     extra = 0
