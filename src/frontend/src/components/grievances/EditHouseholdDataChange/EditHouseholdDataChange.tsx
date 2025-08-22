@@ -123,9 +123,12 @@ function EditHouseholdDataChange({
 
   useEffect(() => {
     if (householdMembers && (!values.roles || values.roles.length === 0)) {
+      const membersWithRole = householdMembers.results.filter(
+        (member) => member.role && member.role !== 'NO_ROLE',
+      );
       setFieldValue(
         'roles',
-        householdMembers.results.map((member) => ({
+        membersWithRole.map((member) => ({
           individual: member.id,
           newRole: '',
         })),
@@ -291,17 +294,24 @@ function EditHouseholdDataChange({
                       color="primary"
                       startIcon={<AddCircleOutline />}
                       onClick={() => {
-                        const defaultIndividual =
-                          availableIndividuals.length > 0
-                            ? availableIndividuals[0].id
-                            : '';
-                        setFieldValue('roles', [
-                          ...(values.roles || []),
-                          {
-                            individual: defaultIndividual,
-                            newRole: '',
-                          },
-                        ]);
+                        if (availableIndividuals.length > 0) {
+                          const defaultIndividual = availableIndividuals[0].id;
+                          // Find current role for this individual
+                          const currentRoleObj =
+                            fullHousehold.rolesInHousehold.find(
+                              (r) => r.individual.id === defaultIndividual,
+                            );
+                          // Only add if newRole is not equal to current role
+                          if (!currentRoleObj || '' !== currentRoleObj.role) {
+                            setFieldValue('roles', [
+                              ...(values.roles || []),
+                              {
+                                individual: defaultIndividual,
+                                newRole: '',
+                              },
+                            ]);
+                          }
+                        }
                       }}
                       data-cy="button-add-new-role"
                       disabled={isDisabled}
