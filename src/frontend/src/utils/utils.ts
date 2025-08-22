@@ -1,5 +1,4 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { ChoiceObject } from '@generated/graphql';
 import { Choice } from '@restgenerated/models/Choice';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -601,7 +600,7 @@ export function columnToOrderBy(
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
 
-export function choicesToDict(choices: ChoiceObject[]): {
+export function choicesToDict(choices: Array<Record<string, any>>): {
   [key: string]: string;
 } {
   if (!choices) return {};

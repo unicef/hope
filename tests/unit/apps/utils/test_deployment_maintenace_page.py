@@ -3,10 +3,10 @@ from unittest import skip
 from extras.test_utils.factories.account import UserFactory
 from rest_framework.test import APIClient
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 
 
-class TestMaintenancePage(APITestCase):
+class TestMaintenancePage(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

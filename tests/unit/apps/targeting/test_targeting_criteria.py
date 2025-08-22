@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from flaky import flaky
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import Household, Individual
 from hope.apps.payment.models import PaymentPlan
@@ -25,7 +25,7 @@ from hope.apps.targeting.models import (
 )
 
 
-class TestTargetingCriteriaQuery(APITestCase):
+class TestTargetingCriteriaQuery(BaseTestCase):
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter: Dict, payment_plan: PaymentPlan) -> PaymentPlan:
         rule = TargetingCriteriaRule(payment_plan=payment_plan)
@@ -133,7 +133,7 @@ class TestTargetingCriteriaQuery(APITestCase):
         )
 
 
-class TestTargetingCriteriaIndividualRules(APITestCase):
+class TestTargetingCriteriaIndividualRules(BaseTestCase):
     @staticmethod
     def get_targeting_criteria_for_filters(filters: List[Dict], payment_plan: PaymentPlan) -> PaymentPlan:
         rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
@@ -351,7 +351,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         )
 
 
-class TestTargetingCriteriaByIdQuery(APITestCase):
+class TestTargetingCriteriaByIdQuery(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

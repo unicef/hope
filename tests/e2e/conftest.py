@@ -168,11 +168,6 @@ def pytest_configure(config) -> None:  # type: ignore
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",

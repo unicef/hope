@@ -13,14 +13,14 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.payment.models import AccountType, PaymentPlan
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
 
 
-class TestXlsxExportTargetingService(APITestCase):
+class TestXlsxExportTargetingService(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
