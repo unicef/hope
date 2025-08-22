@@ -1,5 +1,6 @@
 import logging
-from functools import lru_cache
+from collections import defaultdict
+from functools import lru_cache, cached_property
 from typing import Any
 from uuid import UUID
 
@@ -7,6 +8,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -284,7 +286,38 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
         return permissions_set
 
-    @property
+    @cached_property
+    def all_permissions_in_business_areas(self) -> dict[str, set[str]]:
+        """Return list of permissions for the given business area and program.
+
+        retrieved from RoleAssignments of the user and their partner
+        """
+        content_types_dict = {
+            str(pk): app_lablel for pk, app_lablel in ContentType.objects.values_list("id", "app_label")
+        }
+        role_assignments = (
+            RoleAssignment.objects.filter(
+                Q(partner__user=self, business_area__in=self.business_areas)
+                | Q(user=self, business_area__in=self.business_areas)
+            )
+            .select_related("role", "group")
+            .prefetch_related("group__permissions")
+            .exclude(expiry_date__lt=timezone.now())
+        )
+        permissions_per_business_area = defaultdict(set)
+        for role_assignment in role_assignments:
+            permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                role_assignment.role.permissions
+            )
+            if role_assignment.group is None:
+                continue
+            permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                f"{content_types_dict[str(perm.content_type_id)]}.{perm.codename}"
+                for perm in role_assignment.group.permissions.all()
+            )
+        return permissions_per_business_area
+
+    @cached_property
     def business_areas(self) -> QuerySet[BusinessArea]:
         role_assignments = RoleAssignment.objects.filter(Q(user=self) | Q(partner__user=self)).exclude(
             expiry_date__lt=timezone.now()
