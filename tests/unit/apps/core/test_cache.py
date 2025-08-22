@@ -1,10 +1,9 @@
 from django.core.cache import cache
 
-from hope.apps.core.base_test_case import APITestCase
 from hope.apps.core.utils import save_data_in_cache
 
 
-class TestCache(APITestCase):
+class TestCache:
     def test_simple_cache(self) -> None:
         cache.clear()
         assert cache.get("FOO", "NOTHING") == "NOTHING"

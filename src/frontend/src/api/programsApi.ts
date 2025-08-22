@@ -2,6 +2,7 @@ import { api, handleApiResponse } from './api';
 // import { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 
 //TODO: Add generated types
+//TODO: MOVE to useQuery
 
 interface Program {
   id: string;

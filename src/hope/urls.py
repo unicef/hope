@@ -5,8 +5,6 @@ from django.contrib import admin
 from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
-from django.views.decorators.csrf import csrf_exempt
-from graphene_file_upload.django import FileUploadGraphQLView
 
 import hope.admin
 import hope.apps.account.views
@@ -21,7 +19,6 @@ from hope.apps.core.views import (
     UploadFile,
     homepage,
     logout_view,
-    schema,
     trigger_error,
 )
 from hope.apps.web.views import react_main
@@ -35,8 +32,6 @@ api_patterns = [
     path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
     path("_health", homepage),
     path("explorer/", include("explorer.urls")),
-    path("graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
-    path("graphql/schema.graphql", schema),
     path("logout", logout_view, name="logout"),
     path("sentry-debug/", trigger_error),
     path(

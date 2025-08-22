@@ -14,13 +14,13 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.payment.models import Approval, PaymentPlan
 from hope.apps.payment.notifications import PaymentNotification
 
 
-class TestPaymentNotification(APITestCase):
+class TestPaymentNotification(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

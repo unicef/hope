@@ -4,7 +4,7 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
@@ -19,7 +19,7 @@ from hope.apps.household.models import (
 from hope.apps.utils.models import MergeStatusModel
 
 
-class TestReassignRolesOnUpdate(APITestCase):
+class TestReassignRolesOnUpdate(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
