@@ -32,7 +32,7 @@ from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
 class TestSriLankaRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
             label=IDENTIFICATION_TYPE_NATIONAL_ID,

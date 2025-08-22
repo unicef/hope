@@ -4,22 +4,22 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class ErrorPage(BaseComponents):
     # Locators
-    pageNotFound = "h1"
-    buttonRefresh = "button"
-    buttonCountryDashboard = 'button[data-cy="button-go-back"]'
+    page_not_found = "h1"
+    button_refresh = "button"
+    button_country_dashboard = 'button[data-cy="button-go-back"]'
 
     # Texts
-    text404Error = "Access Denied"
-    textRefresh = "REFRESH PAGE"
-    textGoTo = "GO BACK"
+    text_404_error = "Access Denied"
+    text_refresh = "REFRESH PAGE"
+    text_go_to = "GO BACK"
 
     # Elements
 
-    def getPageNoFound(self) -> WebElement:
-        return self.wait_for(self.pageNotFound).contains(self.text404Error)
+    def get_page_no_found(self) -> WebElement:
+        return self.wait_for(self.page_not_found).contains(self.text_404_error)
 
-    def getButtonRefresh(self) -> WebElement:
-        return self.wait_for(self.buttonRefresh).contains(self.textRefresh)
+    def get_button_refresh(self) -> WebElement:
+        return self.wait_for(self.button_refresh).contains(self.text_refresh)
 
-    def getGoToCountryDashboard(self) -> WebElement:
-        return self.wait_for(self.buttonCountryDashboard).contains(self.textGoTo)
+    def get_go_to_country_dashboard(self) -> WebElement:
+        return self.wait_for(self.button_country_dashboard).contains(self.text_go_to)

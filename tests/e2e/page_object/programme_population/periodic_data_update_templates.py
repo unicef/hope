@@ -3,318 +3,318 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class PeriodicDatUpdateTemplates(BaseComponents):
-    navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
-    navProgramDetails = 'a[data-cy="nav-Programme Details"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    tabIndividuals = 'button[data-cy="tab-individuals"]'
-    tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'
+    nav_program_population = 'a[data-cy="nav-Programme Population"]'
+    nav_program_details = 'a[data-cy="nav-Programme Details"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    tab_individuals = 'button[data-cy="tab-individuals"]'
+    tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
     title = 'h6[data-cy="title"]'
-    newTemplateButton = 'a[data-cy="new-template-button"]'
-    buttonImport = 'button[data-cy="button-import"]'
-    pduTemplatesBtn = 'button[data-cy="pdu-templates"]'
-    pduUpdatesBtn = 'button[data-cy="pdu-updates"]'
-    headCellTemplateId = 'th[data-cy="head-cell-template-id"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    headCellNumberOfRecords = 'th[data-cy="head-cell-number-of-records"]'
-    headCellCreatedAt = 'th[data-cy="head-cell-created-at"]'
-    headCellCreatedBy = 'th[data-cy="head-cell-created-by"]'
-    headCellDetails = 'th[data-cy="head-cell-details"]'
-    headCellStatus = 'th[data-cy="head-cell-status"]'
-    headCellEmpty = 'th[data-cy="head-cell-empty"]'
-    templateRow = 'tr[data-cy="template-row-{}"]'
-    templateId = 'td[data-cy="template-id-{}"]'
-    templateRecords = 'td[data-cy="template-records-{}"]'
-    templateCreatedAt = 'td[data-cy="template-created-at-{}"]'
-    templateCreatedBy = 'td[data-cy="template-created-by-{}"]'
-    templateDetailsBtn = 'td[data-cy="template-details-btn-{}"]'
-    templateStatus = 'td[data-cy="template-status-{}"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    templateAction = 'td[data-cy="template-action-{}"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
+    new_template_button = 'a[data-cy="new-template-button"]'
+    button_import = 'button[data-cy="button-import"]'
+    pdu_templates_btn = 'button[data-cy="pdu-templates"]'
+    pdu_updates_btn = 'button[data-cy="pdu-updates"]'
+    head_cell_template_id = 'th[data-cy="head-cell-template-id"]'
+    table_label = 'span[data-cy="table-label"]'
+    head_cell_number_of_records = 'th[data-cy="head-cell-number-of-records"]'
+    head_cell_created_at = 'th[data-cy="head-cell-created-at"]'
+    head_cell_created_by = 'th[data-cy="head-cell-created-by"]'
+    head_cell_details = 'th[data-cy="head-cell-details"]'
+    head_cell_status = 'th[data-cy="head-cell-status"]'
+    head_cell_empty = 'th[data-cy="head-cell-empty"]'
+    template_row = 'tr[data-cy="template-row-{}"]'
+    template_id = 'td[data-cy="template-id-{}"]'
+    template_records = 'td[data-cy="template-records-{}"]'
+    template_created_at = 'td[data-cy="template-created-at-{}"]'
+    template_created_by = 'td[data-cy="template-created-by-{}"]'
+    template_details_btn = 'td[data-cy="template-details-btn-{}"]'
+    template_status = 'td[data-cy="template-status-{}"]'
+    status_container = 'div[data-cy="status-container"]'
+    template_action = 'td[data-cy="template-action-{}"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
     # details
-    detailModal = 'div[data-cy="periodic-data-update-detail"]'
-    templateField = 'td[data-cy="template-field-{}"]'
-    templateRoundNumber = 'td[data-cy="template-round-number-{}"]'
-    templateRoundName = 'td[data-cy="template-round-name-{}"]'
-    templateNumberOfIndividuals = 'td[data-cy="template-number-of-individuals-{}"]'
+    detail_modal = 'div[data-cy="periodic-data-update-detail"]'
+    template_field = 'td[data-cy="template-field-{}"]'
+    template_round_number = 'td[data-cy="template-round-number-{}"]'
+    template_round_name = 'td[data-cy="template-round-name-{}"]'
+    template_number_of_individuals = 'td[data-cy="template-number-of-individuals-{}"]'
 
-    def getNavProgramPopulation(self) -> WebElement:
-        return self.wait_for(self.navProgramPopulation)
+    def get_nav_program_population(self) -> WebElement:
+        return self.wait_for(self.nav_program_population)
 
-    def getNavProgramDetails(self) -> WebElement:
-        return self.wait_for(self.navProgramDetails)
+    def get_nav_program_details(self) -> WebElement:
+        return self.wait_for(self.nav_program_details)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getTabIndividuals(self) -> WebElement:
-        return self.wait_for(self.tabIndividuals)
+    def get_tab_individuals(self) -> WebElement:
+        return self.wait_for(self.tab_individuals)
 
-    def getTabPeriodicDataUpdates(self) -> WebElement:
-        return self.wait_for(self.tabPeriodicDataUpdates)
+    def get_tab_periodic_data_updates(self) -> WebElement:
+        return self.wait_for(self.tab_periodic_data_updates)
 
-    def getTitle(self) -> WebElement:
+    def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
-    def getNewTemplateButton(self) -> WebElement:
-        return self.wait_for(self.newTemplateButton)
+    def get_new_template_button(self) -> WebElement:
+        return self.wait_for(self.new_template_button)
 
-    def getButtonImport(self) -> WebElement:
-        return self.wait_for(self.buttonImport)
+    def get_button_import(self) -> WebElement:
+        return self.wait_for(self.button_import)
 
-    def getPduTemplatesBtn(self) -> WebElement:
-        return self.wait_for(self.pduTemplatesBtn)
+    def get_pdu_templates_btn(self) -> WebElement:
+        return self.wait_for(self.pdu_templates_btn)
 
-    def getPduUpdatesBtn(self) -> WebElement:
-        return self.wait_for(self.pduUpdatesBtn)
+    def get_pdu_updates_btn(self) -> WebElement:
+        return self.wait_for(self.pdu_updates_btn)
 
-    def getHeadCellTemplateId(self) -> WebElement:
-        return self.wait_for(self.headCellTemplateId)
+    def get_head_cell_template_id(self) -> WebElement:
+        return self.wait_for(self.head_cell_template_id)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getHeadCellNumberOfRecords(self) -> WebElement:
-        return self.wait_for(self.headCellNumberOfRecords)
+    def get_head_cell_number_of_records(self) -> WebElement:
+        return self.wait_for(self.head_cell_number_of_records)
 
-    def getHeadCellCreatedAt(self) -> WebElement:
-        return self.wait_for(self.headCellCreatedAt)
+    def get_head_cell_created_at(self) -> WebElement:
+        return self.wait_for(self.head_cell_created_at)
 
-    def getHeadCellCreatedBy(self) -> WebElement:
-        return self.wait_for(self.headCellCreatedBy)
+    def get_head_cell_created_by(self) -> WebElement:
+        return self.wait_for(self.head_cell_created_by)
 
-    def getHeadCellDetails(self) -> WebElement:
-        return self.wait_for(self.headCellDetails)
+    def get_head_cell_details(self) -> WebElement:
+        return self.wait_for(self.head_cell_details)
 
-    def getHeadCellStatus(self) -> WebElement:
-        return self.wait_for(self.headCellStatus)
+    def get_head_cell_status(self) -> WebElement:
+        return self.wait_for(self.head_cell_status)
 
-    def getHeadCellEmpty(self) -> WebElement:
-        return self.wait_for(self.headCellEmpty)
+    def get_head_cell_empty(self) -> WebElement:
+        return self.wait_for(self.head_cell_empty)
 
-    def getTemplateRow(self) -> WebElement:
-        return self.wait_for(self.templateRow)
+    def get_template_row(self) -> WebElement:
+        return self.wait_for(self.template_row)
 
-    def getTemplateId(self, index: int) -> WebElement:
-        locator = self.templateId.format(index)
+    def get_template_id(self, index: int) -> WebElement:
+        locator = self.template_id.format(index)
         return self.wait_for(locator)
 
-    def getTemplateRecords(self, index: int) -> WebElement:
-        locator = self.templateRecords.format(index)
+    def get_template_records(self, index: int) -> WebElement:
+        locator = self.template_records.format(index)
         return self.wait_for(locator)
 
-    def getTemplateCreatedAt(self, index: int) -> WebElement:
-        locator = self.templateCreatedAt.format(index)
+    def get_template_created_at(self, index: int) -> WebElement:
+        locator = self.template_created_at.format(index)
         return self.wait_for(locator)
 
-    def getTemplateCreatedBy(self, index: int) -> WebElement:
-        locator = self.templateCreatedBy.format(index)
+    def get_template_created_by(self, index: int) -> WebElement:
+        locator = self.template_created_by.format(index)
         return self.wait_for(locator)
 
-    def getTemplateDetailsBtn(self, index: int) -> WebElement:
-        locator = self.templateDetailsBtn.format(index)
+    def get_template_details_btn(self, index: int) -> WebElement:
+        locator = self.template_details_btn.format(index)
         return self.wait_for(locator)
 
-    def getTemplateStatus(self, index: int) -> WebElement:
-        locator = self.templateStatus.format(index)
+    def get_template_status(self, index: int) -> WebElement:
+        locator = self.template_status.format(index)
         return self.wait_for(locator)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTemplateAction(self) -> WebElement:
-        return self.wait_for(self.templateAction)
+    def get_template_action(self) -> WebElement:
+        return self.wait_for(self.template_action)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getTemplateField(self, index: int) -> WebElement:
-        locator = self.templateField.format(index)
+    def get_template_field(self, index: int) -> WebElement:
+        locator = self.template_field.format(index)
         return self.wait_for(locator)
 
-    def getTemplateRoundNumber(self, index: int) -> WebElement:
-        locator = self.templateRoundNumber.format(index)
+    def get_template_round_number(self, index: int) -> WebElement:
+        locator = self.template_round_number.format(index)
         return self.wait_for(locator)
 
-    def getTemplateRoundName(self, index: int) -> WebElement:
-        locator = self.templateRoundName.format(index)
+    def get_template_round_name(self, index: int) -> WebElement:
+        locator = self.template_round_name.format(index)
         return self.wait_for(locator)
 
-    def getTemplateNumberOfIndividuals(self, index: int) -> WebElement:
-        locator = self.templateNumberOfIndividuals.format(index)
+    def get_template_number_of_individuals(self, index: int) -> WebElement:
+        locator = self.template_number_of_individuals.format(index)
         return self.wait_for(locator)
 
-    def getDetailModal(self) -> WebElement:
-        return self.wait_for(self.detailModal)
+    def get_detail_modal(self) -> WebElement:
+        return self.wait_for(self.detail_modal)
 
 
 class PeriodicDatUpdateTemplatesDetails(BaseComponents):
-    navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
-    navProgramDetails = 'a[data-cy="nav-Programme Details"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
+    nav_program_population = 'a[data-cy="nav-Programme Population"]'
+    nav_program_details = 'a[data-cy="nav-Programme Details"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
     arrow_back = 'div[data-cy="arrow_back"]'
-    breadcrumbsContainer = 'div[data-cy="breadcrumbs-container"]'
-    breadcrumbsElementContainer = 'span[data-cy="breadcrumbs-element-container"]'
-    breadcrumbsLink = 'a[data-cy="breadcrumbs-link"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
+    breadcrumbs_container = 'div[data-cy="breadcrumbs-container"]'
+    breadcrumbs_element_container = 'span[data-cy="breadcrumbs-element-container"]'
+    breadcrumbs_link = 'a[data-cy="breadcrumbs-link"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
     title = 'h6[data-cy="title"]'
-    labelKey = 'div[data-cy="label-key"]'
-    filtersRegistrationDataImport = 'div[data-cy="filters-registration-data-import"]'
-    registrationDataImportInput = 'div[data-cy="Registration Data Import-input"]'
-    filtersTargetPopulationAutocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
-    targetPopulationInput = 'div[data-cy="Target Population-input"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    indFiltersGender = 'div[data-cy="ind-filters-gender"]'
-    hhFiltersAgeFrom = 'div[data-cy="hh-filters-age-from"]'
-    hhFiltersAgeTo = 'div[data-cy="hh-filters-age-to"]'
-    indFiltersRegDateFrom = 'div[data-cy="ind-filters-reg-date-from"]'
-    indFiltersRegDateTo = 'div[data-cy="ind-filters-reg-date-to"]'
-    indFiltersGrievanceTicket = 'div[data-cy="ind-filters-grievance-ticket"]'
-    filterAdministrativeArea = 'div[data-cy="filter-administrative-area"]'
-    adminLevel1Input = 'div[data-cy="Admin Level 1-input"]'
-    adminLevel2Input = 'div[data-cy="Admin Level 2-input"]'
-    indFiltersReceivedAssistance = 'div[data-cy="ind-filters-received-assistance"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    cancelButton = 'a[data-cy="cancel-button"]'
-    submitButton = 'button[data-cy="submit-button"]'
-    tableContainer = 'div[data-cy="table-container"]'
+    label_key = 'div[data-cy="label-key"]'
+    filters_registration_data_import = 'div[data-cy="filters-registration-data-import"]'
+    registration_data_import_input = 'div[data-cy="Registration Data Import-input"]'
+    filters_target_population_autocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
+    target_population_input = 'div[data-cy="Target Population-input"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    ind_filters_gender = 'div[data-cy="ind-filters-gender"]'
+    hh_filters_age_from = 'div[data-cy="hh-filters-age-from"]'
+    hh_filters_age_to = 'div[data-cy="hh-filters-age-to"]'
+    ind_filters_reg_date_from = 'div[data-cy="ind-filters-reg-date-from"]'
+    ind_filters_reg_date_to = 'div[data-cy="ind-filters-reg-date-to"]'
+    ind_filters_grievance_ticket = 'div[data-cy="ind-filters-grievance-ticket"]'
+    filter_administrative_area = 'div[data-cy="filter-administrative-area"]'
+    admin_level_1_input = 'div[data-cy="Admin Level 1-input"]'
+    admin_level_2_input = 'div[data-cy="Admin Level 2-input"]'
+    ind_filters_received_assistance = 'div[data-cy="ind-filters-received-assistance"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    cancel_button = 'a[data-cy="cancel-button"]'
+    submit_button = 'button[data-cy="submit-button"]'
+    table_container = 'div[data-cy="table-container"]'
     table = 'table[data-cy="table"]'
-    tableHeaderCheckbox = 'th[data-cy="table-header-checkbox"]'
-    tableHeaderField = 'th[data-cy="table-header-field"]'
-    tableHeaderRoundnumber = 'th[data-cy="table-header-roundNumber"]'
-    tableRow = 'tr[data-cy="table-row-{}"]'
+    table_header_checkbox = 'th[data-cy="table-header-checkbox"]'
+    table_header_field = 'th[data-cy="table-header-field"]'
+    table_header_roundnumber = 'th[data-cy="table-header-roundNumber"]'
+    table_row = 'tr[data-cy="table-row-{}"]'
     checkbox = 'span[data-cy="checkbox-{}"]'
-    tableCellField = 'td[data-cy="table-cell-field-{}"]'
-    tableCellRoundnumber = 'td[data-cy="table-cell-roundNumber-{}"]'
-    selectRoundnumber = 'div[data-cy="select-roundNumber-{}"]'
-    backButton = 'button[data-cy="back-button"]'
+    table_cell_field = 'td[data-cy="table-cell-field-{}"]'
+    table_cell_roundnumber = 'td[data-cy="table-cell-roundNumber-{}"]'
+    select_roundnumber = 'div[data-cy="select-roundNumber-{}"]'
+    back_button = 'button[data-cy="back-button"]'
 
-    def getNavProgramPopulation(self) -> WebElement:
-        return self.wait_for(self.navProgramPopulation)
+    def get_nav_program_population(self) -> WebElement:
+        return self.wait_for(self.nav_program_population)
 
-    def getNavProgramDetails(self) -> WebElement:
-        return self.wait_for(self.navProgramDetails)
+    def get_nav_program_details(self) -> WebElement:
+        return self.wait_for(self.nav_program_details)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getArrow_back(self) -> WebElement:
+    def get_arrow_back(self) -> WebElement:
         return self.wait_for(self.arrow_back)
 
-    def getBreadcrumbsContainer(self) -> WebElement:
-        return self.wait_for(self.breadcrumbsContainer)
+    def get_breadcrumbs_container(self) -> WebElement:
+        return self.wait_for(self.breadcrumbs_container)
 
-    def getBreadcrumbsElementContainer(self) -> WebElement:
-        return self.wait_for(self.breadcrumbsElementContainer)
+    def get_breadcrumbs_element_container(self) -> WebElement:
+        return self.wait_for(self.breadcrumbs_element_container)
 
-    def getBreadcrumbsLink(self) -> WebElement:
-        return self.wait_for(self.breadcrumbsLink)
+    def get_breadcrumbs_link(self) -> WebElement:
+        return self.wait_for(self.breadcrumbs_link)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getTitle(self) -> WebElement:
+    def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
-    def getLabelKey(self) -> WebElement:
-        return self.wait_for(self.labelKey)
+    def get_label_key(self) -> WebElement:
+        return self.wait_for(self.label_key)
 
-    def getFiltersRegistrationDataImport(self) -> WebElement:
-        return self.wait_for(self.filtersRegistrationDataImport)
+    def get_filters_registration_data_import(self) -> WebElement:
+        return self.wait_for(self.filters_registration_data_import)
 
-    def getRegistrationDataImportInput(self) -> WebElement:
-        return self.wait_for(self.registrationDataImportInput)
+    def get_registration_data_import_input(self) -> WebElement:
+        return self.wait_for(self.registration_data_import_input)
 
-    def getFiltersTargetPopulationAutocomplete(self) -> WebElement:
-        return self.wait_for(self.filtersTargetPopulationAutocomplete)
+    def get_filters_target_population_autocomplete(self) -> WebElement:
+        return self.wait_for(self.filters_target_population_autocomplete)
 
-    def getTargetPopulationInput(self) -> WebElement:
-        return self.wait_for(self.targetPopulationInput)
+    def get_target_population_input(self) -> WebElement:
+        return self.wait_for(self.target_population_input)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getIndFiltersGender(self) -> WebElement:
-        return self.wait_for(self.indFiltersGender)
+    def get_ind_filters_gender(self) -> WebElement:
+        return self.wait_for(self.ind_filters_gender)
 
-    def getHhFiltersAgeFrom(self) -> WebElement:
-        return self.wait_for(self.hhFiltersAgeFrom)
+    def get_hh_filters_age_from(self) -> WebElement:
+        return self.wait_for(self.hh_filters_age_from)
 
-    def getHhFiltersAgeTo(self) -> WebElement:
-        return self.wait_for(self.hhFiltersAgeTo)
+    def get_hh_filters_age_to(self) -> WebElement:
+        return self.wait_for(self.hh_filters_age_to)
 
-    def getIndFiltersRegDateFrom(self) -> WebElement:
-        return self.wait_for(self.indFiltersRegDateFrom)
+    def get_ind_filters_reg_date_from(self) -> WebElement:
+        return self.wait_for(self.ind_filters_reg_date_from)
 
-    def getIndFiltersRegDateTo(self) -> WebElement:
-        return self.wait_for(self.indFiltersRegDateTo)
+    def get_ind_filters_reg_date_to(self) -> WebElement:
+        return self.wait_for(self.ind_filters_reg_date_to)
 
-    def getIndFiltersGrievanceTicket(self) -> WebElement:
-        return self.wait_for(self.indFiltersGrievanceTicket)
+    def get_ind_filters_grievance_ticket(self) -> WebElement:
+        return self.wait_for(self.ind_filters_grievance_ticket)
 
-    def getFilterAdministrativeArea(self) -> WebElement:
-        return self.wait_for(self.filterAdministrativeArea)
+    def get_filter_administrative_area(self) -> WebElement:
+        return self.wait_for(self.filter_administrative_area)
 
-    def getAdminLevel1Input(self) -> WebElement:
-        return self.wait_for(self.adminLevel1Input)
+    def get_admin_level_1_input(self) -> WebElement:
+        return self.wait_for(self.admin_level_1_input)
 
-    def getAdminLevel2Input(self) -> WebElement:
-        return self.wait_for(self.adminLevel2Input)
+    def get_admin_level_2_input(self) -> WebElement:
+        return self.wait_for(self.admin_level_2_input)
 
-    def getIndFiltersReceivedAssistance(self) -> WebElement:
-        return self.wait_for(self.indFiltersReceivedAssistance)
+    def get_ind_filters_received_assistance(self) -> WebElement:
+        return self.wait_for(self.ind_filters_received_assistance)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getCancelButton(self) -> WebElement:
-        return self.wait_for(self.cancelButton)
+    def get_cancel_button(self) -> WebElement:
+        return self.wait_for(self.cancel_button)
 
-    def getSubmitButton(self) -> WebElement:
-        return self.wait_for(self.submitButton)
+    def get_submit_button(self) -> WebElement:
+        return self.wait_for(self.submit_button)
 
-    def getTableContainer(self) -> WebElement:
-        return self.wait_for(self.tableContainer)
+    def get_table_container(self) -> WebElement:
+        return self.wait_for(self.table_container)
 
-    def getTable(self) -> WebElement:
+    def get_table(self) -> WebElement:
         return self.wait_for(self.table)
 
-    def getTableHeaderCheckbox(self) -> WebElement:
-        return self.wait_for(self.tableHeaderCheckbox)
+    def get_table_header_checkbox(self) -> WebElement:
+        return self.wait_for(self.table_header_checkbox)
 
-    def getTableHeaderField(self) -> WebElement:
-        return self.wait_for(self.tableHeaderField)
+    def get_table_header_field(self) -> WebElement:
+        return self.wait_for(self.table_header_field)
 
-    def getTableHeaderRoundnumber(self) -> WebElement:
-        return self.wait_for(self.tableHeaderRoundnumber)
+    def get_table_header_roundnumber(self) -> WebElement:
+        return self.wait_for(self.table_header_roundnumber)
 
-    def getTableRow(self, index: str) -> WebElement:
-        locator = self.tableRow.format(index)
+    def get_table_row(self, index: str) -> WebElement:
+        locator = self.table_row.format(index)
         return self.wait_for(locator)
 
-    def getCheckbox(self, index: str) -> WebElement:
+    def get_checkbox(self, index: str) -> WebElement:
         locator = self.checkbox.format(index)
         return self.wait_for(locator)
 
-    def getTableCellField(self, index: str) -> WebElement:
-        locator = self.tableCellField.format(index)
+    def get_table_cell_field(self, index: str) -> WebElement:
+        locator = self.table_cell_field.format(index)
         return self.wait_for(locator)
 
-    def getTableCellRoundnumber(self, index: str) -> WebElement:
-        locator = self.tableCellRoundnumber.format(index)
+    def get_table_cell_roundnumber(self, index: str) -> WebElement:
+        locator = self.table_cell_roundnumber.format(index)
         return self.wait_for(locator)
 
-    def getSelectRoundnumber(self, index: str) -> WebElement:
-        locator = self.selectRoundnumber.format(index)
+    def get_select_roundnumber(self, index: str) -> WebElement:
+        locator = self.select_roundnumber.format(index)
         return self.wait_for(locator)
 
-    def getBackButton(self) -> WebElement:
-        return self.wait_for(self.backButton)
+    def get_back_button(self) -> WebElement:
+        return self.wait_for(self.back_button)

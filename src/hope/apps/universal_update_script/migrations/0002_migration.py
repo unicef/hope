@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
             name="backup_snapshot",
             field=models.FileField(
                 blank=True,
-                help_text="Backup Snapshot File, contains data before update. File updated on each start of update process.",
+                help_text="Backup Snapshot File, contains data before update."
+                " File updated on each start of update process.",
                 null=True,
                 upload_to="",
             ),

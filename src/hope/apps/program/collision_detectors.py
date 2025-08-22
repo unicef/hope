@@ -216,7 +216,8 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         1. Sanity check - household_to_merge must have an identification key
         2. Get the old household id that has the same identification key. If there is no such household, return
         3. Sanity check - All individuals in both households must have an identification key
-        4. Prepare the lists of individuals to add, update and remove. By comparing if the identification keys exist in both households
+        4. Prepare the lists of individuals to add, update and remove.
+        By comparing if the identification keys exist in both households
         5. Store the new roles (by identification_keys), because it will be deleted when we delete individuals
         6. Store the head of household identification key, we will have no access to it when we delete individuals
         7. Update the individuals in the old household with the new ones
@@ -252,7 +253,8 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             raise ValueError(
                 f"Cannot merge households with individuals with no identification key {household_to_merge.id}"
             )
-        # 4. Prepare the lists of individuals to add, update and remove. By comparing if the identification keys exist in both households
+        # 4. Prepare the lists of individuals to add, update and remove.
+        # By comparing if the identification keys exist in both households
         old_individuals_by_identification_key = {
             ind.identification_key: ind for ind in old_individuals if ind.identification_key
         }

@@ -3,68 +3,68 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class ProgrammeUsers(BaseComponents):
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    buttonTargetPopulationCreateNew = 'a[data-cy="button-target-population-create-new"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    partnerFilter = 'div[data-cy="partner-filter"]'
-    roleFilter = 'div[data-cy="role-filter"]'
-    statusFilter = 'div[data-cy="status-filter"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    arrowDown = 'button[data-cy="arrow-down"]'
-    countryRole = 'div[data-cy="country-role"]'
-    mappedCountryRole = 'div[data-cy="mapped-country-role"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    button_target_population_create_new = 'a[data-cy="button-target-population-create-new"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    partner_filter = 'div[data-cy="partner-filter"]'
+    role_filter = 'div[data-cy="role-filter"]'
+    status_filter = 'div[data-cy="status-filter"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_title = 'h6[data-cy="table-title"]'
+    table_label = 'span[data-cy="table-label"]'
+    status_container = 'div[data-cy="status-container"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    arrow_down = 'button[data-cy="arrow-down"]'
+    country_role = 'div[data-cy="country-role"]'
+    mapped_country_role = 'div[data-cy="mapped-country-role"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getButtonTargetPopulationCreateNew(self) -> WebElement:
-        return self.wait_for(self.buttonTargetPopulationCreateNew)
+    def get_button_target_population_create_new(self) -> WebElement:
+        return self.wait_for(self.button_target_population_create_new)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getPartnerFilter(self) -> WebElement:
-        return self.wait_for(self.partnerFilter)
+    def get_partner_filter(self) -> WebElement:
+        return self.wait_for(self.partner_filter)
 
-    def getRoleFilter(self) -> WebElement:
-        return self.wait_for(self.roleFilter)
+    def get_role_filter(self) -> WebElement:
+        return self.wait_for(self.role_filter)
 
-    def getStatusFilter(self) -> WebElement:
-        return self.wait_for(self.statusFilter)
+    def get_status_filter(self) -> WebElement:
+        return self.wait_for(self.status_filter)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getTableLabel(self) -> [WebElement]:
-        self.wait_for(self.tableLabel)
-        return self.get_elements(self.tableLabel)
+    def get_table_label(self) -> [WebElement]:
+        self.wait_for(self.table_label)
+        return self.get_elements(self.table_label)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getArrowDown(self) -> WebElement:
-        return self.wait_for(self.arrowDown)
+    def get_arrow_down(self) -> WebElement:
+        return self.wait_for(self.arrow_down)
 
-    def getCountryRole(self) -> WebElement:
-        return self.wait_for(self.countryRole)
+    def get_country_role(self) -> WebElement:
+        return self.wait_for(self.country_role)
 
-    def getMappedCountryRole(self) -> WebElement:
-        return self.wait_for(self.mappedCountryRole)
+    def get_mapped_country_role(self) -> WebElement:
+        return self.wait_for(self.mapped_country_role)

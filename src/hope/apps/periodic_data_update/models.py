@@ -97,7 +97,10 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
             return self.Status.TO_EXPORT
         if self.celery_status == self.CELERY_STATUS_RETRY:
             return self.Status.TO_EXPORT
-        if self.celery_status == self.CELERY_STATUS_REVOKED or self.celery_status == self.CELERY_STATUS_CANCELED:
+        if self.celery_status in [
+            self.CELERY_STATUS_REVOKED,
+            self.CELERY_STATUS_CANCELED,
+        ]:
             return self.Status.CANCELED
         return self.status
 
@@ -166,7 +169,10 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
             return self.Status.PENDING
         if self.celery_status == self.CELERY_STATUS_RETRY:
             return self.Status.PENDING
-        if self.celery_status == self.CELERY_STATUS_REVOKED or self.celery_status == self.CELERY_STATUS_CANCELED:
+        if self.celery_status in [
+            self.CELERY_STATUS_REVOKED,
+            self.CELERY_STATUS_CANCELED,
+        ]:
             return self.Status.CANCELED
 
         return self.status

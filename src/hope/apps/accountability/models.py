@@ -197,7 +197,7 @@ class FeedbackMessage(TimeStampedUUIDModel):
         verbose_name = _("Feedback message")
 
 
-class SampleFileExpiredException(Exception):
+class SampleFileExpiredError(Exception):
     pass
 
 
@@ -284,7 +284,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         if not self.sample_file:
             return None
         if not self.has_valid_sample_file():
-            raise SampleFileExpiredException()
+            raise SampleFileExpiredError()
         return self.sample_file.url
 
     def has_valid_sample_file(self) -> bool:

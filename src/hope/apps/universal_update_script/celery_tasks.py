@@ -49,7 +49,10 @@ def run_universal_individual_update(universal_update_id: str) -> str:
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
     except Exception as e:  # pragma: no cover
-        error_message = f"Unexpected error occurred in run_universal_update for UniversalUpdate {universal_update_id}\n{traceback.format_exc()}"
+        error_message = (
+            f"Unexpected error occurred in run_universal_update for UniversalUpdate"
+            f" {universal_update_id}\n{traceback.format_exc()}"
+        )
         universal_update.save_logs(error_message)
         raise e
     finally:
@@ -79,7 +82,10 @@ def generate_universal_individual_update_template(universal_update_id: str) -> s
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
     except Exception as e:  # pragma: no cover
-        error_message = f"Unexpected error occurred in run_universal_update for UniversalUpdate {universal_update_id}\n{traceback.format_exc()}"
+        error_message = (
+            f"Unexpected error occurred in run_universal_update for UniversalUpdate"
+            f" {universal_update_id}\n{traceback.format_exc()}"
+        )
         universal_update.save_logs(error_message)
         raise e
     finally:

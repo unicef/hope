@@ -271,18 +271,17 @@ def create_needs_adjudication_tickets_for_biometrics(
                 original_individual = pair.individual1
             else:
                 original_individual = pair.individual2  # pragma: no_cover
-
+        # if both individuals are from the same rdi mark second as duplicate
+        # if one of individuals is in already merged population mark it as original
+        elif pair.individual1.registration_data_import in [
+            pair.individual2.registration_data_import,
+            rdi,
+        ]:
+            original_individual = pair.individual1
+            duplicate_individual = pair.individual2
         else:
-            # if both individuals are from the same rdi mark second as duplicate
-            # if one of individuals is in already merged population mark it as original
-            if (
-                pair.individual1.registration_data_import == pair.individual2.registration_data_import
-            ) or pair.individual2.registration_data_import == rdi:
-                original_individual = pair.individual1
-                duplicate_individual = pair.individual2
-            else:
-                original_individual = pair.individual2
-                duplicate_individual = pair.individual1
+            original_individual = pair.individual2
+            duplicate_individual = pair.individual1
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=original_individual,
