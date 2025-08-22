@@ -2,17 +2,16 @@ import io
 import os
 from datetime import datetime
 from unittest import mock
-from unittest.mock import MagicMock
 
 from django.test import TestCase
 
 import openpyxl
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.models import (
     PaymentPlan,
@@ -40,10 +39,10 @@ class TestQCFReportsService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.user.email_user = MagicMock()
+        partner_unicef = PartnerFactory(name="UNICEF")
+        cls.user = UserFactory.create(partner=partner_unicef)
         role, created = Role.objects.update_or_create(
-            name="Role with Permissions", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF]}
+            name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
         user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.program = ProgramFactory(status=Program.ACTIVE)
@@ -52,6 +51,7 @@ class TestQCFReportsService(TestCase):
             program_cycle=cls.cycle,
             created_by=cls.user,
             status=PaymentPlan.Status.ACCEPTED,
+            business_area=cls.business_area,
         )
         cls.payment_plan.refresh_from_db()
 
@@ -194,5 +194,6 @@ class TestQCFReportsService(TestCase):
             self.assertEqual(charges_total, 35.72)
             self.assertEqual(refunds_total, 0)
 
-            # TODO invoke send email manually and test
-            # self.user.email_user.assert_called_once()
+            with mock.patch.object(User, "email_user") as mock_email_user:
+                service.send_notification_emails(report)  # type: ignore
+                mock_email_user.assert_called_once()
