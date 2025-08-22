@@ -20,6 +20,7 @@ from hope.apps.household.api.serializers.individual import (
     IndividualSimpleSerializer,
 )
 from hope.apps.household.models import (
+    ROLE_CHOICE,
     Document,
     DocumentType,
     Household,
@@ -92,6 +93,11 @@ class TicketNoteSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+
+class HouseholdUpdateRolesSerializer(serializers.Serializer):
+    individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
+    new_role = serializers.ChoiceField(choices=ROLE_CHOICE, required=True)
 
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
@@ -304,6 +310,15 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     currency = serializers.CharField(required=False)
     unhcr_id = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
+    roles = serializers.ListField(child=HouseholdUpdateRolesSerializer(), required=False)
+
+    @staticmethod
+    def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
+        new_roles = [item["new_role"] for item in value]
+        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role != "NO_ROLE"}
+        if duplicates:
+            raise serializers.ValidationError(f"Duplicate roles are not allowed: {', '.join(duplicates)}")
+        return value
 
 
 class AddIndividualDataSerializer(serializers.Serializer):
@@ -332,7 +347,6 @@ class AddIndividualDataSerializer(serializers.Serializer):
     comms_disability = serializers.CharField(required=False)
     who_answers_phone = serializers.CharField(required=False)
     who_answers_alt_phone = serializers.CharField(required=False)
-    role = serializers.CharField()
     business_area = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentityGTSerializer(many=True, required=False)
@@ -372,7 +386,6 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     comms_disability = serializers.CharField(required=False, allow_blank=True)
     who_answers_phone = serializers.CharField(required=False)
     who_answers_alt_phone = serializers.CharField(required=False)
-    role = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     documents_to_remove = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()),
@@ -617,7 +630,7 @@ class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
 
 
 class GrievanceHouseholdDataChangeApproveSerializer(serializers.Serializer):
-    household_approve_data = serializers.JSONField()
+    household_approve_data = serializers.JSONField(required=False)
     flex_fields_approve_data = serializers.JSONField(required=False)
     version = serializers.IntegerField(required=False)
 

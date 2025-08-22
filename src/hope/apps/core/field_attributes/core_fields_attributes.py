@@ -2031,7 +2031,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
         "get_query": get_role_query,
-        "scope": [Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [Scope.TARGETING, Scope.KOBO_IMPORT],
         "snapshot_field": "roles__role__individual__id",
     },
     {

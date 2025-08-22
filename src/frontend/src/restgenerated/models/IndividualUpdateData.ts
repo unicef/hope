@@ -35,7 +35,6 @@ export type IndividualUpdateData = {
     commsDisability?: string;
     whoAnswersPhone?: string;
     whoAnswersAltPhone?: string;
-    role?: string;
     documents?: Array<IndividualDocument>;
     documentsToRemove?: Array<string>;
     documentsToEdit?: Array<EditIndividualDocument>;

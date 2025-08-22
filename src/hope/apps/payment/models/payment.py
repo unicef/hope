@@ -153,7 +153,6 @@ class PaymentPlan(
             "currency",
             "dispersion_start_date",
             "dispersion_end_date",
-            "name",
             "start_date",
             "end_date",
             "background_action_status",

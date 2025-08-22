@@ -6,7 +6,7 @@ from collections import Counter
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_object_or_404

@@ -346,7 +346,11 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const formData = prepareRestUpdateVariables(values, ticket);
+          const formData = prepareRestUpdateVariables(
+            businessAreaSlug,
+            values,
+            ticket,
+          );
           await updateGrievanceTicket({
             id: ticket.id,
             formData,
