@@ -23,6 +23,7 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../programContext';
 import { MiśTheme } from '../../theme';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
+import { showApiErrorMessages } from '@utils/utils';
 
 const Separator = styled.div`
   width: 1px;
@@ -102,14 +103,8 @@ export const GrievanceDetailsToolbar = ({
         formData: { status },
       });
     },
-    onError: (error: any) => {
-      if (error?.response?.data?.errors) {
-        Object.values(error.response.data.errors).forEach((errorMsg: any) => {
-          showMessage(errorMsg);
-        });
-      } else {
-        showMessage(error?.message || 'An error occurred');
-      }
+    onError: (e: any) => {
+      showApiErrorMessages(e, showMessage);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
