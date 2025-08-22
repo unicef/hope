@@ -13,7 +13,7 @@ export type PDUOnlineEditDetail = {
     status: string;
     statusDisplay: string;
     readonly isAuthorized: boolean;
-    approvedBy?: string | null;
+    approvedBy?: string;
     approvedAt?: string | null;
     sentBackComment: PDUOnlineEditSentBackComment;
     editData?: any;

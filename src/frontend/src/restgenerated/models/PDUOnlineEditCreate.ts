@@ -7,7 +7,7 @@ export type PDUOnlineEditCreate = {
     name?: string | null;
     roundsData: Array<Record<string, any>>;
     filters: any;
-    readonly createdBy: string | null;
+    createdBy?: string;
     authorizedUsers?: Array<string>;
 };
 

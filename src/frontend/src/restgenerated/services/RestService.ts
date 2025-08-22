@@ -10531,16 +10531,16 @@ export class RestService {
          */
         ordering?: string,
         /**
+         * * `PENDING_CREATE` - Pending create
          * * `NEW` - New
          * * `READY` - Ready
          * * `APPROVED` - Approved
+         * * `PENDING_MERGE` - Pending merge
          * * `MERGED` - Merged
-         * * `PENDING_CREATE` - Pending create
          * * `NOT_SCHEDULED_CREATE` - Not scheduled create
          * * `CREATING` - Creating
          * * `FAILED_CREATE` - Failed create
          * * `CANCELED_CREATE` - Canceled create
-         * * `PENDING_MERGE` - Pending merge
          * * `NOT_SCHEDULED_MERGE` - Not scheduled merge
          * * `MERGING` - Processing
          * * `FAILED_MERGE` - Failed merge
@@ -10862,16 +10862,16 @@ export class RestService {
          */
         ordering?: string,
         /**
+         * * `PENDING_CREATE` - Pending create
          * * `NEW` - New
          * * `READY` - Ready
          * * `APPROVED` - Approved
+         * * `PENDING_MERGE` - Pending merge
          * * `MERGED` - Merged
-         * * `PENDING_CREATE` - Pending create
          * * `NOT_SCHEDULED_CREATE` - Not scheduled create
          * * `CREATING` - Creating
          * * `FAILED_CREATE` - Failed create
          * * `CANCELED_CREATE` - Canceled create
-         * * `PENDING_MERGE` - Pending merge
          * * `NOT_SCHEDULED_MERGE` - Not scheduled merge
          * * `MERGING` - Processing
          * * `FAILED_MERGE` - Failed merge
@@ -10934,16 +10934,16 @@ export class RestService {
          */
         permission?: 'PDU_ONLINE_APPROVE' | 'PDU_ONLINE_MERGE' | 'PDU_ONLINE_SAVE_DATA',
         /**
+         * * `PENDING_CREATE` - Pending create
          * * `NEW` - New
          * * `READY` - Ready
          * * `APPROVED` - Approved
+         * * `PENDING_MERGE` - Pending merge
          * * `MERGED` - Merged
-         * * `PENDING_CREATE` - Pending create
          * * `NOT_SCHEDULED_CREATE` - Not scheduled create
          * * `CREATING` - Creating
          * * `FAILED_CREATE` - Failed create
          * * `CANCELED_CREATE` - Canceled create
-         * * `PENDING_MERGE` - Pending merge
          * * `NOT_SCHEDULED_MERGE` - Not scheduled merge
          * * `MERGING` - Processing
          * * `FAILED_MERGE` - Failed merge

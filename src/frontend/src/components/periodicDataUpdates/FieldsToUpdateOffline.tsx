@@ -31,7 +31,7 @@ interface SelectedField extends Field {
   label: string;
 }
 
-interface FieldsToUpdateProps {
+interface FieldsToUpdateOfflineProps {
   values: {
     roundsData: SelectedField[];
   };
@@ -40,7 +40,7 @@ interface FieldsToUpdateProps {
   setCheckedFields?: (checkedFields: Record<string, boolean>) => void;
 }
 
-export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
+export const FieldsToUpdateOffline: FC<FieldsToUpdateOfflineProps> = ({
   values,
   setFieldValue,
   checkedFields,
