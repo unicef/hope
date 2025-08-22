@@ -20,6 +20,7 @@ describe('HouseholdMembersTable', () => {
   // Mock household data
   const mockHousehold = {
     id: 'household-1',
+    rolesInHousehold: [],
     deliveredQuantities: [1, 2],
     unicefId: 'HH-001',
     headOfHousehold: {
@@ -101,7 +102,7 @@ describe('HouseholdMembersTable', () => {
   };
 
   // Mock household members data
-  const mockHouseholdMembersData :PaginatedHouseholdMemberList = {
+  const mockHouseholdMembersData: PaginatedHouseholdMemberList = {
     next: null,
     previous: null,
     results: [
@@ -121,7 +122,7 @@ describe('HouseholdMembersTable', () => {
           admin2: { id: 'admin2-1', name: 'District 1' },
           admin3: { id: 'admin3-1', name: '' },
           admin4: { id: 'admin4-1', name: '' },
-          programSlug: "asd3",
+          programSlug: 'asd3',
           firstRegistrationDate: '2023-01-15T10:30:00Z',
           lastRegistrationDate: '2023-01-15T10:30:00Z',
           totalCashReceived: '1000.00',
@@ -162,7 +163,7 @@ describe('HouseholdMembersTable', () => {
           countryOrigin: 'Country 1',
           country: 'Country 1',
           zipCode: null,
-          programSlug: "asd3",
+          programSlug: 'asd3',
           address: '',
           start: null,
           geopoint: null,
@@ -195,7 +196,7 @@ describe('HouseholdMembersTable', () => {
           country: 'Country 1',
           zipCode: null,
           address: '',
-          programSlug: "asd3",
+          programSlug: 'asd3',
           start: null,
           geopoint: null,
           importId: 'import-1',
