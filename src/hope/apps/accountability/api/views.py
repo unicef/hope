@@ -58,7 +58,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.models import BusinessArea
-from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvided
+from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
 from hope.apps.core.utils import to_choice_object
 from hope.apps.household.models import Household
 from hope.apps.program.models import Program
@@ -445,7 +445,7 @@ class SurveyViewSet(
     def available_flows(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         try:
             api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
-        except TokenNotProvided:
+        except TokenNotProvidedError:
             raise ValidationError("Token is not provided.")
         return Response(api.get_flows())
 

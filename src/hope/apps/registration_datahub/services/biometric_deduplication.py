@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class BiometricDeduplicationService:
-    class BiometricDeduplicationServiceException(Exception):
+    class BiometricDeduplicationServiceError(Exception):
         pass
 
     def __init__(self) -> None:
@@ -81,7 +81,7 @@ class BiometricDeduplicationService:
             try:
                 self.api.bulk_upload_images(deduplication_set_id, images)
 
-            except DeduplicationEngineAPI.DeduplicationEngineAPIException:
+            except DeduplicationEngineAPI.DeduplicationEngineAPIError:
                 logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
                 rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
                 rdi.save(update_fields=["deduplication_engine_status"])
@@ -93,7 +93,7 @@ class BiometricDeduplicationService:
     def process_deduplication_set(self, deduplication_set_id: str, rdis: QuerySet[RegistrationDataImport]) -> None:
         response_data, status = self.api.process_deduplication(deduplication_set_id)
         if status == 409:
-            raise self.BiometricDeduplicationServiceException(
+            raise self.BiometricDeduplicationServiceError(
                 f"Deduplication is already in progress for deduplication set {deduplication_set_id}"
             )
         if status == 200:
@@ -107,7 +107,7 @@ class BiometricDeduplicationService:
 
     def upload_and_process_deduplication_set(self, program: Program) -> None:
         if not program.biometric_deduplication_enabled:
-            raise self.BiometricDeduplicationServiceException("Biometric deduplication is not enabled for this program")
+            raise self.BiometricDeduplicationServiceError("Biometric deduplication is not enabled for this program")
 
         deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
         if not deduplication_set_id:
@@ -118,7 +118,7 @@ class BiometricDeduplicationService:
             program=program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         ).exists():
-            raise self.BiometricDeduplicationServiceException("Deduplication is already in progress for some RDIs")
+            raise self.BiometricDeduplicationServiceError("Deduplication is already in progress for some RDIs")
 
         pending_rdis = RegistrationDataImport.objects.filter(
             program=program,
@@ -146,7 +146,7 @@ class BiometricDeduplicationService:
             )
             self.process_deduplication_set(deduplication_set_id, uploaded_rdis)
         else:
-            raise self.BiometricDeduplicationServiceException("Failed to upload images for all RDIs")
+            raise self.BiometricDeduplicationServiceError("Failed to upload images for all RDIs")
 
     def delete_deduplication_set(self, program: Program) -> None:
         if program.deduplication_set_id:

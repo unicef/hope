@@ -167,7 +167,6 @@ def test_update_recent_dashboard_figures_ba_error_continues(
         if slug == afghanistan.slug:
             raise Exception("BA refresh error for afghanistan")
         # For other BAs (e.g., iraq), the mock should behave normally (return None)
-        return
 
     mock_ba_refresh.side_effect = ba_refresh_side_effect_func
 

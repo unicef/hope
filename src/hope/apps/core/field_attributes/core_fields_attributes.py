@@ -1698,7 +1698,8 @@ CORE_FIELDS_ATTRIBUTES = [
         "lookup": "physical_disability",
         "required": False,
         "label": {
-            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL} has difficulty walking or climbing steps, what is the severity?"
+            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL}"
+            f" has difficulty walking or climbing steps, what is the severity?"
         },
         "hint": "",
         "choices": [
@@ -1722,7 +1723,8 @@ CORE_FIELDS_ATTRIBUTES = [
         "lookup": "memory_disability",
         "required": False,
         "label": {
-            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL} has difficulty remembering or concentrating, what is the severity?"
+            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL}"
+            f" has difficulty remembering or concentrating, what is the severity?"
         },
         "hint": "",
         "choices": [

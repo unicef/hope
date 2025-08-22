@@ -76,7 +76,7 @@ def get_program_id_from_headers(headers: Union[dict, "HttpHeaders"]) -> str | No
     # sometimes it get from info.context.headers or kwargs["Program"]: str
 
     program_id = headers.get("Program")
-    return decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
+    return decode_id_string(program_id) if program_id not in ["all", "undefined"] else None
 
 
 def unique_slugify(
@@ -684,7 +684,7 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
                 [str(current_choice_value) for current_choice_value in value] if isinstance(value, list) else str(value)
             )
         if flex_field == FlexibleAttribute.PDU:
-            for round_number, round_data in flex_fields_copy[flex_field_name].items():
+            for round_number, round_data in value.items():
                 if round_data["value"] is None:
                     flex_fields_with_str_choices[flex_field_name].pop(round_number)
             if not flex_fields_with_str_choices[flex_field_name]:

@@ -39,7 +39,7 @@ class TestGenericRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")

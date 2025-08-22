@@ -819,7 +819,7 @@ class TestPaymentGatewayService(BaseTestCase):
         payment.save()
         payment.collector.save()
         with self.assertRaisesMessage(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
@@ -842,7 +842,7 @@ class TestPaymentGatewayService(BaseTestCase):
         )
 
         with self.assertRaisesMessage(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             f"Not found snapshot for Payment {payment.unicef_id}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
@@ -936,7 +936,7 @@ class TestPaymentGatewayService(BaseTestCase):
         bad_status = "bad_status"
         s.value = bad_status
         with self.assertRaisesRegex(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             "Can't set invalid Payment Instruction status:",
         ):
             PaymentGatewayAPI().change_payment_instruction_status(

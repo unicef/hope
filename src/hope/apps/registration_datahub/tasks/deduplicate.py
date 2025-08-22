@@ -269,7 +269,8 @@ class DeduplicateTask:
                 )
                 self._set_error_message_and_status(registration_data_import, message)
                 break
-            # if it is collided household individual, we dont deduplicate against population, because it will be just updating existing household
+            # if it is collided household individual, we dont deduplicate against population,
+            # because it will be just updating existing household
             if str(pending_individual.id) in individual_ids_to_exclude:
                 continue
             # Check against the population
@@ -297,7 +298,8 @@ class DeduplicateTask:
 
             if (len(duplicates_in_population) >= allowed_duplicates_in_population) and individuals_count > 1:
                 message = (
-                    f"The percentage of records ({self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
+                    f"The percentage of records ("
+                    f"{self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a population has reached the maximum number."
                 )
                 self._set_error_message_and_status(registration_data_import, message)
@@ -796,21 +798,20 @@ class HardDocumentDeduplication:
                         # do not create ticket for the same Individual with the same doc number
                         if new_document.type.valid_for_deduplication:
                             new_document.status = Document.STATUS_INVALID
+                        elif (
+                            new_documents.filter(
+                                id__in=[d.id for d in documents_to_dedup],
+                                document_number=new_document.document_number,
+                                type=new_document.type,
+                                individual=new_document.individual,
+                            )
+                            .exclude(id=new_document.id)
+                            .exists()
+                        ):
+                            # same document number/type/individual_id exists in batch
+                            new_document.status = Document.STATUS_INVALID
                         else:
-                            if (
-                                new_documents.filter(
-                                    id__in=[d.id for d in documents_to_dedup],
-                                    document_number=new_document.document_number,
-                                    type=new_document.type,
-                                    individual=new_document.individual,
-                                )
-                                .exclude(id=new_document.id)
-                                .exists()
-                            ):
-                                # same document number/type/individual_id exists in batch
-                                new_document.status = Document.STATUS_INVALID
-                            else:
-                                new_document.status = Document.STATUS_VALID
+                            new_document.status = Document.STATUS_VALID
                         new_document_signatures_in_batch_per_individual_dict[str(new_document.individual_id)].remove(
                             new_document_signature
                         )
@@ -844,7 +845,7 @@ class HardDocumentDeduplication:
                 )
                 raise
 
-            PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+            PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
             possible_duplicates_through_existing_list = (
                 PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
                 .order_by("ticketneedsadjudicationdetails")
@@ -866,7 +867,7 @@ class HardDocumentDeduplication:
 
             ticket_data_collected = []
             tickets_programs = []
-            GrievanceTicketProgramThrough = GrievanceTicket.programs.through
+            GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
             for ticket_data in ticket_data_dict.values():
                 main_individual = ticket_data["original"].individual
                 prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
@@ -944,7 +945,7 @@ class HardDocumentDeduplication:
             is_multiple_duplicates_version=True,
             selected_individual=None,
         )
-        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
         possible_duplicates_throughs = [
             PossibleDuplicateThrough(
                 individual=possible_duplicate_individual,

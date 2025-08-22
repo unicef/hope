@@ -29,7 +29,7 @@ def mock_payment_gateway_env_vars() -> None:
 class SyncWithPaymentGatewayTest(TestCase):
     def setUp(self: Any) -> None:
         self.business_area = create_afghanistan()
-        User = get_user_model()
+        User = get_user_model()  # noqa
         self.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
         self.client.login(username=self.admin_user.username, password="password")
         self.financial_service_provider = FinancialServiceProviderFactory(
