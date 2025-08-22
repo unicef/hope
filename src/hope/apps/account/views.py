@@ -22,5 +22,4 @@ def download_exported_users(request: HttpRequest, business_area_slug: str) -> Ht
         wb.save(tmp.name)
         file = bytes(tmp.read())
     response.write(file)
-
     return response
