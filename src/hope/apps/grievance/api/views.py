@@ -772,8 +772,8 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
-        individual_approve_data = input_data.get("individual_approve_data")
-        flex_fields_approve_data = input_data.get("flex_fields_approve_data")
+        individual_approve_data = input_data.get("individual_approve_data", {})
+        flex_fields_approve_data = input_data.get("flex_fields_approve_data", {})
         user = request.user
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
