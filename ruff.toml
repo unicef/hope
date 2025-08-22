@@ -1,6 +1,6 @@
 target-version = "py312"
 line-length = 120
-exclude = ["src/frontend", "src/hope/one_time_scripts"]
+exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py"]
 
 [lint]
 select = [
@@ -29,7 +29,7 @@ select = [
     "Q", # flake8-quotes
     "R", # PyLint Refactor
     "RET", # flake8-return
-#    "S", # bandit,
+    "S", # bandit,
     "SIM", # flake8-simplify
     "T10", # flake8-debugger
     "T20", # flake8-print
@@ -73,6 +73,8 @@ ignore = [
     "PT027",  # pytest.raises
     "PT022",  # yield
     "PT015",  # pytest.fail
+
+    "S314",  # defusedxml
 
 ]
 

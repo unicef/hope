@@ -363,7 +363,7 @@ class SignatureManager(models.Manager):
 
 
 class SignatureMixin(models.Model):
-    signature_hash = models.CharField(max_length=40, blank=True, editable=False)
+    signature_hash = models.CharField(max_length=256, blank=True, editable=False)
     signature_manager = SignatureManager()
 
     class Meta:
@@ -383,7 +383,7 @@ class SignatureMixin(models.Model):
 
     def update_signature_hash(self) -> None:
         if hasattr(self, "signature_fields") and isinstance(self.signature_fields, list | tuple):
-            sha1 = hashlib.sha1()
+            sha1 = hashlib.sha256()
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
 
