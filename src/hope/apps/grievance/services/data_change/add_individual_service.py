@@ -15,7 +15,6 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_add_document,
     handle_add_identity,
     handle_documents,
-    handle_role,
     save_images,
     to_date_string,
     to_phone_number_str,
@@ -27,7 +26,6 @@ from hope.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
-    ROLE_NO_ROLE,
     Document,
     Household,
     Individual,
@@ -95,7 +93,6 @@ class AddIndividualService(DataChangeService):
         individual_data = details.individual_data
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
-        role = individual_data.pop("role", ROLE_NO_ROLE)
         individual_data["flex_fields"] = populate_pdu_with_null_values(
             household.program, individual_data.get("flex_fields", None)
         )
@@ -130,7 +127,6 @@ class AddIndividualService(DataChangeService):
         else:
             individual.relationship = NON_BENEFICIARY
             individual.save()
-        handle_role(role, household, individual)
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(identities_to_create)
         if household:
