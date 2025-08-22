@@ -402,4 +402,7 @@ class TestIndividualBlockFilter(TestCase):
 
         assert payment_plan.is_social_worker_program
         basic_query_2 = payment_plan.get_basic_query()
-        assert str(basic_query_2) == "(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', ['IND_01', 'IND-02']))))"
+        assert (
+            str(basic_query_2)
+            == "(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', ['IND_01', 'IND-02']))))"
+        )
