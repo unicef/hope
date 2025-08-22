@@ -11,7 +11,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
@@ -27,7 +27,7 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.mark.elasticsearch
-class TestCreateNeedsAdjudicationTickets(APITestCase):
+class TestCreateNeedsAdjudicationTickets(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from pytz import utc
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
@@ -43,7 +43,7 @@ def file_reference_id() -> BytesIO:
     return BytesIO(content)
 
 
-class TestDeliveryDate(APITestCase):
+class TestDeliveryDate(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

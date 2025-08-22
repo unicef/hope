@@ -1,6 +1,7 @@
 import datetime as dt
 import uuid
 
+import pytest
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -38,16 +39,15 @@ from hope.apps.core.attributes_qet_queries import (
     get_unhcr_id_number_query,
     registration_data_import_query,
 )
-from hope.apps.core.base_test_case import APITestCase
 from hope.apps.core.countries import Countries
 from hope.apps.household.models import UNHCR, WFP
 
 
-class TestAttributesGetQueries(APITestCase):
+class TestAttributesGetQueries:
+    @pytest.fixture(autouse=True)
     def setUp(self) -> None:
         self.today = dt.date.today()
         self.social_worker_prefix = "individuals__"
-        super().setUp()
 
     def test_age_to_birth_date_range_query_min_only(self) -> None:
         q = age_to_birth_date_range_query("birth_date", 30, None)
@@ -106,11 +106,11 @@ class TestAttributesGetQueries(APITestCase):
         assert q == Q(birth_date__gt=expected_max_date)
 
     def test_invalid_comparison_method(self) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             age_to_birth_date_query("INVALID_METHOD", [25])
 
     def test_incorrect_argument_count(self) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             age_to_birth_date_query("EQUALS", [])
 
     def test_country_query_equals(self) -> None:
@@ -126,7 +126,7 @@ class TestAttributesGetQueries(APITestCase):
         assert q == Q(registration_data_import__pk__in=[1, 2, 3])
 
     def test_invalid_country_comparison_method(self) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             country_query("INVALID_METHOD", ["USA"])
 
     def test_get_has_phone_number_query_true(self) -> None:
@@ -321,7 +321,7 @@ class TestAttributesGetQueries(APITestCase):
         assert result == expected
 
     def test_invalid_country_origin_comparison(self) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             country_origin_query("INVALID", ["CAN"], is_social_worker_query=True)
 
     def test_get_birth_certificate_issuer_query(self) -> None:

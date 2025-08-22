@@ -22,7 +22,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 from pytz import utc
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import prepare_payment_plan_task
@@ -34,7 +34,7 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.program.models import Program
 
 
-class TestPaymentSignature(APITestCase):
+class TestPaymentSignature(BaseTestCase):
     databases = ("default",)
 
     @classmethod

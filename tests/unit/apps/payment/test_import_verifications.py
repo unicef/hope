@@ -27,7 +27,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from parameterized import parameterized
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
 from hope.apps.payment.models import PaymentVerification
@@ -39,7 +39,7 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 
 
-class TestXlsxVerificationImport(APITestCase):
+class TestXlsxVerificationImport(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         create_afghanistan()

@@ -21,7 +21,7 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -68,7 +68,7 @@ def normalize(data: Any) -> dict:
     return json.loads(json.dumps(data))
 
 
-class TestPaymentGatewayService(APITestCase):
+class TestPaymentGatewayService(BaseTestCase):
     databases = ("default",)
 
     @classmethod

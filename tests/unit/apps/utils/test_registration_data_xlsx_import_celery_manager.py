@@ -4,12 +4,12 @@ from django.core.management import call_command
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 
 
-class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
+class TestRegistrationDataXlsxImportCeleryManager(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
