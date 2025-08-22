@@ -11,7 +11,7 @@ import pytest
 from hct_mis_api.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 
 
-class TestWU(WesternUnionFTPClient):
+class WesternUnionFTPClientMock(WesternUnionFTPClient):
     HOST = "fakehost"
     PORT = 22
     USERNAME = "user"
@@ -49,13 +49,13 @@ class TestWesternUnionFTPClient(TestCase):
     def test_print_files(
         self,
     ) -> None:
-        ftp_client = TestWU()
+        ftp_client = WesternUnionFTPClientMock()
         ftp_client.client.listdir_attr = MagicMock(return_value=[])
         ftp_client.print_files()
         ftp_client.client.listdir_attr.assert_called_once()
 
     def test_get_files_since_filters_and_downloads(self) -> None:
-        ftp_client = TestWU()
+        ftp_client = WesternUnionFTPClientMock()
         now = datetime.now()
         old_time = now - timedelta(days=5)
         new_time = now - timedelta(hours=1)

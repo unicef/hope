@@ -35,12 +35,14 @@ logger = logging.getLogger(__name__)
 class QCFReportPaymentRowData:
     payment_unicef_id: str
     mtcn: str
+    mtcns_match: bool
+    hope_mtcn: str
     payment_plan_unicef_id: str
     programme: str
     fc: str
     principal_amount: float
     charges_amount: float
-    refund_amount: float
+    fee_amount: float
 
 
 @dataclasses.dataclass
@@ -48,23 +50,20 @@ class QCFReportPaymentPlanData:
     payment_plan_unicef_id: str
     principal_total: float = dataclasses.field(init=False)
     charges_total: float = dataclasses.field(init=False)
-    refunds_total_positive: float = dataclasses.field(init=False)
-    refunds_total_negative: float = dataclasses.field(init=False)
+    refunds_total: float = dataclasses.field(init=False)
+    fees_total: float = dataclasses.field(init=False)
     payments_data: List[QCFReportPaymentRowData]
 
     def __post_init__(self) -> None:
-        self.principal_total = sum(p.principal_amount for p in self.payments_data)
-        self.charges_total = sum(p.charges_amount for p in self.payments_data)
-        self.refunds_total_positive = sum(p.refund_amount for p in self.payments_data if p.refund_amount >= 0)
-        self.refunds_total_negative = sum(p.refund_amount for p in self.payments_data if p.refund_amount < 0)
+        self.principal_total = sum(p.principal_amount for p in self.payments_data if p.principal_amount >= 0) or 0
+        self.charges_total = sum(p.charges_amount for p in self.payments_data) or 0
+        self.refunds_total = sum(p.principal_amount for p in self.payments_data if p.principal_amount < 0) or 0
+        self.fees_total = sum(p.fee_amount for p in self.payments_data) or 0
 
 
 class QCFReportsService:
     class QCFReportsServiceException(Exception):
         pass
-
-    def __init__(self) -> None:
-        self.ftp_client = WesternUnionFTPClient()
 
     def process_zip_file(self, file_content: io.BytesIO, wu_qcf_file: WesternUnionQCFFile) -> None:
         with zipfile.ZipFile(file_content) as z:
@@ -74,7 +73,8 @@ class QCFReportsService:
                         self.process_qcf_report_file(zip_info.filename, txt_file, wu_qcf_file)
 
     def process_files_since(self, date_from: datetime) -> None:
-        files: List[Tuple[str, io.BytesIO]] = self.ftp_client.get_files_since(date_from)
+        ftp_client = WesternUnionFTPClient()
+        files: List[Tuple[str, io.BytesIO]] = ftp_client.get_files_since(date_from)
         for filename, file_like in files:
             if not WesternUnionQCFFile.objects.filter(name=filename).exists():
                 wu_qcf_file = self.store_qcf_file(filename, file_like)
@@ -160,30 +160,29 @@ class QCFReportsService:
             f"QCF_{payment_plan.business_area.slug}_{payment_plan.unicef_id}_{no_of_qcf_reports_for_pp + 1}.xlsx"
         )
 
-        funds_commitments = (
-            payment_plan.funds_commitments.all().values_list("rec_serial_number", flat=True) or []
-        )  # TODO show FC rec_serial_number?
-        funds_commitments_str = ", ".join(str(v) for v in funds_commitments) if funds_commitments else "No FC assigned"
-
+        funds_commitments_str = ", ".join(
+            f"{number}/{item}"
+            for number, item in payment_plan.funds_commitments.all().values_list(
+                "funds_commitment_group__funds_commitment_number", "funds_commitment_item"
+            )
+        )
         payments_data: List[QCFReportPaymentRowData] = []
         for payment, fields in payment_raw_data:
-            mtcn = fields[1]
-            if mtcn != payment.fsp_auth_code:
-                # TODO should we raise it and expose mtcn?
-                raise self.QCFReportsServiceException(
-                    f"MTCN {mtcn} does not match payment fsp_auth_code for payment {payment.unicef_id}: {payment.fsp_auth_code}"
-                )
+            report_mtcn = fields[1]
+            mtcn_match: bool = str(report_mtcn) == str(payment.fsp_auth_code)
 
             payments_data.append(
                 QCFReportPaymentRowData(
                     payment_unicef_id=payment.unicef_id,
                     mtcn=fields[1],
+                    mtcns_match=mtcn_match,
+                    hope_mtcn=payment.fsp_auth_code,
                     payment_plan_unicef_id=payment_plan.unicef_id,
                     programme=payment_plan.program_cycle.program.name,
                     fc=funds_commitments_str,
                     principal_amount=float(fields[10]),
                     charges_amount=float(fields[11]),
-                    refund_amount=float(fields[0]),  # TODO which column contains refund values?
+                    fee_amount=float(fields[12]),
                 )
             )
 
@@ -191,9 +190,9 @@ class QCFReportsService:
             payment_plan_unicef_id=payment_plan.unicef_id, payments_data=payments_data
         )
 
-        return report_filename, self.generate_report_xlsx(report_filename, report_data)
+        return report_filename, self.generate_report_xlsx(report_data)
 
-    def generate_report_xlsx(self, filename: str, report_data: QCFReportPaymentPlanData) -> openpyxl.Workbook:
+    def generate_report_xlsx(self, report_data: QCFReportPaymentPlanData) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = f"QCF Report - {report_data.payment_plan_unicef_id}"
@@ -201,12 +200,14 @@ class QCFReportsService:
         headers = [
             "Payment ID",
             "MTCN",
+            "MTCNs match",
+            "HOPE MTCN",
             "Payment Plan ID",
             "Programme",
             "FC",
             "Principal Amount",
             "Charges Amount",
-            "Refund Amount",
+            "Fee Amount",
         ]
         ws.append(headers)
         for cell in ws[1]:
@@ -217,12 +218,14 @@ class QCFReportsService:
                 [
                     p.payment_unicef_id,
                     p.mtcn,
+                    p.mtcns_match,
+                    p.hope_mtcn,
                     p.payment_plan_unicef_id,
                     p.programme,
                     p.fc,
                     p.principal_amount,
                     p.charges_amount,
-                    p.refund_amount,
+                    p.fee_amount,
                 ]
             )
 
@@ -231,8 +234,7 @@ class QCFReportsService:
 
         ws.append(["Principal Total", "", "", "", report_data.principal_total])
         ws.append(["Charges Total", "", "", "", report_data.charges_total])
-        ws.append(["Refunds Total (positive)", "", "", "", report_data.refunds_total_positive])
-        ws.append(["Refunds Total (negative)", "", "", "", report_data.refunds_total_negative])
+        ws.append(["Refunds Total", "", "", "", report_data.refunds_total])
 
         last_row = ws.max_row
         for row in range(last_row - 3, last_row + 1):
