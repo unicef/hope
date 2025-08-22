@@ -141,8 +141,9 @@ export function TableRestComponent<T>({
 }: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
-  const emptyRows =
+  let emptyRows =
     rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage);
+  if (isNaN(emptyRows) || emptyRows < 0) emptyRows = 0;
 
   let body;
 
@@ -156,7 +157,10 @@ export function TableRestComponent<T>({
     ));
   } else if (!data.length) {
     body = (
-      <StyledTableRow data-cy="table-row" style={{ height: 70 * emptyRows }}>
+      <StyledTableRow
+        data-cy="table-row"
+        style={{ height: 70 * emptyRows || 70 }}
+      >
         <StyledTableCell colSpan={headCells.length}>
           <EmptyMessage>
             <IconContainer>

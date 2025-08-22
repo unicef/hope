@@ -1,9 +1,10 @@
 import { periodicDataUpdatesOnlineEditsStatusToColor } from 'src/utils/utils';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { TableCell } from '@mui/material';
+import { TableCell, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
@@ -11,6 +12,8 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 const onlineEditsHeadCells: HeadCell<any>[] = [
   {
@@ -66,7 +69,13 @@ const onlineEditsHeadCells: HeadCell<any>[] = [
 
 const NewPeriodicDataUpdates = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
+  const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
+
+  const newTemplatePath = isSocialDctType
+    ? `/${baseUrl}/population/people/new-online-template`
+    : `/${baseUrl}/population/individuals/new-online-template`;
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug,
@@ -139,6 +148,18 @@ const NewPeriodicDataUpdates = (): ReactElement => {
       setQueryVariables={setQueryVariables}
       title="New Periodic Data Updates"
       hidePagination={true}
+      actions={[
+        <Button
+          key="add-new-online-edit"
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          component={Link}
+          to={newTemplatePath}
+        >
+          {t('New Online Edit')}
+        </Button>,
+      ]}
     />
   );
 };

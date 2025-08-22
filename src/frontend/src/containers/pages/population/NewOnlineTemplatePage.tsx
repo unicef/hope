@@ -20,7 +20,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
-export const NewTemplatePage = (): ReactElement => {
+const NewOnlineTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
@@ -226,7 +226,7 @@ export const NewTemplatePage = (): ReactElement => {
         return (
           <form onSubmit={handleSubmit}>
             <PageHeader
-              title={t('New Template Page')}
+              title={t('New Online Template Page')}
               breadCrumbs={
                 hasPermissions(
                   PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -310,3 +310,8 @@ export const NewTemplatePage = (): ReactElement => {
     </Formik>
   );
 };
+
+export default withErrorBoundary(
+  NewOnlineTemplatePage,
+  'NewOnlineTemplatePage',
+);

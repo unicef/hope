@@ -1,5 +1,4 @@
 import { useRoutes } from 'react-router-dom';
-import { NewTemplatePage } from '@containers/pages/householdMembers/NewTemplatePage';
 import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
 import { ReactElement } from 'react';
 import PeopleDetailsPage from '@containers/pages/people/PeopleDetailsPage';
@@ -8,6 +7,8 @@ import PopulationHouseholdDetailsPage from '@containers/pages/population/Populat
 import PopulationHouseholdPage from '@containers/pages/population/PopulationHouseholdPage';
 import PopulationIndividualsDetailsPage from '@containers/pages/population/PopulationIndividualsDetailsPage';
 import PeriodicDataUpdatesOnlineEditsTemplateDetailsPage from '@components/periodicDataUpdates/PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
+import NewOfflineTemplatePage from '@containers/pages/population/NewOfflineTemplatePage';
+import NewOnlineTemplatePage from '@containers/pages/population/NewOnlineTemplatePage';
 
 export const PopulationRoutes = (): ReactElement => {
   const populationRoutes = [
@@ -36,12 +37,20 @@ export const PopulationRoutes = (): ReactElement => {
       element: <PopulationHouseholdPage />,
     },
     {
-      path: 'population/individuals/new-template',
-      element: <NewTemplatePage />,
+      path: 'population/individuals/new-offline-template',
+      element: <NewOfflineTemplatePage />,
     },
     {
-      path: 'population/people/new-template',
-      element: <NewTemplatePage />,
+      path: 'population/people/new-offline-template',
+      element: <NewOfflineTemplatePage />,
+    },
+    {
+      path: 'population/individuals/new-online-template',
+      element: <NewOnlineTemplatePage />,
+    },
+    {
+      path: 'population/people/new-online-template',
+      element: <NewOnlineTemplatePage />,
     },
     {
       path: 'population/individuals/online-templates/:id',

@@ -164,29 +164,31 @@ const PeriodicDataUpdatePendingForApproval = () => {
   }: {
     headCells: HeadCell<any>[];
   }) => (
-    <tr>
-      {headCells.map((headCell) => (
-        <TableCell
-          key={String(headCell.id)}
-          padding={headCell.id === 'checkbox' ? 'checkbox' : undefined}
-        >
-          {headCell.id === 'checkbox' ? (
-            <Checkbox
-              indeterminate={
-                selected.length > 0 && selected.length < results.length
-              }
-              checked={
-                selected.length > 0 && selected.length === results.length
-              }
-              onChange={handleSelectAllClick}
-              slotProps={{ input: { 'aria-label': 'select all rows' } }}
-            />
-          ) : (
-            headCell.label
-          )}
-        </TableCell>
-      ))}
-    </tr>
+    <thead>
+      <tr>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={String(headCell.id)}
+            padding={headCell.id === 'checkbox' ? 'checkbox' : undefined}
+          >
+            {headCell.id === 'checkbox' ? (
+              <Checkbox
+                indeterminate={
+                  selected.length > 0 && selected.length < results.length
+                }
+                checked={
+                  selected.length > 0 && selected.length === results.length
+                }
+                onChange={handleSelectAllClick}
+                slotProps={{ input: { 'aria-label': 'select all rows' } }}
+              />
+            ) : (
+              headCell.label
+            )}
+          </TableCell>
+        ))}
+      </tr>
+    </thead>
   );
 
   return (
@@ -207,7 +209,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
       actions={[
         <Button
           key="approve-selected"
-          variant="contained"
+          variant="outlined"
           color="primary"
           onClick={handleApprove}
           disabled={selected.length === 0}
