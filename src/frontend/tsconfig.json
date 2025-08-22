@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "types": ["node", "graphql"],
+    "types": ["node"],
     "useDefineForClassFields": true,
     "lib": ["es2021", "DOM", "DOM.Iterable"],
     "allowJs": true,

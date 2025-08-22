@@ -2,11 +2,11 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.contrib.aurora.models import Record
 
 
-class TestClearRecordFilesTask(APITestCase):
+class TestClearRecordFilesTask(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

@@ -11,7 +11,7 @@ if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.celery import CeleryIntegration
     from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
+    from sentry_sdk.integrations.logging import LoggingIntegration
 
     from hope import get_full_version
     from hope.apps.utils.sentry import SentryFilter
@@ -41,4 +41,3 @@ if SENTRY_DSN:
         before_send=SentryFilter().before_send,
         environment=SENTRY_ENVIRONMENT,
     )
-    ignore_logger("graphql.execution.utils")

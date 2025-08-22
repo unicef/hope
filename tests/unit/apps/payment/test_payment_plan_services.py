@@ -34,7 +34,7 @@ from pytz import utc
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import FileTemp
 from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.celery_tasks import (
@@ -53,7 +53,7 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.program.models import Program, ProgramCycle
 
 
-class TestPaymentPlanServices(APITestCase):
+class TestPaymentPlanServices(BaseTestCase):
     databases = ("default",)
 
     @classmethod

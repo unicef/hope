@@ -1,12 +1,12 @@
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.steficon import RuleFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.steficon.forms import RuleForm
 from hope.apps.steficon.models import Rule
 
 
-class TestRuleForm(APITestCase):
+class TestRuleForm(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

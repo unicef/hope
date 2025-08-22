@@ -30,7 +30,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models
@@ -916,7 +916,7 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         assert self.rdi_3.erased is False
 
 
-class TestRegistrationImportCeleryTasks(APITestCase):
+class TestRegistrationImportCeleryTasks(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
