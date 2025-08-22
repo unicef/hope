@@ -778,10 +778,9 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Callable | None = None,
     ) -> QuerySet:
-        params = Q(
-            status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES,
-            delivered_quantity__gt=0,
-        )
+        from hope.apps.payment.models import PaymentVerificationPlan
+
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -789,14 +788,24 @@ class PaymentPlan(
                 | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
             )
         else:
-            params &= Q(payment_verifications__isnull=True)
+            # exclude PaymentVerificationPlan with in statuses Error or Invalid
+            params &= Q(
+                Q(payment_verifications__isnull=True)
+                | Q(
+                    payment_verifications__payment_verification_plan__status__in=[
+                        PaymentVerificationPlan.STATUS_INVALID,
+                        PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
+                    ]
+                )
+            )
 
-        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
+        payment_records = self.eligible_payments.select_related("head_of_household").filter(params).distinct()
 
         if extra_validation:
-            payment_records = [pr.pk for pr in filter(extra_validation, payment_records)]
+            payment_records_ids = [pr.pk for pr in filter(extra_validation, payment_records)]
+            payment_records = Payment.objects.filter(pk__in=payment_records_ids)
 
-        return Payment.objects.filter(pk__in=payment_records)
+        return payment_records
 
     @property
     def program(self) -> "Program":
@@ -836,6 +845,15 @@ class PaymentPlan(
         return self.is_payment_gateway and all_sent_to_fsp
 
     @property
+    def can_regenerate_export_file_per_fsp(self) -> bool:
+        """Can regenerate export_file_per_fsp."""
+        return (
+            self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
+            and self.export_file_per_fsp
+            and self.background_action_status is None
+        )
+
+    @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
@@ -851,11 +869,11 @@ class PaymentPlan(
 
     @property
     def bank_reconciliation_success(self) -> int:
-        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
+        return self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).count()
 
     @property
     def bank_reconciliation_error(self) -> int:
-        return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
+        return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
     def excluded_household_ids_targeting_level(self) -> list:
@@ -1820,24 +1838,12 @@ class Payment(
         (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
-    ALLOW_CREATE_VERIFICATION = (
-        STATUS_SUCCESS,
-        STATUS_DISTRIBUTION_SUCCESS,
-        STATUS_DISTRIBUTION_PARTIAL,
-        STATUS_NOT_DISTRIBUTED,
-    )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
-    DELIVERED_STATUSES = (
-        STATUS_SUCCESS,
-        STATUS_DISTRIBUTION_SUCCESS,
-        STATUS_DISTRIBUTION_PARTIAL,
-    )
-    FAILED_STATUSES = (
-        STATUS_FORCE_FAILED,
-        STATUS_ERROR,
-        STATUS_MANUALLY_CANCELLED,
-        STATUS_NOT_DISTRIBUTED,
-    )
+    DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    NOT_DELIVERED_STATUSES = (STATUS_NOT_DISTRIBUTED,)
+    FAILED_STATUSES = (STATUS_FORCE_FAILED, STATUS_ERROR, STATUS_MANUALLY_CANCELLED, STATUS_NOT_DISTRIBUTED)
+
+    ALLOW_CREATE_VERIFICATION = PENDING_STATUSES + DELIVERED_STATUSES + NOT_DELIVERED_STATUSES
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -1892,33 +1898,17 @@ class Payment(
         blank=True,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_date = models.DateTimeField(null=True, blank=True)
     delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
@@ -2180,10 +2170,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     @property
     def account_data(self) -> dict:
         data = self.data.copy()
-        if self.number:
-            data["number"] = self.number
-        if self.financial_institution:
-            data["financial_institution"] = str(self.financial_institution.id)
+        data["number"] = self.number or data.get("number", "")
+        data["financial_institution"] = str(self.financial_institution.id) if self.financial_institution else ""
         return data
 
     @account_data.setter

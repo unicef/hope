@@ -157,6 +157,16 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
             if delivery_date != payment.delivery_date:
                 self.is_updated = True
+            # convert to date
+            delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
+            if delivery_date > datetime.date.today() or delivery_date < self.payment_plan.program.start_date:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        cell.coordinate,
+                        f"Payment {payment_id}: Delivery date ({delivery_date}) cannot be greater than today's date, and cannot be before Programme's start date",
+                    )
+                )
         except Exception:
             self.errors.append(
                 XlsxError(
@@ -308,6 +318,18 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         if payment_delivery_date := payment.delivery_date:
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
+
+        # convert to date
+        delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
+
+        if (
+            delivery_date
+            and delivery_date > datetime.date.today()
+            or delivery_date
+            and delivery_date < self.payment_plan.program.start_date
+        ):
+            # validate and skip update the date
+            delivery_date = payment_delivery_date
 
         if delivered_quantity is not None and str(delivered_quantity).strip() != "":
             status, delivered_quantity = self._get_delivered_quantity_status_and_value(

@@ -13,7 +13,6 @@ import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
-import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SeeingDisabilityEnum } from './SeeingDisabilityEnum';
 import type { SelfcareDisabilityEnum } from './SelfcareDisabilityEnum';
@@ -23,23 +22,16 @@ export type Individual = {
     firstRegistrationDate?: string;
     lastRegistrationDate?: string;
     readonly household: string;
-    role?: string;
     observedDisability?: string;
-    countryOrigin?: string;
     maritalStatus?: string;
     documents?: Array<Document>;
     birthDate: string;
     accounts?: Array<Account>;
     photo?: string;
-    rdiMergeStatus?: RdiMergeStatusEnum;
-    isRemoved?: boolean;
+    individualId: string;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
-    /**
-     * Individual ID
-     */
-    individualId?: string;
     /**
      * Full Name of the Beneficiary
      */
