@@ -18,6 +18,13 @@ class WesternUnionFTPClientMock(WesternUnionFTPClient):
     PASSWORD = "pass"
 
 
+class WesternUnionFTPClientMockNoCredentials(WesternUnionFTPClient):
+    HOST = ""
+    PORT = 22
+    USERNAME = "user"
+    PASSWORD = "pass"
+
+
 @pytest.fixture(autouse=True)
 def mock_sftp() -> Generator[dict[str, Any], None, None]:
     mock_transport: MagicMock = MagicMock()
@@ -79,3 +86,40 @@ class TestWesternUnionFTPClient(TestCase):
             self.assertEqual(filelike.getvalue(), b"fake content")
 
             mock_download.assert_called_once_with("QCF-123-XYZ-20250101.zip")
+
+    def test_init_raises_if_missing_credentials(self) -> None:
+        with self.assertRaises(ValueError):
+            WesternUnionFTPClientMockNoCredentials()
+
+    def test_disconnect_closes_resources(
+        self,
+    ) -> None:
+        ftp_client = WesternUnionFTPClientMock()
+        ftp_client.disconnect()
+
+        ftp_client.client.close.assert_called_once()
+        ftp_client._transport.close.assert_called_once()
+
+    def test_get(
+        self,
+    ) -> None:
+        ftp_client = WesternUnionFTPClientMock()
+        ftp_client.get("", "")
+        ftp_client.client.get.assert_called_once()
+
+        ftp_client.client.get.reset_mock()
+        ftp_client.client.get.side_effect = FileNotFoundError("nope")
+        ftp_client.get("", "")
+
+    def test_download_returns_bytesio(self) -> None:
+        ftp_client = WesternUnionFTPClientMock()
+
+        def fake_getfo(remote: Any, fl: Any) -> None:
+            fl.write(b"hello world")
+
+        ftp_client.client.getfo.side_effect = fake_getfo
+
+        fl = ftp_client.download("remote.txt")
+        ftp_client.client.getfo.assert_called_once()
+        self.assertIsInstance(fl, io.BytesIO)
+        self.assertEqual(fl.read(), b"hello world")
