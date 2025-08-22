@@ -874,13 +874,14 @@ class GrievanceTicketGlobalViewSet(
                         flex_field_name
                     )
             elif field_name == "roles":
-                for role in household_data["roles"]:
-                    approve_lookup = {
-                        role["individual_id"]: str(role.get("approve_status", "")).lower() == "true"
-                        for role in household_approve_data.get("roles", [])
-                    }
-                    for role in household_data["roles"]:
-                        role["approve_status"] = approve_lookup.get(role["individual_id"], False)
+                approve_lookup = {
+                    role["individual_id"]: str(role.get("approve_status", "")).lower() == "true"
+                    for role in household_approve_data.get("roles", [])
+                }
+                household_data["roles"] = [
+                    {**role, "approve_status": approve_lookup.get(role["individual_id"], False)}
+                    for role in household_data.get("roles", [])
+                ]
             elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
             else:
