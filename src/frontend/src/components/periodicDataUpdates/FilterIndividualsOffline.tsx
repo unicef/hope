@@ -9,13 +9,13 @@ import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/re
 import { t } from 'i18next';
 import React, { FC } from 'react';
 
-interface FilterIndividualsProps {
+interface FilterIndividualsOfflineProps {
   filter;
   setFilter: (filter) => void;
   isOnPaper: boolean;
 }
 
-export const FilterIndividuals: FC<FilterIndividualsProps> = ({
+export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
   filter,
   setFilter,
 

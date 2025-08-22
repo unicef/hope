@@ -3,9 +3,11 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
-import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
+import { FieldsToUpdateOnline } from '@components/periodicDataUpdates/FieldsToUpdateOnline';
+import { FilterIndividualsOnline } from '@components/periodicDataUpdates/FilterIndividualsOnline';
 import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
+import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
+import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -56,6 +58,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
   const steps = [
     `Filter ${isPeople ? 'People' : beneficiaryGroup?.memberLabelPlural}`,
     'Fields to Update',
+    'Authorized Users',
+    'Template Name (optional)',
   ];
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
@@ -211,7 +215,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
       onSubmit={handleSubmit}
       enableReinitialize
     >
-      {({ values, setFieldValue, submitForm }) => {
+      {({ values, setFieldValue }) => {
         const roundsDataToSend = values.roundsData
           .filter((el) => checkedFields[el.field] === true)
           .map((data) => ({
@@ -245,20 +249,22 @@ const NewOnlineTemplatePage = (): ReactElement => {
                 ))}
               </Stepper>
               {activeStep === 0 && (
-                <FilterIndividuals
+                <FilterIndividualsOnline
                   isOnPaper={false}
                   filter={filter}
                   setFilter={setFilter}
                 />
               )}
               {activeStep === 1 && (
-                <FieldsToUpdate
+                <FieldsToUpdateOnline
                   values={values}
                   setFieldValue={setFieldValue}
                   checkedFields={checkedFields}
                   setCheckedFields={setCheckedFields}
                 />
               )}
+              {activeStep === 2 && <AuthorizedUsersOnline />}
+              {activeStep === 3 && <TemplateNameOnline />}
               <Box
                 display="flex"
                 mt={4}
@@ -277,7 +283,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
                   </Button>
                 </Box>
                 <Box display="flex">
-                  {activeStep === 1 && (
+                  {activeStep > 0 && activeStep < 4 && (
                     <Box mr={2}>
                       <Button
                         data-cy="back-button"
@@ -289,17 +295,47 @@ const NewOnlineTemplatePage = (): ReactElement => {
                     </Box>
                   )}
                   <Box>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      data-cy="submit-button"
-                      disabled={
-                        activeStep === 1 && roundsDataToSend.length === 0
-                      }
-                      onClick={activeStep === 1 ? submitForm : handleNext}
-                    >
-                      {activeStep === 1 ? 'Generate Template' : 'Next'}
-                    </Button>
+                    {activeStep === 0 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        data-cy="next-button"
+                        onClick={handleNext}
+                      >
+                        Next
+                      </Button>
+                    )}
+                    {activeStep === 1 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        data-cy="next-button"
+                        disabled={roundsDataToSend.length === 0}
+                        onClick={handleNext}
+                      >
+                        Next
+                      </Button>
+                    )}
+                    {activeStep === 2 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        data-cy="next-button"
+                        onClick={handleNext}
+                      >
+                        Next
+                      </Button>
+                    )}
+                    {activeStep === 3 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        data-cy="submit-button"
+                        type="submit"
+                      >
+                        Generate Template
+                      </Button>
+                    )}
                   </Box>
                 </Box>
               </Box>

@@ -3,8 +3,8 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
-import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
+import { FieldsToUpdateOffline } from '@components/periodicDataUpdates/FieldsToUpdateOffline';
+import { FilterIndividualsOffline } from '@components/periodicDataUpdates/FilterIndividualsOffline';
 import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -245,14 +245,14 @@ const NewOfflineTemplatePage = (): ReactElement => {
                 ))}
               </Stepper>
               {activeStep === 0 && (
-                <FilterIndividuals
+                <FilterIndividualsOffline
                   isOnPaper={false}
                   filter={filter}
                   setFilter={setFilter}
                 />
               )}
               {activeStep === 1 && (
-                <FieldsToUpdate
+                <FieldsToUpdateOffline
                   values={values}
                   setFieldValue={setFieldValue}
                   checkedFields={checkedFields}
