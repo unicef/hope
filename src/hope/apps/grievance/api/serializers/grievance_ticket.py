@@ -630,7 +630,7 @@ class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
 
 
 class GrievanceHouseholdDataChangeApproveSerializer(serializers.Serializer):
-    household_approve_data = serializers.JSONField()
+    household_approve_data = serializers.JSONField(required=False)
     flex_fields_approve_data = serializers.JSONField(required=False)
     version = serializers.IntegerField(required=False)
 
