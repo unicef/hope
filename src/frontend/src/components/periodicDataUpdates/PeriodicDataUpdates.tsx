@@ -29,8 +29,8 @@ export const PeriodicDataUpdates = (): ReactElement => {
   };
 
   const newTemplatePath = isSocialDctType
-    ? `/${baseUrl}/population/people/new-template`
-    : `/${baseUrl}/population/individuals/new-template`;
+    ? `/${baseUrl}/population/people/new-offline-template`
+    : `/${baseUrl}/population/individuals/new-offline-template`;
 
   return (
     <>

@@ -1,5 +1,5 @@
 import React, { useState, ReactElement } from 'react';
-import { TableCell, Checkbox } from '@mui/material';
+import { TableCell, Checkbox, Button } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -70,6 +70,10 @@ const PeriodicDataUpdatePendingForMerge = () => {
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
+  const handleMerge = () => {
+    // TODO: Implement merge logic for selected rows
+    alert(`Merged template IDs: ${selected.join(', ')}`);
+  };
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
@@ -159,29 +163,31 @@ const PeriodicDataUpdatePendingForMerge = () => {
   }: {
     headCells: HeadCell<any>[];
   }) => (
-    <tr>
-      {headCells.map((headCell) => (
-        <TableCell
-          key={String(headCell.id)}
-          padding={headCell.id === 'checkbox' ? 'checkbox' : undefined}
-        >
-          {headCell.id === 'checkbox' ? (
-            <Checkbox
-              indeterminate={
-                selected.length > 0 && selected.length < results.length
-              }
-              checked={
-                selected.length > 0 && selected.length === results.length
-              }
-              onChange={handleSelectAllClick}
-              slotProps={{ input: { 'aria-label': 'select all rows' } }}
-            />
-          ) : (
-            headCell.label
-          )}
-        </TableCell>
-      ))}
-    </tr>
+    <thead>
+      <tr>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={String(headCell.id)}
+            padding={headCell.id === 'checkbox' ? 'checkbox' : undefined}
+          >
+            {headCell.id === 'checkbox' ? (
+              <Checkbox
+                indeterminate={
+                  selected.length > 0 && selected.length < results.length
+                }
+                checked={
+                  selected.length > 0 && selected.length === results.length
+                }
+                onChange={handleSelectAllClick}
+                slotProps={{ input: { 'aria-label': 'select all rows' } }}
+              />
+            ) : (
+              headCell.label
+            )}
+          </TableCell>
+        ))}
+      </tr>
+    </thead>
   );
 
   return (
@@ -199,6 +205,18 @@ const PeriodicDataUpdatePendingForMerge = () => {
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
       hidePagination={true}
+      actions={[
+        <Button
+          key="merge-selected"
+          variant="outlined"
+          color="primary"
+          onClick={handleMerge}
+          disabled={selected.length === 0}
+          sx={{ mr: 1 }}
+        >
+          Merge
+        </Button>,
+      ]}
     />
   );
 };
