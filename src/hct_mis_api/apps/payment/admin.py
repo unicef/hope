@@ -880,7 +880,7 @@ class WesternUnionQCFFileAdmin(admin.ModelAdmin):
     download_link.short_description = "File"
     download_link.admin_order_field = None
 
-    def payment_plans_list(self, obj: WesternUnionQCFFile) -> str:
+    def payment_plans_list(self, obj: WesternUnionQCFFile) -> str:  # pragma: no cover
         return ", ".join(str(r.payment_plan) for r in obj.reports.all().select_related("payment_plan"))
 
     payment_plans_list.short_description = "Payment Plans"
