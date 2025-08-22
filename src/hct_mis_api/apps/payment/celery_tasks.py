@@ -836,8 +836,8 @@ def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
+        qcf_report = WesternUnionQCFFileReport.objects.get(id=qcf_report_id)
         try:
-            qcf_report = WesternUnionQCFFileReport.objects.get(id=qcf_report_id)
             set_sentry_business_area_tag(qcf_report.payment_plan.business_area.name)
 
             service = QCFReportsService()
