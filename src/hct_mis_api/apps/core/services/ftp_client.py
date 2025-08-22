@@ -28,9 +28,6 @@ class FTPClient:
         if self._transport:
             self._transport.close()
 
-    def list_files(self, path: str = ".") -> list:
-        return self.client.listdir(path)
-
     def list_files_w_attrs(self, path: str = ".") -> list:
         return self.client.listdir_attr(path)
 
