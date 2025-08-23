@@ -84,8 +84,8 @@ class SurveyFilter(FilterSet):
         else:
             values = value.split(" ")
         q_obj = Q()
-        for value in values:
-            value = value.strip(",")
+        for unstripped_value in values:
+            value = unstripped_value.strip(",")
             inner_query = Q()
             inner_query |= Q(title__icontains=value)
             inner_query |= Q(unicef_id__istartswith=value)

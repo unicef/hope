@@ -6,145 +6,145 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class RegistrationDataImport(BaseComponents):
     # Locators
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonImport = 'button[data-cy="button-import"]'
-    filterSearch = 'div[data-cy="filter-search"]'
-    importedByInput = 'div[data-cy="Imported By-input"]'
-    filterStatus = 'div[data-cy="filter-status"]'
-    filterSizeMin = 'div[data-cy="filter-size-min"]'
-    filterSizeMax = 'div[data-cy="filter-size-max"]'
-    datePickerFilter = 'div[data-cy="date-picker-filter"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    tableRow = 'tr[role="checkbox"]'
-    importTypeSelect = 'div[data-cy="import-type-select"]'
-    koboProjectSelect = 'div[data-cy="kobo-project-select"]'
-    progressCircle = 'span[role="progressbar"]'
-    downloadTemplate = 'a[data-cy="a-download-template"]'
-    buttonImportRDI = 'button[data-cy="button-import-rdi"]'
-    excelItem = 'li[data-cy="excel-menu-item"]'
-    koboItem = 'li[data-cy="kobo-menu-item"]'
-    inputName = 'input[data-cy="input-name"]'
-    inputFile = 'input[type="file"]'
-    numberOfHouseholds = 'div[data-cy="number-of-households"]'
-    numberOfIndividuals = 'div[data-cy="number-of-individuals"]'
-    errorsContainer = 'div[data-cy="errors-container"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    button_import = 'button[data-cy="button-import"]'
+    filter_search = 'div[data-cy="filter-search"]'
+    imported_by_input = 'div[data-cy="Imported By-input"]'
+    filter_status = 'div[data-cy="filter-status"]'
+    filter_size_min = 'div[data-cy="filter-size-min"]'
+    filter_size_max = 'div[data-cy="filter-size-max"]'
+    date_picker_filter = 'div[data-cy="date-picker-filter"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_title = 'h6[data-cy="table-title"]'
+    table_label = 'span[data-cy="table-label"]'
+    status_container = 'div[data-cy="status-container"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    table_row = 'tr[role="checkbox"]'
+    import_type_select = 'div[data-cy="import-type-select"]'
+    kobo_project_select = 'div[data-cy="kobo-project-select"]'
+    progress_circle = 'span[role="progressbar"]'
+    download_template = 'a[data-cy="a-download-template"]'
+    button_import_rdi = 'button[data-cy="button-import-rdi"]'
+    excel_item = 'li[data-cy="excel-menu-item"]'
+    kobo_item = 'li[data-cy="kobo-menu-item"]'
+    input_name = 'input[data-cy="input-name"]'
+    input_file = 'input[type="file"]'
+    number_of_households = 'div[data-cy="number-of-households"]'
+    number_of_individuals = 'div[data-cy="number-of-individuals"]'
+    errors_container = 'div[data-cy="errors-container"]'
 
     # Texts
-    titleText = "Registration Data Import"
-    importText = "IMPORT"
-    tableTitleText = "List of Imports"
-    importTypeSelectText = "Import From"
-    downloadTemplateText = "DOWNLOAD TEMPLATE"
-    koboItemText = "Kobo"
-    excelItemText = "Excel"
-    inputFileText = "UPLOAD FILE"
+    title_text = "Registration Data Import"
+    import_text = "IMPORT"
+    table_title_text = "List of Imports"
+    import_type_select_text = "Import From"
+    download_template_text = "DOWNLOAD TEMPLATE"
+    kobo_item_text = "Kobo"
+    excel_item_text = "Excel"
+    input_file_text = "UPLOAD FILE"
 
     # Elements
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getButtonImport(self) -> WebElement:
-        return self.wait_for(self.buttonImport)
+    def get_button_import(self) -> WebElement:
+        return self.wait_for(self.button_import)
 
-    def getFilterSearch(self) -> WebElement:
-        return self.wait_for(self.filterSearch)
+    def get_filter_search(self) -> WebElement:
+        return self.wait_for(self.filter_search)
 
-    def getImportedByInput(self) -> WebElement:
-        return self.wait_for(self.importedByInput)
+    def get_imported_by_input(self) -> WebElement:
+        return self.wait_for(self.imported_by_input)
 
-    def getFilterStatus(self) -> WebElement:
-        return self.wait_for(self.filterStatus)
+    def get_filter_status(self) -> WebElement:
+        return self.wait_for(self.filter_status)
 
-    def getFilterSizeMin(self) -> WebElement:
-        return self.wait_for(self.filterSizeMin)
+    def get_filter_size_min(self) -> WebElement:
+        return self.wait_for(self.filter_size_min)
 
-    def getFilterSizeMax(self) -> WebElement:
-        return self.wait_for(self.filterSizeMax)
+    def get_filter_size_max(self) -> WebElement:
+        return self.wait_for(self.filter_size_max)
 
-    def getDatePickerFilter(self) -> WebElement:
-        return self.wait_for(self.datePickerFilter)
+    def get_date_picker_filter(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getTableLabel(self) -> WebElement:
-        return self.get_elements(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.get_elements(self.table_label)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getRows(self) -> list[WebElement]:
-        return self.get_elements(self.tableRow)
+    def get_rows(self) -> list[WebElement]:
+        return self.get_elements(self.table_row)
 
-    def expectedRows(self, number: int) -> bool:
+    def expected_rows(self, number: int) -> bool:
         for _ in range(15):
-            if len(self.getRows()) == number:
+            if len(self.get_rows()) == number:
                 return True
             sleep(1)
         return False
 
-    def getImportTypeSelect(self) -> WebElement:
-        return self.wait_for(self.importTypeSelect)
+    def get_import_type_select(self) -> WebElement:
+        return self.wait_for(self.import_type_select)
 
-    def getKoboProjectSelect(self) -> WebElement:
-        return self.wait_for(self.koboProjectSelect)
+    def get_kobo_project_select(self) -> WebElement:
+        return self.wait_for(self.kobo_project_select)
 
-    def checkLoadingProgressCircle(self) -> None:
-        self.wait_for(self.progressCircle)
-        self.wait_for_disappear(self.progressCircle)
+    def check_loading_progress_circle(self) -> None:
+        self.wait_for(self.progress_circle)
+        self.wait_for_disappear(self.progress_circle)
 
-    def getDownloadTemplate(self) -> WebElement:
-        return self.wait_for(self.downloadTemplate)
+    def get_download_template(self) -> WebElement:
+        return self.wait_for(self.download_template)
 
-    def getButtonImportFile(self) -> WebElement:
-        return self.wait_for(self.buttonImportRDI)
+    def get_button_import_file(self) -> WebElement:
+        return self.wait_for(self.button_import_rdi)
 
-    def disappearButtonImportFile(self) -> None:
-        self.wait_for_disappear(self.buttonImportRDI, timeout=60)
+    def disappear_button_import_file(self) -> None:
+        self.wait_for_disappear(self.button_import_rdi, timeout=60)
 
-    def getExcelItem(self) -> WebElement:
-        return self.wait_for(self.excelItem)
+    def get_excel_item(self) -> WebElement:
+        return self.wait_for(self.excel_item)
 
-    def getKoboItem(self) -> WebElement:
-        return self.wait_for(self.koboItem)
+    def get_kobo_item(self) -> WebElement:
+        return self.wait_for(self.kobo_item)
 
-    def getInputName(self) -> WebElement:
-        return self.wait_for(self.inputName)
+    def get_input_name(self) -> WebElement:
+        return self.wait_for(self.input_name)
 
-    def getInputFile(self) -> WebElement:
-        return self.wait_for(self.inputFile)
+    def get_input_file(self) -> WebElement:
+        return self.wait_for(self.input_file)
 
-    def getNumberOfHouseholds(self) -> WebElement:
-        return self.wait_for(self.numberOfHouseholds)
+    def get_number_of_households(self) -> WebElement:
+        return self.wait_for(self.number_of_households)
 
-    def getNumberOfIndividuals(self) -> WebElement:
-        return self.wait_for(self.numberOfIndividuals)
+    def get_number_of_individuals(self) -> WebElement:
+        return self.wait_for(self.number_of_individuals)
 
-    def getErrorsContainer(self) -> WebElement:
-        return self.wait_for(self.errorsContainer)
+    def get_errors_container(self) -> WebElement:
+        return self.wait_for(self.errors_container)
 
-    def buttonImportFileIsEnabled(self, timeout: int = 30) -> bool:
+    def button_import_file_is_enabled(self, timeout: int = 30) -> bool:
         for _ in range(timeout):
-            if self.getButtonImportFile().is_enabled():
+            if self.get_button_import_file().is_enabled():
                 return True
             sleep(1)
         return False

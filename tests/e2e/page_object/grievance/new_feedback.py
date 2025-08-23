@@ -6,285 +6,285 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class NewFeedback(BaseComponents):
     # Locators
-    titlePage = 'h5[data-cy="page-header-title"]'
-    labelCategory = 'div[data-cy="label-Category"]'
-    selectIssueType = 'div[data-cy="select-issueType"]'
-    issueType = 'div[data-cy="label-Issue Type"]'
-    inputIssueType = 'div[data-cy="input-issue-type"]'
-    buttonCancel = 'a[data-cy="button-cancel"]'
-    buttonBack = 'button[data-cy="button-back"]'
-    buttonNext = 'button[data-cy="button-submit"]'
+    title_page = 'h5[data-cy="page-header-title"]'
+    label_category = 'div[data-cy="label-Category"]'
+    select_issue_type = 'div[data-cy="select-issueType"]'
+    issue_type = 'div[data-cy="label-Issue Type"]'
+    input_issue_type = 'div[data-cy="input-issue-type"]'
+    button_cancel = 'a[data-cy="button-cancel"]'
+    button_back = 'button[data-cy="button-back"]'
+    button_next = 'button[data-cy="button-submit"]'
     option = 'li[role="option"]'
-    householdTableRow = 'tr[data-cy="household-table-row"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"]'
-    lookUpTabsHouseHold = 'button[role="tab"]'
-    lookUpTabsIndividual = 'button[role="tab"]'
-    receivedConsent = 'span[data-cy="input-consent"]'
+    household_table_row = 'tr[data-cy="household-table-row"]'
+    individual_table_row = 'tr[data-cy="individual-table-row"]'
+    look_up_tabs_household = 'button[role="tab"]'
+    look_up_tabs_individual = 'button[role="tab"]'
+    received_consent = 'span[data-cy="input-consent"]'
     error = 'p[data-cy="checkbox-error"]'
-    divDescription = 'div[data-cy="input-description"]'
+    div_description = 'div[data-cy="input-description"]'
     description = 'textarea[data-cy="input-description"]'
     comments = 'textarea[data-cy="input-comments"]'
-    adminAreaAutocomplete = 'div[data-cy="admin-area-autocomplete"]'
-    inputLanguage = 'textarea[data-cy="input-language"]'
-    inputArea = 'input[data-cy="input-area"]'
-    programmeSelect = 'div[data-cy="select-programId"]'
-    hhRadioButton = 'span[data-cy="input-radio-household"]'
-    individualRadioButton = 'span[data-cy="input-radio-individual"]'
-    inputQuestionnaire_size = 'span[data-cy="input-questionnaire_size"]'
-    labelHouseholdSize = 'div[data-cy="label-Household Size"]'
-    inputQuestionnaire_malechildrencount = 'span[data-cy="input-questionnaire_maleChildrenCount"]'
-    labelNumberOfMaleChildren = 'div[data-cy="label-Number of Male Children"]'
-    inputQuestionnaire_femalechildrencount = 'span[data-cy="input-questionnaire_femaleChildrenCount"]'
-    labelNumberOfFemaleChildren = 'div[data-cy="label-Number of Female Children"]'
-    inputQuestionnaire_childrendisabledcount = 'span[data-cy="input-questionnaire_childrenDisabledCount"]'
-    labelNumberOfDisabledChildren = 'div[data-cy="label-Number of Disabled Children"]'
-    inputQuestionnaire_headofhousehold = 'span[data-cy="input-questionnaire_headOfHousehold"]'
-    labelHeadOfHousehold = 'div[data-cy="label-Head of Household"]'
-    inputQuestionnaire_countryorigin = 'span[data-cy="input-questionnaire_countryOrigin"]'
-    labelCountryOfOrigin = 'div[data-cy="label-Country of Origin"]'
-    inputQuestionnaire_address = 'span[data-cy="input-questionnaire_address"]'
-    labelAddress = 'div[data-cy="label-Address"]'
-    inputQuestionnaire_village = 'span[data-cy="input-questionnaire_village"]'
-    labelVillage = 'div[data-cy="label-Village"]'
-    inputQuestionnaire_admin1 = 'span[data-cy="input-questionnaire_admin1"]'
-    labelAdministrativeLevel1 = 'div[data-cy="label-Administrative Level 1"]'
-    inputQuestionnaire_admin2 = 'span[data-cy="input-questionnaire_admin2"]'
-    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
-    inputQuestionnaire_admin3 = 'span[data-cy="input-questionnaire_admin3"]'
-    labelAdministrativeLevel3 = 'div[data-cy="label-Administrative Level 3"]'
-    inputQuestionnaire_admin4 = 'span[data-cy="input-questionnaire_admin4"]'
-    labelAdministrativeLevel4 = 'div[data-cy="label-Administrative Level 4"]'
-    inputQuestionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
-    labelLengthOfTimeSinceArrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
-    inputQuestionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
-    labelIndividualFullName = 'div[data-cy="label-Member full name"]'
-    inputQuestionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
-    labelBirthDate = 'div[data-cy="label-Birth Date"]'
-    inputQuestionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
-    labelPhoneNumber = 'div[data-cy="label-Phone Number"]'
-    inputQuestionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
-    emptyHouseholdRow = 'tr[data-cy="table-row"]'
+    admin_area_autocomplete = 'div[data-cy="admin-area-autocomplete"]'
+    input_language = 'textarea[data-cy="input-language"]'
+    input_area = 'input[data-cy="input-area"]'
+    programme_select = 'div[data-cy="select-programId"]'
+    hh_radio_button = 'span[data-cy="input-radio-household"]'
+    individual_radio_button = 'span[data-cy="input-radio-individual"]'
+    input_questionnaire_size = 'span[data-cy="input-questionnaire_size"]'
+    label_household_size = 'div[data-cy="label-Household Size"]'
+    input_questionnaire_malechildrencount = 'span[data-cy="input-questionnaire_maleChildrenCount"]'
+    label_number_of_male_children = 'div[data-cy="label-Number of Male Children"]'
+    input_questionnaire_femalechildrencount = 'span[data-cy="input-questionnaire_femaleChildrenCount"]'
+    label_number_of_female_children = 'div[data-cy="label-Number of Female Children"]'
+    input_questionnaire_childrendisabledcount = 'span[data-cy="input-questionnaire_childrenDisabledCount"]'
+    label_number_of_disabled_children = 'div[data-cy="label-Number of Disabled Children"]'
+    input_questionnaire_headofhousehold = 'span[data-cy="input-questionnaire_headOfHousehold"]'
+    label_head_of_household = 'div[data-cy="label-Head of Household"]'
+    input_questionnaire_countryorigin = 'span[data-cy="input-questionnaire_countryOrigin"]'
+    label_country_of_origin = 'div[data-cy="label-Country of Origin"]'
+    input_questionnaire_address = 'span[data-cy="input-questionnaire_address"]'
+    label_address = 'div[data-cy="label-Address"]'
+    input_questionnaire_village = 'span[data-cy="input-questionnaire_village"]'
+    label_village = 'div[data-cy="label-Village"]'
+    input_questionnaire_admin1 = 'span[data-cy="input-questionnaire_admin1"]'
+    label_administrative_level1 = 'div[data-cy="label-Administrative Level 1"]'
+    input_questionnaire_admin2 = 'span[data-cy="input-questionnaire_admin2"]'
+    label_administrative_level2 = 'div[data-cy="label-Administrative Level 2"]'
+    input_questionnaire_admin3 = 'span[data-cy="input-questionnaire_admin3"]'
+    label_administrative_level3 = 'div[data-cy="label-Administrative Level 3"]'
+    input_questionnaire_admin4 = 'span[data-cy="input-questionnaire_admin4"]'
+    label_administrative_level4 = 'div[data-cy="label-Administrative Level 4"]'
+    input_questionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
+    label_length_of_time_since_arrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
+    input_questionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
+    label_individual_full_name = 'div[data-cy="label-Member full name"]'
+    input_questionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
+    label_birth_date = 'div[data-cy="label-Birth Date"]'
+    input_questionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
+    label_phone_number = 'div[data-cy="label-Phone Number"]'
+    input_questionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
+    empty_household_row = 'tr[data-cy="table-row"]'
 
     # Texts
-    textTitle = "New Feedback"
-    textCategory = "Feedback"
-    textLookUpHousehold = "LOOK UP {}"
-    textLookUpIndividual = "LOOK UP {}"
+    text_title = "New Feedback"
+    text_category = "Feedback"
+    text_look_up_household = "LOOK UP {}"
+    text_look_up_individual = "LOOK UP {}"
 
     # Elements
 
-    def getTitlePage(self) -> WebElement:
-        return self.wait_for(self.titlePage)
+    def get_title_page(self) -> WebElement:
+        return self.wait_for(self.title_page)
 
-    def getLabelCategory(self) -> WebElement:
-        return self.wait_for(self.labelCategory)
+    def get_label_category(self) -> WebElement:
+        return self.wait_for(self.label_category)
 
-    def getSelectIssueType(self) -> WebElement:
-        return self.wait_for(self.selectIssueType)
+    def get_select_issue_type(self) -> WebElement:
+        return self.wait_for(self.select_issue_type)
 
-    def getButtonCancel(self) -> WebElement:
-        return self.wait_for(self.buttonCancel)
+    def get_button_cancel(self) -> WebElement:
+        return self.wait_for(self.button_cancel)
 
-    def getButtonBack(self) -> WebElement:
-        return self.wait_for(self.buttonBack)
+    def get_button_back(self) -> WebElement:
+        return self.wait_for(self.button_back)
 
-    def getButtonNext(self) -> WebElement:
-        return self.wait_for(self.buttonNext)
+    def get_button_next(self) -> WebElement:
+        return self.wait_for(self.button_next)
 
-    def getOptions(self) -> list[WebElement]:
+    def get_options(self) -> list[WebElement]:
         return self.get_elements(self.option)
 
-    def getHouseholdTab(self, tab_name: str = "GROUP") -> None:
+    def get_household_tab(self, tab_name: str = "GROUP") -> None:
         try:
-            household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
+            household_tab = self.get_elements(self.look_up_tabs_household)[0]
         except IndexError:
             sleep(1)
-            household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
-        assert self.textLookUpHousehold.format(tab_name) in household_tab.text, household_tab.text
+            household_tab = self.get_elements(self.look_up_tabs_household)[0]
+        assert self.text_look_up_household.format(tab_name) in household_tab.text, household_tab.text
         return household_tab
 
-    def getIndividualTab(self, tab_name: str = "MEMBER") -> WebElement:
+    def get_individual_tab(self, tab_name: str = "MEMBER") -> WebElement:
         try:
-            individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
+            individual_tab = self.get_elements(self.look_up_tabs_individual, attempts=5)[1]
         except IndexError:
             sleep(1)
-            individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
-        assert self.textLookUpIndividual.format(tab_name) in individual_tab.text, individual_tab.text
+            individual_tab = self.get_elements(self.look_up_tabs_individual, attempts=5)[1]
+        assert self.text_look_up_individual.format(tab_name) in individual_tab.text, individual_tab.text
         return individual_tab
 
-    def getHouseholdTableRows(self, number: int) -> WebElement:
-        self.get_elements(self.hhRadioButton)
+    def get_household_table_rows(self, number: int) -> WebElement:
+        self.get_elements(self.hh_radio_button)
         try:
-            return self.get_elements(self.householdTableRow, attempts=5)[number]
+            return self.get_elements(self.household_table_row, attempts=5)[number]
         except IndexError:
             sleep(1)
-            return self.get_elements(self.householdTableRow, attempts=5)[number]
+            return self.get_elements(self.household_table_row, attempts=5)[number]
 
-    def getIndividualTableRow(self, number: int) -> WebElement:
-        self.get_elements(self.individualRadioButton)
+    def get_individual_table_row(self, number: int) -> WebElement:
+        self.get_elements(self.individual_radio_button)
         try:
-            return self.get_elements(self.individualTableRow, attempts=5)[number]
+            return self.get_elements(self.individual_table_row, attempts=5)[number]
         except IndexError:
             sleep(1)
-            return self.get_elements(self.individualTableRow, attempts=5)[number]
+            return self.get_elements(self.individual_table_row, attempts=5)[number]
 
-    def getReceivedConsent(self) -> WebElement:
-        return self.wait_for(self.receivedConsent)
+    def get_received_consent(self) -> WebElement:
+        return self.wait_for(self.received_consent)
 
-    def getError(self) -> WebElement:
+    def get_error(self) -> WebElement:
         return self.wait_for(self.error)
 
-    def getDescription(self) -> WebElement:
+    def get_description(self) -> WebElement:
         return self.wait_for(self.description)
 
-    def getDivDescription(self) -> WebElement:
-        return self.wait_for(self.divDescription)
+    def get_div_description(self) -> WebElement:
+        return self.wait_for(self.div_description)
 
-    def getComments(self) -> WebElement:
+    def get_comments(self) -> WebElement:
         return self.wait_for(self.comments)
 
-    def getInputLanguage(self) -> WebElement:
-        return self.wait_for(self.inputLanguage)
+    def get_input_language(self) -> WebElement:
+        return self.wait_for(self.input_language)
 
-    def getInputArea(self) -> WebElement:
-        return self.wait_for(self.inputArea)
+    def get_input_area(self) -> WebElement:
+        return self.wait_for(self.input_area)
 
-    def getAdminAreaAutocomplete(self) -> WebElement:
-        return self.wait_for(self.adminAreaAutocomplete)
+    def get_admin_area_autocomplete(self) -> WebElement:
+        return self.wait_for(self.admin_area_autocomplete)
 
-    def selectArea(self, name: str) -> None:
-        self.getAdminAreaAutocomplete().click()
+    def select_area(self, name: str) -> None:
+        self.get_admin_area_autocomplete().click()
         self.select_listbox_element(name)
 
-    def getIssueType(self) -> WebElement:
-        return self.wait_for(self.issueType)
+    def get_issue_type(self) -> WebElement:
+        return self.wait_for(self.issue_type)
 
-    def getInputIssueType(self) -> WebElement:
-        return self.wait_for(self.inputIssueType)
+    def get_input_issue_type(self) -> WebElement:
+        return self.wait_for(self.input_issue_type)
 
-    def getProgrammeSelect(self) -> WebElement:
-        return self.wait_for(self.programmeSelect)
+    def get_programme_select(self) -> WebElement:
+        return self.wait_for(self.programme_select)
 
-    def selectProgramme(self, name: str) -> None:
-        self.getProgrammeSelect().click()
+    def select_programme(self, name: str) -> None:
+        self.get_programme_select().click()
         self.select_listbox_element(name)
 
-    def checkElementsOnPage(self) -> None:
-        assert self.textTitle in self.getTitlePage().text
-        assert self.textCategory in self.getLabelCategory().text
-        self.getSelectIssueType()
-        self.getButtonCancel()
-        self.getButtonBack()
-        self.getButtonNext()
+    def check_elements_on_page(self) -> None:
+        assert self.text_title in self.get_title_page().text
+        assert self.text_category in self.get_label_category().text
+        self.get_select_issue_type()
+        self.get_button_cancel()
+        self.get_button_back()
+        self.get_button_next()
 
-    def chooseOptionByName(self, name: str) -> None:
-        self.getSelectIssueType().click()
+    def choose_option_by_name(self, name: str) -> None:
+        self.get_select_issue_type().click()
         self.select_listbox_element(name)
 
-    def getInputQuestionnaire_size(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_size)
+    def get_input_questionnaire_size(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_size)
 
-    def getLabelHouseholdSize(self) -> WebElement:
-        return self.wait_for(self.labelHouseholdSize)
+    def get_label_household_size(self) -> WebElement:
+        return self.wait_for(self.label_household_size)
 
-    def getInputQuestionnaire_malechildrencount(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_malechildrencount)
+    def get_input_questionnaire_malechildrencount(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_malechildrencount)
 
-    def getLabelNumberOfMaleChildren(self) -> WebElement:
-        return self.wait_for(self.labelNumberOfMaleChildren)
+    def get_label_number_of_male_children(self) -> WebElement:
+        return self.wait_for(self.label_number_of_male_children)
 
-    def getInputQuestionnaire_femalechildrencount(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_femalechildrencount)
+    def get_input_questionnaire_femalechildrencount(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_femalechildrencount)
 
-    def getLabelNumberOfFemaleChildren(self) -> WebElement:
-        return self.wait_for(self.labelNumberOfFemaleChildren)
+    def get_label_number_of_female_children(self) -> WebElement:
+        return self.wait_for(self.label_number_of_female_children)
 
-    def getInputQuestionnaire_childrendisabledcount(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_childrendisabledcount)
+    def get_input_questionnaire_childrendisabledcount(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_childrendisabledcount)
 
-    def getLabelNumberOfDisabledChildren(self) -> WebElement:
-        return self.wait_for(self.labelNumberOfDisabledChildren)
+    def get_label_number_of_disabled_children(self) -> WebElement:
+        return self.wait_for(self.label_number_of_disabled_children)
 
-    def getInputQuestionnaire_headofhousehold(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_headofhousehold)
+    def get_input_questionnaire_headofhousehold(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_headofhousehold)
 
-    def getLabelHeadOfHousehold(self) -> WebElement:
-        return self.wait_for(self.labelHeadOfHousehold)
+    def get_label_head_of_household(self) -> WebElement:
+        return self.wait_for(self.label_head_of_household)
 
-    def getInputQuestionnaire_countryorigin(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_countryorigin)
+    def get_input_questionnaire_countryorigin(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_countryorigin)
 
-    def getLabelCountryOfOrigin(self) -> WebElement:
-        return self.wait_for(self.labelCountryOfOrigin)
+    def get_label_country_of_origin(self) -> WebElement:
+        return self.wait_for(self.label_country_of_origin)
 
-    def getInputQuestionnaire_address(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_address)
+    def get_input_questionnaire_address(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_address)
 
-    def getLabelAddress(self) -> WebElement:
-        return self.wait_for(self.labelAddress)
+    def get_label_address(self) -> WebElement:
+        return self.wait_for(self.label_address)
 
-    def getInputQuestionnaire_village(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_village)
+    def get_input_questionnaire_village(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_village)
 
-    def getLabelVillage(self) -> WebElement:
-        return self.wait_for(self.labelVillage)
+    def get_label_village(self) -> WebElement:
+        return self.wait_for(self.label_village)
 
-    def getInputQuestionnaire_admin1(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_admin1)
+    def get_input_questionnaire_admin_1(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_admin1)
 
-    def getLabelAdministrativeLevel1(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel1)
+    def get_label_administrative_level_1(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level1)
 
-    def getInputQuestionnaire_admin2(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_admin2)
+    def get_input_questionnaire_admin_2(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_admin2)
 
-    def getLabelAdministrativeLevel2(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel2)
+    def get_label_administrative_level_2(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level2)
 
-    def getInputQuestionnaire_admin3(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_admin3)
+    def get_input_questionnaire_admin_3(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_admin3)
 
-    def getLabelAdministrativeLevel3(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel3)
+    def get_label_administrative_level_3(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level3)
 
-    def getInputQuestionnaire_admin4(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_admin4)
+    def get_input_questionnaire_admin_4(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_admin4)
 
-    def getLabelAdministrativeLevel4(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel4)
+    def get_label_administrative_level_4(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level4)
 
-    def getInputQuestionnaire_months_displaced_h_f(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_months_displaced_h_f)
+    def get_input_questionnaire_months_displaced_h_f(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_months_displaced_h_f)
 
-    def getLabelLengthOfTimeSinceArrival(self) -> WebElement:
-        return self.wait_for(self.labelLengthOfTimeSinceArrival)
+    def get_label_length_of_time_since_arrival(self) -> WebElement:
+        return self.wait_for(self.label_length_of_time_since_arrival)
 
-    def getInputQuestionnaire_fullname(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_fullname)
+    def get_input_questionnaire_fullname(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_fullname)
 
-    def getLabelIndividualFullName(self) -> WebElement:
-        return self.wait_for(self.labelIndividualFullName)
+    def get_label_individual_full_name(self) -> WebElement:
+        return self.wait_for(self.label_individual_full_name)
 
-    def getInputQuestionnaire_birthdate(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_birthdate)
+    def get_input_questionnaire_birthdate(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_birthdate)
 
-    def getLabelBirthDate(self) -> WebElement:
-        return self.wait_for(self.labelBirthDate)
+    def get_label_birth_date(self) -> WebElement:
+        return self.wait_for(self.label_birth_date)
 
-    def getInputQuestionnaire_phoneno(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_phoneno)
+    def get_input_questionnaire_phoneno(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_phoneno)
 
-    def getLabelPhoneNumber(self) -> WebElement:
-        return self.wait_for(self.labelPhoneNumber)
+    def get_label_phone_number(self) -> WebElement:
+        return self.wait_for(self.label_phone_number)
 
-    def getInputQuestionnaire_relationship(self) -> WebElement:
-        return self.wait_for(self.inputQuestionnaire_relationship)
+    def get_input_questionnaire_relationship(self) -> WebElement:
+        return self.wait_for(self.input_questionnaire_relationship)
 
-    def getLabelRelationshipToHoh(self) -> WebElement:
-        return self.wait_for(self.labelRelationshipToHoh)
+    def get_label_relationship_to_hoh(self) -> WebElement:
+        return self.wait_for(self.label_relationship_to_hoh)
 
-    def getInputConsent(self) -> WebElement:
+    def get_input_consent(self) -> WebElement:
         return self.wait_for(self.inputConsent)
 
-    def getTableEmptyRow(self) -> None:
-        self.wait_for_text("No results", self.emptyHouseholdRow)
+    def get_table_empty_row(self) -> None:
+        self.wait_for_text("No results", self.empty_household_row)

@@ -253,10 +253,13 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     request,
                     self.delete_rdi,
                     f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
-                    <h3>Deleting the RDI will also result in the removal of related households, individuals, and their associated grievance tickets.</h3>
-                    <h3>Consequently, these households will no longer be part of any Target Population, if they were included previously.</h3>
+                    <h3>Deleting the RDI will also result in the removal of related households,
+                     individuals, and their associated grievance tickets.</h3>
+                    <h3>Consequently, these households will no longer be part of any Target Population,
+                    if they were included previously.</h3>
                     <br>
-                    <h4>This action will result in removing: {number_of_households} Households, {number_of_individuals} Individuals and {number_of_household_selections} Payments</h4>
+                    <h4>This action will result in removing: {number_of_households} Households,
+                    {number_of_individuals} Individuals and {number_of_household_selections} Payments</h4>
                     """,
                     "Successfully executed",
                 )

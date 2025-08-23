@@ -28,28 +28,27 @@ class PermissionsBackend(BaseBackend):
             program = None
             business_area = None
             filters = {}
+        elif isinstance(obj, BusinessArea):
+            program = None
+            business_area = obj
+            filters = {"business_area": business_area}
+        elif isinstance(obj, Program):
+            program = obj
+            business_area = obj.business_area
+            filters = {
+                "business_area": business_area,
+                "program": program,
+            }
+        elif hasattr(obj, "program"):
+            program = obj.program
+            business_area = obj.business_area
+            filters = {"business_area": business_area, "program": program}
+        elif hasattr(obj, "business_area"):
+            program = None
+            business_area = obj.business_area
+            filters = {"business_area": business_area}
         else:
-            if isinstance(obj, BusinessArea):
-                program = None
-                business_area = obj
-                filters = {"business_area": business_area}
-            elif isinstance(obj, Program):
-                program = obj
-                business_area = obj.business_area
-                filters = {
-                    "business_area": business_area,
-                    "program": program,
-                }
-            elif hasattr(obj, "program"):
-                program = obj.program
-                business_area = obj.business_area
-                filters = {"business_area": business_area, "program": program}
-            elif hasattr(obj, "business_area"):
-                program = None
-                business_area = obj.business_area
-                filters = {"business_area": business_area}
-            else:
-                return set()
+            return set()
 
         user_version = get_or_create_cache_key(get_user_permissions_version_key(user), 1)
         cache_key = get_user_permissions_cache_key(user, user_version, business_area, program)

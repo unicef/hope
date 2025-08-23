@@ -84,7 +84,8 @@ def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> Non
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
 
-    for name, value in flex_fields_to_verify.items():
+    for name, _value in flex_fields_to_verify.items():
+        value = _value
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
             raise ValueError(f"{name} is not a correct `flex field")

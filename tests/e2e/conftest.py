@@ -213,7 +213,6 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture(scope="session")
 def download_path(worker_id: str) -> str:
     try:
-        worker_id = worker_id
         assert worker_id is not None
         yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
     except BaseException:
@@ -272,16 +271,16 @@ def login(browser: Chrome) -> Chrome:
     )
     login = "id_username"
     password = "id_password"
-    loginButton = '//*[@id="login-form"]/div[3]/input'
+    login_button = '//*[@id="login-form"]/div[3]/input'
     from selenium.webdriver.common.by import By
-    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support import expected_conditions
     from selenium.webdriver.support.wait import WebDriverWait
 
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, loginButton)))
-    browser.find_element(By.XPATH, loginButton)
+    WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.XPATH, login_button)))
+    browser.find_element(By.XPATH, login_button)
     browser.find_element(By.ID, login).send_keys("superuser")
     browser.find_element(By.ID, password).send_keys("testtest2")
-    browser.find_element(By.XPATH, loginButton).click()
+    browser.find_element(By.XPATH, login_button).click()
     from time import sleep
 
     sleep(0.3)  # TODO: added just for test in CI
@@ -299,87 +298,87 @@ def filters(request: FixtureRequest, browser: Chrome) -> Filters:
 
 
 @pytest.fixture
-def pageProgrammeManagement(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
+def page_programme_management(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
     yield ProgrammeManagement(browser)
 
 
 @pytest.fixture
-def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
+def page_programme_details(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
     yield ProgrammeDetails(browser)
 
 
 @pytest.fixture
-def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
+def page_admin_panel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
     yield AdminPanel(browser)
 
 
 @pytest.fixture
-def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
+def page_feedback(request: FixtureRequest, browser: Chrome) -> Feedback:
     yield Feedback(browser)
 
 
 @pytest.fixture
-def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
+def page_grievance_tickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
     yield GrievanceTickets(browser)
 
 
 @pytest.fixture
-def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
+def page_feedback_details(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
     yield FeedbackDetailsPage(browser)
 
 
 @pytest.fixture
-def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
+def page_new_feedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
     yield NewFeedback(browser)
 
 
 @pytest.fixture
-def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
+def page_registration_data_import(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
     yield RegistrationDataImport(browser)
 
 
 @pytest.fixture
-def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
+def page_details_registration_data_import(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
     yield RDIDetailsPage(browser)
 
 
 @pytest.fixture
-def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
+def page_households(request: FixtureRequest, browser: Chrome) -> Households:
     yield Households(browser)
 
 
 @pytest.fixture
-def pagePeople(request: FixtureRequest, browser: Chrome) -> People:
+def page_people(request: FixtureRequest, browser: Chrome) -> People:
     yield People(browser)
 
 
 @pytest.fixture
-def pagePeopleDetails(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
+def page_people_details(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
     yield PeopleDetails(browser)
 
 
 @pytest.fixture
-def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
+def page_households_details(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
     yield HouseholdsDetails(browser)
 
 
 @pytest.fixture
-def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
+def page_individuals(request: FixtureRequest, browser: Chrome) -> Individuals:
     yield Individuals(browser)
 
 
 @pytest.fixture
-def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
+def page_individuals_details(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
     yield IndividualsDetails(browser)
 
 
 @pytest.fixture
-def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
+def page_periodic_data_update_templates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
     yield PeriodicDatUpdateTemplates(browser)
 
 
 @pytest.fixture
-def pagePeriodicDataUpdateTemplatesDetails(
+def page_periodic_data_update_templates_details(
     request: FixtureRequest,
     browser: Chrome,
 ) -> PeriodicDatUpdateTemplatesDetails:
@@ -387,119 +386,119 @@ def pagePeriodicDataUpdateTemplatesDetails(
 
 
 @pytest.fixture
-def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
+def page_periodic_data_uploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
     yield PeriodicDataUpdateUploads(browser)
 
 
 @pytest.fixture
-def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
+def page_targeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
 
 
 @pytest.fixture
-def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
+def page_payment_module(request: FixtureRequest, browser: Chrome) -> PaymentModule:
     yield PaymentModule(browser)
 
 
 @pytest.fixture
-def pagePaymentRecord(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
+def page_payment_record(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
     yield PaymentRecord(browser)
 
 
 @pytest.fixture
-def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
+def page_payment_verification_details(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
     yield PaymentVerificationDetails(browser)
 
 
 @pytest.fixture
-def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
+def page_payment_verification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
     yield PaymentVerification(browser)
 
 
 @pytest.fixture
-def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
+def page_targeting_details(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
     yield TargetingDetails(browser)
 
 
 @pytest.fixture
-def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
+def page_targeting_create(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
     yield TargetingCreate(browser)
 
 
 @pytest.fixture
-def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
+def page_grievance_details_page(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
     yield GrievanceDetailsPage(browser)
 
 
 @pytest.fixture
-def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
+def page_grievance_new_ticket(request: FixtureRequest, browser: Chrome) -> NewTicket:
     yield NewTicket(browser)
 
 
 @pytest.fixture
-def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
+def page_grievance_dashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
     yield GrievanceDashboard(browser)
 
 
 @pytest.fixture
-def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
+def page_managerial_console(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
     yield ManagerialConsole(browser)
 
 
 @pytest.fixture
-def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
+def page_payment_module_details(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
     yield PaymentModuleDetails(browser)
 
 
 @pytest.fixture
-def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
+def page_new_payment_plan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
 
 
 @pytest.fixture
-def pageProgramCycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
+def page_program_cycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
     yield ProgramCyclePage(browser)
 
 
 @pytest.fixture
-def pageProgramCycleDetails(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
+def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
     yield ProgramCycleDetailsPage(browser)
 
 
 @pytest.fixture
-def pageAccountabilitySurveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
+def page_accountability_surveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
     yield AccountabilitySurveys(browser)
 
 
 @pytest.fixture
-def pageAccountabilitySurveysDetails(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
+def page_accountability_surveys_details(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
     yield AccountabilitySurveysDetails(browser)
 
 
 @pytest.fixture
-def pageProgrammeUsers(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
+def page_programme_users(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
     yield ProgrammeUsers(browser)
 
 
 @pytest.fixture
-def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
+def page_accountability_communication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
     yield AccountabilityCommunication(browser)
 
 
 @pytest.fixture
-def pageAccountabilityCommunicationDetails(
+def page_accountability_communication_details(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     yield AccountabilityCommunicationDetails(browser)
 
 
 @pytest.fixture
-def pageProgramLog(request: FixtureRequest, browser: Chrome) -> ProgramLog:
+def page_program_log(request: FixtureRequest, browser: Chrome) -> ProgramLog:
     yield ProgramLog(browser)
 
 
 @pytest.fixture
-def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
+def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
     yield CountryDashboard(browser)
 
 

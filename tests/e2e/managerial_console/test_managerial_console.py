@@ -93,21 +93,21 @@ class TestSmokeManagerialConsole:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_managerial_console_smoke_test(
         self,
-        pageManagerialConsole: ManagerialConsole,
+        page_managerial_console: ManagerialConsole,
         create_active_test_program: Program,
     ) -> None:
-        pageManagerialConsole.getNavManagerialConsole().click()
-        pageManagerialConsole.getSelectAllApproval()
+        page_managerial_console.get_nav_managerial_console().click()
+        page_managerial_console.get_select_all_approval()
         with pytest.raises(NoSuchElementException):
-            pageManagerialConsole.getApproveButton().click()
+            page_managerial_console.get_approve_button().click()
 
-        pageManagerialConsole.getSelectAllAuthorization()
+        page_managerial_console.get_select_all_authorization()
         with pytest.raises(NoSuchElementException):
-            pageManagerialConsole.getAuthorizeButton().click()
+            page_managerial_console.get_authorize_button().click()
 
-        pageManagerialConsole.getSelectAllRelease()
+        page_managerial_console.get_select_all_release()
         with pytest.raises(NoSuchElementException):
-            pageManagerialConsole.getReleaseButton().click()
+            page_managerial_console.get_release_button().click()
 
         program = Program.objects.filter(name="Test Programm").first()
         program_cycle = program.cycles.first()
@@ -137,65 +137,69 @@ class TestSmokeManagerialConsole:
             business_area=ba,
             created_by=user,
         )
-        pageManagerialConsole.getMenuUserProfile().click()
-        pageManagerialConsole.getMenuItemClearCache().click()
+        page_managerial_console.get_menu_user_profile().click()
+        page_managerial_console.get_menu_item_clear_cache().click()
 
-        pageManagerialConsole.getSelectAllApproval()
-        pageManagerialConsole.getProgramSelectApproval()
+        page_managerial_console.get_select_all_approval()
+        page_managerial_console.get_program_select_approval()
 
         with pytest.raises(NoSuchElementException):
-            pageManagerialConsole.getApproveButton().click()
+            page_managerial_console.get_approve_button().click()
 
-        pageManagerialConsole.getSelectAllAuthorization()
-        pageManagerialConsole.getProgramSelectAuthorization()
+        page_managerial_console.get_select_all_authorization()
+        page_managerial_console.get_program_select_authorization()
         with pytest.raises(NoSuchElementException):
-            pageManagerialConsole.getAuthorizeButton().click()
+            page_managerial_console.get_authorize_button().click()
 
-        pageManagerialConsole.getSelectAllRelease()
-        pageManagerialConsole.getProgramSelectRelease()
+        page_managerial_console.get_select_all_release()
+        page_managerial_console.get_program_select_release()
         with pytest.raises(NoSuchElementException):
-            pageManagerialConsole.getReleaseButton().click()
+            page_managerial_console.get_release_button().click()
 
-        pageManagerialConsole.getSelectApproval().click()
-        pageManagerialConsole.getApproveButton().click()
-        pageManagerialConsole.getPlansIds()
-        pageManagerialConsole.getButtonSave()
-        pageManagerialConsole.getCommentApprove()
-        pageManagerialConsole.getButtonCancel().click()
-        pageManagerialConsole.getProgramSelectAuthorization()
-        pageManagerialConsole.getSelectAllAuthorization().click()
-        pageManagerialConsole.getAuthorizeButton().click()
-        pageManagerialConsole.getButtonCancel().click()
-        pageManagerialConsole.getProgramSelectRelease()
-        pageManagerialConsole.getSelectAllRelease().click()
-        pageManagerialConsole.getReleaseButton().click()
-        pageManagerialConsole.getButtonCancel().click()
+        page_managerial_console.get_select_approval().click()
+        page_managerial_console.get_approve_button().click()
+        page_managerial_console.get_plans_ids()
+        page_managerial_console.get_button_save()
+        page_managerial_console.get_comment_approve()
+        page_managerial_console.get_button_cancel().click()
+        page_managerial_console.get_program_select_authorization()
+        page_managerial_console.get_select_all_authorization().click()
+        page_managerial_console.get_authorize_button().click()
+        page_managerial_console.get_button_cancel().click()
+        page_managerial_console.get_program_select_release()
+        page_managerial_console.get_select_all_release().click()
+        page_managerial_console.get_release_button().click()
+        page_managerial_console.get_button_cancel().click()
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_managerial_console_happy_path(
-        self, pageManagerialConsole: ManagerialConsole, create_payment_plan: PaymentPlan
+        self,
+        page_managerial_console: ManagerialConsole,
+        create_payment_plan: PaymentPlan,
     ) -> None:
-        pageManagerialConsole.getNavManagerialConsole().click()
+        page_managerial_console.get_nav_managerial_console().click()
         # Approve Payment Plan
-        pageManagerialConsole.getProgramSelectApproval().click()
-        pageManagerialConsole.select_listbox_element("Test Programm")
+        page_managerial_console.get_program_select_approval().click()
+        page_managerial_console.select_listbox_element("Test Programm")
 
-        pageManagerialConsole.getColumnField()
-        pageManagerialConsole.getSelectApproval().click()
-        pageManagerialConsole.getApproveButton().click()
-        pageManagerialConsole.getCommentApprove().find_elements(By.TAG_NAME, "textarea")[0].send_keys("Test Test 123")
-        pageManagerialConsole.getButtonSave().click()
+        page_managerial_console.get_column_field()
+        page_managerial_console.get_select_approval().click()
+        page_managerial_console.get_approve_button().click()
+        page_managerial_console.get_comment_approve().find_elements(By.TAG_NAME, "textarea")[0].send_keys(
+            "Test Test 123"
+        )
+        page_managerial_console.get_button_save().click()
         # Authorize Payment Plan
-        pageManagerialConsole.getProgramSelectAuthorization().click()
-        pageManagerialConsole.select_listbox_element("Test Programm")
-        pageManagerialConsole.getColumnFieldAuthorization()
-        pageManagerialConsole.getSelectAllAuthorization().click()
-        pageManagerialConsole.getAuthorizeButton().click()
-        pageManagerialConsole.getButtonSave().click()
+        page_managerial_console.get_program_select_authorization().click()
+        page_managerial_console.select_listbox_element("Test Programm")
+        page_managerial_console.get_column_field_authorization()
+        page_managerial_console.get_select_all_authorization().click()
+        page_managerial_console.get_authorize_button().click()
+        page_managerial_console.get_button_save().click()
         # Release Payment Plan
-        pageManagerialConsole.getColumnFieldRelease()
-        pageManagerialConsole.getSelectAllRelease().click()
-        pageManagerialConsole.getReleaseButton().click()
-        pageManagerialConsole.getButtonSave().click()
+        page_managerial_console.get_column_field_release()
+        page_managerial_console.get_select_all_release().click()
+        page_managerial_console.get_release_button().click()
+        page_managerial_console.get_button_save().click()
         # Check Released Payment Plans
-        assert create_payment_plan.unicef_id in pageManagerialConsole.getColumnFieldReleased().text
+        assert create_payment_plan.unicef_id in page_managerial_console.get_column_field_released().text

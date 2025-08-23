@@ -12,8 +12,8 @@ from hope.apps.household.models import Document, Household
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.exceptions import (
-    AlreadyRunningException,
-    WrongStatusException,
+    AlreadyRunningError,
+    WrongStatusError,
 )
 from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.registration_datahub.tasks.rdi_program_population_create import (
@@ -79,7 +79,7 @@ def registration_xlsx_import_task(
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
             if not locked:
-                raise AlreadyRunningException(
+                raise AlreadyRunningError(
                     f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
                 )
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -88,7 +88,7 @@ def registration_xlsx_import_task(
                 RegistrationDataImport.IMPORT_SCHEDULED,
                 RegistrationDataImport.IMPORT_ERROR,
             ):
-                raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
+                raise WrongStatusError("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
 
@@ -110,7 +110,7 @@ def registration_xlsx_import_task(
                     program_id=str(program_id),
                 )
             return True
-    except (WrongStatusException, AlreadyRunningException) as e:
+    except (WrongStatusError, AlreadyRunningError) as e:
         logger.info(str(e))
         return True
     except Exception as e:
@@ -132,7 +132,7 @@ def registration_program_population_import_task(
         cache_key = f"registration_program_population_import_task-{registration_data_import_id}"
         with locked_cache(key=cache_key) as locked:
             if not locked:
-                raise AlreadyRunningException(f"Task with key {cache_key} is already running")
+                raise AlreadyRunningError(f"Task with key {cache_key} is already running")
 
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
@@ -140,7 +140,7 @@ def registration_program_population_import_task(
                 RegistrationDataImport.IMPORT_SCHEDULED,
                 RegistrationDataImport.IMPORT_ERROR,
             ):
-                raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
+                raise WrongStatusError("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
 
@@ -151,7 +151,7 @@ def registration_program_population_import_task(
                 import_to_program_id=str(import_to_program_id),
             )
             return True
-    except (WrongStatusException, AlreadyRunningException) as e:
+    except (WrongStatusError, AlreadyRunningError) as e:
         logger.info(str(e))
         return True
     except RegistrationDataImport.DoesNotExist:
