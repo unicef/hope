@@ -381,6 +381,6 @@ class Migration(migrations.Migration):
             """,
         ),
         migrations.RunSQL(
-            sql="CREATE TRIGGER program_cycle_fill_unicef_id_per_business_area_seq BEFORE INSERT ON program_programcycle FOR EACH ROW EXECUTE PROCEDURE program_cycle_fill_unicef_id_per_business_area_seq();",
+            sql="CREATE TRIGGER program_cycle_fill_unicef_id_per_business_area_seq BEFORE INSERT ON program_programcycle FOR EACH ROW EXECUTE PROCEDURE program_cycle_fill_unicef_id_per_business_area_seq();",  # noqa
         ),
     ]

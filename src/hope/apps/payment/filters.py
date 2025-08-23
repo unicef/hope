@@ -70,8 +70,8 @@ class PaymentVerificationFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        values = value.split(" ")
+    def search_filter(self, qs: QuerySet, name: str, values_string: str) -> QuerySet:
+        values = values_string.split(" ")
         q_obj = Q()
         for value in values:
             q_obj |= Q(payment__unicef_id__istartswith=value)

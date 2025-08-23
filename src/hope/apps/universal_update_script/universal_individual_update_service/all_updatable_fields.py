@@ -316,5 +316,8 @@ def get_account_fields() -> dict[Any, Any]:
 
 
 def _get_db_fields(model_class: type[Model]) -> list[str]:
-    """Return a list of field names that correspond to the columns stored in the model's database table, excluding related fields."""
+    """Return a list of field names that correspond to the columns stored in the model's database table.
+
+    It excludes related fields.
+    """
     return [field.name for field in model_class._meta.fields]

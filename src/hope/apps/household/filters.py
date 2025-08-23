@@ -17,7 +17,7 @@ from django_filters import (
 from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.core.exceptions import SearchException
+from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.models import (
@@ -209,7 +209,7 @@ class HouseholdFilter(UpdatedAtFilter):
             if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
                 return self._search_es(qs, value)
             return self._search_db(qs, value)  # pragma: no cover
-        except SearchException:  # pragma: no cover
+        except SearchError:  # pragma: no cover
             return qs.none()
 
     def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:  # pragma: no cover
@@ -232,7 +232,7 @@ class HouseholdFilter(UpdatedAtFilter):
             try:
                 int(search)
             except ValueError:
-                raise SearchException("The search value for a given search type should be a number")
+                raise SearchError("The search value for a given search type should be a number")
             return qs.filter(detail_id__istartswith=search)
         if search_type == "kobo_asset_id":
             inner_query = Q()
@@ -252,7 +252,7 @@ class HouseholdFilter(UpdatedAtFilter):
                 head_of_household__documents__type__key=search_type,
                 head_of_household__documents__document_number__icontains=search,
             )
-        raise SearchException(f"Invalid search key '{search_type}'")
+        raise SearchError(f"Invalid search key '{search_type}'")
 
     def document_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
@@ -417,7 +417,7 @@ class IndividualFilter(UpdatedAtFilter):
             if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
                 return self._search_es(qs, value)
             return self._search_db(qs, value)
-        except SearchException:
+        except SearchError:
             return qs.none()
 
     def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:  # pragma: no cover
@@ -436,14 +436,14 @@ class IndividualFilter(UpdatedAtFilter):
             try:
                 int(search)
             except ValueError:
-                raise SearchException("The search value for a given search type should be a number")
+                raise SearchError("The search value for a given search type should be a number")
             return qs.filter(detail_id__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
             return qs.filter(
                 documents__type__key=search_type,
                 documents__document_number__icontains=search,
             )
-        raise SearchException(f"Invalid search key '{search_type}'")
+        raise SearchError(f"Invalid search key '{search_type}'")
 
     def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
         return qs

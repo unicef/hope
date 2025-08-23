@@ -1,6 +1,6 @@
-class WrongStatusException(Exception):
+class WrongStatusError(Exception):
     pass
 
 
-class AlreadyRunningException(Exception):
+class AlreadyRunningError(Exception):
     pass

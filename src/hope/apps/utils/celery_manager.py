@@ -50,7 +50,9 @@ class BaseCeleryTaskManager:
             if not (task and task.get("status") == "queued" or not task):
                 continue
             logger.info(
-                f"{self.in_progress_queryset.model.__name__}: id {model_object.id} was in status IN PROGRESS importing should be PENDING because task was {'not_in_queue' if not task else 'queued'}"
+                f"{self.in_progress_queryset.model.__name__}: id {model_object.id}"
+                f" was in status IN PROGRESS importing should be PENDING because task was"
+                f" {'not_in_queue' if not task else 'queued'}"
             )
             model_object.status = self.pending_status
             model_object.save()
@@ -61,7 +63,8 @@ class BaseCeleryTaskManager:
             if task:
                 continue
             logger.info(
-                f"{self.pending_queryset.model.__name__}: id {model_object.id} was in status PENDING but not in celery queue"
+                f"{self.pending_queryset.model.__name__}: id {model_object.id}"
+                f" was in status PENDING but not in celery queue"
             )
             logger.info(f"registration_xlsx_import_task scheduled with kwargs {task_kwargs}")
             self.celery_task.delay(**task_kwargs)

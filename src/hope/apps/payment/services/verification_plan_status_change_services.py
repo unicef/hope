@@ -142,7 +142,7 @@ class VerificationPlanStatusChangeServices:
         business_area = payment_verification_plan.payment_plan.business_area
         grievance_ticket_list = []
         tickets_programs = []
-        GrievanceTicketProgramThrough = GrievanceTicket.programs.through
+        GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
         for verification in verifications:
             grievance_ticket = GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,

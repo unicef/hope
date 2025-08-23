@@ -43,10 +43,12 @@ class TargetingCriteriaRuleFilterInputValidator:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=program)
             except FlexibleAttribute.DoesNotExist:  # pragma: no cover
                 logger.warning(
-                    f"Can't find PDU flex field attribute associated with {rule_filter['field_name']} field name in program {program.name}",
+                    f"Can't find PDU flex field attribute associated with {rule_filter['field_name']}"
+                    f" field name in program {program.name}",
                 )
                 raise ValidationError(
-                    f"Can't find PDU flex field attribute associated with {rule_filter['field_name']} field name in program {program.name}",
+                    f"Can't find PDU flex field attribute associated with {rule_filter['field_name']}"
+                    f" field name in program {program.name}",
                 )
         comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter["comparison_method"])
         if comparison_attribute is None:

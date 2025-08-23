@@ -36,7 +36,7 @@ from hope.contrib.aurora.services.czech_republic_flex_registration_service impor
 class TestCzechRepublicRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         document_types_to_create = []
 
         document_mapping = {

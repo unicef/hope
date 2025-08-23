@@ -51,7 +51,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
     @button(permission="auth.view_group")
     def users(self, request: HttpRequest, pk: str) -> HttpResponse:
-        User = get_user_model()
+        User = get_user_model()  # noqa
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
         users = User.objects.filter(groups=group).distinct()

@@ -98,7 +98,7 @@ def init_targeting(seed: str) -> None:
 
 def init_clear(seed: str) -> None:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hope.config.settings")
-    execute_from_command_line(["init-e2e-scenario.py", "initcypress", "--skip-drop"])
+    execute_from_command_line(["init_e2e_scenario.py", "initcypress", "--skip-drop"])
 
 
 def init_payment_plan(seed: str) -> None:

@@ -4,81 +4,83 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class GrievanceDashboard(BaseComponents):
     # Locators
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    totalNumberOfTicketsTopNumber = 'div[data-cy="total-number-of-tickets-top-number"]'
-    labelizedFieldContainerTotalNumberOfTicketsSystemGenerated = (
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    total_number_of_tickets_top_number = 'div[data-cy="total-number-of-tickets-top-number"]'
+    labelized_field_container_total_number_of_tickets_system_generated = (
         'div[data-cy="labelized-field-container-total-number-of-tickets-system-generated"]'
     )
-    labelSystemGenerated = 'div[data-cy="label-SYSTEM-GENERATED"]'
-    labelizedFieldContainerTotalNumberOfTicketsUserGenerated = (
+    label_system_generated = 'div[data-cy="label-SYSTEM-GENERATED"]'
+    labelized_field_container_total_number_of_tickets_user_generated = (
         'div[data-cy="labelized-field-container-total-number-of-tickets-user-generated"]'
     )
-    labelUserGenerated = 'div[data-cy="label-USER-GENERATED"]'
-    totalNumberOfClosedTicketsTopNumber = 'div[data-cy="total-number-of-closed-tickets-top-number"]'
-    labelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated = (
+    label_user_generated = 'div[data-cy="label-USER-GENERATED"]'
+    total_number_of_closed_tickets_top_number = 'div[data-cy="total-number-of-closed-tickets-top-number"]'
+    labelized_field_container_total_number_of_closed_tickets_system_generated = (
         'div[data-cy="labelized-field-container-total-number-of-closed-tickets-system-generated"]'
     )
-    labelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated = (
+    labelized_field_container_total_number_of_closed_tickets_user_generated = (
         'div[data-cy="labelized-field-container-total-number-of-closed-tickets-user-generated"]'
     )
-    ticketsAverageResolutionTopNumber = 'div[data-cy="tickets-average-resolution-top-number"]'
-    labelizedFieldContainerTicketsAverageResolutionSystemGenerated = (
+    tickets_average_resolution_top_number = 'div[data-cy="tickets-average-resolution-top-number"]'
+    labelized_field_container_tickets_average_resolution_system_generated = (
         'div[data-cy="labelized-field-container-tickets-average-resolution-system-generated"]'
     )
-    labelizedFieldContainerTicketsAverageResolutionUserGenerated = (
+    labelized_field_container_tickets_average_resolution_user_generated = (
         'div[data-cy="labelized-field-container-tickets-average-resolution-user-generated"]'
     )
 
     # Texts
-    textTitle = "Grievance Dashboard"
+    text_title = "Grievance Dashboard"
 
     # Elements
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getTotalNumberOfTicketsTopNumber(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfTicketsTopNumber)
+    def get_total_number_of_tickets_top_number(self) -> WebElement:
+        return self.wait_for(self.total_number_of_tickets_top_number)
 
-    def getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated(
+    def get_labelized_field_container_total_number_of_tickets_system_generated(
         self,
     ) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerTotalNumberOfTicketsSystemGenerated)
+        return self.wait_for(self.labelized_field_container_total_number_of_tickets_system_generated)
 
-    def getLabelSystemGenerated(self) -> WebElement:
-        return self.wait_for(self.labelSystemGenerated)
+    def get_label_system_generated(self) -> WebElement:
+        return self.wait_for(self.label_system_generated)
 
-    def getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated(self) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerTotalNumberOfTicketsUserGenerated)
-
-    def getLabelUserGenerated(self) -> WebElement:
-        return self.wait_for(self.labelUserGenerated)
-
-    def getTotalNumberOfClosedTicketsTopNumber(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfClosedTicketsTopNumber)
-
-    def getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated(
+    def get_labelized_field_container_total_number_of_tickets_user_generated(
         self,
     ) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated)
+        return self.wait_for(self.labelized_field_container_total_number_of_tickets_user_generated)
 
-    def getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated(
+    def get_label_user_generated(self) -> WebElement:
+        return self.wait_for(self.label_user_generated)
+
+    def get_total_number_of_closed_tickets_top_number(self) -> WebElement:
+        return self.wait_for(self.total_number_of_closed_tickets_top_number)
+
+    def get_labelized_field_container_total_number_of_closed_tickets_system_generated(
         self,
     ) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated)
+        return self.wait_for(self.labelized_field_container_total_number_of_closed_tickets_system_generated)
 
-    def getTicketsAverageResolutionTopNumber(self) -> WebElement:
-        return self.wait_for(self.ticketsAverageResolutionTopNumber)
-
-    def getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated(
+    def get_labelized_field_container_total_number_of_closed_tickets_user_generated(
         self,
     ) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerTicketsAverageResolutionSystemGenerated)
+        return self.wait_for(self.labelized_field_container_total_number_of_closed_tickets_user_generated)
 
-    def getLabelizedFieldContainerTicketsAverageResolutionUserGenerated(
+    def get_tickets_average_resolution_top_number(self) -> WebElement:
+        return self.wait_for(self.tickets_average_resolution_top_number)
+
+    def get_labelized_field_container_tickets_average_resolution_system_generated(
         self,
     ) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerTicketsAverageResolutionUserGenerated)
+        return self.wait_for(self.labelized_field_container_tickets_average_resolution_system_generated)
+
+    def get_labelized_field_container_tickets_average_resolution_user_generated(
+        self,
+    ) -> WebElement:
+        return self.wait_for(self.labelized_field_container_tickets_average_resolution_user_generated)
