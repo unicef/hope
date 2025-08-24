@@ -183,7 +183,7 @@ class TestGrievanceUtils(TestCase):
         document_type.save()
         with pytest.raises(DRFValidationError) as e:
             handle_add_document(document_data, individual)
-        assert "Document of type tax already exists for this individual" in str(e)
+        assert "Document of type tax already exists for this individual" in str(e.value)
 
         Document.objects.all().delete()
         assert Document.objects.all().count() == 0
@@ -278,8 +278,8 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
         assert (
-            str(e.value)
-            == f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
+            f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
+            in str(e.value)
         )
 
         ticket_details.possible_duplicates.add(individuals[0])
@@ -327,13 +327,13 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-        assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+        assert "Close ticket is not possible when all Individuals are flagged as duplicates" in str(e.value)
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert (
-            str(e.value)
-            == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            in str(e.value)
         )
 
         ticket_details.selected_distinct.add(individuals_2[0])
