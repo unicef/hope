@@ -159,7 +159,8 @@ class TestHouseholdList:
             assert household_result["total_cash_received"] == household.total_cash_received
             assert household_result["total_cash_received_usd"] == household.total_cash_received_usd
             assert (
-                household_result["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                household_result["last_registration_date"]
+                == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}"
             )
 
     @pytest.mark.parametrize(
@@ -422,7 +423,7 @@ class TestHouseholdList:
             },
             "status": self.household1.status,
             "residence_status": self.household1.get_residence_status_display(),
-            "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+            "last_registration_date": f"{self.household1.last_registration_date:}",
         }
 
     def test_household_recipients(self, create_user_role_with_permissions: Any) -> None:
@@ -611,8 +612,8 @@ class TestHouseholdDetail:
         assert data["female_children_count"] == self.household.female_children_count
         assert data["children_disabled_count"] == self.household.children_disabled_count
         assert data["currency"] == self.household.currency
-        assert data["first_registration_date"] == f"{self.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-        assert data["last_registration_date"] == f"{self.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+        assert data["first_registration_date"] == f"{self.household.first_registration_date:}"
+        assert data["last_registration_date"] == f"{self.household.last_registration_date:}"
         assert data["unhcr_id"] == self.household.unhcr_id
         assert data["village"] == self.household.village
         assert data["address"] == self.household.address
@@ -639,7 +640,7 @@ class TestHouseholdDetail:
         assert data["male_age_group_18_59_disabled_count"] == self.household.male_age_group_18_59_disabled_count
         assert data["male_age_group_60_disabled_count"] == self.household.male_age_group_60_disabled_count
         assert data["other_sex_group_count"] == self.household.other_sex_group_count
-        assert data["start"] == f"{self.household.start:%Y-%m-%dT%H:%M:%SZ}"
+        assert data["start"] == f"{self.household.start:}"
         assert data["deviceid"] == self.household.deviceid
         assert data["fchild_hoh"] == self.household.fchild_hoh
         assert data["child_hoh"] == self.household.child_hoh
@@ -887,12 +888,12 @@ class TestHouseholdMembers:
                     "admin2": None,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{self.household1.first_registration_date:}",
+                    "last_registration_date": f"{self.household1.last_registration_date:}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "start": self.household1.start.strftime(""),
                     "zip_code": None,
                     "residence_status": self.household1.get_residence_status_display(),
                     "country_origin": "",
@@ -920,12 +921,12 @@ class TestHouseholdMembers:
                     "admin2": None,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{self.household1.first_registration_date:}",
+                    "last_registration_date": f"{self.household1.last_registration_date:}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "start": self.household1.start.strftime(""),
                     "zip_code": None,
                     "residence_status": self.household1.get_residence_status_display(),
                     "country_origin": "",
@@ -953,12 +954,12 @@ class TestHouseholdMembers:
                     "admin2": None,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": f"{self.household2.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{self.household2.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{self.household2.first_registration_date:}",
+                    "last_registration_date": f"{self.household2.last_registration_date:}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                    "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "start": self.household2.start.strftime(""),
                     "zip_code": None,
                     "residence_status": self.household2.get_residence_status_display(),
                     "country_origin": "",
@@ -1112,10 +1113,7 @@ class TestHouseholdGlobalViewSet:
             assert household_result_first["residence_status"] == household.get_residence_status_display()
             assert household_result_first["total_cash_received"] == household.total_cash_received
             assert household_result_first["total_cash_received_usd"] == household.total_cash_received_usd
-            assert (
-                household_result_first["last_registration_date"]
-                == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-            )
+            assert household_result_first["last_registration_date"] == f"{household.last_registration_date:}"
 
     def test_household_global_list_with_permissions_in_one_program(
         self, create_user_role_with_permissions: Any
