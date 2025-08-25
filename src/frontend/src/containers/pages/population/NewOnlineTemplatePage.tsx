@@ -129,6 +129,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
 
   const initialValues = {
     roundsData: mappedRoundsData,
+    authorizedUserIds: [],
+    name: '',
   };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -209,6 +211,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
     const payload = {
       rounds_data: roundsDataToSend,
       filters: filtersToSend,
+      authorized_users: values.authorizedUserIds,
+      name: values.name,
     };
 
     // Log all submit data
@@ -225,6 +229,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
         requestBody: {
           roundsData: payload.rounds_data,
           filters: payload.filters,
+          authorizedUsers: payload.authorized_users,
+          name: payload.name,
         },
       });
     } catch (error) {
@@ -290,7 +296,10 @@ const NewOnlineTemplatePage = (): ReactElement => {
                 <AuthorizedUsersOnline setFieldValue={setFieldValue} />
               )}
               {activeStep === 3 && (
-                <TemplateNameOnline setFieldValue={setFieldValue} />
+                <TemplateNameOnline
+                  setFieldValue={setFieldValue}
+                  value={values.name}
+                />
               )}
               <Box
                 display="flex"
