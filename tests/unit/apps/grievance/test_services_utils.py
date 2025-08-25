@@ -3,6 +3,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
@@ -133,10 +134,10 @@ class TestGrievanceUtils(TestCase):
         )
 
         assert IndividualRoleInHousehold.objects.all().count() == 0
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
             handle_role(ROLE_PRIMARY, household, individuals[0])
-            assert str(e.value) == "Ticket cannot be closed, primary collector role has to be reassigned"
+            assert "Ticket cannot be closed, primary collector role has to be reassigned" in str(e)
 
         # just remove exists roles
         IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
@@ -167,7 +168,7 @@ class TestGrievanceUtils(TestCase):
             "photoraw": "photo_raw",
         }
 
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             DocumentFactory(
                 document_number=111,
                 type=document_type,
@@ -176,13 +177,13 @@ class TestGrievanceUtils(TestCase):
                 status=Document.STATUS_VALID,
             )
             handle_add_document(document_data, individual)
-            assert str(e.value) == "Document with number 111 of type tax already exists"
+            assert "Document with number 111 of type tax already exists" in str(e)
 
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             document_type.unique_for_individual = True
             document_type.save()
             handle_add_document(document_data, individual)
-            assert str(e.value) == "Document of type tax already exists for this individual"
+            assert "Document of type tax already exists for this individual" in str(e)
 
         Document.objects.all().delete()
         assert Document.objects.all().count() == 0

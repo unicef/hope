@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
@@ -95,7 +96,7 @@ class TestAddIndividualService(TestCase):
         self.ticket_details.save()
 
         service = AddIndividualService(self.ticket, {})
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(DRFValidationError):
             service.close(UserFactory())
         assert Document.objects.filter(document_number="123456").count() == 1
 

@@ -1063,6 +1063,24 @@ class TestGrievanceTicketApprove:
                 "village": {"value": "Test Village"},
                 "size": {"value": 19},
                 "flex_fields": {},
+                "roles": [
+                    {
+                        "value": "PRIMARY",
+                        "full_name": "Anthony Christine",
+                        "unicef_id": "IND-45",
+                        "individual_id": "9cac5264-7f50-4f39-8a5f-0b19bbe80ddf",
+                        "approve_status": False,
+                        "previous_value": "NO_ROLE",
+                    },
+                    {
+                        "value": "ALTERNATE",
+                        "full_name": "Michael Catherine",
+                        "unicef_id": "IND-46",
+                        "individual_id": "15f93b1a-522e-42c1-a85e-8c329ea950f2",
+                        "approve_status": False,
+                        "previous_value": "NO_ROLE",
+                    },
+                ],
             },
         )
         self.bulk_grievance_ticket1 = GrievanceTicketFactory(
@@ -1208,7 +1226,19 @@ class TestGrievanceTicketApprove:
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         data = {
-            "household_approve_data": {"village": True},
+            "household_approve_data": {
+                "village": True,
+                "roles": [
+                    {
+                        "individual_id": "9cac5264-7f50-4f39-8a5f-0b19bbe80ddf",
+                        "approve_status": "True",
+                    },
+                    {
+                        "individual_id": "15f93b1a-522e-42c1-a85e-8c329ea950f2",
+                        "approve_status": "true",
+                    },
+                ],
+            },
             "flex_fields_approve_data": {},
         }
         response = self.api_client.post(
@@ -1235,6 +1265,8 @@ class TestGrievanceTicketApprove:
                 "approve_status": False,
             }
             assert resp_data["ticket_details"]["household_data"]["flex_fields"] == {}
+            for role in resp_data["ticket_details"]["household_data"]["roles"]:
+                assert role["approve_status"] is True
 
     def test_approve_add_individual(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(

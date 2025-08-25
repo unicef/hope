@@ -30,7 +30,6 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_document,
     handle_edit_document,
     handle_edit_identity,
-    handle_role,
     handle_update_account,
     is_approved,
     prepare_edit_accounts_save,
@@ -43,9 +42,6 @@ from hope.apps.grievance.services.data_change.utils import (
     to_phone_number_str,
     update_es,
     verify_flex_fields,
-)
-from hope.apps.grievance.services.reassign_roles_services import (
-    reassign_roles_on_update_service,
 )
 from hope.apps.household.models import (
     HEAD,
@@ -108,8 +104,6 @@ class IndividualDataUpdateService(DataChangeService):
                 "payment_delivery_phone_no",
             ):
                 current_value = str(current_value)
-            elif field == "role":
-                current_value = individual.role
             individual_data_with_approve_status[field]["previous_value"] = current_value
         documents_with_approve_status = [
             {"value": handle_document(document), "approve_status": False} for document in documents
@@ -189,8 +183,6 @@ class IndividualDataUpdateService(DataChangeService):
                 "payment_delivery_phone_no",
             ):
                 current_value = str(current_value)
-            elif field == "role":
-                current_value = individual.role
             individual_data_with_approve_status[field]["previous_value"] = current_value
         documents_with_approve_status = [
             {"value": handle_document(document), "approve_status": False} for document in documents
@@ -237,7 +229,6 @@ class IndividualDataUpdateService(DataChangeService):
         individual = details.individual
         household = individual.household
         individual_data = details.individual_data
-        role_data = individual_data.pop("role", {})
         flex_fields_with_additional_data = individual_data.pop("flex_fields", {})
         flex_fields = {
             field: data.get("value") for field, data in flex_fields_with_additional_data.items() if is_approved(data)
@@ -330,9 +321,6 @@ class IndividualDataUpdateService(DataChangeService):
             household = Household.objects.select_for_update().get(id=household.id)
             household.head_of_household = new_individual
             household.save()
-        reassign_roles_on_update_service(new_individual, details.role_reassign_data, user, program_qs)
-        if is_approved(role_data):
-            handle_role(role_data.get("value"), household, new_individual)
         documents_to_create = [handle_add_document(document, new_individual) for document in documents]
         documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
         identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
