@@ -1,3 +1,44 @@
+import React, { ReactElement, useMemo, useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Grid2 as Grid,
+} from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { BlackLink } from '@components/core/BlackLink';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BaseSection } from '@components/core/BaseSection';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { StatusBox } from '@components/core/StatusBox';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useParams, Link } from 'react-router-dom';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  showApiErrorMessages,
+  periodicDataUpdateTemplateStatusToColor,
+} from '@utils/utils';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useProgramContext } from 'src/programContext';
+import SentBackComment from './SentBackComment';
+import { ConfirmationDialog } from '../../components/core/ConfirmationDialog/ConfirmationDialog';
+
 type PduField = {
   value: any;
   subtype: string;
@@ -6,45 +47,7 @@ type PduField = {
   roundNumber: number;
   columnName?: string;
 };
-import { BaseSection } from '@components/core/BaseSection';
-import { LabelizedField } from '@components/core/LabelizedField';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { StatusBox } from '@components/core/StatusBox';
-import {
-  periodicDataUpdatesOnlineEditsStatusToColor,
-  showApiErrorMessages,
-} from '@utils/utils';
-import Table from '@mui/material/Table';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableBody from '@mui/material/TableBody';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import { Grid2 as Grid } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { BlackLink } from '@components/core/BlackLink';
-import React, { ReactElement, useMemo, useEffect, useState } from 'react';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { useParams, Link } from 'react-router-dom';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useTranslation } from 'react-i18next';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import TableContainer from '@mui/material/TableContainer';
-import Box from '@mui/material/Box';
-import SentBackComment from './SentBackComment';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useProgramContext } from 'src/programContext';
 
-// StickyHeaderCell component for sticky table header cells
 const StickyHeaderCell = ({ shouldScroll, children }) => (
   <TableCell
     style={
@@ -89,8 +92,78 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   const numericId = id ? parseInt(id, 10) : undefined;
+  const queryClient = useQueryClient();
+
+  // Confirmation dialog state for Send Back
+  const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
+  const [sendBackComment, setSendBackComment] = useState('');
+  const [sendBackLoading, setSendBackLoading] = useState(false);
+  const [sendForApprovalLoading, setSendForApprovalLoading] = useState(false);
+
+  const handleSendBackConfirm = async () => {
+    setSendBackLoading(true);
+    try {
+      await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendBackCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: numericId,
+          requestBody: { comment: sendBackComment },
+        },
+      );
+      showMessage(t('Periodic data update sent back successfully.'));
+      setSendBackDialogOpen(false);
+      setSendBackComment('');
+      queryClient.invalidateQueries({
+        queryKey: [
+          'onlineEditsTemplateDetails',
+          businessArea,
+          programId,
+          numericId,
+        ],
+      });
+    } catch (e) {
+      showApiErrorMessages(
+        e,
+        showMessage,
+        t('Failed to send back periodic data update.'),
+      );
+    } finally {
+      setSendBackLoading(false);
+    }
+  };
+
+  const handleSendForApproval = async () => {
+    setSendForApprovalLoading(true);
+    try {
+      await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendForApprovalCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: numericId,
+        },
+      );
+      showMessage(t('Periodic data update sent for approval.'));
+      queryClient.invalidateQueries({
+        queryKey: [
+          'onlineEditsTemplateDetails',
+          businessArea,
+          programId,
+          numericId,
+        ],
+      });
+    } catch (e) {
+      showApiErrorMessages(e, showMessage, t('Failed to send for approval.'));
+    } finally {
+      setSendForApprovalLoading(false);
+    }
+  };
+
+  // Modal state for Authorized Users
+  const [authorizedUsersModalOpen, setAuthorizedUsersModalOpen] =
+    useState(false);
+
   const { data, isLoading } = useQuery({
     queryKey: [
       'onlineEditsTemplateDetails',
@@ -108,12 +181,6 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       ),
     enabled: !!businessArea && !!programId && !!numericId,
   });
-
-  // Modal state for Authorized Users
-  const [authorizedUsersModalOpen, setAuthorizedUsersModalOpen] =
-    useState(false);
-
-  // Helper to map permissions to role string
 
   // All hooks must be called before any return
   const individuals = useMemo(() => {
@@ -181,11 +248,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         return updated;
       });
     } catch (e) {
-      showApiErrorMessages(
-        e,
-        showMessage,
-        'An error occurred while updating the data',
-      );
+      // @ts-ignore
+      showMessage('An error occurred while updating the data');
     }
   };
 
@@ -230,6 +294,82 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       <PageHeader
         title={`Online Edits Template Details: ${name}`}
         breadCrumbs={breadCrumbsItems}
+      >
+        <>
+          {status === 'NEW' && (
+            <Box px={6} pt={2} pb={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSendForApproval}
+                disabled={sendForApprovalLoading}
+                data-cy="send-for-approval"
+              >
+                {t('Send for Approval')}
+              </Button>
+            </Box>
+          )}
+          {status === 'READY' && (
+            <Box px={6} pt={2} pb={2} display="flex" gap={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setSendBackDialogOpen(true)}
+                data-cy="send-back"
+              >
+                {t('Send Back')}
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                // Add approve handler here
+                data-cy="approve"
+              >
+                {t('Approve')}
+              </Button>
+            </Box>
+          )}
+          {/* Show Send for Approval button if status is OPEN */}
+          {status === 'OPEN' && (
+            <Box px={6} pt={2} pb={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSendForApproval}
+                disabled={sendForApprovalLoading}
+                data-cy="send-for-approval"
+              >
+                {sendForApprovalLoading
+                  ? t('Sending...')
+                  : t('Send for Approval')}
+              </Button>
+            </Box>
+          )}
+        </>
+      </PageHeader>
+      {/* Confirmation Dialog for Send Back */}
+      <ConfirmationDialog
+        open={sendBackDialogOpen}
+        title={t('Send Back Confirmation')}
+        content={t(
+          'Are you sure you want to send back this periodic data update? Please provide a comment.',
+        )}
+        continueText={t('Confirm')}
+        onSubmit={handleSendBackConfirm}
+        onClose={() => setSendBackDialogOpen(false)}
+        disabled={sendBackLoading || !sendBackComment}
+        extraContent={
+          <TextField
+            label={t('Comment')}
+            multiline
+            fullWidth
+            minRows={3}
+            value={sendBackComment}
+            onChange={(e) => setSendBackComment(e.target.value)}
+            disabled={sendBackLoading}
+          />
+        }
+        type="primary"
       />
       <BaseSection title="Details">
         <Grid container spacing={6}>
@@ -237,7 +377,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
             <LabelizedField label={t('Status')}>
               <StatusBox
                 status={status}
-                statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
+                statusToColor={periodicDataUpdateTemplateStatusToColor}
               />
             </LabelizedField>
           </Grid>
@@ -363,6 +503,15 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           author={c.author}
         />
       ))}
+      {/* //TODO: add it */}
+      {/* {sendBackComment && (
+        <SentBackComment
+          key={sentBackComment.id}
+          comment={sentBackComment.comment}
+          date={sentBackComment.date}
+          author={sentBackComment.author}
+        />
+      )} */}
 
       {/* Periodic Data Update Table */}
       <Box p={6}>
