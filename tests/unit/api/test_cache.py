@@ -20,6 +20,7 @@ class TestEtagDecorator:
     class DummyRequest:
         def __init__(self, headers: dict) -> None:
             self.headers = headers
+            self.method = "GET"
 
     @etag_decorator(DummyEtagConstructorClass)
     def dummy_view(self, request: Any, *args: Any, **kwargs: Any) -> Response:

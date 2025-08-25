@@ -165,6 +165,12 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             ("ping_rapidpro", "Can test RapidPRO connection"),
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
         )
+        indexes = [
+            # Optimize queries filtering by active status
+            models.Index(fields=["active"], name="idx_ba_active"),
+            # Optimize queries by slug (already has db_index but adding compound index for performance)
+            models.Index(fields=["slug", "active"], name="idx_ba_slug_active"),
+        ]
 
     def __str__(self) -> str:
         return self.name
