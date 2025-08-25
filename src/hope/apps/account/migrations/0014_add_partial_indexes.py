@@ -2,9 +2,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0013_migration'),
+        ("account", "0013_migration"),
     ]
 
     operations = [

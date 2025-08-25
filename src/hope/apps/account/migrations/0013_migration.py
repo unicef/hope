@@ -4,26 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0012_migration'),
+        ("account", "0012_migration"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='roleassignment',
-            index=models.Index(fields=['user', 'expiry_date'], name='idx_ra_user_exp'),
+            model_name="roleassignment",
+            index=models.Index(fields=["user", "expiry_date"], name="idx_ra_user_exp"),
         ),
         migrations.AddIndex(
-            model_name='roleassignment',
-            index=models.Index(fields=['partner', 'business_area', 'expiry_date'], name='idx_ra_partner_ba_exp'),
+            model_name="roleassignment",
+            index=models.Index(fields=["partner", "business_area", "expiry_date"], name="idx_ra_partner_ba_exp"),
         ),
         migrations.AddIndex(
-            model_name='roleassignment',
-            index=models.Index(fields=['business_area', 'expiry_date'], name='idx_ra_ba_exp'),
+            model_name="roleassignment",
+            index=models.Index(fields=["business_area", "expiry_date"], name="idx_ra_ba_exp"),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['partner', 'id'], name='idx_user_partner_id'),
+            model_name="user",
+            index=models.Index(fields=["partner", "id"], name="idx_user_partner_id"),
         ),
     ]
