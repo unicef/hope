@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,8 +7,10 @@ from natural_keys import NaturalKeyModel
 
 from hope.models.user import User, logger
 from hope.models.role_assignment import RoleAssignment
-from hope.models.core import BusinessArea
 from hope.models.utils import TimeStampedUUIDModel
+
+if TYPE_CHECKING:
+    from hope.models.core import BusinessArea
 
 
 class IncompatibleRolesManager(models.Manager):
