@@ -145,7 +145,7 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
             onChange={(_, option) => {
               handleStateFilterChange('admin2', option);
             }}
-            level={1}
+            level={2}
             dataCy="filter-admin2"
             disabled={filter.admin1?.length > 0}
           />

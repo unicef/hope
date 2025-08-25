@@ -3,13 +3,15 @@ import { TextField } from '@mui/material';
 
 interface TemplateNameOnlineProps {
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+  value: string;
 }
 
 export const TemplateNameOnline: React.FC<TemplateNameOnlineProps> = ({
   setFieldValue,
+  value,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFieldValue('templateName', e.target.value);
+    setFieldValue('name', e.target.value);
   };
   return (
     <TextField
@@ -18,6 +20,7 @@ export const TemplateNameOnline: React.FC<TemplateNameOnlineProps> = ({
       fullWidth
       size="medium"
       margin="normal"
+      value={value}
       onChange={handleChange}
     />
   );

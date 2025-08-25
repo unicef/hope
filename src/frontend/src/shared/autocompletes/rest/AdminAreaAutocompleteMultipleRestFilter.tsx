@@ -182,7 +182,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
         option?.value === value1?.value
       }
       renderOption={(props, option: any, { selected }) => (
-        <li {...props}>
+        <li {...props} key={option.value}>
           <Checkbox
             icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
             checkedIcon={<CheckBoxIcon fontSize="small" />}
