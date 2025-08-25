@@ -317,7 +317,7 @@ class TestMailjet(TestCase):
         )
         with pytest.raises(ValueError) as exc:
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
+        mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You cannot use both template and custom email body"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
@@ -333,7 +333,7 @@ class TestMailjet(TestCase):
         )
         with pytest.raises(ValueError) as exc:
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
+        mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You cannot use both template and custom email body"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
@@ -347,7 +347,7 @@ class TestMailjet(TestCase):
         )
         with pytest.raises(ValueError) as exc:
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
+        mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You need to provide body variables for template email"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
@@ -362,7 +362,7 @@ class TestMailjet(TestCase):
         )
         with pytest.raises(ValueError) as exc:
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
+        mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You need to provide either template or custom email body"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
