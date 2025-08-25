@@ -110,7 +110,6 @@ class HouseholdViewSet(
         )
 
     @etag_decorator(HouseholdListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 

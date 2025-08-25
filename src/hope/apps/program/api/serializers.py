@@ -4,6 +4,7 @@ from typing import Any
 from django.db.models import Count, F, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -376,6 +377,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     def get_target_populations_count(self, obj: Program) -> int:
         return PaymentPlan.objects.filter(program_cycle__program=obj).count()
 
+    @extend_schema_field(serializers.ListSerializer(child=PartnerForProgramSerializer()))
     def get_partners(self, obj: Program) -> ReturnDict:
         partners_qs = (
             Partner.objects.filter(

@@ -175,6 +175,8 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
         return "BUSINESS_AREA"
 
     def get_areas(self, obj: Partner) -> ReturnDict:
+        if not obj.has_area_limits_in_program(obj.partner_program):
+            return None
         areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")
         return AreaLevelSerializer(areas_qs, many=True).data
 
