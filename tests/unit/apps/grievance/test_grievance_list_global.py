@@ -335,12 +335,12 @@ class TestGrievanceTicketGlobalList:
                     },
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                    "start": household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "start": household.start.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     "zip_code": None,
                     "residence_status": household.get_residence_status_display(),
                     "country_origin": household.country_origin.name,
@@ -362,7 +362,7 @@ class TestGrievanceTicketGlobalList:
                     "name": grievance_ticket.admin2.name,
                     "p_code": grievance_ticket.admin2.p_code,
                     "area_type": grievance_ticket.admin2.area_type.id,
-                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
+                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
                 }
                 if grievance_ticket.admin2
                 else None
@@ -382,13 +382,13 @@ class TestGrievanceTicketGlobalList:
                 "email": grievance_ticket.created_by.email,
                 "username": grievance_ticket.created_by.username,
             }
-            assert grievance_ticket_result["user_modified"] == f"{grievance_ticket.user_modified:%Y-%m-%dT%H:%M:%SZ}"
+            assert grievance_ticket_result["user_modified"] == f"{grievance_ticket.user_modified:%Y-%m-%dT%H:%M:%S.%fZ}"
             assert grievance_ticket_result["category"] == grievance_ticket.category
             assert grievance_ticket_result["issue_type"] == grievance_ticket.issue_type
             assert grievance_ticket_result["priority"] == grievance_ticket.priority
             assert grievance_ticket_result["urgency"] == grievance_ticket.urgency
-            assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%SZ}"
-            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%SZ}"
+            assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}"
 
             # total_days
             if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:

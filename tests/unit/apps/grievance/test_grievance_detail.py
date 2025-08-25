@@ -663,15 +663,15 @@ class TestGrievanceTicketDetail:
                 "admin3": None,
                 "admin4": None,
                 "first_registration_date": ticket_details.reason_household.first_registration_date.strftime(
-                    "%Y-%m-%dT%H:%M:%SZ"
+                    "%Y-%m-%dT%H:%M:%S.%fZ"
                 ),
                 "last_registration_date": ticket_details.reason_household.last_registration_date.strftime(
-                    "%Y-%m-%dT%H:%M:%SZ"
+                    "%Y-%m-%dT%H:%M:%S.%fZ"
                 ),
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                "start": ticket_details.reason_household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "start": ticket_details.reason_household.start.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                 "zip_code": None,
                 "residence_status": ticket_details.reason_household.get_residence_status_display(),
                 "country_origin": ticket_details.reason_household.country_origin.name,
@@ -781,8 +781,8 @@ class TestGrievanceTicketDetail:
                 "address": golden_records_individual.household.address,
                 "village": golden_records_individual.household.village,
                 "geopoint": golden_records_individual.household.geopoint,
-                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "total_cash_received": golden_records_individual.household.total_cash_received,
                 "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -791,7 +791,7 @@ class TestGrievanceTicketDetail:
                         "total_delivered_quantity": "0.00",
                     }
                 ],
-                "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "zip_code": golden_records_individual.household.zip_code,
                 "residence_status": golden_records_individual.household.get_residence_status_display(),
                 "import_id": golden_records_individual.household.unicef_id,
@@ -934,7 +934,7 @@ class TestGrievanceTicketDetail:
             "payment_verification": {
                 "id": str(payment_verification.id),
                 "status": payment_verification.status,
-                "status_date": f"{payment_verification.status_date:%Y-%m-%dT%H:%M:%SZ}",
+                "status_date": f"{payment_verification.status_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "received_amount": f"{payment_verification.received_amount:.2f}",
             },
         }
@@ -1082,8 +1082,8 @@ class TestGrievanceTicketDetail:
                 "address": golden_records_individual.household.address,
                 "village": golden_records_individual.household.village,
                 "geopoint": golden_records_individual.household.geopoint,
-                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "total_cash_received": golden_records_individual.household.total_cash_received,
                 "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -1092,7 +1092,7 @@ class TestGrievanceTicketDetail:
                         "total_delivered_quantity": "0.00",
                     }
                 ],
-                "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "zip_code": golden_records_individual.household.zip_code,
                 "residence_status": golden_records_individual.household.get_residence_status_display(),
                 "import_id": golden_records_individual.household.unicef_id,
@@ -1157,8 +1157,8 @@ class TestGrievanceTicketDetail:
                 "address": self.individuals2[0].household.address,
                 "village": self.individuals2[0].household.village,
                 "geopoint": self.individuals2[0].household.geopoint,
-                "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "total_cash_received": self.individuals2[0].household.total_cash_received,
                 "total_cash_received_usd": self.individuals2[0].household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -1167,7 +1167,7 @@ class TestGrievanceTicketDetail:
                         "total_delivered_quantity": "0.00",
                     }
                 ],
-                "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%SZ}",
+                "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                 "zip_code": self.individuals2[0].household.zip_code,
                 "residence_status": self.individuals2[0].household.get_residence_status_display(),
                 "import_id": self.individuals2[0].household.unicef_id,
@@ -1204,8 +1204,8 @@ class TestGrievanceTicketDetail:
                     "address": self.individuals2[0].household.address,
                     "village": self.individuals2[0].household.village,
                     "geopoint": self.individuals2[0].household.geopoint,
-                    "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "total_cash_received": self.individuals2[0].household.total_cash_received,
                     "total_cash_received_usd": self.individuals2[0].household.total_cash_received_usd,
                     "delivered_quantities": [
@@ -1214,7 +1214,7 @@ class TestGrievanceTicketDetail:
                             "total_delivered_quantity": "0.00",
                         }
                     ],
-                    "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%SZ}",
+                    "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "zip_code": self.individuals2[0].household.zip_code,
                     "residence_status": self.individuals2[0].household.get_residence_status_display(),
                     "import_id": self.individuals2[0].household.unicef_id,
@@ -1252,8 +1252,8 @@ class TestGrievanceTicketDetail:
                     "address": duplicate.household.address,
                     "village": duplicate.household.village,
                     "geopoint": duplicate.household.geopoint,
-                    "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "total_cash_received": duplicate.household.total_cash_received,
                     "total_cash_received_usd": duplicate.household.total_cash_received_usd,
                     "delivered_quantities": [
@@ -1262,7 +1262,7 @@ class TestGrievanceTicketDetail:
                             "total_delivered_quantity": "0.00",
                         }
                     ],
-                    "start": f"{duplicate.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                    "start": f"{duplicate.household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "zip_code": duplicate.household.zip_code,
                     "residence_status": duplicate.household.get_residence_status_display(),
                     "import_id": duplicate.household.unicef_id,
@@ -1414,7 +1414,7 @@ class TestGrievanceTicketDetail:
                 "name": grievance_ticket.admin2.name,
                 "p_code": grievance_ticket.admin2.p_code,
                 "area_type": grievance_ticket.admin2.area_type.id,
-                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
+                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
             }
             if grievance_ticket.admin2
             else None
@@ -1434,13 +1434,13 @@ class TestGrievanceTicketDetail:
             "email": grievance_ticket.created_by.email,
             "username": grievance_ticket.created_by.username,
         }
-        assert data["user_modified"] == f"{grievance_ticket.user_modified:%Y-%m-%dT%H:%M:%SZ}"
+        assert data["user_modified"] == f"{grievance_ticket.user_modified:%Y-%m-%dT%H:%M:%S.%fZ}"
         assert data["category"] == grievance_ticket.category
         assert data["issue_type"] == grievance_ticket.issue_type
         assert data["priority"] == grievance_ticket.priority
         assert data["urgency"] == grievance_ticket.urgency
-        assert data["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%SZ}"
-        assert data["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%SZ}"
+        assert data["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+        assert data["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}"
 
         # total_days
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
@@ -1485,13 +1485,13 @@ class TestGrievanceTicketDetail:
                     "program_slug": individual.program.slug,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": delivered_quantities
                     or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                    "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     "zip_code": None,
                     "residence_status": individual.household.get_residence_status_display(),
                     "country_origin": individual.household.country_origin.name,
@@ -1523,13 +1523,13 @@ class TestGrievanceTicketDetail:
                             "address": role.household.address,
                             "village": role.household.village,
                             "geopoint": role.household.geopoint,
-                            "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                            "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                            "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                            "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                             "total_cash_received": role.household.total_cash_received,
                             "total_cash_received_usd": role.household.total_cash_received_usd,
                             "delivered_quantities": delivered_quantities
                             or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                            "start": f"{role.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                            "start": f"{role.household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                             "zip_code": role.household.zip_code,
                             "residence_status": role.household.get_residence_status_display(),
                             "import_id": role.household.unicef_id,
@@ -1597,8 +1597,8 @@ class TestGrievanceTicketDetail:
                     "email": self.user.email,
                     "username": self.user.username,
                 },
-                "created_at": f"{self.ticket_note.created_at:%Y-%m-%dT%H:%M:%SZ}",
-                "updated_at": f"{self.ticket_note.updated_at:%Y-%m-%dT%H:%M:%SZ}",
+                "created_at": f"{self.ticket_note.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "updated_at": f"{self.ticket_note.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
             }
         ]
 
@@ -1617,7 +1617,7 @@ class TestGrievanceTicketDetail:
                     "email": self.user.email,
                     "username": self.user.username,
                 },
-                "created_at": f"{self.grievance_document.created_at:%Y-%m-%dT%H:%M:%SZ}",
-                "updated_at": f"{self.grievance_document.updated_at:%Y-%m-%dT%H:%M:%SZ}",
+                "created_at": f"{self.grievance_document.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "updated_at": f"{self.grievance_document.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
             }
         ]

@@ -228,7 +228,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         response_json = response.json()["results"]
         assert len(response_json) == 1
         assert response_json[0]["last_approval_process_date"] == approval_process.sent_for_approval_date.strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
+            "%Y-%m-%dT%H:%M:%S.%fZ"
         )
         assert response_json[0]["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
 

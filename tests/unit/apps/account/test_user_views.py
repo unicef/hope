@@ -260,7 +260,7 @@ class TestUserProfile:
         assert profile_data["cross_area_filter_available"] is False
 
         assert profile_data["status"] == self.user.status
-        assert profile_data["last_login"] == f"{self.user.last_login:%Y-%m-%dT%H:%M:%SZ}"
+        assert profile_data["last_login"] == f"{self.user.last_login:%Y-%m-%dT%H:%M:%S.%fZ}"
 
     def test_user_profile_in_scope_program(self) -> None:
         response = self.api_client.get(self.user_profile_url, {"program": self.program1.slug})
@@ -762,7 +762,9 @@ class TestProgramUsers:
             }
             assert user_result["cross_area_filter_available"] is False
             assert user_result["status"] == user.status
-            assert user_result["last_login"] == (f"{user.last_login:%Y-%m-%dT%H:%M:%SZ}" if user.last_login else None)
+            assert user_result["last_login"] == (
+                f"{user.last_login:%Y-%m-%dT%H:%M:%S.%fZ}" if user.last_login else None
+            )
 
         # self.user
         assert response_results[0]["partner_roles"] == []

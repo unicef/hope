@@ -66,8 +66,8 @@ class APICountriesTests(HOPEApiTestCase):
             "iso_code3": country.iso_code3,
             "iso_num": country.iso_num,
             "updated_at": country.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "valid_from": country.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "valid_until": country.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "valid_from": country.valid_from.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "valid_until": country.valid_until.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         }
 
     def test_get_countries(self) -> None:
@@ -148,8 +148,8 @@ class AreaListTests(HOPEApiTestCase):
             "original_id": area.original_id,
             "name": area.name,
             "p_code": area.p_code,
-            "valid_from": area.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "valid_until": area.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "valid_from": area.valid_from.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "valid_until": area.valid_until.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "extras": area.extras,
             "lft": area.lft,
             "rght": area.rght,
@@ -238,7 +238,7 @@ class AreaTypeListTests(HOPEApiTestCase):
             "name": area_type.name,
             "area_level": area_type.area_level,
             "valid_from": area_type.valid_from.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "valid_until": area_type.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "valid_until": area_type.valid_until.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "extras": area_type.extras,
             "lft": area_type.lft,
             "rght": area_type.rght,

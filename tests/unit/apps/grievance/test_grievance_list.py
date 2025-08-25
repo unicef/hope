@@ -334,8 +334,8 @@ class TestGrievanceTicketList:
                     "address": household.address,
                     "village": household.village,
                     "geopoint": household.geopoint,
-                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "total_cash_received": household.total_cash_received,
                     "total_cash_received_usd": household.total_cash_received_usd,
                     "delivered_quantities": [
@@ -344,7 +344,7 @@ class TestGrievanceTicketList:
                             "total_delivered_quantity": "0.00",
                         }
                     ],
-                    "start": f"{household.start:%Y-%m-%dT%H:%M:%SZ}",
+                    "start": f"{household.start:%Y-%m-%dT%H:%M:%S.%fZ}",
                     "zip_code": household.zip_code,
                     "residence_status": household.get_residence_status_display(),
                     "import_id": household.unicef_id,
@@ -381,12 +381,12 @@ class TestGrievanceTicketList:
                 "email": grievance_ticket.created_by.email,
                 "username": grievance_ticket.created_by.username,
             }
-            assert grievance_ticket_result["user_modified"] == f"{grievance_ticket.user_modified:%Y-%m-%dT%H:%M:%SZ}"
+            assert grievance_ticket_result["user_modified"] == f"{grievance_ticket.user_modified:%Y-%m-%dT%H:%M:%S.%fZ}"
             assert grievance_ticket_result["category"] == grievance_ticket.category
             assert grievance_ticket_result["issue_type"] == grievance_ticket.issue_type
             assert grievance_ticket_result["priority"] == grievance_ticket.priority
             assert grievance_ticket_result["urgency"] == grievance_ticket.urgency
-            assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%SZ}"
+            assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
             assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}"
 
             # total_days
