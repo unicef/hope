@@ -139,10 +139,9 @@ def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **k
     _invalidate_user_permissions_cache([instance])
 
 
-
-
 # Profile cache
 User = get_user_model()
+
 
 # invalidate every UserProfile (Global)
 @receiver(post_save, sender=Role)
@@ -156,16 +155,19 @@ User = get_user_model()
 def _authz_global_changed(*args, **kwargs):
     transaction.on_commit(profile_cache.bump_global)
 
+
 @receiver(m2m_changed, sender=Group.permissions.through)
 def _group_permissions_changed(action, **kwargs):
     if action in {"post_add", "post_remove", "post_clear"}:
         transaction.on_commit(profile_cache.bump_global)
+
 
 # Invalidate only the UserProfile associated with the User
 @receiver(post_save, sender=User)
 @receiver(post_delete, sender=User)
 def _user_changed(instance: User, **kwargs):
     transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))
+
 
 @receiver(m2m_changed, sender=User.groups.through)
 def _user_groups_changed(instance: User, action, **kwargs):

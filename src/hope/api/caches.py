@@ -28,9 +28,13 @@ def _inm_matches(etag: str, inm_header: str | None) -> bool:
     n_etag = norm(etag)
     return any(n_etag == norm(t) for t in tokens)
 
-def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool = True, safe_only: bool = True) -> Callable:
-    """
-    Decorate ViewSet methods. Computes ETag from a KeyConstructor and:
+
+def etag_decorator(
+    key_constructor_class: "KeyConstructor", compare_etags: bool = True, safe_only: bool = True
+) -> Callable:
+    """Decorate ViewSet methods.
+
+    Computes ETag from a KeyConstructor and:
     - For GET/HEAD: returns 304 when If-None-Match matches (weak compare).
     - Otherwise: sets ETag header on the response.
     """
