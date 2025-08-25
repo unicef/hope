@@ -295,12 +295,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         content_types_dict = {
             str(pk): app_lablel for pk, app_lablel in ContentType.objects.values_list("id", "app_label")
         }
-        businesses_ids = list(self.business_areas.values_list("id", flat=True))
         role_assignments = (
-            RoleAssignment.objects.filter(
-                Q(partner__user=self, business_area_id__in=businesses_ids)
-                | Q(user=self, business_area__id__in=businesses_ids)
-            )
+            RoleAssignment.objects.filter(Q(partner__user=self) | Q(user=self))
             .select_related("role", "group")
             .prefetch_related("group__permissions")
             .exclude(expiry_date__lt=timezone.now())
@@ -501,7 +497,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
             models.Index(fields=["user", "expiry_date"], name="idx_ra_user_exp"),
             # Optimize partner + business_area queries with expiry_date filtering
             models.Index(fields=["partner", "business_area", "expiry_date"], name="idx_ra_partner_ba_exp"),
-            # Optimize business_area queries with expiry_date filtering  
+            # Optimize business_area queries with expiry_date filtering
             models.Index(fields=["business_area", "expiry_date"], name="idx_ra_ba_exp"),
         ]
 
