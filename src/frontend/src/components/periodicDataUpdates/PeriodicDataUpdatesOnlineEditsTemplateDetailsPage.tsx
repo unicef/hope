@@ -265,6 +265,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     approvedBy,
     approvedAt,
     createdBy,
+    sentBackComment,
   } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -275,19 +276,19 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   ];
 
   // Fake sent back comments data
-  const sentBackComments = [
-    {
-      comment:
-        'Missing Date for Individual ID: 69023-3455, please update before sending for approval again',
-      date: '13 May 2025',
-      author: 'Jon Snow',
-    },
-    {
-      comment: 'Please verify the address for Individual ID: 69023-3456.',
-      date: '10 May 2025',
-      author: 'Arya Stark',
-    },
-  ];
+  // const sentBackComments = [
+  //   {
+  //     comment:
+  //       'Missing Date for Individual ID: 69023-3455, please update before sending for approval again',
+  //     date: '13 May 2025',
+  //     author: 'Jon Snow',
+  //   },
+  //   {
+  //     comment: 'Please verify the address for Individual ID: 69023-3456.',
+  //     date: '10 May 2025',
+  //     author: 'Arya Stark',
+  //   },
+  // ];
 
   return (
     <>
@@ -494,24 +495,24 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         </Grid>
       </BaseSection>
 
+      {/* //TODO: example */}
       {/* Sent Back Comments */}
-      {sentBackComments.map((c, idx) => (
+      {/* {sentBackComments.map((c, idx) => (
         <SentBackComment
           key={idx}
           comment={c.comment}
           date={c.date}
           author={c.author}
         />
-      ))}
-      {/* //TODO: add it */}
-      {/* {sendBackComment && (
+      ))} */}
+      {sendBackComment && (
         <SentBackComment
           key={sentBackComment.id}
           comment={sentBackComment.comment}
           date={sentBackComment.date}
           author={sentBackComment.author}
         />
-      )} */}
+      )}
 
       {/* Periodic Data Update Table */}
       <Box p={6}>
