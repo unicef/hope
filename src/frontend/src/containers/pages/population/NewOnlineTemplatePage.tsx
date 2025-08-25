@@ -3,18 +3,18 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
 import { FieldsToUpdateOnline } from '@components/periodicDataUpdates/FieldsToUpdateOnline';
 import { FilterIndividualsOnline } from '@components/periodicDataUpdates/FilterIndividualsOnline';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
-import { RestService } from '@restgenerated/services/RestService';
-import { PDUOnlineEditCreate } from '@restgenerated/models/PDUOnlineEditCreate';
+import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
-import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
+import { PDUOnlineEditCreate } from '@restgenerated/models/PDUOnlineEditCreate';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
@@ -27,6 +27,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const navigate = useNavigate();
   const location = useLocation();
+  const [selected, setSelected] = useState<string[]>([]);
+
   const isPeople = location.pathname.includes('people');
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -293,7 +295,11 @@ const NewOnlineTemplatePage = (): ReactElement => {
                 />
               )}
               {activeStep === 2 && (
-                <AuthorizedUsersOnline setFieldValue={setFieldValue} />
+                <AuthorizedUsersOnline
+                  setFieldValue={setFieldValue}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
               )}
               {activeStep === 3 && (
                 <TemplateNameOnline

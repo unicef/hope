@@ -30,12 +30,15 @@ import { renderUserName } from '@utils/utils';
 
 interface AuthorizedUsersOnlineProps {
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
   setFieldValue,
+  selected,
+  setSelected,
 }) => {
-  // API model
   type AuthorizedUser = APIAuthorizedUser & {
     canEdit: boolean;
     canApprove: boolean;
@@ -43,60 +46,10 @@ export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
     name: string;
   };
   const { t } = useTranslation();
-
-  // Fallback fake data for UI display
-  const fakeData: APIAuthorizedUser[] = [
-    {
-      id: '1',
-      firstName: 'Stefano',
-      lastName: 'Examplo',
-      username: 'stefano',
-      email: 'stefano@example.com',
-      pduPermissions: ['PDU_ONLINE_SAVE_DATA'],
-    },
-    {
-      id: '2',
-      firstName: 'Julie',
-      lastName: 'Halding',
-      username: 'julie',
-      email: 'julie@example.com',
-      pduPermissions: ['PDU_ONLINE_APPROVE'],
-    },
-    {
-      id: '3',
-      firstName: 'Jean',
-      lastName: 'Wilner Bassette',
-      username: 'jean',
-      email: 'jean@example.com',
-      pduPermissions: ['PDU_ONLINE_APPROVE'],
-    },
-    {
-      id: '4',
-      firstName: 'Michael',
-      lastName: 'Jord',
-      username: 'nikola',
-      email: 'nikola@example.com',
-      pduPermissions: ['PDU_ONLINE_MERGE'],
-    },
-    {
-      id: '5',
-      firstName: 'Name',
-      lastName: '',
-      username: 'name5',
-      email: 'name5@example.com',
-      pduPermissions: [],
-    },
-    {
-      id: '6',
-      firstName: 'Name',
-      lastName: '',
-      username: 'name6',
-      email: 'name6@example.com',
-      pduPermissions: [],
-    },
-  ];
-
   const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const [search, setSearch] = React.useState('');
+  const [permission, setPermission] = React.useState<string[]>([]);
 
   const { data, isLoading, error } = useQuery<PaginatedAuthorizedUserList>({
     queryKey: ['authorizedUsersOnline', businessAreaSlug, programSlug],
@@ -110,10 +63,6 @@ export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
     enabled: Boolean(businessAreaSlug && programSlug),
   });
 
-  const [search, setSearch] = React.useState('');
-  const [permission, setPermission] = React.useState<string[]>([]);
-  const [selected, setSelected] = React.useState<string[]>([]);
-
   // Map API permissions to UI flags
   function mapPermissions(user: AuthorizedUser) {
     return {
@@ -125,13 +74,9 @@ export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
     };
   }
 
-  //TODO: remove fake data when not needed
-  let users: AuthorizedUser[] = [];
-  if (data?.results && data.results.length > 0) {
-    users = data.results.map(mapPermissions);
-  } else {
-    users = fakeData.map(mapPermissions);
-  }
+  const users: AuthorizedUser[] = data?.results
+    ? data.results.map(mapPermissions)
+    : [];
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -148,11 +93,11 @@ export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
     });
   });
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (userId: string) => {
     setSelected((prev) => {
-      const newSelected = prev.includes(id)
-        ? prev.filter((sid) => sid !== id)
-        : [...prev, id];
+      const newSelected = prev.includes(userId)
+        ? prev.filter((sid) => sid !== userId)
+        : [...prev, userId];
       setFieldValue('authorizedUserIds', newSelected);
       return newSelected;
     });
