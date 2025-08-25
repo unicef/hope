@@ -96,11 +96,13 @@ class TestQCFReportsService(TestCase):
             qcf_file = WesternUnionQCFFile.objects.first()
             self.assertEqual(qcf_file.name, filename)
             self.assertEqual(WesternUnionQCFFile.objects.count(), 1)
+            self.assertEqual(qcf_file, qcf_file.name)
 
             self.assertEqual(WesternUnionQCFFileReport.objects.count(), 1)
             report = WesternUnionQCFFileReport.objects.first()
             self.assertEqual(report.qcf_file, qcf_file)
             self.assertEqual(report.payment_plan, self.payment_plan)
+            self.assertEqual(report, f"{report.payment_plan.name} - sent: {report.sent}")
 
             report_file = report.report_file
             self.assertIsNotNone(report_file)
