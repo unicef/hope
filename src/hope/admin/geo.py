@@ -6,6 +6,7 @@ from admin_extra_buttons.decorators import button
 from admin_sync.mixin import SyncMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
+from admin_cursor_paginator import CursorPaginatorAdmin
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
@@ -158,7 +159,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",
