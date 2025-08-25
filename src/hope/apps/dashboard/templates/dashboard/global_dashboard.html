@@ -230,9 +230,9 @@
                         .label((d) => {
                             const totalRegionSum = regionGroup.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalRegionSum > 0 ? ((d.value / totalRegionSum) * 100).toFixed(0) : '0';
-                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
+                            return `${truncateLabel(d.key)} ${percentage}%`;
                         })
-                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`)
                         .xAxis()
                         .ticks(3);
 
