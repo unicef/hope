@@ -303,15 +303,15 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
         permissions_per_business_area = defaultdict(set)
         for role_assignment in role_assignments:
-            permissions_per_business_area[str(role_assignment.business_area_id)].update(
-                role_assignment.role.permissions
-            )
-            if role_assignment.group is None:
-                continue
-            permissions_per_business_area[str(role_assignment.business_area_id)].update(
-                f"{content_types_dict[str(perm.content_type_id)]}.{perm.codename}"
-                for perm in role_assignment.group.permissions.all()
-            )
+            if role_assignment.role.permissions is not None:
+                permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                    role_assignment.role.permissions
+                )
+            if role_assignment.group is not None:
+                permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                    f"{content_types_dict[str(perm.content_type_id)]}.{perm.codename}"
+                    for perm in role_assignment.group.permissions.all()
+                )
         return permissions_per_business_area
 
     @cached_property
