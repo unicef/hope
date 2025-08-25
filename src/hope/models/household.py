@@ -33,9 +33,9 @@ from sorl.thumbnail import ImageField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.languages import Languages
-from models.core import BusinessArea, StorageFile
+from hope.models.core import BusinessArea, StorageFile
 from hope.apps.core.utils import FlexFieldsEncoder
-from models.geo import Area
+from hope.models.geo import Area
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
     IndividualDeliveryDataMixin,
@@ -46,7 +46,7 @@ from hope.apps.household.signals import (
     individual_deleted,
     individual_withdrawn,
 )
-from models.utils import (
+from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,

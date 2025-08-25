@@ -8,19 +8,19 @@ from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.api.serializers import PartnerForProgramSerializer
-from models.account import Partner
+from hope.models.partner import Partner
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.api.serializers import DataCollectingTypeSerializer
-from models.core import (
+from hope.models.core import (
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
-from models.household import Household
+from hope.models.household import Household
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldSerializer
-from models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
 
 
 def validate_cycle_timeframes_overlapping(

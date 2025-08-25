@@ -4,8 +4,8 @@ from typing import TypedDict
 from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 
-from models.geo import Area
-from models.household import Household
+from hope.models.geo import Area
+from hope.models.household import Household
 from hope.apps.payment.models import Payment, PaymentVerification
 from hope.apps.payment.utils import get_payment_items_for_dashboard
 

@@ -3,9 +3,9 @@ import abc
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-from models.accountability import Feedback
-from models.activity_log import log_create
-from models.core import BusinessArea
+from hope.models.accountability import Feedback
+from hope.models.activity_log import log_create
+from hope.models.core import BusinessArea
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,

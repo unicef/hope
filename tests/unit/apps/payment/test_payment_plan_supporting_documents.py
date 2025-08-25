@@ -11,7 +11,8 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
-from models.account import Role, RoleAssignment
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
 from hope.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument

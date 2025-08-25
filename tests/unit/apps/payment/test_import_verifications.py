@@ -28,8 +28,8 @@ from parameterized import parameterized
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from models.core import BusinessArea, DataCollectingType
-from models.geo import Area
+from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.geo import Area
 from hope.apps.payment.models import PaymentVerification
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,

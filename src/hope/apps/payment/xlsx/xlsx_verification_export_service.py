@@ -1,6 +1,5 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
 
 import openpyxl
 from django.conf import settings
@@ -9,13 +8,11 @@ from django.core.files import File
 from django.urls import reverse
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from models.core import FileTemp
+from hope.models.core import FileTemp
 from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

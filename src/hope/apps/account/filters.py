@@ -1,16 +1,13 @@
-from typing import TYPE_CHECKING
-
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
-from models.account import USER_STATUS_CHOICES, Partner, Role
+from hope.models.user import USER_STATUS_CHOICES
+from hope.models.role import Role
+from hope.models.partner import Partner
 from hope.apps.core.utils import CustomOrderingFilter
-from models.program import Program
-
-if TYPE_CHECKING:
-    pass
+from hope.models.program import Program
 
 
 class UsersFilter(FilterSet):

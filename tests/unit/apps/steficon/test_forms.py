@@ -3,7 +3,7 @@ from extras.test_utils.factories.steficon import RuleFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.steficon.forms import RuleForm
-from models.steficon import Rule
+from hope.models.steficon import Rule
 
 
 class TestRuleForm(BaseTestCase):

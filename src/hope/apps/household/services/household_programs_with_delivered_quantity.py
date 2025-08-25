@@ -4,7 +4,7 @@ from typing import Any
 from django.db.models import DecimalField, Sum
 from django.db.models.functions import Coalesce
 
-from models.household import Household
+from hope.models.household import Household
 from hope.apps.payment.models import Payment
 
 

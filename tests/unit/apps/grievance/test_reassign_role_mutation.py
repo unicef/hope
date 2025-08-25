@@ -18,9 +18,9 @@ from rest_framework import status
 from hope.apps.account.permissions import Permissions
 from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import ROLE_PRIMARY, IndividualRoleInHousehold
-from models.program import Program
-from models.utils import MergeStatusModel
+from hope.models.household import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.models.program import Program
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

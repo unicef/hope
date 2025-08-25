@@ -1,11 +1,11 @@
 from datetime import date
 from typing import Any
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import timezone_datetime
-from models.geo import Area
-from models.household import SEX_CHOICE
-from models.program import Program
+from hope.models.geo import Area
+from hope.models.household import SEX_CHOICE
+from hope.models.program import Program
 from hope.apps.utils.phone import is_valid_phone_number
 
 

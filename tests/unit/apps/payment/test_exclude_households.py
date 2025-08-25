@@ -16,9 +16,9 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from models.core import BusinessArea, DataCollectingType
+from hope.models.core import BusinessArea, DataCollectingType
 from hope.apps.core.utils import encode_id_base64
-from models.household import Household, Individual
+from hope.models.household import Household, Individual
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
 from hope.apps.payment.models import PaymentPlan
 

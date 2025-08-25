@@ -7,8 +7,8 @@ from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
 from hope.admin.steficon import AutocompleteWidget
-from models.core import BusinessArea
-from models.household import (
+from hope.models.core import BusinessArea
+from hope.models.household import (
     Household,
     Individual,
     PendingDocument,
@@ -16,8 +16,8 @@ from models.household import (
     PendingIndividual,
     XlsxUpdateFile,
 )
-from models.program import Program, ProgramCycle
-from models.registration_data import RegistrationDataImport
+from hope.models.program import Program, ProgramCycle
+from hope.models.registration_data import RegistrationDataImport
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:

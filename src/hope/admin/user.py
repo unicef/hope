@@ -1,7 +1,7 @@
 import csv
 import logging
 from collections import defaultdict, namedtuple
-from typing import TYPE_CHECKING, Any, Sequence, Union
+from typing import Any, Sequence, Union
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -21,34 +21,37 @@ from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 
+import models.incompatible_roles
+import models.partner
+import models.role
+import models.role_assignment
 from hope.admin.account_filters import BusinessAreaFilter, HasKoboAccount
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.account_mixins import KoboAccessMixin
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
-from models import account as account_models
+from models import user as account_models
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from models.account import Partner, User
-from models.core import BusinessArea
+from hope.models.user import User
+from hope.models.partner import Partner
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import build_arg_dict_from_dict
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
 
 class LoadUsersForm(forms.Form):
     emails = forms.CharField(widget=forms.Textarea, help_text="Emails must be space separated")
-    role = forms.ModelChoiceField(queryset=account_models.Role.objects.all())
+    role = forms.ModelChoiceField(queryset=models.role.Role.objects.all())
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all().order_by("name"),
         required=True,
         widget=AutocompleteWidget(BusinessArea, ""),
     )
     partner = forms.ModelChoiceField(
-        queryset=account_models.Partner.objects.all().order_by("name"),
+        queryset=models.partner.Partner.objects.all().order_by("name"),
         required=True,
         widget=AutocompleteWidget(Partner, ""),
     )
@@ -177,10 +180,10 @@ class ADUSerMixin:
                             user.set_unusable_password()
                             users_to_bulk_create.append(user)
                             global_business_area = BusinessArea.objects.filter(slug="global").first()
-                            basic_role = account_models.Role.objects.filter(name="Basic User").first()
+                            basic_role = models.role.Role.objects.filter(name="Basic User").first()
                             if global_business_area and basic_role:
                                 users_role_to_bulk_create.append(
-                                    account_models.RoleAssignment(
+                                    models.role_assignment.RoleAssignment(
                                         business_area=global_business_area,
                                         user=user,
                                         role=basic_role,
@@ -189,7 +192,7 @@ class ADUSerMixin:
                             results.created.append(user)
 
                         users_role_to_bulk_create.append(
-                            account_models.RoleAssignment(role=role, business_area=business_area, user=user)
+                            models.role_assignment.RoleAssignment(role=role, business_area=business_area, user=user)
                         )
                     except HTTPError as e:
                         if e.response.status_code != 404:
@@ -198,7 +201,9 @@ class ADUSerMixin:
                     except Http404:
                         results.missing.append(email)
                 account_models.User.objects.bulk_create(users_to_bulk_create)
-                account_models.RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                models.role_assignment.RoleAssignment.objects.bulk_create(
+                    users_role_to_bulk_create, ignore_conflicts=True
+                )
                 ctx["results"] = results
                 return TemplateResponse(request, "admin/load_users.html", ctx)
             except Exception as e:
@@ -384,7 +389,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                         for role in roles:
                             if crud == "ADD":
                                 try:
-                                    account_models.IncompatibleRoles.objects.validate_user_role(u, ba, role)
+                                    models.incompatible_roles.IncompatibleRoles.objects.validate_user_role(u, ba, role)
                                     ur, is_new = u.role_assignments.get_or_create(business_area=ba, role=role)
                                     if is_new:
                                         added += 1
@@ -420,7 +425,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
 
         context: dict = self.get_common_context(request, processed=False)
         if request.method == "GET":
-            form = ImportCSVForm(initial={"partner": account_models.Partner.objects.first()})
+            form = ImportCSVForm(initial={"partner": models.partner.Partner.objects.first()})
             context["form"] = form
         else:
             form = ImportCSVForm(data=request.POST, files=request.FILES)
@@ -475,7 +480,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
-                                        account_models.IncompatibleRoles.objects.validate_user_role(
+                                        models.incompatible_roles.IncompatibleRoles.objects.validate_user_role(
                                             u, business_area, role
                                         )
                                         u.role_assignments.get_or_create(business_area=business_area, role=role)

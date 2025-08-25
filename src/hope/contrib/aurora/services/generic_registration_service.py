@@ -2,9 +2,9 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 
-from models.geo import Area, Country
+from hope.models.geo import Area, Country
 from hope.apps.household.forms import DocumentForm, IndividualForm
-from models.household import (
+from hope.models.household import (
     DISABLED,
     HEAD,
     NOT_DISABLED,
@@ -17,7 +17,7 @@ from models.household import (
     PendingIndividualRoleInHousehold,
 )
 from hope.apps.payment.models import AccountType, PendingAccount
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )

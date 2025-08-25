@@ -17,8 +17,8 @@ from rest_framework import status
 from hope.apps.account.permissions import Permissions
 from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import AUNT_UNCLE, BROTHER_SISTER, HEAD, Individual
-from models.program import Program
+from hope.models.household import AUNT_UNCLE, BROTHER_SISTER, HEAD, Individual
+from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

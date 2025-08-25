@@ -24,7 +24,7 @@ from django.utils.translation import gettext_lazy as _
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.apps.utils.security import is_root
 from hope.contrib.aurora.celery_tasks import fresh_extract_records_task
 from hope.contrib.aurora.models import Record, Registration

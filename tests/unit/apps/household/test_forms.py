@@ -7,8 +7,8 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.household.forms import MassEnrollForm
-from models.household import Household
-from models.program import Program
+from hope.models.household import Household
+from hope.models.program import Program
 
 
 class MassEnrollFormTest(TestCase):

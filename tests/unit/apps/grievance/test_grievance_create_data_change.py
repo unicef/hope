@@ -16,13 +16,13 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
-from models.account import Partner
+from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import (
+from hope.models.household import (
     FEMALE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -33,7 +33,7 @@ from models.household import (
     WIDOWED,
     DocumentType,
 )
-from models.program import Program
+from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

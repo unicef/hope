@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import Any, Iterable
 
 import xlrd
 from django.core.exceptions import ValidationError
@@ -19,14 +19,11 @@ from hope.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hope.apps.core.utils import xlrd_rows_iterator
-from models.household import (
+from hope.models.household import (
     BLANK,
     NOT_PROVIDED,
     RELATIONSHIP_UNKNOWN,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 logger = logging.getLogger(__name__)

@@ -17,7 +17,7 @@ from rest_framework.reverse import reverse
 from test_utils.factories.core import PeriodicFieldDataFactory
 
 from hope.apps.account.permissions import Permissions
-from models.core import (
+from hope.models.core import (
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,

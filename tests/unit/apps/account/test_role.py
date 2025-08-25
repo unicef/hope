@@ -2,7 +2,11 @@ from django.urls import reverse
 from django_webtest import WebTest
 from extras.test_utils.factories.account import UserFactory
 
-from models.account import Role, User
+from hope.models.role import Role
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hope.models.user import User
 
 
 class RoleTest(WebTest):

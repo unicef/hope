@@ -8,7 +8,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.geo import Area
+from hope.models.geo import Area
 from hope.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,

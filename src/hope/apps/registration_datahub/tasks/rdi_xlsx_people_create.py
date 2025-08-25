@@ -7,14 +7,14 @@ from django.db import transaction
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
-from models.activity_log import log_create
+from hope.models.activity_log import log_create
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from models.core import BusinessArea, FlexibleAttribute
+from hope.models.core import BusinessArea, FlexibleAttribute
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
-from models.geo import Area
-from models.geo import Country as GeoCountry
-from models.household import (
+from hope.models.geo import Area
+from hope.models.geo import Country as GeoCountry
+from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
@@ -24,8 +24,8 @@ from models.household import (
 )
 from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from models.program import Program
-from models.registration_data import ImportData, RegistrationDataImport
+from hope.models.program import Program
+from hope.models.registration_data import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list

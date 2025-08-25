@@ -19,7 +19,7 @@ from hope.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from models.payment import FinancialInstitutionMapping
+from hope.models.payment import FinancialInstitutionMapping
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,

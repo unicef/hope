@@ -30,7 +30,7 @@ from unit.apps.periodic_data_update.test_periodic_data_update_import_service imp
 )
 
 from hope.apps.account.permissions import Permissions
-from models.core import PeriodicFieldData
+from hope.models.core import PeriodicFieldData
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )

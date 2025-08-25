@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 
-from models.activity_log import log_create
+from hope.models.activity_log import log_create
 from hope.apps.grievance.models import GrievanceTicket, TicketDeleteIndividualDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
@@ -8,7 +8,7 @@ from hope.apps.grievance.services.data_change.data_change_service import (
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
-from models.household import Individual
+from hope.models.household import Individual
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 
 

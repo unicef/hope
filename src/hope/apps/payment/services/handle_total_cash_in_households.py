@@ -3,7 +3,7 @@ from uuid import UUID
 from django.db.models import F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 
-from models.household import Household
+from hope.models.household import Household
 from hope.apps.payment.models import Payment
 
 

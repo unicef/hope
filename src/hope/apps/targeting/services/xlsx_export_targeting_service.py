@@ -8,7 +8,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.utils import nested_getattr
-from models.household import Document, Individual
+from hope.models.household import Document, Individual
 from hope.apps.payment.models import PaymentPlan
 
 

@@ -10,7 +10,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import decode_id_string, resolve_flex_fields_choices_to_string
-from models.geo import Country
+from hope.models.geo import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
     HouseholdSimpleSerializer,
@@ -19,7 +19,7 @@ from hope.apps.household.api.serializers.household import (
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from models.household import (
+from hope.models.household import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     ROLE_NO_ROLE,

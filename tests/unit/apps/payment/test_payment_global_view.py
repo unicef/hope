@@ -10,7 +10,7 @@ from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import Payment, PaymentPlan
-from models.program import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db
 

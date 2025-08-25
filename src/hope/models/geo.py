@@ -13,7 +13,7 @@ from mptt.models import MPTTModel
 from mptt.querysets import TreeQuerySet
 from natural_keys import NaturalKeyModel
 
-from models.utils import TimeStampedUUIDModel
+from hope.models.utils import TimeStampedUUIDModel
 
 
 class ValidityQuerySet(TreeQuerySet):

@@ -1,14 +1,10 @@
 import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING
 
 from django.db.models import Sum
 
 from hope.apps.payment.models import Payment
 from hope.apps.payment.utils import get_quantity_in_usd
-
-if TYPE_CHECKING:
-    pass
 
 
 def mark_as_failed(payment_item: Payment) -> None:

@@ -7,15 +7,15 @@ from django.db import transaction
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from models.geo import Country
+from hope.models.geo import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from models.household import Document, DocumentType, Household, Individual
+from hope.models.household import Document, DocumentType, Household, Individual
 from hope.apps.payment.models import Account, AccountType
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
-from models.universal_update_script import UniversalUpdate
+from hope.models.universal_update_script import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_account_fields,
     get_document_fields,

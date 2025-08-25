@@ -1,10 +1,5 @@
-from typing import TYPE_CHECKING
-
 import responses
 from django.urls import reverse
-
-if TYPE_CHECKING:
-    pass
 
 
 def test_sanction_list_refresh(

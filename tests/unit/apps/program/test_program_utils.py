@@ -19,7 +19,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
-from models.household import (
+from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
@@ -32,7 +32,7 @@ from hope.apps.program.utils import (
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 
 
 class TestEnrolHouseholdToProgram(TestCase):

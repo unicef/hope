@@ -17,7 +17,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -26,9 +26,9 @@ from hope.apps.dashboard.services import (
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
-from models.household import Household
+from hope.models.household import Household
 from hope.apps.payment.models import Payment, PaymentPlan
-from models.program import Program
+from hope.models.program import Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),

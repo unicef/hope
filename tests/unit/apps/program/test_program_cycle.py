@@ -10,8 +10,8 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from rest_framework.exceptions import ValidationError
 
-from models.core import BusinessArea
-from models.program import Program, ProgramCycle
+from hope.models.core import BusinessArea
+from hope.models.program import Program, ProgramCycle
 
 
 class TestProgramCycleMethods(TestCase):

@@ -5,9 +5,11 @@ from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import receiver
 
-from models.account import Partner, Role, RoleAssignment
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
+from hope.models.partner import Partner
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-from models.core import BusinessArea, DataCollectingType
+from hope.models.core import BusinessArea, DataCollectingType
 
 
 @receiver(m2m_changed, sender=DataCollectingType.compatible_types.through)

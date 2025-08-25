@@ -5,9 +5,9 @@ from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet
 from django_filters import rest_framework as filters
 
-from models.accountability import Feedback, Message, Survey
+from hope.models.accountability import Feedback, Message, Survey
 from hope.apps.core.utils import CustomOrderingFilter
-from models.program import Program
+from hope.models.program import Program
 
 
 class MessagesFilter(FilterSet):

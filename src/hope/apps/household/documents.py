@@ -4,7 +4,7 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
-from models.household import (
+from hope.models.household import (
     Household,
     Individual,
     IndividualIdentity,

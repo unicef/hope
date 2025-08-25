@@ -31,10 +31,10 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFilterFactory,
 )
 
-from models.account import RoleAssignment
-from models.core import BusinessArea
-from models.geo import Area
-from models.household import DocumentType
+from hope.models.role_assignment import RoleAssignment
+from hope.models.core import BusinessArea
+from hope.models.geo import Area
+from hope.models.household import DocumentType
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 if TYPE_CHECKING:

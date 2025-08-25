@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Count, Q
 
-from models.household import (
+from hope.models.household import (
     DISABLED,
     FEMALE,
     MALE,

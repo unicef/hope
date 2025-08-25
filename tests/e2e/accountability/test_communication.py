@@ -7,11 +7,11 @@ from e2e.page_object.accountability.comunication_details import (
 from extras.test_utils.factories.accountability import CommunicationMessageFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 
-from models.account import User
-from models.accountability import Message
-from models.core import BusinessArea, DataCollectingType
+from hope.models.user import User
+from hope.models.accountability import Message
+from hope.models.core import BusinessArea, DataCollectingType
 from hope.apps.payment.models import PaymentPlan
-from models.program import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

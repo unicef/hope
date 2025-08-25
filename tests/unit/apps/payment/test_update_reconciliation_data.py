@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from pytz import utc
 
 from hope.apps.core.base_test_case import BaseTestCase
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,

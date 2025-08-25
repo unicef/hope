@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
@@ -18,13 +18,10 @@ from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.models import Grant
 from hope.api.utils import humanize_errors
-from models.geo import Country
-from models.household import PendingHousehold
-from models.program import Program
-from models.registration_data import RegistrationDataImport
-
-if TYPE_CHECKING:
-    pass
+from hope.models.geo import Country
+from hope.models.household import PendingHousehold
+from hope.models.program import Program
+from hope.models.registration_data import RegistrationDataImport
 
 
 class RDISerializer(serializers.ModelSerializer):

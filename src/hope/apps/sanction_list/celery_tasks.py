@@ -3,7 +3,7 @@ from typing import Any
 from uuid import UUID
 
 from hope.apps.core.celery import app
-from models.sanction_list import SanctionList
+from hope.models.sanction_list import SanctionList
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
 

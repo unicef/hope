@@ -15,11 +15,11 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import Household, Individual
-from models.program import Program
+from hope.models.household import Household, Individual
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

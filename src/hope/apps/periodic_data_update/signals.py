@@ -5,8 +5,8 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key
-from models.core import FlexibleAttribute, PeriodicFieldData
-from models.periodic_data_update import (
+from hope.models.core import FlexibleAttribute, PeriodicFieldData
+from hope.models.periodic_data_update import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )

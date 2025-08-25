@@ -4,8 +4,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from models.core import BusinessArea
-from models.periodic_data_update import (
+from hope.models.core import BusinessArea
+from hope.models.periodic_data_update import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )

@@ -19,10 +19,10 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from models import geo as geo_models
-from models.household import (
+from hope.models.household import (
     IDENTIFICATION_TYPE_CHOICE,
     DocumentType,
     PendingDocument,
@@ -30,9 +30,9 @@ from models.household import (
     PendingIndividual,
 )
 from hope.apps.payment.models import PendingAccount
-from models.registration_data import ImportData, RegistrationDataImport
+from hope.models.registration_data import ImportData, RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

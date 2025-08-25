@@ -1,9 +1,9 @@
 import logging
 
-from models.household import Household, Individual
+from hope.models.household import Household, Individual
 from hope.apps.payment.models import PaymentPlan
-from models.program import Program
-from models.targeting import (
+from hope.models.program import Program
+from hope.models.targeting import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,

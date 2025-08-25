@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from models.program import Program
+from hope.models.program import Program
 
 
 class ProgramGlobalSerializer(serializers.ModelSerializer):

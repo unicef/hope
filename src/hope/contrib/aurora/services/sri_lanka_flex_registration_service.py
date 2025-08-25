@@ -5,8 +5,8 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
-from models.geo import Area, Country
-from models.household import (
+from hope.models.geo import Area, Country
+from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_BANK_STATEMENT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -19,7 +19,7 @@ from models.household import (
     PendingIndividualRoleInHousehold,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,

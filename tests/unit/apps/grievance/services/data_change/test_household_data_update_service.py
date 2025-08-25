@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from models.program import Program
+from hope.models.program import Program
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import IndividualRoleInHousehold, ROLE_ALTERNATE
-from models.utils import MergeStatusModel
+from hope.models.household import IndividualRoleInHousehold, ROLE_ALTERNATE
+from hope.models.utils import MergeStatusModel
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory

@@ -14,7 +14,7 @@ from unit.api.factories import UserFactory
 
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models.household import (
+from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
@@ -23,8 +23,8 @@ from models.household import (
     PendingHousehold,
 )
 from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
-from models.program import Program
-from models.registration_data import RegistrationDataImport
+from hope.models.program import Program
+from hope.models.registration_data import RegistrationDataImport
 
 
 class CreateRDITests(HOPEApiTestCase):

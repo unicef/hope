@@ -18,11 +18,11 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from models.account import User
-from models.core import BusinessArea, DataCollectingType
-from models.geo import Area, Country
-from models.household import HOST, Household
-from models.program import BeneficiaryGroup, Program
+from hope.models.user import User
+from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.geo import Area, Country
+from hope.models.household import HOST, Household
+from hope.models.program import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

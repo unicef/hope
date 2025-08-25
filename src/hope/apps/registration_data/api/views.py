@@ -17,7 +17,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from models.activity_log import log_create
+from hope.models.activity_log import log_create
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
@@ -27,8 +27,8 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.documents import get_individual_doc
-from models.household import Household, Individual
-from models.program import Program
+from hope.models.household import Household, Individual
+from hope.models.program import Program
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
@@ -39,7 +39,7 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from models.registration_data import (
+from hope.models.registration_data import (
     ImportData,
     KoboImportData,
     RegistrationDataImport,
@@ -359,7 +359,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Import data is not ready for import")
 
         # Create RDI objects inline instead of using GraphQL mutation helpers
-        from models.core import BusinessArea
+        from hope.models.core import BusinessArea
 
         import_data_id = validated_data.pop("import_data_id")
         import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -440,7 +440,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Kobo import data is not ready for import")
 
         # Create RDI objects inline instead of using GraphQL mutation helpers
-        from models.core import BusinessArea
+        from hope.models.core import BusinessArea
 
         import_data_id = validated_data.pop("import_data_id")
         import_data_obj = KoboImportData.objects.get(id=import_data_id)

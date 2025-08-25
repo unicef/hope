@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING
-
 from django_filters import BooleanFilter, CharFilter
 
 from hope.apps.core.api.filters import UpdatedAtFilter
-from models.program import Program
-
-if TYPE_CHECKING:
-    pass
+from hope.models.program import Program
 
 
 class ProgramFilter(UpdatedAtFilter):

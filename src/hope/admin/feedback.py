@@ -2,7 +2,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.accountability import Feedback
+from hope.models.accountability import Feedback
 
 
 @admin.register(Feedback)

@@ -7,8 +7,8 @@ from factory.django import DjangoModelFactory
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from models.household import RESIDENCE_STATUS_CHOICE
-from models.targeting import (
+from hope.models.household import RESIDENCE_STATUS_CHOICE
+from hope.models.targeting import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )

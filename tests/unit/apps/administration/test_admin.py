@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple, TYPE_CHECKING
 
 import factory
 from django.contrib.admin import ModelAdmin, site
@@ -10,11 +10,13 @@ from extras.test_utils.factories.core import create_afghanistan
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from models.account import Role, RoleAssignment, User
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
 
 if TYPE_CHECKING:
-    pass
+    from hope.models.user import User
+
 
 EXCLUDED_MODELS = []
 

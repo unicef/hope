@@ -13,10 +13,10 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import DataCollectingType
+from hope.models.core import DataCollectingType
 from models import geo as geo_models
-from models.geo import Area, AreaType
-from models.household import (
+from hope.models.geo import Area, AreaType
+from hope.models.household import (
     HEAD,
     MALE,
     DocumentType,

@@ -18,7 +18,7 @@ from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 
 from hope.apps.core.utils import unique_slugify
-from models.utils import (
+from hope.models.utils import (
     SoftDeletionTreeManager,
     SoftDeletionTreeModel,
     TimeStampedUUIDModel,

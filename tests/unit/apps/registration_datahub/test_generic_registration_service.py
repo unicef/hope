@@ -15,10 +15,10 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from models.core import DataCollectingType
+from hope.models.core import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models.geo import Country
-from models.household import (
+from hope.models.geo import Country
+from hope.models.household import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,

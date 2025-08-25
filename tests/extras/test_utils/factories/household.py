@@ -12,7 +12,7 @@ from faker import Faker
 from pytz import utc
 
 from models import geo as geo_models
-from models.household import (
+from hope.models.household import (
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
@@ -39,7 +39,7 @@ from models.household import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 faker = Faker()
 

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.conf import settings
 from django.db.models import Count, Q, Sum
@@ -8,9 +8,6 @@ from django.urls import reverse
 from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import Approval, Payment, PaymentPlan
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
-
-if TYPE_CHECKING:
-    pass
 
 
 logger = logging.getLogger(__name__)

@@ -1,9 +1,4 @@
-from typing import TYPE_CHECKING
-
 from django.urls import reverse
-
-if TYPE_CHECKING:
-    pass
 
 
 def test_template_file(django_app: "DjangoTestApp", admin_user: "User") -> None:

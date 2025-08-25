@@ -13,9 +13,9 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from models.account import User
+from hope.models.user import User
 from hope.apps.core.celery import app
-from models.core import FileTemp
+from hope.models.core import FileTemp
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
@@ -294,7 +294,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 @sentry_tags
 def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
     from hope.apps.payment.models import Payment, PaymentPlan
-    from models.steficon import Rule
+    from hope.models.steficon import Rule
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -349,7 +349,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files."""
     try:
-        from models.core import FileTemp
+        from hope.models.core import FileTemp
         from hope.apps.payment.models import PaymentPlan
 
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
@@ -555,7 +555,7 @@ def payment_plan_exclude_beneficiaries(
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
     """Create PDF file with summary and sent an email to request user."""
     try:
-        from models.core import FileTemp
+        from hope.models.core import FileTemp
         from hope.apps.payment.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -711,7 +711,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 @sentry_tags
 def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
     from hope.apps.payment.models import Payment, PaymentPlan
-    from models.steficon import Rule
+    from hope.models.steficon import Rule
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)

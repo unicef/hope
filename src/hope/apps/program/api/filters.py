@@ -9,7 +9,7 @@ from django_filters import rest_framework as filters
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.apps.payment.models import PaymentPlan
-from models.program import Program, ProgramCycle
+from hope.models.program import Program, ProgramCycle
 
 
 class ProgramCycleFilter(UpdatedAtFilter):

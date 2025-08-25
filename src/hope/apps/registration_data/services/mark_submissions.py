@@ -3,9 +3,9 @@ from uuid import UUID
 from django.db import transaction
 from django.db.models import QuerySet
 
-from models.core import BusinessArea
-from models.household import Household
-from models.registration_data import (
+from hope.models.core import BusinessArea
+from hope.models.household import Household
+from hope.models.registration_data import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )

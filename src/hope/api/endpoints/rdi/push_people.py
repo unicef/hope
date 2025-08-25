@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -18,8 +18,8 @@ from hope.api.endpoints.rdi.upload import (
     DocumentSerializer,
 )
 from hope.api.models import Grant
-from models.geo import Area, Country
-from models.household import (
+from hope.models.geo import Area, Country
+from hope.models.household import (
     BLANK,
     DATA_SHARING_CHOICES,
     HEAD,
@@ -30,10 +30,8 @@ from models.household import (
     PendingIndividual,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 
-if TYPE_CHECKING:
-    pass
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),

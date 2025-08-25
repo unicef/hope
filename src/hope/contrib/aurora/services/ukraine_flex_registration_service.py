@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -9,9 +9,9 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict,
     build_flex_arg_dict_from_list_if_exists,
 )
-from models.geo import Area, Country
+from hope.models.geo import Area, Country
 from hope.apps.household.forms import DocumentForm, IndividualForm
-from models.household import (
+from hope.models.household import (
     BLANK,
     DISABLED,
     HEAD,
@@ -30,13 +30,10 @@ from models.household import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):

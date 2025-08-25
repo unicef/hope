@@ -4,7 +4,7 @@ from uuid import UUID
 from django.db.models import QuerySet
 
 if TYPE_CHECKING:
-    from models.geo import Area
+    from hope.models.geo import Area
 
 
 class VisibilityBackend:
@@ -21,15 +21,15 @@ class VisibilityBackend:
 
     @classmethod
     def get_areas_for_program(cls, partner: "Partner", program_id: str | UUID) -> QuerySet["Area"]:
-        from models.geo import Area
+        from hope.models.geo import Area
 
         area_limits = cls.get_area_limits_for_program(partner, program_id)
         return area_limits or Area.objects.filter(area_type__country__business_areas__program__id=program_id)
 
     @classmethod
     def get_area_limits_for_program(cls, partner: "Partner", program_id: str | UUID) -> QuerySet["Area"]:
-        from models.account import AdminAreaLimitedTo
-        from models.geo import Area
+        from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+        from hope.models.geo import Area
 
         area_limits = AdminAreaLimitedTo.objects.filter(partner=partner, program_id=program_id)
         return Area.objects.filter(admin_area_limits__in=area_limits)

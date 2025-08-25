@@ -15,10 +15,11 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-from models.account import Partner, User
-from models.core import BusinessArea, DataCollectingType
+from hope.models.user import User
+from hope.models.partner import Partner
+from hope.models.core import BusinessArea, DataCollectingType
 from hope.apps.payment.models import PaymentPlan
-from models.program import BeneficiaryGroup, Program
+from hope.models.program import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

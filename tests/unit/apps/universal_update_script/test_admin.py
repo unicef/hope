@@ -4,8 +4,8 @@ from django.urls import reverse
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.program import Program
-from models.universal_update_script import UniversalUpdate
+from hope.models.program import Program
+from hope.models.universal_update_script import UniversalUpdate
 
 
 class UniversalUpdateAdminTest(TestCase):

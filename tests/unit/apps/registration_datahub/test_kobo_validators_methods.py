@@ -6,8 +6,8 @@ from django.test import TestCase
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import BusinessArea
-from models.program import Program
+from hope.models.core import BusinessArea
+from hope.models.program import Program
 from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )

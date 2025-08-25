@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
 from django import forms
@@ -42,16 +42,16 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
 )
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
-from models.core import FileTemp, FlexibleAttribute, StorageFile
+from hope.models.core import FileTemp, FlexibleAttribute, StorageFile
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from models.geo import Area, Country
-from models.household import FEMALE, MALE, DocumentType, Household, Individual
+from hope.models.geo import Area, Country
+from hope.models.household import FEMALE, MALE, DocumentType, Household, Individual
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
-from models.steficon import Rule, RuleCommit
+from hope.models.steficon import Rule, RuleCommit
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
-from models.utils import (
+from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     InternalDataFieldModel,
@@ -65,8 +65,6 @@ from models.utils import (
 )
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
-if TYPE_CHECKING:  # pragma: no cover
-    pass
 
 logger = logging.getLogger(__name__)
 

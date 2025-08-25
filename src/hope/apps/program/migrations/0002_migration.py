@@ -7,7 +7,7 @@ import model_utils.fields
 from constance import config
 from django.db import migrations, models
 
-from models.core import DataCollectingType
+from hope.models.core import DataCollectingType
 
 
 def create_default_object(apps, schema_editor):

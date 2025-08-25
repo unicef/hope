@@ -23,12 +23,12 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from strategy_field.fields import StrategyField
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from models.core import DataCollectingType
-from models.household import Household
+from hope.models.core import DataCollectingType
+from hope.models.household import Household
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.collision_detectors import collision_detectors_registry
-from models.sanction_list import SanctionList
-from models.utils import (
+from hope.models.sanction_list import SanctionList
+from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,

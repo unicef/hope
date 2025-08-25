@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import (
 )
 from freezegun import freeze_time
 
-from models.household import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.models.household import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
@@ -23,7 +23,7 @@ from hope.apps.payment.services import payment_household_snapshot_service
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 
 class TestBuildSnapshot(TestCase):

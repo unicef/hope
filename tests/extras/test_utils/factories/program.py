@@ -11,8 +11,8 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from models.core import BusinessArea, DataCollectingType
-from models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
 
 fake = Faker()
 
@@ -171,7 +171,7 @@ def generate_people_program() -> None:
         create_individual_document,
     )
 
-    from models.household import HOST, SEEING
+    from hope.models.household import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")
     people_program = ProgramFactory(

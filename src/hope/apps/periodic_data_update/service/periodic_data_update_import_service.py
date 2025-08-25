@@ -8,9 +8,9 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 
-from models.core import FlexibleAttribute, PeriodicFieldData
-from models.household import Individual
-from models.periodic_data_update import (
+from hope.models.core import FlexibleAttribute, PeriodicFieldData
+from hope.models.household import Individual
+from hope.models.periodic_data_update import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )

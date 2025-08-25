@@ -5,7 +5,7 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
 from hope.apps.household.documents import get_individual_doc
-from models.household import (
+from hope.models.household import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
     Document,

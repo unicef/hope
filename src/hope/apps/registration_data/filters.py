@@ -7,7 +7,7 @@ from django_filters import CharFilter, DateFromToRangeFilter, RangeFilter
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import CustomOrderingFilter
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 
 
 class RegistrationDataImportFilter(UpdatedAtFilter):

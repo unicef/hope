@@ -9,10 +9,10 @@ from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPag
 from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 
-from models.account import User
-from models.core import BusinessArea
+from hope.models.user import User
+from hope.models.core import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket
-from models.program import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

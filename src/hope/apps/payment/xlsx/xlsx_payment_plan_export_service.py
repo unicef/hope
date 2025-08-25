@@ -1,12 +1,11 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
 
 import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
-from models.core import FileTemp
+from hope.models.core import FileTemp
 from hope.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -17,8 +16,6 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

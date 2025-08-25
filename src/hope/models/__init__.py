@@ -1,59 +1,7 @@
-# from models.acceptance import (
-#     AcceptanceProcessThreshold,
-#     Approval,
-#     ApprovalProcess,
-# )
-# from models.payment import (
-#     Account,
-#     AccountType,
-#     DeliveryMechanism,
-#     DeliveryMechanismConfig,
-#     FinancialInstitution,
-#     FinancialInstitutionMapping,
-#     FinancialServiceProvider,
-#     FinancialServiceProviderXlsxTemplate,
-#     FlexFieldArrayField,
-#     FspNameMapping,
-#     FspXlsxTemplatePerDeliveryMechanism,
-#     Payment,
-#     PaymentDataCollector,
-#     PaymentHouseholdSnapshot,
-#     PaymentPlan,
-#     PaymentPlanSplit,
-#     PaymentPlanSupportingDocument,
-#     PendingAccount,
-# )
-# from models.verification import (
-#     PaymentVerification,
-#     PaymentVerificationPlan,
-#     PaymentVerificationSummary,
-#     build_summary,
-# )
-#
-# __all__ = [
-#     "AcceptanceProcessThreshold",
-#     "AccountType",
-#     "FspNameMapping",
-#     "Approval",
-#     "ApprovalProcess",
-#     "DeliveryMechanism",
-#     "Account",
-#     "FinancialServiceProvider",
-#     "FinancialServiceProviderXlsxTemplate",
-#     "FspXlsxTemplatePerDeliveryMechanism",
-#     "Payment",
-#     "PaymentHouseholdSnapshot",
-#     "PaymentPlan",
-#     "PaymentPlanSplit",
-#     "PaymentPlanSupportingDocument",
-#     "PendingAccount",
-#     "PaymentVerification",
-#     "PaymentVerificationPlan",
-#     "PaymentVerificationSummary",
-#     "FlexFieldArrayField",
-#     "build_summary",
-#     "DeliveryMechanismConfig",
-#     "FinancialInstitution",
-#     "FinancialInstitutionMapping",
-#     "PaymentDataCollector",
-# ]
+import importlib
+import pathlib
+
+models_dir = pathlib.Path(__file__).parent
+for path in models_dir.glob("*.py"):
+    if path.name != "__init__.py":
+        importlib.import_module(f"{__package__}.{path.stem}")

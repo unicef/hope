@@ -4,7 +4,7 @@ import string
 import urllib.parse
 from collections import Counter
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from rest_framework.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -12,8 +12,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from models.account import Partner
-from models.activity_log import log_create
+from hope.models.partner import Partner
+from hope.models.activity_log import log_create
 from hope.apps.core.field_attributes.fields_types import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_DATE,
@@ -21,7 +21,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
 )
-from models.core import FlexibleAttribute
+from hope.models.core import FlexibleAttribute
 from hope.apps.core.utils import (
     encode_id_base64,
     encode_id_base64_required,
@@ -29,7 +29,7 @@ from hope.apps.core.utils import (
 )
 from models import geo as geo_models
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from models.household import (
+from hope.models.household import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
@@ -42,10 +42,8 @@ from models.household import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import Account, AccountType
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

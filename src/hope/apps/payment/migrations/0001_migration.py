@@ -317,7 +317,7 @@ class Migration(migrations.Migration):
                 ("vision_vendor_number", models.CharField(max_length=100, unique=True)),
                 (
                     "delivery_mechanisms_choices",
-                    hope.apps.account.models.HorizontalChoiceArrayField(
+                    models.utils.HorizontalChoiceArrayField(
                         base_field=models.CharField(
                             choices=[
                                 (

@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.filters import _prepare_kobo_asset_id_value
-from models.household import (
+from hope.models.household import (
     IDENTIFICATION_TYPE_TAX_ID,
     Household,
     PendingDocument,

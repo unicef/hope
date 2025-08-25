@@ -8,10 +8,10 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from rest_framework.test import APIRequestFactory
 from test_utils.factories.program import ProgramFactory
 
-from models.core import FlexibleAttribute, PeriodicFieldData
+from hope.models.core import FlexibleAttribute, PeriodicFieldData
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
-from models.targeting import (
+from hope.models.targeting import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,

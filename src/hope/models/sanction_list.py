@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 from django.db import models
 from strategy_field.fields import StrategyField
 
-from models.utils import TimeStampedModel, TimeStampedUUIDModel
+from hope.models.utils import TimeStampedModel, TimeStampedUUIDModel
 
 from apps.sanction_list.strategies import registry
 

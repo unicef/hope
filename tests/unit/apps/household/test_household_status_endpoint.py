@@ -16,9 +16,9 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from rest_framework.test import APIClient
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models.household import (
+from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_NO_ROLE,

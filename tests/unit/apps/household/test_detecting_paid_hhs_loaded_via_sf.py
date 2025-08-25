@@ -7,7 +7,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )

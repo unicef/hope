@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.collector import ForeignKeysCollector
@@ -13,21 +13,20 @@ from django.urls import reverse
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
+import models.incompatible_roles
+import models.role
 from hope.admin.account_filters import IncompatibleRoleFilter, PermissionFilter
 from hope.admin.account_forms import RoleAdminForm
 from hope.admin.utils import HOPEModelAdminBase
-from models import account as account_models
 from hope.apps.account.permissions import Permissions
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
 
 class RoleResource(resources.ModelResource):
     class Meta:
-        model = account_models.Role
+        model = models.role.Role
         fields = ("name", "subsystem", "permissions")
         import_id_fields = ("name", "subsystem")
 
@@ -41,7 +40,7 @@ class UnrelatedForeignKeysProtocol(LoadDumpProtocol):
     collector_class = UnrelatedForeignKeysCollector
 
 
-@admin.register(account_models.Role)
+@admin.register(models.role.Role)
 class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
@@ -62,7 +61,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted(str(x.value) for x in Permissions)
-        roles = account_models.Role.objects.order_by("name").filter(subsystem="HOPE")
+        roles = models.role.Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []
             for role in roles:
@@ -113,7 +112,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         return change_message
 
 
-@admin.register(account_models.IncompatibleRoles)
+@admin.register(models.incompatible_roles.IncompatibleRoles)
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)

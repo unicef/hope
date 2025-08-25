@@ -22,9 +22,9 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
-from models.household import Individual, PendingIndividual
+from hope.models.household import Individual, PendingIndividual
 from hope.apps.payment.models import Payment
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )

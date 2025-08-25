@@ -3,7 +3,7 @@ from django.contrib import admin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.sanction_list import (
+from hope.models.sanction_list import (
     SanctionListIndividual,
     SanctionListIndividualDateOfBirth,
 )

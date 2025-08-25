@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from constance import config
 from django.db.models import Q, QuerySet
@@ -19,7 +19,8 @@ from hope.apps.account.api.serializers import (
     UserSerializer,
 )
 from hope.apps.account.filters import UsersFilter
-from hope.models.account import Partner, User
+from hope.models.user import User
+from hope.models.partner import Partner
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -28,13 +29,10 @@ from hope.apps.core.api.mixins import (
     PermissionActionMixin,
     SerializerActionMixin,
 )
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import to_choice_object
-from models.household import Household, Individual
-from models.program import Program
-
-if TYPE_CHECKING:
-    pass
+from hope.models.household import Household, Individual
+from hope.models.program import Program
 
 
 class UserViewSet(

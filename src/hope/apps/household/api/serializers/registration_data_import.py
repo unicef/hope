@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import UserSerializer
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 
 
 class RegistrationDataImportSerializer(serializers.ModelSerializer):

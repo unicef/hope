@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Generator, Union
+from typing import Any, Callable, Generator, Union
 
 from admin_extra_buttons.decorators import button
 from admin_sync.mixin import SyncMixin
@@ -17,10 +17,8 @@ from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.geo import Area, AreaType, Country
+from hope.models.geo import Area, AreaType, Country
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

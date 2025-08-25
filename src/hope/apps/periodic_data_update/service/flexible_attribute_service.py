@@ -2,13 +2,13 @@ from typing import Any
 
 from rest_framework.exceptions import ValidationError
 
-from models.core import FlexibleAttribute, PeriodicFieldData
+from hope.models.core import FlexibleAttribute, PeriodicFieldData
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.periodic_data_update.signals import (
     increment_periodic_field_version_cache,
 )
 from hope.apps.periodic_data_update.utils import field_label_to_field_name
-from models.program import Program
+from hope.models.program import Program
 
 
 class FlexibleAttributeForPDUService:

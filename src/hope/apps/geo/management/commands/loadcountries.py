@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 from django_countries import countries
 
 from hope.apps.geo.missing_countries import missing_countries
-from models.geo import Country
+from hope.models.geo import Country
 
 logger = logging.getLogger(__name__)
 

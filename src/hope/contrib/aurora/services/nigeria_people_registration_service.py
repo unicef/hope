@@ -4,8 +4,8 @@ from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
-from models.geo import Country
-from models.household import (
+from hope.models.geo import Country
+from hope.models.household import (
     HEAD,
     ROLE_PRIMARY,
     DocumentType,
@@ -13,7 +13,7 @@ from models.household import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
     mergedicts,

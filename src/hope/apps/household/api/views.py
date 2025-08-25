@@ -22,7 +22,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.serializers import FieldAttributeSerializer
-from models.core import FlexibleAttribute
+from hope.models.core import FlexibleAttribute
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
@@ -41,10 +41,10 @@ from hope.apps.household.api.serializers.individual import (
     IndividualPhotoDetailSerializer,
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
-from models.household import Household, Individual, IndividualRoleInHousehold
+from hope.models.household import Household, Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import Payment, PaymentPlan
-from models.program import Program
+from hope.models.program import Program
 
 
 class HouseholdViewSet(

@@ -13,10 +13,10 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from models.household import (
+from hope.models.household import (
     FEMALE,
     HEAD,
     MALE,
@@ -27,7 +27,7 @@ from models.household import (
 )
 from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

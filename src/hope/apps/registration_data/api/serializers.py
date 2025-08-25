@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import get_count_and_percentage
-from models.registration_data import (
+from hope.models.registration_data import (
     ImportData,
     KoboImportData,
     RegistrationDataImport,

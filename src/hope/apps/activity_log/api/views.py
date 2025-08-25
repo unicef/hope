@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.api.serializers import LogEntrySerializer
 from hope.apps.activity_log.filters import LogEntryFilter
-from models.activity_log import LogEntry
+from hope.models.activity_log import LogEntry
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,

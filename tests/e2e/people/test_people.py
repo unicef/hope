@@ -19,10 +19,10 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from selenium.webdriver.common.by import By
 
-from models.core import BusinessArea, DataCollectingType
-from models.household import HOST, SEEING, Individual
+from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.household import HOST, SEEING, Individual
 from hope.apps.payment.models import Payment
-from models.program import BeneficiaryGroup, Program
+from hope.models.program import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

@@ -30,7 +30,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
         from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             deduplicate_and_check_against_sanctions_list_task_single_individual,
         )
-        from models.household import Individual
+        from hope.models.household import Individual
 
         individual = Individual.objects.get(id=individual_id)
         if individual:

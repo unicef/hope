@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING
-
 from django.db.models import Q
 from django_filters import CharFilter, FilterSet
 
-from models.activity_log import LogEntry
-
-if TYPE_CHECKING:
-    pass
+from hope.models.activity_log import LogEntry
 
 
 class LogEntryFilter(FilterSet):

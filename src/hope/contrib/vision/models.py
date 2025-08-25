@@ -1,6 +1,6 @@
 from django.db import models
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.payment.models import PaymentPlan
 
 

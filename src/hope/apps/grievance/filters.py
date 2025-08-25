@@ -14,11 +14,11 @@ from django_filters import (
 from django_filters import rest_framework as filters
 
 from hope.apps.account.permissions import Permissions
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from models.household import HEAD, Individual
-from models.program import Program
+from hope.models.household import HEAD, Individual
+from hope.models.program import Program
 
 logger = logging.getLogger(__name__)
 

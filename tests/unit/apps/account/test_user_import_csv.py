@@ -14,8 +14,10 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 
 from hope.admin.account_mixins import get_valid_kobo_username
-from models.account import IncompatibleRoles, Role, User
-from models.core import BusinessArea
+from hope.models.user import User
+from hope.models.incompatible_roles import IncompatibleRoles
+from hope.models.role import Role
+from hope.models.core import BusinessArea
 
 
 class UserImportCSVTest(WebTest):

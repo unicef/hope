@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
-from models.program import BeneficiaryGroup
+from hope.models.program import BeneficiaryGroup
 
 
 @admin.register(BeneficiaryGroup)

@@ -3,7 +3,6 @@ import io
 from contextlib import suppress
 from datetime import date, datetime
 from itertools import permutations
-from typing import TYPE_CHECKING
 
 import dateutil.parser
 from django.conf import settings
@@ -13,11 +12,8 @@ from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 
-from models.sanction_list import SanctionListIndividual, UploadedXLSXFile
+from hope.models.sanction_list import SanctionListIndividual, UploadedXLSXFile
 from hope.apps.utils.mailjet import MailjetClient
-
-if TYPE_CHECKING:
-    pass
 
 
 class CheckAgainstSanctionListTask:

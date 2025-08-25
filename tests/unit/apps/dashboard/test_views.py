@@ -13,9 +13,9 @@ from extras.test_utils.factories.account import (
 )
 from rest_framework import status
 
-from models.account import RoleAssignment
+from hope.models.role_assignment import RoleAssignment
 from hope.apps.account.permissions import Permissions
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.dashboard.services import DashboardGlobalDataCache
 from hope.apps.dashboard.views import DashboardReportView
 

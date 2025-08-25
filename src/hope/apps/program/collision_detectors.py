@@ -1,15 +1,13 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.db import models
 from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
-from models.household import Household, Individual, IndividualRoleInHousehold
+from hope.models.household import Household, Individual, IndividualRoleInHousehold
 
 # only for typing purposes
-if TYPE_CHECKING:
-    pass
 
 
 class AbstractCollisionDetector:

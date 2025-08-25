@@ -15,8 +15,8 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from models.core import DataCollectingType
-from models.household import (
+from hope.models.core import DataCollectingType
+from hope.models.household import (
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,

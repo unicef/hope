@@ -1,21 +1,18 @@
 import logging
 from enum import auto
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
 from constance import config
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from models.account import RoleAssignment, User
+from hope.models.user import User
+from hope.models.role_assignment import RoleAssignment
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
 
 logger = logging.getLogger(__name__)
-
-
-if TYPE_CHECKING:
-    pass
 
 
 class GrievanceNotification:

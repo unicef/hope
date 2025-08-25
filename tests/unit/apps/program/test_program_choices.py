@@ -7,9 +7,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from models.core import DataCollectingType, PeriodicFieldData
+from hope.models.core import DataCollectingType, PeriodicFieldData
 from hope.apps.core.utils import to_choice_object
-from models.program import Program, ProgramCycle
+from hope.models.program import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 

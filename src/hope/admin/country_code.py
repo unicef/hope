@@ -1,14 +1,11 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.contrib import admin
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.core import CountryCodeMap
-
-if TYPE_CHECKING:
-    pass
+from hope.models.core import CountryCodeMap
 
 
 logger = logging.getLogger(__name__)

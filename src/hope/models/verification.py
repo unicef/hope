@@ -1,6 +1,6 @@
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.postgres.fields import ArrayField
@@ -13,16 +13,14 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from models.core import BusinessArea, FileTemp
-from models.utils import (
+from hope.models.core import BusinessArea, FileTemp
+from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
 
-if TYPE_CHECKING:  # pragma: no cover
-    pass
 
 logger = logging.getLogger(__name__)
 

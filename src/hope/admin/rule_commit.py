@@ -1,5 +1,4 @@
 import logging
-from typing import TYPE_CHECKING
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib.admin import register
@@ -11,15 +10,13 @@ from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.account import User
+from hope.models.user import User
 from hope.apps.steficon.forms import RuleCommitAdminForm
-from models.steficon import Rule, RuleCommit
+from hope.models.steficon import Rule, RuleCommit
 from hope.apps.utils.security import is_root
 
 from .steficon import TestRuleMixin
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

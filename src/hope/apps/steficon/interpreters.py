@@ -36,7 +36,7 @@ class Interpreter:
 
 
 def call_rule(rule_id: UUID, context: dict) -> Any:
-    from models.steficon import Rule
+    from hope.models.steficon import Rule
 
     rule: Rule = Rule.objects.get(id=rule_id)
     return rule.execute(context)

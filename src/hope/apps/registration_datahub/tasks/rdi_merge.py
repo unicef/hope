@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from models.activity_log import log_create
+from hope.models.activity_log import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import chunks
 from hope.apps.grievance.models import GrievanceTicket
@@ -16,7 +16,7 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
 )
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from models.household import (
+from hope.models.household import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
     Household,
@@ -29,7 +29,7 @@ from models.household import (
     PendingIndividualRoleInHousehold,
 )
 from hope.apps.payment.models import PendingAccount
-from models.registration_data import (
+from hope.models.registration_data import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
@@ -46,7 +46,7 @@ from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)

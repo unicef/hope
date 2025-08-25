@@ -4,8 +4,8 @@ from dateutil.relativedelta import relativedelta
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import BusinessArea, DataCollectingType
-from models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
 
 
 def get_program_with_dct_type_and_name(

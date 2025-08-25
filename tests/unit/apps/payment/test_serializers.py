@@ -15,9 +15,11 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from models.account import Role, RoleAssignment, User
+from hope.models.user import User
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
@@ -33,7 +35,7 @@ from hope.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from models.payment import (
+from hope.models.payment import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,

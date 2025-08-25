@@ -3,12 +3,12 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.core.api.serializers import FieldAttributeSerializer
-from models.core import FlexibleAttribute
+from hope.models.core import FlexibleAttribute
 from hope.apps.payment.models import PaymentPlan
-from models.program import Program
+from hope.models.program import Program
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hope.apps.targeting.choices import FlexFieldClassification
-from models.targeting import (
+from hope.models.targeting import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,

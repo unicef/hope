@@ -17,10 +17,10 @@ from urllib3 import Retry
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.api.models import Grant
 from hope.apps.account.api.permissions import BaseRestPermission
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 
 if TYPE_CHECKING:
-    from models.program import Program
+    from hope.models.program import Program
 
 
 class BaseAPI:
@@ -121,7 +121,7 @@ class ProgramMixin:
 
     @cached_property
     def program(self) -> "Program":
-        from models.program import Program
+        from hope.models.program import Program
 
         return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
@@ -182,7 +182,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from models.program import Program
+        from hope.models.program import Program
 
         queryset = super().get_queryset()
         user = self.request.user

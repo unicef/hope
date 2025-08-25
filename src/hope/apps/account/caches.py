@@ -1,7 +1,4 @@
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    pass
+from typing import Optional
 
 
 def get_user_permissions_version_key(user: "User") -> str:

@@ -23,15 +23,15 @@ from freezegun import freeze_time
 from pytz import utc
 
 from hope.apps.core.base_test_case import BaseTestCase
-from models.core import BusinessArea
-from models.household import ROLE_PRIMARY
+from hope.models.core import BusinessArea
+from hope.models.household import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import prepare_payment_plan_task
 from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from models.program import Program
+from hope.models.program import Program
 
 
 class TestPaymentSignature(BaseTestCase):

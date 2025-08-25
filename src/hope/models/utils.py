@@ -11,7 +11,10 @@ import celery
 from celery import states
 from celery.contrib.abortable import AbortableAsyncResult
 from concurrency.fields import IntegerVersionField
+from django import forms
 from django.conf import settings
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.http import HttpRequest
 from django.urls import reverse
@@ -591,3 +594,20 @@ class InternalDataFieldModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class HorizontalChoiceArrayField(ArrayField):
+    def formfield(
+        self,
+        form_class: Any | None = ...,
+        choices_form_class: Any | None = ...,
+        **kwargs: Any,
+    ) -> Any:
+        widget = FilteredSelectMultiple(self.verbose_name, False)
+        defaults = {
+            "form_class": forms.MultipleChoiceField,
+            "widget": widget,
+            "choices": self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)

@@ -1,13 +1,13 @@
 import io
 from decimal import Decimal
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
 import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 from openpyxl.cell import Cell
 
-from models.core import FileTemp
+from hope.models.core import FileTemp
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
@@ -16,8 +16,6 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
 
-if TYPE_CHECKING:
-    pass
 
 Row = tuple[Cell]
 

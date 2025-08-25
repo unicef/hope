@@ -12,9 +12,9 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import DataCollectingType
+from hope.models.core import DataCollectingType
 from models import geo as geo_models
-from models.household import (
+from hope.models.household import (
     DISABLED,
     FEMALE,
     GOVERNMENT_PARTNER,

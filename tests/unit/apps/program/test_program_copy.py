@@ -20,14 +20,14 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from models.account import AdminAreaLimitedTo
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
-from models.core import (
+from hope.models.core import (
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from models.program import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db
 

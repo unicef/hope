@@ -10,10 +10,14 @@ from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
-from models import account as account_models
-from models.account import Partner, Role
+import models.incompatible_roles
+import models.role
+import models.role_assignment
+from models import user as account_models
+from hope.models.role import Role
+from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +30,7 @@ class RoleAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = account_models.Role
+        model = models.role.Role
         fields = (
             "name",
             "subsystem",
@@ -37,11 +41,11 @@ class RoleAdminForm(forms.ModelForm):
 
 
 class RoleAssignmentAdminForm(forms.ModelForm):
-    role = forms.ModelChoiceField(account_models.Role.objects.order_by("name"))
+    role = forms.ModelChoiceField(models.role.Role.objects.order_by("name"))
     business_area = forms.ModelChoiceField(BusinessArea.objects.filter(is_split=False))
 
     class Meta:
-        model = account_models.RoleAssignment
+        model = models.role_assignment.RoleAssignment
         fields = (
             "business_area",
             "user",
@@ -60,11 +64,11 @@ class RoleAssignmentAdminForm(forms.ModelForm):
         user = self.cleaned_data["user"]
         business_area = self.cleaned_data["business_area"]
 
-        account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
+        models.incompatible_roles.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
 
 
 class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
-    model = account_models.RoleAssignment
+    model = models.role_assignment.RoleAssignment
 
     def add_fields(self, form: "forms.Form", index: int | None) -> None:
         super().add_fields(form, index)
@@ -81,9 +85,13 @@ class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
                 business_area = form.cleaned_data["business_area"]
                 role = form.cleaned_data["role"]
                 incompatible_roles = list(
-                    account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+                    models.incompatible_roles.IncompatibleRoles.objects.filter(role_one=role).values_list(
+                        "role_two", flat=True
+                    )
                 ) + list(
-                    account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
+                    models.incompatible_roles.IncompatibleRoles.objects.filter(role_two=role).values_list(
+                        "role_one", flat=True
+                    )
                 )
                 error_forms = [
                     form_two.cleaned_data["role"].name

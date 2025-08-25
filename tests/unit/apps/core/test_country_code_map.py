@@ -4,7 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from parameterized import parameterized
 
-from models.core import CountryCodeMap
+from hope.models.core import CountryCodeMap
 
 
 class TestCountryCodeMap(TestCase):

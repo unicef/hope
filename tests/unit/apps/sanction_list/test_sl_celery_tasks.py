@@ -1,13 +1,8 @@
-from typing import TYPE_CHECKING
-
 import responses
 from django.core.management import call_command
 
 from hope.apps.sanction_list.celery_tasks import sync_sanction_list_task
-from models.sanction_list import SanctionListIndividual
-
-if TYPE_CHECKING:
-    pass
+from hope.models.sanction_list import SanctionListIndividual
 
 
 def test_sync_sanction_list_task(

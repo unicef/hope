@@ -14,7 +14,7 @@ from hope.apps.grievance.management.commands.fix_grievance_tickets import (
     fix_disability_fields,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import DISABLED, HEAD, MALE, NOT_DISABLED
+from hope.models.household import DISABLED, HEAD, MALE, NOT_DISABLED
 
 
 class TestFixingGrievanceTickets(BaseTestCase):

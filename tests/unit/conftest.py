@@ -13,7 +13,8 @@ from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 
-from models.account import Partner, Role
+from hope.models.role import Role
+from hope.models.partner import Partner
 
 
 @pytest.fixture(autouse=True)

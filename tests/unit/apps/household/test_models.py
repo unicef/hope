@@ -12,10 +12,10 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models.geo import Country
-from models.household import (
+from hope.models.geo import Country
+from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
@@ -23,7 +23,7 @@ from models.household import (
     DocumentType,
     Household,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 
 class TestHousehold(TestCase):

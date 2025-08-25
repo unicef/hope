@@ -3,12 +3,12 @@ from typing import Any
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from models.core import BusinessArea, FlexibleAttribute, PeriodicFieldData
-from models.periodic_data_update import (
+from hope.models.core import BusinessArea, FlexibleAttribute, PeriodicFieldData
+from hope.models.periodic_data_update import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )
-from models.program import Program
+from hope.models.program import Program
 
 
 class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):

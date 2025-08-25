@@ -27,14 +27,14 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.account import User
+from hope.models.user import User
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.steficon.forms import (
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
     RuleForm,
 )
-from models.steficon import MONITORED_FIELDS, Rule, RuleCommit
+from hope.models.steficon import MONITORED_FIELDS, Rule, RuleCommit
 from hope.apps.utils.security import is_root
 
 from .steficon import TestRuleMixin

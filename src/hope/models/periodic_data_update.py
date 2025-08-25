@@ -3,8 +3,8 @@ import json
 from django.conf import settings
 from django.db import models
 
-from models.core import FileTemp
-from models.utils import CeleryEnabledModel, TimeStampedModel
+from hope.models.core import FileTemp
+from hope.models.utils import CeleryEnabledModel, TimeStampedModel
 
 
 class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):

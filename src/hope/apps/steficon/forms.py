@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.steficon.config import config
 from hope.apps.steficon.interpreters import Interpreter, mapping
-from models.steficon import Rule, RuleCommit
+from hope.models.steficon import Rule, RuleCommit
 from hope.apps.steficon.widget import ContentTypeChoiceField, PythonFormatterEditor
 
 if TYPE_CHECKING:

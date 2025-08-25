@@ -10,12 +10,12 @@ from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
-from models.activity_log import log_create
-from models.core import BusinessArea
+from hope.models.activity_log import log_create
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import to_dict
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
-from models.household import (
+from hope.models.household import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
@@ -28,15 +28,15 @@ from models.household import (
     Individual,
     PendingIndividual,
 )
-from models.program import Program
-from models.registration_data import RegistrationDataImport
+from hope.models.program import Program
+from hope.models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.utils import post_process_dedupe_results
 from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
     wait_until_es_healthy,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)

@@ -4,11 +4,11 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
 
-from models.accountability import Feedback
-from models.core import BusinessArea
-from models.geo import Area
-from models.household import Household, Individual
-from models.program import Program
+from hope.models.accountability import Feedback
+from hope.models.core import BusinessArea
+from hope.models.geo import Area
+from hope.models.household import Household, Individual
+from hope.models.program import Program
 
 
 class FeedbackCrudServices:

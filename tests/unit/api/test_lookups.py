@@ -10,9 +10,9 @@ from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hope.api.models import Grant
-from models.geo import Area, AreaType, Country
+from hope.models.geo import Area, AreaType, Country
 from hope.apps.payment.models import FinancialInstitution
-from models.program import Program
+from hope.models.program import Program
 
 
 class APIProgramStatuesTests(HOPEApiTestCase):

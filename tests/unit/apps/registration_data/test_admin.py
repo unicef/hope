@@ -16,7 +16,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from models.household import (
+from hope.models.household import (
     Document,
     Household,
     Individual,
@@ -25,9 +25,9 @@ from models.household import (
     PendingIndividual,
 )
 from hope.apps.payment.models import Payment
-from models.registration_data import RegistrationDataImport
+from hope.models.registration_data import RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

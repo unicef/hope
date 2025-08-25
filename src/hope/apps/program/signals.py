@@ -6,7 +6,7 @@ from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
 from hope.api.caches import get_or_create_cache_key
-from models.program import BeneficiaryGroup, Program
+from hope.models.program import BeneficiaryGroup, Program
 from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,

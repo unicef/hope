@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from models.household import (
+from hope.models.household import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     UNIQUE,
@@ -13,8 +13,8 @@ from models.household import (
     Individual,
     PendingIndividual,
 )
-from models.program import Program
-from models.registration_data import (
+from hope.models.program import Program
+from hope.models.registration_data import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,
 )
@@ -26,7 +26,7 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
     IgnoredFilenamesPair,
     SimilarityPair,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 

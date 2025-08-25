@@ -2,7 +2,7 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from models.sanction_list import SanctionList, SanctionListIndividual
+from hope.models.sanction_list import SanctionList, SanctionListIndividual
 
 
 class SanctionListFactory(DjangoModelFactory):

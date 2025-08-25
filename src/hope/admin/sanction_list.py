@@ -3,7 +3,7 @@ from django.contrib import admin, messages
 from django.http import HttpRequest, HttpResponseRedirect
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.sanction_list import SanctionList
+from hope.models.sanction_list import SanctionList
 
 
 @admin.register(SanctionList)

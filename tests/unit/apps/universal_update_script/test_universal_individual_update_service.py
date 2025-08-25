@@ -7,12 +7,12 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.core import FlexibleAttribute
-from models.geo import Area, AreaType, Country
-from models.household import FEMALE, MALE, Document, DocumentType, Individual
+from hope.models.core import FlexibleAttribute
+from hope.models.geo import Area, AreaType, Country
+from hope.models.household import FEMALE, MALE, Document, DocumentType, Individual
 from hope.apps.payment.models import Account, AccountType, FinancialInstitution
-from models.program import Program
-from models.universal_update_script import UniversalUpdate
+from hope.models.program import Program
+from hope.models.universal_update_script import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )

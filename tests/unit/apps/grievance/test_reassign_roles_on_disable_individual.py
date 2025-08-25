@@ -9,17 +9,17 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
-from models.household import (
+from hope.models.household import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 
 class TestReassignRolesOnDisableIndividual(BaseTestCase):

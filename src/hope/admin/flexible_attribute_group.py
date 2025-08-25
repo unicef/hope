@@ -9,7 +9,7 @@ from jsoneditor.forms import JSONEditor
 from mptt.admin import MPTTModelAdmin
 
 from hope.admin.utils import SoftDeletableAdminMixin
-from models.core import FlexibleAttribute, FlexibleAttributeGroup
+from hope.models.core import FlexibleAttribute, FlexibleAttributeGroup
 
 logger = logging.getLogger(__name__)
 

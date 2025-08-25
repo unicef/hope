@@ -3,7 +3,7 @@ from datetime import date
 from typing import Any
 
 from hope.apps.core.celery import app
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
     DashboardDataCache,

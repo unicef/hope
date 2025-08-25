@@ -7,12 +7,12 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch import Elasticsearch
 
-from models.account import User
-from models.core import BusinessArea
-from models.geo import Area
+from hope.models.user import User
+from hope.models.core import BusinessArea
+from hope.models.geo import Area
 from hope.apps.grievance.models import GrievanceTicket
-from models.household import DocumentType, Household, Individual
-from models.registration_data import RegistrationDataImport
+from hope.models.household import DocumentType, Household, Individual
+from hope.models.registration_data import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

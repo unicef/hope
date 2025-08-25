@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db import models
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.changelog import Changelog
+from hope.models.changelog import Changelog
 from hope.apps.changelog.widget import HTMLEditor
 
 

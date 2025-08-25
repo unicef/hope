@@ -9,9 +9,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from freezegun import freeze_time
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
-from models.household import (
+from hope.models.household import (
     AUNT_UNCLE,
     BROTHER_SISTER,
     COUSIN,

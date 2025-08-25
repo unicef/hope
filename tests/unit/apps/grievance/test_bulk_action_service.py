@@ -7,7 +7,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from faker.generator import random
 from flaky import flaky
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_NOT_SET,

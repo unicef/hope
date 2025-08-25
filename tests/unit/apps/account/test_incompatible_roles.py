@@ -3,8 +3,10 @@ from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 
-from models.account import IncompatibleRoles, Role, RoleAssignment
-from models.core import BusinessArea
+from hope.models.role_assignment import RoleAssignment
+from hope.models.incompatible_roles import IncompatibleRoles
+from hope.models.role import Role
+from hope.models.core import BusinessArea
 
 
 class IncompatibleRolesTest(TestCase):

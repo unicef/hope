@@ -8,7 +8,7 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )

@@ -13,7 +13,7 @@ from extras.test_utils.factories.payment import (
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.admin.fsp import FspXlsxTemplatePerDeliveryMechanismForm
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.validators import DataChangeValidator
 from hope.apps.payment.models import DeliveryMechanism, FinancialServiceProvider

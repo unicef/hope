@@ -35,14 +35,14 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
-from models.account import User
-from models.core import (
+from hope.models.user import User
+from hope.models.core import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from models.household import (
+from hope.models.household import (
     HEARING,
     HOST,
     REFUGEE,
@@ -61,8 +61,8 @@ from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from models.program import BeneficiaryGroup, Program, ProgramCycle
-from models.steficon import Rule
+from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.steficon import Rule
 
 pytestmark = pytest.mark.django_db()
 

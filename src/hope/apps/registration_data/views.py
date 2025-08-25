@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
-from models.program import Program
+from hope.models.program import Program
 from hope.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
 )

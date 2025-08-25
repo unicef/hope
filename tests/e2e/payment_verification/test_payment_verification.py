@@ -31,13 +31,13 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from selenium.webdriver.common.by import By
 
-from models.account import User
-from models.core import BusinessArea, DataCollectingType
-from models.geo import Area
+from hope.models.user import User
+from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.geo import Area
 from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hope.apps.payment.models import PaymentVerification
 from hope.apps.payment.models import PaymentVerificationPlan
-from models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
 

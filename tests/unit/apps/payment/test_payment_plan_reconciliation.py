@@ -2,7 +2,7 @@ import datetime
 import io
 from collections import namedtuple
 from decimal import Decimal
-from typing import TYPE_CHECKING, Tuple
+from typing import Tuple
 
 import pytz
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -25,8 +25,8 @@ from parameterized import parameterized
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from models.core import DataCollectingType
-from models.household import ROLE_PRIMARY
+from hope.models.core import DataCollectingType
+from hope.models.household import ROLE_PRIMARY
 from hope.apps.payment.models import (
     Payment,
     PaymentPlan,
@@ -36,10 +36,7 @@ from hope.apps.payment.models import (
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from models.program import Program
-
-if TYPE_CHECKING:
-    pass
+from hope.models.program import Program
 
 
 class TestPaymentPlanReconciliation(BaseTestCase):

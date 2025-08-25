@@ -23,12 +23,14 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from models.account import INACTIVE, USER_STATUS_CHOICES, Partner, Role
+from hope.models.user import INACTIVE, USER_STATUS_CHOICES
+from hope.models.role import Role
+from hope.models.partner import Partner
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
-from models.accountability import Message
-from models.core import BusinessArea
+from hope.models.accountability import Message
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import to_choice_object
-from models.program import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db
 

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
 import xlrd
 from admin_extra_buttons.api import button
@@ -23,11 +23,8 @@ from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from models.core import XLSXKoboTemplate
+from hope.models.core import XLSXKoboTemplate
 from hope.apps.core.validators import KoboTemplateValidator
-
-if TYPE_CHECKING:
-    pass
 
 
 logger = logging.getLogger(__name__)

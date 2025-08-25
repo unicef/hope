@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import Any, Union
 from uuid import UUID
 
 from django.conf import settings
@@ -10,9 +10,6 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.utils import nested_getattr
-
-if TYPE_CHECKING:
-    pass
 
 
 class LogEntry(models.Model):

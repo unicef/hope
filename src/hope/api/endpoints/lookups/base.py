@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
@@ -11,8 +9,8 @@ from hope.api.endpoints.serializers import (
     FinancialInstitutionListSerializer,
 )
 from hope.api.filters import CountryFilter, FinancialInstitutionFilter
-from models.geo import Country
-from models.household import (
+from hope.models.geo import Country
+from hope.models.household import (
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
@@ -22,10 +20,7 @@ from models.household import (
     SEX_CHOICE,
 )
 from hope.apps.payment.models import FinancialInstitution
-from models.program import Program
-
-if TYPE_CHECKING:
-    pass
+from hope.models.program import Program
 
 
 class DocumentType(HOPEAPIView):

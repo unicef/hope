@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from models.sanction_list import SanctionListIndividualCountries
+from hope.models.sanction_list import SanctionListIndividualCountries
 
 
 @admin.register(SanctionListIndividualCountries)

@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -24,17 +24,15 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from models.household import Individual
+from hope.models.household import Individual
 from hope.apps.payment.models import Payment, PaymentVerification
-from models.utils import (
+from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -893,7 +891,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return self.golden_records_individual
 
     def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
-        from models.household import Individual
+        from hope.models.household import Individual
 
         unique_areas_count = (
             Individual.objects.filter(

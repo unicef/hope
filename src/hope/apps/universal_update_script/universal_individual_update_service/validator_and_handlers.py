@@ -4,10 +4,10 @@ from typing import Any, Callable
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
 
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 from hope.apps.core.utils import timezone_datetime
-from models.geo import Area
-from models.program import Program
+from hope.models.geo import Area
+from hope.models.program import Program
 from hope.apps.utils.phone import is_valid_phone_number
 
 

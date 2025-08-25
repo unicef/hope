@@ -3,12 +3,13 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
-from models.account import Partner, User
-from models.accountability import Feedback
+from hope.models.user import User
+from hope.models.partner import Partner
+from hope.models.accountability import Feedback
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaListSerializer
-from models.geo import Area
+from hope.models.geo import Area
 from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
@@ -19,7 +20,7 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
-from models.household import (
+from hope.models.household import (
     ROLE_CHOICE,
     Document,
     DocumentType,
@@ -30,7 +31,7 @@ from models.household import (
 from hope.apps.payment.api.serializers import PaymentSmallSerializer
 from hope.apps.payment.models import Payment
 from hope.apps.program.api.serializers import ProgramSmallSerializer
-from models.program import Program
+from hope.models.program import Program
 
 
 class CreateAccountSerializer(serializers.Serializer):

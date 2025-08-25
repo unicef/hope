@@ -2,8 +2,8 @@ import pytest
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 
-from models.core import DataCollectingType
-from models.program import Program
+from hope.models.core import DataCollectingType
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

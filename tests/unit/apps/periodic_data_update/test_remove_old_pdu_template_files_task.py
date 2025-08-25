@@ -10,11 +10,11 @@ from extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
 )
 
-from models.core import FileTemp
+from hope.models.core import FileTemp
 from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
-from models.periodic_data_update import PeriodicDataUpdateTemplate
+from hope.models.periodic_data_update import PeriodicDataUpdateTemplate
 
 pytestmark = pytest.mark.django_db
 

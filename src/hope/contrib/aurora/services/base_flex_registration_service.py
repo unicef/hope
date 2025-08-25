@@ -3,7 +3,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import Any, Iterable
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -11,16 +11,14 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from models.core import BusinessArea
-from models.household import PendingHousehold, PendingIndividual
-from models.registration_data import ImportData, RegistrationDataImport
+from hope.models.core import BusinessArea
+from hope.models.household import PendingHousehold, PendingIndividual
+from hope.models.registration_data import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hope.contrib.aurora.celery_tasks import process_flex_records_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.rdi import AuroraProcessor
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

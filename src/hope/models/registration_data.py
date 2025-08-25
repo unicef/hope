@@ -13,8 +13,8 @@ from django.db.models import Count, OuterRef, Q, QuerySet, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from models.core import BusinessArea
-from models.household import (
+from hope.models.core import BusinessArea
+from hope.models.household import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
     Household,
@@ -23,7 +23,7 @@ from models.household import (
     PendingIndividual,
 )
 from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
-from models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
+from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 logger = logging.getLogger(__name__)
@@ -431,14 +431,14 @@ class DeduplicationEngineSimilarityPair(models.Model):
 
     @classmethod
     def remove_pairs(cls, deduplication_set_id: str) -> None:
-        from models.program import Program
+        from hope.models.program import Program
 
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         cls.objects.filter(program=program).delete()
 
     @classmethod
     def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: list[SimilarityPair]) -> None:
-        from models.program import Program
+        from hope.models.program import Program
 
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         duplicates = []

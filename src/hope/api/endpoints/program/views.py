@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView
 from hope.api.endpoints.base import HOPEAPIView
 from hope.api.endpoints.program.filters import ProgramFilter
 from hope.api.endpoints.program.serializers import ProgramGlobalSerializer
-from models.program import Program
+from hope.models.program import Program
 
 
 class ProgramGlobalListView(HOPEAPIView, ListAPIView):

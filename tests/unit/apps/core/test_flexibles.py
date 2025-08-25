@@ -6,7 +6,7 @@ from django.test import TestCase
 from xlrd import XLRDError
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from models.core import (
+from hope.models.core import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,

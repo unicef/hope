@@ -14,7 +14,7 @@ from rest_framework.viewsets import ViewSetMixin
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.api.models import APILogEntry, Grant
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 
 
 class RejectPolicy(models.TextChoices):

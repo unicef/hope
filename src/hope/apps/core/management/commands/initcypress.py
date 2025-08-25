@@ -5,11 +5,14 @@ from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from extras.test_utils.factories.account import generate_unicef_partners
 
-from models.account import Partner, Role, RoleAssignment, User
+from hope.models.user import User
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
+from hope.models.partner import Partner
 from hope.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
-from models.core import BusinessArea
+from hope.models.core import BusinessArea
 
 
 class Command(BaseCommand):

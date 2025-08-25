@@ -22,11 +22,11 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from models.geo import Country
+from hope.models.geo import Country
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
-from models.household import Document
+from hope.models.household import Document
 from hope.apps.payment.models import AccountType
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 

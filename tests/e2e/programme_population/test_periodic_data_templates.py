@@ -16,15 +16,15 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from selenium.webdriver.common.by import By
 
-from models.core import FlexibleAttribute, PeriodicFieldData
-from models.household import Individual
-from models.periodic_data_update import PeriodicDataUpdateTemplate
+from hope.models.core import FlexibleAttribute, PeriodicFieldData
+from hope.models.household import Individual
+from hope.models.periodic_data_update import PeriodicDataUpdateTemplate
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from models.program import Program
-from models.registration_data import RegistrationDataImport
+from hope.models.program import Program
+from hope.models.registration_data import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db()
 
