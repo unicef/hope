@@ -270,6 +270,8 @@ dependencies = [
     "msoffcrypto-tool>=5.4.2",
     "pyzipper>=0.3.6",
     "legacy-cgi>=2.6.3",
+    "paramiko>=4.0.0",
+    "types-paramiko>=4.0.0.20250821",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
