@@ -10,6 +10,7 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
 class VerificationPlanStatusChangeServices:
@@ -121,6 +122,9 @@ class VerificationPlanStatusChangeServices:
             raise error
 
     def finish(self) -> PaymentVerificationPlan:
+        if not self.payment_verification_plan.payment_plan.is_reconciled:
+            log_and_raise("You can finish only if reconciliation is finalized")
+
         self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_FINISHED
         self.payment_verification_plan.completion_date = timezone.now()
         self.payment_verification_plan.save()
