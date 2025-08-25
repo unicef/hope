@@ -7,6 +7,7 @@ import PopulationHouseholdDetailsPage from '@containers/pages/population/Populat
 import PopulationHouseholdPage from '@containers/pages/population/PopulationHouseholdPage';
 import PopulationIndividualsDetailsPage from '@containers/pages/population/PopulationIndividualsDetailsPage';
 import PeriodicDataUpdatesOnlineEditsTemplateDetailsPage from '@components/periodicDataUpdates/PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
+import EditAuthorizedUsersOnline from '@components/periodicDataUpdates/EditAuthorizedUsersOnline';
 import NewOfflineTemplatePage from '@containers/pages/population/NewOfflineTemplatePage';
 import NewOnlineTemplatePage from '@containers/pages/population/NewOnlineTemplatePage';
 
@@ -55,6 +56,10 @@ export const PopulationRoutes = (): ReactElement => {
     {
       path: 'population/individuals/online-templates/:id',
       element: <PeriodicDataUpdatesOnlineEditsTemplateDetailsPage />,
+    },
+    {
+      path: 'population/individuals/online-templates/:id/edit-authorised-users',
+      element: <EditAuthorizedUsersOnline />,
     },
   ];
 
