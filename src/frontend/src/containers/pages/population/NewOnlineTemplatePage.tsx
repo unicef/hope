@@ -5,15 +5,16 @@ import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FieldsToUpdateOnline } from '@components/periodicDataUpdates/FieldsToUpdateOnline';
 import { FilterIndividualsOnline } from '@components/periodicDataUpdates/FilterIndividualsOnline';
-import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
-import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
-import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
+import { RestService } from '@restgenerated/services/RestService';
+import { PDUOnlineEditCreate } from '@restgenerated/models/PDUOnlineEditCreate';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
+import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
@@ -24,14 +25,37 @@ import { useProgramContext } from 'src/programContext';
 
 const NewOnlineTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const isPeople = location.pathname.includes('people');
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { mutateAsync: createTemplateMutation } = useMutation({
+    mutationFn: (params: {
+      businessAreaSlug: string;
+      programSlug: string;
+      requestBody: PDUOnlineEditCreate;
+    }) =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsCreate(
+        params,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['periodicFields', businessArea, programId, programId],
+      });
+      showMessage(t('Template created successfully.'));
+      navigate(`/${baseUrl}/population/individuals`, {
+        state: { isNewTemplateJustCreated: true },
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage, t('Failed to create template.'));
+    },
+  });
 
   const initialFilter = {
     registrationDataImportId: null,
@@ -51,8 +75,6 @@ const NewOnlineTemplatePage = (): ReactElement => {
   const [checkedFields, setCheckedFields] = useState<Record<string, boolean>>(
     {},
   );
-
-  const uploadTemplate = useUploadPeriodicDataUpdateTemplate();
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = [
@@ -124,7 +146,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     const yesNoToBoolean = (value) => {
       if (value === 'YES') {
         return true;
@@ -195,24 +217,19 @@ const NewOnlineTemplatePage = (): ReactElement => {
     console.log('Rounds data to send:', roundsDataToSend);
     console.log('Payload:', payload);
 
-    uploadTemplate.mutate(
-      {
+    try {
+      await createTemplateMutation({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        //@ts-ignore ID not needed in request body
         requestBody: {
-          rounds_data: payload.rounds_data,
+          roundsData: payload.rounds_data,
           filters: payload.filters,
         },
-      },
-      {
-        onSuccess: () => {
-          showMessage(t('Template created successfully.'));
-          navigate(`/${baseUrl}/population/individuals`, {
-            state: { isNewTemplateJustCreated: true },
-          });
-        },
-      },
-    );
+      });
+    } catch (error) {
+      showApiErrorMessages(error, showMessage, t('Failed to create template.'));
+    }
   };
 
   return (
