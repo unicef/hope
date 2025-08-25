@@ -31,6 +31,12 @@ const matchColorToWindowOrigin = (): string => {
   if (url.includes('dev')) {
     return '#00796B';
   }
+  if (url.includes('eph')) {
+    return '#CC00EF';
+  }
+  if (url.includes('tst')) {
+    return '#EF00A7';
+  }
   return '#00ADEF';
 };
 

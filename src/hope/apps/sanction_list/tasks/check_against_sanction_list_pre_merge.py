@@ -82,7 +82,7 @@ def _generate_ticket(
     registration_data_import: RegistrationDataImport | None,
     sanction_list_individual: SanctionListIndividual,
 ) -> tuple[GrievanceTicket, TicketSystemFlaggingDetails, Any] | None:
-    GrievanceTicketProgramThrough = GrievanceTicket.programs.through
+    GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
     household = marked_individual.household
     admin_level_2 = getattr(household, "admin2", None)
     area = getattr(household, "village", "")
@@ -183,7 +183,8 @@ def check_against_sanction_list_pre_merge(
                     tickets_programs.append(tickets_program)
 
             log.debug(
-                f"SANCTION LIST INDIVIDUAL: {sanction_list_individual.full_name} - reference number: {sanction_list_individual.reference_number}"
+                f"SANCTION LIST INDIVIDUAL: {sanction_list_individual.full_name}"
+                f" - reference number: {sanction_list_individual.reference_number}"
                 f" Scores: ",
             )
             log.debug([(r.full_name, r.meta.score) for r in results])
@@ -202,7 +203,8 @@ def check_against_sanction_list_pre_merge(
 
     if not individuals_ids:
         # If we not pass individuals_ids, it means we want to check all individuals in the program.
-        # So we know that individuals which are not found in the possible matches need to be marked as not possible matches.
+        # So we know that individuals which are not found in the possible matches
+        # need to be marked as not possible matches.
         not_possible_matches_individuals = evaluate_qs(
             Individual.objects.exclude(id__in=possible_matches)
             .filter(sanction_list_possible_match=True)
@@ -212,7 +214,7 @@ def check_against_sanction_list_pre_merge(
         not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
     GrievanceTicket.objects.bulk_create(tickets_to_create)
-    GrievanceTicketProgramThrough = GrievanceTicket.programs.through
+    GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
     GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
     for ticket in tickets_to_create:
         GrievanceNotification.send_all_notifications(

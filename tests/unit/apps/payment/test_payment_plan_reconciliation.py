@@ -180,7 +180,7 @@ class TestPaymentPlanReconciliation(BaseTestCase):
 
         if not expected_status:
             with self.assertRaisesMessage(
-                service.XlsxPaymentPlanImportPerFspServiceException,
+                service.XlsxPaymentPlanImportPerFspServiceError,
                 f"Invalid delivered_quantity {delivered_quantity} provided for payment_id xx",
             ):
                 service._get_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity, "xx")

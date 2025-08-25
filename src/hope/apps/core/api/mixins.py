@@ -27,14 +27,14 @@ class BaseAPI:
     API_KEY_ENV_NAME = ""
     API_URL_ENV_NAME = ""
 
-    class APIException(Exception):
+    class APIError(Exception):
         pass
 
-    class APIMissingCredentialsException(Exception):
+    class APIMissingCredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = APIException
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsException
+    API_EXCEPTION_CLASS = APIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsError
 
     def __init__(self) -> None:
         self.api_key = os.getenv(self.API_KEY_ENV_NAME)
@@ -145,7 +145,7 @@ class ProgramMixin:
 
 
 class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
-    #  Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+    """Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs."""
 
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()

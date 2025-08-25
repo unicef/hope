@@ -17,7 +17,7 @@ from hope.apps.utils.exceptions import log_and_raise
 logger = logging.getLogger(__name__)
 
 
-class CountryCodeNotProvided(Exception):
+class CountryCodeNotProvidedError(Exception):
     pass
 
 
@@ -146,7 +146,7 @@ class KoboAPI:
 
     def get_all_projects_data(self, country_code: str) -> list:
         if not country_code:
-            raise CountryCodeNotProvided("No country code provided")
+            raise CountryCodeNotProvidedError("No country code provided")
         endpoint = f"api/v2/project-views/{self._project_views_id}/assets/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         query_params += f"&q=settings__country_codes__icontains:{country_code.upper()}"

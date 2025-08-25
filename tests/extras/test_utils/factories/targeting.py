@@ -49,7 +49,7 @@ def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
         maximum = random.randint(minimum, random.randint(minimum + 1, 10))
     if obj.field_name == "residence_status":
         return [random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])]
-    if obj.comparison_method == "RANGE" or obj.comparison_method == "NOT_IN_RANGE":
+    if obj.comparison_method in ["RANGE", "NOT_IN_RANGE"]:
         return [minimum, maximum]
     return [minimum]
 

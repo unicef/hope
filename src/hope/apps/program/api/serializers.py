@@ -186,11 +186,10 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"start_date": "Programme Cycle start date must be between programme start and end dates."}
                 )
-        else:
-            if start_date < program.start_date:
-                raise serializers.ValidationError(
-                    {"start_date": "Programme Cycle start date cannot be before programme start date."}
-                )
+        elif start_date < program.start_date:
+            raise serializers.ValidationError(
+                {"start_date": "Programme Cycle start date cannot be before programme start date."}
+            )
 
         if end_date:
             if not program.end_date and end_date < program.start_date:

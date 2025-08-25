@@ -511,7 +511,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         return None
 
     @classproperty
-    def task_handler(cls) -> Callable[[Any], Any]:
+    def task_handler(cls) -> Callable[[Any], Any]:  # noqa
         import importlib
 
         module_path, func_name = cls.celery_task_name.rsplit(".", 1)

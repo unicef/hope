@@ -78,7 +78,8 @@ class Migration(migrations.Migration):
                     "template_file",
                     models.FileField(
                         blank=True,
-                        help_text="Generated Template XLSX File, contains columns for data to be updated. Contains also rows for unicef_ids to be updated",
+                        help_text="Generated Template XLSX File, contains columns for data to be updated."
+                        " Contains also rows for unicef_ids to be updated",
                         null=True,
                         upload_to="",
                     ),
@@ -87,7 +88,8 @@ class Migration(migrations.Migration):
                     "update_file",
                     models.FileField(
                         blank=True,
-                        help_text="Uploaded File, contains data to be updated. After clicking a button to update, data will be updated",
+                        help_text="Uploaded File, contains data to be updated."
+                        " After clicking a button to update, data will be updated",
                         null=True,
                         upload_to="",
                     ),

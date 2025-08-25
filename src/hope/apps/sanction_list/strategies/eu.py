@@ -47,8 +47,8 @@ class EUParser:
         namespace = {"ns": "http://eu.europa.ec/fpi/fsd/export"}
         num = self.root.get("globalFileId", "")
         for _i, entity in enumerate(self.root.findall("ns:sanctionEntity", namespace), 1):
-            subjectType = entity.findall("ns:subjectType", namespace)[0]
-            if subjectType.get("classificationCode") != "P":
+            subject_type = entity.findall("ns:subjectType", namespace)[0]
+            if subject_type.get("classificationCode") != "P":
                 continue
             aliases: list[Alias] = []
             for alias in entity.findall("ns:nameAlias", namespace):

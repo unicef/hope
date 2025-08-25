@@ -316,7 +316,8 @@ class ProgramViewSet(
         # update partner access for ALL_PARTNERS_ACCESS type if it was not changed but the partners need to be refetched
         if partner_access == old_partner_access and partner_access == Program.ALL_PARTNERS_ACCESS:
             create_program_partner_access([], program, partner_access)
-        # update partner access only for SELECTED_PARTNERS_ACCESS type, since update to NONE and ALL are handled through signal
+        # update partner access only for SELECTED_PARTNERS_ACCESS type,
+        # since update to NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)

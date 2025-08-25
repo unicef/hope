@@ -55,7 +55,6 @@ class TestBeneficiaryGroupViewSet:
         response = self.client.get(self.list_url, HTTP_IF_NONE_MATCH=etag)
         assert response.status_code == status.HTTP_304_NOT_MODIFIED
         etag_after_cache = response.headers["ETAG"]
-        assert etag_after_cache == etag_after_cache
 
         self.beneficiary_group1.group_label = "new_group_label"
         self.beneficiary_group1.save()

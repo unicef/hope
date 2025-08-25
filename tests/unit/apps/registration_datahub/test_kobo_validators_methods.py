@@ -493,7 +493,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=cls.business_area)
 
