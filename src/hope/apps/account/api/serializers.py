@@ -37,7 +37,7 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj: BusinessArea) -> list:
         user = self.context["user_obj"]
         if user:
-            return user.all_permissions_in_business_areas[obj.id]
+            return user.all_permissions_in_business_areas[str(obj.id)]
         return []
 
     def get_is_accountability_applicable(self, obj: BusinessArea) -> bool:
