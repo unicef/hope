@@ -189,6 +189,12 @@ const NewOnlineTemplatePage = (): ReactElement => {
       filters: filtersToSend,
     };
 
+    // Log all submit data
+    console.log('Formik values:', values);
+    console.log('Filters to send:', filtersToSend);
+    console.log('Rounds data to send:', roundsDataToSend);
+    console.log('Payload:', payload);
+
     uploadTemplate.mutate(
       {
         businessAreaSlug: businessArea,
@@ -215,7 +221,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
       onSubmit={handleSubmit}
       enableReinitialize
     >
-      {({ values, setFieldValue }) => {
+      {({ values, setFieldValue, handleSubmit: formikHandleSubmit }) => {
         const roundsDataToSend = values.roundsData
           .filter((el) => checkedFields[el.field] === true)
           .map((data) => ({
@@ -228,7 +234,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
               })),
           }));
         return (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={formikHandleSubmit}>
             <PageHeader
               title={t('New Online Template Page')}
               breadCrumbs={
@@ -263,8 +269,12 @@ const NewOnlineTemplatePage = (): ReactElement => {
                   setCheckedFields={setCheckedFields}
                 />
               )}
-              {activeStep === 2 && <AuthorizedUsersOnline />}
-              {activeStep === 3 && <TemplateNameOnline />}
+              {activeStep === 2 && (
+                <AuthorizedUsersOnline setFieldValue={setFieldValue} />
+              )}
+              {activeStep === 3 && (
+                <TemplateNameOnline setFieldValue={setFieldValue} />
+              )}
               <Box
                 display="flex"
                 mt={4}
