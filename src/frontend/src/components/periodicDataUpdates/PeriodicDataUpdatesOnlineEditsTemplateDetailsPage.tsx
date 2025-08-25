@@ -275,7 +275,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   ];
 
-  // Fake sent back comments data
+  //TODO: Fake sent back comments data
   // const sentBackComments = [
   //   {
   //     comment:
@@ -507,10 +507,10 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       ))} */}
       {sendBackComment && (
         <SentBackComment
-          key={sentBackComment.id}
+          key={sentBackComment.comment}
           comment={sentBackComment.comment}
-          date={sentBackComment.date}
-          author={sentBackComment.author}
+          date={sentBackComment.createdAt}
+          author={sentBackComment.createdBy}
         />
       )}
 
