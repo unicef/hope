@@ -394,5 +394,6 @@ export type HouseholdDetail = {
      * * `UNICEF` - UNICEF
      */
     consentSharing?: ConsentSharingEnum;
+    readonly rolesInHousehold: Record<string, any>;
 };
 

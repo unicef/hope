@@ -1,6 +1,9 @@
 from datetime import date, datetime
+from typing import Any
 
 from django.contrib.auth.models import AbstractUser
+from django.shortcuts import get_object_or_404
+
 from django_countries.fields import Country
 
 from hope.apps.activity_log.models import log_create
@@ -14,12 +17,32 @@ from hope.apps.grievance.services.data_change.data_change_service import (
 )
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
+    handle_role,
     is_approved,
     to_date_string,
     verify_flex_fields,
 )
-from hope.apps.household.models import Household
-from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.apps.household.models import Household, Individual
+from hope.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
+
+
+def _prepare_roles_with_approve_status(roles_data: list[dict[Any, Any]]) -> list[dict[str, Any]]:
+    roles_with_approve_status = []
+    for role in roles_data:
+        individual = role["individual"]
+        roles_with_approve_status.append(
+            {
+                "value": role["new_role"],
+                "approve_status": False,
+                "previous_value": individual.role,
+                "individual_id": str(individual.pk),
+                "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
+            }
+        )
+    return roles_with_approve_status
 
 
 class HouseholdDataUpdateService(DataChangeService):
@@ -28,6 +51,7 @@ class HouseholdDataUpdateService(DataChangeService):
         household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
         household = household_data_update_issue_type_extras.get("household")
         household_data = household_data_update_issue_type_extras.get("household_data", {})
+        roles = household_data.pop("roles", [])
         to_date_string(household_data, "start")
         to_date_string(household_data, "end")
         flex_fields = {to_snake_case(field): value for field, value in household_data.pop("flex_fields", {}).items()}
@@ -63,6 +87,9 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
+        if roles:
+            household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
+
         ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
             household_data=household_data_with_approve_status,
             household=household,
@@ -79,6 +106,7 @@ class HouseholdDataUpdateService(DataChangeService):
         new_household_data = household_data_update_new_extras.get("household_data", {})
         to_date_string(new_household_data, "start")
         to_date_string(new_household_data, "end")
+        roles = new_household_data.pop("roles", [])
         flex_fields = {
             to_snake_case(field): value for field, value in new_household_data.pop("flex_fields", {}).items()
         }
@@ -115,6 +143,8 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
+        if roles:
+            household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
         ticket_details.household_data = household_data_with_approve_status
         ticket_details.save()
         self.grievance_ticket.refresh_from_db()
@@ -132,10 +162,11 @@ class HouseholdDataUpdateService(DataChangeService):
         country = household_data.get("country", {})
         admin_area_title = household_data.pop("admin_area_title", {})
         flex_fields_with_additional_data = household_data.pop("flex_fields", {})
+        roles_data = sorted(household_data.pop("roles", []), key=lambda x: x["value"] != "PRIMARY")
         flex_fields = {
             field: data.get("value")
             for field, data in flex_fields_with_additional_data.items()
-            if data.get("approve_status") is True
+            if isinstance(data, dict) and data.get("approve_status") is True
         }
         if country_origin.get("value") is not None:
             household_data["country_origin"]["value"] = geo_models.Country.objects.filter(
@@ -162,6 +193,13 @@ class HouseholdDataUpdateService(DataChangeService):
         if admin_area_title.get("value") is not None and is_approved(admin_area_title):
             area = Area.objects.filter(p_code=admin_area_title.get("value")).first()
             updated_household.set_admin_areas(area)
+        # update Roles
+        for role in roles_data:
+            # update only approved roles
+            if role.get("approve_status") is True:
+                individual_id = role["individual_id"]
+                individual = get_object_or_404(Individual, id=individual_id)
+                handle_role(role.get("value"), household, individual)
 
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)

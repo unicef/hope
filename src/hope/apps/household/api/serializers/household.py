@@ -29,6 +29,7 @@ from hope.apps.household.models import (
     DocumentType,
     Household,
     Individual,
+    IndividualRoleInHousehold,
 )
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
@@ -193,6 +194,20 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualRoleInHouseholdForHouseholdSerializer(serializers.ModelSerializer):
+    from hope.apps.household.api.serializers.individual import IndividualSmallSerializer
+
+    individual = IndividualSmallSerializer()
+
+    class Meta:
+        model = IndividualRoleInHousehold
+        fields = (
+            "id",
+            "individual",
+            "role",
+        )
+
+
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
     admin1 = AreaSimpleSerializer()
@@ -213,6 +228,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     import_id = serializers.SerializerMethodField()
     delivered_quantities = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    roles_in_household = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -289,6 +305,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "org_name_enumerator",
             "registration_method",
             "consent_sharing",
+            "roles_in_household",
         )
 
     def get_has_duplicates(self, obj: Household) -> bool:
@@ -319,6 +336,11 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
 
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
+
+    def get_roles_in_household(self, obj: Household) -> dict:
+        return IndividualRoleInHouseholdForHouseholdSerializer(
+            obj.individuals_and_roles(manager="all_merge_status_objects"), many=True
+        ).data
 
 
 class HouseholdForTicketSerializer(serializers.ModelSerializer):

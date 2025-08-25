@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type GrievanceHouseholdDataChangeApprove = {
-    householdApproveData: any;
+    householdApproveData?: any;
     flexFieldsApproveData?: any;
     version?: number;
 };

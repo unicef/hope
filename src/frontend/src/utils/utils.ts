@@ -1333,11 +1333,24 @@ export function showApiErrorMessages(
   showMessage: (msg: string) => void,
   fallbackMsg: string = 'An error occurred',
 ): void {
+  function traverseErrors(obj: any, path: string = '') {
+    if (Array.isArray(obj)) {
+      obj.forEach((item, idx) => {
+        traverseErrors(item, `${path}[${idx}]`);
+      });
+    } else if (obj && typeof obj === 'object') {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newPath = path ? `${path}.${key}` : key;
+        traverseErrors(value, newPath);
+      });
+    } else if (typeof obj === 'string') {
+      showMessage(path ? `${path}: ${obj}` : obj);
+    }
+  }
+
   // Handle array of errors in error.body
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
-    error.body.forEach((msg: string) => {
-      if (msg) showMessage(msg);
-    });
+    traverseErrors(error.body);
     return;
   }
   // Handle string error in error.body
@@ -1345,62 +1358,20 @@ export function showApiErrorMessages(
     showMessage(error.body);
     return;
   }
-  // Handle object of arrays in error.body (field errors)
+  // Handle object of arrays/objects in error.body (field errors)
   if (
     error &&
     typeof error === 'object' &&
     typeof error.body === 'object' &&
     error.body !== null
   ) {
-    Object.entries(error.body).forEach(([field, messages]) => {
-      if (Array.isArray(messages)) {
-        // Check for array of objects (nested errors)
-        if (
-          messages.length > 0 &&
-          typeof messages[0] === 'object' &&
-          messages[0] !== null
-        ) {
-          messages.forEach((nestedObj, idx) => {
-            Object.entries(nestedObj).forEach(
-              ([nestedField, nestedMessages]) => {
-                if (Array.isArray(nestedMessages)) {
-                  nestedMessages.forEach((msg: string) => {
-                    if (msg)
-                      showMessage(`${field}[${idx}].${nestedField}: ${msg}`);
-                  });
-                }
-              },
-            );
-          });
-        } else {
-          messages.forEach((msg: string) => {
-            if (msg) showMessage(`${field}: ${msg}`);
-          });
-        }
-      } else if (typeof messages === 'object' && messages !== null) {
-        // Handle single nested error object
-        Object.entries(messages).forEach(([nestedField, nestedMessages]) => {
-          if (Array.isArray(nestedMessages)) {
-            nestedMessages.forEach((msg: string) => {
-              if (msg) showMessage(`${field}.${nestedField}: ${msg}`);
-            });
-          }
-        });
-      }
-    });
+    traverseErrors(error.body);
     return;
   }
   // Handle top-level object of arrays (field errors)
   if (error && typeof error === 'object' && error !== null) {
-    const entries = Object.entries(error);
-    if (entries.every(([, v]) => Array.isArray(v))) {
-      entries.forEach(([field, messages]) => {
-        (messages as string[]).forEach((msg) => {
-          if (msg) showMessage(`${field}: ${msg}`);
-        });
-      });
-      return;
-    }
+    traverseErrors(error);
+    return;
   }
   // Handle string error in error.message
   if (error && typeof error === 'object' && typeof error.message === 'string') {
