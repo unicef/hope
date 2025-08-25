@@ -14,8 +14,8 @@ from django.template.loader import render_to_string
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.account.models import User
-from hope.apps.core.models import FileTemp, FlexibleAttribute
+from models.account import User
+from models.core import FileTemp, FlexibleAttribute
 from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,

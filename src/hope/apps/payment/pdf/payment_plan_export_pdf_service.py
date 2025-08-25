@@ -10,7 +10,7 @@ from hope.apps.payment.models import Approval, Payment, PaymentPlan
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    pass
 
 
 logger = logging.getLogger(__name__)

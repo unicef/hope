@@ -1,6 +1,6 @@
 from django import forms
 
-from hope.apps.changelog import models
+from models import changelog
 
 
 class ChangelogForm(forms.ModelForm):

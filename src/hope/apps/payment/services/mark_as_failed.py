@@ -8,7 +8,7 @@ from hope.apps.payment.models import Payment
 from hope.apps.payment.utils import get_quantity_in_usd
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Household
+    pass
 
 
 def mark_as_failed(payment_item: Payment) -> None:

@@ -6,7 +6,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.contrib.aurora.models import Organization, Project, Registration
 
 faker = Faker()

@@ -2,8 +2,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from hope.apps.geo.models import Country
-from hope.apps.payment.models.payment import FinancialInstitution
+from models.geo import Country
+from models.payment import FinancialInstitution
 
 
 class RejectPolicy(models.TextChoices):

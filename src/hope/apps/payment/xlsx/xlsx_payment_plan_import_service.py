@@ -7,7 +7,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 from openpyxl.cell import Cell
 
-from hope.apps.core.models import FileTemp
+from models.core import FileTemp
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
@@ -17,10 +17,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
 )
 
 if TYPE_CHECKING:
-    from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import User
+    pass
 
 Row = tuple[Cell]
 

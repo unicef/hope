@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.utils.models import (
+from models.utils import (
     AdminUrlMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,

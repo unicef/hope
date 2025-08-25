@@ -4,7 +4,7 @@ from django.db import transaction
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from hope.apps.account.models import User
+from models.account import User
 
 
 class GenericField:

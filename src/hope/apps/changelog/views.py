@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from hope.apps.changelog.forms import ChangelogForm
-from hope.apps.changelog.models import Changelog
+from models.changelog import Changelog
 
 
 class ChangelogListView(LoginRequiredMixin, generic.ListView):

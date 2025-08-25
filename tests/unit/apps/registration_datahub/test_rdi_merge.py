@@ -24,7 +24,7 @@ from extras.test_utils.factories.sanction_list import SanctionListFactory
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from hope.apps.household.models import (
+from models.household import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
@@ -36,13 +36,13 @@ from hope.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hope.apps.registration_data.models import (
+from models.registration_data import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
 from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

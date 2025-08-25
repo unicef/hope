@@ -41,7 +41,7 @@ from hope.apps.accountability.filters import (
     MessagesFilter,
     SurveyFilter,
 )
-from hope.apps.accountability.models import Feedback, FeedbackMessage, Message, Survey
+from models.accountability import Feedback, FeedbackMessage, Message, Survey
 from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
@@ -49,7 +49,7 @@ from hope.apps.accountability.services.message_crud_services import MessageCrudS
 from hope.apps.accountability.services.sampling import Sampling
 from hope.apps.accountability.services.survey_crud_services import SurveyCrudServices
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hope.apps.activity_log.models import log_create
+from models.activity_log import log_create
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
@@ -57,11 +57,11 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
 from hope.apps.core.utils import to_choice_object
-from hope.apps.household.models import Household
-from hope.apps.program.models import Program
+from models.household import Household
+from models.program import Program
 
 logger = logging.getLogger(__name__)
 

@@ -4,15 +4,11 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
 from django.core.exceptions import PermissionDenied
 
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import get_program_id_from_headers
 
 if TYPE_CHECKING:
-    from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import User
-    from hope.apps.program.models import Program
+    from models.program import Program
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +292,7 @@ DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DE
 
 
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
-    from hope.apps.program.models import Program
+    from models.program import Program
 
     if not user.is_authenticated:
         return False

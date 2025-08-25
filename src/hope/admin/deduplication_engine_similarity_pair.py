@@ -4,7 +4,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from models.registration_data import DeduplicationEngineSimilarityPair
 
 logger = logging.getLogger(__name__)
 

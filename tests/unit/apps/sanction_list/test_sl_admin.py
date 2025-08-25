@@ -4,11 +4,7 @@ import responses
 from django.urls import reverse
 
 if TYPE_CHECKING:
-    from django_webtest import DjangoTestApp
-    from responses import RequestsMock
-
-    from hope.apps.account.models import User
-    from hope.apps.sanction_list.models import SanctionList
+    pass
 
 
 def test_sanction_list_refresh(

@@ -1,7 +1,7 @@
 from django_filters import DateFromToRangeFilter
 from django_filters.rest_framework import FilterSet
 
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 
 
 class UpdatedAtFilter(FilterSet):

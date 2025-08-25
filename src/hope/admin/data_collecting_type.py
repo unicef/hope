@@ -5,7 +5,7 @@ from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
 
 from hope.apps.core.forms import DataCollectingTypeForm
-from hope.apps.core.models import DataCollectingType
+from models.core import DataCollectingType
 
 logger = logging.getLogger(__name__)
 

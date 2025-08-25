@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.program.models import Program
+from models.program import Program
 
 pytestmark = pytest.mark.django_db
 

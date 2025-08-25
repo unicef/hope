@@ -7,12 +7,12 @@ from extras.test_utils.factories.account import UserFactory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hope.apps.account.models import User
-from hope.apps.accountability.models import Feedback, FeedbackMessage, Message, Survey
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area
-from hope.apps.household.models import Household
-from hope.apps.program.models import Program
+from models.account import User
+from models.accountability import Feedback, FeedbackMessage, Message, Survey
+from models.core import BusinessArea
+from models.geo import Area
+from models.household import Household
+from models.program import Program
 
 
 class FeedbackFactory(DjangoModelFactory):

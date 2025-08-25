@@ -5,7 +5,7 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from mptt import register
 
-from hope.apps.account.models import Role
+from models.account import Role
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
 
 BATCH_SIZE = 1000

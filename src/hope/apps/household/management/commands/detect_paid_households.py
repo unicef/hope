@@ -8,8 +8,8 @@ from django.conf import settings
 from django.core.management import BaseCommand, CommandParser
 from django.db.models import Q, QuerySet
 
-from hope.apps.core.models import StorageFile
-from hope.apps.household.models import Document, Household
+from models.core import StorageFile
+from models.household import Document, Household
 from hope.apps.payment.models import Payment
 
 

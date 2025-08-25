@@ -1,7 +1,7 @@
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hope.apps.changelog.models import Changelog
+from models.changelog import Changelog
 
 faker = Faker()
 

@@ -4,8 +4,8 @@ from typing import Any
 
 from django.db.models import Model
 
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.household.models import DocumentType
+from models.core import FlexibleAttribute
+from models.household import DocumentType
 from hope.apps.payment.models import AccountType
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,

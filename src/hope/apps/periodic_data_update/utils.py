@@ -1,8 +1,8 @@
 import re
 
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.household.models import Individual
-from hope.apps.program.models import Program
+from models.core import FlexibleAttribute
+from models.household import Individual
+from models.program import Program
 
 
 def field_label_to_field_name(input_string: str) -> str:

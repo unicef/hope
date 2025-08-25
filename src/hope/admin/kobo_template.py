@@ -23,11 +23,11 @@ from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from hope.apps.core.models import XLSXKoboTemplate
+from models.core import XLSXKoboTemplate
 from hope.apps.core.validators import KoboTemplateValidator
 
 if TYPE_CHECKING:
-    from uuid import UUID
+    pass
 
 
 logger = logging.getLogger(__name__)

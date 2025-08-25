@@ -8,8 +8,8 @@ from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hope.api.models import Grant
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from models.core import BusinessArea
+from models.program import Program
 
 
 class APIProgramTests(HOPEApiTestCase):

@@ -24,9 +24,9 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hope.apps.household.models import Individual
+from models.household import Individual
 from hope.apps.payment.models import Payment, PaymentVerification
-from hope.apps.utils.models import (
+from models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -34,7 +34,7 @@ from hope.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Household  # pragma: no cover
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -893,7 +893,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return self.golden_records_individual
 
     def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
-        from hope.apps.household.models import Individual
+        from models.household import Individual
 
         unique_areas_count = (
             Individual.objects.filter(

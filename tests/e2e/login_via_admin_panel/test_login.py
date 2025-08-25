@@ -4,7 +4,7 @@ from extras.test_utils.factories.account import UserFactory
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
-from hope.apps.account.models import User
+from models.account import User
 
 pytestmark = pytest.mark.django_db()
 

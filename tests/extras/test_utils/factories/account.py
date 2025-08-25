@@ -9,14 +9,14 @@ from django.contrib.auth import get_user_model
 from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 
-from hope.apps.account.models import (
+from models.account import (
     AdminAreaLimitedTo,
     Partner,
     Role,
     RoleAssignment,
     User,
 )
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 
 
 class PartnerFactory(DjangoModelFactory):

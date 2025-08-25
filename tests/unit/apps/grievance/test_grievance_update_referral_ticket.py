@@ -12,9 +12,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo import models as geo_models
+from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.program.models import Program
+from models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

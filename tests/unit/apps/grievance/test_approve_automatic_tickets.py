@@ -19,10 +19,10 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo import models as geo_models
+from models.core import BusinessArea
+from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.sanction_list.models import SanctionListIndividual
+from models.sanction_list import SanctionListIndividual
 
 pytestmark = pytest.mark.django_db()
 

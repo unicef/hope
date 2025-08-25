@@ -42,7 +42,7 @@ from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import (
+from models.household import (
     DUPLICATE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -50,9 +50,9 @@ from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hope.apps.sanction_list.models import (
+from models.program import Program
+from models.registration_data import DeduplicationEngineSimilarityPair
+from models.sanction_list import (
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
 )

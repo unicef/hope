@@ -9,18 +9,18 @@ from django.core.files.storage import default_storage
 from django.db import transaction
 from django_countries.fields import Country
 
-from hope.apps.activity_log.models import log_create
+from models.activity_log import log_create
 from hope.apps.core.kobo.api import KoboAPI
 from hope.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
     get_submission_metadata,
 )
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import chunks, rename_dict_keys
-from hope.apps.geo.models import Area
-from hope.apps.geo.models import Country as GeoCountry
-from hope.apps.household.models import (
+from models.geo import Area
+from models.geo import Country as GeoCountry
+from models.household import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
@@ -34,7 +34,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import (
+from models.registration_data import (
     ImportData,
     KoboImportedSubmission,
     RegistrationDataImport,

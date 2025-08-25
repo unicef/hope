@@ -73,8 +73,8 @@ from hope.apps.core.field_attributes.lookup_functions import (
     get_unhcr_id_no,
 )
 from hope.apps.core.languages import Languages
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from models.geo import Area, Country
+from models.household import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -89,7 +89,7 @@ from hope.apps.household.models import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

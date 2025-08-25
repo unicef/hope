@@ -8,7 +8,7 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.household.models import Household
+from models.household import Household
 
 
 @pytest.fixture

@@ -13,16 +13,13 @@ from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.steficon.debug import get_error_info
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
-    from django.http import HttpRequest
-
+    pass
 
 logger = logging.getLogger(__name__)
 
 
 try:  # pragma: no cover
-    from hope.apps.steficon.models import RuleCommit
+    from models.steficon import RuleCommit
 
     class RuleReRunForm(forms.Form):
         rule = forms.ModelChoiceField(

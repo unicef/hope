@@ -12,9 +12,9 @@ from django.utils import timezone
 
 from hope.apps.core.celery import app
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import Household, Individual
+from models.household import Household, Individual
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.logs import log_start_and_end
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def recalculate_population_fields_chunk_task(households_ids: list[UUID], program_id: str | None = None) -> None:
-    from hope.apps.household.models import Household, Individual
+    from models.household import Household, Individual
 
     # memory optimization
     paginator = Paginator(households_ids, 200)
@@ -64,7 +64,7 @@ def recalculate_population_fields_chunk_task(households_ids: list[UUID], program
 @log_start_and_end
 @sentry_tags
 def recalculate_population_fields_task(household_ids: list[str] | None = None, program_id: str | None = None) -> None:
-    from hope.apps.household.models import Household
+    from models.household import Household
 
     params = {}
     if household_ids:
@@ -92,7 +92,7 @@ def recalculate_population_fields_task(household_ids: list[str] | None = None, p
 @log_start_and_end
 @sentry_tags
 def interval_recalculate_population_fields_task() -> None:
-    from hope.apps.household.models import Individual
+    from models.household import Individual
 
     datetime_now = timezone.now()
     now_day, now_month = datetime_now.day, datetime_now.month
@@ -112,7 +112,7 @@ def interval_recalculate_population_fields_task() -> None:
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
 
-    from hope.apps.registration_data.models import Household
+    from models.registration_data import Household
 
     return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
         # TODO: count differently or add all the fields for the new gender options

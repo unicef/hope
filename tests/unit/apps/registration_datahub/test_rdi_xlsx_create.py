@@ -28,10 +28,10 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from PIL import Image
 
-from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
+from models.core import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
-from hope.apps.geo.models import Country as GeoCountry
-from hope.apps.household.models import (
+from models.geo import Country as GeoCountry
+from models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
@@ -41,10 +41,10 @@ from hope.apps.household.models import (
     PendingIndividualIdentity,
 )
 from hope.apps.payment.models import PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData
+from models.program import Program
+from models.registration_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

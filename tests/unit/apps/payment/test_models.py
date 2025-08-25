@@ -42,8 +42,8 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hope.apps.household.models import (
+from models.core import BusinessArea, DataCollectingType, FileTemp
+from models.household import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
@@ -65,8 +65,8 @@ from hope.apps.payment.models import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.program.models import ProgramCycle
-from hope.apps.steficon.models import Rule
+from models.program import ProgramCycle
+from models.steficon import Rule
 
 pytestmark = pytest.mark.django_db()
 

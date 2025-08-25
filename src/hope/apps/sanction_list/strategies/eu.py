@@ -7,15 +7,15 @@ from typing import TYPE_CHECKING
 import requests
 from elasticsearch import NotFoundError
 
-from ...geo.models import Country
-from ...program.models import Program
+from models.geo import Country
+from models.program import Program
 from ..tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
 from ._base import BaseSanctionList
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import Generator, TypedDict
+    from typing import TypedDict
 
     class Alias(TypedDict):
         first_name: str

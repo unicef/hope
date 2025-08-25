@@ -4,7 +4,7 @@ from typing import Any
 from django.core.management import BaseCommand
 from django.db.models import Q
 
-from hope.apps.account.models import IncompatibleRoles, Role
+from models.account import IncompatibleRoles, Role
 from hope.apps.account.permissions import Permissions
 
 

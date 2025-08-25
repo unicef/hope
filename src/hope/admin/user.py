@@ -27,16 +27,14 @@ from hope.admin.account_mixins import KoboAccessMixin
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
-from hope.apps.account import models as account_models
+from models import account as account_models
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hope.apps.account.models import Partner, User
-from hope.apps.core.models import BusinessArea
+from models.account import Partner, User
+from models.core import BusinessArea
 from hope.apps.core.utils import build_arg_dict_from_dict
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
-    from django.db.models.query import _QuerySet
+    pass
 
 logger = logging.getLogger(__name__)
 

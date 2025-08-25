@@ -2,11 +2,11 @@ from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.accountability.models import Survey
+from models.accountability import Survey
 from hope.apps.accountability.services.sampling import Sampling
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import Household
-from hope.apps.program.models import Program
+from models.core import BusinessArea
+from models.household import Household
+from models.program import Program
 
 
 class SurveyCrudServices:

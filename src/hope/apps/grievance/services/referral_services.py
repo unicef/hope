@@ -1,5 +1,5 @@
 from hope.apps.grievance.models import GrievanceTicket, TicketReferralDetails
-from hope.apps.household.models import Household, Individual
+from models.household import Household, Individual
 
 
 def save_referral_service(grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:

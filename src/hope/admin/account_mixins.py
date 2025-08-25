@@ -18,7 +18,7 @@ from django.template.response import TemplateResponse
 from django.utils.crypto import get_random_string
 from requests import Response
 
-from hope.apps.account.models import User
+from models.account import User
 
 logger = logging.getLogger(__name__)
 

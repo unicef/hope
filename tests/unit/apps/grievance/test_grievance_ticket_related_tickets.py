@@ -11,10 +11,10 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from models import geo as geo_models
+from models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,

@@ -10,8 +10,8 @@ from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from selenium.common.exceptions import NoSuchElementException
 
-from hope.apps.core.models import DataCollectingType
-from hope.apps.program.models import BeneficiaryGroup, Program
+from models.core import DataCollectingType
+from models.program import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

@@ -28,7 +28,7 @@ from hope.apps.payment.models import (
     PaymentVerificationSummary,
     build_summary,
 )
-from hope.apps.program.models import Program
+from models.program import Program
 
 pytestmark = pytest.mark.django_db
 

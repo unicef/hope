@@ -2,7 +2,7 @@ from django.db.models.functions import Lower
 from django_filters import FilterSet
 
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.apps.sanction_list.models import SanctionListIndividual
+from models.sanction_list import SanctionListIndividual
 
 
 class SanctionListIndividualFilter(FilterSet):

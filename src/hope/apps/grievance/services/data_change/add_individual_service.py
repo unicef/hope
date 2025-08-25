@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.utils import timezone
 
-from hope.apps.activity_log.models import log_create
+from models.activity_log import log_create
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
@@ -22,7 +22,7 @@ from hope.apps.grievance.services.data_change.utils import (
     verify_flex_fields,
 )
 from hope.apps.grievance.signals import individual_added
-from hope.apps.household.models import (
+from models.household import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
@@ -33,7 +33,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
 
 

@@ -28,9 +28,9 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.household.celery_tasks import revalidate_phone_number_task
-from hope.apps.household.models import (
+from models.household import (
     Household,
     Individual,
     IndividualCollection,

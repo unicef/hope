@@ -16,12 +16,12 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.account.models import Partner, User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.program.models import BeneficiaryGroup, Program
-from hope.apps.registration_data.models import ImportData
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.account import Partner, User
+from models.core import BusinessArea, DataCollectingType
+from models.geo import Area, AreaType, Country
+from models.program import BeneficiaryGroup, Program
+from models.registration_data import ImportData
+from models.registration_data import RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.django_db()

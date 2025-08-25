@@ -10,7 +10,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import log_create
+from models.activity_log import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.currencies import CURRENCY_CHOICES
@@ -25,7 +25,7 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualSmallSerializer,
 )
-from hope.apps.household.models import (
+from models.household import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
     Household,
@@ -43,7 +43,7 @@ from hope.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
-from hope.apps.payment.models.payment import (
+from models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProviderXlsxTemplate,
@@ -54,7 +54,7 @@ from hope.apps.program.api.serializers import (
     ProgramCycleSmallSerializer,
     ProgramSmallSerializer,
 )
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer

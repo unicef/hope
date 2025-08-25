@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.geo.models import Area
+from models.geo import Area
 
 
 class AreaFilter(UpdatedAtFilter):

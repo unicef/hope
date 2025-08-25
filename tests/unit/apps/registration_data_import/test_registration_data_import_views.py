@@ -18,7 +18,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 

@@ -15,8 +15,8 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
-from hope.apps.account.models import RoleAssignment
-from hope.apps.accountability.models import Feedback
+from models.account import RoleAssignment
+from models.accountability import Feedback
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin
@@ -31,13 +31,13 @@ from hope.apps.core.api.serializers import (
 from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.field_attributes.fields_types import TYPE_STRING
 from hope.apps.core.languages import Languages
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import (
     get_fields_attr_generators,
     resolve_assets_list,
     to_choice_object,
 )
-from hope.apps.geo.models import Country
+from models.geo import Country
 from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,

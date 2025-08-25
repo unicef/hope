@@ -5,11 +5,11 @@ from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
-from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from models.household import Household, Individual, IndividualRoleInHousehold
 
 # only for typing purposes
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    pass
 
 
 class AbstractCollisionDetector:

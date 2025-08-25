@@ -22,7 +22,7 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.core.celery import app as celery_app
-from hope.apps.core.models import BusinessArea, FileTemp
+from models.core import BusinessArea, FileTemp
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.utils.celery_utils import get_task_in_queue_or_running
@@ -117,7 +117,7 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        from hope.apps.core.models import BusinessArea
+        from models.core import BusinessArea
 
         return BusinessArea.objects.values_list("code", "name").distinct()
 

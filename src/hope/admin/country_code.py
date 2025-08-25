@@ -5,10 +5,10 @@ from django.contrib import admin
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.core.models import CountryCodeMap
+from models.core import CountryCodeMap
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
+    pass
 
 
 logger = logging.getLogger(__name__)

@@ -18,7 +18,7 @@ from extras.test_utils.factories.account import UserFactory
 
 from hope.admin.kobo_template import XLSXKoboTemplateAdmin
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import XLSXKoboTemplate
+from models.core import XLSXKoboTemplate
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,

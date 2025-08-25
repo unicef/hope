@@ -5,11 +5,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.account.models import Role, RoleAssignment, User
+from models.account import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import encode_id_base64_required
-from hope.apps.program.models import Program
+from models.program import Program
 
 
 class TestCheckPermissions(TestCase):

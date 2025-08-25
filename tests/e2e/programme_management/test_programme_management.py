@@ -21,9 +21,9 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
-from hope.apps.account.models import Partner
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.program.models import BeneficiaryGroup, Program
+from models.account import Partner
+from models.core import BusinessArea, DataCollectingType
+from models.program import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

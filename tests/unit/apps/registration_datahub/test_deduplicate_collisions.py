@@ -6,11 +6,11 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.geo.models import Country
-from hope.apps.household.models import Household, PendingIndividual
+from models.geo import Country
+from models.household import Household, PendingIndividual
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.program import Program
+from models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 pytestmark = pytest.mark.django_db(transaction=True)

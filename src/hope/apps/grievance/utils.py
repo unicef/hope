@@ -8,9 +8,9 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
-from hope.apps.account.models import Partner, User
+from models.account import Partner, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.accountability.models import Feedback
+from models.accountability import Feedback
 from hope.apps.core.utils import decode_id_string
 from hope.apps.grievance.models import (
     GrievanceDocument,
@@ -23,7 +23,7 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hope.apps.grievance.validators import validate_file
-from hope.apps.household.models import Individual
+from models.household import Individual
 
 logger = logging.getLogger(__name__)
 

@@ -6,8 +6,8 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 
 from hope.apps.core.celery import app
-from hope.apps.core.models import FileTemp
-from hope.apps.periodic_data_update.models import (
+from models.core import FileTemp
+from models.periodic_data_update import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )

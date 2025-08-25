@@ -3,12 +3,12 @@ import logging
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
-from hope.apps.accountability.models import Survey
+from models.accountability import Survey
 from hope.apps.accountability.services.export_survey_sample_service import (
     ExportSurveySampleService,
 )
 from hope.apps.core.celery import app
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import send_email_notification
 from hope.apps.utils.logs import log_start_and_end

@@ -7,8 +7,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from hope.apps.account.models import ChoiceArrayField, User
-from hope.apps.core.models import BusinessArea
+from models.account import ChoiceArrayField, User
+from models.core import BusinessArea
 
 
 @unique

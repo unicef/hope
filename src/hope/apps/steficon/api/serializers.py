@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.apps.steficon.models import Rule, RuleCommit
+from models.steficon import Rule, RuleCommit
 
 
 class RuleSerializer(serializers.ModelSerializer):

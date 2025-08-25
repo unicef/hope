@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import SanctionListIndividualDateOfBirth
+from models.sanction_list import SanctionListIndividualDateOfBirth
 
 
 @admin.register(SanctionListIndividualDateOfBirth)

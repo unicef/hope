@@ -11,10 +11,10 @@ from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
-from hope.apps.account import models as account_models
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area
-from hope.apps.program.models import Program
+from models import account as account_models
+from models.core import BusinessArea
+from models.geo import Area
+from models.program import Program
 
 
 def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) -> bool:

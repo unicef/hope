@@ -15,12 +15,12 @@ from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.api.models import APIToken
-from hope.apps.account.models import ChoiceArrayField
-from hope.apps.core.models import BusinessArea
+from models.account import ChoiceArrayField
+from models.core import BusinessArea
 from hope.apps.utils.security import is_root
 
 if TYPE_CHECKING:
-    from uuid import UUID
+    pass
 
 
 TOKEN_INFO_EMAIL = """

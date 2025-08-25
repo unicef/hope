@@ -5,8 +5,8 @@ from typing import Any
 from celery import Task
 from django.db.models import QuerySet
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.core import BusinessArea
+from models.registration_data import RegistrationDataImport
 from hope.apps.utils.celery_utils import (
     get_all_celery_tasks,
     get_task_in_queue_or_running,

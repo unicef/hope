@@ -4,9 +4,9 @@ import uuid
 
 import django.contrib.postgres.fields
 import model_utils.fields
-from django.db import migrations, models
+from django.db import migrations
 
-import hope.apps.utils.models
+import models.utils
 
 
 class Migration(migrations.Migration):
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Feedback",
                 "ordering": ("created_at",),
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(models.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="FeedbackMessage",
@@ -129,7 +129,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Message",
                 "ordering": ("created_at",),
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(models.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="Survey",
@@ -189,6 +189,6 @@ class Migration(migrations.Migration):
                 "verbose_name": "Survey",
                 "ordering": ("created_at",),
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(models.models.AdminUrlMixin, models.Model),
         ),
     ]

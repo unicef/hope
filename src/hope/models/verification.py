@@ -13,8 +13,8 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.models import BusinessArea, FileTemp
-from hope.apps.utils.models import (
+from models.core import BusinessArea, FileTemp
+from models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -22,8 +22,7 @@ from hope.apps.utils.models import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover
-    from hope.apps.payment.models import PaymentPlan
-    from hope.apps.program.models import Program
+    pass
 
 logger = logging.getLogger(__name__)
 

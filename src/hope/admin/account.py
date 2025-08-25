@@ -4,14 +4,14 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.payment.models import (
     Account,
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
 )
-from hope.apps.program.models import Program
+from models.program import Program
 
 
 @admin.register(Account)

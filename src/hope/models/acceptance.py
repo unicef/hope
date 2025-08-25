@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from psycopg2._range import NumericRange
 
-from hope.apps.utils.models import TimeStampedUUIDModel
+from models.utils import TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 

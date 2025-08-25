@@ -9,9 +9,9 @@ import django.utils.timezone
 import model_utils.fields
 import mptt.fields
 from django.conf import settings
-from django.db import migrations, models
+from django.db import migrations
 
-import hope.apps.core.models
+import models.core
 
 
 class Migration(migrations.Migration):
@@ -319,7 +319,7 @@ class Migration(migrations.Migration):
                     "label",
                     models.JSONField(
                         default=dict,
-                        validators=[hope.apps.core.models.label_contains_english_en_validator],
+                        validators=[models.models.label_contains_english_en_validator],
                     ),
                 ),
                 ("hint", models.JSONField(default=dict)),

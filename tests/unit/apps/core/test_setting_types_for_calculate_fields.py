@@ -12,7 +12,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
 )
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hope.apps.core.models import FlexibleAttribute
+from models.core import FlexibleAttribute
 
 
 class MockSuperUser:

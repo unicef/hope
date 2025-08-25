@@ -15,7 +15,7 @@ from extras.test_utils.factories.program import get_program_with_dct_type_and_na
 from parameterized import parameterized
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import DataCollectingType, PeriodicFieldData
+from models.core import DataCollectingType, PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader
 from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 

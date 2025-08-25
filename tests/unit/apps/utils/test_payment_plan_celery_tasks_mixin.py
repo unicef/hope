@@ -9,7 +9,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 from rest_framework import status
 
-from hope.apps.account.models import User
+from models.account import User
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
 

@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.views.generic.edit import CreateView
 
-from hope.apps.sanction_list.models import SanctionList, UploadedXLSXFile
+from models.sanction_list import SanctionList, UploadedXLSXFile
 from hope.apps.sanction_list.template_generator import get_template_file
 
 

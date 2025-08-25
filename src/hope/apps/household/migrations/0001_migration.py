@@ -14,7 +14,7 @@ import sorl.thumbnail.fields
 from django.db import migrations, models
 
 import hope.apps.core.utils
-import hope.apps.utils.models
+import models.utils
 
 
 class Migration(migrations.Migration):
@@ -723,7 +723,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Household",
                 "permissions": (("can_withdrawn", "Can withdrawn Household"),),
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="HouseholdCollection",
@@ -1171,7 +1171,7 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Individual",
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="IndividualCollection",

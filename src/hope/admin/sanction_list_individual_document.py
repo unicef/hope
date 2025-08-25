@@ -4,7 +4,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import SanctionListIndividualDocument
+from models.sanction_list import SanctionListIndividualDocument
 
 
 @admin.register(SanctionListIndividualDocument)

@@ -16,7 +16,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.household.models import (
+from models.household import (
     HEAD,
     MALE,
     ROLE_PRIMARY,
@@ -26,7 +26,7 @@ from hope.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )

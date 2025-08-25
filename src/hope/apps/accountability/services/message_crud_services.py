@@ -6,15 +6,15 @@ from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
-from hope.apps.accountability.models import Message
+from models.accountability import Message
 from hope.apps.accountability.services.sampling import Sampling
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.apps.household.models import Household
+from models.household import Household
 from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.program import Program
+from models.registration_data import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

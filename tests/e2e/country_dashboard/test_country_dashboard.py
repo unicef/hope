@@ -13,7 +13,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from selenium.webdriver.common.by import By
 
 from hope.apps.dashboard.services import DashboardDataCache
-from hope.apps.program.models import BeneficiaryGroup
+from models.program import BeneficiaryGroup
 
 
 class ModifiedPaymentFactory(PaymentFactory):

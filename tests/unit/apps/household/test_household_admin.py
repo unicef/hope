@@ -17,7 +17,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.household.models import Document
+from models.household import Document
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 

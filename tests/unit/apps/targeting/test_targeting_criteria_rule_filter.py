@@ -24,8 +24,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 from pytz import utc
 
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.household.models import (
+from models.core import PeriodicFieldData
+from models.household import (
     ROLE_PRIMARY,
     Household,
     Individual,
@@ -33,7 +33,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.payment.models import AccountType
 from hope.apps.targeting.choices import FlexFieldClassification
-from hope.apps.targeting.models import (
+from models.targeting import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
@@ -41,7 +41,7 @@ from hope.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):

@@ -4,13 +4,13 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.grievance.services.data_change.utils import handle_role
-from hope.apps.household.models import (
+from models.household import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     IndividualRoleInHousehold,
 )
-from hope.apps.program.models import Program
-from hope.apps.utils.models import MergeStatusModel
+from models.program import Program
+from models.utils import MergeStatusModel
 
 
 class TestHandleRole(TestCase):

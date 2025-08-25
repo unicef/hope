@@ -9,7 +9,7 @@ from unit.api.base import HOPEApiTestCase
 
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from models.household import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
@@ -21,8 +21,8 @@ from hope.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.program import Program
+from models.registration_data import RegistrationDataImport
 
 
 class UploadRDITests(HOPEApiTestCase):

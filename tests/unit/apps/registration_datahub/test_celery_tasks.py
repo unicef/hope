@@ -31,10 +31,10 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from models import geo as geo_models
+from models.household import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -48,8 +48,8 @@ from hope.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
+from models.program import Program
+from models.registration_data import (
     ImportData,
     KoboImportData,
     RegistrationDataImport,
@@ -69,7 +69,7 @@ from hope.apps.registration_datahub.celery_tasks import (
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 from hope.contrib.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,

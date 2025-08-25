@@ -27,7 +27,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
-from hope.apps.activity_log.models import log_create
+from models.activity_log import log_create
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -36,7 +36,7 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import FlexibleAttribute
+from models.core import FlexibleAttribute
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
@@ -65,13 +65,13 @@ from hope.apps.program.celery_tasks import (
     copy_program_task,
     populate_pdu_new_rounds_with_null_values_task,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from models.program import BeneficiaryGroup, Program, ProgramCycle
 from hope.apps.program.utils import (
     copy_program_object,
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )

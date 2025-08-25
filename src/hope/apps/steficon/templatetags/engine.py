@@ -7,7 +7,7 @@ from django import template
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 
-from hope.apps.household.models import Household
+from models.household import Household
 
 register = template.Library()
 

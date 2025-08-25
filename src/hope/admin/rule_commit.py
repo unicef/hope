@@ -11,15 +11,15 @@ from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account.models import User
+from models.account import User
 from hope.apps.steficon.forms import RuleCommitAdminForm
-from hope.apps.steficon.models import Rule, RuleCommit
+from models.steficon import Rule, RuleCommit
 from hope.apps.utils.security import is_root
 
 from .steficon import TestRuleMixin
 
 if TYPE_CHECKING:
-    from django.db.models import QuerySet
+    pass
 
 logger = logging.getLogger(__name__)
 

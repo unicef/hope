@@ -27,12 +27,12 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
+from models.core import (
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hope.apps.program.models import Program, ProgramCycle
+from models.program import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 

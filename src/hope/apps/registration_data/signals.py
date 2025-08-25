@@ -5,7 +5,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 
 
 @receiver(post_save, sender=RegistrationDataImport)

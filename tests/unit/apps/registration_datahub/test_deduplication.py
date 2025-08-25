@@ -6,9 +6,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from unit.conftest import disabled_locally_test
 
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import (
+from models.household import (
     DUPLICATE,
     FEMALE,
     HEAD,
@@ -20,7 +20,7 @@ from hope.apps.household.models import (
     Individual,
     PendingIndividual,
 )
-from hope.apps.registration_data.models import (
+from models.registration_data import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
     ImportData,

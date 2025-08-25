@@ -5,18 +5,18 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
-from hope.apps.household.models import (
+from models.household import (
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Individual,
     IndividualRoleInHousehold,
 )
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 
 class TestReassignRolesOnUpdate(BaseTestCase):

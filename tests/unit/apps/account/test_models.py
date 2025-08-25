@@ -12,8 +12,8 @@ from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.account.models import RoleAssignment
-from hope.apps.program.models import Program
+from models.account import RoleAssignment
+from models.program import Program
 
 
 class TestRoleAssignmentModel(TransactionTestCase):

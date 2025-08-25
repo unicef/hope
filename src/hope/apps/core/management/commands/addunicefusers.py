@@ -2,8 +2,8 @@ from typing import Any
 
 from django.core.management import BaseCommand
 
-from hope.apps.account.models import Role, RoleAssignment, User
-from hope.apps.core.models import BusinessArea
+from models.account import Role, RoleAssignment, User
+from models.core import BusinessArea
 
 emails = [
     "gerba",

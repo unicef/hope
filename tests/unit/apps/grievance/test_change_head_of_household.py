@@ -15,10 +15,10 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo import models as geo_models
+from models import geo as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import AUNT_UNCLE, BROTHER_SISTER, HEAD, Individual
-from hope.apps.program.models import Program
+from models.household import AUNT_UNCLE, BROTHER_SISTER, HEAD, Individual
+from models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

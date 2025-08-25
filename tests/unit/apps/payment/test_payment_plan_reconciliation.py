@@ -25,8 +25,8 @@ from parameterized import parameterized
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import DataCollectingType
-from hope.apps.household.models import ROLE_PRIMARY
+from models.core import DataCollectingType
+from models.household import ROLE_PRIMARY
 from hope.apps.payment.models import (
     Payment,
     PaymentPlan,
@@ -36,10 +36,10 @@ from hope.apps.payment.models import (
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hope.apps.program.models import Program
+from models.program import Program
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Household, Individual
+    pass
 
 
 class TestPaymentPlanReconciliation(BaseTestCase):

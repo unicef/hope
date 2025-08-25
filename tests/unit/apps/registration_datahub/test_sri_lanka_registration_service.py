@@ -12,10 +12,10 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 
-from hope.apps.core.models import DataCollectingType
+from models.core import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from models import geo as geo_models
+from models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,
     PendingDocument,

@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
-from hope.apps.activity_log.models import LogEntry
+from models.activity_log import LogEntry
 
 
 @admin.register(LogEntry)

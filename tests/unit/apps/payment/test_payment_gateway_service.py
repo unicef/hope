@@ -22,8 +22,8 @@ from extras.test_utils.factories.payment import (
 )
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import ROLE_PRIMARY
+from models.core import BusinessArea
+from models.household import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
 )

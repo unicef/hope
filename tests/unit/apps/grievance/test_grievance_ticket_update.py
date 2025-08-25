@@ -37,11 +37,11 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hope.apps.account.models import AdminAreaLimitedTo
+from models.account import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
+from models import geo as geo_models
 from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
@@ -52,7 +52,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketNote,
 )
-from hope.apps.household.models import (
+from models.household import (
     FEMALE,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -65,9 +65,9 @@ from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

@@ -16,11 +16,11 @@ from import_export.admin import ImportExportModelAdmin
 from hope.admin.account_filters import IncompatibleRoleFilter, PermissionFilter
 from hope.admin.account_forms import RoleAdminForm
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account import models as account_models
+from models import account as account_models
 from hope.apps.account.permissions import Permissions
 
 if TYPE_CHECKING:
-    from uuid import UUID
+    pass
 
 logger = logging.getLogger(__name__)
 

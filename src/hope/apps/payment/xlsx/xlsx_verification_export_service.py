@@ -9,13 +9,13 @@ from django.core.files import File
 from django.urls import reverse
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from hope.apps.core.models import FileTemp
+from models.core import FileTemp
 from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    pass
 
 logger = logging.getLogger(__name__)
 

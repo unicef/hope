@@ -10,8 +10,8 @@ from flaky import flaky
 from webtest import Upload
 
 from hope.admin.geo import AreaAdmin
-from hope.apps.account.models import Partner, User
-from hope.apps.geo.models import Area, AreaType
+from models.account import Partner, User
+from models.geo import Area, AreaType
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

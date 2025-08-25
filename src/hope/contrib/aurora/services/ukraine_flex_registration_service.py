@@ -9,9 +9,9 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hope.apps.geo.models import Area, Country
+from models.geo import Area, Country
 from hope.apps.household.forms import DocumentForm, IndividualForm
-from hope.apps.household.models import (
+from models.household import (
     BLANK,
     DISABLED,
     HEAD,
@@ -30,15 +30,13 @@ from hope.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
-    from hope.apps.account.models import Role
+    pass
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):

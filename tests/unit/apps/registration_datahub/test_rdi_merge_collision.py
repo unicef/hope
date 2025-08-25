@@ -8,10 +8,10 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import MALE, Household, Individual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.geo import Area, AreaType, Country
+from models.household import MALE, Household, Individual
+from models.program import Program
+from models.registration_data import RegistrationDataImport
 
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),

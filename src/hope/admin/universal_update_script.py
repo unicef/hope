@@ -16,7 +16,7 @@ from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
-from hope.apps.universal_update_script.models import DocumentType, UniversalUpdate
+from models.universal_update_script import DocumentType, UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
     get_individual_flex_fields,

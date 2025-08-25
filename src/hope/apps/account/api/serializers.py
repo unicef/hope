@@ -6,7 +6,7 @@ from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hope.apps.account.models import (
+from models.account import (
     USER_STATUS_CHOICES,
     Partner,
     Role,
@@ -14,10 +14,10 @@ from hope.apps.account.models import (
     User,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
-from hope.apps.program.models import Program
+from models.program import Program
 
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):

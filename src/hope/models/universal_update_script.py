@@ -2,10 +2,10 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
 
-from hope.apps.household.models import DocumentType
+from models.household import DocumentType
 from hope.apps.payment.models import AccountType
-from hope.apps.program.models import Program
-from hope.apps.utils.models import CeleryEnabledModel, TimeStampedModel
+from models.program import Program
+from models.utils import CeleryEnabledModel, TimeStampedModel
 
 
 class UniversalUpdate(

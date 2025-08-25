@@ -7,7 +7,7 @@ from responses import RequestsMock
 from hope.apps.core.celery import app
 
 if TYPE_CHECKING:
-    from hope.apps.sanction_list.models import SanctionList
+    pass
 
 
 @pytest.fixture

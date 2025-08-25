@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from django.db import transaction
 
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import Household
+from models.household import Household
 
 
 class HouseholdWithdraw:

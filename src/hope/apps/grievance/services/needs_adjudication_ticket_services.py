@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Sequence
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
+from models.activity_log import log_create
+from models.core import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
@@ -20,8 +20,8 @@ from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
 )
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Household, Individual
-from hope.apps.registration_data.models import (
+from models.household import UNIQUE, UNIQUE_IN_BATCH, Household, Individual
+from models.registration_data import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,
 )
@@ -31,7 +31,7 @@ from hope.apps.utils.elasticsearch_utils import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +209,7 @@ def create_needs_adjudication_tickets(
     issue_type: int,
     registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
-    from hope.apps.household.models import Individual
+    from models.household import Individual
 
     if not individuals_queryset:
         return

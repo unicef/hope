@@ -14,9 +14,9 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, FileTemp
+from models.core import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import (
+from models.household import (
     ROLE_PRIMARY,
     Individual,
     IndividualRoleInHousehold,
@@ -46,8 +46,8 @@ from hope.apps.payment.models import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.targeting.models import (
+from models.program import Program, ProgramCycle
+from models.targeting import (
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
@@ -56,12 +56,8 @@ from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 
 if TYPE_CHECKING:  # pragma: no cover
-    from uuid import UUID
 
-    from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import AbstractUser, User
+    pass
 
 
 class PaymentPlanService:

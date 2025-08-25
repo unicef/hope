@@ -35,9 +35,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from models.core import FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import to_choice_object
-from hope.apps.household.models import (
+from models.household import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -71,9 +71,9 @@ from hope.apps.household.models import (
 )
 from hope.apps.payment.models import AccountType, FinancialInstitution
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

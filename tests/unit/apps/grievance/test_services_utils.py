@@ -29,9 +29,9 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.apps.account.models import AdminAreaLimitedTo
-from hope.apps.core.models import BusinessArea
-from hope.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
+from models.account import AdminAreaLimitedTo
+from models.core import BusinessArea
+from models.core import FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -49,14 +49,14 @@ from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
-from hope.apps.household.models import (
+from models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
     IndividualRoleInHousehold,
 )
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hope.apps.utils.models import MergeStatusModel
+from models.registration_data import DeduplicationEngineSimilarityPair
+from models.utils import MergeStatusModel
 
 
 class FlexibleAttribute:

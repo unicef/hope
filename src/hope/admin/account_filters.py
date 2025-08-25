@@ -7,9 +7,9 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
-from hope.apps.account import models as account_models
+from models import account as account_models
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 
 logger = logging.getLogger(__name__)
 

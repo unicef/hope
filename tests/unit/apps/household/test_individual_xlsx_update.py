@@ -10,8 +10,8 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import (
+from models.core import BusinessArea
+from models.household import (
     FEMALE,
     HEAD,
     MALE,

@@ -8,13 +8,13 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hope.apps.core.kobo.common import get_field_name
-from hope.apps.household.models import (
+from models.household import (
     ROLE_PRIMARY,
     Household,
     Individual,
     IndividualRoleInHousehold,
 )
-from hope.apps.program.models import Program
+from models.program import Program
 
 
 def post_process_dedupe_results(record: Any) -> None:

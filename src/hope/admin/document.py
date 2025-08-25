@@ -14,7 +14,7 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.core.utils import AutoCompleteFilterTemp
-from hope.apps.household.models import FOSTER_CHILD, Document, DocumentType, Individual
+from models.household import FOSTER_CHILD, Document, DocumentType, Individual
 
 logger = logging.getLogger(__name__)
 

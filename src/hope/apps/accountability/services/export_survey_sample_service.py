@@ -8,9 +8,9 @@ from django.core.files.temp import NamedTemporaryFile
 from django.urls import reverse
 from openpyxl.utils import get_column_letter
 
-from hope.apps.accountability.models import Survey
+from models.accountability import Survey
 from hope.apps.core.utils import encode_id_base64
-from hope.apps.household.models import Household
+from models.household import Household
 
 logger = logging.getLogger(__name__)
 

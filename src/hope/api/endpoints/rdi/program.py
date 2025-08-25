@@ -13,11 +13,10 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hope.api.models import Grant
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.program.models import Program
+from models.program import Program
 
 if TYPE_CHECKING:
-    from rest_framework.request import Request
-    from rest_framework.serializers import BaseSerializer
+    pass
 
 
 class ProgramAPISerializer(serializers.ModelSerializer):

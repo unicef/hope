@@ -28,13 +28,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
-    from django.db.models import Model, QuerySet
     from django.http import HttpHeaders
-    from openpyxl.cell import Cell
-    from openpyxl.worksheet.worksheet import Worksheet
-
-    from hope.apps.account.models import User
-
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +198,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             },
         }
     """
-    from hope.apps.core.models import FlexibleAttribute
+    from models.core import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
@@ -611,8 +605,8 @@ def chart_permission_decorator(chart_resolve: Callable | None = None, permission
 
     @functools.wraps(chart_resolve)
     def resolve_f(*args: Any, **kwargs: Any) -> Any:
-        from hope.apps.core.models import BusinessArea
-        from hope.apps.program.models import Program
+        from models.core import BusinessArea
+        from models.program import Program
 
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
@@ -669,7 +663,7 @@ def chart_create_filter_query_for_payment_verification_gfk(
 
 
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
-    from hope.apps.core.models import FlexibleAttribute
+    from models.core import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: dict = {**parent.flex_fields}
@@ -754,7 +748,7 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
     excluded_individuals_ids_array = [
         excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
     ]
-    from hope.apps.household.models import Household
+    from models.household import Household
 
     excluded_household_ids_from_individuals_array = Household.objects.filter(
         individuals__unicef_id__in=excluded_individuals_ids_array
@@ -926,7 +920,7 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
-    from hope.apps.core.models import BusinessArea
+    from models.core import BusinessArea
 
     try:
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
@@ -950,8 +944,8 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.apps.core.models import FlexibleAttribute
-    from hope.apps.program.models import Program
+    from models.core import FlexibleAttribute
+    from models.program import Program
 
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(

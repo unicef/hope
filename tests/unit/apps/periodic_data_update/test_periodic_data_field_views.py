@@ -20,7 +20,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import PeriodicFieldData
+from models.core import PeriodicFieldData
 
 pytestmark = pytest.mark.django_db()
 

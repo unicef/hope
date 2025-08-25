@@ -7,7 +7,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.household.models import Document, Household, Individual
+from models.household import Document, Household, Individual
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 

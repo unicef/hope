@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from hope.apps.accountability.models import (
+from models.accountability import (
     Feedback,
     FeedbackMessage,
     Message,
@@ -11,7 +11,7 @@ from hope.apps.accountability.models import (
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
 from hope.apps.household.api.serializers.household import HouseholdSmallSerializer
-from hope.apps.household.models import Household
+from models.household import Household
 from hope.apps.payment.api.serializers import (
     FollowUpPaymentPlanSerializer,
     FullListSerializer,
@@ -21,7 +21,7 @@ from hope.apps.payment.models import PaymentPlan
 from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):

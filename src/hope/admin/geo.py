@@ -17,14 +17,10 @@ from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.geo.models import Area, AreaType, Country
+from models.geo import Area, AreaType, Country
 
 if TYPE_CHECKING:
-    from django.http import (
-        HttpRequest,
-        HttpResponsePermanentRedirect,
-        HttpResponseRedirect,
-    )
+    pass
 
 logger = logging.getLogger(__name__)
 

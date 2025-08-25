@@ -18,8 +18,8 @@ from hope.api.endpoints.rdi.upload import (
     DocumentSerializer,
 )
 from hope.api.models import Grant
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from models.geo import Area, Country
+from models.household import (
     BLANK,
     DATA_SHARING_CHOICES,
     HEAD,
@@ -30,10 +30,10 @@ from hope.apps.household.models import (
     PendingIndividual,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.registration_data import RegistrationDataImport
 
 if TYPE_CHECKING:
-    from rest_framework.request import Request
+    pass
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),

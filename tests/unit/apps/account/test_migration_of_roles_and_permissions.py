@@ -12,9 +12,9 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.account.models import AdminAreaLimitedTo, Partner, Role, RoleAssignment
-from hope.apps.core.models import BusinessAreaPartnerThrough
-from hope.apps.program.models import ProgramPartnerThrough
+from models.account import AdminAreaLimitedTo, Partner, Role, RoleAssignment
+from models.core import BusinessAreaPartnerThrough
+from models.program import ProgramPartnerThrough
 
 data_migration = import_module("hope.apps.account.migrations.0011_migration")
 

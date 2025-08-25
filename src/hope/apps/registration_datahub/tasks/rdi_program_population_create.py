@@ -2,9 +2,9 @@ import logging
 
 from django.db import transaction
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.activity_log import log_create
+from models.core import BusinessArea
+from models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.import_program_population import (
     import_program_population,

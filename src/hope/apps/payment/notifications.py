@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.apps.account.models import RoleAssignment, User
+from models.account import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import PaymentPlan

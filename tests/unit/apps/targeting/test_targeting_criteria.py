@@ -14,10 +14,10 @@ from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from flaky import flaky
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import Household, Individual
+from models.core import BusinessArea
+from models.household import Household, Individual
 from hope.apps.payment.models import PaymentPlan
-from hope.apps.targeting.models import (
+from models.targeting import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,

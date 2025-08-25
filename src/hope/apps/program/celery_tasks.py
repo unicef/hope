@@ -2,7 +2,7 @@ from hope.apps.core.celery import app
 from hope.apps.periodic_data_update.utils import (
     populate_pdu_new_rounds_with_null_values,
 )
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.apps.program.signals import program_copied
 from hope.apps.program.utils import copy_program_related_data
 from hope.apps.utils.logs import log_start_and_end

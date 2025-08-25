@@ -8,12 +8,12 @@ from django.utils import timezone
 from extras.test_utils.factories.core import create_afghanistan
 from strategy_field.utils import fqn
 
-from hope.apps.sanction_list.models import SanctionList, SanctionListIndividual
+from models.sanction_list import SanctionListIndividual
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    pass
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

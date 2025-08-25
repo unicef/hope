@@ -12,10 +12,7 @@ from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import AbstractUser, User
-    from hope.apps.program.models import Program
+    pass
 
 
 class LogEntry(models.Model):

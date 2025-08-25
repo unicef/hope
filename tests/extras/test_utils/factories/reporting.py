@@ -7,7 +7,7 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.reporting.models import DashboardReport, Report
 
 

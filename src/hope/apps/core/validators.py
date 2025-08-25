@@ -19,14 +19,14 @@ from hope.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hope.apps.core.utils import xlrd_rows_iterator
-from hope.apps.household.models import (
+from models.household import (
     BLANK,
     NOT_PROVIDED,
     RELATIONSHIP_UNKNOWN,
 )
 
 if TYPE_CHECKING:
-    from openpyxl.worksheet.worksheet import Worksheet
+    pass
 
 
 logger = logging.getLogger(__name__)

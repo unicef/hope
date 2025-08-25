@@ -3,7 +3,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.contrib.vision.models import FundsCommitment
 
 fake = Faker()

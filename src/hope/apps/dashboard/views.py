@@ -13,9 +13,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from hope.apps.account.models import RoleAssignment
+from models.account import RoleAssignment
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.dashboard.celery_tasks import generate_dash_report_task
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,

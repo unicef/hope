@@ -29,9 +29,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FlexibleAttribute
+from models.core import FlexibleAttribute
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
-from hope.apps.household.models import (
+from models.household import (
     DUPLICATE,
     HOST,
     REFUGEE,
@@ -42,9 +42,9 @@ from hope.apps.household.models import (
     Household,
 )
 from hope.apps.payment.models import Payment
-from hope.apps.program.models import Program
+from models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

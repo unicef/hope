@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.forms import Form, ModelForm
+from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -27,14 +27,14 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account.models import User
+from models.account import User
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.steficon.forms import (
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
     RuleForm,
 )
-from hope.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
+from models.steficon import MONITORED_FIELDS, Rule, RuleCommit
 from hope.apps.utils.security import is_root
 
 from .steficon import TestRuleMixin

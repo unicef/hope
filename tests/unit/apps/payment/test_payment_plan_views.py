@@ -37,7 +37,7 @@ from rest_framework.reverse import reverse
 from test_utils.factories.household import create_household_and_individuals
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FileTemp
+from models.core import FileTemp
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hope.apps.payment.models import (
     Approval,
@@ -46,8 +46,8 @@ from hope.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.steficon.models import Rule
+from models.program import Program, ProgramCycle
+from models.steficon import Rule
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db()

@@ -19,16 +19,16 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from unit.api.base import HOPEApiTestCase
 
-from hope.apps.account.models import Role, RoleAssignment
+from models.account import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
+from models.household import Household, Individual
+from models.program import Program
+from models.registration_data import (
     ImportData,
     KoboImportData,
     RegistrationDataImport,
 )
-from hope.apps.sanction_list.models import SanctionList
+from models.sanction_list import SanctionList
 
 
 class RegistrationDataImportViewSetTest(HOPEApiTestCase):

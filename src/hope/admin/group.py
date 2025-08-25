@@ -21,7 +21,7 @@ from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
 from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
-from hope.apps.account import models as account_models
+from models import account as account_models
 
 logger = logging.getLogger(__name__)
 

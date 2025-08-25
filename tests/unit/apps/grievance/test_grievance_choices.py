@@ -11,7 +11,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import DocumentType
+from models.household import DocumentType
 
 pytestmark = pytest.mark.django_db()
 

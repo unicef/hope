@@ -14,8 +14,8 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hope.apps.household.models import (
+from models.core import FlexibleAttribute, PeriodicFieldData
+from models.household import (
     FEMALE,
     MALE,
     ROLE_PRIMARY,
@@ -24,14 +24,14 @@ from hope.apps.household.models import (
 )
 from hope.apps.payment.models import AccountType
 from hope.apps.targeting.choices import FlexFieldClassification
-from hope.apps.targeting.models import (
+from models.targeting import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 
 class TestIndividualBlockFilter(TestCase):

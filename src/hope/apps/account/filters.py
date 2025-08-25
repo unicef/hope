@@ -5,16 +5,12 @@ from django.db.models import Q
 from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
-from hope.apps.account.models import USER_STATUS_CHOICES, Partner, Role
+from models.account import USER_STATUS_CHOICES, Partner, Role
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.apps.program.models import Program
+from models.program import Program
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
-    from django.db.models.query import QuerySet
-
-    from hope.apps.account.models import User
+    pass
 
 
 class UsersFilter(FilterSet):

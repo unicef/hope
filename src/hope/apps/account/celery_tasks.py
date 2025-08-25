@@ -5,7 +5,7 @@ from typing import Any
 from django.db.models import Q
 from django.utils import timezone
 
-from hope.apps.account.models import User
+from models.account import User
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end

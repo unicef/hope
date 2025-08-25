@@ -19,7 +19,7 @@ from hope.apps.account.api.serializers import (
     UserSerializer,
 )
 from hope.apps.account.filters import UsersFilter
-from hope.apps.account.models import Partner, User
+from hope.models.account import Partner, User
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -28,13 +28,13 @@ from hope.apps.core.api.mixins import (
     PermissionActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import to_choice_object
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
+from models.household import Household, Individual
+from models.program import Program
 
 if TYPE_CHECKING:
-    from rest_framework.request import Request
+    pass
 
 
 class UserViewSet(

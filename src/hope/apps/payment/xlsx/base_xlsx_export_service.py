@@ -13,9 +13,7 @@ from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 from hope.apps.core.utils import encode_id_base64
 
 if TYPE_CHECKING:
-    from openpyxl.worksheet.worksheet import Worksheet
-
-    from hope.apps.account.models import User
+    pass
 
 
 logger = logging.getLogger(__name__)

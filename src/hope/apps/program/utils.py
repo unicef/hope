@@ -5,11 +5,11 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.geo.models import Area
+from models.account import AdminAreaLimitedTo, Partner, RoleAssignment, User
+from models.core import FlexibleAttribute
+from models.geo import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from models.household import (
     ROLE_PRIMARY,
     Document,
     EntitlementCard,
@@ -22,10 +22,10 @@ from hope.apps.household.models import (
 )
 from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.program import Program, ProgramCycle
+from models.registration_data import RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import populate_index
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 
 def copy_program_object(copy_from_program_id: str, program_data: dict, user: User) -> Program:

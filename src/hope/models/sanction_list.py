@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, Any
 from django.db import models
 from strategy_field.fields import StrategyField
 
-from hope.apps.utils.models import TimeStampedModel, TimeStampedUUIDModel
+from models.utils import TimeStampedModel, TimeStampedUUIDModel
 
-from .strategies import registry
+from apps.sanction_list.strategies import registry
 
 if TYPE_CHECKING:
-    from .strategies._base import BaseSanctionList
+    from apps.sanction_list.strategies._base import BaseSanctionList
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):

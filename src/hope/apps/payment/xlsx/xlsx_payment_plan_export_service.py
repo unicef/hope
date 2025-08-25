@@ -6,7 +6,7 @@ import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
-from hope.apps.core.models import FileTemp
+from models.core import FileTemp
 from hope.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -18,7 +18,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    pass
 
 logger = logging.getLogger(__name__)
 

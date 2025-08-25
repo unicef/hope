@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
 from hope.api.models import APIToken
-from hope.apps.account.models import User
+from models.account import User
 
 
 class HOPEAuthentication(TokenAuthentication):

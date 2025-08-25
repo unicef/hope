@@ -31,13 +31,13 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
+from models.account import User
+from models.core import BusinessArea, DataCollectingType
+from models.geo import Area
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.household.models import HOST, Household, Individual
+from models.household import HOST, Household, Individual
 from hope.apps.payment.models import Payment
-from hope.apps.program.models import BeneficiaryGroup, Program
+from models.program import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 

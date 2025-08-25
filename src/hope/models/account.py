@@ -27,11 +27,11 @@ from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.account.permissions import Permissions
 from hope.apps.account.utils import test_conditional
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.visibility_backends import VisibilityBackend
-from hope.apps.geo.models import Area
+from models.geo import Area
 from hope.apps.utils.mailjet import MailjetClient
-from hope.apps.utils.models import TimeStampedUUIDModel
+from models.utils import TimeStampedUUIDModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         return not self.is_unicef and not self.is_default
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> list[str]:
-        from hope.apps.program.models import Program
+        from models.program import Program
 
         if not hasattr(self, "_program_ids_for_business_area_cache"):
             self._program_ids_for_business_area_cache = {}
@@ -134,7 +134,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
         """Return list of program ids that the partner has permissions for in the given business area."""
-        from hope.apps.program.models import Program
+        from models.program import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
 
@@ -186,7 +186,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> list[str]:
         """Return list of program ids that the user (or user's partner) has access to in the given business area."""
-        from hope.apps.program.models import Program
+        from models.program import Program
 
         if not hasattr(self, "_program_ids_for_business_area_cache"):
             self._program_ids_for_business_area_cache = {}
@@ -219,7 +219,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
         """Return list of program ids that the user (or user's partner) has permissions for in the given business area."""
-        from hope.apps.program.models import Program
+        from models.program import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
 

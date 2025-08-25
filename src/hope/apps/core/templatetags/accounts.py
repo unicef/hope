@@ -10,9 +10,7 @@ register = template.Library()
 
 
 if TYPE_CHECKING:
-    from django.http import HttpRequest
-
-    from hope.apps.account.models import User
+    pass
 
 
 @register.simple_tag()

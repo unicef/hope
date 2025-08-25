@@ -4,19 +4,16 @@ import re
 import sys
 from pathlib import Path
 from time import sleep
-from typing import Any
 
-import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 
-from hope.apps.account.models import Partner, Role
+from models.account import Partner, Role
 
 
 @pytest.fixture(autouse=True)

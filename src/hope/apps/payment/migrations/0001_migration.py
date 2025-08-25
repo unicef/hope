@@ -5,7 +5,6 @@ from decimal import Decimal
 
 import concurrency.fields
 import django.contrib.postgres.fields
-import django.contrib.postgres.fields.ranges
 import django.contrib.postgres.validators
 import django.core.validators
 import django.db.models.deletion
@@ -14,13 +13,12 @@ import model_utils.fields
 import multiselectfield.db.fields
 import psycopg2.extras
 from django.conf import settings
-from django.db import migrations, models
+from django.db import migrations
 
-import hope.apps.account.models
 import hope.apps.payment.fields
 import hope.apps.payment.models
 import hope.apps.payment.validators
-import hope.apps.utils.models
+import models.utils
 
 
 class Migration(migrations.Migration):
@@ -235,7 +233,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Cash Plan",
                 "ordering": ["created_at"],
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(models.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="DeliveryMechanism",
@@ -773,7 +771,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(models.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="PaymentPlan",
@@ -1249,7 +1247,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Payment Plan",
                 "ordering": ["created_at"],
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentPlanSplit",
@@ -1468,7 +1466,7 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ("created_at",),
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentVerification",
@@ -1529,7 +1527,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentRecord",
@@ -1725,7 +1723,7 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(models.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="PaymentPlanSupportingDocument",

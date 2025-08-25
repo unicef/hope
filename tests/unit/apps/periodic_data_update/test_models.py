@@ -7,8 +7,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.core.models import BusinessArea, FlexibleAttribute
-from hope.apps.program.models import Program
+from models.core import BusinessArea, FlexibleAttribute
+from models.program import Program
 
 
 class TestFlexibleAttribute(TransactionTestCase):

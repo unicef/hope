@@ -16,7 +16,7 @@ from django.utils.translation import get_language
 
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.steficon.forms import RuleTestForm
-from hope.apps.steficon.models import Rule, RuleCommit
+from models.steficon import Rule, RuleCommit
 
 logger = logging.getLogger(__name__)
 

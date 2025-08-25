@@ -2,7 +2,7 @@ from django.urls import reverse
 from django_webtest import WebTest
 from extras.test_utils.factories.account import UserFactory
 
-from hope.apps.account.models import Role, User
+from models.account import Role, User
 
 
 class RoleTest(WebTest):

@@ -10,9 +10,9 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from faker import Faker
 
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.household.models import (
+from models.account import User
+from models.core import BusinessArea, DataCollectingType
+from models.household import (
     MALE,
     ROLE_PRIMARY,
     Household,
@@ -22,14 +22,14 @@ from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.steficon.models import Rule
-from hope.apps.targeting.models import (
+from models.program import Program
+from models.registration_data import RegistrationDataImport
+from models.steficon import Rule
+from models.targeting import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 faker = Faker()
 

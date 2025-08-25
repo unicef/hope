@@ -20,7 +20,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_ONE,
     TYPE_STRING,
 )
-from hope.apps.core.models import (
+from models.core import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,

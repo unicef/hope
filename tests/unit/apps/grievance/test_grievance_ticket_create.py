@@ -14,9 +14,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
+from models import geo as geo_models
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -26,7 +26,7 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.household.models import (
+from models.household import (
     FEMALE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -39,8 +39,8 @@ from hope.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )
-from hope.apps.program.models import Program
-from hope.apps.utils.models import MergeStatusModel
+from models.program import Program
+from models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

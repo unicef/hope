@@ -32,11 +32,11 @@ from extras.test_utils.factories.targeting import (
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hope.apps.account.models import User
+from models.account import User
 from hope.apps.core.currencies import CURRENCY_CHOICES
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
-from hope.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
+from models.core import BusinessArea, DataCollectingType
+from models.geo import Area
+from models.household import MALE, ROLE_PRIMARY, Household, Individual
 from hope.apps.payment.models import (
     Account,
     AccountType,
@@ -57,12 +57,12 @@ from hope.apps.payment.models import (
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
-from hope.apps.program.models import Program
-from hope.apps.targeting.models import (
+from models.program import Program
+from models.targeting import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
-from hope.apps.utils.models import MergeStatusModel
+from models.utils import MergeStatusModel
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:

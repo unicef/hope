@@ -76,11 +76,11 @@ from pytest_html_reporter import attach
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
+from models.account import Partner, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Country
-from hope.apps.household.models import DocumentType
+from models.core import BusinessArea, DataCollectingType
+from models.geo import Country
+from models.household import DocumentType
 from hope.config.env import env
 
 

@@ -1,4 +1,4 @@
-from hope.apps.household.models import (
+from models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_ELECTORAL_CARD,

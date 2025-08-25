@@ -10,10 +10,10 @@ from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
-from hope.apps.account import models as account_models
-from hope.apps.account.models import Partner, Role
+from models import account as account_models
+from models.account import Partner, Role
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 
 logger = logging.getLogger(__name__)
 

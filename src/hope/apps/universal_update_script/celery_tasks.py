@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 
 from hope.apps.core.celery import app
-from hope.apps.universal_update_script.models import UniversalUpdate
+from models.universal_update_script import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
 )

@@ -7,10 +7,10 @@ from django.db import transaction
 from django.utils import timezone
 
 from hope.apps.core.celery import app
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import Document, Household
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from models.core import BusinessArea
+from models.household import Document, Household
+from models.program import Program
+from models.registration_data import RegistrationDataImport
 from hope.apps.registration_datahub.exceptions import (
     AlreadyRunningError,
     WrongStatusError,
@@ -23,9 +23,7 @@ from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
-    from django.db.models import QuerySet
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +67,7 @@ def registration_xlsx_import_task(
     program_id: "UUID",
 ) -> bool:
     try:
-        from hope.apps.program.models import Program
+        from models.program import Program
         from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
@@ -174,7 +172,7 @@ def registration_kobo_import_task(
     program_id: "UUID",
 ) -> None:
     try:
-        from hope.apps.core.models import BusinessArea
+        from models.core import BusinessArea
         from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
@@ -200,7 +198,7 @@ def registration_kobo_import_task(
 @sentry_tags
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
-        from hope.apps.core.models import BusinessArea
+        from models.core import BusinessArea
         from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
@@ -229,7 +227,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 @sentry_tags
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
-        from hope.apps.core.models import BusinessArea
+        from models.core import BusinessArea
         from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
@@ -263,7 +261,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
         if not locked:
             return True  # pragma: no cover
         try:
-            from hope.apps.registration_data.models import RegistrationDataImport
+            from models.registration_data import RegistrationDataImport
             from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -276,7 +274,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
             RdiMergeTask().execute(registration_data_import_id)
         except Exception as e:
             logger.exception(e)
-            from hope.apps.registration_data.models import RegistrationDataImport
+            from models.registration_data import RegistrationDataImport
 
             RegistrationDataImport.objects.filter(
                 id=registration_data_import_id,
@@ -312,7 +310,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> dict:
-    from hope.apps.registration_data.models import KoboImportData
+    from models.registration_data import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
@@ -334,8 +332,8 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
 @log_start_and_end
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> dict:
-    from hope.apps.program.models import Program
-    from hope.apps.registration_data.models import ImportData
+    from models.program import Program
+    from models.registration_data import ImportData
     from hope.apps.registration_datahub.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )

@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.query import QuerySet
 
-from hope.apps.core.models import BusinessArea
+from models.core import BusinessArea
 
 
 class LimitBusinessAreaModelQuerySet(QuerySet):
