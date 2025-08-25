@@ -7,11 +7,15 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
-import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
+import {
+  periodicDataUpdatesOnlineEditsStatusToColor,
+  showApiErrorMessages,
+} from '@utils/utils';
 import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -67,13 +71,11 @@ const pendingHeadCells: HeadCell<any>[] = [
 ];
 
 const PeriodicDataUpdatePendingForMerge = () => {
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
-  const handleMerge = () => {
-    // TODO: Implement merge logic for selected rows
-    alert(`Merged template IDs: ${selected.join(', ')}`);
-  };
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
@@ -81,6 +83,50 @@ const PeriodicDataUpdatePendingForMerge = () => {
     status: ['APPROVED' as const],
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const { mutateAsync: bulkMerge } = useMutation({
+    mutationFn: (ids: number[]) => {
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+          requestBody: { ids },
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage('Templates merged successfully.');
+      setSelected([]);
+      queryClient.invalidateQueries({
+        queryKey: [
+          'periodicDataUpdatePendingForMerge',
+          queryVariables,
+          businessAreaSlug,
+          programId,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'mergedPeriodicDataUpdates',
+          {
+            ordering: 'created_at',
+            businessAreaSlug,
+            programSlug: programId,
+            status: ['MERGED' as const],
+          },
+          businessAreaSlug,
+          programId,
+        ],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
+  const handleMerge = async () => {
+    const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
+    await bulkMerge(ids);
+  };
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
@@ -127,10 +173,13 @@ const PeriodicDataUpdatePendingForMerge = () => {
       }
       style={{ cursor: 'pointer' }}
     >
-      <TableCell padding="checkbox">
+      <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
         <Checkbox
           checked={selected.includes(row.id)}
-          onChange={() => handleSelectOne(row.id)}
+          onChange={(e) => {
+            e.stopPropagation();
+            handleSelectOne(row.id);
+          }}
           slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
         />
       </TableCell>

@@ -7,12 +7,16 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
-import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
+import {
+  periodicDataUpdatesOnlineEditsStatusToColor,
+  showApiErrorMessages,
+} from '@utils/utils';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -68,15 +72,13 @@ const pendingHeadCells: HeadCell<any>[] = [
 ];
 
 const PeriodicDataUpdatePendingForApproval = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
+
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
-  const handleApprove = () => {
-    // TODO: Implement approve logic for selected rows
-    // Example: console.log('Approve', selected);
-    alert(`Approved template IDs: ${selected.join(', ')}`);
-  };
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
@@ -84,6 +86,51 @@ const PeriodicDataUpdatePendingForApproval = () => {
     status: ['READY' as const],
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const { mutateAsync: bulkApprove } = useMutation({
+    mutationFn: (ids: number[]) => {
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+          requestBody: { ids },
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage(t('Templates approved successfully.'));
+      setSelected([]);
+      queryClient.invalidateQueries({
+        queryKey: [
+          'periodicDataUpdatePendingForApproval',
+          queryVariables,
+          businessAreaSlug,
+          programId,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'periodicDataUpdatePendingForMerge',
+          {
+            ordering: 'created_at',
+            businessAreaSlug,
+            programSlug: programId,
+            status: ['APPROVED' as const],
+          },
+          businessAreaSlug,
+          programId,
+        ],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
+  const handleApprove = async () => {
+    const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
+    await bulkApprove(ids);
+  };
+  // ...existing code...
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
@@ -134,6 +181,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
         <Checkbox
           checked={selected.includes(row.id)}
           onChange={() => handleSelectOne(row.id)}
+          onClick={(e) => e.stopPropagation()}
           slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
         />
       </TableCell>
