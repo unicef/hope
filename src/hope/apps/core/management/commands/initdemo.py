@@ -37,7 +37,8 @@ This command initializes demo data for the application by performing the followi
 
 - Initialize demo data and add specific staff and tester users:
   ```bash
-  python manage.py initdemo --email-list="admin@example.com,user@example.com" --tester-list="tester1@example.com,tester2@example.com"
+  python manage.py initdemo --email-list="admin@example.com,user@example.com"
+   --tester-list="tester1@example.com,tester2@example.com"
   ```
 
 **Environment Variables**:

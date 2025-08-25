@@ -35,7 +35,7 @@ from hope.contrib.aurora.services.nigeria_people_registration_service import (
 class TestNigeriaPeopleRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         generate_delivery_mechanisms()
         country = geo_models.Country.objects.create(name="Nigeria")
         area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)

@@ -180,11 +180,11 @@ def filter_based_on_partner_areas_2(
         if not programs_for_business_area:
             return queryset.model.objects.none()
 
-        for program_id in programs_for_business_area:
-            program_q = Q(**{lookup_id: id_container(program_id)})
+        for prog_id in programs_for_business_area:
+            program_q = Q(**{lookup_id: id_container(prog_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
             # apply admin area limits if partner has restrictions
-            area_limits = user.partner.get_area_limits_for_program(program_id)
+            area_limits = user.partner.get_area_limits_for_program(prog_id)
             areas_query = Q(admin2__in=area_limits) if area_limits.exists() else Q()
 
             filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))

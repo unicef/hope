@@ -6,7 +6,7 @@ from django.conf import settings
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from e2e.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
+    RegistrationDataImport as RegistrationDataImportComponent,
 )
 from elasticsearch_dsl import connections
 from extras.test_utils.factories.account import PartnerFactory
@@ -21,7 +21,7 @@ from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area, AreaType, Country
 from hope.apps.program.models import BeneficiaryGroup, Program
 from hope.apps.registration_data.models import ImportData
-from hope.apps.registration_data.models import RegistrationDataImport as RDI
+from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.django_db()
@@ -56,7 +56,7 @@ def add_rdi() -> None:
     imported_by = User.objects.first()
     number_of_individuals = 9
     number_of_households = 3
-    status = RDI.IN_REVIEW
+    status = RegistrationDataImport.IN_REVIEW
 
     import_data = ImportData.objects.create(
         status=ImportData.STATUS_PENDING,
@@ -66,9 +66,9 @@ def add_rdi() -> None:
         number_of_households=number_of_households,
         created_by_id=imported_by.id if imported_by else None,
     )
-    RDI.objects.create(
+    RegistrationDataImport.objects.create(
         name="Test",
-        data_source=RDI.FLEX_REGISTRATION,
+        data_source=RegistrationDataImport.FLEX_REGISTRATION,
         imported_by=imported_by,
         number_of_individuals=number_of_individuals,
         number_of_households=number_of_households,
@@ -78,9 +78,9 @@ def add_rdi() -> None:
         import_data=import_data,
     )
 
-    RDI.objects.create(
+    RegistrationDataImport.objects.create(
         name="Test Other Status",
-        data_source=RDI.KOBO,
+        data_source=RegistrationDataImport.KOBO,
         imported_by=imported_by,
         number_of_individuals=number_of_individuals,
         number_of_households=number_of_households,
@@ -141,78 +141,88 @@ class TestSmokeRegistrationDataImport:
         self,
         create_programs: None,
         add_rdi: None,
-        pageRegistrationDataImport: RegistrationDataImport,
+        page_registration_data_import: RegistrationDataImportComponent,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
-        pageRegistrationDataImport.getNavRegistrationDataImport().click()
+        page_registration_data_import.select_global_program_filter("Test Programm")
+        page_registration_data_import.get_nav_registration_data_import().click()
         # Check Elements on Page
-        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
-        assert pageRegistrationDataImport.importText in pageRegistrationDataImport.getButtonImport().text
-        assert pageRegistrationDataImport.tableTitleText in pageRegistrationDataImport.getTableTitle().text
-        assert pageRegistrationDataImport.expectedRows(2)
-        assert "2" in pageRegistrationDataImport.getTableTitle().text
-        assert "Title" in pageRegistrationDataImport.getTableLabel()[0].text
-        assert "Status" in pageRegistrationDataImport.getTableLabel()[1].text
-        assert "Import Date" in pageRegistrationDataImport.getTableLabel()[2].text
-        assert "Num. of Items" in pageRegistrationDataImport.getTableLabel()[3].text
-        assert "Num. of Items Groups" in pageRegistrationDataImport.getTableLabel()[4].text
-        assert "Imported by" in pageRegistrationDataImport.getTableLabel()[5].text
-        assert "Data Source" in pageRegistrationDataImport.getTableLabel()[6].text
+        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        assert page_registration_data_import.import_text in page_registration_data_import.get_button_import().text
+        assert page_registration_data_import.table_title_text in page_registration_data_import.get_table_title().text
+        assert page_registration_data_import.expected_rows(2)
+        assert "2" in page_registration_data_import.get_table_title().text
+        assert "Title" in page_registration_data_import.get_table_label()[0].text
+        assert "Status" in page_registration_data_import.get_table_label()[1].text
+        assert "Import Date" in page_registration_data_import.get_table_label()[2].text
+        assert "Num. of Items" in page_registration_data_import.get_table_label()[3].text
+        assert "Num. of Items Groups" in page_registration_data_import.get_table_label()[4].text
+        assert "Imported by" in page_registration_data_import.get_table_label()[5].text
+        assert "Data Source" in page_registration_data_import.get_table_label()[6].text
 
     @pytest.mark.skip(reason="RDI import only possible though Program Population")
     def test_smoke_registration_data_import_select_file(
-        self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
+        self,
+        create_programs: None,
+        page_registration_data_import: RegistrationDataImportComponent,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
-        pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
-        pageRegistrationDataImport.getButtonImport().click()
+        page_registration_data_import.select_global_program_filter("Test Programm")
+        page_registration_data_import.get_nav_registration_data_import().click()
+        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.get_button_import().click()
         # Check Elements on Page
-        assert pageRegistrationDataImport.downloadTemplateText in pageRegistrationDataImport.getDownloadTemplate().text
-        assert pageRegistrationDataImport.importText in pageRegistrationDataImport.getButtonImportFile().text
-        assert not pageRegistrationDataImport.getButtonImportFile().is_enabled()
-        assert pageRegistrationDataImport.getButtonImportFile().get_property("disabled")
-        pageRegistrationDataImport.getImportTypeSelect().click()
-        assert pageRegistrationDataImport.koboItemText in pageRegistrationDataImport.getKoboItem().text
-        assert pageRegistrationDataImport.excelItemText in pageRegistrationDataImport.getExcelItem().text
-        pageRegistrationDataImport.getExcelItem().click()
-        pageRegistrationDataImport.getInputName()
+        assert (
+            page_registration_data_import.download_template_text
+            in page_registration_data_import.get_download_template().text
+        )
+        assert page_registration_data_import.import_text in page_registration_data_import.get_button_import_file().text
+        assert not page_registration_data_import.get_button_import_file().is_enabled()
+        assert page_registration_data_import.get_button_import_file().get_property("disabled")
+        page_registration_data_import.get_import_type_select().click()
+        assert page_registration_data_import.kobo_item_text in page_registration_data_import.get_kobo_item().text
+        assert page_registration_data_import.excel_item_text in page_registration_data_import.get_excel_item().text
+        page_registration_data_import.get_excel_item().click()
+        page_registration_data_import.get_input_name()
 
     def test_smoke_registration_data_details_page(
         self,
         create_programs: None,
         add_rdi: None,
-        pageRegistrationDataImport: RegistrationDataImport,
-        pageDetailsRegistrationDataImport: RDIDetailsPage,
+        page_registration_data_import: RegistrationDataImportComponent,
+        page_details_registration_data_import: RDIDetailsPage,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
-        pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert pageRegistrationDataImport.expectedRows(2)
-        assert "2" in pageRegistrationDataImport.getTableTitle().text
-        pageRegistrationDataImport.getRows()[0].click()
+        page_registration_data_import.select_global_program_filter("Test Programm")
+        page_registration_data_import.get_nav_registration_data_import().click()
+        assert page_registration_data_import.expected_rows(2)
+        assert "2" in page_registration_data_import.get_table_title().text
+        page_registration_data_import.get_rows()[0].click()
         # Check Elements on Details page
-        assert "Test Other Status" in pageDetailsRegistrationDataImport.getPageHeaderTitle().text
-        assert "IN REVIEW" in pageDetailsRegistrationDataImport.getLabelStatus().text
-        assert "KoBo" in pageDetailsRegistrationDataImport.getLabelSourceOfData().text
-        assert datetime.now().strftime("%-d %b %Y") in pageDetailsRegistrationDataImport.getLabelImportDate().text
-        pageDetailsRegistrationDataImport.getLabelImportedBy()
+        assert "Test Other Status" in page_details_registration_data_import.get_page_header_title().text
+        assert "IN REVIEW" in page_details_registration_data_import.get_label_status().text
+        assert "KoBo" in page_details_registration_data_import.get_label_source_of_data().text
+        assert (
+            datetime.now().strftime("%-d %b %Y") in page_details_registration_data_import.get_label_import_date().text
+        )
+        page_details_registration_data_import.get_label_imported_by()
         assert (
             "TOTAL NUMBER OF ITEMS GROUPS"
-            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
+            in page_details_registration_data_import.get_labelized_field_container_households().text
         )
-        assert "3" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
-        assert "TOTAL NUMBER OF ITEMS" in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
-        assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
+        assert "3" in page_details_registration_data_import.get_label_total_number_of_households().text
         assert (
-            pageDetailsRegistrationDataImport.buttonMergeRdiText
-            in pageDetailsRegistrationDataImport.getButtonMergeRdi().text
+            "TOTAL NUMBER OF ITEMS"
+            in page_details_registration_data_import.get_labelized_field_container_individuals().text
+        )
+        assert "9" in page_details_registration_data_import.get_label_total_number_of_individuals().text
+        assert (
+            page_details_registration_data_import.button_merge_rdi_text
+            in page_details_registration_data_import.get_button_merge_rdi().text
         )
         assert (
-            pageDetailsRegistrationDataImport.buttonRefuseRdiText
-            in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
+            page_details_registration_data_import.button_refuse_rdi_text
+            in page_details_registration_data_import.get_button_refuse_rdi().text
         )
 
 
@@ -226,44 +236,46 @@ class TestRegistrationDataImport:
         add_rdi: None,
         unhcr_partner: Partner,
         wfp_partner: Partner,
-        pageRegistrationDataImport: RegistrationDataImport,
-        pageDetailsRegistrationDataImport: RDIDetailsPage,
-        pageHouseholdsDetails: HouseholdsDetails,
+        page_registration_data_import: RegistrationDataImportComponent,
+        page_details_registration_data_import: RDIDetailsPage,
+        page_households_details: HouseholdsDetails,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
-        pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
-        pageRegistrationDataImport.getButtonImport().click()
-        pageRegistrationDataImport.getImportTypeSelect().click()
-        pageRegistrationDataImport.getExcelItem().click()
-        pageRegistrationDataImport.upload_file(f"{pytest.SELENIUM_PATH}/helpers/rdi_import_50_hh_50_ind.xlsx")
-        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled()
-        assert "50" in pageRegistrationDataImport.getNumberOfHouseholds().text
-        assert "208" in pageRegistrationDataImport.getNumberOfIndividuals().text
-        pageRegistrationDataImport.getButtonImportFile().click()
-        pageRegistrationDataImport.disappearButtonImportFile()
+        page_registration_data_import.select_global_program_filter("Test Programm")
+        page_registration_data_import.get_nav_registration_data_import().click()
+        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.get_button_import().click()
+        page_registration_data_import.get_import_type_select().click()
+        page_registration_data_import.get_excel_item().click()
+        page_registration_data_import.upload_file(f"{pytest.SELENIUM_PATH}/helpers/rdi_import_50_hh_50_ind.xlsx")
+        page_registration_data_import.get_input_name().send_keys("Test 1234 !")
+        assert page_registration_data_import.button_import_file_is_enabled()
+        assert "50" in page_registration_data_import.get_number_of_households().text
+        assert "208" in page_registration_data_import.get_number_of_individuals().text
+        page_registration_data_import.get_button_import_file().click()
+        page_registration_data_import.disappear_button_import_file()
 
-        pageDetailsRegistrationDataImport.waitForStatus("IN REVIEW")
-        assert "50" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
-        assert "208" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
-        pageDetailsRegistrationDataImport.element_clickable(pageDetailsRegistrationDataImport.buttonMergeRdi)
+        page_details_registration_data_import.wait_for_status("IN REVIEW")
+        assert "50" in page_details_registration_data_import.get_label_total_number_of_households().text
+        assert "208" in page_details_registration_data_import.get_label_total_number_of_individuals().text
+        page_details_registration_data_import.element_clickable(page_details_registration_data_import.button_merge_rdi)
         sleep(2)
-        pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
-        pageDetailsRegistrationDataImport.element_clickable(pageDetailsRegistrationDataImport.buttonMerge)
+        page_details_registration_data_import.get_button_merge_rdi().click()
+        page_details_registration_data_import.element_clickable(page_details_registration_data_import.button_merge)
         sleep(2)
-        pageDetailsRegistrationDataImport.getButtonMerge().click()
-        pageDetailsRegistrationDataImport.waitForStatus("MERGED")
-        pageDetailsRegistrationDataImport.wait_for_text("MERGED", pageDetailsRegistrationDataImport.statusContainer)
-        assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
-        pageDetailsRegistrationDataImport.getButtonIndividuals().click()
-        pageDetailsRegistrationDataImport.getButtonHouseholds().click()
-        hausehold_id = (
-            pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].text
+        page_details_registration_data_import.get_button_merge().click()
+        page_details_registration_data_import.wait_for_status("MERGED")
+        page_details_registration_data_import.wait_for_text(
+            "MERGED", page_details_registration_data_import.status_container
         )
-        pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].click()
-        assert hausehold_id in pageHouseholdsDetails.getPageHeaderTitle().text
+        assert "VIEW TICKETS" in page_details_registration_data_import.get_button_view_tickets().text
+        page_details_registration_data_import.get_button_individuals().click()
+        page_details_registration_data_import.get_button_households().click()
+        hausehold_id = (
+            page_details_registration_data_import.get_imported_households_row(0).find_elements("tag name", "td")[1].text
+        )
+        page_details_registration_data_import.get_imported_households_row(0).find_elements("tag name", "td")[1].click()
+        assert hausehold_id in page_households_details.get_page_header_title().text
 
     @pytest.mark.night
     @pytest.mark.skip(reason="Kobo form is not available. This is a external service, we cannot control it.")
@@ -272,29 +284,29 @@ class TestRegistrationDataImport:
         self,
         login: None,
         create_programs: None,
-        pageRegistrationDataImport: RegistrationDataImport,
+        page_registration_data_import: RegistrationDataImportComponent,
         kobo_setup: None,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
-        pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
-        pageRegistrationDataImport.getButtonImport().click()
+        page_registration_data_import.select_global_program_filter("Test Programm")
+        page_registration_data_import.get_nav_registration_data_import().click()
+        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.get_button_import().click()
         # Check Elements on Page
-        assert pageRegistrationDataImport.getButtonImportFile().get_property("disabled")
-        pageRegistrationDataImport.getImportTypeSelect().click()
-        assert pageRegistrationDataImport.koboItemText in pageRegistrationDataImport.getKoboItem().text
-        pageRegistrationDataImport.getKoboItem().click()
-        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
+        assert page_registration_data_import.get_button_import_file().get_property("disabled")
+        page_registration_data_import.get_import_type_select().click()
+        assert page_registration_data_import.kobo_item_text in page_registration_data_import.get_kobo_item().text
+        page_registration_data_import.get_kobo_item().click()
+        page_registration_data_import.get_input_name().send_keys("Test 1234 !")
 
-        pageRegistrationDataImport.getKoboProjectSelect().click()
-        pageRegistrationDataImport.select_listbox_element("Education new programme")
+        page_registration_data_import.get_kobo_project_select().click()
+        page_registration_data_import.select_listbox_element("Education new programme")
 
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
-        assert "0" in pageRegistrationDataImport.getNumberOfHouseholds().text
-        assert "0" in pageRegistrationDataImport.getNumberOfIndividuals().text
-        pageRegistrationDataImport.getButtonImportFile().click()
-        pageRegistrationDataImport.checkAlert("Cannot import empty form")
+        assert page_registration_data_import.button_import_file_is_enabled(timeout=300)
+        assert "0" in page_registration_data_import.get_number_of_households().text
+        assert "0" in page_registration_data_import.get_number_of_individuals().text
+        page_registration_data_import.get_button_import_file().click()
+        page_registration_data_import.check_alert("Cannot import empty form")
 
     @pytest.mark.night
     @pytest.mark.skip(reason="Kobo form is not available. This is a external service, we cannot control it.")
@@ -303,32 +315,32 @@ class TestRegistrationDataImport:
         self,
         login: None,
         create_programs: None,
-        pageRegistrationDataImport: RegistrationDataImport,
-        pageDetailsRegistrationDataImport: RDIDetailsPage,
+        page_registration_data_import: RegistrationDataImportComponent,
+        page_details_registration_data_import: RDIDetailsPage,
         kobo_setup: None,
         areas: None,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
-        pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
-        pageRegistrationDataImport.getButtonImport().click()
+        page_registration_data_import.select_global_program_filter("Test Programm")
+        page_registration_data_import.get_nav_registration_data_import().click()
+        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.get_button_import().click()
         # Check Elements on Page
-        assert pageRegistrationDataImport.getButtonImportFile().get_property("disabled")
-        pageRegistrationDataImport.getImportTypeSelect().click()
-        assert pageRegistrationDataImport.koboItemText in pageRegistrationDataImport.getKoboItem().text
-        pageRegistrationDataImport.getKoboItem().click()
-        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
+        assert page_registration_data_import.get_button_import_file().get_property("disabled")
+        page_registration_data_import.get_import_type_select().click()
+        assert page_registration_data_import.kobo_item_text in page_registration_data_import.get_kobo_item().text
+        page_registration_data_import.get_kobo_item().click()
+        page_registration_data_import.get_input_name().send_keys("Test 1234 !")
 
-        pageRegistrationDataImport.getKoboProjectSelect().click()
-        pageRegistrationDataImport.select_listbox_element("UNICEF NGA Education")
+        page_registration_data_import.get_kobo_project_select().click()
+        page_registration_data_import.select_listbox_element("UNICEF NGA Education")
 
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
-        assert "1" in pageRegistrationDataImport.getNumberOfHouseholds().text
-        assert "2" in pageRegistrationDataImport.getNumberOfIndividuals().text
+        assert page_registration_data_import.button_import_file_is_enabled(timeout=300)
+        assert "1" in page_registration_data_import.get_number_of_households().text
+        assert "2" in page_registration_data_import.get_number_of_individuals().text
 
-        pageRegistrationDataImport.getButtonImportFile().click()
-        pageRegistrationDataImport.disappearButtonImportFile()
-        pageDetailsRegistrationDataImport.waitForStatus("IN REVIEW")
-        assert "1" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
-        assert "2" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
+        page_registration_data_import.get_button_import_file().click()
+        page_registration_data_import.disappear_button_import_file()
+        page_details_registration_data_import.wait_for_status("IN REVIEW")
+        assert "1" in page_details_registration_data_import.get_label_total_number_of_households().text
+        assert "2" in page_details_registration_data_import.get_label_total_number_of_individuals().text

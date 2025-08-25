@@ -40,26 +40,26 @@ def combine_collections(a: dict, b: dict, path: list | None = None, update: bool
     """Merge b into a version from flex registration."""
     if path is None:
         path = []
-    for key in b:
+    for key, value in b.items():
         if key in a:
-            if isinstance(a[key], dict) and isinstance(b[key], dict):
-                combine_collections(a[key], b[key], path + [str(key)])
-            elif a[key] == b[key]:
+            if isinstance(a[key], dict) and isinstance(value, dict):
+                combine_collections(a[key], value, path + [str(key)])
+            elif a[key] == value:
                 pass  # same leaf value
-            elif isinstance(a[key], list) and isinstance(b[key], list):
-                for idx in range(len(b[key])):
+            elif isinstance(a[key], list) and isinstance(value, list):
+                for idx in range(len(value)):
                     a[key][idx] = combine_collections(
                         a[key][idx],
-                        b[key][idx],
+                        value[idx],
                         path + [str(key), str(idx)],
                         update=update,
                     )
             elif update:
-                a[key] = b[key]
+                a[key] = value
             else:
                 raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
         else:
-            a[key] = b[key]
+            a[key] = value
     return a
 
 
@@ -150,7 +150,9 @@ def get_rdi_program_population(
         .distinct()
         .order_by("first_registration_date")
     )
-    if exclude_external_collectors:  # exclude external collectors holding alternate role -> import only individuals that belong to households or hold the primary role
+    # exclude external collectors holding alternate role ->
+    # import only individuals that belong to households or hold the primary role
+    if exclude_external_collectors:
         individuals = individuals.filter(
             Q(household__program_id=import_from_program_id) | Q(households_and_roles__role=ROLE_PRIMARY)
         )

@@ -60,7 +60,7 @@ from hope.apps.utils.models import MergeStatusModel
 
 
 class FlexibleAttribute:
-    class objects:
+    class Objects:
         @staticmethod
         def filter(field_type: Any) -> Any:
             return MagicMock()

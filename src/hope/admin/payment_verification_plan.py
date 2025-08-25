@@ -61,9 +61,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button(permission="core.execute_sync_rapid_pro")
     def execute_sync_rapid_pro(self, request: HttpRequest) -> HttpResponseRedirect | None:
         if request.method == "POST":
-            from hope.apps.payment.tasks.CheckRapidProVerificationTask import (
-                CheckRapidProVerificationTask,
-            )
+            from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 
             task = CheckRapidProVerificationTask()
             task.execute()

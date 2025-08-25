@@ -399,8 +399,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _validate_birth_date(obj_to_create: Any) -> Any:
         birth_date = obj_to_create.birth_date
 
-        if obj_to_create.birth_date < datetime(1923, 1, 1):
-            obj_to_create.birth_date = datetime(1923, 1, 1)
+        obj_to_create.birth_date = max(obj_to_create.birth_date, datetime(1923, 1, 1))
         if obj_to_create.birth_date > datetime.today():
             obj_to_create.birth_date = datetime(2022, 4, 25)
 

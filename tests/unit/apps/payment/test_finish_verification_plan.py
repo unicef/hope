@@ -37,7 +37,7 @@ class TestFinishVerificationPlan(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()

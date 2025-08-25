@@ -99,14 +99,16 @@ class Migration(migrations.Migration):
                     "deduplication_golden_record_duplicates_percentage",
                     models.IntegerField(
                         default=50,
-                        help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
+                        help_text="If percentage of duplicates is higher or equal to this setting,"
+                        " deduplication is aborted",
                     ),
                 ),
                 (
                     "deduplication_golden_record_duplicates_allowed",
                     models.IntegerField(
                         default=5,
-                        help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
+                        help_text="If amount of duplicates for single individual exceeds this limit deduplication"
+                        " is aborted",
                     ),
                 ),
                 (

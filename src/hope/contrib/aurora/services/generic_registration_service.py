@@ -39,14 +39,14 @@ EXTRA_FIELD = "extra"
 def mergedicts(a: dict, b: dict, path: list | None) -> dict:
     if not path:
         path = []
-    for key in b:
+    for key, value in b.items():
         if key in a:
-            if isinstance(a[key], dict) and isinstance(b[key], dict):
-                mergedicts(a[key], b[key], path + [str(key)])
-            elif a[key] != b[key]:
+            if isinstance(a[key], dict) and isinstance(value, dict):
+                mergedicts(a[key], value, path + [str(key)])
+            elif a[key] != value:
                 raise Exception("Conflict at " + ".".join(path + [str(key)]))
         else:
-            a[key] = b[key]
+            a[key] = value
     return a
 
 
@@ -157,7 +157,7 @@ class GenericRegistrationService(BaseRegistrationService):
                             my_dict[field] = retrieved_value
             elif isinstance(value, dict):
                 if key in data_dict:
-                    my_dict.update(cls._create_household_dict(data_dict[key], mapping_dict[key]))
+                    my_dict.update(cls._create_household_dict(data_dict[key], value))
 
         # update admin areas values
         for key in ["admin1", "admin2", "admin3", "admin4"]:
@@ -188,9 +188,7 @@ class GenericRegistrationService(BaseRegistrationService):
         constances = mapping.get("individual_constances", {})
 
         for item in data_dict:
-            my_dict = {"extra": {}}
-            my_dict["documents"] = {}
-            my_dict[ACCOUNT_FIELD] = {}
+            my_dict = {"extra": {}, "documents": {}, ACCOUNT_FIELD: {}}
             flex_fields = {}
             for key, value in mapping_dict.items():
                 model, field = value.split(".")
