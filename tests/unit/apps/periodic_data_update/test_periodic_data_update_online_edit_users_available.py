@@ -34,7 +34,9 @@ class TestPDUOnlineEditUsersAvailable:
         # Test Users; will be ordered alphabetically by first name
 
         # User with save data permission
-        self.user_can_save_data = UserFactory(partner=self.partner_empty, first_name="Alice")
+        self.user_can_save_data = UserFactory(
+            partner=self.partner_empty, first_name="Alice", last_name="Johnson", email="alice.johnson@test.com"
+        )
         save_data_role = RoleFactory(name="Save Data", permissions=[Permissions.PDU_ONLINE_SAVE_DATA.value])
         RoleAssignmentFactory(
             user=self.user_can_save_data,
@@ -44,7 +46,9 @@ class TestPDUOnlineEditUsersAvailable:
         )
 
         # User with approve permission
-        self.user_can_approve = UserFactory(partner=self.partner_empty, first_name="Bob")
+        self.user_can_approve = UserFactory(
+            partner=self.partner_empty, first_name="Bob", last_name="Smith", email="bob.smith@example.org"
+        )
         approve_role = RoleFactory(name="Approve", permissions=[Permissions.PDU_ONLINE_APPROVE.value])
         RoleAssignmentFactory(
             user=self.user_can_approve,
@@ -54,7 +58,9 @@ class TestPDUOnlineEditUsersAvailable:
         )
 
         # User with merge permission
-        self.user_can_merge = UserFactory(partner=self.partner_empty, first_name="Charlie")
+        self.user_can_merge = UserFactory(
+            partner=self.partner_empty, first_name="Charlie", last_name="Brown", email="charlie.brown@company.com"
+        )
         merge_role = RoleFactory(name="Merge", permissions=[Permissions.PDU_ONLINE_MERGE.value])
         RoleAssignmentFactory(
             user=self.user_can_merge,
@@ -64,7 +70,9 @@ class TestPDUOnlineEditUsersAvailable:
         )
 
         # User with all PDU permissions
-        self.user_can_all = UserFactory(partner=self.partner_empty, first_name="David")
+        self.user_can_all = UserFactory(
+            partner=self.partner_empty, first_name="David", last_name="Wilson", email="d.wilson@hope.org"
+        )
         can_all_role = RoleFactory(
             permissions=[
                 Permissions.PDU_ONLINE_SAVE_DATA.value,
@@ -81,7 +89,9 @@ class TestPDUOnlineEditUsersAvailable:
 
         # User with PDU permissions on Partner
         partner_can_all = PartnerFactory(name="Partner with PDU Permissions")
-        self.user_partner_can_all = UserFactory(partner=partner_can_all, first_name="Eve")
+        self.user_partner_can_all = UserFactory(
+            partner=partner_can_all, first_name="Eve", last_name="Davis", email="eve.davis@partner.org"
+        )
         RoleAssignmentFactory(
             user=self.user_partner_can_all,
             role=can_all_role,
@@ -90,7 +100,9 @@ class TestPDUOnlineEditUsersAvailable:
         )
 
         # User with no PDU permissions
-        self.user_without_permissions = UserFactory(partner=self.partner_empty, first_name="Frank")
+        self.user_without_permissions = UserFactory(
+            partner=self.partner_empty, first_name="Frank", last_name="Miller", email="frank.miller@test.com"
+        )
         no_pdu_role = RoleFactory(name="No Permissions", permissions=[Permissions.PROGRAMME_UPDATE.value])
         RoleAssignmentFactory(
             user=self.user_without_permissions,
@@ -236,3 +248,156 @@ class TestPDUOnlineEditUsersAvailable:
         response = self.api_client.get(self.url_users_available, {"permission": Permissions.PROGRAMME_UPDATE.value})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Invalid permission" in response.json()[0]
+
+    # Search functionality tests using existing users
+
+    def test_users_available_search_by_first_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "Alice"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_save_data.id)
+        assert results[0]["first_name"] == "Alice"
+
+    def test_users_available_search_by_last_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "Brown"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_merge.id)
+        assert results[0]["last_name"] == "Brown"
+
+    def test_users_available_search_by_email(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "bob.smith@example.org"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_approve.id)
+        assert results[0]["email"] == "bob.smith@example.org"
+
+    def test_users_available_search_by_full_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "David Wilson"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_all.id)
+        assert results[0]["first_name"] == "David"
+        assert results[0]["last_name"] == "Wilson"
+
+    def test_users_available_search_by_full_name_reversed(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "Davis Eve"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_partner_can_all.id)
+        assert results[0]["first_name"] == "Eve"
+        assert results[0]["last_name"] == "Davis"
+
+    def test_users_available_search_partial_match(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "Char"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_merge.id)
+        assert results[0]["first_name"] == "Charlie"
+
+    def test_users_available_search_case_insensitive(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "ALICE JOHNSON"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_save_data.id)
+
+    def test_users_available_search_no_results(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": "NonExistentUser"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        assert len(results) == 0
+
+    def test_users_available_search_empty_string(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.url_users_available, {"search": ""})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        # Should return all users (same as no search)
+        assert len(results) == 5
+
+    def test_users_available_search_with_permission_filter(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_TEMPLATE_CREATE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(
+            self.url_users_available, {"search": "David", "permission": Permissions.PDU_ONLINE_SAVE_DATA.value}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()
+
+        # Should return David who has save data permission
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.user_can_all.id)
+        assert results[0]["first_name"] == "David"
