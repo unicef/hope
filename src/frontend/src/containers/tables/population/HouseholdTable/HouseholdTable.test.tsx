@@ -8,6 +8,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
 import { CurrencyEnum } from '@restgenerated/models/CurrencyEnum';
+import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -16,7 +17,7 @@ describe('HouseholdTable', () => {
   let queryClient: QueryClient;
 
   // Mock data
-  const mockHouseholdData = {
+  const mockHouseholdData :PaginatedHouseholdListList = {
     next: null,
     previous: null,
     results: [
@@ -43,16 +44,10 @@ describe('HouseholdTable', () => {
         hasDuplicates: false,
         sanctionListPossibleMatch: false,
         sanctionListConfirmedMatch: false,
-        program: {
-          id: 'test-program',
-          name: 'Test Program',
-          slug: 'test-program',
-          status: ProgramStatusEnum.ACTIVE,
-          screenBeneficiary: false,
-        },
+        programId: 'test-program',
+        programName: 'Test Program',
       },
     ],
-    count: 1,
   };
 
   const mockCountData = {

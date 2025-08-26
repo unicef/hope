@@ -4,14 +4,12 @@
 /* eslint-disable */
 import type { AreaSimple } from './AreaSimple';
 import type { CurrencyEnum } from './CurrencyEnum';
-import type { ProgramSmall } from './ProgramSmall';
 export type HouseholdList = {
     readonly id: string;
-    unicefId: string | null;
+    unicefId?: string | null;
     headOfHousehold: string;
     admin1: AreaSimple;
     admin2: AreaSimple;
-    program: ProgramSmall;
     readonly status: string;
     /**
      * Household size
@@ -196,8 +194,13 @@ export type HouseholdList = {
      * * `USDC` - USD Coin
      */
     currency?: CurrencyEnum;
-    readonly hasDuplicates: boolean;
-    readonly sanctionListPossibleMatch: boolean;
-    readonly sanctionListConfirmedMatch: boolean;
+    hasDuplicates: boolean;
+    sanctionListPossibleMatch: boolean;
+    sanctionListConfirmedMatch: boolean;
+    /**
+     * Household program
+     */
+    readonly programId: string;
+    programName: string;
 };
 
