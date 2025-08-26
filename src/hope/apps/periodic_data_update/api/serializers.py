@@ -176,9 +176,12 @@ class AuthorizedUserSerializer(serializers.ModelSerializer):
         permissions_from_roles = (
             RoleAssignment.objects.filter(
                 Q(user=user) | Q(partner=user.partner),
-                business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"],
-                program__slug=self.context["request"].parser_context["kwargs"]["program_slug"],
-                role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS],
+                Q(business_area__slug=self.context["request"].parser_context["kwargs"]["business_area_slug"])
+                & (
+                    Q(program__slug=self.context["request"].parser_context["kwargs"]["program_slug"])
+                    | Q(program__isnull=True)
+                )
+                & Q(role__permissions__overlap=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]),
             )
             .exclude(expiry_date__lt=timezone.now())
             .values_list("role__permissions", flat=True)

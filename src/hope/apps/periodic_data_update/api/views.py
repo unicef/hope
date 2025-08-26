@@ -363,9 +363,9 @@ class PDUOnlineEditViewSet(
             permissions_to_check = [permission_filter]
 
         role_assignments_with_pdu_online_edit_related_permissions = RoleAssignment.objects.filter(
-            role__permissions__overlap=permissions_to_check,
-            business_area__slug=business_area_slug,
-            program__slug=program_slug,
+            Q(role__permissions__overlap=permissions_to_check)
+            & Q(business_area__slug=business_area_slug)
+            & (Q(program__slug=program_slug) | Q(program__isnull=True))
         ).exclude(expiry_date__lt=timezone.now())
         users_available = (
             User.objects.filter(

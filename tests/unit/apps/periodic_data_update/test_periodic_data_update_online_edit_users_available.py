@@ -94,6 +94,16 @@ class TestPDUOnlineEditUsersAvailable:
             program=self.program,
         )
 
+        self.user_can_approve_in_whole_ba = UserFactory(
+            partner=self.partner_empty, first_name="Grace", last_name="Chen", email="grace.chen@global.org"
+        )
+        RoleAssignmentFactory(
+            user=self.user_can_approve_in_whole_ba,
+            role=approve_role,
+            business_area=self.afghanistan,
+            program=None,  # Permission in whole business area
+        )
+
         # User with no PDU permissions
         self.user_without_permissions = UserFactory(
             partner=self.partner_empty, first_name="Frank", last_name="Miller", email="frank.miller@test.com"
@@ -147,13 +157,14 @@ class TestPDUOnlineEditUsersAvailable:
         assert response.status_code == status.HTTP_200_OK
         results = response.json()
 
-        assert len(results) == 5
+        assert len(results) == 6
         user_ids = {user["id"] for user in results}
         assert str(self.user_can_save_data.id) in user_ids
         assert str(self.user_can_approve.id) in user_ids
         assert str(self.user_can_merge.id) in user_ids
         assert str(self.user_can_all.id) in user_ids
         assert str(self.user_partner_can_all.id) in user_ids
+        assert str(self.user_can_approve_in_whole_ba.id) in user_ids
         assert str(self.user_without_permissions.id) not in user_ids
 
         assert results[0] == {
@@ -204,6 +215,16 @@ class TestPDUOnlineEditUsersAvailable:
                 Permissions.PDU_ONLINE_SAVE_DATA.value,
             ],
         }
+        assert results[5] == {
+            "id": str(self.user_can_approve_in_whole_ba.id),
+            "first_name": self.user_can_approve_in_whole_ba.first_name,
+            "last_name": self.user_can_approve_in_whole_ba.last_name,
+            "username": self.user_can_approve_in_whole_ba.username,
+            "email": self.user_can_approve_in_whole_ba.email,
+            "pdu_permissions": [
+                Permissions.PDU_ONLINE_APPROVE.value,
+            ],
+        }
 
     @pytest.mark.parametrize("permission", [p.value for p in PDU_ONLINE_EDIT_RELATED_PERMISSIONS])
     def test_users_available_filter_by_permission(
@@ -226,11 +247,12 @@ class TestPDUOnlineEditUsersAvailable:
             assert str(self.user_can_all.id) in user_ids
             assert str(self.user_partner_can_all.id) in user_ids
         elif permission == Permissions.PDU_ONLINE_APPROVE.value:
-            assert len(results) == 3
+            assert len(results) == 4
             user_ids = {user["id"] for user in results}
             assert str(self.user_can_approve.id) in user_ids
             assert str(self.user_can_all.id) in user_ids
             assert str(self.user_partner_can_all.id) in user_ids
+            assert str(self.user_can_approve_in_whole_ba.id) in user_ids
         elif permission == Permissions.PDU_ONLINE_MERGE.value:
             assert len(results) == 3
             user_ids = {user["id"] for user in results}
@@ -382,7 +404,7 @@ class TestPDUOnlineEditUsersAvailable:
         results = response.json()
 
         # Should return all users (same as no search)
-        assert len(results) == 5
+        assert len(results) == 6
 
     def test_users_available_search_with_permission_filter(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
