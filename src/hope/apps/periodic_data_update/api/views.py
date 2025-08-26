@@ -29,7 +29,7 @@ from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixi
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
-from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter
+from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter, UserAvailableFilter
 from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
 from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxTemplateCreateSerializer,
@@ -339,7 +339,13 @@ class PDUOnlineEditViewSet(
                 description="Filter by permission",
                 required=False,
                 enum=[perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS],
-            )
+            ),
+            OpenApiParameter(
+                name="search",
+                type=str,
+                description="Search users by first name, last name, username, or email.",
+                required=False,
+            ),
         ],
         responses={200: AuthorizedUserSerializer(many=True)},
     )
@@ -369,6 +375,9 @@ class PDUOnlineEditViewSet(
             .distinct()
             .order_by("first_name", "last_name", "username")
         )
+
+        # Apply search filter
+        users_available = UserAvailableFilter(self.request.query_params, queryset=users_available).qs
 
         # Prefetch role_assignments with relevant permissions for user and partner to avoid extra queries in serializer
         users_available = users_available.prefetch_related(

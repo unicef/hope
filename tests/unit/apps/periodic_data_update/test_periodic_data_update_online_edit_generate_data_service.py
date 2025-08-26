@@ -89,7 +89,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
             program=cls.program,
             business_area=cls.business_area,
         )
-        cls.rounds_data= [
+        cls.rounds_data = [
             {
                 "field": "muac",
                 "round": 2,
@@ -162,7 +162,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "is_editable": True,
                     },
                 },
-            }
+            },
         ]
         assert len(edit_data) == 2
 
@@ -195,7 +195,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "round_number": 2,
                         "round_name": "February",
                         "value": 20,  # value is already set
-                        "collection_date": None, # collection date is not needed as the value will not be edited
+                        "collection_date": None,  # collection date is not needed as the value will not be edited
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": False,
                     },
@@ -232,7 +232,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "is_editable": True,
                     },
                 },
-            }
+            },
         ]
         assert len(edit_data) == 2
 
