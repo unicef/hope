@@ -507,20 +507,20 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getInputTitle().send_keys("Edited title check")
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
+            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=2)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonSave().click()
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
-        start_date = (datetime.now() + relativedelta(days=11)).strftime("%-d %b %Y")
+        start_date = (datetime.now() + relativedelta(days=1)).strftime("%-d %b %Y")
         for _ in range(50):
             if start_date in pageProgrammeDetails.getProgramCycleStartDate()[0].text:
                 break
             sleep(0.1)
         else:
             assert start_date in pageProgrammeDetails.getProgramCycleStartDate()[0].text
-        assert (datetime.now() + relativedelta(days=12)).strftime(
+        assert (datetime.now() + relativedelta(days=2)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[0].text
         assert "Edited title check" in pageProgrammeDetails.getProgramCycleTitle()[0].text

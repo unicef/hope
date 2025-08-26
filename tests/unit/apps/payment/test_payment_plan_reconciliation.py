@@ -228,6 +228,7 @@ mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $fspXlsxTem
             status
             canCreateXlsxWithFspAuthCode
             hasPaymentListExportFile
+            canRegenerateExportFilePerFsp
         }
     }
 }
@@ -526,6 +527,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             financial_service_provider=santander_fsp,
             currency="PLN",
             has_valid_wallet=True,
+            delivery_date=None,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
         create_payment_plan_snapshot_data(payment_plan)
@@ -1245,7 +1247,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode", status=Payment.STATUS_SENT_TO_FSP)
         payment_plan.export_file_per_fsp = file
         payment_plan.save()
-        # Payment Plan already has created exported file
+        # Payment Plan regenerate new file
         self.snapshot_graphql_request(
             request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
         )
+        payment_plan.refresh_from_db()
+        self.assertIsNotNone(payment_plan.export_file_per_fsp)
+        self.assertNotEqual(str(payment_plan.export_file_per_fsp.pk), str(file.pk))

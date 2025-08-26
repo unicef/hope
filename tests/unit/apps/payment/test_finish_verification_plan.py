@@ -24,11 +24,16 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from graphql import GraphQLError
 
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -87,6 +92,7 @@ class TestFinishVerificationPlan(TestCase):
                 head_of_household=household.head_of_household,
                 delivered_quantity_usd=200,
                 currency="PLN",
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
             )
 
             PaymentVerificationFactory(
@@ -112,3 +118,10 @@ class TestFinishVerificationPlan(TestCase):
         self.assertEqual(ticket.admin2_id, household.admin2_id)
 
         self.assertEqual(mocked_requests_post.call_count, 10)
+
+    def test_finish_verification_if_pp_not_finished_yet(self) -> None:
+        Payment.objects.all().update(status=Payment.STATUS_PENDING)
+        self.assertFalse(self.verification.payment_plan.is_reconciled)
+        with self.assertRaises(GraphQLError) as e:
+            VerificationPlanStatusChangeServices(self.verification).finish()
+        self.assertEqual(e.exception.message, "You can finish only if reconciliation is finalized")

@@ -1275,7 +1275,6 @@ type GenericPaymentPlanNode {
   id: String
   objType: String
   paymentVerificationSummary: PaymentVerificationSummaryNode
-  availablePaymentRecordsCount: Int
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int, programId: String): PaymentVerificationPlanNodeConnection
   statusDate: DateTime
   status: String
@@ -1911,6 +1910,7 @@ type IndividualNode implements Node {
   originUnicefId: String
   isMigrationHandled: Boolean!
   migratedAt: DateTime
+  identificationKey: String
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection
@@ -2743,6 +2743,7 @@ type PaymentPlanNode implements Node {
   canCreateXlsxWithFspAuthCode: Boolean
   fspCommunicationChannel: String
   canExportXlsx: Boolean
+  canRegenerateExportFilePerFsp: Boolean
   canDownloadXlsx: Boolean
   canSendXlsxPassword: Boolean
   failedWalletValidationCollectorsIds: [String]

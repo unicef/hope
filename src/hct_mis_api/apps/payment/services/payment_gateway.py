@@ -427,7 +427,12 @@ class PaymentGatewayService:
             return response_status
         return None  # pragma: no cover
 
-    def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
+    def add_records_to_payment_instructions(
+        self, payment_plan: PaymentPlan, id_filters: Optional[List[str]] = None
+    ) -> None:
+        if id_filters is None:
+            id_filters = []
+
         def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
             for _idx, _payment in enumerate(_payments):
                 _payment.status = Payment.STATUS_ERROR
@@ -440,18 +445,21 @@ class PaymentGatewayService:
             Payment.objects.bulk_update(_payments, ["status"])
 
         def _add_records(_payments: List[Payment], _container: PaymentPlanSplit) -> None:
-            add_records_error = False
+            add_records_error = None
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
-                    payments_chunk, _container.id, validate_response=False
+                    payments_chunk, _container.id, validate_response=True
                 )
                 if response.errors:
-                    add_records_error = True
+                    add_records_error = response.errors
                     _handle_errors(response, payments_chunk)
                 else:
                     _handle_success(response, payments_chunk)
 
-            if not add_records_error:
+            if add_records_error:
+                logger.error(f"Sent to Payment Gateway add records error: {add_records_error}")
+
+            elif _payments:
                 _container.sent_to_payment_gateway = True
                 _container.save(update_fields=["sent_to_payment_gateway"])
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
@@ -459,7 +467,13 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments = list(split.split_payment_items.eligible().order_by("unicef_id"))
+                payments_qs = split.split_payment_items.eligible().filter(
+                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                )
+                if id_filters:
+                    # filter by id to add missing records to payment instructions
+                    payments_qs = payments_qs.filter(id__in=id_filters)
+                payments = list(payments_qs.order_by("unicef_id"))
                 _add_records(payments, split)
 
     def sync_fsps(self) -> None:
@@ -661,3 +675,13 @@ class PaymentGatewayService:
                     ),
                 },
             )
+
+    def add_missing_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
+        record_ids: List[str] = []
+        for payment in payment_plan.eligible_payments.all():
+            pg_payment_record = self.api.get_record(payment.id)
+            if not pg_payment_record:
+                record_ids.append(str(payment.pk))
+
+        if record_ids:
+            self.add_records_to_payment_instructions(payment_plan, record_ids)
