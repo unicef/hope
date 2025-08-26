@@ -161,7 +161,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
     def test_registration_program_population_import_task_error(self) -> None:
         rdi_id = self.registration_data_import.id
         self.registration_data_import.delete()
-        with self.assertRaises(RegistrationDataImport.DoesNotExist):
+        with pytest.raises(RegistrationDataImport.DoesNotExist):
             self._run_task(str(rdi_id))
 
     def test_registration_program_population_import_ba_postpone_deduplication(

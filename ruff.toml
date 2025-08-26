@@ -77,10 +77,10 @@ ignore = [
     "PLR0912", # too many branches
     "PLR0913",  # too many arguments
     "PLR0915",  # too many statements
-    "PLC0415",  # `import` should be at the top-level of a file
 
     "C901",  # too complex
-    "BLE001",  # catch blind exceptions
+    "BLE001",  # Do not catch blind exception: `BaseException`
+    "PLC0415",  # `import` should be at the top-level of a file
 ]
 
 [format]
@@ -100,3 +100,4 @@ known-first-party = ["hope"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 combine-as-imports = true
 force-sort-within-sections = true
+force-to-top = ["import"]
