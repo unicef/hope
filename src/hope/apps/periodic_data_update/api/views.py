@@ -283,7 +283,7 @@ class PDUOnlineEditViewSet(
         instance.save()
 
         PDUOnlineEditSentBackComment.objects.create(
-            comment=serializer.validated_data["sent_back_comment"],
+            comment=serializer.validated_data["comment"],
             created_by=request.user,
             pdu_online_edit=instance,
         )
