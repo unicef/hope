@@ -88,9 +88,9 @@
       <td>Total pending Households</td>
       <td>{{reconciliation.pending|default_if_none:"0"}}</td>
       <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
-      <td>{{reconciliation.pending_local|default_if_none:"0"}}</td>
+      <td>{{reconciliation.failed_local|default_if_none:"0"}}</td>
       <td>Total amount unredeemed (USD)</td>
-      <td>{{reconciliation.pending_usd|default_if_none:"0"}}</td>
+      <td>{{reconciliation.failed_usd|default_if_none:"0"}}</td>
     </tr>
   </tbody>
 </table>

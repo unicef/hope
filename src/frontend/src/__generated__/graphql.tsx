@@ -1863,7 +1863,6 @@ export type GenericPaymentNode = {
 
 export type GenericPaymentPlanNode = {
   __typename?: 'GenericPaymentPlanNode';
-  availablePaymentRecordsCount?: Maybe<Scalars['Int']['output']>;
   bankReconciliationError?: Maybe<Scalars['Int']['output']>;
   bankReconciliationSuccess?: Maybe<Scalars['Int']['output']>;
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']['output']>;
@@ -2719,6 +2718,7 @@ export type IndividualNode = Node & {
   household?: Maybe<HouseholdNode>;
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>;
   id: Scalars['ID']['output'];
+  identificationKey?: Maybe<Scalars['String']['output']>;
   identities?: Maybe<IndividualIdentityNodeConnection>;
   importId?: Maybe<Scalars['String']['output']>;
   importedIndividualId?: Maybe<Scalars['UUID']['output']>;
@@ -4321,6 +4321,7 @@ export type PaymentPlanNode = Node & {
   canCreateXlsxWithFspAuthCode?: Maybe<Scalars['Boolean']['output']>;
   canDownloadXlsx?: Maybe<Scalars['Boolean']['output']>;
   canExportXlsx?: Maybe<Scalars['Boolean']['output']>;
+  canRegenerateExportFilePerFsp?: Maybe<Scalars['Boolean']['output']>;
   canSendToPaymentGateway?: Maybe<Scalars['Boolean']['output']>;
   canSendXlsxPassword?: Maybe<Scalars['Boolean']['output']>;
   canSplit?: Maybe<Scalars['Boolean']['output']>;
@@ -9458,7 +9459,7 @@ export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 
 export type HouseholdChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, accountFinancialInstitutionChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type HouseholdFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18747,6 +18748,10 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  accountFinancialInstitutionChoices {
+    name
+    value
+  }
 }
     `;
 
@@ -23514,7 +23519,6 @@ export type GenericPaymentNodeResolvers<ContextType = any, ParentType extends Re
 };
 
 export type GenericPaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GenericPaymentPlanNode'] = ResolversParentTypes['GenericPaymentPlanNode']> = {
-  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -23945,6 +23949,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>;
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identificationKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   identities?: Resolver<Maybe<ResolversTypes['IndividualIdentityNodeConnection']>, ParentType, ContextType, Partial<IndividualNodeIdentitiesArgs>>;
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
@@ -24445,6 +24450,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   canCreateXlsxWithFspAuthCode?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canDownloadXlsx?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canExportXlsx?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  canRegenerateExportFilePerFsp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSendToPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSendXlsxPassword?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSplit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
