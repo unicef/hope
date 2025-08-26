@@ -294,6 +294,10 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
 
 
 class PDUOnlineEditUpdateAuthorizedUsersSerializer(serializers.ModelSerializer):
+    authorized_users = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), required=True, allow_empty=True
+    )
+
     class Meta:
         model = PDUOnlineEdit
         fields = ("authorized_users",)
