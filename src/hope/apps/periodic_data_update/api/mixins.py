@@ -1,4 +1,4 @@
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.request import Request
 
 from hope.apps.periodic_data_update.models import PDUOnlineEdit
@@ -25,10 +25,9 @@ class PDUOnlineEditAuthorizedUserMixin:
             if ids:
                 queryset = PDUOnlineEdit.objects.filter(pk__in=ids)
                 if queryset.count() != len(ids):
-                    raise PermissionDenied("One or more PDU online edits not found.")
+                    raise ValidationError("One or more PDU online edits not found.")
 
                 queryset_unauthorized = queryset.exclude(authorized_users__pk=user.pk)
                 if queryset_unauthorized.exists():
-                    raise PermissionDenied(
-                        f"You are not an authorized user for PDU Online Edit: {queryset_unauthorized.values_list('id', flat=True)}"
-                    )
+                    unauthorized_ids = ", ".join(str(id) for id in queryset_unauthorized.values_list("id", flat=True))
+                    raise PermissionDenied(f"You are not an authorized user for PDU Online Edit: {unauthorized_ids}")

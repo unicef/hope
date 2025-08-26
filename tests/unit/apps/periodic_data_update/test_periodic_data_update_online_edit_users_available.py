@@ -20,11 +20,6 @@ class TestPDUOnlineEditUsersAvailable:
         self.afghanistan = create_afghanistan()
         self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
 
-        self.url_users_available = reverse(
-            "api:periodic-data-update:periodic-data-update-online-edits-users-available",
-            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
-        )
-
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.api_client = api_client(self.user)
@@ -109,6 +104,11 @@ class TestPDUOnlineEditUsersAvailable:
             role=no_pdu_role,
             business_area=self.afghanistan,
             program=self.program,
+        )
+
+        self.url_users_available = reverse(
+            "api:periodic-data-update:periodic-data-update-online-edits-users-available",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
         )
 
     @pytest.mark.parametrize(
