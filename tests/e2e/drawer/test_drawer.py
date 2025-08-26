@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
@@ -8,6 +7,7 @@ from e2e.page_object.programme_management.programme_management import (
 )
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from selenium.common.exceptions import NoSuchElementException
 
 from hope.apps.core.models import DataCollectingType

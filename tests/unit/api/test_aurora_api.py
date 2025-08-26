@@ -9,7 +9,6 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
-from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hope.api.models import Grant
 from hope.contrib.aurora.caches import (
@@ -18,6 +17,7 @@ from hope.contrib.aurora.caches import (
     RegistrationListVersionsKeyBit,
 )
 from hope.contrib.aurora.models import Organization, Project, Registration
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class ProjectListViewTests(HOPEApiTestCase):

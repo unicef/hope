@@ -1,13 +1,13 @@
-import logging
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+import logging
 from typing import Any
 from uuid import UUID
 
-import requests
 from constance import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
+import requests
 
 from hope.apps.core.models import BusinessArea
 

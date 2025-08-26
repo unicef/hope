@@ -1,9 +1,7 @@
-import uuid
 from typing import Any
 from unittest.mock import MagicMock, patch
+import uuid
 
-import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
@@ -28,10 +26,11 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.account.models import AdminAreaLimitedTo
-from hope.apps.core.models import BusinessArea
-from hope.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
+from hope.apps.core.models import BusinessArea, FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,

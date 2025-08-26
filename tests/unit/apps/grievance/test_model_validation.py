@@ -1,8 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -10,6 +8,7 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     generate_delivery_mechanisms,
 )
+import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.admin.fsp import FspXlsxTemplatePerDeliveryMechanismForm

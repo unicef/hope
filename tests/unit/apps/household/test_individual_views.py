@@ -1,8 +1,6 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-import freezegun
-import pytest
 from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -31,6 +29,8 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import freezegun
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

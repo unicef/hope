@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, Any
 from constance import config
 from django.contrib import messages
 from django.contrib.messages import add_message
-from django.core.cache import cache as dj_cache
-from django.core.cache import caches
+from django.core.cache import cache as dj_cache, caches
 from django.shortcuts import render
 from django.urls import path
 from django.utils.html import format_html

@@ -1,5 +1,5 @@
-import time
 from threading import Thread
+import time
 
 from django.test import TestCase
 

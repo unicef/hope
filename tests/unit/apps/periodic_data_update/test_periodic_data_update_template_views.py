@@ -1,8 +1,6 @@
 import json
 from typing import Callable
 
-import freezegun
-import pytest
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -20,6 +18,8 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
+import freezegun
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

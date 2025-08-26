@@ -1,5 +1,5 @@
-import json
 from datetime import datetime
+import json
 from typing import Any
 from unittest.mock import patch
 
@@ -9,10 +9,10 @@ from django.http import HttpRequest
 from django.test import TestCase, override_settings
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from unit.api.factories import APITokenFactory
 
 from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
 from hope.api.models import Grant
+from unit.api.factories import APITokenFactory
 
 
 class TestApiToken(TestCase):

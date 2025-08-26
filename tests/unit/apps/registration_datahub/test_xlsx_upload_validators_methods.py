@@ -2,7 +2,6 @@ import operator
 from typing import Tuple
 from unittest import mock
 
-import openpyxl
 from django.conf import settings
 from django.core.management import call_command
 from extras.test_utils.factories.core import (
@@ -12,6 +11,7 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+import openpyxl
 from parameterized import parameterized
 
 from hope.apps.core.base_test_case import BaseTestCase

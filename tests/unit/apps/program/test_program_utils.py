@@ -3,7 +3,6 @@ import json
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 from django.core.cache import cache
 from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
@@ -17,6 +16,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.models import (

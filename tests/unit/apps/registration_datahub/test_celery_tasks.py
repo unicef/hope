@@ -1,14 +1,13 @@
+from abc import ABC, abstractmethod
 import base64
+from contextlib import contextmanager
 import datetime
 import json
-import uuid
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
+import uuid
 
-import pytest
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
@@ -29,6 +28,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea

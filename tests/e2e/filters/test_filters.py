@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -22,14 +21,13 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.payment.models import PaymentVerification
-from hope.apps.payment.models import PaymentVerificationPlan
+from hope.apps.payment.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan
 from hope.apps.program.models import BeneficiaryGroup, Program
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 

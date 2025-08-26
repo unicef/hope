@@ -1,11 +1,11 @@
 import io
 import logging
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING
+import xml.etree.ElementTree as ET
 
-import requests
 from elasticsearch import NotFoundError
+import requests
 
 from ...geo.models import Country
 from ...program.models import Program

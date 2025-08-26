@@ -1,5 +1,5 @@
-import logging
 from datetime import date, timedelta
+import logging
 from typing import Any
 
 from constance import config
@@ -13,8 +13,8 @@ from django_filters import (
     FilterSet,
     MultipleChoiceFilter,
     OrderingFilter,
+    rest_framework as filters,
 )
-from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError

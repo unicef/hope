@@ -2,11 +2,11 @@ import random
 from random import choice
 from typing import Any
 
-import factory.fuzzy
-from extras.test_utils.factories.account import UserFactory
 from factory.django import DjangoModelFactory
+import factory.fuzzy
 from pytz import utc
 
+from extras.test_utils.factories.account import UserFactory
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Feedback, FeedbackMessage, Message, Survey
 from hope.apps.core.models import BusinessArea

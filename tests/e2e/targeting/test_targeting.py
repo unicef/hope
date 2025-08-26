@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Callable
 
-import factory
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
@@ -30,6 +28,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+import factory
+import pytest
 from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys

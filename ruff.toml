@@ -1,6 +1,6 @@
 target-version = "py312"
 line-length = 120
-exclude = ["src/frontend", "src/hope/one_time_scripts"]
+exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py"]
 
 [lint]
 select = [
@@ -58,7 +58,6 @@ ignore = [
     "ISC001",  # conflicts with ruff format command
     "RUF005",  # collection-literal-concatenation: syntax not compatible with py2
     "RUF012", # mutable-class-default: typing is not available for py2
-    "I001", # unsorted imports https://docs.astral.sh/ruff/rules/unsorted-imports/#unsorted-imports-i001
     "UP037", # [*] Remove quotes from type annotation
     "UP035", # Import from `collections.abc` instead: `Sequence`
     "UP031", # Use format specifiers instead of percent format
@@ -99,3 +98,9 @@ line-ending = "auto"
 "tests/**.py" = ["S101", "PLR2004", "S", "SIM117", "D", "UP", "PLR0913", "ANN", "N999"]
 "src/**/versioning/**.py" = ["N999", ]
 "src/**/one_time_scripts/**.py" = ["T201", ]
+
+[lint.isort]
+known-first-party = ["hope"]  # Modifica con il tuo namespace
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+combine-as-imports = true
+force-sort-within-sections = true

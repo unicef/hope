@@ -1,6 +1,5 @@
 from typing import Any, Optional
 
-import mptt
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
@@ -14,6 +13,7 @@ from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from fernet_fields import EncryptedCharField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
+import mptt
 from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 

@@ -2,7 +2,6 @@ import datetime
 from enum import Enum
 from typing import Any
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -23,6 +22,7 @@ from extras.test_utils.factories.program import (
     ProgramCycleFactory,
     ProgramFactory,
 )
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

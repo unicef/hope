@@ -1,5 +1,5 @@
-import logging
 from contextlib import contextmanager
+import logging
 from typing import TYPE_CHECKING, Any
 
 from django.core.cache import cache

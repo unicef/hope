@@ -1,22 +1,21 @@
 from django.test import TestCase
-
-from hope.apps.program.models import Program
-from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import IndividualRoleInHousehold, ROLE_ALTERNATE
-from hope.apps.utils.models import MergeStatusModel
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
-    TicketHouseholdDataUpdateDetailsFactory,
     GrievanceTicketFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
 )
-from extras.test_utils.factories.household import create_household, IndividualFactory
+from extras.test_utils.factories.household import IndividualFactory, create_household
+from extras.test_utils.factories.program import ProgramFactory
 
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import (
     HouseholdDataUpdateService,
 )
+from hope.apps.household.models import ROLE_ALTERNATE, IndividualRoleInHousehold
+from hope.apps.program.models import Program
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestHouseholdDataUpdateService(TestCase):

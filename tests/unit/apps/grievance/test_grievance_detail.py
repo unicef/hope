@@ -1,7 +1,6 @@
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 
-import pytest
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.base import ContentFile
@@ -37,6 +36,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from freezegun import freeze_time
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

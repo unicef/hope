@@ -1,6 +1,5 @@
 from typing import Any
 
-import pytest
 from django.core.management import call_command
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -11,6 +10,7 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
