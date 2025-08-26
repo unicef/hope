@@ -1,10 +1,8 @@
 import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
-
 from urllib.parse import urlencode
 
-import pytest
 from django.urls import reverse
 from django.utils import timezone
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -23,6 +21,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions

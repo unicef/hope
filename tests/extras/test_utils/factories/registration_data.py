@@ -1,13 +1,13 @@
 import time
 from typing import Any
 
-import factory.fuzzy
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
+import factory.fuzzy
 from faker import Faker
 from pytz import utc
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea
 from hope.apps.program.models import Program

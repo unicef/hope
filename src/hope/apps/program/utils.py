@@ -1,5 +1,5 @@
-import re
 from random import randint
+import re
 
 from django.db import transaction
 from django.db.models import Q, QuerySet

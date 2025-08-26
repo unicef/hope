@@ -1,6 +1,6 @@
-import pytest
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from extras.test_utils.factories.account import UserFactory
+import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 

@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import mkdocs_gen_files
 from mkdocs.structure.files import File, Files
 from mkdocs.structure.pages import Page
+import mkdocs_gen_files
 
 PAT = '<a id="{id}" href="../{url}">{title}</a> | {description}'
 

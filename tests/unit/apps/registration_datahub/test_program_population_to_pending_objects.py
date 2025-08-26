@@ -781,22 +781,24 @@ class TestProgramPopulationToPendingObjects(BaseTestCase):
         )
 
         assert Household.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 3
-        assert (
-            Individual.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 8
-        )  # 6 individuals from households + 2 external collectors
+        # 6 individuals from households + 2 external collectors
+        assert Individual.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 8
+        # 1 identity from self.household + 1 from external alternatecollector
         assert (
             IndividualIdentity.pending_objects.filter(
                 individual__program=program_to_without_exclude_external_collectors
             ).count()
             == 2
-        )  # 1 identity from self.household + 1 from external alternatecollector
+        )
         assert Document.pending_objects.filter(program=program_to_without_exclude_external_collectors).count() == 1
+        # 3 primary roles from households + 1 alternate role from household_1 + 1
+        # alternate external collector from household_2
         assert (
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_without_exclude_external_collectors
             ).count()
             == 5
-        )  # 3 primary roles from households + 1 alternate role from household_1 + 1 alternate external collector from household_2
+        )
         assert (
             Account.all_objects.filter(
                 rdi_merge_status=MergeStatusModel.PENDING,
@@ -817,22 +819,24 @@ class TestProgramPopulationToPendingObjects(BaseTestCase):
             rdi=registration_data_import,
         )
         assert Household.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 3
-        assert (
-            Individual.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 7
-        )  # 6 individuals from households + 1 external primary collector from household_1 (alternate from household_2 is excluded)
+        # 6 individuals from households + 1 external primary collector from household_1
+        # (alternate from household_2 is excluded)
+        assert Individual.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 7
+        # 1 identity from self.household (1 from external alternate collector is excluded)
         assert (
             IndividualIdentity.pending_objects.filter(
                 individual__program=program_to_exclude_external_collectors
             ).count()
             == 1
-        )  # 1 identity from self.household (1 from external alternate collector is excluded)
+        )
         assert Document.pending_objects.filter(program=program_to_exclude_external_collectors).count() == 1
+        # 3 primary roles from households + 1 alternate role from household_1 (alternate from household_2 is excluded)
         assert (
             IndividualRoleInHousehold.pending_objects.filter(
                 household__program=program_to_exclude_external_collectors
             ).count()
             == 4
-        )  # 3 primary roles from households + 1 alternate role from household_1 (alternate from household_2 is excluded)
+        )
         assert (
             Account.all_objects.filter(
                 rdi_merge_status=MergeStatusModel.PENDING,

@@ -3,11 +3,11 @@
 import uuid
 
 import django.contrib.postgres.fields.citext
+from django.contrib.postgres.operations import CITextExtension
+from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 import mptt.fields
-from django.contrib.postgres.operations import CITextExtension
-from django.db import migrations, models
 
 
 class Migration(migrations.Migration):

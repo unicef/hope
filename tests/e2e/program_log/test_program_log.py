@@ -1,9 +1,9 @@
 from datetime import datetime
 
-import pytest
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.program_log.payment_log import ProgramLog
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
+import pytest
 
 from hope.apps.account.models import User
 from hope.apps.program.models import Program

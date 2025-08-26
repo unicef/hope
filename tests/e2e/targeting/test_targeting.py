@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Callable
 
-import factory
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
@@ -30,6 +28,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+import factory
+import pytest
 from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -551,7 +551,10 @@ class TestCreateTargeting:
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
-        disability_expected_criteria_text = "Does the Social Worker have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
+        disability_expected_criteria_text = (
+            "Does the Social Worker have disability?: Difficulty hearing (even if "
+            "using a hearing aid), Difficulty seeing (even if wearing glasses)"
+        )
         assert page_targeting_create.get_criteria_container().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
         page_targeting_create.get_field_name().send_keys(targeting_name)
@@ -1499,8 +1502,8 @@ class TestTargeting:
         assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
         assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
-            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-            in page_targeting_create.get_criteria_container().text
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing "
+            "(even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
         page_targeting_create.get_button_edit().click()
         page_targeting_create.get_targeting_criteria_auto_complete_individual()
@@ -1518,8 +1521,8 @@ class TestTargeting:
         assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
         assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
-            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-            in page_targeting_create.get_criteria_container().text
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), "
+            "Difficulty seeing (even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
         assert (
             "Males age 0 - 5 with disability: 1 -10"

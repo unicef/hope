@@ -1,8 +1,8 @@
-import random
-import time
 from argparse import ArgumentParser
 from decimal import Decimal
 from functools import partial
+import random
+import time
 from typing import TYPE_CHECKING, Any, Callable
 
 from django.core.management import BaseCommand, call_command

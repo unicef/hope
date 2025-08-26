@@ -9,7 +9,6 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
-from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hope.api.models import Grant
 from hope.contrib.aurora.caches import (
@@ -18,6 +17,7 @@ from hope.contrib.aurora.caches import (
     RegistrationListVersionsKeyBit,
 )
 from hope.contrib.aurora.models import Organization, Project, Registration
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class ProjectListViewTests(HOPEApiTestCase):
@@ -85,7 +85,11 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert org["hope_id"] == str(self.business_area.pk)
         assert org["aurora_id"] == 777
 
-        cache_key = f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}"
+        cache_key = (
+            f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:"
+            f"{Organization.objects.latest('updated_at').updated_at}:"
+            f"{Organization.objects.all().count()}"
+        )
         assert cache.get(cache_key)
         assert len(queries) > 0
         # second call
@@ -113,7 +117,11 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert project["hope_id"] == str(self.program.pk)
         assert project["organization"] == "test_organization"
 
-        cache_key = f"{ProjectListVersionsKeyBit.specific_view_cache_key}:{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}"
+        cache_key = (
+            f"{ProjectListVersionsKeyBit.specific_view_cache_key}:"
+            f"{Project.objects.latest('updated_at').updated_at}:"
+            f"{Project.objects.all().count()}"
+        )
         assert cache.get(cache_key) is not None
         assert len(queries) > 0
         # second call

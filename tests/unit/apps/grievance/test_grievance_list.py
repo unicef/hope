@@ -1,8 +1,7 @@
-import json
 from datetime import datetime
+import json
 from typing import Any, Callable
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -14,6 +13,7 @@ from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

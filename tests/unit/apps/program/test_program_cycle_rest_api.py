@@ -16,7 +16,6 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
-from unit.api.base import HOPEApiTestCase
 
 from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
@@ -27,6 +26,7 @@ from hope.apps.program.api.serializers import (
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
 from hope.apps.program.models import Program, ProgramCycle
+from unit.api.base import HOPEApiTestCase
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):

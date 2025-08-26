@@ -2,7 +2,6 @@ from datetime import datetime
 from decimal import Decimal
 from time import sleep
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
@@ -17,6 +16,7 @@ from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from selenium.common.exceptions import NoSuchElementException
 
 from hope.apps.account.models import User
@@ -780,10 +780,12 @@ class TestProgrammeDetails:
 
         # ToDo: Lack of information about wrong date 212579
         # for _ in range(50):
-        #     if "Programme Cycles' timeframes must not overlap with the provided start date." in page_programme_details.get_start_date_cycle_div().text:
+        #     if ("Programme Cycles' timeframes must not overlap with the provided start date."
+        #             in page_programme_details.get_start_date_cycle_div().text):
         #         break
         #     sleep(0.1)
-        # assert "Programme Cycles' timeframes must not overlap with the provided start date." in page_programme_details.get_start_date_cycle_div().text
+        # assert ("Programme Cycles' timeframes must not overlap with the provided start date."
+        #         in page_programme_details.get_start_date_cycle_div().text)
 
         page_programme_details.get_start_date_cycle().click()
         page_programme_details.get_start_date_cycle().send_keys(

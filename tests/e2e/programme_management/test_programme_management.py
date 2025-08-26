@@ -1,8 +1,7 @@
-import random
 from datetime import datetime
+import random
 from time import sleep
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
@@ -17,6 +16,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -44,7 +44,8 @@ def create_unhcr_partner() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     partner_unhcr.role_assignments.all().delete()
     partner_unhcr.allowed_business_areas.add(afghanistan)
-    # TODO: below line can be removed after temporary solution is removed for partners. Only being allowed in BA is enough.
+    # TODO: below line can be removed after temporary solution is removed for partners.
+    # Only being allowed in BA is enough.
     RoleAssignmentFactory(
         partner=partner_unhcr,
         business_area=afghanistan,
