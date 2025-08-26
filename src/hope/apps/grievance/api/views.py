@@ -811,7 +811,7 @@ class GrievanceTicketGlobalViewSet(
         for field_name, item in individual_data.items():
             field_to_approve = individual_approve_data.get(field_name)
             if field_name in documents_mapping:
-                for index, document_data in enumerate(individual_data[field_name]):
+                for index, document_data in enumerate(item):
                     approved_documents_indexes = documents_mapping.get(field_name, [])
                     document_data["approve_status"] = index in approved_documents_indexes
             elif field_name == "flex_fields":

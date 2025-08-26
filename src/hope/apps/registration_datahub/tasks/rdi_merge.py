@@ -94,7 +94,8 @@ class RdiMergeTask:
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
                     logger.info(
-                        f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
+                        f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)}"
+                        f" households"
                     )
                     kobo_submissions = []
                     for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
@@ -173,7 +174,8 @@ class RdiMergeTask:
                             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
-                            f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
+                            f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)}"
+                            f" duplicates"
                         )
 
                         needs_adjudication = Individual.objects.filter(
@@ -192,7 +194,8 @@ class RdiMergeTask:
                             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
-                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)}"
+                            f" needs adjudication"
                         )
 
                     # SANCTION LIST CHECK
@@ -268,8 +271,10 @@ class RdiMergeTask:
 
     def _update_household_collections(self, households: QuerySet[Household], rdi: RegistrationDataImport) -> None:
         households_to_update = []
-        # if there are at least 2 households with the same unicef_id, they already have a collection - and new representation will be added to it
-        # if this is the 2nd representation - the collection is created now for the new representation and the existing one
+        # if there are at least 2 households with the same unicef_id, they already have a collection -
+        # and new representation will be added to it
+        # if this is the 2nd representation -
+        # the collection is created now for the new representation and the existing one
         for household in households:
             # find other household with the same unicef_id and group them in the same collection
             household_from_collection = (

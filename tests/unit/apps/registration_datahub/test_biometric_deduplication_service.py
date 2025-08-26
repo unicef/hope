@@ -125,7 +125,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     def test_upload_individuals_failure(self, mock_bulk_upload_images: mock.Mock) -> None:
-        mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIException
+        mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
         rdi = RegistrationDataImportFactory(
             program=self.program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
@@ -168,7 +168,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
 
         mock_process_deduplication.return_value = ({}, 409)
-        with self.assertRaises(BiometricDeduplicationService.BiometricDeduplicationServiceException):
+        with self.assertRaises(BiometricDeduplicationService.BiometricDeduplicationServiceError):
             service.process_deduplication_set(
                 str(self.program.deduplication_set_id),
                 RegistrationDataImport.objects.all(),
@@ -208,7 +208,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.save()
 
         with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceException,
+            BiometricDeduplicationService.BiometricDeduplicationServiceError,
             "Biometric deduplication is not enabled for this program",
         ):
             service.upload_and_process_deduplication_set(self.program)
@@ -230,7 +230,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.create_deduplication_set = mock.MagicMock()
         with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceException,
+            BiometricDeduplicationService.BiometricDeduplicationServiceError,
             "Deduplication is already in progress for some RDIs",
         ):
             service.upload_and_process_deduplication_set(self.program)
@@ -242,9 +242,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi_2.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
         rdi_2.save()
 
-        mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIException
+        mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
         with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceException,
+            BiometricDeduplicationService.BiometricDeduplicationServiceError,
             "Failed to upload images for all RDIs",
         ):
             service.upload_and_process_deduplication_set(self.program)

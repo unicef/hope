@@ -282,7 +282,7 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
-        """Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces."""
+        """Split input list of ids by literal 'new line' or any of "," "|" "/" or white spaces."""
         return [hh_id.strip() for hh_id in re.split(r"new line|[,\|/\s]+", household_list) if hh_id]
 
     @staticmethod
@@ -607,7 +607,8 @@ class HouseholdAdmin(
             request,
             self.logical_delete,
             """<h1>Household logical delete</h1>
-                <p>After this operation household will be marked as logical deleted and will be hidden in the application.</p>
+                <p>After this operation household will be marked as logical deleted
+                 and will be hidden in the application.</p>
                 """,
             "Successfully executed",
         )

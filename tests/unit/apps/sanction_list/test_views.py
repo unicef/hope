@@ -12,7 +12,7 @@ from extras.test_utils.factories.sanction_list import SanctionListIndividualFact
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_datahub.validators import XlsxException
+from hope.apps.registration_datahub.validators import XlsxError
 from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet
 
 pytestmark = pytest.mark.django_db
@@ -161,7 +161,7 @@ class TestSanctionListIndividualViewSet:
         with patch.object(
             SanctionListIndividualViewSet,
             "validate",
-            side_effect=XlsxException(error_payload),
+            side_effect=XlsxError(error_payload),
         ):
             response = self.client.post(self.url_check, {"file": file}, format="multipart")
 

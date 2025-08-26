@@ -18,18 +18,18 @@ class TestSmokeAccountabilitySurveys:
     def test_smoke_programme_users(
         self,
         test_program: Program,
-        pageProgrammeUsers: ProgrammeUsers,
+        page_programme_users: ProgrammeUsers,
     ) -> None:
-        pageProgrammeUsers.selectGlobalProgramFilter("Test Program")
-        pageProgrammeUsers.getNavProgrammeUsers().click()
-        assert "Users List" in pageProgrammeUsers.getTableTitle().text
-        assert "Name" in pageProgrammeUsers.getTableLabel()[1].text
-        assert "Status sorted descending" in pageProgrammeUsers.getTableLabel()[2].text.replace("\n", " ")
-        assert "Partner" in pageProgrammeUsers.getTableLabel()[3].text
-        assert "Email" in pageProgrammeUsers.getTableLabel()[4].text
-        assert "Last Login" in pageProgrammeUsers.getTableLabel()[5].text
-        assert "INVITED" in pageProgrammeUsers.getStatusContainer().text
-        assert "Rows per page: 10 1–1 of 1" in pageProgrammeUsers.getTablePagination().text.replace("\n", " ")
-        pageProgrammeUsers.getArrowDown().click()
-        assert "Country / Program / Role" in pageProgrammeUsers.getCountryRole().text
-        assert "Afghanistan / All / Role" in pageProgrammeUsers.getMappedCountryRole().text
+        page_programme_users.select_global_program_filter("Test Program")
+        page_programme_users.get_nav_programme_users().click()
+        assert "Users List" in page_programme_users.get_table_title().text
+        assert "Name" in page_programme_users.get_table_label()[1].text
+        assert "Status sorted descending" in page_programme_users.get_table_label()[2].text.replace("\n", " ")
+        assert "Partner" in page_programme_users.get_table_label()[3].text
+        assert "Email" in page_programme_users.get_table_label()[4].text
+        assert "Last Login" in page_programme_users.get_table_label()[5].text
+        assert "INVITED" in page_programme_users.get_status_container().text
+        assert "Rows per page: 10 1–1 of 1" in page_programme_users.get_table_pagination().text.replace("\n", " ")
+        page_programme_users.get_arrow_down().click()
+        assert "Country / Program / Role" in page_programme_users.get_country_role().text
+        assert "Afghanistan / All / Role" in page_programme_users.get_mapped_country_role().text

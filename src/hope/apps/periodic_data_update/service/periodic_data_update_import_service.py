@@ -60,7 +60,7 @@ def validation_error_to_json(
 ) -> Any:  # pragma: no cover
     """Recursively convert a Django ValidationError into a JSON-serializable format.
 
-    Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objects.
+    Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objs.
 
     Args:
         error (ValidationError): The ValidationError instance to convert.
@@ -246,7 +246,8 @@ class PeriodicDataUpdateImportService:
             current_value = self._get_round_value(individual, field_name, round_number)
             if current_value and value_from_xlsx:
                 raise ValidationError(
-                    f"Value already exists for field {field_name} for round {round_number} and individual {individual_unicef_id}"
+                    f"Value already exists for field {field_name} for round {round_number} "
+                    f"and individual {individual_unicef_id}"
                 )
             self.set_round_value(
                 individual,
