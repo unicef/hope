@@ -28,7 +28,7 @@ class TestMixinBaseAPI:
 
     def test_init_missing_credentials(self, api_class: Type[BaseAPI]) -> None:
         with patch.dict(os.environ, {"TEST_API_KEY": "", "TEST_API_URL": ""}):
-            with pytest.raises(BaseAPI.APIMissingCredentialsException) as exc:
+            with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
                 api_class()
             assert "Missing TestAPI Key/URL" in str(exc.value)
 
@@ -48,7 +48,7 @@ class TestMixinBaseAPI:
         mock_response.ok = False
         mock_response.content = b"Error"
         mock_response.url = "http://test-hope.com"
-        with pytest.raises(BaseAPI.APIException) as exc:
+        with pytest.raises(BaseAPI.APIError) as exc:
             api_instance.validate_response(mock_response)
         assert "Invalid response" in str(exc.value)
 

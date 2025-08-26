@@ -85,11 +85,11 @@ class TestDrawer:
     def test_social_worker_program_drawer_order(
         self,
         social_worker_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+        page_programme_management: ProgrammeManagement,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
-        pageProgrammeManagement.selectGlobalProgramFilter("Worker Program")
-        assert "Worker Program" in pageProgrammeDetails.getHeaderTitle().text
+        page_programme_management.select_global_program_filter("Worker Program")
+        assert "Worker Program" in page_programme_details.get_header_title().text
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
@@ -103,17 +103,17 @@ class TestDrawer:
             "Programme Users",
             "Programme Log",
         ]
-        actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
+        actual_menu_items = page_programme_management.get_drawer_items().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
     def test_normal_program_drawer_order(
         self,
         normal_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+        page_programme_management: ProgrammeManagement,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
-        pageProgrammeManagement.selectGlobalProgramFilter("Normal Program")
-        assert "Normal Program" in pageProgrammeDetails.getHeaderTitle().text
+        page_programme_management.select_global_program_filter("Normal Program")
+        assert "Normal Program" in page_programme_details.get_header_title().text
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
@@ -127,14 +127,14 @@ class TestDrawer:
             "Programme Users",
             "Programme Log",
         ]
-        actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
+        actual_menu_items = page_programme_management.get_drawer_items().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
     def test_all_program_drawer_order(
         self,
         social_worker_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+        page_programme_management: ProgrammeManagement,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
         expected_menu_items = [
             "Country Dashboard",
@@ -143,7 +143,7 @@ class TestDrawer:
             "Grievance",
             "Activity Log",
         ]
-        actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
+        actual_menu_items = page_programme_management.get_drawer_items().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
     def test_inactive_draft_subheader(
@@ -151,23 +151,23 @@ class TestDrawer:
         draft_program: Program,
         active_program: Program,
         finished_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+        page_programme_management: ProgrammeManagement,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
         draft_program_name = draft_program.name
         active_program_name = active_program.name
         finished_program_name = finished_program.name
 
-        pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name)
-        assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "Programme Inactive"
+        page_programme_management.select_global_program_filter(draft_program_name)
+        assert draft_program_name in page_programme_details.get_header_title().text
+        assert page_programme_details.get_drawer_inactive_subheader().text == "Programme Inactive"
 
-        pageProgrammeManagement.selectGlobalProgramFilter(active_program_name)
-        assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
+        page_programme_management.select_global_program_filter(active_program_name)
+        assert active_program_name in page_programme_details.get_header_title().text
         with pytest.raises(NoSuchElementException):
-            pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
+            page_programme_details.get_drawer_inactive_subheader(timeout=0.05)
 
         # first have to search Finished program because of default filtering
-        pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name)
-        assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "Programme Inactive"
+        page_programme_management.select_global_program_filter(finished_program_name)
+        assert finished_program_name in page_programme_details.get_header_title().text
+        assert page_programme_details.get_drawer_inactive_subheader().text == "Programme Inactive"

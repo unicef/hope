@@ -16,15 +16,26 @@ from django.utils import timezone
 from hope.apps.account.models import User
 from hope.apps.core.celery import app
 from hope.apps.core.models import FileTemp
+from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
-from hope.apps.payment.models import PaymentPlan, PaymentVerificationPlan
+from hope.apps.payment.models import (
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
-from hope.apps.payment.utils import generate_cache_key, get_quantity_in_usd
+from hope.apps.payment.utils import (
+    calculate_counts,
+    from_received_to_status,
+    generate_cache_key,
+    get_quantity_in_usd,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -32,6 +43,7 @@ from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
 from hope.apps.utils.logs import log_start_and_end
+from hope.apps.utils.phone import is_valid_phone_number
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
@@ -42,10 +54,6 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def get_sync_run_rapid_pro_task(self: Any) -> None:
     try:
-        from hope.apps.payment.tasks.CheckRapidProVerificationTask import (
-            CheckRapidProVerificationTask,
-        )
-
         CheckRapidProVerificationTask().execute()
     except Exception as e:
         logger.exception(e)
@@ -790,3 +798,69 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
             payment_plan.build_status_failed()
             payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)
+
+
+def does_payment_record_have_right_hoh_phone_number(record: Payment) -> bool:
+    hoh = record.head_of_household
+    if not hoh:
+        logging.warning("Payment record has no head of household")
+        return False
+    return hoh.phone_no_valid or hoh.phone_no_alternative_valid
+
+
+class CheckRapidProVerificationTask:
+    def execute(self) -> None:
+        active_rapidpro_verifications = PaymentVerificationPlan.objects.filter(
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
+        )
+        for payment_verification_plan in active_rapidpro_verifications:
+            try:
+                self._verify_cashplan_payment_verification(payment_verification_plan)
+            except Exception as e:
+                logger.exception(e)
+
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan) -> None:
+        payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
+            "payment__head_of_household"
+        )
+        business_area = payment_verification_plan.payment_plan.business_area
+        payment_record_verifications_phone_number_dict = {
+            str(payment_verification.payment.head_of_household.phone_no): payment_verification
+            for payment_verification in payment_record_verifications
+            if payment_verification.payment.head_of_household is not None
+        }
+        api = RapidProAPI(business_area.slug, RapidProAPI.MODE_VERIFICATION)
+        rapid_pro_results = api.get_mapped_flow_runs(payment_verification_plan.rapid_pro_flow_start_uuids)
+        payment_record_verification_to_update = self._get_payment_record_verification_to_update(
+            rapid_pro_results, payment_record_verifications_phone_number_dict
+        )
+        PaymentVerification.objects.bulk_update(payment_record_verification_to_update, ("status", "received_amount"))
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.save()
+
+    def _get_payment_record_verification_to_update(self, results: Any, phone_numbers: dict) -> list:
+        output = []
+        for rapid_pro_result in results:
+            payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
+                phone_numbers, rapid_pro_result
+            )
+            if payment_record_verification:
+                output.append(payment_record_verification)
+        return output
+
+    def _rapid_pro_results_to_payment_record_verification(
+        self, payment_record_verifications_phone_number_dict: Any, rapid_pro_result: Any
+    ) -> PaymentVerification | None:
+        received = rapid_pro_result.get("received")
+        received_amount = rapid_pro_result.get("received_amount")
+        phone_number = rapid_pro_result.get("phone_number")
+        if not phone_number or not is_valid_phone_number(phone_number):
+            return None
+        payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
+        if not payment_record_verification:
+            return None
+        delivered_amount = payment_record_verification.payment.delivered_quantity
+        payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
+        payment_record_verification.received_amount = received_amount
+        return payment_record_verification

@@ -22,7 +22,7 @@ class TestMarkSubmissions(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         create_afghanistan()
 
         cls.business_area = BusinessArea.objects.first()

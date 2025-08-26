@@ -5,176 +5,176 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class Individuals(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    indFiltersSearch = 'div[data-cy="ind-filters-search"]'
-    filterDocumentType = 'div[data-cy="filters-document-type"]'
-    indFiltersGender = 'div[data-cy="ind-filters-gender"]'
-    indFiltersAgeFrom = 'div[data-cy="ind-filters-age-from"]'
-    indFiltersAgeTo = 'div[data-cy="ind-filters-age-to"]'
-    indFiltersFlags = 'div[data-cy="ind-filters-flags"]'
-    indFiltersOrderBy = 'div[data-cy="ind-filters-order-by"]'
-    indFiltersStatus = 'div[data-cy="ind-filters-status"]'
-    datePickerFilter = 'div[data-cy="date-picker-filter"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    pageDetailsContainer = 'div[data-cy="page-details-container"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    sanctionListPossibleMatch = 'th[data-cy="sanction-list-possible-match"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    individualId = 'th[data-cy="individual-id"]'
-    individualName = 'th[data-cy="individual-name"]'
-    householdId = 'th[data-cy="household-id"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    ind_filters_search = 'div[data-cy="ind-filters-search"]'
+    filter_document_type = 'div[data-cy="filters-document-type"]'
+    ind_filters_gender = 'div[data-cy="ind-filters-gender"]'
+    ind_filters_age_from = 'div[data-cy="ind-filters-age-from"]'
+    ind_filters_age_to = 'div[data-cy="ind-filters-age-to"]'
+    ind_filters_flags = 'div[data-cy="ind-filters-flags"]'
+    ind_filters_order_by = 'div[data-cy="ind-filters-order-by"]'
+    ind_filters_status = 'div[data-cy="ind-filters-status"]'
+    date_picker_filter = 'div[data-cy="date-picker-filter"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    page_details_container = 'div[data-cy="page-details-container"]'
+    table_title = 'h6[data-cy="table-title"]'
+    sanction_list_possible_match = 'th[data-cy="sanction-list-possible-match"]'
+    table_label = 'span[data-cy="table-label"]'
+    individual_id = 'th[data-cy="individual-id"]'
+    individual_name = 'th[data-cy="individual-name"]'
+    household_id = 'th[data-cy="household-id"]'
     relationship = 'th[data-cy="relationship"]'
-    individualAge = 'th[data-cy="individual-age"]'
-    individualSex = 'th[data-cy="individual-sex"]'
-    individualLocation = 'th[data-cy="individual-location"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"'
+    individual_age = 'th[data-cy="individual-age"]'
+    individual_sex = 'th[data-cy="individual-sex"]'
+    individual_location = 'th[data-cy="individual-location"]'
+    table_row = 'tr[data-cy="table-row"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    individual_table_row = 'tr[data-cy="individual-table-row"'
 
     # PDU
-    tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'
-    buttonImport = 'button[data-cy="button-import"]'
-    dialogImport = 'div[data-cy="dialog-import"]'
-    fileInput = 'input[data-cy="file-input"]'
-    closeButton = 'button[data-cy="close-button"]'
-    buttonImportSubmit = 'button[data-cy="button-import-submit"]'
-    updateStatus = 'td[data-cy="update-status-{}"]'
-    templateStatus = 'td[data-cy="template-status-{}"]'
-    templateAction = 'td[data-cy="template-action-{}"]'
-    updateDetailsBtn = 'button[data-cy="update-details-btn-{}"]'
-    downloadBtn = 'a[data-cy="download-btn-{}"]'
-    exportBtn = 'button[data-cy="export-btn-{}"]'
-    pduUpdates = 'button[data-cy="pdu-updates"]'
-    statusContainer = '[data-cy="status-container"]'
-    pduFormErrors = 'div[data-cy="pdu-form-errors"]'
-    pduUploadError = 'div[data-cy="pdu-upload-error"]'
+    tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
+    button_import = 'button[data-cy="button-import"]'
+    dialog_import = 'div[data-cy="dialog-import"]'
+    file_input = 'input[data-cy="file-input"]'
+    close_button = 'button[data-cy="close-button"]'
+    button_import_submit = 'button[data-cy="button-import-submit"]'
+    update_status = 'td[data-cy="update-status-{}"]'
+    template_status = 'td[data-cy="template-status-{}"]'
+    template_action = 'td[data-cy="template-action-{}"]'
+    update_details_btn = 'button[data-cy="update-details-btn-{}"]'
+    download_btn = 'a[data-cy="download-btn-{}"]'
+    export_btn = 'button[data-cy="export-btn-{}"]'
+    pdu_updates = 'button[data-cy="pdu-updates"]'
+    status_container = '[data-cy="status-container"]'
+    pdu_form_errors = 'div[data-cy="pdu-form-errors"]'
+    pdu_upload_error = 'div[data-cy="pdu-upload-error"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getIndFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.indFiltersSearch)
+    def get_ind_filters_search(self) -> WebElement:
+        return self.wait_for(self.ind_filters_search)
 
-    def getFilterDocumentType(self) -> WebElement:
-        return self.wait_for(self.filterDocumentType)
+    def get_filter_document_type(self) -> WebElement:
+        return self.wait_for(self.filter_document_type)
 
-    def getIndFiltersGender(self) -> WebElement:
-        return self.wait_for(self.indFiltersGender)
+    def get_ind_filters_gender(self) -> WebElement:
+        return self.wait_for(self.ind_filters_gender)
 
-    def getIndFiltersAgeFrom(self) -> WebElement:
-        return self.wait_for(self.indFiltersAgeFrom)
+    def get_ind_filters_age_from(self) -> WebElement:
+        return self.wait_for(self.ind_filters_age_from)
 
-    def getIndFiltersAgeTo(self) -> WebElement:
-        return self.wait_for(self.indFiltersAgeTo)
+    def get_ind_filters_age_to(self) -> WebElement:
+        return self.wait_for(self.ind_filters_age_to)
 
-    def getIndFiltersFlags(self) -> WebElement:
-        return self.wait_for(self.indFiltersFlags)
+    def get_ind_filters_flags(self) -> WebElement:
+        return self.wait_for(self.ind_filters_flags)
 
-    def getIndFiltersOrderBy(self) -> WebElement:
-        return self.wait_for(self.indFiltersOrderBy)
+    def get_ind_filters_order_by(self) -> WebElement:
+        return self.wait_for(self.ind_filters_order_by)
 
-    def getIndFiltersStatus(self) -> WebElement:
-        return self.wait_for(self.indFiltersStatus)
+    def get_ind_filters_status(self) -> WebElement:
+        return self.wait_for(self.ind_filters_status)
 
-    def getDatePickerFilter(self) -> WebElement:
-        return self.wait_for(self.datePickerFilter)
+    def get_date_picker_filter(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getPageDetailsContainer(self) -> WebElement:
-        return self.wait_for(self.pageDetailsContainer)
+    def get_page_details_container(self) -> WebElement:
+        return self.wait_for(self.page_details_container)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getSanctionListPossibleMatch(self) -> WebElement:
-        return self.wait_for(self.sanctionListPossibleMatch)
+    def get_sanction_list_possible_match(self) -> WebElement:
+        return self.wait_for(self.sanction_list_possible_match)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getIndividualId(self) -> WebElement:
-        return self.wait_for(self.individualId)
+    def get_individual_id(self) -> WebElement:
+        return self.wait_for(self.individual_id)
 
-    def getIndividualName(self) -> WebElement:
-        return self.wait_for(self.individualName)
+    def get_individual_name(self) -> WebElement:
+        return self.wait_for(self.individual_name)
 
-    def getHouseholdId(self) -> WebElement:
-        return self.wait_for(self.householdId)
+    def get_household_id(self) -> WebElement:
+        return self.wait_for(self.household_id)
 
-    def getRelationship(self) -> WebElement:
+    def get_relationship(self) -> WebElement:
         return self.wait_for(self.relationship)
 
-    def getIndividualAge(self) -> WebElement:
-        return self.wait_for(self.individualAge)
+    def get_individual_age(self) -> WebElement:
+        return self.wait_for(self.individual_age)
 
-    def getIndividualSex(self) -> WebElement:
-        return self.wait_for(self.individualSex)
+    def get_individual_sex(self) -> WebElement:
+        return self.wait_for(self.individual_sex)
 
-    def getIndividualLocation(self) -> WebElement:
-        return self.wait_for(self.individualLocation)
+    def get_individual_location(self) -> WebElement:
+        return self.wait_for(self.individual_location)
 
-    def getTableRow(self) -> [WebElement]:
-        return self.get_elements(self.tableRow)
+    def get_table_row(self) -> [WebElement]:
+        return self.get_elements(self.table_row)
 
-    def getIndividualTableRow(self) -> [WebElement]:
-        self.wait_for(self.individualTableRow)
-        return self.get_elements(self.individualTableRow)
+    def get_individual_table_row(self) -> [WebElement]:
+        self.wait_for(self.individual_table_row)
+        return self.get_elements(self.individual_table_row)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
     # PDU
-    def getTabPeriodicDataUpdates(self) -> WebElement:
-        return self.wait_for(self.tabPeriodicDataUpdates)
+    def get_tab_periodic_data_updates(self) -> WebElement:
+        return self.wait_for(self.tab_periodic_data_updates)
 
-    def getButtonImport(self) -> WebElement:
-        return self.wait_for(self.buttonImport)
+    def get_button_import(self) -> WebElement:
+        return self.wait_for(self.button_import)
 
-    def getDialogImport(self) -> WebElement:
-        return self.wait_for(self.dialogImport)
+    def get_dialog_import(self) -> WebElement:
+        return self.wait_for(self.dialog_import)
 
-    def getFileInput(self) -> WebElement:
-        return self.wait_for(self.fileInput)
+    def get_file_input(self) -> WebElement:
+        return self.wait_for(self.file_input)
 
-    def getCloseButton(self) -> WebElement:
-        return self.wait_for(self.closeButton)
+    def get_close_button(self) -> WebElement:
+        return self.wait_for(self.close_button)
 
-    def getButtonImportSubmit(self) -> WebElement:
-        return self.wait_for(self.buttonImportSubmit)
+    def get_button_import_submit(self) -> WebElement:
+        return self.wait_for(self.button_import_submit)
 
-    def getUpdateStatus(self, pk: Union[int, str]) -> WebElement:
-        return self.wait_for(self.updateStatus.format(pk))
+    def get_update_status(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.update_status.format(pk))
 
-    def getDownloadBtn(self, pk: Union[int, str]) -> WebElement:
-        return self.wait_for(self.downloadBtn.format(pk))
+    def get_download_btn(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.download_btn.format(pk))
 
-    def getExportBtn(self, pk: Union[int, str]) -> WebElement:
-        return self.wait_for(self.exportBtn.format(pk))
+    def get_export_btn(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.export_btn.format(pk))
 
-    def getUpdateDetailsBtn(self, pk: Union[int, str]) -> WebElement:
-        return self.wait_for(self.updateDetailsBtn.format(pk))
+    def get_update_details_btn(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.update_details_btn.format(pk))
 
-    def getPduUpdates(self) -> WebElement:
-        return self.wait_for(self.pduUpdates)
+    def get_pdu_updates(self) -> WebElement:
+        return self.wait_for(self.pdu_updates)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getPduFormErrors(self) -> WebElement:
-        return self.wait_for(self.pduFormErrors)
+    def get_pdu_form_errors(self) -> WebElement:
+        return self.wait_for(self.pdu_form_errors)
 
-    def getPduUploadError(self) -> WebElement:
-        return self.wait_for(self.pduUploadError)
+    def get_pdu_upload_error(self) -> WebElement:
+        return self.wait_for(self.pdu_upload_error)
 
-    def getTemplateStatus(self, pk: Union[int, str]) -> WebElement:
-        return self.wait_for(self.templateStatus.format(pk))
+    def get_template_status(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.template_status.format(pk))

@@ -35,7 +35,7 @@ class TestPeopleRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         admin1 = AreaFactory(p_code="UA07", name="Name1")
         admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
         AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)

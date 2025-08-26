@@ -22,7 +22,7 @@ factories_registry = {}
 
 
 class AutoRegisterFactoryMetaClass(FactoryMetaClass):
-    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:
+    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:  # noqa
         new_class = super().__new__(mcs, class_name, bases, attrs)
         factories_registry[new_class._meta.model] = new_class
         return new_class

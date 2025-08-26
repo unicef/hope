@@ -130,7 +130,7 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
         date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
-        PLANNED_STATUSES = [
+        PLANNED_STATUSES = [  # noqa
             PaymentPlan.Status.IN_APPROVAL,
             PaymentPlan.Status.IN_AUTHORIZATION,
             PaymentPlan.Status.IN_REVIEW,

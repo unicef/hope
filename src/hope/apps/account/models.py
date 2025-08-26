@@ -288,12 +288,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     @cached_property
     def all_permissions_in_business_areas(self) -> dict[str, set[str]]:
-        """Return list of permissions for the given business area and program.
+        """
+        Return a dictionary mapping business area IDs to sets of permissions for the user.
 
-        retrieved from RoleAssignments of the user and their partner
+        Permissions are retrieved from RoleAssignments of the user and their partner, for all business areas associated with the user.
         """
         content_types_dict = {
-            str(pk): app_lablel for pk, app_lablel in ContentType.objects.values_list("id", "app_label")
+            str(pk): app_label for pk, app_label in ContentType.objects.values_list("id", "app_label")
         }
         role_assignments = (
             RoleAssignment.objects.filter(Q(partner__user=self) | Q(user=self))

@@ -76,7 +76,7 @@ class TestRdiXlsxCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         generate_delivery_mechanisms()
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.INTEGER,

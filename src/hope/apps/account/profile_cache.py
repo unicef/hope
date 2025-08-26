@@ -7,8 +7,8 @@ from rest_framework_extensions.key_constructor.constructors import KeyConstructo
 
 _NS = "v2"  # if we change something, bump the version
 
-class ProfileVersioner:
 
+class ProfileVersioner:
     def _global_key(self) -> str:
         return f"profile:global:{_NS}"
 
@@ -44,17 +44,21 @@ class ProfileVersioner:
         g, u = self.get_versions(user_id)
         return f"profile:{user_id}:{g}.{u}"
 
+
 profile_cache = ProfileVersioner()
+
 
 class ProfileEtagKey:
     def __call__(self, view_instance, view_method, request, args, kwargs) -> str:
         return profile_cache.etag_for(request.user.id)
 
+
 class ProfileVersionsKeyBit(KeyBitBase):
     def get_data(self, params, view_instance, view_method, request, args, kwargs):
         return profile_cache.cache_key_for(request.user.id)
 
+
 class ProfileKeyConstructor(KeyConstructor):
-    profile_version  = ProfileVersionsKeyBit()
+    profile_version = ProfileVersionsKeyBit()
     unique_method_id = bits.UniqueMethodIdKeyBit()
-    params           = bits.KwargsKeyBit()
+    params = bits.KwargsKeyBit()

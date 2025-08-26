@@ -1,8 +1,5 @@
 import logging
-from functools import wraps
-from typing import Any, Callable
-
-from django.db import transaction
+from typing import Any
 
 from hope.apps.core.celery import app
 from hope.apps.core.models import XLSXKoboTemplate
@@ -13,23 +10,6 @@ from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
-
-
-class transaction_celery_task:  # used as decorator
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.task_args = args
-        self.task_kwargs = kwargs
-
-    def __call__(self, func: Callable) -> Any:
-        @wraps(func)
-        def wrapper_func(*args: Any, **kwargs: Any) -> None:
-            try:
-                with transaction.atomic():
-                    return func(*args, **kwargs)
-            except Exception as e:
-                logger.exception(e)
-
-        return app.task(*self.task_args, **self.task_kwargs)(wrapper_func)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)

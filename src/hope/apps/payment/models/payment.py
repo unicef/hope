@@ -2325,7 +2325,8 @@ class PaymentDataCollector(Account):
         if not dm_config:
             return True
 
-        for field in dm_config.required_fields:
+        for field_value in dm_config.required_fields:
+            field = field_value
             if fsp_name_mapping := fsp_names_mappings.get(field):
                 field = fsp_name_mapping.hope_name
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)

@@ -28,10 +28,12 @@ def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
                 if isinstance(field_instance, DateTimeField | DateField):
                     if field_value is None:
                         continue
-                    field_value = parse(field_value, fuzzy=True)
-                if isinstance(field_instance, IntegerField) and not field_value:
+                    parsed_field_value = parse(field_value, fuzzy=True)
+                else:
+                    parsed_field_value = field_value
+                if isinstance(field_instance, IntegerField) and not parsed_field_value:
                     continue
-                clean_data[field_name] = field_instance.clean(field_value)
+                clean_data[field_name] = field_instance.clean(parsed_field_value)
         return clean_data or None
     return None
 

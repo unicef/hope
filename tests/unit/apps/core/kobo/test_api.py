@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from hope.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
+from hope.apps.core.kobo.api import CountryCodeNotProvidedError, KoboAPI
 
 
 class TestKoboAPI:
@@ -15,7 +15,7 @@ class TestKoboAPI:
     def test_get_all_projects_with_not_provided_country_code(self) -> None:
         service = KoboAPI()
 
-        with pytest.raises(CountryCodeNotProvided):
+        with pytest.raises(CountryCodeNotProvidedError):
             service.get_all_projects_data(None)  # type: ignore[arg-type]
 
     @pytest.mark.vcr

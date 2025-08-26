@@ -9,7 +9,10 @@ from hope.apps.payment.models import PaymentVerificationPlan
 from hope.apps.payment.utils import get_number_of_samples
 
 if TYPE_CHECKING:
-    from hope.apps.payment.models import Payment, PaymentPlan  # pragma: no cover
+    from hope.apps.payment.models import (
+        Payment,  # pragma: no cover
+        PaymentPlan,
+    )
 
 
 class Sampling:
