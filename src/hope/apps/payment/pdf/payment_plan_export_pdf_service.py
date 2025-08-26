@@ -44,7 +44,10 @@ class PaymentPlanPDFExportService:
         )
 
     def get_email_context(self, user: "User") -> dict:
-        msg = "Payment Plan Summary PDF file(s) have been generated, and below you will find the link to download the file(s)."
+        msg = (
+            "Payment Plan Summary PDF file(s) have been generated, "
+            "and below you will find the link to download the file(s)."
+        )
 
         return {
             "first_name": getattr(user, "first_name", ""),

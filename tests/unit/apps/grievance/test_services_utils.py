@@ -1,9 +1,7 @@
-import uuid
 from typing import Any
 from unittest.mock import MagicMock, patch
+import uuid
 
-import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
@@ -28,10 +26,11 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.account.models import AdminAreaLimitedTo
-from hope.apps.core.models import BusinessArea
-from hope.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
+from hope.apps.core.models import BusinessArea, FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -277,8 +276,8 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
         assert (
-            f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
-            in str(e.value)
+            f"The selected individual {individuals[0].unicef_id} is not valid, "
+            f"must be one of those attached to the ticket" in str(e.value)
         )
 
         ticket_details.possible_duplicates.add(individuals[0])
@@ -330,14 +329,15 @@ class TestGrievanceUtils(TestCase):
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert (
             e.value.args[0]
-            == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
+            "individuals is withdrawn or duplicate"
         )
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert (
-            e.value.args[0]
-            == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            e.value.args[0] == "Close ticket is possible when at least one individual is flagged as distinct or one "
+            "of the individuals is withdrawn or duplicate"
         )
 
         ticket_details.selected_distinct.add(individuals_2[0])
@@ -523,7 +523,8 @@ class TestGrievanceUtils(TestCase):
             close_needs_adjudication_ticket_service(gr, user)
         assert (
             e.value.args[0]
-            == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
+            "individuals is withdrawn or duplicate"
         )
 
     @patch.dict(
@@ -534,7 +535,10 @@ class TestGrievanceUtils(TestCase):
         },
     )
     @patch(
-        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_false_positive_duplicate"
     )
     def test_close_needs_adjudication_ticket_service_for_biometrics(
         self, report_false_positive_duplicate_mock: MagicMock

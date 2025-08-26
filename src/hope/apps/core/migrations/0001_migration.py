@@ -2,14 +2,14 @@
 
 import uuid
 
+from django.conf import settings
 import django.contrib.postgres.fields
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
 import mptt.fields
-from django.conf import settings
-from django.db import migrations, models
 
 import hope.apps.core.models
 

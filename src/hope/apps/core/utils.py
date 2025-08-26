@@ -1,17 +1,16 @@
+from collections import OrderedDict
+from collections.abc import MutableMapping
+from copy import deepcopy
+from datetime import date, datetime
+from decimal import Decimal
 import functools
 import io
 import itertools
 import json
 import logging
 import string
-from collections import OrderedDict
-from collections.abc import MutableMapping
-from copy import deepcopy
-from datetime import date, datetime
-from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional, Union
 
-import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
 from django.core.cache import cache
@@ -23,6 +22,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
 from PIL import Image
+import pytz
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.utils.exceptions import log_and_raise
@@ -821,8 +821,7 @@ def clear_cache_for_key(key: str) -> None:
             cache.delete(k)
 
 
-"""Constants for the identification type field to key mapping, used until other systems are updated to use the new keys"""
-
+# Constants for the identification type field to key mapping, used until other systems are updated to use the new keys
 IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
 IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
 IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"

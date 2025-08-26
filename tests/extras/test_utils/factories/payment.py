@@ -1,13 +1,16 @@
-import random
-import string
 from datetime import timedelta
 from decimal import Decimal
+import random
 from random import randint
+import string
 from typing import Any, Optional
 from uuid import UUID
 
-import factory
 from django.utils import timezone
+import factory
+from factory.django import DjangoModelFactory
+from pytz import utc
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.geo import CountryFactory
@@ -29,9 +32,6 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from factory.django import DjangoModelFactory
-from pytz import utc
-
 from hope.apps.account.models import User
 from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.models import BusinessArea, DataCollectingType

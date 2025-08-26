@@ -1,7 +1,6 @@
 import os
 from time import sleep
 
-import pytest
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
@@ -14,6 +13,7 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from selenium.webdriver.common.by import By
 
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData

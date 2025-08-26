@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Any
 
-import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.urls import reverse
@@ -16,6 +15,7 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions

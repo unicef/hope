@@ -1,4 +1,3 @@
-import pytest
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -17,6 +16,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType

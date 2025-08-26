@@ -1,11 +1,8 @@
-import os
-import zipfile
 from datetime import datetime
+import os
 from time import sleep
+import zipfile
 
-import factory
-import openpyxl
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
@@ -30,6 +27,9 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+import factory
+import openpyxl
+import pytest
 from pytz import utc
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By

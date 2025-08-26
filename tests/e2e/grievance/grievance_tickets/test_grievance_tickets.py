@@ -3,7 +3,6 @@ from datetime import datetime
 from time import sleep
 from typing import Optional
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
 from e2e.filters.test_filters import create_grievance
@@ -27,6 +26,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement

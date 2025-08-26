@@ -1,6 +1,6 @@
-import logging
 from collections import defaultdict
-from functools import lru_cache, cached_property
+from functools import cached_property, lru_cache
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -220,7 +220,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
-        """Return list of program ids that the user (or user's partner) has permissions for in the given business area."""
+        """Return list of program ids that the user (or user's partner) has permissions in selected business area."""
         from hope.apps.program.models import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
@@ -290,7 +290,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def all_permissions_in_business_areas(self) -> dict[str, set[str]]:
         """Return a dictionary mapping business area IDs to sets of permissions for the user.
 
-        Permissions are retrieved from RoleAssignments of the user and their partner, for all business areas associated with the user.
+        Permissions are retrieved from RoleAssignments of the user and their partner, for all business areas
+        associated with the user.
         """
         content_types_dict = {
             str(pk): app_label for pk, app_label in ContentType.objects.values_list("id", "app_label")
@@ -635,7 +636,8 @@ class IncompatibleRolesManager(models.Manager):
             raise ValidationError(
                 {
                     "role": _(
-                        f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+                        f"This role is incompatible with "
+                        f"{', '.join([userrole.role.name for userrole in incompatible_userroles])}"
                     )
                 }
             )

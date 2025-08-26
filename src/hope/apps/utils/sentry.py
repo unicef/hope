@@ -1,5 +1,5 @@
-import logging
 from functools import wraps
+import logging
 from typing import Any, Callable
 
 from sentry_sdk import configure_scope, set_tag

@@ -2,6 +2,7 @@ import base64
 from typing import Callable
 
 import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory
 
 

@@ -9,8 +9,7 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hope.apps.geo.models import Area
-from hope.apps.geo.models import Country as GeoCountry
+from hope.apps.geo.models import Area, Country as GeoCountry
 from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.apps.household.models import (
     GOVERNMENT_PARTNER,

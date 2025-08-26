@@ -1,7 +1,6 @@
 import logging
 from typing import TYPE_CHECKING, Any, Callable
 
-import xlrd
 from admin_extra_buttons.api import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -17,6 +16,7 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
+import xlrd
 from xlrd import XLRDError
 
 from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
