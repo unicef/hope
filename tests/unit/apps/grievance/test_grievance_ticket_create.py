@@ -476,7 +476,7 @@ class TestGrievanceTicketCreate:
             role=ROLE_ALTERNATE,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
-        extras = {
+        extras: dict[str, Any] = {
             "issue_type": {
                 "household_data_update_issue_type_extras": {
                     "household": str(household.pk),
@@ -505,12 +505,10 @@ class TestGrievanceTicketCreate:
         assert TicketComplaintDetails.objects.all().count() == 0
         response = self.api_client.post(self.list_url, input_data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert (
-            f"Duplicate roles are not allowed: {ROLE_PRIMARY}"
-            in response.json()["extras"]["issue_type"]["household_data_update_issue_type_extras"]["household_data"][
-                "roles"
-            ]
-        )
+        errors = response.json()["extras"]["issue_type"]["household_data_update_issue_type_extras"]["household_data"][
+            "roles"
+        ]
+        assert f"Duplicate roles are not allowed: {ROLE_PRIMARY}" in errors
         # coverage
         extras["issue_type"]["household_data_update_issue_type_extras"]["household_data"]["roles"] = [
             {"individual": str(individual.pk), "new_role": ROLE_PRIMARY},

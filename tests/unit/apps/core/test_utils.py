@@ -26,7 +26,7 @@ class TestCoreUtils(TestCase):
         )
         assert get_payment_delivered_quantity_status_and_value(0, Decimal(10.00)) == (
             Payment.STATUS_NOT_DISTRIBUTED,
-            0,
+            Decimal(0),
         )
         assert get_payment_delivered_quantity_status_and_value(5.00, Decimal(10.00)) == (
             Payment.STATUS_DISTRIBUTION_PARTIAL,

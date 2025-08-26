@@ -248,7 +248,7 @@ class TestExchangeRates(TestCase):
         assert xeu_second_historical_rate.past_ratio == 1
 
         # dispersion_date not provided, return current rate
-        assert xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None) == xeu.x_rate * xeu.ratio
+        assert xeu.get_exchange_rate_by_dispersion_date(dispersion_date=timezone.now()) == xeu.x_rate * xeu.ratio
         # dispersion_date from current valid date range, return current rate
         assert (
             xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 12, 15, 0, 0))

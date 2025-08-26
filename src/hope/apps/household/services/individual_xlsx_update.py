@@ -149,7 +149,7 @@ class IndividualXlsxUpdate:
 
         if not form.is_valid():
             if "phone_no" in form.errors:
-                form.errors["phone_no"] = [f"Invalid phone number for individual {individual.unicef_id}."]
+                form.errors["phone_no"].append(f"Invalid phone number for individual {individual.unicef_id}.")
             raise ValidationError(form.errors)
         # TODO: add 'program_id' arg or None? individual.program_id
         log_create(

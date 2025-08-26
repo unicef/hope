@@ -331,7 +331,7 @@ class NewTicket(BaseComponents):
     def get_look_up_button(self) -> WebElement:
         return self.wait_for(self.look_up_button)
 
-    def get_look_up_payment_record(self) -> [WebElement]:
+    def get_look_up_payment_record(self) -> list[WebElement]:
         return self.get_elements(self.look_up_button)[1]
 
     def get_checkbox(self) -> WebElement:

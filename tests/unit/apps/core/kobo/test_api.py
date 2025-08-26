@@ -16,7 +16,7 @@ class TestKoboAPI:
         service = KoboAPI()
 
         with pytest.raises(CountryCodeNotProvidedError):
-            service.get_all_projects_data(None)  # type: ignore[arg-type]
+            service.get_all_projects_data(None)
 
     @pytest.mark.vcr
     def test_get_all_projects_filter_by_country_code(self) -> None:

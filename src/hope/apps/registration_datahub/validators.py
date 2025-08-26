@@ -7,7 +7,7 @@ import logging
 from operator import itemgetter
 from pathlib import Path
 import re
-from typing import Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Sequence
 from zipfile import BadZipfile
 
 from dateutil import parser
@@ -46,6 +46,9 @@ from hope.apps.registration_datahub.utils import (
 from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class XlsxError(Exception):
@@ -1594,7 +1597,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
             if business_area.get_sys_option("ignore_amended_kobo_submissions"):
                 all_saved_submissions = all_saved_submissions.filter(amended=False)
-            all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
+            all_saved_submissions: QuerySet[dict[str, Any]] = all_saved_submissions.values(
+                "kobo_submission_uuid", "kobo_submission_time"
+            )
 
             all_saved_submissions_dict = {}
             for submission in all_saved_submissions:

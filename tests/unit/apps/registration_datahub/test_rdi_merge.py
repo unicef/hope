@@ -289,7 +289,7 @@ class TestRdiMergeTask(TestCase):
         assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address == "Wallet Address 1"
 
         household_data: Dict = model_to_dict(
-            household,  # type: ignore
+            household,
             (
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",

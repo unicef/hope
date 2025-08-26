@@ -867,7 +867,7 @@ class Household(
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
 
     @property
-    def active_individuals(self) -> QuerySet:
+    def active_individuals(self) -> QuerySet["Individual"]:
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
     @cached_property
@@ -929,15 +929,15 @@ class PendingHousehold(Household):
     objects = PendingManager()
 
     @property
-    def individuals(self) -> QuerySet:
+    def individuals(self) -> "QuerySet[Any]":
         return super().individuals(manager="pending_objects")
 
     @property
-    def individuals_and_roles(self) -> QuerySet:
+    def individuals_and_roles(self) -> "QuerySet[Any]":
         return super().individuals_and_roles(manager="pending_objects")
 
     @property
-    def pending_representatives(self) -> QuerySet:
+    def pending_representatives(self) -> "QuerySet[Any]":
         return super().representatives(manager="pending_objects")
 
     @cached_property

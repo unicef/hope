@@ -143,7 +143,7 @@ class TestHousehold(TestCase):
 
     def test_geopoint(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.geopoint = 1.2, 0.5  # type: ignore
+        household.geopoint = (1.2, 0.5)
         assert household.longitude == 1.2
         assert household.latitude == 0.5
         household.geopoint = None

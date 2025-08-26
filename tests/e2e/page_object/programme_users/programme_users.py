@@ -51,7 +51,7 @@ class ProgrammeUsers(BaseComponents):
     def get_table_title(self) -> WebElement:
         return self.wait_for(self.table_title)
 
-    def get_table_label(self) -> [WebElement]:
+    def get_table_label(self) -> list[WebElement]:
         self.wait_for(self.table_label)
         return self.get_elements(self.table_label)
 

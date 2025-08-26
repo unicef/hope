@@ -169,7 +169,7 @@ class TestPaymentPlanReconciliation(BaseTestCase):
         expected_delivered_quantity: Decimal,
         expected_status: str,
     ) -> None:
-        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(created_by=self.user), None)  # type: ignore
+        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(created_by=self.user), None)
 
         if not expected_status:
             with self.assertRaisesMessage(

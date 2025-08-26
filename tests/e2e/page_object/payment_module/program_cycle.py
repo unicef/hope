@@ -84,7 +84,7 @@ class ProgramCyclePage(BaseComponents):
     def get_head_cell_empty(self) -> WebElement:
         return self.wait_for(self.head_cell_empty)
 
-    def get_program_cycle_row(self) -> [WebElement]:
+    def get_program_cycle_row(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_row)
         return self.get_elements(self.program_cycle_row)
 
@@ -100,11 +100,11 @@ class ProgramCyclePage(BaseComponents):
     def get_program_cycle_end_date(self) -> WebElement:
         return self.wait_for(self.program_cycle_end_date)
 
-    def get_program_cycle_start_date_list(self) -> [WebElement]:
+    def get_program_cycle_start_date_list(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_start_date)
         return self.get_elements(self.program_cycle_start_date)
 
-    def get_program_cycle_end_date_list(self) -> [WebElement]:
+    def get_program_cycle_end_date_list(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_end_date)
         return self.get_elements(self.program_cycle_end_date)
 
@@ -114,7 +114,7 @@ class ProgramCyclePage(BaseComponents):
     def get_table_pagination(self) -> WebElement:
         return self.wait_for(self.table_pagination)
 
-    def get_table_program_cycle_title(self) -> [WebElement]:
+    def get_table_program_cycle_title(self) -> list[WebElement]:
         return self.get_elements(self.program_cycle_title)
 
     def get_program_cycle_id(self) -> WebElement:
