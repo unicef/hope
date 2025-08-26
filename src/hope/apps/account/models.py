@@ -293,7 +293,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         retrieved from RoleAssignments of the user and their partner
         """
         content_types_dict = {
-            str(pk): app_lablel for pk, app_lablel in ContentType.objects.values_list("id", "app_label")
+            str(pk): app_label for pk, app_label in ContentType.objects.values_list("id", "app_label")
         }
         role_assignments = (
             RoleAssignment.objects.filter(Q(partner__user=self) | Q(user=self))
