@@ -371,7 +371,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             )
             .annotate(partner_program=Value(obj.id))
             .annotate(
-                has_admin_area_limit=Exists(
+                annotate_has_admin_area_limit=Exists(
                     AdminAreaLimitedTo.objects.filter(
                         partner_id=OuterRef("pk"),
                         program_id=obj.pk,
@@ -479,6 +479,14 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             Partner.objects.filter(
                 Q(role_assignments__program=obj)
                 | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
+            )
+            .annotate(
+                annotate_has_admin_area_limit=Exists(
+                    AdminAreaLimitedTo.objects.filter(
+                        partner_id=OuterRef("pk"),
+                        program_id=obj.pk,
+                    )
+                )
             )
             .annotate(partner_program=Value(obj.id))
             .order_by("name")
@@ -593,6 +601,14 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
                 | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
             )
             .annotate(partner_program=Value(obj.id))
+            .annotate(
+                annotate_has_admin_area_limit=Exists(
+                    AdminAreaLimitedTo.objects.filter(
+                        partner_id=OuterRef("pk"),
+                        program_id=obj.pk,
+                    )
+                )
+            )
             .order_by("name")
             .distinct()
         )

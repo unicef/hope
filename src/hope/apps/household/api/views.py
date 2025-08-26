@@ -271,7 +271,40 @@ class HouseholdGlobalViewSet(
     filterset_class = HouseholdFilter
     admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
+    def get_list_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("head_of_household", "admin1", "admin2", "program")
+            .annotate(
+                annotate_has_sanction_list_possible_match=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        sanction_list_possible_match=True,
+                    )
+                )
+            )
+            .annotate(
+                annotate_has_sanction_list_confirmed_match=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        sanction_list_confirmed_match=True,
+                    )
+                )
+            )
+            .annotate(
+                annotate_has_duplicates=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        deduplication_golden_record_status=DUPLICATE,
+                    )
+                )
+            )
+        )
+
     def get_queryset(self) -> QuerySet:
+        if self.action == "list":
+            return self.get_list_queryset()
         return (
             super()
             .get_queryset()
