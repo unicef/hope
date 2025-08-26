@@ -233,6 +233,7 @@ class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
     sent_back_comment = PDUOnlineEditSentBackCommentSerializer()
     authorized_users = AuthorizedUserSerializer(many=True)
     approved_by = serializers.CharField(source="approved_by.get_full_name", default="")
+    is_creator = serializers.SerializerMethodField()
 
     class Meta:
         model = PDUOnlineEdit
@@ -242,7 +243,12 @@ class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
             "sent_back_comment",
             "edit_data",
             "authorized_users",
+            "is_creator",
         )
+
+    def get_is_creator(self, obj: PDUOnlineEdit) -> bool:
+        request = self.context.get("request")
+        return obj.created_by == request.user
 
 
 class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):

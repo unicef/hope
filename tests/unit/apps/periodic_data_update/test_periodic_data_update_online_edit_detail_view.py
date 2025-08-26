@@ -137,6 +137,7 @@ class TestPDUOnlineEditDetail:
         assert result["status"] == self.pdu_edit.status
         assert result["status_display"] == self.pdu_edit.get_status_display()
         assert result["is_authorized"] is False
+        assert result["is_creator"] is True
         assert result["approved_by"] == self.pdu_edit.approved_by.get_full_name()
         assert result["approved_at"] == f"{self.pdu_edit.approved_at:%Y-%m-%dT%H:%M:%SZ}"
         assert result["sent_back_comment"] == {
