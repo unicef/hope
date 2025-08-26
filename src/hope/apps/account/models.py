@@ -288,8 +288,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     @cached_property
     def all_permissions_in_business_areas(self) -> dict[str, set[str]]:
-        """
-        Return a dictionary mapping business area IDs to sets of permissions for the user.
+        """Return a dictionary mapping business area IDs to sets of permissions for the user.
 
         Permissions are retrieved from RoleAssignments of the user and their partner, for all business areas associated with the user.
         """
