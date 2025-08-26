@@ -251,7 +251,6 @@ class TestPDUOnlineEditBulkApprove:
         assert "One or more PDU online edits not found." in response_json[0]
 
     def test_bulk_approve_preserves_other_fields(self, create_user_role_with_permissions: Any) -> None:
-        """Test that bulk approve only updates the expected fields"""
         create_user_role_with_permissions(
             user=self.user,
             permissions=[Permissions.PDU_ONLINE_APPROVE],
