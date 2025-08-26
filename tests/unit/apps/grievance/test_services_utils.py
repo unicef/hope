@@ -167,7 +167,6 @@ class TestGrievanceUtils(TestCase):
             "photo": "photo",
             "photoraw": "photo_raw",
         }
-
         DocumentFactory(
             document_number=111,
             type=document_type,
@@ -183,7 +182,7 @@ class TestGrievanceUtils(TestCase):
         document_type.save()
         with pytest.raises(DRFValidationError) as e:
             handle_add_document(document_data, individual)
-        assert "Document of type tax already exists for this individual" in str(e.value)
+        assert "Document with number 111 of type tax already exists" in str(e)
 
         Document.objects.all().delete()
         assert Document.objects.all().count() == 0
@@ -285,12 +284,14 @@ class TestGrievanceUtils(TestCase):
         ticket_details.possible_duplicates.add(individuals[0])
 
         individuals[0].withdraw()
-        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-        assert str(e.value) == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
-
-        individuals[0].unwithdraw()
         with pytest.raises(ValidationError) as e:
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
+        assert (
+            e.value.args[0] == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
+        )
+
+        individuals[0].unwithdraw()
+        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
 
         ticket_details.selected_distinct.remove(individuals[0])
         individuals[0].unwithdraw()
@@ -327,20 +328,23 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-        assert "Close ticket is not possible when all Individuals are flagged as duplicates" in str(e.value)
+        assert (
+            e.value.args[0]
+            == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+        )
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert (
-            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
-            in str(e.value)
+            e.value.args[0]
+            == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
         )
 
         ticket_details.selected_distinct.add(individuals_2[0])
         ticket_details.save()
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-        assert str(e.value) == "Close ticket is possible when all active Individuals are flagged"
+        assert e.value.args[0] == "Close ticket is possible when all active Individuals are flagged"
 
         ticket_details.selected_individuals.add(individuals_1[0])
         validate_all_individuals_before_close_needs_adjudication(ticket_details)
@@ -495,7 +499,7 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             close_needs_adjudication_ticket_service(grievance, user)
-        assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+        assert e.value.args[0] == "Close ticket is not possible when all Individuals are flagged as duplicates"
 
         gr = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -518,7 +522,7 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             close_needs_adjudication_ticket_service(gr, user)
         assert (
-            str(e.value)
+            e.value.args[0]
             == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
         )
 
