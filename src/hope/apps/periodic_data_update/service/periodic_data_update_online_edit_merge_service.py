@@ -33,7 +33,7 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
                         continue
 
                     expected_type = field_data.get("subtype")
-                    self._validate_value(value, expected_type, pdu_field_name)
+                    validated_value = self._validate_value(value, expected_type, pdu_field_name)
                     round_number = field_data["round_number"]
 
                     # Safety check if the value already exists for this round and individual - but should not reach this point as the is_editable flag should be False
@@ -47,7 +47,7 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
                         individual=individual,
                         pdu_field_name=pdu_field_name,
                         round_number=round_number,
-                        value=value,
+                        value=validated_value,
                         collection_date=field_data["collection_date"],
                     )
                 individuals_to_update.append(individual)
@@ -56,19 +56,21 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
                 Individual.objects.bulk_update(individuals_to_update, ["flex_fields"])
 
     @staticmethod
-    def _validate_value(value: Any, expected_type: str, field_name: str) -> None:
+    def _validate_value(value: Any, expected_type: str, field_name: str) -> Any:
         if expected_type == PeriodicFieldData.BOOL and not isinstance(value, bool):
             raise ValidationError(f"Invalid type for field {field_name}. Expected boolean, got {type(value).__name__}.")
-        if expected_type == PeriodicFieldData.DECIMAL and not isinstance(value, int | float):
+        elif expected_type == PeriodicFieldData.DECIMAL and not isinstance(value, int | float):
             raise ValidationError(f"Invalid type for field {field_name}. Expected number, got {type(value).__name__}.")
-        if expected_type == PeriodicFieldData.DATE:
+        elif expected_type == PeriodicFieldData.DATE:
             if not isinstance(value, str):
                 raise ValidationError(
                     f"Invalid type for field {field_name}. Expected string for date, got {type(value).__name__}."
                 )
             try:
-                datetime.date.fromisoformat(value)
+                return datetime.date.fromisoformat(value)
             except (TypeError, ValueError):
                 raise ValidationError(f"Invalid date format for field {field_name}. Expected YYYY-MM-DD.")
-        if expected_type == PeriodicFieldData.STRING and not isinstance(value, str):
+        elif expected_type == PeriodicFieldData.STRING and not isinstance(value, str):
             raise ValidationError(f"Invalid type for field {field_name}. Expected string, got {type(value).__name__}.")
+
+        return value
