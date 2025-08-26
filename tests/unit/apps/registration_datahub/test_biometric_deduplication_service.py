@@ -168,7 +168,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
 
         mock_process_deduplication.return_value = ({}, 409)
-        with self.assertRaises(BiometricDeduplicationService.BiometricDeduplicationServiceError):
+        with pytest.raises(BiometricDeduplicationService.BiometricDeduplicationServiceError):
             service.process_deduplication_set(
                 str(self.program.deduplication_set_id),
                 RegistrationDataImport.objects.all(),

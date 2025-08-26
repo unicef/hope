@@ -7,6 +7,7 @@ from extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
@@ -105,7 +106,7 @@ class TestReassignRolesOnDisableIndividual(BaseTestCase):
             },
         }
 
-        with self.assertRaises(ValidationError) as context:
+        with pytest.raises(ValidationError) as context:
             reassign_roles_on_disable_individual_service(
                 self.alternate_collector_individual,
                 role_reassign_data,
@@ -113,7 +114,7 @@ class TestReassignRolesOnDisableIndividual(BaseTestCase):
                 self.program_one,
             )
 
-        assert "Cannot reassign the role" in str(context.exception)
+        assert "Cannot reassign the role" in str(context.value)
 
     def test_reassign_alternate_role(self) -> None:
         individual = IndividualFactory(household=self.household, program=self.program_one)

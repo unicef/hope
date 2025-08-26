@@ -96,7 +96,7 @@ class TestAddIndividualService(TestCase):
         self.ticket_details.save()
 
         service = AddIndividualService(self.ticket, {})
-        with self.assertRaises(DRFValidationError):
+        with pytest.raises(DRFValidationError):
             service.close(UserFactory())
         assert Document.objects.filter(document_number="123456").count() == 1
 
