@@ -406,7 +406,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => setAuthorizedUsersModalOpen(true)}
               >
-                {`${authorizedUsers && authorizedUsers.length ? authorizedUsers.length : 0} ${t('Authorized Users')}`}
+                {`${authorizedUsers && authorizedUsers.length ? authorizedUsers.length : 0} ${t(authorizedUsers && authorizedUsers.length === 1 ? 'Authorized User' : 'Authorized Users')}`}
               </BlackLink>
             </LabelizedField>
           </Grid>

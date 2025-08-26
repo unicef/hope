@@ -1,7 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import type { PaginatedAuthorizedUserList } from '@restgenerated/models/PaginatedAuthorizedUserList';
 import type { AuthorizedUser as APIAuthorizedUser } from '@restgenerated/models/AuthorizedUser';
 import { useTranslation } from 'react-i18next';
 import CheckIcon from '@mui/icons-material/Check';
@@ -27,18 +26,17 @@ import {
 } from '@mui/material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
+import { useParams } from 'react-router-dom';
 
-interface AuthorizedUsersOnlineProps {
+interface AuthorizedUsersOnlineListEditProps {
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
   selected: string[];
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
-  setFieldValue,
-  selected,
-  setSelected,
-}) => {
+export const AuthorizedUsersOnlineListEdit: React.FC<
+  AuthorizedUsersOnlineListEditProps
+> = ({ setFieldValue, selected, setSelected }) => {
   type AuthorizedUser = APIAuthorizedUser & {
     canEdit: boolean;
     canApprove: boolean;
@@ -47,20 +45,22 @@ export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
   };
   const { t } = useTranslation();
   const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { id } = useParams<{ id: string }>();
 
   const [search, setSearch] = React.useState('');
   const [permission, setPermission] = React.useState<string[]>([]);
 
-  const { data, isLoading, error } = useQuery<PaginatedAuthorizedUserList>({
-    queryKey: ['authorizedUsersOnline', businessAreaSlug, programSlug],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['onlineEdit', businessAreaSlug, programSlug, id],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {
-          businessAreaSlug: businessAreaSlug || '',
-          programSlug: programSlug || '',
+          businessAreaSlug: businessAreaSlug,
+          programSlug: programSlug,
+          id: id ? Number(id) : undefined,
         },
       ),
-    enabled: Boolean(businessAreaSlug && programSlug),
+    enabled: Boolean(businessAreaSlug && programSlug && id),
   });
 
   // Map API permissions to UI flags
@@ -74,9 +74,11 @@ export const AuthorizedUsersOnline: React.FC<AuthorizedUsersOnlineProps> = ({
     };
   }
 
-  const users: AuthorizedUser[] = data?.results
-    ? data.results.map(mapPermissions)
+  const users: AuthorizedUser[] = data?.authorizedUsers
+    ? data.authorizedUsers.map(mapPermissions)
     : [];
+
+  console.log('users', users);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =

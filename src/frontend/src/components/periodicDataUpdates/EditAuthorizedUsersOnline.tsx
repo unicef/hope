@@ -2,9 +2,10 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
+import { AuthorizedUsersOnlineListEdit } from '@components/periodicDataUpdates/AuthorizedUsersOnlineListEdit';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import React, { ReactElement } from 'react';
+import { Formik } from 'formik';
 import Button from '@mui/material/Button';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 const EditAuthorizedUsersOnline = (): ReactElement => {
   const [selected, setSelected] = React.useState<string[]>([]);
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -24,13 +26,13 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
 
   const { mutateAsync: updateAuthorizedUsers } = useMutation({
-    mutationFn: (ids: string[]) => {
+    mutationFn: (values: { authorizedUserIds: string[] }) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdateAuthorizedUsersCreate(
         {
-          businessAreaSlug: (selectedProgram as any)?.businessAreaSlug || '',
-          programSlug: (selectedProgram as any)?.programSlug || '',
+          businessAreaSlug: businessAreaSlug,
+          programSlug: programSlug,
           id: id ? Number(id) : undefined,
-          requestBody: { authorizedUsers: ids },
+          requestBody: { authorizedUsers: values.authorizedUserIds },
         },
       );
     },
@@ -38,11 +40,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
       showMessage(t('Authorized users updated successfully.'));
       setSelected([]);
       queryClient.invalidateQueries({
-        queryKey: [
-          'authorizedUsersOnline',
-          (selectedProgram as any)?.businessAreaSlug,
-          (selectedProgram as any)?.programSlug,
-        ],
+        queryKey: ['authorizedUsersOnline', businessAreaSlug, programSlug],
       });
     },
     onError: (error: any) => {
@@ -50,9 +48,6 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
     },
   });
 
-  const handleSave = async () => {
-    await updateAuthorizedUsers(selected);
-  };
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -66,28 +61,38 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
   ];
 
   return (
-    <>
-      <PageHeader
-        title={`${t('Edit Authorized Users')} - Template ID: ${id}`}
-        breadCrumbs={breadCrumbsItems}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={selected.length === 0}
-        >
-          {t('Save')}
-        </Button>
-      </PageHeader>
-      <BaseSection>
-        <AuthorizedUsersOnline
-          setFieldValue={() => {}}
-          selected={selected}
-          setSelected={setSelected}
-        />
-      </BaseSection>
-    </>
+    <Formik
+      initialValues={{ authorizedUserIds: [] }}
+      onSubmit={async (values, { setSubmitting }) => {
+        await updateAuthorizedUsers(values);
+        setSubmitting(false);
+      }}
+    >
+      {({ setFieldValue, values, handleSubmit, isSubmitting }) => (
+        <form onSubmit={handleSubmit}>
+          <PageHeader
+            title={`${t('Edit Authorized Users')} - Template ID: ${id}`}
+            breadCrumbs={breadCrumbsItems}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={isSubmitting || values.authorizedUserIds.length === 0}
+            >
+              {t('Save')}
+            </Button>
+          </PageHeader>
+          <BaseSection>
+            <AuthorizedUsersOnlineListEdit
+              setFieldValue={setFieldValue}
+              selected={selected}
+              setSelected={setSelected}
+            />
+          </BaseSection>
+        </form>
+      )}
+    </Formik>
   );
 };
 

@@ -120,7 +120,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
       >
         <TableCell>{row.id}</TableCell>
         <TableCell>{row.name}</TableCell>
-        <TableCell>{row.numberOfRecords}</TableCell>
+        <TableCell align="right">{row.numberOfRecords}</TableCell>
         <TableCell>
           <UniversalMoment>{row.createdAt}</UniversalMoment>
         </TableCell>

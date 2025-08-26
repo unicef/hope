@@ -3,7 +3,7 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { AuthorizedUsersOnline } from '@components/periodicDataUpdates/AuthorizedUsersOnline';
+import { AuthorizedUsersOnlineListCreate } from '@components/periodicDataUpdates/AuthorizedUsersOnlineListCreate';
 import { FieldsToUpdateOnline } from '@components/periodicDataUpdates/FieldsToUpdateOnline';
 import { FilterIndividualsOnline } from '@components/periodicDataUpdates/FilterIndividualsOnline';
 import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
@@ -295,7 +295,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
                 />
               )}
               {activeStep === 2 && (
-                <AuthorizedUsersOnline
+                <AuthorizedUsersOnlineListCreate
                   setFieldValue={setFieldValue}
                   selected={selected}
                   setSelected={setSelected}
