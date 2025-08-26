@@ -185,7 +185,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     erased = models.BooleanField(default=False, help_text="Abort RDI")
     refuse_reason = models.CharField(max_length=100, blank=True, null=True)
     error_message = models.TextField(blank=True)
-    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+    sentry_id = models.CharField(max_length=100, blank=True, default="", help_text="Sentry ID [sys]")
 
     number_of_individuals = models.PositiveIntegerField(db_index=True)
     number_of_households = models.PositiveIntegerField(db_index=True)
@@ -378,7 +378,7 @@ class KoboImportedSubmission(models.Model):
         on_delete=models.CASCADE,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.kobo_submission_uuid} ({self.kobo_asset_id})"
 
 
@@ -426,7 +426,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
             ),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.program} - {self.individual1} / {self.individual2}"
 
     @classmethod
@@ -441,7 +441,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         from hope.apps.program.models import Program
 
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
-        duplicates = []
+        duplicates: list[DeduplicationEngineSimilarityPair] = []
         for pair in duplicates_data:
             if pair.first and pair.second:
                 # Ensure consistent ordering of individual1 and individual2
@@ -460,7 +460,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     program=program,
                     individual1_id=individual1,
                     individual2_id=individual2,
-                    status_code=pair.status_code,
+                    status_code=pair.status_code or "",
                     similarity_score=pair.score * 100,
                 )
             )
