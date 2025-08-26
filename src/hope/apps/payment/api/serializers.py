@@ -10,7 +10,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.currencies import CURRENCY_CHOICES
@@ -29,9 +29,9 @@ from hope.models.household import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
     Household,
-    Individual,
 )
-from hope.apps.payment.models import (
+from hope.models.individual import Individual
+from hope.models import (
     Approval,
     ApprovalProcess,
     FinancialServiceProvider,
@@ -43,11 +43,9 @@ from hope.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
-from hope.models.payment import (
-    DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
-    FinancialServiceProviderXlsxTemplate,
-)
+from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (

@@ -19,7 +19,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
-from hope.models.household import SINGLE, Document, Individual
+from hope.models.household import SINGLE
+from hope.models.individual import Individual
+from hope.models.document import Document
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

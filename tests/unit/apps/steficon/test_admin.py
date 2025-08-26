@@ -15,7 +15,7 @@ from extras.test_utils.factories.steficon import RuleFactory
 from hope.admin.steficon import AutocompleteWidget
 from hope.models.program import Program
 from hope.apps.steficon.forms import RuleTestForm
-from hope.models.steficon import Rule
+from hope.models.rule import Rule
 
 
 @pytest.mark.django_db

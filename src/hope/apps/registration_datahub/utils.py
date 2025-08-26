@@ -11,9 +11,9 @@ from hope.apps.core.kobo.common import get_field_name
 from hope.models.household import (
     ROLE_PRIMARY,
     Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual import Individual
 from hope.models.program import Program
 
 

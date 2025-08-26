@@ -7,7 +7,8 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.models.core import BusinessArea, FlexibleAttribute
+from hope.models.business_area import BusinessArea
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.program import Program
 
 

@@ -5,7 +5,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
-from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.program import Program
 
 

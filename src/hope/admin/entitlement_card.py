@@ -4,7 +4,7 @@ from adminfilters.value import ValueFilter
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.household import EntitlementCard
+from hope.models.entitlement_card import EntitlementCard
 
 logger = logging.getLogger(__name__)
 

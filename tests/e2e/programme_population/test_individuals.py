@@ -13,10 +13,12 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from freezegun import freeze_time
 
 from hope.models.user import User
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.models.geo import Area
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.area import Area
 from hope.models.household import FEMALE, MARRIED, Household
-from hope.models.program import BeneficiaryGroup, Program
+from hope.models.program import Program
+from hope.models.beneficiary_group import BeneficiaryGroup
 
 pytestmark = pytest.mark.django_db()
 

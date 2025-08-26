@@ -5,7 +5,7 @@ import logging
 import sys
 import warnings
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
+from typing import Any, Callable, Iterable, Sequence, T
 
 import celery
 from celery import states
@@ -29,8 +29,6 @@ from mptt.models import MPTTModel
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
 
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
 

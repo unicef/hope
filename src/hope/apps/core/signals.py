@@ -9,7 +9,8 @@ from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.models.partner import Partner
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
 
 
 @receiver(m2m_changed, sender=DataCollectingType.compatible_types.through)

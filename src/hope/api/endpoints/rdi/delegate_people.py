@@ -6,7 +6,8 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.models import Grant
-from hope.models.household import ROLE_PRIMARY, PendingIndividualRoleInHousehold
+from hope.models.household import ROLE_PRIMARY
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 
 
 class DelegateSerializer(serializers.Serializer):

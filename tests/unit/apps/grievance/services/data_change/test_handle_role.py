@@ -7,8 +7,8 @@ from hope.apps.grievance.services.data_change.utils import handle_role
 from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.program import Program
 from hope.models.utils import MergeStatusModel
 

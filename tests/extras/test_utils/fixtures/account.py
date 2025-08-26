@@ -12,8 +12,8 @@ from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.models.partner import Partner
-from hope.models.core import BusinessArea
-from hope.models.geo import Area
+from hope.models.business_area import BusinessArea
+from hope.models.area import Area
 from hope.models.program import Program
 
 

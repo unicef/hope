@@ -9,7 +9,7 @@ from django.http import HttpRequest
 
 import models.role
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 logger = logging.getLogger(__name__)
 

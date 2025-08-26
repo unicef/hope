@@ -2,12 +2,11 @@ from typing import Any, Callable
 
 from rest_framework import serializers
 
-from hope.models.core import (
+from hope.models.business_area import (
     BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
 )
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 
 

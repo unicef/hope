@@ -24,10 +24,10 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.models.geo import Area
+from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import Household
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )

@@ -12,7 +12,7 @@ from hope.models.partner import Partner
 from hope.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 
 class Command(BaseCommand):

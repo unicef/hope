@@ -18,7 +18,7 @@ from unit.api.base import HOPEApiTestCase
 
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hope.api.models import Grant
-from hope.models.core import DataCollectingType
+from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.models.household import (
     FEMALE,
@@ -26,13 +26,13 @@ from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
     NOT_COLLECTED,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class TestPushPeople(HOPEApiTestCase):

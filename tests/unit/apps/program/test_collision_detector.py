@@ -3,18 +3,20 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.models.geo import Area, AreaType, Country
+from hope.models.country import Country
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 from hope.models.household import (
     FEMALE,
     MALE,
-    Document,
-    DocumentType,
     Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account, AccountType
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
+from hope.models import Account, AccountType
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models.program import Program
 

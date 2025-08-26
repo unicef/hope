@@ -15,7 +15,7 @@ from natural_keys import NaturalKeyModel
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.account.utils import test_conditional
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models.partner import Partner
 from hope.models.role import Role
@@ -216,6 +216,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         email.send_email()
 
     class Meta:
+        app_label = "account"
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),

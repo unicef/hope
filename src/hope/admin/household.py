@@ -32,7 +32,7 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import JSONBSet
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import (
@@ -50,12 +50,12 @@ from hope.models.household import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Document,
     Household,
     HouseholdCollection,
-    Individual,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual import Individual
+from hope.models.document import Document
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 from hope.models.program import Program
 from hope.apps.utils.security import is_root

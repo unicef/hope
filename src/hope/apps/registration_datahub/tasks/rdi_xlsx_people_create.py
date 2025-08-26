@@ -7,25 +7,27 @@ from django.db import transaction
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.models.core import BusinessArea, FlexibleAttribute
+from hope.models.business_area import BusinessArea
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
-from hope.models.geo import Area
-from hope.models.geo import Country as GeoCountry
+from hope.models.area import Area
+from hope.models.country import Country as GeoCountry
 from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.document_type import DocumentType
+from hope.models import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.program import Program
-from hope.models.registration_data import ImportData, RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.import_data import ImportData
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list

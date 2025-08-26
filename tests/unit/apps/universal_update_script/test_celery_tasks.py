@@ -3,10 +3,15 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.models.core import FlexibleAttribute
-from hope.models.geo import Area, AreaType, Country
-from hope.models.household import MALE, Document, DocumentType, Individual
-from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.country import Country
+from hope.models.area import Area
+from hope.models.area_type import AreaType
+from hope.models.household import MALE
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
+from hope.models import Account, AccountType, DeliveryMechanism
 from hope.models.program import Program
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,

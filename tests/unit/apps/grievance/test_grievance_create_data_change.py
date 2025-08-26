@@ -18,9 +18,9 @@ from rest_framework import status
 
 from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import (
     FEMALE,
@@ -31,8 +31,8 @@ from hope.models.household import (
     SINGLE,
     UNHCR,
     WIDOWED,
-    DocumentType,
 )
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 

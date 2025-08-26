@@ -47,15 +47,13 @@ from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models import PaymentVerification, PaymentVerificationPlan
 from hope.models.program import Program
-from hope.models.registration_data import DeduplicationEngineSimilarityPair
-from hope.models.sanction_list import (
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument,
-)
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
+from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
+from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
 
 pytestmark = pytest.mark.django_db()
 

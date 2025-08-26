@@ -7,8 +7,8 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 from openpyxl.cell import Cell
 
-from hope.models.core import FileTemp
-from hope.apps.payment.models import Payment, PaymentPlan
+from hope.models.file_temp import FileTemp
+from hope.models import Payment, PaymentPlan
 from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError

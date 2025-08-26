@@ -29,7 +29,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.models.core import FlexibleAttribute
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
 from hope.models.household import (
     DUPLICATE,
@@ -38,10 +38,10 @@ from hope.models.household import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
     Household,
 )
-from hope.apps.payment.models import Payment
+from hope.models.document_type import DocumentType
+from hope.models import Payment
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel

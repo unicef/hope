@@ -18,7 +18,8 @@ from hope.api.endpoints.rdi.upload import (
     DocumentSerializer,
 )
 from hope.api.models import Grant
-from hope.models.geo import Area, Country
+from hope.models.country import Country
+from hope.models.area import Area
 from hope.models.household import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -30,7 +31,7 @@ from hope.models.household import (
     PendingIndividual,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 PEOPLE_TYPE_CHOICES = (

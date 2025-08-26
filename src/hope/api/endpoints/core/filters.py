@@ -1,5 +1,5 @@
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 
 class BusinessAreaFilter(UpdatedAtFilter):

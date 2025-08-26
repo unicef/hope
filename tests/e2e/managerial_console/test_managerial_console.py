@@ -17,9 +17,11 @@ from selenium.webdriver.common.by import By
 
 from hope.models.user import User
 from hope.models.partner import Partner
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.apps.payment.models import PaymentPlan
-from hope.models.program import BeneficiaryGroup, Program
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models import PaymentPlan
+from hope.models.program import Program
+from hope.models.beneficiary_group import BeneficiaryGroup
 
 pytestmark = pytest.mark.django_db()
 

@@ -8,9 +8,9 @@ from django.core.files import File
 from django.urls import reverse
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from hope.models.core import FileTemp
+from hope.models.file_temp import FileTemp
 from hope.apps.core.utils import encode_id_base64
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
 

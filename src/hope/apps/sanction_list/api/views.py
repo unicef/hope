@@ -22,7 +22,8 @@ from hope.apps.sanction_list.api.serializers import (
 )
 from hope.apps.sanction_list.celery_tasks import check_against_sanction_list_task
 from hope.apps.sanction_list.filters import SanctionListIndividualFilter
-from hope.models.sanction_list import SanctionListIndividual, UploadedXLSXFile
+from hope.models.sanction_list import UploadedXLSXFile
+from hope.models.sanction_list_individual import SanctionListIndividual
 
 
 class SanctionListIndividualViewSet(

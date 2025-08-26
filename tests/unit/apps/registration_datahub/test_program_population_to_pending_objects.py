@@ -21,13 +21,13 @@ from hope.models.household import (
     MALE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Document,
     Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models import Account, AccountType, DeliveryMechanism
 from hope.apps.registration_datahub.tasks.import_program_population import (
     import_program_population,
 )

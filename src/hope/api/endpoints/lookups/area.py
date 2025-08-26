@@ -4,7 +4,8 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
 
 from hope.api.filters import AreaFilter, AreaTypeFilter
-from hope.models.geo import Area, AreaType
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 
 
 class AreaSerializer(serializers.ModelSerializer):

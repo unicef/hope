@@ -12,7 +12,8 @@ from webtest import Upload
 from hope.admin.geo import AreaAdmin
 from hope.models.user import User
 from hope.models.partner import Partner
-from hope.models.geo import Area, AreaType
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

@@ -39,9 +39,9 @@ from rest_framework.reverse import reverse
 
 from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
@@ -61,10 +61,10 @@ from hope.models.household import (
     ROLE_PRIMARY,
     SINGLE,
     WIDOWED,
-    DocumentType,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.document_type import DocumentType
+from hope.models import PaymentVerification, PaymentVerificationPlan
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel

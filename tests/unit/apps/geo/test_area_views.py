@@ -21,7 +21,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.models.geo import Area, AreaType, Country
+from hope.models.country import Country
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 
 pytestmark = pytest.mark.django_db()
 

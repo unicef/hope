@@ -43,7 +43,7 @@ from hope.apps.account.permissions import (
     check_permissions,
     has_creator_or_owner_permission,
 )
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaVisibilityMixin,
@@ -55,7 +55,7 @@ from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.api.serializers import FieldAttributeSerializer
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.models.core import FlexibleAttribute
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import check_concurrency_version_in_mutation, sort_by_attr
 from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
@@ -111,7 +111,8 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.models.household import HEAD, Household, IndividualRoleInHousehold
+from hope.models.household import HEAD, Household
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:

@@ -6,16 +6,16 @@ from uuid import UUID
 from django.core.paginator import Paginator
 from phonenumber_field.phonenumber import PhoneNumber
 
-from hope.models.geo import Country
+from hope.models.country import Country
 from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import (
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual import Individual
+from hope.models import (
     Payment,
     PaymentDataCollector,
     PaymentHouseholdSnapshot,

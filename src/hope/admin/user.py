@@ -35,7 +35,7 @@ from models import user as account_models
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.models.user import User
 from hope.models.partner import Partner
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import build_arg_dict_from_dict
 
 

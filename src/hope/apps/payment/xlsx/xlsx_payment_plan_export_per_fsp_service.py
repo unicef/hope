@@ -15,8 +15,9 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.models.user import User
-from hope.models.core import FileTemp, FlexibleAttribute
-from hope.apps.payment.models import (
+from hope.models.file_temp import FileTemp
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,

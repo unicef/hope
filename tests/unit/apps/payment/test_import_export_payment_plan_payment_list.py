@@ -31,22 +31,22 @@ from hope.models.user import User
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from hope.models.core import (
+from hope.models.business_area import (
     BusinessArea,
-    DataCollectingType,
-    FileTemp,
-    FlexibleAttribute,
 )
-from models import geo as geo_models
+from hope.models.file_temp import FileTemp
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute
+from models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
-    Document,
     Household,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.document import Document
 from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hope.apps.payment.models import (
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,

@@ -36,14 +36,16 @@ from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
 from hope.models.user import User
-from hope.models.core import DataCollectingType
-from hope.apps.payment.models import (
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
-from hope.models.steficon import Rule
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.beneficiary_group import BeneficiaryGroup
+from hope.models.rule import Rule
 
 pytestmark = pytest.mark.django_db()
 

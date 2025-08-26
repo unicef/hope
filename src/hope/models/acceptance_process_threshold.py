@@ -27,6 +27,7 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
     finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
+        app_label = "payment"
         ordering = ("payments_range_usd",)
 
     def __str__(self) -> str:

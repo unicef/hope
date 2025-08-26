@@ -9,7 +9,7 @@ from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
-from hope.apps.payment.models import (
+from hope.models import (
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
@@ -19,7 +19,7 @@ from hope.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hope.models.payment import FinancialInstitutionMapping
+from hope.models.financial_institution_mapping import FinancialInstitutionMapping
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,

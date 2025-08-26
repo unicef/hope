@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import requests
 from elasticsearch import NotFoundError
 
-from hope.models.geo import Country
+from hope.models.country import Country
 from hope.models.program import Program
 from ..tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,

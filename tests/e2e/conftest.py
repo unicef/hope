@@ -81,9 +81,10 @@ from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.models.geo import Country
-from hope.models.household import DocumentType
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.country import Country
+from hope.models.document_type import DocumentType
 from hope.config.env import env
 
 

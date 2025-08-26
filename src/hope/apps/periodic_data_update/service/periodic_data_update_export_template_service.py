@@ -8,7 +8,7 @@ from django.db.models import Q, QuerySet
 from openpyxl.packaging.custom import StringProperty
 
 from hope.apps.core.attributes_qet_queries import age_to_birth_date_query
-from hope.models.core import FileTemp
+from hope.models.file_temp import FileTemp
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -21,9 +21,9 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.models.household import Individual
-from hope.apps.payment.models import Payment
-from hope.models.periodic_data_update import PeriodicDataUpdateTemplate
+from hope.models.individual import Individual
+from hope.models import Payment
+from hope.models.periodic_data_update_template import PeriodicDataUpdateTemplate
 
 
 class PeriodicDataUpdateExportTemplateService:

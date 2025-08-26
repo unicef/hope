@@ -5,7 +5,7 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
 
-from hope.models.core import PeriodicFieldData
+from hope.models.flexible_attribute import PeriodicFieldData
 from hope.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
 )

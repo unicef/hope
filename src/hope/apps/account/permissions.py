@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
 from django.core.exceptions import PermissionDenied
 
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import get_program_id_from_headers
 
 if TYPE_CHECKING:

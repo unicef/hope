@@ -17,9 +17,11 @@ from extras.test_utils.factories.registration_data import (
 )
 from freezegun import freeze_time
 
-from hope.models.household import Household, Individual, IndividualIdentity
+from hope.models.household import Household
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import Individual
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):

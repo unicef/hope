@@ -19,7 +19,7 @@ from hope.models.user import User
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
@@ -29,17 +29,17 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.apps.payment.models import (
+from hope.models import (
     Approval,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
 from hope.models.payment import (
-    DeliveryMechanismPerPaymentPlan,
-    FinancialServiceProvider,
     Payment,
 )
+from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
+from hope.models.financial_service_provider import FinancialServiceProvider
 
 
 class TPHouseholdListSerializerTest(TestCase):

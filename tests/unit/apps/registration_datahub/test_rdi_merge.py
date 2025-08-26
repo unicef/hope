@@ -31,15 +31,15 @@ from hope.models.household import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     Household,
-    Individual,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.models.registration_data import (
-    KoboImportedSubmission,
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.individual import Individual
+from hope.models.registration_data_import import (
     RegistrationDataImport,
 )
+from hope.models.kobo_imported_submission import KoboImportedSubmission
 from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel

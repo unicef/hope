@@ -15,7 +15,7 @@ from rest_framework import status
 
 from hope.models.role_assignment import RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.services import DashboardGlobalDataCache
 from hope.apps.dashboard.views import DashboardReportView
 

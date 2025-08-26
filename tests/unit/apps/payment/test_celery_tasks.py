@@ -17,7 +17,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 
-from hope.models.core import FileTemp
+from hope.models.file_temp import FileTemp
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_steficon_hh_selection,
@@ -26,13 +26,13 @@ from hope.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
 )
-from hope.apps.payment.models import (
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
 from hope.apps.payment.utils import generate_cache_key
-from hope.models.steficon import Rule
+from hope.models.rule import Rule
 
 
 class TestPaymentCeleryTask(TestCase):

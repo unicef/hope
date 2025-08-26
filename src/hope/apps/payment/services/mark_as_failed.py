@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from hope.apps.payment.models import Payment
+from hope.models import Payment
 from hope.apps.payment.utils import get_quantity_in_usd
 
 

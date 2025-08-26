@@ -16,8 +16,8 @@ from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.models.partner import Partner
-from hope.models.core import BusinessAreaPartnerThrough
-from hope.models.program import ProgramPartnerThrough
+from hope.models.business_area import BusinessAreaPartnerThrough
+from hope.models.program_partner_through import ProgramPartnerThrough
 
 data_migration = import_module("hope.apps.account.migrations.0011_migration")
 

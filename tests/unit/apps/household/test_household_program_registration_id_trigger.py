@@ -10,7 +10,8 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.models.user import User
 from hope.models.partner import Partner
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
 from hope.models.program import Program
 

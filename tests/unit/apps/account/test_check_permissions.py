@@ -9,7 +9,7 @@ from hope.models.user import User
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import encode_id_base64_required
 from hope.models.program import Program
 

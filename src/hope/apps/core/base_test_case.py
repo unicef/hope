@@ -7,7 +7,8 @@ from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.household import IDENTIFICATION_TYPE_CHOICE, DocumentType
+from hope.models.household import IDENTIFICATION_TYPE_CHOICE
+from hope.models.document_type import DocumentType
 
 
 class BaseTestCase(TestCase):

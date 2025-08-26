@@ -8,8 +8,8 @@ from hope.models.household import (
     IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
-    Individual,
 )
+from hope.models.individual import Individual
 
 
 def get_birth_certificate_no(individual: Individual) -> str:

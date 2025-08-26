@@ -6,7 +6,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from unit.conftest import disabled_locally_test
 
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.household.documents import get_individual_doc
 from hope.models.household import (
     DUPLICATE,
@@ -17,14 +17,14 @@ from hope.models.household import (
     SON_DAUGHTER,
     UNIQUE,
     WIFE_HUSBAND,
-    Individual,
     PendingIndividual,
 )
-from hope.models.registration_data import (
+from hope.models.individual import Individual
+from hope.models.registration_data_import import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
-    ImportData,
 )
+from hope.models.import_data import ImportData
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
 from hope.apps.utils.querysets import evaluate_qs

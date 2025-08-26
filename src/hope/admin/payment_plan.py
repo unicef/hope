@@ -14,7 +14,7 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import (
+from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,

@@ -10,14 +10,14 @@ from hope.models.household import (
     DUPLICATE_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    Individual,
     PendingIndividual,
 )
+from hope.models.individual import Individual
 from hope.models.program import Program
-from hope.models.registration_data import (
-    DeduplicationEngineSimilarityPair,
+from hope.models.registration_data_import import (
     RegistrationDataImport,
 )
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,

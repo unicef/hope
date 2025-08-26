@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hope.apps.core.kobo.api import KoboAPI
-from hope.models.core import XLSXKoboTemplate
+from hope.models.xlsx_kobo_template import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 

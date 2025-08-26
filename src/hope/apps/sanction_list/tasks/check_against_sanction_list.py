@@ -12,7 +12,8 @@ from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 
-from hope.models.sanction_list import SanctionListIndividual, UploadedXLSXFile
+from hope.models.sanction_list import UploadedXLSXFile
+from hope.models.sanction_list_individual import SanctionListIndividual
 from hope.apps.utils.mailjet import MailjetClient
 
 

@@ -10,7 +10,7 @@ from dateutil.parser import parse
 from django.utils import timezone
 from xlwt import Row
 
-from hope.apps.payment.models import Payment, PaymentVerification
+from hope.models import Payment, PaymentVerification
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
@@ -26,7 +26,7 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hope.apps.payment.models import PaymentPlan
+    from hope.models import PaymentPlan
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):

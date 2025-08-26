@@ -2,7 +2,7 @@ from typing import Any
 
 from dateutil.parser import parse
 
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.models.household import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
 
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
@@ -68,7 +68,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     from hashlib import sha256
 
     from hope.apps.core.utils import rename_dict_keys
-    from hope.models.registration_data import KoboImportedSubmission
+    from hope.models.kobo_imported_submission import KoboImportedSubmission
 
     total_households_count = 0
     total_individuals_count = 0

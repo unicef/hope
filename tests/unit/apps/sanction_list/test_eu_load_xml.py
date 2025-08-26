@@ -4,13 +4,10 @@ from typing import Any
 import pytest
 from django.core.management import call_command
 
-from hope.models.sanction_list import (
-    SanctionListIndividual,
-    SanctionListIndividualAliasName,
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualNationalities,
-)
-
+from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
+from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
+from hope.models.sanction_list_Individual_nationalities import SanctionListIndividualNationalities
+from hope.models.sanction_list_individual import SanctionListIndividual
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

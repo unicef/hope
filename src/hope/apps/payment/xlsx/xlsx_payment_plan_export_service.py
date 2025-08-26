@@ -5,8 +5,8 @@ import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
-from hope.models.core import FileTemp
-from hope.apps.payment.models import (
+from hope.models.file_temp import FileTemp
+from hope.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,

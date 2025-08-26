@@ -34,10 +34,12 @@ from pytz import utc
 
 from hope.models.user import User
 from hope.apps.core.currencies import CURRENCY_CHOICES
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.models.geo import Area
-from hope.models.household import MALE, ROLE_PRIMARY, Household, Individual
-from hope.apps.payment.models import (
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.area import Area
+from hope.models.household import MALE, ROLE_PRIMARY, Household
+from hope.models.individual import Individual
+from hope.models import (
     Account,
     AccountType,
     Approval,
@@ -58,10 +60,8 @@ from hope.apps.payment.models import (
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
 from hope.models.program import Program
-from hope.models.targeting import (
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.utils import MergeStatusModel
 
 

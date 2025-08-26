@@ -11,7 +11,8 @@ import mptt.fields
 from django.conf import settings
 from django.db import migrations
 
-import models.core
+import models.business_area
+import models.flexible_attribute
 
 
 class Migration(migrations.Migration):
@@ -319,7 +320,7 @@ class Migration(migrations.Migration):
                     "label",
                     models.JSONField(
                         default=dict,
-                        validators=[models.models.label_contains_english_en_validator],
+                        validators=[models.flexible_attribute.label_contains_english_en_validator],
                     ),
                 ),
                 ("hint", models.JSONField(default=dict)),

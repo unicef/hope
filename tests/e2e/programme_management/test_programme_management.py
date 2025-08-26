@@ -22,8 +22,10 @@ from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
 from hope.models.partner import Partner
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.models.program import BeneficiaryGroup, Program
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.program import Program
+from hope.models.beneficiary_group import BeneficiaryGroup
 
 pytestmark = pytest.mark.django_db()
 

@@ -16,7 +16,7 @@ from extras.test_utils.factories.program import ProgramFactory
 
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.models.user import User
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.models.program import Program
 
 

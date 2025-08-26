@@ -8,9 +8,10 @@ from extras.test_utils.factories.accountability import CommunicationMessageFacto
 from extras.test_utils.factories.payment import PaymentPlanFactory
 
 from hope.models.user import User
-from hope.models.accountability import Message
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.apps.payment.models import PaymentPlan
+from hope.models.message import Message
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models import PaymentPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()

@@ -22,7 +22,7 @@ from hope.models.household import (
     NOT_PROCESSED,
     UNIQUE,
 )
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,

@@ -4,22 +4,22 @@ from dataclasses import dataclass
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from hope.models.geo import Country
+from hope.models.country import Country
 from hope.models.household import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
     Household,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import PendingAccount
+from hope.models.document_type import DocumentType
+from hope.models import PendingAccount
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

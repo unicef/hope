@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
 from hope.apps.account.permissions import Permissions
-from hope.models.accountability import SampleFileExpiredError, Survey
+from hope.models.survey import SampleFileExpiredError, Survey
 
 
 @login_required

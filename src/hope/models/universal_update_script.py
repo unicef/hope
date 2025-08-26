@@ -2,8 +2,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
 
-from hope.models.household import DocumentType
-from hope.apps.payment.models import AccountType
+from hope.models.document_type import DocumentType
+from hope.models.account import AccountType
 from hope.models.program import Program
 from hope.models.utils import CeleryEnabledModel, TimeStampedModel
 
@@ -73,6 +73,7 @@ class UniversalUpdate(
     )
 
     class Meta:
+        app_label = "universal_update_script"
         permissions = [
             ("can_run_universal_update", "Can run universal update"),
             (

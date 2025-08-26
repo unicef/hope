@@ -25,11 +25,11 @@ from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
 from hope.models.role_assignment import RoleAssignment
 from hope.models.partner import Partner
 from hope.apps.administration.widgets import JsonWidget
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.models.household import DocumentType
+from hope.models.document_type import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
-from hope.apps.payment.models import AcceptanceProcessThreshold
+from hope.models import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
 
 

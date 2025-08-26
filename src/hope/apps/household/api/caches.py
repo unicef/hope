@@ -7,7 +7,8 @@ from hope.api.caches import (
     BusinessAreaAndProgramLastUpdatedKeyBit,
     KeyConstructorMixin,
 )
-from hope.models.household import Household, Individual
+from hope.models.household import Household
+from hope.models.individual import Individual
 
 
 class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):

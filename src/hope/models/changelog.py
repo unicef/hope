@@ -12,6 +12,7 @@ class Changelog(models.Model):
     date = models.DateField(default=datetime.date.today)
 
     class Meta:
+        app_label = "changelog"
         ordering = ("-date",)
 
     def __str__(self) -> str:

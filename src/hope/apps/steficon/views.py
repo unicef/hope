@@ -4,7 +4,7 @@ from rest_framework.generics import ListAPIView
 
 from hope.apps.steficon.api.serializers import RuleSerializer
 from hope.apps.steficon.filters import SteficonRuleFilter
-from hope.models.steficon import Rule
+from hope.models.rule import Rule
 
 
 class RuleEngineViewSet(ListAPIView):

@@ -28,16 +28,15 @@ from hope.admin.utils import (
     SoftDeletableAdminMixin,
 )
 from hope.apps.administration.widgets import JsonWidget
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.household.celery_tasks import revalidate_phone_number_task
 from hope.models.household import (
     Household,
-    Individual,
-    IndividualCollection,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import IndividualCollection, Individual
+from hope.models import Account
 from hope.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)

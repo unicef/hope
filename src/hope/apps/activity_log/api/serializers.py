@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.models.activity_log import LogEntry
+from hope.models.log_entry import LogEntry
 from hope.models.program import Program
 
 

@@ -18,6 +18,7 @@ from django.db import migrations
 import hope.apps.payment.fields
 import hope.apps.payment.models
 import hope.apps.payment.validators
+import models.financial_service_provider_xlsx_template
 import models.utils
 
 
@@ -519,7 +520,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "flex_fields",
-                    hope.apps.payment.models.FlexFieldArrayField(
+                    models.financial_service_provider_xlsx_template.FlexFieldArrayField(
                         base_field=models.CharField(blank=True, max_length=255),
                         blank=True,
                         default=list,

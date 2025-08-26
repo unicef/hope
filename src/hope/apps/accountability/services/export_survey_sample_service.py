@@ -8,7 +8,7 @@ from django.core.files.temp import NamedTemporaryFile
 from django.urls import reverse
 from openpyxl.utils import get_column_letter
 
-from hope.models.accountability import Survey
+from hope.models.survey import Survey
 from hope.apps.core.utils import encode_id_base64
 from hope.models.household import Household
 

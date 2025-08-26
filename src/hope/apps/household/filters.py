@@ -32,10 +32,10 @@ from hope.models.household import (
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
     STATUS_WITHDRAWN,
-    DocumentType,
     Household,
-    Individual,
 )
+from hope.models.individual import Individual
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.utils import MergeStatusModel
 

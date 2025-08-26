@@ -10,8 +10,7 @@ from django.http import HttpRequest
 from jsoneditor.forms import JSONEditor
 
 from hope.admin.utils import SoftDeletableAdminMixin
-from hope.models.core import FlexibleAttribute
-
+from hope.models.flexible_attribute import FlexibleAttribute
 
 logger = logging.getLogger(__name__)
 

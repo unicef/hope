@@ -10,7 +10,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.models.household import (
     FEMALE,
     HEAD,
@@ -18,8 +18,8 @@ from hope.models.household import (
     OTHER,
     SON_DAUGHTER,
     WIFE_HUSBAND,
-    XlsxUpdateFile,
 )
+from hope.models.xlsx_update_file import XlsxUpdateFile
 from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,

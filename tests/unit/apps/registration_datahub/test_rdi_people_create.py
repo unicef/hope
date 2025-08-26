@@ -19,17 +19,18 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.models.core import DataCollectingType, PeriodicFieldData
-from hope.models.geo import Country as GeoCountry
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models.country import Country as GeoCountry
 from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import PendingAccount
+from hope.models import PendingAccount
 from hope.models.program import Program
-from hope.models.registration_data import ImportData
+from hope.models.import_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel
 

@@ -10,10 +10,11 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.documents import get_individual_doc
-from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID, Individual
+from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID
+from hope.models.individual import Individual
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
-from hope.models.sanction_list import SanctionListIndividual
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.sanction_list_individual import SanctionListIndividual
 from hope.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)

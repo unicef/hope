@@ -9,6 +9,8 @@ class AccountConfig(AppConfig):
     name = "hope.apps.account"
 
     def ready(self) -> None:
+        import hope.models  # noqa
+
         from hijack.signals import hijack_started
 
         import hope.apps.account.signals  # noqa

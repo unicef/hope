@@ -11,7 +11,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from models import geo as geo_models
+from models import country as geo_models
 from hope.models.household import (
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_CHOICE,
@@ -24,21 +24,18 @@ from hope.models.household import (
     ROLE_PRIMARY,
     SEX_CHOICE,
     UNICEF,
-    Document,
-    DocumentType,
-    EntitlementCard,
     Household,
     HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold, PendingIndividualRoleInHousehold
+from hope.models.individual_identity import IndividualIdentity, PendingIndividualIdentity
+from hope.models.entitlement_card import EntitlementCard
+from hope.models.individual import IndividualCollection, Individual
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
 from hope.models.utils import MergeStatusModel
 
 faker = Faker()

@@ -12,14 +12,14 @@ from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
     create_needs_adjudication_tickets_for_biometrics,
 )
-from hope.models.household import Individual
-from hope.models.registration_data import DeduplicationEngineSimilarityPair
+from hope.models.individual import Individual
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

@@ -5,10 +5,10 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.periodic_data_update import (
+from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
 )
+from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
 
 
 class PeriodicDataUpdateUploadInline(admin.TabularInline):

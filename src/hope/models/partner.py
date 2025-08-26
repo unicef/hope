@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from apps.core.mixins import LimitBusinessAreaModelMixin
+from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -11,11 +11,11 @@ from django.utils.translation import gettext_lazy as _
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 
-from apps.account.permissions import Permissions
+from hope.apps.account.permissions import Permissions
 
-from apps.core.visibility_backends import VisibilityBackend
+from hope.apps.core.visibility_backends import VisibilityBackend
 from hope.models.role_assignment import RoleAssignment
-from hope.models.geo import Area
+from hope.models.area import Area
 
 
 class Partner(LimitBusinessAreaModelMixin, MPTTModel):
@@ -28,6 +28,9 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         verbose_name=_("Parent"),
     )
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
+
+    class Meta:
+        app_label = "account"
 
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name

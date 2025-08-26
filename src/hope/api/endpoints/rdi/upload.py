@@ -17,7 +17,7 @@ from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.models import Grant
 from hope.api.utils import humanize_errors
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.geo import Area
+from hope.models.area import Area
 from hope.models.household import (
     DATA_SHARING_CHOICES,
     HEAD,
@@ -29,9 +29,9 @@ from hope.models.household import (
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
+from hope.models import AccountType, FinancialInstitution, PendingAccount
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 logger = logging.getLogger(__name__)

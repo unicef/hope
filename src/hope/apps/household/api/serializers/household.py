@@ -26,15 +26,15 @@ from hope.models.household import (
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
-    DocumentType,
     Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual import Individual
+from hope.models.document_type import DocumentType
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution
+from hope.models import AccountType, FinancialInstitution
 from hope.apps.program.api.serializers import ProgramSmallSerializer
 
 

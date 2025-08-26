@@ -8,7 +8,7 @@ from django.conf import settings
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.models.registration_data import KoboImportData
+from hope.models.kobo_import_data import KoboImportData
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )

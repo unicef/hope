@@ -17,11 +17,11 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.models.core import PeriodicFieldData
-from hope.models.periodic_data_update import (
+from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
 )
+from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )

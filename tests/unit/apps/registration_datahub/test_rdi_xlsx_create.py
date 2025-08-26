@@ -28,21 +28,22 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from PIL import Image
 
-from hope.models.core import BusinessArea, FlexibleAttribute, PeriodicFieldData
+from hope.models.business_area import BusinessArea
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
-from hope.models.geo import Country as GeoCountry
+from hope.models.country import Country as GeoCountry
 from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualIdentity,
 )
-from hope.apps.payment.models import PendingAccount
+from hope.models.individual_identity import PendingIndividualIdentity
+from hope.models.document_type import DocumentType
+from hope.models import PendingAccount
 from hope.models.program import Program
-from hope.models.registration_data import ImportData
+from hope.models.import_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel
 

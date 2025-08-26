@@ -20,11 +20,13 @@ from hope.admin.utils import (
 )
 from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.models.partner import Partner
-from hope.models.geo import Area
+from hope.models.area import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.models.household import Household, Individual
-from hope.models.program import Program, ProgramCycle
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )

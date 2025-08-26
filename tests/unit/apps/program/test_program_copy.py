@@ -22,11 +22,8 @@ from rest_framework.reverse import reverse
 
 from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
-from hope.models.core import (
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db

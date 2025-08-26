@@ -4,7 +4,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.registration_data import KoboImportData
+from hope.models.kobo_import_data import KoboImportData
 
 logger = logging.getLogger(__name__)
 

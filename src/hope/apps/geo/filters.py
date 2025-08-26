@@ -2,7 +2,7 @@ from django_filters import CharFilter, FilterSet
 
 from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import decode_id_string
-from hope.models.geo import Area
+from hope.models.area import Area
 
 
 class AreaFilter(FilterSet):

@@ -13,9 +13,9 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from pytz import utc
 
-from hope.models.geo import Area
+from hope.models.area import Area
 from hope.models.household import Household
-from hope.apps.payment.models import DeliveryMechanism, Payment
+from hope.models import DeliveryMechanism, Payment
 from hope.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )

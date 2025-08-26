@@ -14,9 +14,10 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
 )
-from hope.models.core import FlexibleAttribute
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import get_attr_value
-from hope.models.household import Household, Individual
+from hope.models.household import Household
+from hope.models.individual import Individual
 from hope.apps.targeting.choices import FlexFieldClassification
 
 logger = logging.getLogger(__name__)

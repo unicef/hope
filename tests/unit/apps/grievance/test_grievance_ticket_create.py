@@ -14,9 +14,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -36,9 +36,9 @@ from hope.models.household import (
     SINGLE,
     UNHCR,
     WIDOWED,
-    DocumentType,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.utils import MergeStatusModel
 

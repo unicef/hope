@@ -4,7 +4,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework.exceptions import ValidationError
 
-from hope.models.accountability import Message
+from hope.models.message import Message
 from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )

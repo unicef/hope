@@ -3,6 +3,9 @@ import datetime
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
+import models.area
+import models.area_type
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -12,17 +15,17 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 
-from hope.models.core import DataCollectingType
+from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
@@ -49,29 +52,29 @@ class TestSriLankaRegistrationService(TestCase):
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
-        area_type1 = geo_models.AreaType.objects.create(country=country, name="admin1")
-        area_type2 = geo_models.AreaType.objects.create(country=country, name="admin2")
-        area_type3 = geo_models.AreaType.objects.create(country=country, name="admin3")
-        area_type4 = geo_models.AreaType.objects.create(country=country, name="admin4")
+        area_type1 = models.area_type.AreaType.objects.create(country=country, name="admin1")
+        area_type2 = models.area_type.AreaType.objects.create(country=country, name="admin2")
+        area_type3 = models.area_type.AreaType.objects.create(country=country, name="admin3")
+        area_type4 = models.area_type.AreaType.objects.create(country=country, name="admin4")
 
-        admin1 = geo_models.Area(
+        admin1 = models.area.Area(
             name="SriLanka admin1",
             p_code="LK1",
             area_type=area_type1,
         )
         admin1.save()
-        admin2 = geo_models.Area(name="SriLanka admin2", p_code="LK11", area_type=area_type2, parent=admin1)
+        admin2 = models.area.Area(name="SriLanka admin2", p_code="LK11", area_type=area_type2, parent=admin1)
         admin2.save()
-        admin3 = geo_models.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
+        admin3 = models.area.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
         admin3.save()
-        admin4 = geo_models.Area(
+        admin4 = models.area.Area(
             name="SriLanka admin4",
             p_code="LK1163020",
             area_type=area_type4,
             parent=admin3,
         )
         admin4.save()
-        geo_models.Area.objects.rebuild()
+        models.area.Area.objects.rebuild()
 
         children_info = [
             {

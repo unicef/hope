@@ -11,7 +11,7 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
-from hope.models.household import XlsxUpdateFile
+from hope.models.xlsx_update_file import XlsxUpdateFile
 from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,

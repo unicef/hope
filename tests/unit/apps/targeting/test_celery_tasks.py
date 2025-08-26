@@ -6,7 +6,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 
 

@@ -36,12 +36,11 @@ from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
 from hope.models.user import User
-from hope.models.core import (
+from hope.models.business_area import (
     BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
 )
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.household import (
     HEARING,
     HOST,
@@ -49,9 +48,9 @@ from hope.models.household import (
     ROLE_PRIMARY,
     SEEING,
     Household,
-    Individual,
 )
-from hope.apps.payment.models import (
+from hope.models.individual import Individual
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
@@ -61,8 +60,10 @@ from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
-from hope.models.steficon import Rule
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.beneficiary_group import BeneficiaryGroup
+from hope.models.rule import Rule
 
 pytestmark = pytest.mark.django_db()
 

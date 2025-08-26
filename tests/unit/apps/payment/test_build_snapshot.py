@@ -13,8 +13,9 @@ from extras.test_utils.factories.payment import (
 )
 from freezegun import freeze_time
 
-from hope.models.household import ROLE_PRIMARY, IndividualRoleInHousehold
-from hope.apps.payment.models import (
+from hope.models.household import ROLE_PRIMARY
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,

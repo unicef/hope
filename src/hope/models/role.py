@@ -3,11 +3,11 @@ from django.core.validators import MinLengthValidator, MaxLengthValidator, Prohi
 from django.db import models
 from natural_keys import NaturalKeyModel
 
-from apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
-from apps.account.fields import ChoiceArrayField
+from hope.apps.account.fields import ChoiceArrayField
 
-from apps.account.permissions import Permissions
+from hope.apps.account.permissions import Permissions
 from hope.models.utils import TimeStampedUUIDModel
 
 
@@ -50,6 +50,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
             raise ValidationError("Only HOPE roles can have permissions")
 
     class Meta:
+        app_label = "account"
         unique_together = ("name", "subsystem")
         ordering = ("subsystem", "name")
 

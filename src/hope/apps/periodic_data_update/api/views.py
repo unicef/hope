@@ -20,7 +20,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import BaseViewSet, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.models.core import FlexibleAttribute
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hope.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateCreateSerializer,
@@ -31,10 +31,10 @@ from hope.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateUploadSerializer,
     PeriodicFieldSerializer,
 )
-from hope.models.periodic_data_update import (
+from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
 )
+from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )

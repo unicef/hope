@@ -5,8 +5,8 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import DocumentTypeFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.models.geo import Country
-from hope.models.household import Document
+from hope.models.country import Country
+from hope.models.document import Document
 from hope.models.utils import MergeStatusModel
 
 

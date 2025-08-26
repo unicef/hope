@@ -17,7 +17,7 @@ from hope.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
 )
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 if TYPE_CHECKING:
     from django.forms.utils import ErrorList

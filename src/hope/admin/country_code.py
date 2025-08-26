@@ -5,8 +5,7 @@ from django.contrib import admin
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.core import CountryCodeMap
-
+from hope.models.country_code_map import CountryCodeMap
 
 logger = logging.getLogger(__name__)
 

@@ -20,7 +20,7 @@ from openpyxl import Workbook
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import (
+from hope.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,

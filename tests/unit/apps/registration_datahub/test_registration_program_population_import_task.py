@@ -20,13 +20,13 @@ from hope.models.household import (
     HEAD,
     MALE,
     ROLE_PRIMARY,
-    Document,
     Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models.registration_data_import import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )

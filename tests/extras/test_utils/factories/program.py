@@ -11,8 +11,11 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.beneficiary_group import BeneficiaryGroup
 
 fake = Faker()
 

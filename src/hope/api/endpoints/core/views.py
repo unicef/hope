@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView
 from hope.api.endpoints.base import HOPEAPIView
 from hope.api.endpoints.core.filters import BusinessAreaFilter
 from hope.api.endpoints.core.serializers import BusinessAreaSerializer
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 
 class BusinessAreaListView(HOPEAPIView, ListAPIView):

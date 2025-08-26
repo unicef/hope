@@ -17,7 +17,7 @@ from hope.apps.core.api.mixins import BaseViewSet, BusinessAreaMixin, Permission
 from hope.apps.geo.api.caches import AreaKeyConstructor
 from hope.apps.geo.api.filters import AreaFilter
 from hope.apps.geo.api.serializers import AreaListSerializer, AreaTreeSerializer
-from hope.models.geo import Area
+from hope.models.area import Area
 
 logger = logging.getLogger(__name__)
 

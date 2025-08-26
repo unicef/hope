@@ -5,11 +5,11 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key
-from hope.models.core import FlexibleAttribute, PeriodicFieldData
-from hope.models.periodic_data_update import (
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
+from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
 )
+from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
 
 
 @receiver(post_save, sender=PeriodicDataUpdateTemplate)

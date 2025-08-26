@@ -198,7 +198,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             },
         }
     """
-    from hope.models.core import FlexibleAttribute
+    from hope.models.flexible_attribute import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
@@ -444,7 +444,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
 
 
 def decode_and_get_payment_object(encoded_id: str, required: bool) -> Any | None:
-    from hope.apps.payment.models import Payment
+    from hope.models import Payment
 
     if required or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
@@ -605,7 +605,7 @@ def chart_permission_decorator(chart_resolve: Callable | None = None, permission
 
     @functools.wraps(chart_resolve)
     def resolve_f(*args: Any, **kwargs: Any) -> Any:
-        from hope.models.core import BusinessArea
+        from hope.models.business_area import BusinessArea
         from hope.models.program import Program
 
         _, resolve_info = args
@@ -663,7 +663,7 @@ def chart_create_filter_query_for_payment_verification_gfk(
 
 
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
-    from hope.models.core import FlexibleAttribute
+    from hope.models.flexible_attribute import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: dict = {**parent.flex_fields}
@@ -920,7 +920,7 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
-    from hope.models.core import BusinessArea
+    from hope.models.business_area import BusinessArea
 
     try:
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
@@ -944,7 +944,7 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.models.core import FlexibleAttribute
+    from hope.models.flexible_attribute import FlexibleAttribute
     from hope.models.program import Program
 
     if flex_field is not False:

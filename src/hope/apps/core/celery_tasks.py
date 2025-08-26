@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from hope.apps.core.celery import app
-from hope.models.core import XLSXKoboTemplate
+from hope.models.xlsx_kobo_template import XLSXKoboTemplate
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )

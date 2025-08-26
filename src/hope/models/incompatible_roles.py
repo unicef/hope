@@ -10,7 +10,7 @@ from hope.models.role_assignment import RoleAssignment
 from hope.models.utils import TimeStampedUUIDModel
 
 if TYPE_CHECKING:
-    from hope.models.core import BusinessArea
+    from hope.models.business_area import BusinessArea
 
 
 class IncompatibleRolesManager(models.Manager):
@@ -50,6 +50,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         return f"{self.role_one.name} and {self.role_two.name}"
 
     class Meta:
+        app_label = "account"
         verbose_name = "incompatible roles"
         verbose_name_plural = "incompatible roles"
         unique_together = ("role_one", "role_two")

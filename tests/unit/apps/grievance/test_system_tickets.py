@@ -12,7 +12,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.system_ticket_service import (
     close_system_flagging_ticket_service,
 )
-from hope.models.household import Individual
+from hope.models.individual import Individual
 
 
 class TestSystemTickets(BaseTestCase):

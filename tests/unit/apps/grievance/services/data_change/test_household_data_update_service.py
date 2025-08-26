@@ -3,7 +3,8 @@ from django.test import TestCase
 from hope.models.program import Program
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models.household import IndividualRoleInHousehold, ROLE_ALTERNATE
+from hope.models.household import ROLE_ALTERNATE
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan

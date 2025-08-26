@@ -16,11 +16,13 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import encode_id_base64
-from hope.models.household import Household, Individual
+from hope.models.household import Household
+from hope.models.individual import Individual
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 
 
 class TestExcludeHouseholds(BaseTestCase):

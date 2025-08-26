@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import BLANK_CHOICE_DASH
 from django.utils.functional import lazy
 
-from hope.models.geo import Country
+from hope.models.country import Country
 
 
 class GeoCountryDescriptor:

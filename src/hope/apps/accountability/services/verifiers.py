@@ -2,7 +2,7 @@ import logging
 
 from rest_framework.exceptions import ValidationError
 
-from hope.models.accountability import Message
+from hope.models.message import Message
 
 logger = logging.getLogger(__name__)
 

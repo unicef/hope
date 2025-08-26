@@ -1,0 +1,207 @@
+from typing import Sequence, Any, Optional
+
+from hope.apps.core.mixins import LimitBusinessAreaModelMixin
+
+from hope.apps.steficon.interpreters import interpreters, Interpreter, mapping
+from concurrency.fields import AutoIncVersionField
+from django.conf import settings
+from django.contrib.postgres.fields import CICharField
+from django.core.validators import ProhibitNullCharactersValidator
+
+from hope.apps.steficon.validators import StartEndSpaceValidator, DoubleSpaceValidator
+from django.db import models
+
+from hope.apps.steficon.config import SAFETY_NONE, SAFETY_STANDARD, SAFETY_HIGH
+from django.db.models import JSONField
+from django.db.transaction import atomic
+from django.forms import model_to_dict
+from django.utils.functional import cached_property
+
+from hope.apps.steficon.result import Result
+from hope.models.rule_commit import MONITORED_FIELDS, RuleCommit
+
+
+class Rule(LimitBusinessAreaModelMixin):
+    TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
+    TYPE_TARGETING = "TARGETING"
+
+    TYPE_CHOICES = (
+        (TYPE_PAYMENT_PLAN, "Payment Plan"),
+        (TYPE_TARGETING, "Targeting"),
+    )
+
+    LANGUAGES: Sequence[tuple] = [(a.label.lower(), a.label) for a in interpreters]
+    version = AutoIncVersionField()
+    name = CICharField(
+        max_length=100,
+        unique=True,
+        validators=[
+            ProhibitNullCharactersValidator(),
+            StartEndSpaceValidator,
+            DoubleSpaceValidator,
+        ],
+    )
+    definition = models.TextField(blank=True, default="result.value=0")
+    description = models.TextField(blank=True, null=True)
+    enabled = models.BooleanField(default=False)
+    deprecated = models.BooleanField(default=False)
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)  # type: ignore # FIXME
+    security = models.IntegerField(
+        choices=(
+            (SAFETY_NONE, "Low"),
+            (SAFETY_STANDARD, "Medium"),
+            (SAFETY_HIGH, "High"),
+        ),
+        default=SAFETY_STANDARD,
+    )
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    type = models.CharField(
+        choices=TYPE_CHOICES,
+        max_length=50,
+        default=TYPE_TARGETING,
+        help_text="Use Rule for Targeting or Payment Plan",
+    )
+    flags = JSONField(default=dict, blank=True)
+
+    class Meta:
+        app_label = "steficon"
+        permissions = (
+            ("process_file", "Can Process File"),
+            ("check_diff", "Can Check Diff"),
+            ("changelog", "Can Check Changelog"),
+            ("rerun_rule", "Can Rerun Rule"),
+        )
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.__original_security = self.security
+
+    def get_flag(self, name: str, default: str | None = None) -> str:
+        return self.flags.get(name, default)
+
+    def as_dict(self) -> dict:
+        return model_to_dict(self, MONITORED_FIELDS)
+
+    def clean(self) -> None:
+        if self.pk:
+            self.security = self.__original_security
+
+    def clean_definition(self) -> None:
+        self.interpreter.validate()
+
+    def delete(self, using: Any | None = None, keep_parents: bool | None = False) -> tuple[int, dict[str, int]]:
+        self.enabled = False
+        self.save()
+        return 1, {self._meta.label: 1}
+
+    def get_changes(self) -> tuple[dict, list]:
+        prev = self.latest_commit
+        if prev:
+            data1 = prev.after
+            data2 = self.as_dict()
+        else:
+            data1 = {}
+            data2 = self.as_dict()
+
+        diff = set(data1.items()).symmetric_difference(data2.items())
+        return data1, list(dict(diff).keys())
+
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Any | None = None,
+        update_fields: Any | None = None,
+    ) -> None:
+        with atomic():
+            super().save(force_insert, force_update, using, update_fields)
+            self.commit()
+
+    def commit(self, is_release: bool = False, force: bool = False) -> Optional["RuleCommit"]:
+        stored, changes = self.get_changes()
+        release = None
+        values = {
+            "enabled": self.enabled,
+            "definition": self.definition,
+            "is_release": is_release,
+            "updated_by": self.updated_by,
+            "before": stored,
+            "after": self.as_dict(),
+            "affected_fields": changes,
+        }
+        if changes:
+            release = RuleCommit.objects.create(rule=self, version=self.version, **values)
+        elif force:
+            release, __ = RuleCommit.objects.update_or_create(rule=self, version=self.version, defaults=values)
+        if is_release:
+            self.history.exclude(pk=release.pk).update(deprecated=True)
+        return release
+
+    def release(self) -> Optional["RuleCommit"]:
+        if self.deprecated or not self.enabled:
+            raise ValueError("Cannot release disabled/deprecated rules")
+        commit = self.history.filter(version=self.version).first()
+        if commit and not commit.is_release:
+            commit.is_release = True
+            commit.save()
+            self.history.exclude(pk=commit.pk).update(deprecated=True)
+        else:
+            commit = self.commit(is_release=True, force=True)
+        return commit
+
+    @property
+    def latest(self) -> Optional["RuleCommit"]:
+        try:
+            return self.history.filter(is_release=True).order_by("-version").first()
+        except RuleCommit.DoesNotExist:
+            return None
+
+    @property
+    def latest_commit(self) -> Optional["RuleCommit"]:
+        try:
+            return self.history.order_by("version").last()
+        except RuleCommit.DoesNotExist:
+            return None
+
+    @property
+    def last_changes(self) -> dict | None:
+        try:
+            return {
+                "fields": self.latest_commit.affected_fields,
+                "before": self.latest_commit.before,
+                "after": self.latest_commit.after,
+            }
+        except RuleCommit.DoesNotExist:
+            return None
+
+    @cached_property
+    def interpreter(self) -> Any:
+        func: type[Interpreter] = mapping[self.language]
+        return func(self.definition)
+
+    def execute(
+        self,
+        context: dict | None = None,
+        only_release: bool = True,
+        only_enabled: bool = True,
+    ) -> Result:
+        if self.pk:
+            qs = self.history
+            if only_release:
+                qs = qs.filter(is_release=True)
+
+            if only_enabled:
+                qs = qs.filter(enabled=True)
+            latest = qs.order_by("-version").first()
+        else:
+            latest = self
+        with atomic():
+            if latest:
+                return latest.interpreter.execute(context)
+            raise ValueError("No Released Rules found")

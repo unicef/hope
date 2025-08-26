@@ -8,9 +8,12 @@ from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hope.models.user import User
-from hope.models.accountability import Feedback, FeedbackMessage, Message, Survey
-from hope.models.core import BusinessArea
-from hope.models.geo import Area
+from hope.models.survey import Survey
+from hope.models.feedback import Feedback
+from hope.models.feedback_message import FeedbackMessage
+from hope.models.message import Message
+from hope.models.business_area import BusinessArea
+from hope.models.area import Area
 from hope.models.household import Household
 from hope.models.program import Program
 

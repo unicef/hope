@@ -1,7 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from hope.models.geo import Area
+from hope.models.area import Area
 
 
 class AreaListSerializer(serializers.ModelSerializer):

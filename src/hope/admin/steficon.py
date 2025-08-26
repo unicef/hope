@@ -14,9 +14,10 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import get_language
 
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 from hope.apps.steficon.forms import RuleTestForm
-from hope.models.steficon import Rule, RuleCommit
+from hope.models.rule_commit import RuleCommit
+from hope.models.rule import Rule
 
 logger = logging.getLogger(__name__)
 

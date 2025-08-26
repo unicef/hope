@@ -1,16 +1,17 @@
 import logging
 
-from hope.models.household import Household, Individual
-from hope.apps.payment.models import PaymentPlan
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models import PaymentPlan
 from hope.models.program import Program
-from hope.models.targeting import (
+from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,
-    TargetingCollectorRuleFilterBlock,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
 )
+from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 
 logger = logging.getLogger(__name__)
 

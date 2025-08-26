@@ -8,10 +8,11 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.payment import PaymentPlanFactory
 
 from hope.models.user import User
-from hope.models.accountability import Survey
-from hope.models.core import BusinessArea, DataCollectingType
+from hope.models.survey import Survey
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import REFUGEE, Household
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()

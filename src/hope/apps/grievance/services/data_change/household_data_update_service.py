@@ -6,11 +6,11 @@ from django.shortcuts import get_object_or_404
 
 from django_countries.fields import Country
 
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
-from models import geo as geo_models
-from hope.models.geo import Area
+from models import country as geo_models
+from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
@@ -22,7 +22,8 @@ from hope.apps.grievance.services.data_change.utils import (
     to_date_string,
     verify_flex_fields,
 )
-from hope.models.household import Household, Individual
+from hope.models.household import Household
+from hope.models.individual import Individual
 from hope.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )

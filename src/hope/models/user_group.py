@@ -9,6 +9,7 @@ class UserGroup(NaturalKeyModel, models.Model):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
 
     class Meta:
+        app_label = "account"
         unique_together = ("business_area", "user", "group")
 
     def __str__(self) -> str:

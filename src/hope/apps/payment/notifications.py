@@ -10,7 +10,7 @@ from hope.models.user import User
 from hope.models.role_assignment import RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import encode_id_base64
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 from hope.apps.utils.mailjet import MailjetClient
 
 logger = logging.getLogger(__name__)

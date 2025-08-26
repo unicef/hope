@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.grievance.models import (
     TicketAddIndividualDetails,
     TicketDeleteHouseholdDetails,
@@ -21,7 +21,7 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
 )
-from hope.models.household import Individual
+from hope.models.individual import Individual
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
 from hope.models.program import Program
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer

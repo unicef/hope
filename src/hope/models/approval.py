@@ -29,6 +29,7 @@ class Approval(TimeStampedUUIDModel):
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
 
     class Meta:
+        app_label = "payment"
         ordering = ("-created_at",)
 
     def __str__(self) -> str:

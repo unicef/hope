@@ -9,7 +9,7 @@ from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
 from hope.models.user import User
 from hope.models.household import Household
-from hope.models.steficon import Rule
+from hope.models.rule import Rule
 from hope.config import settings
 
 CODE = """

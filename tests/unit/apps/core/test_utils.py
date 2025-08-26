@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.test import TestCase
 
 from hope.apps.core.utils import get_count_and_percentage
-from hope.apps.payment.models import Payment
+from hope.models import Payment
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
 
 

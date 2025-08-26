@@ -8,9 +8,9 @@ from hope.apps.household.documents import get_individual_doc
 from hope.models.household import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
-    Document,
-    Individual,
 )
+from hope.models.individual import Individual
+from hope.models.document import Document
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,

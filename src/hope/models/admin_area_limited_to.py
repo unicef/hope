@@ -17,6 +17,7 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
     areas = models.ManyToManyField("geo.Area", related_name="admin_area_limits", blank=True)
 
     class Meta:
+        app_label = "account"
         unique_together = ("partner", "program")
 
     def clean(self) -> None:

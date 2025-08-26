@@ -29,9 +29,10 @@ from hope.apps.core.api.mixins import (
     PermissionActionMixin,
     SerializerActionMixin,
 )
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import to_choice_object
-from hope.models.household import Household, Individual
+from hope.models.household import Household
+from hope.models.individual import Individual
 from hope.models.program import Program
 
 

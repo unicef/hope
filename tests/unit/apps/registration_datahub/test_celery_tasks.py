@@ -31,9 +31,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.models.household import (
     DISABLED,
     FEMALE,
@@ -43,17 +43,17 @@ from hope.models.household import (
     MALE,
     NOT_DISABLED,
     SON_DAUGHTER,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.registration_data import (
-    ImportData,
-    KoboImportData,
+from hope.models.registration_data_import import (
     RegistrationDataImport,
 )
+from hope.models.import_data import ImportData
+from hope.models.kobo_import_data import KoboImportData
 from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,

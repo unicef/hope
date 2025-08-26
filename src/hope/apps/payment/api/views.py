@@ -24,7 +24,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -34,7 +34,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
@@ -83,7 +83,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
 )
-from hope.apps.payment.models import (
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -115,8 +115,8 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hope.models.program import ProgramCycle
-from hope.models.steficon import Rule
+from hope.models.program_cycle import ProgramCycle
+from hope.models.rule import Rule
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
 

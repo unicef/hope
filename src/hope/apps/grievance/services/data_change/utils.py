@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from hope.models.partner import Partner
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.core.field_attributes.fields_types import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_DATE,
@@ -21,27 +21,27 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
 )
-from hope.models.core import FlexibleAttribute
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import (
     encode_id_base64,
     encode_id_base64_required,
     serialize_flex_attributes,
 )
-from models import geo as geo_models
+from models import country as geo_models
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.models.household import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Document,
-    DocumentType,
     Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account, AccountType
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
+from hope.models import Account, AccountType
 from hope.models.utils import MergeStatusModel
 
 

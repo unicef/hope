@@ -30,8 +30,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.core import BusinessArea
-from hope.models.core import FlexibleAttribute as Core_FlexibleAttribute
+from hope.models.business_area import BusinessArea
+from hope.models.flexible_attribute import FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -52,10 +52,10 @@ from hope.apps.grievance.utils import (
 from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Document,
-    IndividualRoleInHousehold,
 )
-from hope.models.registration_data import DeduplicationEngineSimilarityPair
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.document import Document
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.models.utils import MergeStatusModel
 
 

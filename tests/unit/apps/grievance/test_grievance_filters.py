@@ -42,7 +42,7 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.models import PaymentVerification, PaymentVerificationPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()

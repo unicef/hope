@@ -1,7 +1,7 @@
 import re
 
-from hope.models.core import FlexibleAttribute
-from hope.models.household import Individual
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.individual import Individual
 from hope.models.program import Program
 
 

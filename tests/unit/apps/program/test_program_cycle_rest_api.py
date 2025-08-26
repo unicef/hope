@@ -22,13 +22,14 @@ from hope.models.user import User
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 from hope.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
-from hope.models.program import Program, ProgramCycle
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):

@@ -7,8 +7,10 @@ from django_filters import (
 from django_filters.rest_framework import FilterSet
 
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.models.geo import Area, AreaType, Country
-from hope.apps.payment.models import FinancialInstitution
+from hope.models.country import Country
+from hope.models.area import Area
+from hope.models.area_type import AreaType
+from hope.models import FinancialInstitution
 from hope.contrib.aurora.models import Project, Registration
 
 

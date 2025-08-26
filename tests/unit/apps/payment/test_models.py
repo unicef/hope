@@ -42,14 +42,16 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 from hope.apps.core.currencies import USDC
-from hope.models.core import BusinessArea, DataCollectingType, FileTemp
+from hope.models.business_area import BusinessArea
+from hope.models.file_temp import FileTemp
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hope.apps.payment.models import (
+from hope.models import (
     Account,
     AccountType,
     Approval,
@@ -65,8 +67,8 @@ from hope.apps.payment.models import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.models.program import ProgramCycle
-from hope.models.steficon import Rule
+from hope.models.program_cycle import ProgramCycle
+from hope.models.rule import Rule
 
 pytestmark = pytest.mark.django_db()
 

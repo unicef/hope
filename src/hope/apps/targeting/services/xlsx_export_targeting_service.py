@@ -8,8 +8,9 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.utils import nested_getattr
-from hope.models.household import Document, Individual
-from hope.apps.payment.models import PaymentPlan
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models import PaymentPlan
 
 
 class XlsxExportTargetingService:

@@ -3,7 +3,7 @@ from typing import Any, Optional
 from django.db.models import DateTimeField
 
 from hope.models.household import Household
-from hope.apps.payment.models import Payment, PaymentPlan
+from hope.models import Payment, PaymentPlan
 from hope.models.utils import MergeStatusModel
 
 

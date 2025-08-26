@@ -18,10 +18,10 @@ from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.models import Grant
 from hope.api.utils import humanize_errors
-from hope.models.geo import Country
+from hope.models.country import Country
 from hope.models.household import PendingHousehold
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class RDISerializer(serializers.ModelSerializer):

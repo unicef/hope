@@ -13,7 +13,7 @@ from rest_framework.test import APITestCase
 from unit.api.factories import APITokenFactory
 
 from hope.api.models import APIToken, Grant
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 
 @contextlib.contextmanager

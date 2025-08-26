@@ -17,12 +17,12 @@ from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
-    DocumentType,
     PendingHousehold,
     PendingIndividual,
 )
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class UploadRDITests(HOPEApiTestCase):

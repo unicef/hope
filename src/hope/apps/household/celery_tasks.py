@@ -12,7 +12,8 @@ from django.utils import timezone
 
 from hope.apps.core.celery import app
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models.household import Household, Individual
+from hope.models.household import Household
+from hope.models.individual import Individual
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.models.program import Program
 from hope.apps.program.utils import enroll_households_to_program
@@ -112,7 +113,7 @@ def interval_recalculate_population_fields_task() -> None:
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
 
-    from hope.models.registration_data import Household
+    from hope.models.registration_data_import import Household
 
     return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
         # TODO: count differently or add all the fields for the new gender options

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.sanction_list import SanctionListIndividualAliasName
+from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
 
 
 @admin.register(SanctionListIndividualAliasName)

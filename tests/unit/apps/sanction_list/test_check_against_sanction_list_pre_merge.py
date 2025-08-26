@@ -14,11 +14,12 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from strategy_field.utils import fqn
 
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID, Individual
+from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID
+from hope.models.individual import Individual
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,

@@ -35,13 +35,14 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import FileTemp
-from hope.models.household import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.models.file_temp import FileTemp
+from hope.models.household import ROLE_PRIMARY
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hope.apps.payment.models import (
+from hope.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -50,7 +51,8 @@ from hope.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models.program import Program, ProgramCycle
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
 
 
 class TestPaymentPlanServices(BaseTestCase):

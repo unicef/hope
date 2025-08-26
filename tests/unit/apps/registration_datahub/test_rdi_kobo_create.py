@@ -13,24 +13,28 @@ from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
 from django_countries.fields import Country
+
+import models.area
+import models.area_type
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import geo as geo_models
+from models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_CHOICE,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.models.registration_data import ImportData, RegistrationDataImport
+from hope.models.document_type import DocumentType
+from hope.models import PendingAccount
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.import_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel
 
@@ -84,11 +88,11 @@ class TestRdiKoboCreateTask(TestCase):
 
         country = geo_models.Country.objects.first()
 
-        admin1_type = geo_models.AreaType.objects.create(name="Bakool", area_level=1, country=country)
-        admin1 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
+        admin1_type = models.area_type.AreaType.objects.create(name="Bakool", area_level=1, country=country)
+        admin1 = models.area.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
 
-        admin2_type = geo_models.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
-        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
+        admin2_type = models.area_type.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
+        models.area.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
 
         cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -599,9 +603,9 @@ class TestRdiKoboCreateTask(TestCase):
         self.registration_data_import.program = program
         self.registration_data_import.save()
         country = geo_models.Country.objects.first()
-        admin4_type = geo_models.AreaType.objects.create(name="Bakool", area_level=4, country=country)
-        admin4 = geo_models.Area.objects.create(p_code="CD8309ZS01AS01", name="CD8309ZS01AS01", area_type=admin4_type)
-        admin4_mapped = geo_models.Area.objects.create(
+        admin4_type = models.area_type.AreaType.objects.create(name="Bakool", area_level=4, country=country)
+        admin4 = models.area.Area.objects.create(p_code="CD8309ZS01AS01", name="CD8309ZS01AS01", area_type=admin4_type)
+        admin4_mapped = models.area.Area.objects.create(
             p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type
         )
 

@@ -17,12 +17,10 @@ from rest_framework.reverse import reverse
 from test_utils.factories.core import PeriodicFieldDataFactory
 
 from hope.apps.account.permissions import Permissions
-from hope.models.core import (
+from hope.models.business_area import (
     BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    PeriodicFieldData,
 )
+from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice, PeriodicFieldData
 from hope.apps.core.utils import get_fields_attr_generators
 
 pytestmark = pytest.mark.django_db

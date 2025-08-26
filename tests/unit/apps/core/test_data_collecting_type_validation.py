@@ -3,7 +3,7 @@ from django.test import TestCase
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 
-from hope.models.core import DataCollectingType
+from hope.models.data_collecting_type import DataCollectingType
 
 
 class TestDCTValidation(TestCase):

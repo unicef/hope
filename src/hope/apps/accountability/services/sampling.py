@@ -4,7 +4,7 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 
-from hope.models.accountability import Message
+from hope.models.message import Message
 from hope.apps.core.filters import filter_age
 from hope.models.household import Household
 from hope.apps.payment.utils import get_number_of_samples

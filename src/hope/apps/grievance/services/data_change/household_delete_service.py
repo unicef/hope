@@ -10,7 +10,8 @@ from hope.apps.grievance.models import (
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
 )
-from hope.models.household import Household, IndividualRoleInHousehold
+from hope.models.household import Household
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 

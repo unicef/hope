@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django_filters import CharFilter, FilterSet
 
-from hope.models.activity_log import LogEntry
+from hope.models.log_entry import LogEntry
 
 
 class LogEntryFilter(FilterSet):

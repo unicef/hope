@@ -19,12 +19,12 @@ from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
-    DocumentType,
     PendingHousehold,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
+from hope.models.document_type import DocumentType
+from hope.models import AccountType, FinancialInstitution, PendingAccount
 from hope.models.program import Program
-from hope.models.registration_data import RegistrationDataImport
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class CreateRDITests(HOPEApiTestCase):

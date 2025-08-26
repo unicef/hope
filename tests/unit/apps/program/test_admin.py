@@ -13,7 +13,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.models.role_assignment import RoleAssignment
 from hope.models.partner import Partner
-from hope.models.geo import Area
+from hope.models.area import Area
 
 pytestmark = pytest.mark.django_db()
 

@@ -6,11 +6,7 @@ from django.test import TestCase
 from xlrd import XLRDError
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hope.models.core import (
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-)
+from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeGroup, FlexibleAttributeChoice
 
 
 class MockSuperUser:

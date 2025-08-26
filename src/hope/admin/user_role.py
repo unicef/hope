@@ -15,7 +15,7 @@ from hope.admin.account_forms import (
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models.role import Role
 from hope.models.partner import Partner
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 
 logger = logging.getLogger(__name__)
 

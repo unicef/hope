@@ -32,12 +32,15 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from selenium.webdriver.common.by import By
 
 from hope.models.user import User
-from hope.models.core import BusinessArea, DataCollectingType
-from hope.models.geo import Area
-from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hope.apps.payment.models import PaymentVerification
-from hope.apps.payment.models import PaymentVerificationPlan
-from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.area import Area
+from hope.models import DeliveryMechanism, Payment, PaymentPlan
+from hope.models import PaymentVerification
+from hope.models import PaymentVerificationPlan
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.beneficiary_group import BeneficiaryGroup
 
 pytestmark = pytest.mark.django_db()
 

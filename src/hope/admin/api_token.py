@@ -16,7 +16,7 @@ from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.api.models import APIToken
 from hope.models.user import ChoiceArrayField
-from hope.models.core import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.apps.utils.security import is_root
 
 

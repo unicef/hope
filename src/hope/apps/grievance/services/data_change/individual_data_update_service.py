@@ -7,10 +7,11 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
-from hope.models.geo import Area, Country
+from hope.models.country import Country
+from hope.models.area import Area
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
@@ -45,13 +46,13 @@ from hope.apps.grievance.services.data_change.utils import (
 )
 from hope.models.household import (
     HEAD,
-    Document,
     Household,
-    Individual,
-    IndividualIdentity,
 )
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual import Individual
+from hope.models.document import Document
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.apps.payment.models import Account
+from hope.models import Account
 from hope.apps.utils.phone import is_valid_phone_number
 
 

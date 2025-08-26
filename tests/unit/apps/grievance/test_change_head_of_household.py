@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 import pytest
 from django.core.management import call_command
@@ -15,11 +15,14 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from models import geo as geo_models
+from models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models.household import AUNT_UNCLE, BROTHER_SISTER, HEAD, Individual
+from hope.models.household import AUNT_UNCLE, BROTHER_SISTER, HEAD
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+
+if TYPE_CHECKING:
+    from hope.models.individual import Individual
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()

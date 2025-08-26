@@ -4,7 +4,7 @@ import django_filters
 from django.db.models import Q, QuerySet
 from django_filters import FilterSet
 
-from hope.apps.payment.models import (
+from hope.models import (
     DeliveryMechanism,
     PaymentPlan,
     PaymentVerificationSummary,

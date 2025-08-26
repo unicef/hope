@@ -12,8 +12,8 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.models.core import DataCollectingType
-from models import geo as geo_models
+from hope.models.data_collecting_type import DataCollectingType
+from models import country as geo_models
 from hope.models.household import (
     DISABLED,
     FEMALE,
@@ -21,12 +21,12 @@ from hope.models.household import (
     MALE,
     NOT_DISABLED,
     PRIVATE_PARTNER,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.czech_republic_flex_registration_service import (
     CzechRepublicFlexRegistration,

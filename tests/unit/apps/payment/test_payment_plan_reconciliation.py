@@ -25,9 +25,9 @@ from parameterized import parameterized
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.core import DataCollectingType
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import ROLE_PRIMARY
-from hope.apps.payment.models import (
+from hope.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,

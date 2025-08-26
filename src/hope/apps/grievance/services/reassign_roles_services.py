@@ -6,16 +6,16 @@ from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
-from hope.models.activity_log import log_create
+from hope.models.log_entry import log_create
 from hope.models.household import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual import Individual
 from hope.apps.utils.exceptions import log_and_raise
 from hope.apps.utils.querysets import evaluate_qs
 

@@ -14,7 +14,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 
-from hope.apps.payment.models import FinancialServiceProvider, PaymentPlan
+from hope.models import FinancialServiceProvider, PaymentPlan
 
 
 @pytest.fixture(autouse=True)

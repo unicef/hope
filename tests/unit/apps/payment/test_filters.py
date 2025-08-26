@@ -8,8 +8,8 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 
-from hope.models.core import BusinessArea
-from hope.apps.payment.models import (
+from hope.models.business_area import BusinessArea
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,

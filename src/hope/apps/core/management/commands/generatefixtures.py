@@ -32,9 +32,9 @@ from extras.test_utils.factories.targeting import (
 )
 
 from hope.models.role_assignment import RoleAssignment
-from hope.models.core import BusinessArea
-from hope.models.geo import Area
-from hope.models.household import DocumentType
+from hope.models.business_area import BusinessArea
+from hope.models.area import Area
+from hope.models.document_type import DocumentType
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 if TYPE_CHECKING:

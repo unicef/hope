@@ -12,8 +12,8 @@ from mptt.forms import TreeNodeMultipleChoiceField
 import models.partner
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
-from hope.models.core import BusinessArea
-from hope.models.geo import Area
+from hope.models.business_area import BusinessArea
+from hope.models.area import Area
 from hope.models.program import Program
 
 

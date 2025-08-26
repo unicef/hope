@@ -24,5 +24,6 @@ class ApprovalProcess(TimeStampedUUIDModel):
     finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
+        app_label = "payment"
         ordering = ("-created_at",)
         verbose_name_plural = "Approval Processes"

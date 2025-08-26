@@ -15,15 +15,15 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hope.models.core import DataCollectingType
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import (
     ROLE_PRIMARY,
-    DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.people_registration_service import (
     PeopleRegistrationService,

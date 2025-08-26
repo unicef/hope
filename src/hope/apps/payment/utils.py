@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
-from hope.apps.payment.models import (
+from hope.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,

@@ -13,7 +13,8 @@ from django_filters import (
 )
 
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.models.program import Program, ProgramCycle
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
 
 
 class ChartProgramFilter(FilterSet):

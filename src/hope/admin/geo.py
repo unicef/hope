@@ -17,8 +17,9 @@ from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.geo import Area, AreaType, Country
-
+from hope.models.country import Country
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 
 logger = logging.getLogger(__name__)
 

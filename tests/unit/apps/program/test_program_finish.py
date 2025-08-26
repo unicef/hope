@@ -10,8 +10,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan
-from hope.models.program import Program, ProgramCycle
+from hope.models import PaymentPlan
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
