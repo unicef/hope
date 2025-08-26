@@ -1,19 +1,16 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
 from django.core.management import call_command
 
-from hope.apps.sanction_list.models import (
-    SanctionList,
+from hope.models.sanction_list import (
     SanctionListIndividual,
     SanctionListIndividualAliasName,
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualNationalities,
 )
 
-if TYPE_CHECKING:
-    from hope.apps.sanction_list.strategies.eu import EUSanctionList
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

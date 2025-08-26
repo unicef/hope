@@ -1,1 +1,1 @@
-from hope.apps.core.models import CustomDatabaseScheduler  # noqa
+from hope.models.core import CustomDatabaseScheduler  # noqa

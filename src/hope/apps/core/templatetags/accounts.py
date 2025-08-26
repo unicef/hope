@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django import template
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -7,12 +7,6 @@ from django.urls import reverse
 from hope.apps.utils.security import is_root
 
 register = template.Library()
-
-
-if TYPE_CHECKING:
-    from django.http import HttpRequest
-
-    from hope.apps.account.models import User
 
 
 @register.simple_tag()

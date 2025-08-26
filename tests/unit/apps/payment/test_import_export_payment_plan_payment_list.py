@@ -27,16 +27,18 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import Role, RoleAssignment, User
+from hope.models.user import User
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
+from hope.models.core import (
     BusinessArea,
     DataCollectingType,
     FileTemp,
     FlexibleAttribute,
 )
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from models import geo as geo_models
+from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
     Document,

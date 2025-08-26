@@ -8,10 +8,10 @@ import django.core.validators
 import django.db.models.deletion
 import model_utils.fields
 from django.conf import settings
-from django.db import migrations, models
+from django.db import migrations
 
 import hope.apps.targeting.services.targeting_service
-import hope.apps.utils.models
+import models.utils
 
 
 class Migration(migrations.Migration):
@@ -376,7 +376,7 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Target Population",
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="TargetingIndividualRuleFilterBlock",

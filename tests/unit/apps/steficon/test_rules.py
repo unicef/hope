@@ -7,9 +7,9 @@ from extras.test_utils.factories.household import HouseholdFactory
 
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
-from hope.apps.account.models import User
-from hope.apps.household.models import Household
-from hope.apps.steficon.models import Rule
+from hope.models.user import User
+from hope.models.household import Household
+from hope.models.steficon import Rule
 from hope.config import settings
 
 CODE = """

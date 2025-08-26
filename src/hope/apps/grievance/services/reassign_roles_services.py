@@ -1,13 +1,13 @@
 from collections import Counter
-from typing import TYPE_CHECKING, Union
+from typing import Union
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.household.models import (
+from hope.models.activity_log import log_create
+from hope.models.household import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
@@ -19,10 +19,6 @@ from hope.apps.household.models import (
 from hope.apps.utils.exceptions import log_and_raise
 from hope.apps.utils.querysets import evaluate_qs
 
-if TYPE_CHECKING:  # pragma: no cover
-    from django.contrib.auth.models import AbstractUser  # pragma: no cover
-
-    from hope.apps.program.models import Program  # pragma: no cover
 
 """
 Reassing data structure:

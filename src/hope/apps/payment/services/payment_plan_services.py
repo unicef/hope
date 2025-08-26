@@ -2,7 +2,7 @@ import datetime
 import logging
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Union
+from typing import IO, Callable, Union
 
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
@@ -14,9 +14,9 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, FileTemp
+from hope.models.core import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import (
+from hope.models.household import (
     ROLE_PRIMARY,
     Individual,
     IndividualRoleInHousehold,
@@ -46,22 +46,14 @@ from hope.apps.payment.models import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.targeting.models import (
+from hope.models.program import Program, ProgramCycle
+from hope.models.targeting import (
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
 )
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
-
-if TYPE_CHECKING:  # pragma: no cover
-    from uuid import UUID
-
-    from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import AbstractUser, User
 
 
 class PaymentPlanService:

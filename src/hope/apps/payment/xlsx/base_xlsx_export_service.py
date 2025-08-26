@@ -1,7 +1,7 @@
 import decimal
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import openpyxl
 from django.conf import settings
@@ -11,11 +11,6 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 from hope.apps.core.utils import encode_id_base64
-
-if TYPE_CHECKING:
-    from openpyxl.worksheet.worksheet import Worksheet
-
-    from hope.apps.account.models import User
 
 
 logger = logging.getLogger(__name__)

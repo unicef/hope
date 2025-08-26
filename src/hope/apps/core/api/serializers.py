@@ -2,7 +2,7 @@ from typing import Any, Callable
 
 from rest_framework import serializers
 
-from hope.apps.core.models import (
+from hope.models.core import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,

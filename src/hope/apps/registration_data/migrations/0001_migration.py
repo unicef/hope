@@ -9,9 +9,9 @@ import django.db.models.deletion
 import django.db.models.expressions
 import model_utils.fields
 from django.conf import settings
-from django.db import migrations, models
+from django.db import migrations
 
-import hope.apps.utils.models
+import models.utils
 
 
 class Migration(migrations.Migration):
@@ -335,7 +335,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Registration data import",
                 "unique_together": {("name", "business_area")},
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, models.models.AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="KoboImportedSubmission",

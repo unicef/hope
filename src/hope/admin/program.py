@@ -18,12 +18,13 @@ from hope.admin.utils import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.account.models import AdminAreaLimitedTo, Partner
-from hope.apps.geo.models import Area
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.partner import Partner
+from hope.models.geo import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program, ProgramCycle
+from hope.models.household import Household, Individual
+from hope.models.program import Program, ProgramCycle
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )

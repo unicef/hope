@@ -1,17 +1,13 @@
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import Iterable, Optional
 
 from django.test import TestCase
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
-
-if TYPE_CHECKING:  # pragma: no_cover
-    from hope.apps.account.models import Partner, User
-    from hope.apps.core.models import BusinessArea
-    from hope.apps.geo.models import Area
-    from hope.apps.program.models import Program
+from hope.models.household import IDENTIFICATION_TYPE_CHOICE, DocumentType
 
 
 class BaseTestCase(TestCase):

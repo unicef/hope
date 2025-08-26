@@ -5,8 +5,8 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 
-from hope.apps.household.models import Household, Individual
-from hope.apps.targeting.models import (
+from hope.models.household import Household, Individual
+from hope.models.targeting import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,

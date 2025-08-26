@@ -8,10 +8,10 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
+from hope.models.user import User
+from hope.models.core import BusinessArea
+from hope.models.program import Program
+from hope.models.registration_data import (
     ImportData,
     KoboImportData,
     RegistrationDataImport,

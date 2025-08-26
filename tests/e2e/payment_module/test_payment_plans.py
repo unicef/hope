@@ -35,15 +35,15 @@ from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
-from hope.apps.account.models import User
-from hope.apps.core.models import DataCollectingType
+from hope.models.user import User
+from hope.models.core import DataCollectingType
 from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.steficon.models import Rule
+from hope.models.program import BeneficiaryGroup, Program, ProgramCycle
+from hope.models.steficon import Rule
 
 pytestmark = pytest.mark.django_db()
 

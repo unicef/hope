@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.db import models
 from django.db.models import JSONField, Q
@@ -8,7 +8,7 @@ from model_utils import Choices
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.household.models import (
+from hope.models.household import (
     ROLE_PRIMARY,
     Individual,
     IndividualRoleInHousehold,
@@ -20,10 +20,8 @@ from hope.apps.targeting.services.targeting_service import (
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualRuleFilterBlockBase,
 )
-from hope.apps.utils.models import TimeStampedUUIDModel
+from hope.models.utils import TimeStampedUUIDModel
 
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
 

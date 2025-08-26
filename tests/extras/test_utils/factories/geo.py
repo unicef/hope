@@ -6,8 +6,8 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models.core import BusinessArea
+from hope.models.geo import Area, AreaType, Country
 
 faker = Faker()
 

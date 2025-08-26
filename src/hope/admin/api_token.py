@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -15,12 +15,9 @@ from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.api.models import APIToken
-from hope.apps.account.models import ChoiceArrayField
-from hope.apps.core.models import BusinessArea
+from hope.models.user import ChoiceArrayField
+from hope.models.core import BusinessArea
 from hope.apps.utils.security import is_root
-
-if TYPE_CHECKING:
-    from uuid import UUID
 
 
 TOKEN_INFO_EMAIL = """

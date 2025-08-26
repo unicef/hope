@@ -8,8 +8,10 @@ from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 from hope.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hope.apps.account.models import ACTIVE, Role, RoleAssignment, User
-from hope.apps.core.models import BusinessArea
+from hope.models.user import ACTIVE, User
+from hope.models.role_assignment import RoleAssignment
+from hope.models.role import Role
+from hope.models.core import BusinessArea
 
 logger = logging.getLogger(__name__)
 
