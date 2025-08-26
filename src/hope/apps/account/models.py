@@ -398,18 +398,15 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
         **kwargs: Any,
     ) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
-            "form_class": forms.MultipleChoiceField,
             "widget": widget,
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        return super(ArrayField, self).formfield(forms.MultipleChoiceField, **defaults)
 
 
 class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):

@@ -1,7 +1,6 @@
 import datetime
 from io import BytesIO
 import json
-from tempfile import _TemporaryFileWrapper
 from typing import Any
 import uuid
 
@@ -32,9 +31,7 @@ from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.program.models import Program
 
 
-def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]
-) -> _TemporaryFileWrapper:
+def add_pdu_data_to_xlsx(periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]) -> BytesIO:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     ws_pdu = wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
     for row_index, row in enumerate(rows):

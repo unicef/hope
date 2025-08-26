@@ -157,7 +157,7 @@ class TestHouseholdDataUpdateService(TestCase):
                 "household_data": {
                     "country": "AGO",
                     "flex_fields": {},
-                    "roles": [{"new_role": "ALTERNATE", "individual": individual}],  # type: ignore
+                    "roles": [{"new_role": "ALTERNATE", "individual": individual}],
                 },
             }
         }
@@ -228,11 +228,11 @@ class TestHouseholdDataUpdateService(TestCase):
         # update Role to PRIMARY
         extras = {
             "household_data_update_issue_type_extras": {
-                "household": household,  # type: ignore
+                "household": household,
                 "household_data": {
                     "country": "AGO",
                     "flex_fields": {},
-                    "roles": [{"new_role": "PRIMARY", "individual": individual}],  # type: ignore
+                    "roles": [{"new_role": "PRIMARY", "individual": individual}],
                 },
             }
         }

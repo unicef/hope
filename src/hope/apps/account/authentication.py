@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.http import HttpRequest, HttpResponse
 from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth, user as social_core_user
@@ -70,7 +71,7 @@ def create_user(
     strategy: Any,
     details: dict,
     backend: Any,
-    user: bool | User,
+    user: User | AbstractBaseUser,
     *args: Any,
     **kwargs: Any,
 ) -> dict[str, bool | User] | None:
