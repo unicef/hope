@@ -15,7 +15,6 @@ from typing import (
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
-from django.db import IntegrityError
 from django.db.models import Model, QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
@@ -27,6 +26,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
 
+from hct_mis_api.apps.geo.celery_tasks import import_areas_from_csv_task
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -216,42 +216,51 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
             form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
                 csv_file = form.cleaned_data["file"]
-                data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                reader = csv.DictReader(data_set)
-                try:
-                    country = None
+                data_set = csv_file.read().decode("utf-8-sig")
+                reader = csv.DictReader(data_set.splitlines())
+                rows = list(reader)
 
-                    for row in reader:
-                        d = len(row) // 2
-                        area_types = [*row][:d]
-                        admin_area = [*row][d:]
-                        country = country or Country.objects.get(short_name=row["Country"])
-                        for area_level, area_type_name in enumerate(area_types[1:], 1):
-                            area_type, _ = AreaType.objects.get_or_create(
-                                name=area_type_name, country=country, area_level=area_level
-                            )
-                            area, _ = Area.objects.get_or_create(
-                                name=row[area_type_name], p_code=row[admin_area[area_level]], area_type=area_type
-                            )
-                            ids = area_level - 1
-                            if ids > 0:
-                                area_type.parent = AreaType.objects.get(
-                                    country=country, area_level=ids, name=area_types[ids]
-                                )
-                                area_type.save()
-                                area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
-                                area.save()
-                    self.message_user(request, f"Updated all areas for {country}")
+                if not rows:
+                    self.message_user(request, "CSV file is empty.", messages.WARNING)
                     return redirect("admin:geo_area_changelist")
-                except IntegrityError as e:
-                    logger.warning(f"Integrity error: {e}")
-                    if p_code := str(e).split("p_code)=(")[-1].split(")")[0]:
-                        self.message_user(
-                            request, f"Area with p_code {p_code} already exists but with different data", messages.ERROR
-                        )
-                except Exception as e:
-                    logger.warning(e)
-                    self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
+
+                try:
+                    Country.objects.get(short_name=rows[0]["Country"])
+                except Country.DoesNotExist:
+                    self.message_user(request, f"Country '{rows[0]['Country']}' not found", messages.ERROR)
+                    return redirect("admin:geo_area_changelist")
+                except KeyError:
+                    self.message_user(request, "CSV must have a 'Country' column", messages.ERROR)
+                    return redirect("admin:geo_area_changelist")
+
+                keys = list(rows[0].keys())
+                num_cols = len(keys)
+                if num_cols % 2 != 0:
+                    self.message_user(
+                        request, "CSV must have an even number of columns (names and p-codes)", messages.ERROR
+                    )
+                    return redirect("admin:geo_area_changelist")
+
+                d = num_cols // 2
+                name_headers = keys[:d]
+                p_code_headers = keys[d:]
+
+                if name_headers[0] != "Country":
+                    self.message_user(request, "First column must be 'Country'", messages.ERROR)
+                    return redirect("admin:geo_area_changelist")
+
+                all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
+                existing_p_codes = set(Area.objects.filter(p_code__in=all_p_codes).values_list("p_code", flat=True))
+                new_areas_count = len(all_p_codes - existing_p_codes)
+
+                import_areas_from_csv_task.delay(data_set)
+
+                self.message_user(
+                    request,
+                    (f"Found {new_areas_count} new areas to create. " "The import is running in the background."),
+                    messages.SUCCESS,
+                )
+                return redirect("admin:geo_area_changelist")
         else:
             form = ImportCSVForm()
         context["form"] = form
