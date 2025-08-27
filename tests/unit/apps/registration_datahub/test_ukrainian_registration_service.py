@@ -126,15 +126,13 @@ class BaseTestUkrainianRegistrationService(TestCase):
             "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
         }
 
-        disability_certificate_picture = (
-            (
-                "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////////"
-                "/////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAA"
-                "AAAAAAAAAAAAAAAP/aAAgBAQABPxA="
-            ),
-        )
-
-        files = {"individuals": [{"disability_certificate_picture": disability_certificate_picture}]}
+        files = {
+            "individuals": [
+                {
+                    "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",  # noqa
+                }
+            ]
+        }
 
         records = [
             Record(

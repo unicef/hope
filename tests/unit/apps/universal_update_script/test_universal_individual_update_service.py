@@ -424,13 +424,12 @@ Validation failed
 Row: 2 - Administrative area admin1 with p_code TEST String not found
 Row: 2 - TEST String for column size is not a valid integer
 Row: 2 - TEST String for column returnee is not a valid boolean allowed values are TRUE or FALSE
-Row: 2 - Invalid value TEST String for column sex allowed values are
- ['MALE', 'FEMALE', 'OTHER', 'NOT_COLLECTED', 'NOT_ANSWERED']
+Row: 2 - Invalid value TEST String for column sex allowed values are ['MALE', 'FEMALE', 'OTHER', 'NOT_COLLECTED', 'NOT_ANSWERED']
 Row: 2 - TEST String for column birth_date is not a valid date
 Row: 2 - TEST String for column phone_no is not a valid phone number
 Row: 2 - Country not found for field national_id_country_i_c and value TEST String
 Row: 2 - Financial institution ID must be a number for field account__mobile__financial_institution_pk
-"""
+"""  # noqa
         assert universal_update.saved_logs == expected_update_log
         assert universal_update.saved_logs == universal_update.logs
         assert individual.given_name == given_name_old

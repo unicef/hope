@@ -43,7 +43,7 @@ class EUParser:
     def __init__(self, root: ET.Element) -> None:
         self.root = root
 
-    def __iter__(self) -> "Generator[Entry, None, None]":
+    def __iter__(self) -> "Generator[Entry]":
         namespace = {"ns": "http://eu.europa.ec/fpi/fsd/export"}
         num = self.root.get("globalFileId", "")
         for _i, entity in enumerate(self.root.findall("ns:sanctionEntity", namespace), 1):
