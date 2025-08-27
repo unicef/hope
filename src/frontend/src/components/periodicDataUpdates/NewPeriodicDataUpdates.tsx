@@ -128,6 +128,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
         <TableCell>
           <StatusBox
             status={row.status}
+            statusDisplay={row.statusDisplay}
             statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
           />
         </TableCell>

@@ -260,6 +260,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
 
   const {
     status,
+    statusDisplay,
     name,
     createdAt,
     numberOfRecords,
@@ -382,6 +383,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               <StatusBox
                 status={status}
                 statusToColor={periodicDataUpdateTemplateStatusToColor}
+                statusDisplay={statusDisplay}
               />
             </LabelizedField>
           </Grid>

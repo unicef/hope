@@ -94,7 +94,7 @@ export const AuthorizedUsersOnlineListCreate: React.FC<
       const newSelected = prev.includes(userId)
         ? prev.filter((sid) => sid !== userId)
         : [...prev, userId];
-      setFieldValue('authorizedUserIds', newSelected);
+      setFieldValue('authorizedUsers', newSelected);
       return newSelected;
     });
   };
