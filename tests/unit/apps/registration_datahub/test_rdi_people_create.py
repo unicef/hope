@@ -2,7 +2,6 @@ from datetime import date
 from io import BytesIO
 from pathlib import Path
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
@@ -18,6 +17,7 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.core.models import DataCollectingType, PeriodicFieldData
 from hope.apps.geo.models import Country as GeoCountry
@@ -41,7 +41,7 @@ class TestRdiXlsxPeople(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         PartnerFactory(name="UNHCR")
         content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx").read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")

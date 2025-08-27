@@ -1,7 +1,6 @@
 from typing import Callable, Dict, Optional
 from unittest.mock import Mock, patch
 
-import pytest
 from django.core.cache import cache
 from django.http import Http404
 from django.test import RequestFactory
@@ -11,6 +10,7 @@ from extras.test_utils.factories.account import (
     RoleFactory,
     UserFactory,
 )
+import pytest
 from rest_framework import status
 
 from hope.apps.account.models import RoleAssignment

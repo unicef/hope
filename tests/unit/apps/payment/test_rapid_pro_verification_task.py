@@ -1,7 +1,7 @@
-import uuid
 from decimal import Decimal
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
+import uuid
 
 from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
@@ -23,10 +23,8 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.geo.models import Area
+from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hope.apps.payment.tasks.CheckRapidProVerificationTask import (
-    CheckRapidProVerificationTask,
-)
 from hope.apps.utils.phone import is_valid_phone_number
 
 

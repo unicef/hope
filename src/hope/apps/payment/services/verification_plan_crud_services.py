@@ -3,6 +3,9 @@ from typing import TYPE_CHECKING, Any
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.payment.celery_tasks import (
+    does_payment_record_have_right_hoh_phone_number,
+)
 from hope.apps.payment.models import PaymentVerificationPlan
 from hope.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
@@ -10,9 +13,6 @@ from hope.apps.payment.services.create_payment_verifications import (
 from hope.apps.payment.services.process_verification import ProcessVerification
 from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
-from hope.apps.payment.tasks.CheckRapidProVerificationTask import (
-    does_payment_record_have_right_hoh_phone_number,
-)
 
 if TYPE_CHECKING:
     from hope.apps.payment.models import PaymentPlan  # pragma: no cover

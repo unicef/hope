@@ -84,7 +84,10 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         if not delivery_mechanism or not financial_service_provider:
             return cleaned_data
 
-        error_message = f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider {financial_service_provider}"
+        error_message = (
+            f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider "
+            f"{financial_service_provider}"
+        )
         # to work both in inline and standalone
         if delivery_mechanisms := self.data.getlist("delivery_mechanisms"):
             if delivery_mechanism and str(delivery_mechanism.id) not in delivery_mechanisms:
@@ -179,7 +182,8 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                 payment_plans = self.locked_payment_plans_for_fsp(self.instance)
                 if payment_plans.exists():
                     raise ValidationError(
-                        f"Cannot modify {self.instance}, it is assigned to following Payment Plans: {list(payment_plans)}"
+                        f"Cannot modify {self.instance}, it is assigned to following Payment Plans:"
+                        f" {list(payment_plans)}"
                     )
 
         return super().clean()
@@ -240,7 +244,11 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
             "<br>".join(
-                f"<a href='{reverse('admin:%s_%s_change' % (template._meta.app_label, template._meta.model_name), args=[template.id])}'>{template}</a>"
+                f"<a href='{
+                    reverse(
+                        'admin:%s_%s_change' % (template._meta.app_label, template._meta.model_name), args=[template.id]
+                    )
+                }'>{template}</a>"
                 for template in obj.fsp_xlsx_template_per_delivery_mechanisms.all()
             )
         )

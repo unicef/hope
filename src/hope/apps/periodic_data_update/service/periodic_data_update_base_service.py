@@ -101,7 +101,7 @@ class PDUDataExtractionService:
                 .values_list(individual_field_name, flat=True)
             ]
             ticket_individual_ids.update(ids)
-        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
         ids = [
             str(x)
             for x in PossibleDuplicateThrough.objects.filter(individual__in=individuals_ids)

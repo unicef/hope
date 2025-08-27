@@ -15,7 +15,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.core.utils import encode_id_base64
 from hope.apps.household.models import Household, Individual
@@ -23,7 +23,7 @@ from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
 from hope.apps.payment.models import PaymentPlan
 
 
-class TestExcludeHouseholds(APITestCase):
+class TestExcludeHouseholds(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -187,7 +187,10 @@ class TestExcludeHouseholds(APITestCase):
             self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
         )
 
-        error_msg = f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        error_msg = (
+            f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} "
+            f"because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        )
         assert self.payment_plan.exclude_household_error == error_msg
 
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)

@@ -1,17 +1,16 @@
+from collections import OrderedDict
+from collections.abc import MutableMapping
+from copy import deepcopy
+from datetime import date, datetime
+from decimal import Decimal
 import functools
 import io
 import itertools
 import json
 import logging
 import string
-from collections import OrderedDict
-from collections.abc import MutableMapping
-from copy import deepcopy
-from datetime import date, datetime
-from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional, Union
 
-import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
 from django.core.cache import cache
@@ -23,6 +22,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
 from PIL import Image
+import pytz
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.utils.exceptions import log_and_raise
@@ -76,7 +76,7 @@ def get_program_id_from_headers(headers: Union[dict, "HttpHeaders"]) -> str | No
     # sometimes it get from info.context.headers or kwargs["Program"]: str
 
     program_id = headers.get("Program")
-    return decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
+    return decode_id_string(program_id) if program_id not in ["all", "undefined"] else None
 
 
 def unique_slugify(
@@ -478,14 +478,6 @@ def decode_and_get_object_required(encoded_id: str, model: type) -> Any:
     return decode_and_get_object(encoded_id, model, required=True)
 
 
-def dict_to_camel_case(dictionary: dict) -> dict:
-    from graphene.utils.str_converters import to_camel_case
-
-    if isinstance(dictionary, dict):
-        return {to_camel_case(key): value for key, value in dictionary.items()}
-    return {}
-
-
 def to_snake_case(camel_case_string: str) -> str:
     if "_" in camel_case_string:
         return camel_case_string
@@ -692,7 +684,7 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
                 [str(current_choice_value) for current_choice_value in value] if isinstance(value, list) else str(value)
             )
         if flex_field == FlexibleAttribute.PDU:
-            for round_number, round_data in flex_fields_copy[flex_field_name].items():
+            for round_number, round_data in value.items():
                 if round_data["value"] is None:
                     flex_fields_with_str_choices[flex_field_name].pop(round_number)
             if not flex_fields_with_str_choices[flex_field_name]:
@@ -829,8 +821,7 @@ def clear_cache_for_key(key: str) -> None:
             cache.delete(k)
 
 
-"""Constants for the identification type field to key mapping, used until other systems are updated to use the new keys"""
-
+# Constants for the identification type field to key mapping, used until other systems are updated to use the new keys
 IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
 IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
 IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"

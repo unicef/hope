@@ -129,6 +129,7 @@ export type { HouseholdMember as HouseholdMemberCamelCase } from './models/House
 export type { HouseholdSimple as HouseholdSimpleCamelCase } from './models/HouseholdSimple';
 export type { HouseholdSmall as HouseholdSmallCamelCase } from './models/HouseholdSmall';
 export type { HouseholdUpdateData as HouseholdUpdateDataCamelCase } from './models/HouseholdUpdateData';
+export type { HouseholdUpdateRoles as HouseholdUpdateRolesCamelCase } from './models/HouseholdUpdateRoles';
 export type { ImportData as ImportDataCamelCase } from './models/ImportData';
 export type { Individual as IndividualCamelCase } from './models/Individual';
 export type { IndividualChoices as IndividualChoicesCamelCase } from './models/IndividualChoices';
@@ -156,6 +157,7 @@ export { MessageDetailSamplingTypeEnum as MessageDetailSamplingTypeEnumCamelCase
 export type { MessageList as MessageListCamelCase } from './models/MessageList';
 export type { MessageSampleSize as MessageSampleSizeCamelCase } from './models/MessageSampleSize';
 export type { NegativeFeedbackTicketExtras as NegativeFeedbackTicketExtrasCamelCase } from './models/NegativeFeedbackTicketExtras';
+export { NewRoleEnum as NewRoleEnumCamelCase } from './models/NewRoleEnum';
 export { ObservedDisabilityEnum as ObservedDisabilityEnumCamelCase } from './models/ObservedDisabilityEnum';
 export type { Organization as OrganizationCamelCase } from './models/Organization';
 export { OrgEnumeratorEnum as OrgEnumeratorEnumCamelCase } from './models/OrgEnumeratorEnum';

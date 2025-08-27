@@ -77,7 +77,7 @@ class RoleAssignmentsTest(TestCase):
             "role_assignments-0-business_area": self.business_area_afg.id,
             "role_assignments-1-business_area": self.business_area_afg.id,
         }
-        RoleAssignmentFormSet = inlineformset_factory(
+        RoleAssignmentFormSet = inlineformset_factory(  # noqa
             User,
             RoleAssignment,
             fields=("__all__"),
@@ -99,7 +99,7 @@ class RoleAssignmentsTest(TestCase):
             "role_assignments-0-business_area": self.business_area_afg.id,
             "role_assignments-1-business_area": self.business_area_afg.id,
         }
-        RoleAssignmentFormSet = inlineformset_factory(
+        RoleAssignmentFormSet = inlineformset_factory(  # noqa
             User,
             RoleAssignment,
             fields=("__all__"),

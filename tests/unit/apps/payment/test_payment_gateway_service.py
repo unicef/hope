@@ -1,11 +1,10 @@
+from decimal import Decimal
 import json
 import os
-from decimal import Decimal
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
 
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -20,8 +19,9 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
+import pytest
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -68,7 +68,7 @@ def normalize(data: Any) -> dict:
     return json.loads(json.dumps(data))
 
 
-class TestPaymentGatewayService(APITestCase):
+class TestPaymentGatewayService(BaseTestCase):
     databases = ("default",)
 
     @classmethod
@@ -819,7 +819,7 @@ class TestPaymentGatewayService(APITestCase):
         payment.save()
         payment.collector.save()
         with self.assertRaisesMessage(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
@@ -842,7 +842,7 @@ class TestPaymentGatewayService(APITestCase):
         )
 
         with self.assertRaisesMessage(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             f"Not found snapshot for Payment {payment.unicef_id}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
@@ -936,7 +936,7 @@ class TestPaymentGatewayService(APITestCase):
         bad_status = "bad_status"
         s.value = bad_status
         with self.assertRaisesRegex(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             "Can't set invalid Payment Instruction status:",
         ):
             PaymentGatewayAPI().change_payment_instruction_status(

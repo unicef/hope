@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Callable
 
-import factory
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
@@ -30,6 +28,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+import factory
+import pytest
 from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -69,7 +69,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.SOCIAL,
         status=Program.ACTIVE,
@@ -79,7 +79,7 @@ def sw_program() -> Program:
 
 @pytest.fixture
 def non_sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.STANDARD,
         status=Program.ACTIVE,
@@ -220,17 +220,17 @@ def create_custom_household(
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
+    return create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
+    return create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
 
 
 @pytest.fixture
 def household_refugee() -> Household:
-    yield create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
+    return create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
 
 
 def get_program_with_dct_type_and_name(
@@ -392,7 +392,7 @@ def create_targeting() -> PaymentPlan:
     PaymentPlanService.create_payments(pp)
     pp.update_population_count_fields()
     pp.refresh_from_db()
-    yield pp
+    return pp
 
 
 @pytest.fixture
@@ -416,17 +416,17 @@ class TestSmokeTargeting:
         self,
         create_programs: None,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
+        page_targeting: Targeting,
     ) -> None:
         PaymentPlanFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
             status=PaymentPlan.Status.TP_OPEN,
         )
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        assert "Targeting" in pageTargeting.getTitlePage().text
-        assert "CREATE NEW" in pageTargeting.getButtonCreateNew().text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        assert "Targeting" in page_targeting.get_title_page().text
+        assert "CREATE NEW" in page_targeting.get_button_create_new().text
         expected_column_names = [
             "Name",
             "Status",
@@ -435,81 +435,81 @@ class TestSmokeTargeting:
             "Last Edited",
             "Created by",
         ]
-        assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
-        assert len(pageTargeting.getTargetPopulationsRows()) == 2
-        pageTargeting.getButtonCreateNew().click()
+        assert expected_column_names == [name.text for name in page_targeting.get_tab_column_label()]
+        assert len(page_targeting.get_target_populations_rows()) == 2
+        page_targeting.get_button_create_new().click()
 
     def test_smoke_targeting_create_use_filters(
         self,
         create_programs: None,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
-        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
-        pageTargetingCreate.getInputName()
-        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
-        pageTargetingCreate.getButtonHouseholdRule().click()
-        pageTargetingCreate.getButtonIndividualRule().click()
-        pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        assert "SAVE" in page_targeting_create.get_button_target_population_create().text
+        page_targeting_create.get_input_name()
+        page_targeting_create.get_div_target_population_add_criteria().click()
+        page_targeting_create.get_button_household_rule().click()
+        page_targeting_create.get_button_individual_rule().click()
+        page_targeting_create.get_autocomplete_target_criteria_option().click()
 
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
-        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
-        pageTargetingCreate.getInputName()
-        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
-        pageTargetingCreate.getInputIncludedHouseholdIds()
-        pageTargetingCreate.getInputHouseholdids()
-        pageTargetingCreate.getInputIncludedIndividualIds()
-        pageTargetingCreate.getInputIndividualids()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        assert "SAVE" in page_targeting_create.get_button_target_population_create().text
+        page_targeting_create.get_input_name()
+        page_targeting_create.get_div_target_population_add_criteria().click()
+        page_targeting_create.get_input_included_household_ids()
+        page_targeting_create.get_input_household_ids()
+        page_targeting_create.get_input_included_individual_ids()
+        page_targeting_create.get_input_individual_ids()
 
     def test_smoke_targeting_details_page(
         self,
         create_programs: None,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.chooseTargetPopulations(0).click()
-        assert create_targeting.name in pageTargetingDetails.getPageHeaderTitle().text
-        pageTargetingDetails.getButtonTargetPopulationDuplicate()
-        pageTargetingDetails.getButtonDelete()
-        assert "EDIT" in pageTargetingDetails.getButtonEdit().text
-        assert "REBUILD" in pageTargetingDetails.getButtonRebuild().text
-        assert "LOCK" in pageTargetingDetails.getButtonTargetPopulationLock().text
-        assert "Details" in pageTargetingDetails.getDetailsTitle().text
-        assert "OPEN" in pageTargetingDetails.getLabelStatus().text
-        assert "OPEN" in pageTargetingDetails.getTargetPopulationStatus().text
-        assert "CREATED BY" in pageTargetingDetails.getLabelizedFieldContainerCreatedBy().text
-        pageTargetingDetails.getLabelCreatedBy()
-        # assert "PROGRAMME POPULATION CLOSE DATE" in pageTargetingDetails.getLabelizedFieldContainerCloseDate().text
-        assert "PROGRAMME" in pageTargetingDetails.getLabelizedFieldContainerProgramName().text
-        assert "Test Programm" in pageTargetingDetails.getLabelProgramme().text
-        # assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
-        # assert "-" in pageTargetingDetails.getLabelSendBy().text
-        # assert "-" in pageTargetingDetails.getLabelSendDate().text
-        assert "5" in pageTargetingDetails.getLabelFemaleChildren().text
-        assert "3" in pageTargetingDetails.getLabelMaleChildren().text
-        assert "2" in pageTargetingDetails.getLabelFemaleAdults().text
-        assert "1" in pageTargetingDetails.getLabelMaleAdults().text
-        assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
-        assert "11" in pageTargetingDetails.getLabelTargetedIndividuals().text
-        assert "Items Groups" in pageTargetingDetails.getTableTitle().text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.choose_target_populations(0).click()
+        assert create_targeting.name in page_targeting_details.get_page_header_title().text
+        page_targeting_details.get_button_target_population_duplicate()
+        page_targeting_details.get_button_delete()
+        assert "EDIT" in page_targeting_details.get_button_edit().text
+        assert "REBUILD" in page_targeting_details.get_button_rebuild().text
+        assert "LOCK" in page_targeting_details.get_button_target_population_lock().text
+        assert "Details" in page_targeting_details.get_details_title().text
+        assert "OPEN" in page_targeting_details.get_label_status().text
+        assert "OPEN" in page_targeting_details.get_target_population_status().text
+        assert "CREATED BY" in page_targeting_details.get_labelized_field_container_created_by().text
+        page_targeting_details.get_label_created_by()
+        # assert "PROGRAMME POPULATION CLOSE DATE" in page_targeting_details.getLabelizedFieldContainerCloseDate().text
+        assert "PROGRAMME" in page_targeting_details.get_labelized_field_container_program_name().text
+        assert "Test Programm" in page_targeting_details.get_label_programme().text
+        # assert "SEND BY" in page_targeting_details.getLabelizedFieldContainerSendBy().text
+        # assert "-" in page_targeting_details.getLabelSendBy().text
+        # assert "-" in page_targeting_details.getLabelSendDate().text
+        assert "5" in page_targeting_details.get_label_female_children().text
+        assert "3" in page_targeting_details.get_label_male_children().text
+        assert "2" in page_targeting_details.get_label_female_adults().text
+        assert "1" in page_targeting_details.get_label_male_adults().text
+        assert "2" in page_targeting_details.get_label_total_number_of_households().text
+        assert "11" in page_targeting_details.get_label_targeted_individuals().text
+        assert "Items Groups" in page_targeting_details.get_table_title().text
         expected_menu_items = [
             "ID",
             "Head of Items Group",
@@ -517,7 +517,7 @@ class TestSmokeTargeting:
             "Administrative Level 2",
             "Score",
         ]
-        assert expected_menu_items == [i.text for i in pageTargetingDetails.getTableLabel()]
+        assert expected_menu_items == [i.text for i in page_targeting_details.get_table_label()]
 
 
 @pytest.mark.night
@@ -528,41 +528,49 @@ class TestCreateTargeting:
         sw_program: Program,
         household_with_disability: Household,
         household_without_disabilities: Household,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
     ) -> None:
-        pageTargeting.navigate_to_page("afghanistan", sw_program.slug)
-        pageTargeting.getButtonCreateNew().click()
+        page_targeting.navigate_to_page("afghanistan", sw_program.slug)
+        page_targeting.get_button_create_new().click()
 
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD PEOPLE RULE"
-        pageTargetingCreate.getAddPeopleRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Does the Social Worker have disability?")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getTargetingCriteriaValue().click()
-        pageTargetingCreate.select_multiple_option_by_name(HEARING, SEEING)
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
-        disability_expected_criteria_text = "Does the Social Worker have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-        assert pageTargetingCreate.getCriteriaContainer().text == disability_expected_criteria_text
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
+        page_targeting_create.get_add_people_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(
+            "Does the Social Worker have disability?"
+        )
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_targeting_criteria_value().click()
+        page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
+        disability_expected_criteria_text = (
+            "Does the Social Worker have disability?: Difficulty hearing (even if "
+            "using a hearing aid), Difficulty seeing (even if wearing glasses)"
+        )
+        assert page_targeting_create.get_criteria_container().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
         individual = household_with_disability.individuals.first()
-        pageTargetingDetails.wait_for_text(individual.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1))
-        assert len(pageTargetingDetails.getPeopleTableRows()) == 1
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual.unicef_id
+        page_targeting_details.wait_for_text(
+            individual.unicef_id,
+            page_targeting_details.household_table_cell.format(1, 1),
+        )
+        assert len(page_targeting_details.get_people_table_rows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual.unicef_id
 
     def test_create_targeting_for_normal_program(
         self,
@@ -570,49 +578,49 @@ class TestCreateTargeting:
         household_with_disability: Household,
         household_without_disabilities: Household,
         household_refugee: Household,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
     ) -> None:
-        pageTargeting.navigate_to_page("afghanistan", non_sw_program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD ITEMS GROUP RULE"
-        pageTargetingCreate.getAddHouseholdRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Residence status")
-        pageTargetingCreate.getTargetingCriteriaValue().click()
-        pageTargetingCreate.getSelectRefugee().click()
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", non_sw_program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD ITEMS GROUP RULE"
+        page_targeting_create.get_add_household_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.select_listbox_element("Residence status")
+        page_targeting_create.get_targeting_criteria_value().click()
+        page_targeting_create.get_select_refugee().click()
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"
-        assert pageTargetingCreate.getCriteriaContainer().text == disability_expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == disability_expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             household_refugee.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == household_refugee.unicef_id
-        actions = ActionChains(pageTargetingDetails.driver)
-        actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()
+        assert len(page_targeting_details.get_household_table_rows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == household_refugee.unicef_id
+        actions = ActionChains(page_targeting_details.driver)
+        actions.move_to_element(page_targeting_details.get_household_table_cell(1, 1)).perform()
 
     def test_create_targeting_with_pdu_string_criteria(
         self,
         program: Program,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
         individual: Callable,
         string_attribute: FlexibleAttribute,
     ) -> None:
@@ -623,47 +631,47 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddIndividualRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
-        pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValue().send_keys("Text")
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_individual_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test String Attribute")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
+        page_targeting_create.get_select_round_option(1).click()
+        page_targeting_create.get_input_individuals_filters_blocks_value().send_keys("Text")
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test String Attribute: Text\nRound 1 (Test Round String 1)"
-        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == expected_criteria_text
         targeting_name = "Test Targeting PDU str"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        assert len(page_targeting_details.get_household_table_rows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
 
     @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
         individual: Callable,
         bool_attribute: FlexibleAttribute,
     ) -> None:
@@ -674,72 +682,72 @@ class TestCreateTargeting:
         individual2.flex_fields[bool_attribute.name]["2"]["value"] = False
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddIndividualRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test Bool Attribute")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
-        pageTargetingCreate.getSelectRoundOption(2).click()
-        pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
-        pageTargetingCreate.select_option_by_name("Yes")
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_individual_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test Bool Attribute")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
+        page_targeting_create.get_select_round_option(2).click()
+        page_targeting_create.get_select_individuals_filters_blocks_value().click()
+        page_targeting_create.select_option_by_name("Yes")
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         bool_yes_expected_criteria_text = "Test Bool Attribute: Yes\nRound 2 (Test Round Bool 2)"
-        assert pageTargetingCreate.getCriteriaContainer().text == bool_yes_expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == bool_yes_expected_criteria_text
 
         targeting_name = "Test Targeting PDU bool"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
 
-        pageTargetingDetails.getLockButton()
+        page_targeting_details.get_lock_button()
 
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == bool_yes_expected_criteria_text
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == bool_yes_expected_criteria_text
         assert Household.objects.count() == 3
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
+        assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        assert len(page_targeting_details.get_household_table_rows()) == 1
 
         # edit to False
-        pageTargetingDetails.getButtonEdit().click()
-        pageTargetingDetails.getButtonIconEdit().click()
-        pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
-        pageTargetingCreate.select_option_by_name("No")
+        page_targeting_details.get_button_edit().click()
+        page_targeting_details.get_button_icon_edit().click()
+        page_targeting_create.get_select_individuals_filters_blocks_value().click()
+        page_targeting_create.select_option_by_name("No")
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
-        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
-        assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
-        pageTargetingCreate.getButtonSave().click()
-        pageTargetingDetails.getLockButton()
+        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
+        assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
+        page_targeting_create.get_button_save().click()
+        page_targeting_details.get_lock_button()
 
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             individual2.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual2.household.unicef_id
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+        assert page_targeting_details.get_criteria_container().text == bool_no_expected_criteria_text
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual2.household.unicef_id
+        assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        assert len(page_targeting_details.get_household_table_rows()) == 1
 
     @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_targeting_with_pdu_decimal_criteria(
         self,
         program: Program,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
         individual: Callable,
         decimal_attribute: FlexibleAttribute,
     ) -> None:
@@ -750,67 +758,67 @@ class TestCreateTargeting:
         individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 7.0
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddIndividualRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test Decimal Attribute")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
-        pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueFrom().send_keys("2")
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("4")
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_individual_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test Decimal Attribute")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
+        page_targeting_create.get_select_round_option(1).click()
+        page_targeting_create.get_input_individuals_filters_blocks_value_from().send_keys("2")
+        page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys("4")
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test Decimal Attribute: 2 - 4\nRound 1 (Test Round Decimal 1)"
-        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == expected_criteria_text
         targeting_name = "Test Targeting PDU decimal"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        assert len(page_targeting_details.get_household_table_rows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
 
         # edit range
-        pageTargetingDetails.getButtonEdit().click()
-        pageTargetingDetails.getButtonIconEdit().click()
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys(Keys.BACKSPACE)
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("9")
+        page_targeting_details.get_button_edit().click()
+        page_targeting_details.get_button_icon_edit().click()
+        page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys(Keys.BACKSPACE)
+        page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys("9")
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
-        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
 
-        assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
-        pageTargetingCreate.getButtonSave().click()
-        pageTargetingDetails.getLockButton()
-        pageTargetingDetails.disappearStatusContainer()
-        pageTargetingDetails.wait_for_text(
+        assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
+        page_targeting_create.get_button_save().click()
+        page_targeting_details.get_lock_button()
+        page_targeting_details.disappear_status_container()
+        page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text in [
+        assert page_targeting_details.get_criteria_container().text == bool_no_expected_criteria_text
+        assert page_targeting_create.get_total_number_of_households_count().text == "2"
+        assert len(page_targeting_details.get_household_table_rows()) == 2
+        assert page_targeting_details.get_household_table_cell(1, 1).text in [
             individual1.household.unicef_id,
             individual2.household.unicef_id,
         ]
-        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text in [
+        assert page_targeting_details.get_household_table_cell(2, 1).text in [
             individual1.household.unicef_id,
             individual2.household.unicef_id,
         ]
@@ -818,9 +826,9 @@ class TestCreateTargeting:
     def test_create_targeting_with_pdu_date_criteria(
         self,
         program: Program,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
         individual: Callable,
         date_attribute: FlexibleAttribute,
     ) -> None:
@@ -831,48 +839,48 @@ class TestCreateTargeting:
         individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddIndividualRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test Date Attribute")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
-        pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueFrom().click()
-        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueFrom().send_keys("2022-01-01")
-        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueTo().click()
-        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueTo().send_keys("2022-03-03")
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_individual_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test Date Attribute")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
+        page_targeting_create.get_select_round_option(1).click()
+        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().click()
+        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().send_keys("2022-01-01")
+        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().click()
+        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().send_keys("2022-03-03")
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
-        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == expected_criteria_text
         targeting_name = "Test Targeting PDU date"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
+        assert len(page_targeting_details.get_household_table_rows()) == 1
+        assert page_targeting_create.get_total_number_of_households_count().text == "1"
 
     def test_create_targeting_with_pdu_null_criteria(
         self,
         program: Program,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
         individual: Callable,
         string_attribute: FlexibleAttribute,
     ) -> None:
@@ -883,46 +891,46 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual3 = individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddIndividualRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
-        pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.getSelectIndividualsiFltersBlocksIsNull().click()
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_individual_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test String Attribute")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
+        page_targeting_create.get_select_round_option(1).click()
+        page_targeting_create.get_select_individuals_filters_blocks_is_null().click()
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test String Attribute: Empty\nRound 1 (Test Round String 1)"
-        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == expected_criteria_text
         targeting_name = "Test Targeting PDU null"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
-        pageTargetingDetails.wait_for_text(
+        assert page_targeting_create.get_total_number_of_households_count().text == "1"
+        page_targeting_details.wait_for_text(
             individual3.household.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
+        assert len(page_targeting_details.get_household_table_rows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual3.household.unicef_id
 
     def test_create_targeting_for_people_with_pdu(
         self,
         sw_program: Program,
-        pageTargeting: Targeting,
-        pageTargetingCreate: TargetingCreate,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_create: TargetingCreate,
+        page_targeting_details: TargetingDetails,
         individual: Callable,
     ) -> None:
         string_attribute_for_sw = create_flexible_attribute(
@@ -939,44 +947,44 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Failed"
         individual2.save()
         individual(sw_program)
-        pageTargeting.navigate_to_page("afghanistan", sw_program.slug)
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD PEOPLE RULE"
-        pageTargetingCreate.getAddPeopleRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        # pageTargetingCreate.select_listbox_element("Test String Attribute SW")  # not works
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingCreate.getSelectFiltersRoundNumber().click()
-        pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.getInputFiltersValue().send_keys("Text")
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
+        page_targeting.navigate_to_page("afghanistan", sw_program.slug)
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
+        page_targeting_create.get_add_people_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        # page_targeting_create.select_listbox_element("Test String Attribute SW")  # not works
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test String Attribute")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_create.get_select_filters_round_number().click()
+        page_targeting_create.get_select_round_option(1).click()
+        page_targeting_create.get_input_filters_value().send_keys("Text")
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test String Attribute SW: Text\nRound 1 (Test Round String 1)"
-        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        assert page_targeting_create.get_criteria_container().text == expected_criteria_text
         targeting_name = "Test Targeting SW PDU str"
-        pageTargetingCreate.getFieldName().send_keys(targeting_name)
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        pageTargetingDetails.getLockButton()
+        page_targeting_create.get_field_name().send_keys(targeting_name)
+        page_targeting_create.get_target_population_save_button().click()
+        page_targeting_details.get_lock_button()
 
-        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
+        assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        assert pageTargetingCreate.getTotalNumberOfPeopleCount().text == "1"
+        assert page_targeting_create.get_total_number_of_people_count().text == "1"
 
-        pageTargetingDetails.wait_for_text(
+        page_targeting_details.wait_for_text(
             individual1.unicef_id,
-            pageTargetingDetails.household_table_cell.format(1, 1),
+            page_targeting_details.household_table_cell.format(1, 1),
         )
 
-        assert len(pageTargetingDetails.getPeopleTableRows()) == 1
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
+        assert len(page_targeting_details.get_people_table_rows()) == 1
+        assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.unicef_id
 
 
 @pytest.mark.night
@@ -987,31 +995,35 @@ class TestTargeting:
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
-        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
-        pageTargetingCreate.getInputHouseholdids().click()
-        pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
-        pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
-        pageTargetingCreate.clickButtonTargetPopulationCreate()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        assert "SAVE" in page_targeting_create.get_button_target_population_create().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_div_target_population_add_criteria().click()
+        page_targeting_create.get_input_household_ids().click()
+        page_targeting_create.get_input_household_ids().send_keys(household_with_disability.unicef_id)
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
+        page_targeting_create.get_input_name().send_keys(f"Target Population for {household_with_disability.unicef_id}")
+        page_targeting_create.click_button_target_population_create()
         target_population = PaymentPlan.objects.get(name__startswith="Target Population for")
-        assert str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
         assert (
-            str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+            str(target_population.total_individuals_count)
+            == page_targeting_details.get_label_targeted_individuals().text
+        )
+        assert (
+            str(target_population.total_households_count)
+            == page_targeting_details.get_label_total_number_of_households().text
         )
         assert str(target_population.status) == "TP_OPEN"
-        assert "OPEN" in pageTargetingDetails.getLabelStatus().text
+        assert "OPEN" in page_targeting_details.get_label_status().text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_create_use_ids_individual(
@@ -1019,98 +1031,99 @@ class TestTargeting:
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
-        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getInputIndividualids().send_keys("IND-88-0000.0002")
-        pageTargetingCreate.getInputName().send_keys("Target Population for IND-88-0000.0002")
-        pageTargetingCreate.clickButtonTargetPopulationCreate()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        assert "SAVE" in page_targeting_create.get_button_target_population_create().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_input_individual_ids().send_keys("IND-88-0000.0002")
+        page_targeting_create.get_input_name().send_keys("Target Population for IND-88-0000.0002")
+        page_targeting_create.click_button_target_population_create()
         target_population = PaymentPlan.objects.get(name="Target Population for IND-88-0000.0002")
         assert (
             "4"
             == str(target_population.total_individuals_count)
-            == pageTargetingDetails.getLabelTargetedIndividuals().text
+            == page_targeting_details.get_label_targeted_individuals().text
         )
         assert (
-            str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+            str(target_population.total_households_count)
+            == page_targeting_details.get_label_total_number_of_households().text
         )
-        assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
-        pageTargetingDetails.getButtonRebuild().click()
+        assert str(target_population.status) in page_targeting_details.get_label_status().text
+        page_targeting_details.get_button_rebuild().click()
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_rebuild(
         self,
         create_programs: None,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.chooseTargetPopulations(0).click()
-        pageTargetingDetails.getLabelStatus()
-        pageTargetingDetails.getButtonRebuild().click()
-        pageTargetingDetails.getStatusContainer()
-        pageTargetingDetails.disappearStatusContainer()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.choose_target_populations(0).click()
+        page_targeting_details.get_label_status()
+        page_targeting_details.get_button_rebuild().click()
+        page_targeting_details.get_status_container()
+        page_targeting_details.disappear_status_container()
 
     def test_targeting_mark_ready(
         self,
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
+        page_targeting: Targeting,
         filters: Filters,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
         # filters.selectFiltersSatus("TP_OPEN")
-        pageTargeting.chooseTargetPopulations(0).click()
-        pageTargetingDetails.getLabelStatus()
-        pageTargetingDetails.getLockButton().click()
-        pageTargetingDetails.getLockPopupButton().click()
-        pageTargetingDetails.waitForLabelStatus("LOCKED")
-        pageTargetingDetails.screenshot("targeting_locked.png")
-        pageTargetingDetails.getButtonMarkReady().click()
-        pageTargetingDetails.screenshot("targeting_lockedgetButtonMarkReady.png")
-        pageTargetingDetails.getButtonPopupMarkReady().click()
-        pageTargetingDetails.waitForLabelStatus("READY FOR PAYMENT MODULE")
+        page_targeting.choose_target_populations(0).click()
+        page_targeting_details.get_label_status()
+        page_targeting_details.get_lock_button().click()
+        page_targeting_details.get_lock_popup_button().click()
+        page_targeting_details.wait_for_label_status("LOCKED")
+        page_targeting_details.screenshot("targeting_locked.png")
+        page_targeting_details.get_button_mark_ready().click()
+        page_targeting_details.screenshot("targeting_lockedgetButtonMarkReady.png")
+        page_targeting_details.get_button_popup_mark_ready().click()
+        page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_copy_targeting(
         self,
         create_programs: None,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
-        pageTargeting.selectGlobalProgramFilter(program.name)
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.chooseTargetPopulations(0).click()
-        pageTargetingDetails.getButtonTargetPopulationDuplicate().click()
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingDetails.getInputName().send_keys("a1!")
-        pageTargetingDetails.get_elements(pageTargetingDetails.buttonTargetPopulationDuplicate)[1].click()
-        pageTargetingDetails.disappearInputName()
-        assert "a1!" in pageTargetingDetails.getTitlePage().text
-        assert "OPEN" in pageTargetingDetails.getTargetPopulationStatus().text
-        assert "PROGRAMME" in pageTargetingDetails.getLabelizedFieldContainerProgramName().text
-        assert "Test Programm" in pageTargetingDetails.getLabelProgramme().text
-        assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
-        assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
+        page_targeting.select_global_program_filter(program.name)
+        page_targeting.get_nav_targeting().click()
+        page_targeting.choose_target_populations(0).click()
+        page_targeting_details.get_button_target_population_duplicate().click()
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_details.get_input_name().send_keys("a1!")
+        page_targeting_details.get_elements(page_targeting_details.buttonTargetPopulationDuplicate)[1].click()
+        page_targeting_details.disappear_input_name()
+        assert "a1!" in page_targeting_details.get_title_page().text
+        assert "OPEN" in page_targeting_details.get_target_population_status().text
+        assert "PROGRAMME" in page_targeting_details.get_labelized_field_container_program_name().text
+        assert "Test Programm" in page_targeting_details.get_label_programme().text
+        assert "2" in page_targeting_details.get_label_total_number_of_households().text
+        assert "8" in page_targeting_details.get_label_targeted_individuals().text
 
     @pytest.mark.xfail(reason="Problem with select_listbox_element or getButtonIconEdit")
     def test_edit_targeting(
@@ -1118,63 +1131,63 @@ class TestTargeting:
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.chooseTargetPopulations(0).click()
-        pageTargetingDetails.getButtonEdit().click()
-        pageTargetingDetails.getButtonIconEdit().click()
-        pageTargetingCreate.getButtonHouseholdRule().send_keys(Keys.TAB)
-        pageTargetingCreate.getButtonHouseholdRule().send_keys(Keys.TAB)
-        pageTargetingCreate.getButtonHouseholdRule().send_keys(Keys.SPACE)
-        # pageTargetingCreate.getButtonHouseholdRule().click()
-        pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
-        pageTargetingCreate.select_listbox_element("What is the Household size?")
-        # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("What is the Household size")
-        # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        pageTargetingDetails.getHouseholdSizeFrom().send_keys("0")
-        pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
-        # pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingDetails.clear_input(pageTargetingDetails.getInputName())
-        pageTargetingDetails.getInputName().send_keys("New Test Data")
-        pageTargetingDetails.getInputName().send_keys(Keys.ENTER)
-        # pageTargetingCreate.getButtonSave().click()
-        pageTargetingDetails.getButtonEdit()
-        assert pageTargetingDetails.waitForTextTitlePage("New Test Data")
-        assert "9" in pageTargetingDetails.getCriteriaContainer().text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.choose_target_populations(0).click()
+        page_targeting_details.get_button_edit().click()
+        page_targeting_details.get_button_icon_edit().click()
+        page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
+        page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
+        page_targeting_create.get_button_household_rule().send_keys(Keys.SPACE)
+        # page_targeting_create.getButtonHouseholdRule().click()
+        page_targeting_create.get_autocomplete_target_criteria_option().click()
+        page_targeting_create.select_listbox_element("What is the Household size?")
+        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys("What is the Household size")
+        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
+        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        page_targeting_details.get_household_size_from().send_keys("0")
+        page_targeting_details.get_household_size_to().send_keys("9")
+        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        # page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_details.clear_input(page_targeting_details.get_input_name())
+        page_targeting_details.get_input_name().send_keys("New Test Data")
+        page_targeting_details.get_input_name().send_keys(Keys.ENTER)
+        # page_targeting_create.get_button_save().click()
+        page_targeting_details.get_button_edit()
+        assert page_targeting_details.wait_for_text_title_page("New Test Data")
+        assert "9" in page_targeting_details.get_criteria_container().text
 
     def test_delete_targeting(
         self,
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
     ) -> None:
         PaymentPlanFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
             status=PaymentPlan.Status.TP_OPEN,
         )
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.disappearLoadingRows()
-        old_list = pageTargeting.getTargetPopulationsRows()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.disappear_loading_rows()
+        old_list = page_targeting.get_target_populations_rows()
         assert len(old_list) == 2
         assert "Copy TP" in old_list[0].text
 
-        pageTargeting.chooseTargetPopulations(0).click()
-        pageTargetingDetails.getButtonDelete().click()
-        pageTargetingDetails.getDialogBox()
-        pageTargetingDetails.get_elements(pageTargetingDetails.buttonDelete)[1].click()
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.disappearLoadingRows()
-        new_list = pageTargeting.getTargetPopulationsRows()
+        page_targeting.choose_target_populations(0).click()
+        page_targeting_details.get_button_delete().click()
+        page_targeting_details.get_dialog_box()
+        page_targeting_details.get_elements(page_targeting_details.button_delete)[1].click()
+        page_targeting.get_nav_targeting().click()
+        page_targeting.disappear_loading_rows()
+        new_list = page_targeting.get_target_populations_rows()
         assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
@@ -1182,26 +1195,26 @@ class TestTargeting:
     def test_targeting_different_program_statuses(
         self,
         create_programs: None,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         program.status = Program.DRAFT
         program.save()
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.mouse_on_element(pageTargeting.getButtonInactiveCreateNew())
-        assert "Program has to be active to create a new Target Population" in pageTargeting.geTooltip().text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.mouse_on_element(page_targeting.get_button_inactive_create_new())
+        assert "Program has to be active to create a new Target Population" in page_targeting.get_tooltip().text
         program.status = Program.ACTIVE
         program.save()
-        pageTargeting.driver.refresh()
-        pageTargeting.getButtonCreateNew()
+        page_targeting.driver.refresh()
+        page_targeting.get_button_create_new()
         program.status = Program.FINISHED
         program.save()
-        pageTargeting.driver.refresh()
-        pageTargeting.mouse_on_element(pageTargeting.getButtonInactiveCreateNew())
-        assert "Program has to be active to create a new Target Population" in pageTargeting.geTooltip().text
+        page_targeting.driver.refresh()
+        page_targeting.mouse_on_element(page_targeting.get_button_inactive_create_new())
+        assert "Program has to be active to create a new Target Population" in page_targeting.get_tooltip().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -1221,49 +1234,49 @@ class TestTargeting:
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
         program.data_collecting_type.save()
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
-        pageTargetingCreate.getInputHouseholdids().click()
-        pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
-        pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
-        pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
-        pageTargetingCreate.clickButtonTargetPopulationCreate()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_div_target_population_add_criteria().click()
+        page_targeting_create.get_input_household_ids().click()
+        page_targeting_create.get_input_household_ids().send_keys(household_with_disability.unicef_id)
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
+        page_targeting_create.get_input_name().send_keys(f"Test {household_with_disability.unicef_id}")
+        page_targeting_create.get_input_flag_exclude_if_active_adjudication_ticket().click()
+        page_targeting_create.click_button_target_population_create()
         with pytest.raises(NoSuchElementException):
-            pageTargetingDetails.getCheckboxExcludeIfOnSanctionList().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+            page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
+                By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
         if test_data["type"] == "SOCIAL":
-            pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket()
-            pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+            page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket()
+            page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket().find_element(
+                By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
             assert (
                 test_data["text"]
-                in pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket()
+                in page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket()
                 .find_element(By.XPATH, "./..")
                 .text
             )
         elif test_data["type"] == "STANDARD":
-            pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
-            pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+            page_targeting_details.get_checkbox_exclude_if_active_adjudication_ticket()
+            page_targeting_details.get_checkbox_exclude_if_active_adjudication_ticket().find_element(
+                By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
             assert (
                 test_data["text"]
-                in pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
+                in page_targeting_details.get_checkbox_exclude_if_active_adjudication_ticket()
                 .find_element(By.XPATH, "./..")
                 .text
             )
@@ -1294,54 +1307,54 @@ class TestTargeting:
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
         program.data_collecting_type.save()
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getInputHouseholdids().click()
-        pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
-        pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
-        pageTargetingCreate.getInputFlagexcludeifonsanctionlist().click()
-        pageTargetingCreate.clickButtonTargetPopulationCreate()
-        pageTargetingDetails.getCheckboxExcludeIfOnSanctionList()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_input_household_ids().click()
+        page_targeting_create.get_input_household_ids().send_keys(household_with_disability.unicef_id)
+        page_targeting_create.get_input_name().send_keys(f"Test {household_with_disability.unicef_id}")
+        page_targeting_create.get_input_flag_exclude_if_on_sanction_list().click()
+        page_targeting_create.click_button_target_population_create()
+        page_targeting_details.get_checkbox_exclude_if_on_sanction_list()
         # ToDo: Add after merge to develop
         # assert (
         #     test_data["text"]
-        #     in pageTargetingDetails.getCheckboxExcludeIfOnSanctionList().find_element(By.XPATH, "./..").text
+        #     in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
         # )
-        pageTargetingDetails.getCheckboxExcludeIfOnSanctionList().find_element(
-            By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+        page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
+            By.CSS_SELECTOR, page_targeting_details.icon_selected
         )
         with pytest.raises(NoSuchElementException):
-            pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+            page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket().find_element(
+                By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
     def test_targeting_info_button(
         self,
         create_programs: None,
-        pageTargeting: Targeting,
+        page_targeting: Targeting,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonTargetPopulation().click()
-        pageTargeting.getTabFieldList()
-        pageTargeting.getTabTargetingDiagram().click()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_target_population().click()
+        page_targeting.get_tab_field_list()
+        page_targeting.get_tab_targeting_diagram().click()
 
     def test_targeting_filters(
         self,
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
+        page_targeting: Targeting,
         filters: Filters,
     ) -> None:
         PaymentPlanFactory(
@@ -1349,35 +1362,35 @@ class TestTargeting:
             name="Copy TP",
             status=PaymentPlan.Status.TP_PROCESSING,
         )
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        filters.getFiltersSearch().send_keys("Copy")
-        filters.getButtonFiltersApply().click()
-        pageTargeting.countTargetPopulations(1)
-        assert "PROCESSING" in pageTargeting.getStatusContainer().text
-        filters.getButtonFiltersClear().click()
-        filters.getFiltersStatus().click()
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        filters.get_filters_search().send_keys("Copy")
+        filters.get_button_filters_apply().click()
+        page_targeting.count_target_populations(1)
+        assert "PROCESSING" in page_targeting.get_status_container().text
+        filters.get_button_filters_clear().click()
+        filters.get_filters_status().click()
         filters.select_listbox_element("Open")
-        filters.getButtonFiltersApply().click()
-        pageTargeting.countTargetPopulations(1)
-        assert "OPEN" in pageTargeting.getStatusContainer().text
-        filters.getButtonFiltersClear().click()
-        filters.getFiltersTotalHouseholdsCountMin().send_keys("10")
-        filters.getFiltersTotalHouseholdsCountMax().send_keys("10")
-        filters.getButtonFiltersApply().click()
-        pageTargeting.countTargetPopulations(0)
-        filters.getButtonFiltersClear().click()
-        filters.getFiltersTotalHouseholdsCountMin().send_keys("1")
-        filters.getFiltersTotalHouseholdsCountMax().send_keys("3")
-        pageTargeting.countTargetPopulations(2)
-        filters.getButtonFiltersClear().click()
+        filters.get_button_filters_apply().click()
+        page_targeting.count_target_populations(1)
+        assert "OPEN" in page_targeting.get_status_container().text
+        filters.get_button_filters_clear().click()
+        filters.get_filters_total_households_count_min().send_keys("10")
+        filters.get_filters_total_households_count_max().send_keys("10")
+        filters.get_button_filters_apply().click()
+        page_targeting.count_target_populations(0)
+        filters.get_button_filters_clear().click()
+        filters.get_filters_total_households_count_min().send_keys("1")
+        filters.get_filters_total_households_count_max().send_keys("3")
+        page_targeting.count_target_populations(2)
+        filters.get_button_filters_clear().click()
 
     def test_targeting_and_labels(
         self,
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
+        page_targeting: Targeting,
     ) -> None:
         if not (user2 := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e88999").first()):
             user2 = UserFactory(
@@ -1392,67 +1405,67 @@ class TestTargeting:
             created_by=user2,
             total_households_count=1,
         )
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getColumnName().click()
-        pageTargeting.disappearLoadingRows()
-        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnName().click()
-        pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnStatus().click()
-        pageTargeting.disappearLoadingRows()
-        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnStatus().click()
-        pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnNumOfHouseholds().click()
-        pageTargeting.disappearLoadingRows()
-        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnDateCreated().click()
-        pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnDateCreated().click()
-        pageTargeting.disappearLoadingRows()
-        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnLastEdited().click()
-        pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnLastEdited().click()
-        pageTargeting.disappearLoadingRows()
-        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
-        pageTargeting.getColumnCreatedBy().click()
-        pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_column_name().click()
+        page_targeting.disappear_loading_rows()
+        assert "A Copy TP" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_name().click()
+        page_targeting.disappear_loading_rows()
+        assert "Test Target Population" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_status().click()
+        page_targeting.disappear_loading_rows()
+        assert "A Copy TP" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_status().click()
+        page_targeting.disappear_loading_rows()
+        assert "Test Target Population" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_num_of_households().click()
+        page_targeting.disappear_loading_rows()
+        assert "A Copy TP" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_date_created().click()
+        page_targeting.disappear_loading_rows()
+        assert "Test Target Population" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_date_created().click()
+        page_targeting.disappear_loading_rows()
+        assert "A Copy TP" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_last_edited().click()
+        page_targeting.disappear_loading_rows()
+        assert "Test Target Population" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_last_edited().click()
+        page_targeting.disappear_loading_rows()
+        assert "A Copy TP" in page_targeting.choose_target_populations(0).text
+        page_targeting.get_column_created_by().click()
+        page_targeting.disappear_loading_rows()
+        assert "Test Target Population" in page_targeting.choose_target_populations(0).text
 
     def test_targeting_parametrized_rules_filters(
         self,
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddPeopleRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Females Age 0 - 5")
-        pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("0")
-        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
-        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
-        pageTargetingCreate.getButtonTargetPopulationAddCriteria().click()
-        pageTargetingCreate.getNoValidationFspAccept().click()
-        pageTargetingCreate.getInputName().send_keys("Target Population for Females Age 0 - 5")
-        pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
-        pageTargetingCreate.clickButtonTargetPopulationCreate()
-        assert "Females Age 0 - 5: 11" in pageTargetingCreate.getCriteriaContainer().text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_people_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.select_listbox_element("Females Age 0 - 5")
+        page_targeting_create.get_input_filters_value_from(0).send_keys("0")
+        page_targeting_create.get_input_filters_value_to(0).send_keys("1")
+        page_targeting_create.get_input_filters_value_to(0).send_keys("1")
+        page_targeting_create.get_button_target_population_add_criteria().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
+        page_targeting_create.get_input_name().send_keys("Target Population for Females Age 0 - 5")
+        page_targeting_create.get_input_flag_exclude_if_active_adjudication_ticket().click()
+        page_targeting_create.click_button_target_population_create()
+        assert "Females Age 0 - 5: 11" in page_targeting_create.get_criteria_container().text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_parametrized_rules_filters_and_or(
@@ -1460,58 +1473,58 @@ class TestTargeting:
         create_programs: None,
         household_with_disability: Household,
         create_targeting: PaymentPlan,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        page_targeting: Targeting,
+        page_targeting_details: TargetingDetails,
+        page_targeting_create: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm")
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonCreateNew().click()
-        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
-        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
-        pageTargetingCreate.getAddCriteriaButton().click()
-        pageTargetingCreate.getAddPeopleRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Females Age 0 - 5")
-        pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("0")
-        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
-        pageTargetingCreate.getButtonHouseholdRule().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete(1).click()
-        pageTargetingCreate.select_listbox_element("Village")
-        pageTargetingCreate.getInputFiltersValue(1).send_keys("Testtown")
-        pageTargetingCreate.getButtonIndividualRule().click()
-        pageTargetingCreate.getTargetingCriteriaAutoCompleteIndividual().click()
-        pageTargetingCreate.select_listbox_element("Does the Individual have disability?")
-        pageTargetingCreate.getSelectMany().click()
-        pageTargetingCreate.select_multiple_option_by_name(HEARING, SEEING)
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        assert "Females Age 0 - 5: 1" in pageTargetingCreate.getCriteriaContainer().text
-        assert "Village: Testtown" in pageTargetingCreate.getCriteriaContainer().text
+        page_targeting.select_global_program_filter("Test Programm")
+        page_targeting.get_nav_targeting().click()
+        page_targeting.get_button_create_new().click()
+        assert "New Target Population" in page_targeting_create.get_title_page().text
+        page_targeting_create.get_filters_program_cycle_autocomplete().click()
+        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_add_criteria_button().click()
+        page_targeting_create.get_add_people_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.select_listbox_element("Females Age 0 - 5")
+        page_targeting_create.get_input_filters_value_from(0).send_keys("0")
+        page_targeting_create.get_input_filters_value_to(0).send_keys("1")
+        page_targeting_create.get_button_household_rule().click()
+        page_targeting_create.get_targeting_criteria_auto_complete(1).click()
+        page_targeting_create.select_listbox_element("Village")
+        page_targeting_create.get_input_filters_value(1).send_keys("Testtown")
+        page_targeting_create.get_button_individual_rule().click()
+        page_targeting_create.get_targeting_criteria_auto_complete_individual().click()
+        page_targeting_create.select_listbox_element("Does the Individual have disability?")
+        page_targeting_create.get_select_many().click()
+        page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
+        assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
-            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-            in pageTargetingCreate.getCriteriaContainer().text
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing "
+            "(even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
-        pageTargetingCreate.getButtonEdit().click()
-        pageTargetingCreate.getTargetingCriteriaAutoCompleteIndividual()
-        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-        pageTargetingCreate.getInputName().send_keys("Target Population")
-        assert "ADD 'OR'FILTER" in pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().text
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        pageTargetingCreate.getAddHouseholdRuleButton().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Males age 0 - 5 with disability")
-        pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("1")
-        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("10")
-        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-        pageTargetingCreate.getTargetPopulationSaveButton().click()
-        assert "Females Age 0 - 5: 1" in pageTargetingCreate.getCriteriaContainer().text
-        assert "Village: Testtown" in pageTargetingCreate.getCriteriaContainer().text
+        page_targeting_create.get_button_edit().click()
+        page_targeting_create.get_targeting_criteria_auto_complete_individual()
+        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_input_name().send_keys("Target Population")
+        assert "ADD 'OR'FILTER" in page_targeting_create.get_targeting_criteria_add_dialog_save_button().text
+        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        page_targeting_create.get_add_household_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
+        page_targeting_create.select_listbox_element("Males age 0 - 5 with disability")
+        page_targeting_create.get_input_filters_value_from(0).send_keys("1")
+        page_targeting_create.get_input_filters_value_to(0).send_keys("10")
+        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_target_population_save_button().click()
+        assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
+        assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
-            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-            in pageTargetingCreate.getCriteriaContainer().text
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), "
+            "Difficulty seeing (even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
         assert (
             "Males age 0 - 5 with disability: 1 -10"
-            in pageTargetingCreate.get_elements(pageTargetingCreate.criteriaContainer)[1].text
+            in page_targeting_create.get_elements(page_targeting_create.criteriaContainer)[1].text
         )

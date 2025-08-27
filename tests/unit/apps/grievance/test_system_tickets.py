@@ -7,7 +7,7 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.system_ticket_service import (
     close_system_flagging_ticket_service,
@@ -15,7 +15,7 @@ from hope.apps.grievance.services.system_ticket_service import (
 from hope.apps.household.models import Individual
 
 
-class TestSystemTickets(APITestCase):
+class TestSystemTickets(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

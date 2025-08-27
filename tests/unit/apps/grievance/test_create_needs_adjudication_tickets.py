@@ -1,6 +1,5 @@
 from typing import Any
 
-import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.urls import reverse
@@ -8,10 +7,11 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
@@ -27,7 +27,7 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.mark.elasticsearch
-class TestCreateNeedsAdjudicationTickets(APITestCase):
+class TestCreateNeedsAdjudicationTickets(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

@@ -1,11 +1,10 @@
-import json
-import secrets
 from io import BytesIO
+import json
 from pathlib import Path
+import secrets
 from typing import Any, Dict
 from unittest import mock
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
@@ -18,6 +17,7 @@ from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -46,7 +46,7 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         create_afghanistan()
         from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
@@ -27,6 +26,7 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from PIL import Image
+import pytest
 
 from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
@@ -76,7 +76,7 @@ class TestRdiXlsxCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         generate_delivery_mechanisms()
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.INTEGER,

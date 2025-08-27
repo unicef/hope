@@ -37,7 +37,8 @@ This command initializes demo data for the application by performing the followi
 
 - Initialize demo data and add specific staff and tester users:
   ```bash
-  python manage.py initdemo --email-list="admin@example.com,user@example.com" --tester-list="tester1@example.com,tester2@example.com"
+  python manage.py initdemo --email-list="admin@example.com,user@example.com"
+   --tester-list="tester1@example.com,tester2@example.com"
   ```
 
 **Environment Variables**:
@@ -46,17 +47,17 @@ This command initializes demo data for the application by performing the followi
 - `INITDEMO_TESTER_LIST`: Comma-separated list of emails to be added as testers.
 """
 
+from argparse import ArgumentParser
 import logging
 import os
 import time
-from argparse import ArgumentParser
 from typing import Any
 
-import elasticsearch
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
+import elasticsearch
 from extras.test_utils.factories.account import (
     create_superuser,
     generate_unicef_partners,

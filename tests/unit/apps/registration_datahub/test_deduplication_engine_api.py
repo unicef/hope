@@ -1,11 +1,11 @@
 import dataclasses
 import os
-import uuid
 from unittest import mock
 from unittest.mock import patch
+import uuid
 
-import pytest
 from django.test import TestCase
+import pytest
 
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,

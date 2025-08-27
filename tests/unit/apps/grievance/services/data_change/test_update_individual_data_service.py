@@ -1,6 +1,5 @@
 import uuid
 
-import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
@@ -20,6 +19,8 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.geo.models import Country
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
@@ -154,11 +155,10 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.save()
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
-        with self.assertRaises(ValidationError) as e:
+        with self.assertRaises(DRFValidationError) as e:
             service.close(self.user)
-        assert (
-            f"Document of type {self.document_type_unique_for_individual} already exists for this individual"
-            == e.exception.message
+        assert f"Document of type {self.document_type_unique_for_individual} already exists for this individual" in str(
+            e.exception
         )
 
         assert Document.objects.filter(document_number="111111").count() == 0
@@ -232,11 +232,10 @@ class TestUpdateIndividualDataService(TestCase):
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
 
-        with self.assertRaises(ValidationError) as e:
+        with self.assertRaises(DRFValidationError) as e:
             service.close(self.user)
-        assert (
-            f"Document of type {self.document_type_unique_for_individual} already exists for this individual"
-            == e.exception.message
+        assert f"Document of type {self.document_type_unique_for_individual} already exists for this individual" in str(
+            e.exception
         )
 
         document_to_edit.refresh_from_db()
@@ -322,11 +321,11 @@ class TestUpdateIndividualDataService(TestCase):
         ]
         self.ticket.individual_data_update_ticket_details.save()
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
-        with self.assertRaises(ValidationError) as e:
+        with self.assertRaises(DRFValidationError) as e:
             service.close(self.user)
         assert (
-            f"Document with number {existing_document.document_number} of type {self.document_type_unique_for_individual} already exists"
-            == e.exception.message
+            f"Document with number {existing_document.document_number} of type "
+            f"{self.document_type_unique_for_individual} already exists" in str(e.exception)
         )
 
         document_to_edit.refresh_from_db()

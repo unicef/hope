@@ -1,13 +1,13 @@
 import datetime
+from decimal import Decimal
 import io
 import logging
-from decimal import Decimal
 from typing import TYPE_CHECKING
 
-import openpyxl
-import pytz
 from dateutil.parser import parse
 from django.utils import timezone
+import openpyxl
+import pytz
 from xlwt import Row
 
 from hope.apps.payment.models import Payment, PaymentVerification
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
 
-    class XlsxPaymentPlanImportPerFspServiceException(Exception):
+    class XlsxPaymentPlanImportPerFspServiceError(Exception):
         pass
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
@@ -249,7 +249,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         try:
             status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)
         except Exception:
-            raise self.XlsxPaymentPlanImportPerFspServiceException(
+            raise self.XlsxPaymentPlanImportPerFspServiceError(
                 f"Invalid delivered_quantity {delivered_quantity} provided for payment_id {payment_id}"
             )
 

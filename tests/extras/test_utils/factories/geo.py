@@ -86,19 +86,23 @@ def generate_areas(country_names: Optional[List[str]] = None) -> None:
         for p_code in generate_p_code(p_code_prefix, 3):
             area_l_1 = AreaFactory(area_type=area_type_level_1, p_code=p_code)
             # 2 level
-            for p_code in generate_p_code(area_l_1.p_code, 3):
-                area_l_2 = AreaFactory(area_type=area_type_level_2, p_code=p_code, parent=area_l_1)
+            for p_code_l1 in generate_p_code(area_l_1.p_code, 3):
+                area_l_2 = AreaFactory(area_type=area_type_level_2, p_code=p_code_l1, parent=area_l_1)
                 # 3 level
-                for p_code in generate_p_code(area_l_2.p_code, 2):
-                    area_l_3 = AreaFactory(area_type=area_type_level_3, p_code=p_code, parent=area_l_2)
+                for p_code_2 in generate_p_code(area_l_2.p_code, 2):
+                    area_l_3 = AreaFactory(area_type=area_type_level_3, p_code=p_code_2, parent=area_l_2)
                     # 4 level
-                    for p_code in generate_p_code(area_l_3.p_code, 2):
-                        area_l_4 = AreaFactory(area_type=area_type_level_4, p_code=p_code, parent=area_l_3)
+                    for p_code_3 in generate_p_code(area_l_3.p_code, 2):
+                        area_l_4 = AreaFactory(
+                            area_type=area_type_level_4,
+                            p_code=p_code_3,
+                            parent=area_l_3,
+                        )
                         # 5 level
-                        for p_code in generate_p_code(area_l_4.p_code, 2):
+                        for p_code_4 in generate_p_code(area_l_4.p_code, 2):
                             AreaFactory(
                                 area_type=area_type_level_5,
-                                p_code=p_code,
+                                p_code=p_code_4,
                                 parent=area_l_4,
                             )
 

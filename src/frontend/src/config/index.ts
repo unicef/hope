@@ -1,5 +1,4 @@
 export const API_BASE_URL = '/api';
-export const GRAPHQL_URL = `${API_BASE_URL}/graphql`;
 export const LOGIN_URL = '/api/login/azuread-tenant-oauth2/';
 export const DATE_FORMAT = 'd MMM yyyy';
 export const DATE_FORMAT_LONG = 'd MMM yyyy h:mm a';

@@ -186,7 +186,7 @@ class ProgramAdmin(
     def area_limits(self, request: HttpRequest, pk: int) -> TemplateResponse | HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Admin Area Limits")
         program: Program = context["original"]
-        PartnerAreaLimitFormSet = formset_factory(PartnerAreaLimitForm, extra=0, can_delete=True)
+        PartnerAreaLimitFormSet = formset_factory(PartnerAreaLimitForm, extra=0, can_delete=True)  # noqa
 
         is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
 

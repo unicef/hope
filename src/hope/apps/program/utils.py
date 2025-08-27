@@ -1,5 +1,5 @@
-import re
 from random import randint
+import re
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -216,8 +216,8 @@ class CopyProgramPopulation:
         individual_identities_to_create = []
         delivery_mechanism_data_to_create = []
 
-        for new_individual in new_individuals:
-            new_individual = self.set_household_per_individual(new_individual)
+        for individual in new_individuals:
+            new_individual = self.set_household_per_individual(individual)
             individuals_to_update.append(new_individual)
             documents_to_create.extend(
                 self.copy_document_per_individual(
@@ -540,13 +540,12 @@ def create_program_partner_access(
                 program=program,
             )
             area_limits.areas.set(Area.objects.filter(id__in=areas))
-        else:
-            # remove area limits if it is updated to full-area-access
-            if area_limits := AdminAreaLimitedTo.objects.filter(
-                partner_id=partner_data["partner"],
-                program=program,
-            ).first():
-                area_limits.delete()
+        # remove area limits if it is updated to full-area-access
+        elif area_limits := AdminAreaLimitedTo.objects.filter(
+            partner_id=partner_data["partner"],
+            program=program,
+        ).first():
+            area_limits.delete()
 
     return partners_data
 

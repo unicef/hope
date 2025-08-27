@@ -1,8 +1,6 @@
 import json
 from typing import Callable
 
-import freezegun
-import pytest
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
@@ -23,11 +21,10 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from flaky import flaky
+import freezegun
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.apps.periodic_data_update.test_periodic_data_update_xlsx_import_service import (
-    add_pdu_data_to_xlsx,
-)
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import PeriodicFieldData
@@ -35,6 +32,9 @@ from hope.apps.periodic_data_update.service.periodic_data_update_export_template
     PDUXlsxExportTemplateService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from unit.apps.periodic_data_update.test_periodic_data_update_xlsx_import_service import (
+    add_pdu_data_to_xlsx,
+)
 
 pytestmark = pytest.mark.django_db()
 

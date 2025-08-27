@@ -1,11 +1,11 @@
 from typing import Any
 
 import factory
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.program.models import Program
 from hope.contrib.aurora.models import Organization, Project, Registration
 

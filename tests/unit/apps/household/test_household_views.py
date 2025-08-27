@@ -1,7 +1,6 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
-import pytest
 from constance.test import override_config
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
@@ -25,6 +24,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -498,6 +498,11 @@ class TestHouseholdDetail:
             },
             individuals_data=[{}, {}],
         )
+        self.primary_role = IndividualRoleInHouseholdFactory(
+            individual=self.individuals[0],
+            household=self.household,
+            role=ROLE_PRIMARY,
+        )
 
         duplicated_individual = self.individuals[1]
         duplicated_individual.deduplication_golden_record_status = DUPLICATE
@@ -665,6 +670,16 @@ class TestHouseholdDetail:
         assert data["org_name_enumerator"] == self.household.org_name_enumerator
         assert data["registration_method"] == self.household.registration_method
         assert data["consent_sharing"] == list(self.household.consent_sharing)
+        assert data["roles_in_household"] == [
+            {
+                "id": str(self.primary_role.id),
+                "role": ROLE_PRIMARY,
+                "individual": {
+                    "id": str(self.individuals[0].id),
+                    "unicef_id": self.individuals[0].unicef_id,
+                },
+            }
+        ]
 
     @pytest.mark.parametrize(
         "permissions",

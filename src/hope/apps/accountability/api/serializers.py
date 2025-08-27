@@ -5,7 +5,7 @@ from hope.apps.accountability.models import (
     Feedback,
     FeedbackMessage,
     Message,
-    SampleFileExpiredException,
+    SampleFileExpiredError,
     Survey,
 )
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -271,7 +271,7 @@ class SurveySerializer(serializers.ModelSerializer):
     def get_sample_file_path(self, obj: Survey) -> str | None:
         try:
             return obj.sample_file_path()
-        except SampleFileExpiredException:
+        except SampleFileExpiredError:
             return None
 
     def get_has_valid_sample_file(self, obj: Survey) -> bool:

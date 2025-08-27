@@ -3,8 +3,6 @@ import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getClient } from '../../../apollo/client';
-import { clearCache } from '@utils/utils';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
 import { FC } from 'react';
@@ -55,9 +53,7 @@ export const PageNotFound: FC = () => {
   const pathSegments = location.pathname.split('/');
   const businessArea = pathSegments[2];
 
-  const goBackAndClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
+  const goBackAndClearCache = () => {
     navigate(-1);
   };
 

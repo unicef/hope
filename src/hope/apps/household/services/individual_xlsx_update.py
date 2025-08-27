@@ -1,9 +1,9 @@
 from typing import IO, Any
 
-import openpyxl
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.forms.models import modelform_factory
+import openpyxl
 from xlwt import Row
 
 from hope.apps.activity_log.models import log_create
@@ -142,7 +142,7 @@ class IndividualXlsxUpdate:
             name = self.attr_by_column_index[cell.col_idx]["name"]
             updated[name] = cell.value
 
-        IndividualForm = modelform_factory(Individual, fields=list(updated.keys()))
+        IndividualForm = modelform_factory(Individual, fields=list(updated.keys()))  # noqa
         form = IndividualForm(instance=individual, data=updated)
 
         for field in form.fields.values():

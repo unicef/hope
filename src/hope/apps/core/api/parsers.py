@@ -12,10 +12,10 @@ class DictDrfNestedParser(MultiPartParser):
         media_type: str | None = None,
         parser_context: Mapping[str, Any] | None = None,
     ) -> DataAndFiles:
-        clsDataAndFile = super().parse(stream, media_type, parser_context)
+        cls_data_and_file = super().parse(stream, media_type, parser_context)
 
-        data = clsDataAndFile.data.dict()
-        data.update(clsDataAndFile.files.dict())  # add files to data
+        data = cls_data_and_file.data.dict()
+        data.update(cls_data_and_file.files.dict())  # add files to data
 
         parser = NestedParser(data)
         if parser.is_valid():

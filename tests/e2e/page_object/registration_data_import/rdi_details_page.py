@@ -6,108 +6,108 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class RDIDetailsPage(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    labelStatus = 'div[data-cy="label-status"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    labelSourceOfData = 'div[data-cy="label-Source of Data"]'
-    labelImportDate = 'div[data-cy="label-Import Date"]'
-    labelImportedBy = 'div[data-cy="label-Imported by"]'
-    labelizedFieldContainerHouseholds = 'div[data-cy="labelized-field-container-households"]'
-    labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Items Groups"]'
-    labelizedFieldContainerIndividuals = 'div[data-cy="labelized-field-container-individuals"]'
-    labelTotalNumberOfIndividuals = 'div[data-cy="label-Total Number of Items"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    importedIndividualsTable = 'div[data-cy="imported-individuals-table"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    buttonRefuseRdi = 'button[data-cy="button-refuse-rdi"]'
-    buttonMergeRdi = 'button[data-cy="button-merge-rdi"]'
-    buttonMerge = 'button[data-cy="button-merge"]'
-    buttonViewTickets = 'a[data-cy="button-view-tickets"]'
-    buttonHouseholds = 'button[data-cy="tab-Households"]'
-    buttonIndividuals = 'button[data-cy="tab-Individuals"]'
-    importedHouseholdsRow = './/tr[@data-cy="imported-households-row"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    label_status = 'div[data-cy="label-status"]'
+    status_container = 'div[data-cy="status-container"]'
+    label_source_of_data = 'div[data-cy="label-Source of Data"]'
+    label_import_date = 'div[data-cy="label-Import Date"]'
+    label_imported_by = 'div[data-cy="label-Imported by"]'
+    labelized_field_container_households = 'div[data-cy="labelized-field-container-households"]'
+    label_total_number_of_households = 'div[data-cy="label-Total Number of Items Groups"]'
+    labelized_field_container_individuals = 'div[data-cy="labelized-field-container-individuals"]'
+    label_total_number_of_individuals = 'div[data-cy="label-Total Number of Items"]'
+    table_label = 'span[data-cy="table-label"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    imported_individuals_table = 'div[data-cy="imported-individuals-table"]'
+    table_row = 'tr[data-cy="table-row"]'
+    button_refuse_rdi = 'button[data-cy="button-refuse-rdi"]'
+    button_merge_rdi = 'button[data-cy="button-merge-rdi"]'
+    button_merge = 'button[data-cy="button-merge"]'
+    button_view_tickets = 'a[data-cy="button-view-tickets"]'
+    button_households = 'button[data-cy="tab-Households"]'
+    button_individuals = 'button[data-cy="tab-Individuals"]'
+    imported_households_row = './/tr[@data-cy="imported-households-row"]'
 
     # Texts
-    buttonRefuseRdiText = "REFUSE IMPORT"
-    buttonMergeRdiText = "MERGE"
+    button_refuse_rdi_text = "REFUSE IMPORT"
+    button_merge_rdi_text = "MERGE"
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getLabelStatus(self) -> WebElement:
-        return self.wait_for(self.labelStatus)
+    def get_label_status(self) -> WebElement:
+        return self.wait_for(self.label_status)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getLabelSourceOfData(self) -> WebElement:
-        return self.wait_for(self.labelSourceOfData)
+    def get_label_source_of_data(self) -> WebElement:
+        return self.wait_for(self.label_source_of_data)
 
-    def getLabelImportDate(self) -> WebElement:
-        return self.wait_for(self.labelImportDate)
+    def get_label_import_date(self) -> WebElement:
+        return self.wait_for(self.label_import_date)
 
-    def getLabelImportedBy(self) -> WebElement:
-        return self.wait_for(self.labelImportedBy)
+    def get_label_imported_by(self) -> WebElement:
+        return self.wait_for(self.label_imported_by)
 
-    def getLabelizedFieldContainerHouseholds(self) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerHouseholds)
+    def get_labelized_field_container_households(self) -> WebElement:
+        return self.wait_for(self.labelized_field_container_households)
 
-    def getLabelTotalNumberOfHouseholds(self) -> WebElement:
-        return self.wait_for(self.labelTotalNumberOfHouseholds)
+    def get_label_total_number_of_households(self) -> WebElement:
+        return self.wait_for(self.label_total_number_of_households)
 
-    def getLabelizedFieldContainerIndividuals(self) -> WebElement:
-        return self.wait_for(self.labelizedFieldContainerIndividuals)
+    def get_labelized_field_container_individuals(self) -> WebElement:
+        return self.wait_for(self.labelized_field_container_individuals)
 
-    def getLabelTotalNumberOfIndividuals(self) -> WebElement:
-        return self.wait_for(self.labelTotalNumberOfIndividuals)
+    def get_label_total_number_of_individuals(self) -> WebElement:
+        return self.wait_for(self.label_total_number_of_individuals)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def get_table_row(self) -> WebElement:
+        return self.wait_for(self.table_row)
 
-    def getButtonRefuseRdi(self) -> WebElement:
-        return self.wait_for(self.buttonRefuseRdi)
+    def get_button_refuse_rdi(self) -> WebElement:
+        return self.wait_for(self.button_refuse_rdi)
 
-    def getTablePagination(self) -> WebElement:
-        return self.get(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.get(self.table_pagination)
 
-    def getButtonMergeRdi(self) -> WebElement:
-        return self.wait_for(self.buttonMergeRdi)
+    def get_button_merge_rdi(self) -> WebElement:
+        return self.wait_for(self.button_merge_rdi)
 
-    def getButtonMerge(self) -> WebElement:
-        return self.wait_for(self.buttonMerge)
+    def get_button_merge(self) -> WebElement:
+        return self.wait_for(self.button_merge)
 
-    def getButtonViewTickets(self) -> WebElement:
-        return self.wait_for(self.buttonViewTickets)
+    def get_button_view_tickets(self) -> WebElement:
+        return self.wait_for(self.button_view_tickets)
 
-    def getButtonHouseholds(self) -> WebElement:
-        return self.wait_for(self.buttonHouseholds)
+    def get_button_households(self) -> WebElement:
+        return self.wait_for(self.button_households)
 
-    def getButtonIndividuals(self) -> WebElement:
-        return self.wait_for(self.buttonIndividuals)
+    def get_button_individuals(self) -> WebElement:
+        return self.wait_for(self.button_individuals)
 
-    def getImportedIndividualsTable(self) -> WebElement:
-        return self.wait_for(self.importedIndividualsTable)
+    def get_imported_individuals_table(self) -> WebElement:
+        return self.wait_for(self.imported_individuals_table)
 
-    def getImportedHouseholdsRow(self, number: int) -> WebElement:
-        self.wait_for(self.importedHouseholdsRow, By.XPATH)
-        return self.get_elements(self.importedHouseholdsRow, By.XPATH)[number]
+    def get_imported_households_row(self, number: int) -> WebElement:
+        self.wait_for(self.imported_households_row, By.XPATH)
+        return self.get_elements(self.imported_households_row, By.XPATH)[number]
 
-    def waitForStatus(self, status: str, timeout: int = 60) -> None:
+    def wait_for_status(self, status: str, timeout: int = 60) -> None:
         for _ in range(timeout):
             sleep(1)
-            if self.getStatusContainer().text == status:
+            if self.get_status_container().text == status:
                 break
             self.driver.refresh()
 
-    def waitForNumberOfRows(self, string: str, timeout: int = 60) -> bool:
+    def wait_for_number_of_rows(self, string: str, timeout: int = 60) -> bool:
         for _ in range(timeout):
             sleep(1)
             if string in self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text:

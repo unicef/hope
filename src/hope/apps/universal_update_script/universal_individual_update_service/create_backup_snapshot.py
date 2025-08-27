@@ -62,7 +62,10 @@ def create_snapshot_content(log_message: Callable[[str], None], program_id: str,
         chunk_size = 10
         length = len(household_ids)
         for index, id_chunk in enumerate(chunks(household_ids, chunk_size)):
-            message = f"Creating backup snapshot for records {index * chunk_size} to {min((index + 1) * chunk_size, length)} out of {length}"
+            message = (
+                f"Creating backup snapshot for records"
+                f" {index * chunk_size} to {min((index + 1) * chunk_size, length)} out of {length}"
+            )
             log_message(message)
             households = (
                 Household.objects.filter(id__in=id_chunk)

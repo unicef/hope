@@ -1,9 +1,9 @@
 import datetime
 
-import pytz
 from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
+import pytz
 
 from hope.apps.core.utils import timezone_datetime
 
