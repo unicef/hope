@@ -1,6 +1,6 @@
 import csv
-import os
 from datetime import datetime
+import os
 
 import django
 from django.core.management import call_command

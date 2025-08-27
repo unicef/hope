@@ -4,12 +4,12 @@ import uuid
 import django.contrib.auth.models
 import django.contrib.auth.validators
 import django.contrib.postgres.fields.citext
+from django.contrib.postgres.operations import CITextExtension
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.manager
 import django.utils.timezone
 import model_utils.fields
-from django.contrib.postgres.operations import CITextExtension
-from django.db import migrations, models
 
 import hope.apps.account.fields
 
@@ -68,7 +68,8 @@ class Migration(migrations.Migration):
                     "is_active",
                     models.BooleanField(
                         default=True,
-                        help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                        help_text="Designates whether this user should be treated as active. "
+                        "Unselect this instead of deleting accounts.",
                         verbose_name="active",
                     ),
                 ),

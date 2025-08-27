@@ -395,7 +395,8 @@ class TestPaymentPlanServices(BaseTestCase):
         ):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
-        # create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
+        # create follow-up payments for
+        # STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
         for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
             payment.status = status
             payment.save()

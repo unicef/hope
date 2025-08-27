@@ -17,7 +17,6 @@ from extras.test_utils.factories.registration_data import (
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from rest_framework import status
 from rest_framework.test import APIClient
-from unit.api.base import HOPEApiTestCase
 
 from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
@@ -29,6 +28,7 @@ from hope.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hope.apps.sanction_list.models import SanctionList
+from unit.api.base import HOPEApiTestCase
 
 
 class RegistrationDataImportViewSetTest(HOPEApiTestCase):

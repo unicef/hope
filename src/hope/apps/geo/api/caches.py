@@ -24,7 +24,12 @@ class AreaListVersionsKeyBit(KeyBitBase):
             f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list",
             1,
         )
-        version_key = f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:area_type_list:{area_types_version}:{self.specific_view_cache_key}"
+        version_key = (
+            f"{business_area_slug}:{business_area_version}:"
+            f"country_list:{countries_version}:area_type_list:"
+            f"{area_types_version}:"
+            f"{self.specific_view_cache_key}"
+        )
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
 
@@ -63,7 +68,11 @@ class AreaTypeListVersionsKeyBit(KeyBitBase):
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         countries_version = get_or_create_cache_key(f"{business_area_slug}:{business_area_version}:country_list", 1)
-        version_key = f"{business_area_slug}:{business_area_version}:country_list:{countries_version}:{self.specific_view_cache_key}"
+        version_key = (
+            f"{business_area_slug}:{business_area_version}:"
+            f"country_list:{countries_version}:"
+            f"{self.specific_view_cache_key}"
+        )
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
 

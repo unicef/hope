@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Any
 
-import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 from extras.test_utils.factories.account import (
@@ -34,6 +33,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

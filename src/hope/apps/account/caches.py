@@ -16,4 +16,8 @@ def get_user_permissions_cache_key(
     business_area: Optional["BusinessArea"],
     program: Optional["Program"],
 ) -> str:
-    return f"permissions:{str(user.id)}:{user_version}:{business_area.slug if business_area else 'None'}:{program.id if program else 'None'}"
+    return (
+        f"permissions:{str(user.id)}:"
+        f"{user_version}:{business_area.slug if business_area else 'None'}:"
+        f"{program.id if program else 'None'}"
+    )

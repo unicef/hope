@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import responses
 from constance.test import override_config
 from django.conf import settings
 from django.urls import reverse
@@ -12,6 +11,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
+import responses
 
 from hope.admin.account_mixins import get_valid_kobo_username
 from hope.apps.account.models import IncompatibleRoles, Role, User

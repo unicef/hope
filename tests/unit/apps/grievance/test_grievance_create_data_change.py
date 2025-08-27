@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Any
 
-import pytest
 from django.core.management import call_command
 from django.urls import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -14,6 +13,7 @@ from extras.test_utils.factories.household import (
     IndividualIdentityFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 
 from hope.apps.account.models import Partner

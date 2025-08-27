@@ -1,10 +1,9 @@
-import json
 from datetime import datetime
+import json
 from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
@@ -40,6 +39,7 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+import pytest
 
 from hope.apps.core.currencies import USDC
 from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp

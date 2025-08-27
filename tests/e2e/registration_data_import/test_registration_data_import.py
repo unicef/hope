@@ -1,7 +1,6 @@
 from datetime import datetime
 from time import sleep
 
-import pytest
 from django.conf import settings
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
@@ -15,13 +14,13 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.account.models import Partner, User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area, AreaType, Country
 from hope.apps.program.models import BeneficiaryGroup, Program
-from hope.apps.registration_data.models import ImportData
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.django_db()

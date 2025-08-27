@@ -1,7 +1,7 @@
-import logging
-import mimetypes
 from datetime import datetime
 from decimal import Decimal
+import logging
+import mimetypes
 from typing import Any
 from zipfile import BadZipFile
 
@@ -187,7 +187,8 @@ class PaymentVerificationViewSet(
 
     # @etag_decorator(PaymentVerificationListKeyConstructor)
     # @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
-    # TODO: Enable cache on verification list, it is not working due to the fact that when summary is invalidated payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
+    # TODO: Enable cache on verification list, it is not working due to the fact that when summary is invalidated
+    # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -574,7 +575,8 @@ class PaymentVerificationRecordViewSet(
             raise ValidationError("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             raise ValidationError(
-                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
+                f"You can only update status of payment verification for "
+                f"{PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
         if not payment_verification.is_manually_editable:
             raise ValidationError("You can only edit payment verification in first 10 minutes")

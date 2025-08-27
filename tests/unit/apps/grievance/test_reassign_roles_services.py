@@ -297,7 +297,8 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             )
         assert (
             str(error.exception.messages[0])
-            == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY in household with unicef_id {self.household.unicef_id}"
+            == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY "
+            f"in household with unicef_id {self.household.unicef_id}"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_not_reassigned(
@@ -317,8 +318,10 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0]) == ""
-            f"Role for head of household in household with unicef_id {self.household.unicef_id} was not reassigned, when individual ({self.primary_collector_individual.unicef_id}) was marked as duplicated"
+            str(error.exception.messages[0]) == f"Role for head of household in household with unicef_id "
+            f"{self.household.unicef_id} was not reassigned, when individual "
+            f"({self.primary_collector_individual.unicef_id}) was marked as "
+            f"duplicated"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
@@ -339,5 +342,6 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             )
         assert (
             str(error.exception.messages[0])
-            == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated individual({self.primary_collector_individual.unicef_id})"
+            == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated "
+            f"individual({self.primary_collector_individual.unicef_id})"
         )

@@ -1,16 +1,16 @@
-import random
-import string
 from datetime import datetime, timedelta
+import random
 from random import randint
+import string
 from typing import Any
 
-import factory
 from dateutil.relativedelta import relativedelta
-from extras.test_utils.factories.core import DataCollectingTypeFactory
+import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
+from extras.test_utils.factories.core import DataCollectingTypeFactory
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
@@ -170,7 +170,6 @@ def generate_people_program() -> None:
         create_household,
         create_individual_document,
     )
-
     from hope.apps.household.models import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")

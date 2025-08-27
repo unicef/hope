@@ -1,6 +1,5 @@
 from importlib import import_module
 
-import pytest
 from django.apps import apps
 from django.test import TestCase
 from django.utils import timezone
@@ -11,6 +10,7 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, Role, RoleAssignment
 from hope.apps.core.models import BusinessAreaPartnerThrough
@@ -275,7 +275,8 @@ class MigrateUserRolesTest(TestCase):
 
         now = timezone.now()
 
-        # user_unicef_in_afg - has role_1 in Afg, UNICEF has access to all programs -> should have role_1 in Afg for each program
+        # user_unicef_in_afg - has role_1 in Afg, UNICEF has access to all programs ->
+        # should have role_1 in Afg for each program
         assert self.user_unicef_in_afg.role_assignments.count() == 2
         assert (
             RoleAssignment.objects.filter(
@@ -298,7 +299,8 @@ class MigrateUserRolesTest(TestCase):
             is not None
         )
 
-        # user_unicef_in_ukr - has role_2 in Ukr, UNICEF has access to all programs -> should have role_2 in Ukr for each program
+        # user_unicef_in_ukr - has role_2 in Ukr,
+        # UNICEF has access to all programs -> should have role_2 in Ukr for each program
         assert self.user_unicef_in_ukr.role_assignments.count() == 2
         assert (
             RoleAssignment.objects.filter(
@@ -321,7 +323,8 @@ class MigrateUserRolesTest(TestCase):
             is not None
         )
 
-        # unicef_user_hq - has role_1 in Afg and role_2 Ukr, UNICEF has access to all programs -> should have role_1 in Afg and role_2 Ukr for each program
+        # unicef_user_hq - has role_1 in Afg and role_2 Ukr,
+        # UNICEF has access to all programs -> should have role_1 in Afg and role_2 Ukr for each program
         assert self.unicef_user_hq.role_assignments.count() == 4
         assert (
             RoleAssignment.objects.filter(
@@ -365,7 +368,8 @@ class MigrateUserRolesTest(TestCase):
         # unicef_user_without_any_role - no role, UNICEF has access to all programs -> should have no roles
         assert self.unicef_user_without_any_role.role_assignments.count() == 0
 
-        # user_1_partner_1 - has role_1 in Afg and role_2 in Ukr, his partner has access to Program 1 AFG -> should have role_1 in Program 1 AFG, role_2 in Ukr is marked as expired
+        # user_1_partner_1 - has role_1 in Afg and role_2 in Ukr, his partner has access to Program 1 AFG ->
+        # should have role_1 in Program 1 AFG, role_2 in Ukr is marked as expired
         assert self.user_1_partner_1.role_assignments.count() == 2
         assert (
             RoleAssignment.objects.filter(
@@ -426,7 +430,8 @@ class MigrateUserRolesTest(TestCase):
             is not None
         )
 
-        # user_2_partner_2 - has role_2 in Ukr, his partner has access to Program 1 and 2 AFG and Program 1 UKR -> should have role_2 in Ukr for Program 1
+        # user_2_partner_2 - has role_2 in Ukr, his partner has access to Program 1 and 2 AFG and Program 1 UKR ->
+        # should have role_2 in Ukr for Program 1
         assert self.user_2_partner_2.role_assignments.count() == 1
         assert (
             RoleAssignment.objects.filter(

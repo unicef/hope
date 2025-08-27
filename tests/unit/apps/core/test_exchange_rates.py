@@ -1,12 +1,12 @@
-import os
 from datetime import datetime, timedelta
+import os
 from typing import Any, Optional
 from unittest import mock
 
-import requests_mock
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from parameterized import parameterized
+import requests_mock
 
 from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy

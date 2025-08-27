@@ -1,7 +1,5 @@
 from datetime import date
 
-import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
@@ -15,6 +13,8 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,

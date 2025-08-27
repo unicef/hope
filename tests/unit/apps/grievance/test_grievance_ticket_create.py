@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Any
 
-import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -10,6 +9,7 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

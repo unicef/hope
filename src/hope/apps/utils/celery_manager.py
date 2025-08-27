@@ -1,5 +1,5 @@
-import logging
 from functools import cached_property
+import logging
 from typing import Any
 
 from celery import Task

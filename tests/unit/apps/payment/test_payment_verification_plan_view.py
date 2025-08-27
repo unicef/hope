@@ -2,7 +2,6 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, List, Optional
 
-import pytest
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
@@ -17,6 +16,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from openpyxl import Workbook
+import pytest
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions

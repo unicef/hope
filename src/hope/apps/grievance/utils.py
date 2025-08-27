@@ -240,7 +240,8 @@ def validate_all_individuals_before_close_needs_adjudication(
 
     if not distinct_qs and (not withdrawn_in_all_possible_duplicates or not duplicates_qs):
         raise ValidationError(
-            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is "
+            "withdrawn or duplicate"
         )
 
     for individual in all_possible_duplicates:

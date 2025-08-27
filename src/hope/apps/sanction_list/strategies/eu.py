@@ -1,11 +1,11 @@
 import io
 import logging
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING
+import xml.etree.ElementTree as ET
 
-import requests
 from elasticsearch import NotFoundError
+import requests
 
 from ...geo.models import Country
 from ...program.models import Program
@@ -43,7 +43,7 @@ class EUParser:
     def __init__(self, root: ET.Element) -> None:
         self.root = root
 
-    def __iter__(self) -> "Generator[Entry, None, None]":
+    def __iter__(self) -> "Generator[Entry]":
         namespace = {"ns": "http://eu.europa.ec/fpi/fsd/export"}
         num = self.root.get("globalFileId", "")
         for _i, entity in enumerate(self.root.findall("ns:sanctionEntity", namespace), 1):
