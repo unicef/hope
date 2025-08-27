@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_active_test_program() -> Program:
-    yield create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
+    return create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
 
 
 @pytest.fixture

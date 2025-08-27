@@ -69,7 +69,7 @@ ignore = [
     "PT011",  # pytest.raises match
     "PT019",  # pytest.mark.usefixtures
     "PT027",  # pytest.raises
-    "PT022",  # yield
+#    "PT022",  # yield
 
     "ERA001",  # e2e comments..
 

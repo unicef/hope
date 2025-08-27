@@ -55,7 +55,7 @@ def add_people(social_worker_program: Program) -> List:
         )
         individual = individuals[0]
         create_individual_document(individual)
-    yield [individual, household]
+    return [individual, household]
 
 
 @pytest.fixture

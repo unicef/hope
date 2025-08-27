@@ -69,7 +69,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.SOCIAL,
         status=Program.ACTIVE,
@@ -79,7 +79,7 @@ def sw_program() -> Program:
 
 @pytest.fixture
 def non_sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.STANDARD,
         status=Program.ACTIVE,
@@ -220,17 +220,17 @@ def create_custom_household(
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
+    return create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
+    return create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
 
 
 @pytest.fixture
 def household_refugee() -> Household:
-    yield create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
+    return create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
 
 
 def get_program_with_dct_type_and_name(
@@ -392,7 +392,7 @@ def create_targeting() -> PaymentPlan:
     PaymentPlanService.create_payments(pp)
     pp.update_population_count_fields()
     pp.refresh_from_db()
-    yield pp
+    return pp
 
 
 @pytest.fixture
