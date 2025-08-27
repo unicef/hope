@@ -31,7 +31,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def standard_program() -> Program:
-    yield get_program_with_dct_type_and_name("Test For Edit", "TEST")
+    return get_program_with_dct_type_and_name("Test For Edit", "TEST")
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def program_with_three_cycles() -> Program:
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     program.save()
-    yield program
+    return program
 
 
 @pytest.fixture
@@ -69,7 +69,7 @@ def program_with_different_cycles() -> Program:
         end_date=datetime.now() + relativedelta(days=20),
     )
     program.save()
-    yield program
+    return program
 
 
 def get_program_with_dct_type_and_name(
@@ -104,7 +104,7 @@ def get_program_with_dct_type_and_name(
 
 @pytest.fixture
 def standard_program_with_draft_programme_cycle() -> Program:
-    yield get_program_without_cycle_end_date(
+    return get_program_without_cycle_end_date(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -114,7 +114,7 @@ def standard_program_with_draft_programme_cycle() -> Program:
 
 @pytest.fixture
 def standard_active_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -125,7 +125,7 @@ def standard_active_program() -> Program:
 
 @pytest.fixture
 def standard_active_program_cycle_draft() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -136,7 +136,7 @@ def standard_active_program_cycle_draft() -> Program:
 
 @pytest.fixture
 def standard_active_program_with_draft_program_cycle() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme And DRAFT Programme Cycle",
         "LILI",
         status=Program.ACTIVE,
@@ -222,7 +222,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         is_follow_up=False,
         program_cycle=cycle,
     )
-    yield payment_plan[0]
+    return payment_plan[0]
 
 
 @pytest.fixture

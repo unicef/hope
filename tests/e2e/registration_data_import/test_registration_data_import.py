@@ -92,27 +92,27 @@ def add_rdi() -> None:
 
 @pytest.fixture
 def unicef_partner() -> Partner:
-    yield PartnerFactory(name="UNICEF")
+    return PartnerFactory(name="UNICEF")
 
 
 @pytest.fixture
 def unicef_hq() -> Partner:
-    yield PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
+    return PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
 
 
 @pytest.fixture
 def unhcr_partner() -> Partner:
-    yield PartnerFactory(name="UNHCR")
+    return PartnerFactory(name="UNHCR")
 
 
 @pytest.fixture
 def wfp_partner() -> Partner:
-    yield PartnerFactory(name="WFP")
+    return PartnerFactory(name="WFP")
 
 
 @pytest.fixture
 def country() -> Country:
-    yield Country.objects.get(name="Afghanistan")
+    return Country.objects.get(name="Afghanistan")
 
 
 @pytest.fixture

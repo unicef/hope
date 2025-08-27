@@ -86,12 +86,12 @@ def create_programs() -> None:
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[])
+    return create_custom_household(observed_disability=[])
 
 
 @pytest.fixture
 def household_social_worker() -> Household:
-    yield create_custom_household(
+    return create_custom_household(
         observed_disability=[],
         program_name="Social Program",
         dct_type=DataCollectingType.Type.SOCIAL,
@@ -120,7 +120,7 @@ def find_text_of_label(element: WebElement) -> str:
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(
+    return create_program(
         "Social Program",
         dct_type=DataCollectingType.Type.SOCIAL,
         beneficiary_group="People",
@@ -197,7 +197,6 @@ def add_grievance_needs_adjudication() -> None:
     generate_grievance(status=GrievanceTicket.STATUS_FOR_APPROVAL)
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
-    yield
 
 
 def generate_grievance(
@@ -289,7 +288,7 @@ def add_grievance_tickets() -> GrievanceTicket:
     grievance = create_grievance_referral()
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
-    yield grievance
+    return grievance
 
 
 @pytest.fixture
@@ -308,7 +307,7 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
     ]
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
-    yield grievance
+    return grievance
 
 
 @pytest.fixture
@@ -316,7 +315,7 @@ def create_grievance_tickets_social_program() -> GrievanceTicket:
     grievance = create_grievance_referral(assigned_to="", household_unicef_id="HH-20-0000.0001")
     grievance.programs.add(Program.objects.filter(name="Social Program").first())
     grievance.save()
-    yield grievance
+    return grievance
 
 
 def create_grievance_referral(
