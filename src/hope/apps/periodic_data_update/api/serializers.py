@@ -397,6 +397,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
                     raise serializers.ValidationError(
                         f"Field '{field_name}' has invalid date format. Expected YYYY-MM-DD"
                     )
+
         return data
 
 

@@ -203,7 +203,7 @@ class PDUOnlineEditViewSet(
         "retrieve": PDUOnlineEditDetailSerializer,
         "create": PDUOnlineEditCreateSerializer,
         "update_authorized_users": PDUOnlineEditUpdateAuthorizedUsersSerializer,
-        "save_data": PDUOnlineEditSaveDataSerializer,  # TODO: PDU - handle the update of edit_data
+        "save_data": PDUOnlineEditSaveDataSerializer,
         "send_back": PDUOnlineEditSendBackSerializer,
         "bulk_approve": BulkSerializer,
         "bulk_merge": BulkSerializer,
@@ -267,6 +267,43 @@ class PDUOnlineEditViewSet(
         instance.status = PDUOnlineEdit.Status.READY
         instance.save()
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
+
+    @action(detail=True, methods=["post"])
+    def save_data(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        self.check_user_authorization(request)
+        instance = self.get_object()
+
+        if instance.status != PDUOnlineEdit.Status.NEW:
+            raise ValidationError("PDU Online Edit data can only be saved when status is 'New'.")
+
+        serializer = self.get_serializer(data=request.data, context={"pdu_online_edit": instance})
+        serializer.is_valid(raise_exception=True)
+
+        individual_uuid = str(serializer.validated_data["individual_uuid"])
+        pdu_fields_update = serializer.validated_data["pdu_fields"]
+
+        individual_data = next(
+            (item for item in instance.edit_data if item.get("individual_uuid") == individual_uuid),
+            None
+        )
+
+        current_pdu_fields = individual_data.get("pdu_fields", {})
+        for field_name, field_data in pdu_fields_update.items():
+            current_field_data = current_pdu_fields[field_name]
+            new_value = field_data.get("value")
+            old_value = current_field_data.get("value")
+
+            # Update value and set collection_date if value has changed
+            if new_value != old_value:
+                current_field_data["value"] = new_value
+                current_field_data["collection_date"] = timezone.now().date().isoformat()
+
+        instance.save(update_fields=["edit_data"])
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"message": "Edit data saved successfully."}
+        )
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
