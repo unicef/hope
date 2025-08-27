@@ -30,7 +30,6 @@ pytestmark = pytest.mark.django_db()
 @pytest.fixture
 def add_feedbacks() -> None:
     generate_feedback()
-    yield
 
 
 @pytest.fixture
@@ -88,7 +87,7 @@ def create_households_and_individuals() -> Household:
     hh.save()
     hh.set_admin_areas()
     hh.refresh_from_db()
-    yield hh
+    return hh
 
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
