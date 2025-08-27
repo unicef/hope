@@ -59,9 +59,9 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
     def _validate_value(value: Any, expected_type: str, field_name: str) -> Any:
         if expected_type == PeriodicFieldData.BOOL and not isinstance(value, bool):
             raise ValidationError(f"Invalid type for field {field_name}. Expected boolean, got {type(value).__name__}.")
-        elif expected_type == PeriodicFieldData.DECIMAL and not isinstance(value, int | float):
+        if expected_type == PeriodicFieldData.DECIMAL and not isinstance(value, int | float):
             raise ValidationError(f"Invalid type for field {field_name}. Expected number, got {type(value).__name__}.")
-        elif expected_type == PeriodicFieldData.DATE:
+        if expected_type == PeriodicFieldData.DATE:
             if not isinstance(value, str):
                 raise ValidationError(
                     f"Invalid type for field {field_name}. Expected string for date, got {type(value).__name__}."
