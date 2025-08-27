@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.accountability.models import SampleFileExpiredException, Survey
+from hope.apps.accountability.models import SampleFileExpiredError, Survey
 
 
 @login_required
@@ -18,5 +18,5 @@ def download_cash_plan_payment_verification(request: HttpRequest, survey_id: str
         if sample_file_path := survey.sample_file_path():
             return redirect(sample_file_path)
         return HttpResponse("Sample file doesn't exist", status=404)
-    except SampleFileExpiredException:
+    except SampleFileExpiredError:
         return HttpResponse("Sample file expired", status=400)

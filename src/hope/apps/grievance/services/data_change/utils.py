@@ -1,16 +1,16 @@
+from collections import Counter
+from datetime import datetime
 import logging
 import random
 import string
-import urllib.parse
-from collections import Counter
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Iterable, Optional
+import urllib.parse
 
-from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.models import Partner
 from hope.apps.activity_log.models import log_create
@@ -84,7 +84,8 @@ def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> Non
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
 
-    for name, value in flex_fields_to_verify.items():
+    for name, _value in flex_fields_to_verify.items():
+        value = _value
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
             raise ValueError(f"{name} is not a correct `flex field")

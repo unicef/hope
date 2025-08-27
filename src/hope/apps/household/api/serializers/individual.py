@@ -1,5 +1,5 @@
-import uuid
 from datetime import date
+import uuid
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta

@@ -1,9 +1,9 @@
-import logging
 from io import BytesIO
+import logging
 from typing import Any
 
-import openpyxl
 from django.db import transaction
+import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -186,7 +186,8 @@ class UniversalIndividualUpdateService:
                         had_financial_institution = True
             if updating_anything and not had_financial_institution:
                 errors.append(
-                    f"Row: {row_index} - Financial institution ID must be provided for account type {account_type} if any other field is updated"
+                    f"Row: {row_index} - Financial institution ID must be provided for account type {account_type}"
+                    f" if any other field is updated"
                 )
         return errors
 
@@ -197,7 +198,8 @@ class UniversalIndividualUpdateService:
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
                 self.print_message(
-                    f"Validating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Indivduals"
+                    f"Validating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)}"
+                    f" Indivduals"
                 )
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
@@ -355,7 +357,8 @@ class UniversalIndividualUpdateService:
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
                 self.print_message(
-                    f"Updating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Individuals"
+                    f"Updating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)}"
+                    f" Individuals"
                 )
             unicef_id = row[headers.index("unicef_id")]
             individual = (

@@ -1,9 +1,9 @@
 from io import StringIO
 from unittest import mock
 
-import pytest
 from django.core.management import call_command
 from django.test import TestCase
+import pytest
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

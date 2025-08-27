@@ -3,16 +3,16 @@ from pathlib import Path
 from typing import Any, List
 from unittest.mock import patch
 
-import pytest
 from django.conf import settings
 from django.urls import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+import pytest
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_datahub.validators import XlsxException
+from hope.apps.registration_datahub.validators import XlsxError
 from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet
 
 pytestmark = pytest.mark.django_db
@@ -161,7 +161,7 @@ class TestSanctionListIndividualViewSet:
         with patch.object(
             SanctionListIndividualViewSet,
             "validate",
-            side_effect=XlsxException(error_payload),
+            side_effect=XlsxError(error_payload),
         ):
             response = self.client.post(self.url_check, {"file": file}, format="multipart")
 

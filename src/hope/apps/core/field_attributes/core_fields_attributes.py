@@ -1,6 +1,6 @@
 import copy
-import logging
 from functools import reduce
+import logging
 from typing import Any, Iterable
 
 from hope.apps.core.attributes_qet_queries import (
@@ -1698,7 +1698,8 @@ CORE_FIELDS_ATTRIBUTES = [
         "lookup": "physical_disability",
         "required": False,
         "label": {
-            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL} has difficulty walking or climbing steps, what is the severity?"
+            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL}"
+            f" has difficulty walking or climbing steps, what is the severity?"
         },
         "hint": "",
         "choices": [
@@ -1722,7 +1723,8 @@ CORE_FIELDS_ATTRIBUTES = [
         "lookup": "memory_disability",
         "required": False,
         "label": {
-            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL} has difficulty remembering or concentrating, what is the severity?"
+            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL}"
+            f" has difficulty remembering or concentrating, what is the severity?"
         },
         "hint": "",
         "choices": [
@@ -2031,7 +2033,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
         "get_query": get_role_query,
-        "scope": [Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [Scope.TARGETING, Scope.KOBO_IMPORT],
         "snapshot_field": "roles__role__individual__id",
     },
     {

@@ -1,18 +1,18 @@
+from io import BytesIO
 import logging
 import string
-import zipfile
-from io import BytesIO
 from tempfile import NamedTemporaryFile
+import zipfile
 
-import msoffcrypto
-import openpyxl
-import pyzipper
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+import msoffcrypto
+import openpyxl
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
+import pyzipper
 
 from hope.apps.account.models import User
 from hope.apps.core.models import FileTemp, FlexibleAttribute

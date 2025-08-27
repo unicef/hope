@@ -1,7 +1,7 @@
 import datetime
-import logging
 from functools import partial
 from itertools import groupby
+import logging
 from typing import IO, TYPE_CHECKING, Callable, Union
 
 from constance import config
@@ -816,7 +816,8 @@ class PaymentPlanService:
 
             if chunks_no > payments_count or chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
                 raise ValidationError(
-                    f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
+                    f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} "
+                    f"and total number of payments"
                 )
             payments_chunks = list(chunks(list(payments.order_by("unicef_id")), chunks_no))
 

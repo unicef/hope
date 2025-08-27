@@ -1,10 +1,9 @@
-import datetime
-import io
 from collections import namedtuple
+import datetime
 from decimal import Decimal
+import io
 from typing import TYPE_CHECKING, Tuple
 
-import pytz
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -22,9 +21,10 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from parameterized import parameterized
+import pytz
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import DataCollectingType
 from hope.apps.household.models import ROLE_PRIMARY
 from hope.apps.payment.models import (
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from hope.apps.household.models import Household, Individual
 
 
-class TestPaymentPlanReconciliation(APITestCase):
+class TestPaymentPlanReconciliation(BaseTestCase):
     @classmethod
     def create_household_and_individual(cls, program: Program) -> Tuple["Household", "Individual"]:
         household, individuals = create_household_and_individuals(
@@ -180,7 +180,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         if not expected_status:
             with self.assertRaisesMessage(
-                service.XlsxPaymentPlanImportPerFspServiceException,
+                service.XlsxPaymentPlanImportPerFspServiceError,
                 f"Invalid delivered_quantity {delivered_quantity} provided for payment_id xx",
             ):
                 service._get_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity, "xx")

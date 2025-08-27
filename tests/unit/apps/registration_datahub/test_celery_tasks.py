@@ -1,14 +1,13 @@
+from abc import ABC, abstractmethod
 import base64
+from contextlib import contextmanager
 import datetime
 import json
-import uuid
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
+import uuid
 
-import pytest
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
@@ -29,8 +28,9 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models
@@ -536,7 +536,7 @@ class TestAutomatingRDICreationTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         organization = OrganizationFactory.create(slug="ukraine")
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)
@@ -845,7 +845,7 @@ class TestAutomatingRDICreationTask(TestCase):
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
             @classproperty
             @abstractmethod
-            def PROCESS_FLEX_RECORDS_TASK(cls) -> str:
+            def process_flex_records_task(cls) -> str:
                 raise NotImplementedError
 
         with self.assertRaises(NotImplementedError):
@@ -916,7 +916,7 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         assert self.rdi_3.erased is False
 
 
-class TestRegistrationImportCeleryTasks(APITestCase):
+class TestRegistrationImportCeleryTasks(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -942,8 +942,8 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
 
     @patch("hope.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
-    def test_registration_kobo_import_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
-        mock_task_instance = MockRdiKoboCreateTask.return_value
+    def test_registration_kobo_import_task_execute_called_once(self, mock_rdi_kobo_create_task: Mock) -> None:
+        mock_task_instance = mock_rdi_kobo_create_task.return_value
         registration_data_import_id = self.registration_data_import.id
         import_data_id = self.import_data.id
         business_area_id = self.business_area.id
@@ -960,27 +960,27 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
 
     @patch("hope.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
-    def test_registration_kobo_import_hourly_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
+    def test_registration_kobo_import_hourly_task_execute_called_once(self, mock_rdi_kobo_create_task: Mock) -> None:
         self.registration_data_import.status = RegistrationDataImport.LOADING
         self.registration_data_import.save()
-        mock_task_instance = MockRdiKoboCreateTask.return_value
+        mock_task_instance = mock_rdi_kobo_create_task.return_value
         registration_kobo_import_hourly_task.delay()
         mock_task_instance.execute.assert_called_once()
 
     @patch("hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask")
-    def test_registration_xlsx_import_hourly_task_execute_called_once(self, MockRdiXlsxCreateTask: Mock) -> None:
+    def test_registration_xlsx_import_hourly_task_execute_called_once(self, mock_rdi_xlsx_create_task: Mock) -> None:
         self.registration_data_import.status = RegistrationDataImport.LOADING
         self.registration_data_import.save()
-        mock_task_instance = MockRdiXlsxCreateTask.return_value
+        mock_task_instance = mock_rdi_xlsx_create_task.return_value
         registration_xlsx_import_hourly_task.delay()
         mock_task_instance.execute.assert_called_once()
 
     @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task_exception(
         self,
-        MockRdiMergeTask: Mock,
+        mock_rdi_merge_task: Mock,
     ) -> None:
-        mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
+        mock_rdi_merge_task_instance = mock_rdi_merge_task.return_value
         mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
@@ -990,9 +990,9 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(
         self,
-        MockRdiMergeTask: Mock,
+        mock_rdi_merge_task: Mock,
     ) -> None:
-        mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
+        mock_rdi_merge_task_instance = mock_rdi_merge_task.return_value
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         mock_rdi_merge_task_instance.execute.assert_called_once()
@@ -1000,9 +1000,9 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask")
     def test_rdi_deduplication_task_exception(
         self,
-        MockDeduplicateTask: Mock,
+        mock_deduplicate_task: Mock,
     ) -> None:
-        mock_deduplicate_task_task_instance = MockDeduplicateTask.return_value
+        mock_deduplicate_task_task_instance = mock_deduplicate_task.return_value
         mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
@@ -1012,19 +1012,19 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hope.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
     def test_pull_kobo_submissions_task(
         self,
-        PullKoboSubmissionsTask: Mock,
+        mock_pull_kobo_submissions_task: Mock,
     ) -> None:
         kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234", pull_pictures=True)
-        mock_task_instance = PullKoboSubmissionsTask.return_value
+        mock_task_instance = mock_pull_kobo_submissions_task.return_value
         pull_kobo_submissions_task.delay(kobo_import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
 
     @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.ValidateXlsxImport")
     def test_validate_xlsx_import_task(
         self,
-        ValidateXlsxImportTask: Mock,
+        mock_validate_xlsx_import_task: Mock,
     ) -> None:
-        mock_task_instance = ValidateXlsxImportTask.return_value
+        mock_task_instance = mock_validate_xlsx_import_task.return_value
         validate_xlsx_import_task.delay(self.import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
 

@@ -1,6 +1,5 @@
 from typing import Any
 
-import pytest
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -15,6 +14,7 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

@@ -3,8 +3,8 @@ import hashlib
 import json
 import logging
 import sys
-import warnings
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
+import warnings
 
 import celery
 from celery import states

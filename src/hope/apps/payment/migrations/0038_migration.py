@@ -31,7 +31,8 @@ class Migration(migrations.Migration):
             name="flag_exclude_if_active_adjudication_ticket",
             field=models.BooleanField(
                 default=False,
-                help_text="Exclude households with individuals (members or collectors) that have active adjudication ticket(s).",
+                help_text="Exclude households with individuals (members or collectors) "
+                "that have active adjudication ticket(s).",
             ),
         ),
         migrations.AddField(

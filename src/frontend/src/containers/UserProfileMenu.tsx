@@ -9,8 +9,6 @@ import {
   Popper,
 } from '@mui/material';
 import styled from 'styled-components';
-import { clearCache } from '@utils/utils';
-import { getClient } from '../apollo/client';
 import React, { ReactElement, useState, useRef, useEffect } from 'react';
 
 const UserProfileButton = styled(Button)`
@@ -43,9 +41,8 @@ export function UserProfileMenu({
     setOpen((previousOpen) => !previousOpen);
   };
 
-  const handleClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
+  const handleClearCache = () => {
+    //TODO: Clear the cache from backend and frontend
   };
 
   const handleClose = (event): void => {
@@ -66,8 +63,7 @@ export function UserProfileMenu({
     handleClearCache();
   };
 
-  const handleClearCacheAndReloadWindow = async (): Promise<void> => {
-    await handleClearCache();
+  const handleClearCacheAndReloadWindow = () => {
     window.location.reload();
   };
 

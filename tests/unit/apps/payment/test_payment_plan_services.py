@@ -34,7 +34,7 @@ from pytz import utc
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import FileTemp
 from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.celery_tasks import (
@@ -53,7 +53,7 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.program.models import Program, ProgramCycle
 
 
-class TestPaymentPlanServices(APITestCase):
+class TestPaymentPlanServices(BaseTestCase):
     databases = ("default",)
 
     @classmethod
@@ -395,7 +395,8 @@ class TestPaymentPlanServices(APITestCase):
         ):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
-        # create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
+        # create follow-up payments for
+        # STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
         for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
             payment.status = status
             payment.save()

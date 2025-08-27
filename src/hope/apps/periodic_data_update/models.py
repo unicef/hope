@@ -123,10 +123,10 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
             return self.Status.TO_EXPORT
         if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.TO_EXPORT
-        if (
-            self.get_celery_status() == self.CELERY_STATUS_REVOKED
-            or self.get_celery_status() == self.CELERY_STATUS_CANCELED
-        ):
+        if self.get_celery_status() in [
+            self.CELERY_STATUS_REVOKED,
+            self.CELERY_STATUS_CANCELED
+        ]:
             return self.Status.CANCELED
         return self.status
 
@@ -198,10 +198,10 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
             return self.Status.PENDING
         if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.PENDING
-        if (
-            self.get_celery_status() == self.CELERY_STATUS_REVOKED
-            or self.get_celery_status() == self.CELERY_STATUS_CANCELED
-        ):
+        if self.get_celery_status() in [
+            self.CELERY_STATUS_REVOKED,
+            self.CELERY_STATUS_CANCELED,
+        ]:
             return self.Status.CANCELED
 
         return self.status

@@ -3,7 +3,6 @@ from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Dict
 from unittest.mock import patch
 
-import requests
 from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
@@ -15,9 +14,10 @@ from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 from extras.test_utils.factories.account import UserFactory
+import requests
 
 from hope.admin.kobo_template import XLSXKoboTemplateAdmin
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import XLSXKoboTemplate
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
@@ -50,11 +50,11 @@ def raise_as_func(exception: BaseException) -> Callable:
     return _raise
 
 
-class TestKoboTemplateUpload(APITestCase):
+class TestKoboTemplateUpload(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
@@ -134,7 +134,7 @@ class TestKoboTemplateUpload(APITestCase):
         )
 
 
-class TestKoboErrorHandling(APITestCase):
+class TestKoboErrorHandling(BaseTestCase):
     def generate_empty_template(self) -> XLSXKoboTemplate:
         with NamedTemporaryFile(mode="w+b") as tmp_file:
             tmp_file.write(b"abcdefg")

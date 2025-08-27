@@ -8,8 +8,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import View
-from graphene_django.settings import graphene_settings
-from graphql.utils import schema_printer
 
 from hope.apps.core.forms import StorageFileForm
 from hope.apps.core.models import StorageFile
@@ -20,12 +18,6 @@ logger = logging.getLogger(__name__)
 
 def homepage(request: HttpRequest) -> HttpResponse:
     return HttpResponse("", status=200)
-
-
-def schema(request: HttpRequest) -> HttpResponse:
-    schema = graphene_settings.SCHEMA
-    my_schema_str = schema_printer.print_schema(schema)
-    return HttpResponse(my_schema_str, content_type="application/graphlq", status=200)
 
 
 def logout_view(request: HttpRequest) -> HttpResponse:

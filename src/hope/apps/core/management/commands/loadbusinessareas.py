@@ -1,7 +1,7 @@
-import logging
-import xml.etree.ElementTree as ET
 from argparse import ArgumentParser
+import logging
 from typing import Any
+import xml.etree.ElementTree as ET
 
 from django.conf import settings
 from django.core.management import BaseCommand

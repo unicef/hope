@@ -2,7 +2,6 @@ import base64
 from io import BytesIO
 from typing import Any
 
-import pytest
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -12,9 +11,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from parameterized import parameterized
 from PIL import Image
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
 
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hope.api.models import Grant
@@ -33,6 +32,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class TestPushPeople(HOPEApiTestCase):

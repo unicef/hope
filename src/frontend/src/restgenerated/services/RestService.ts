@@ -1729,7 +1729,7 @@ export class RestService {
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        formData: GrievanceHouseholdDataChangeApprove,
+        formData?: GrievanceHouseholdDataChangeApprove,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',

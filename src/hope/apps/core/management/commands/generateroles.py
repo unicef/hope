@@ -15,7 +15,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--delete_all",
             action="store_true",
-            help="Should delete all existing roles before creating defaults. Be aware that it would also remove all existing RoleAssignments and IncompatibleRoles.",
+            help="Should delete all existing roles before creating defaults."
+            " Be aware that it would also remove all existing RoleAssignments and IncompatibleRoles.",
         )
         parser.add_argument(
             "--delete_incompatible",

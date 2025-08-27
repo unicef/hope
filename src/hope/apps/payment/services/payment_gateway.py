@@ -1,9 +1,9 @@
+from _decimal import Decimal
 import dataclasses
-import logging
 from enum import Enum
+import logging
 from typing import Any
 
-from _decimal import Decimal
 from django.utils.timezone import now
 from rest_framework import serializers
 
@@ -115,7 +115,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def get_extra_data(self, obj: Payment) -> dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
+            raise PaymentGatewayAPI.PaymentGatewayAPIError(f"Not found snapshot for Payment {obj.unicef_id}")
 
         return snapshot.snapshot_data
 
@@ -178,7 +178,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload = PaymentPayloadSerializer(data=payload_data)
         if not payload.is_valid():
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
+            raise PaymentGatewayAPI.PaymentGatewayAPIError(payload.errors)
 
         return payload.data
 
@@ -300,14 +300,14 @@ class PaymentGatewayAPI(BaseAPI):
     API_KEY_ENV_NAME = "PAYMENT_GATEWAY_API_KEY"
     API_URL_ENV_NAME = "PAYMENT_GATEWAY_API_URL"
 
-    class PaymentGatewayAPIException(Exception):
+    class PaymentGatewayAPIError(Exception):
         pass
 
-    class PaymentGatewayMissingAPICredentialsException(Exception):
+    class PaymentGatewayMissingAPICredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = PaymentGatewayAPIException  # type: ignore
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException  # type: ignore
+    API_EXCEPTION_CLASS = PaymentGatewayAPIError  # type: ignore
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsError  # type: ignore
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"

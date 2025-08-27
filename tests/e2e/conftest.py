@@ -1,15 +1,26 @@
+from contextlib import suppress
+from datetime import datetime
 import logging
 import os
 import re
-from contextlib import suppress
-from datetime import datetime
 from typing import Any
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
+from environ import Env
+from extras.test_utils.factories.account import RoleFactory, UserFactory
+from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.factories.household import DocumentTypeFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory
+from flags.models import FlagState
+import pytest
+from pytest_django.live_server_helper import LiveServer
+from pytest_html_reporter import attach
+from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options
+
 from e2e.page_object.accountability.communication import AccountabilityCommunication
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
@@ -65,17 +76,6 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from environ import Env
-from extras.test_utils.factories.account import RoleFactory, UserFactory
-from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
-from flags.models import FlagState
-from pytest_django.live_server_helper import LiveServer
-from pytest_html_reporter import attach
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import Options
-
 from hope.apps.account.models import Partner, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea, DataCollectingType
@@ -168,11 +168,6 @@ def pytest_configure(config) -> None:  # type: ignore
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
@@ -218,7 +213,6 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture(scope="session")
 def download_path(worker_id: str) -> str:
     try:
-        worker_id = worker_id
         assert worker_id is not None
         yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
     except BaseException:
@@ -243,13 +237,12 @@ def driver(download_path: str) -> Chrome:
         "download.default_directory": download_path,
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    driver = Chrome(options=chrome_options)
-    yield driver
+    return Chrome(options=chrome_options)
 
 
 @pytest.fixture
 def live_server() -> LiveServer:
-    yield LiveServer("localhost")
+    return LiveServer("localhost")
 
 
 @pytest.fixture(autouse=True)
@@ -277,16 +270,16 @@ def login(browser: Chrome) -> Chrome:
     )
     login = "id_username"
     password = "id_password"
-    loginButton = '//*[@id="login-form"]/div[3]/input'
+    login_button = '//*[@id="login-form"]/div[3]/input'
     from selenium.webdriver.common.by import By
-    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support import expected_conditions
     from selenium.webdriver.support.wait import WebDriverWait
 
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, loginButton)))
-    browser.find_element(By.XPATH, loginButton)
+    WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.XPATH, login_button)))
+    browser.find_element(By.XPATH, login_button)
     browser.find_element(By.ID, login).send_keys("superuser")
     browser.find_element(By.ID, password).send_keys("testtest2")
-    browser.find_element(By.XPATH, loginButton).click()
+    browser.find_element(By.XPATH, login_button).click()
     from time import sleep
 
     sleep(0.3)  # TODO: added just for test in CI
@@ -295,217 +288,217 @@ def login(browser: Chrome) -> Chrome:
     from django.core.cache import cache
 
     cache.clear()
-    yield browser
+    return browser
 
 
 @pytest.fixture
 def filters(request: FixtureRequest, browser: Chrome) -> Filters:
-    yield Filters(browser)
+    return Filters(browser)
 
 
 @pytest.fixture
-def pageProgrammeManagement(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
-    yield ProgrammeManagement(browser)
+def page_programme_management(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
+    return ProgrammeManagement(browser)
 
 
 @pytest.fixture
-def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
-    yield ProgrammeDetails(browser)
+def page_programme_details(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
+    return ProgrammeDetails(browser)
 
 
 @pytest.fixture
-def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
-    yield AdminPanel(browser)
+def page_admin_panel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
+    return AdminPanel(browser)
 
 
 @pytest.fixture
-def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
-    yield Feedback(browser)
+def page_feedback(request: FixtureRequest, browser: Chrome) -> Feedback:
+    return Feedback(browser)
 
 
 @pytest.fixture
-def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
-    yield GrievanceTickets(browser)
+def page_grievance_tickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
+    return GrievanceTickets(browser)
 
 
 @pytest.fixture
-def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
-    yield FeedbackDetailsPage(browser)
+def page_feedback_details(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
+    return FeedbackDetailsPage(browser)
 
 
 @pytest.fixture
-def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
-    yield NewFeedback(browser)
+def page_new_feedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
+    return NewFeedback(browser)
 
 
 @pytest.fixture
-def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
-    yield RegistrationDataImport(browser)
+def page_registration_data_import(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
+    return RegistrationDataImport(browser)
 
 
 @pytest.fixture
-def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
-    yield RDIDetailsPage(browser)
+def page_details_registration_data_import(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
+    return RDIDetailsPage(browser)
 
 
 @pytest.fixture
-def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
-    yield Households(browser)
+def page_households(request: FixtureRequest, browser: Chrome) -> Households:
+    return Households(browser)
 
 
 @pytest.fixture
-def pagePeople(request: FixtureRequest, browser: Chrome) -> People:
-    yield People(browser)
+def page_people(request: FixtureRequest, browser: Chrome) -> People:
+    return People(browser)
 
 
 @pytest.fixture
-def pagePeopleDetails(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
-    yield PeopleDetails(browser)
+def page_people_details(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
+    return PeopleDetails(browser)
 
 
 @pytest.fixture
-def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
-    yield HouseholdsDetails(browser)
+def page_households_details(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
+    return HouseholdsDetails(browser)
 
 
 @pytest.fixture
-def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
-    yield Individuals(browser)
+def page_individuals(request: FixtureRequest, browser: Chrome) -> Individuals:
+    return Individuals(browser)
 
 
 @pytest.fixture
-def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
-    yield IndividualsDetails(browser)
+def page_individuals_details(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
+    return IndividualsDetails(browser)
 
 
 @pytest.fixture
-def pagePDUXlsxTemplates(request: FixtureRequest, browser: Chrome) -> PDUXlsxTemplates:
-    yield PDUXlsxTemplates(browser)
+def page_pdu_xlsx_templates(request: FixtureRequest, browser: Chrome) -> PDUXlsxTemplates:
+    return PDUXlsxTemplates(browser)
 
 
 @pytest.fixture
-def pagePDUXlsxTemplatesDetails(
+def page_pdu_xlsx_templates_details(
     request: FixtureRequest,
     browser: Chrome,
 ) -> PDUXlsxTemplatesDetails:
-    yield PDUXlsxTemplatesDetails(browser)
+    return PDUXlsxTemplatesDetails(browser)
 
 
 @pytest.fixture
-def pagePDUXlsxUploads(request: FixtureRequest, browser: Chrome) -> PDUXlsxUploads:
-    yield PDUXlsxUploads(browser)
+def page_pdu_xlsx_uploads(request: FixtureRequest, browser: Chrome) -> PDUXlsxUploads:
+    return PDUXlsxUploads(browser)
 
 
 @pytest.fixture
-def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
-    yield Targeting(browser)
+def page_targeting(request: FixtureRequest, browser: Chrome) -> Targeting:
+    return Targeting(browser)
 
 
 @pytest.fixture
-def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
-    yield PaymentModule(browser)
+def page_payment_module(request: FixtureRequest, browser: Chrome) -> PaymentModule:
+    return PaymentModule(browser)
 
 
 @pytest.fixture
-def pagePaymentRecord(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
-    yield PaymentRecord(browser)
+def page_payment_record(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
+    return PaymentRecord(browser)
 
 
 @pytest.fixture
-def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
-    yield PaymentVerificationDetails(browser)
+def page_payment_verification_details(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
+    return PaymentVerificationDetails(browser)
 
 
 @pytest.fixture
-def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
-    yield PaymentVerification(browser)
+def page_payment_verification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
+    return PaymentVerification(browser)
 
 
 @pytest.fixture
-def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
-    yield TargetingDetails(browser)
+def page_targeting_details(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
+    return TargetingDetails(browser)
 
 
 @pytest.fixture
-def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
-    yield TargetingCreate(browser)
+def page_targeting_create(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
+    return TargetingCreate(browser)
 
 
 @pytest.fixture
-def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
-    yield GrievanceDetailsPage(browser)
+def page_grievance_details_page(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
+    return GrievanceDetailsPage(browser)
 
 
 @pytest.fixture
-def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
-    yield NewTicket(browser)
+def page_grievance_new_ticket(request: FixtureRequest, browser: Chrome) -> NewTicket:
+    return NewTicket(browser)
 
 
 @pytest.fixture
-def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
-    yield GrievanceDashboard(browser)
+def page_grievance_dashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
+    return GrievanceDashboard(browser)
 
 
 @pytest.fixture
-def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
-    yield ManagerialConsole(browser)
+def page_managerial_console(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
+    return ManagerialConsole(browser)
 
 
 @pytest.fixture
-def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
-    yield PaymentModuleDetails(browser)
+def page_payment_module_details(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
+    return PaymentModuleDetails(browser)
 
 
 @pytest.fixture
-def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
-    yield NewPaymentPlan(browser)
+def page_new_payment_plan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
+    return NewPaymentPlan(browser)
 
 
 @pytest.fixture
-def pageProgramCycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
-    yield ProgramCyclePage(browser)
+def page_program_cycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
+    return ProgramCyclePage(browser)
 
 
 @pytest.fixture
-def pageProgramCycleDetails(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
-    yield ProgramCycleDetailsPage(browser)
+def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
+    return ProgramCycleDetailsPage(browser)
 
 
 @pytest.fixture
-def pageAccountabilitySurveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
-    yield AccountabilitySurveys(browser)
+def page_accountability_surveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
+    return AccountabilitySurveys(browser)
 
 
 @pytest.fixture
-def pageAccountabilitySurveysDetails(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
-    yield AccountabilitySurveysDetails(browser)
+def page_accountability_surveys_details(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
+    return AccountabilitySurveysDetails(browser)
 
 
 @pytest.fixture
-def pageProgrammeUsers(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
-    yield ProgrammeUsers(browser)
+def page_programme_users(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
+    return ProgrammeUsers(browser)
 
 
 @pytest.fixture
-def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
-    yield AccountabilityCommunication(browser)
+def page_accountability_communication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
+    return AccountabilityCommunication(browser)
 
 
 @pytest.fixture
-def pageAccountabilityCommunicationDetails(
+def page_accountability_communication_details(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
-    yield AccountabilityCommunicationDetails(browser)
+    return AccountabilityCommunicationDetails(browser)
 
 
 @pytest.fixture
-def pageProgramLog(request: FixtureRequest, browser: Chrome) -> ProgramLog:
-    yield ProgramLog(browser)
+def page_program_log(request: FixtureRequest, browser: Chrome) -> ProgramLog:
+    return ProgramLog(browser)
 
 
 @pytest.fixture
-def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
-    yield CountryDashboard(browser)
+def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
+    return CountryDashboard(browser)
 
 
 @pytest.fixture
@@ -529,7 +522,7 @@ def business_area(create_unicef_partner: Any, create_role_with_all_permissions: 
         value="True",
         required=False,
     )
-    yield business_area
+    return business_area
 
 
 @pytest.fixture
@@ -547,7 +540,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     user.partner = Partner.objects.get(name="UNHCR")
     user.partner.allowed_business_areas.add(business_area)
     user.save()
-    yield user
+    return user
 
 
 @pytest.fixture(autouse=True)

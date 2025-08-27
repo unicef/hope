@@ -1,7 +1,6 @@
 import json
 from typing import Any, Callable
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -17,6 +16,7 @@ from extras.test_utils.factories.geo import (
     CountryFactory,
     generate_area_types,
 )
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

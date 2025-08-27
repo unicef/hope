@@ -5,7 +5,6 @@ class Config(AppConfig):
     name = "hope.contrib.aurora"
 
     def ready(self) -> None:
-        import hope.contrib.aurora.signals  # noqa: F401
         from hope.contrib.aurora.rdi import registry
         from hope.contrib.aurora.services.czech_republic_flex_registration_service import (
             CzechRepublicFlexRegistration,
@@ -27,6 +26,7 @@ class Config(AppConfig):
             UkraineBaseRegistrationService,
             UkraineRegistrationService,
         )
+        import hope.contrib.aurora.signals  # noqa: F401
 
         registry.register(GenericRegistrationService)
         registry.register(PeopleRegistrationService)

@@ -1,6 +1,6 @@
+from _decimal import Decimal
 from typing import Any
 
-from _decimal import Decimal
 from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.functions import Coalesce, Lower
@@ -23,10 +23,9 @@ class ChartProgramFilter(FilterSet):
         fields = ("business_area",)
         model = Program
 
-    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        values = value.split(" ")
+    def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
         q_obj = Q()
-        for value in values:
+        for value in values.split(" "):
             q_obj |= Q(first_name__startswith=value)
             q_obj |= Q(last_name__startswith=value)
             q_obj |= Q(email__startswith=value)
@@ -59,10 +58,9 @@ class ProgramCycleFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        values = value.split(" ")
+    def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
         q_obj = Q()
-        for value in values:
+        for value in values.split(" "):
             q_obj |= Q(title__istartswith=value)
         return qs.filter(q_obj)
 

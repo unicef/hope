@@ -2,10 +2,10 @@
 
 import uuid
 
-import django.db.models.deletion
-import model_utils.fields
 from django.conf import settings
 from django.db import migrations, models
+import django.db.models.deletion
+import model_utils.fields
 
 
 class Migration(migrations.Migration):

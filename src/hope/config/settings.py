@@ -222,7 +222,6 @@ OTHER_APPS = [
     "django_countries",
     "phonenumber_field",
     "compressor",
-    "graphene_django",
     "social_django",
     "corsheaders",
     "django_elasticsearch_dsl",

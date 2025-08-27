@@ -4,15 +4,15 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-import pytz
 from django.conf import settings
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+import pytz
 from pytz import utc
 
-from hope.apps.core.base_test_case import APITestCase
+from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
@@ -42,7 +42,7 @@ def file_reference_id() -> BytesIO:
     return BytesIO(content)
 
 
-class TestDeliveryDate(APITestCase):
+class TestDeliveryDate(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

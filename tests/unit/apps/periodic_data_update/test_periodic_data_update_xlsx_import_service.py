@@ -1,11 +1,10 @@
 import datetime
-import json
-import uuid
 from io import BytesIO
+import json
 from tempfile import _TemporaryFileWrapper
 from typing import Any
+import uuid
 
-import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.test import TestCase
@@ -16,6 +15,7 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import openpyxl
 
 from hope.apps.core.models import PeriodicFieldData
 from hope.apps.periodic_data_update.models import (

@@ -1,7 +1,6 @@
 import copy
 from typing import Any, Callable
 
-import pytest
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -23,6 +22,7 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
 )
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -1334,8 +1334,9 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    def test_update_pdu_fields_when_program_has_RDI(self, create_user_role_with_permissions: Callable) -> None:
-        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields - only possible to increase number of rounds and add names for new rounds
+    def test_update_pdu_fields_when_program_has_rdi(self, create_user_role_with_permissions: Callable) -> None:
+        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields -
+        # only possible to increase number of rounds and add names for new rounds
         create_user_role_with_permissions(
             self.user,
             [Permissions.PROGRAMME_UPDATE],
@@ -1441,7 +1442,7 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    def test_update_pdu_fields_invalid_when_program_has_RDI_decrease_rounds(
+    def test_update_pdu_fields_invalid_when_program_has_rdi_decrease_rounds(
         self, create_user_role_with_permissions: Callable
     ) -> None:
         # round number CANNOT be decreased for Program with RDI
@@ -1486,7 +1487,7 @@ class TestProgramUpdate:
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False
 
-    def test_update_pdu_fields_invalid_when_program_has_RDI_change_rounds_names(
+    def test_update_pdu_fields_invalid_when_program_has_rdi_change_rounds_names(
         self, create_user_role_with_permissions: Callable
     ) -> None:
         # names for existing rounds cannot be changed for Program with RDI

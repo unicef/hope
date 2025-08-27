@@ -1,5 +1,5 @@
-import os
 from functools import cached_property
+import os
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q, QuerySet
@@ -27,14 +27,14 @@ class BaseAPI:
     API_KEY_ENV_NAME = ""
     API_URL_ENV_NAME = ""
 
-    class APIException(Exception):
+    class APIError(Exception):
         pass
 
-    class APIMissingCredentialsException(Exception):
+    class APIMissingCredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = APIException
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsException
+    API_EXCEPTION_CLASS = APIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsError
 
     def __init__(self) -> None:
         self.api_key = os.getenv(self.API_KEY_ENV_NAME)
@@ -145,7 +145,7 @@ class ProgramMixin:
 
 
 class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
-    #  Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+    """Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs."""
 
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
@@ -285,8 +285,11 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
-    #  Mixin to allow using the same viewset for both internal and external endpoints.
-    #  If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
+    """Mixin to allow using the same viewset for both internal and external endpoints.
+
+    If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
+    variable token_permission.
+    """
 
     token_permission = Grant.API_READ_ONLY
 

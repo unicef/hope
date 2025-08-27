@@ -1,7 +1,6 @@
 import os
 from time import sleep
 
-import pytest
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
     PDUXlsxTemplates,
@@ -14,6 +13,7 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from selenium.webdriver.common.by import By
 
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
@@ -129,7 +129,7 @@ class TestPeriodicDataTemplates:
         clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
+        page_individuals: Individuals,
         individual: Individual,
         download_path: str,
     ) -> None:
@@ -149,24 +149,26 @@ class TestPeriodicDataTemplates:
                 }
             ],
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
-        status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
+        status = page_individuals.get_template_status(periodic_data_update_template.pk).text
         assert status == "NOT SCHEDULED"
-        pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
+        page_individuals.get_export_btn(periodic_data_update_template.pk).click()
         for _ in range(10):
-            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            status = page_individuals.get_template_status(periodic_data_update_template.pk).text
             if status == "EXPORTED":
                 break
             sleep(1)
         else:
             assert status == "EXPORTED"
-        pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
+        page_individuals.get_download_btn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (
-            pageIndividuals.check_file_exists(os.path.join(download_path, periodic_data_update_template.file.file.name))
+            page_individuals.check_file_exists(
+                os.path.join(download_path, periodic_data_update_template.file.file.name)
+            )
             is True
         )
 
@@ -175,8 +177,8 @@ class TestPeriodicDataTemplates:
         self,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePDUXlsxTemplates: PDUXlsxTemplates,
+        page_individuals: Individuals,
+        page_pdu_xlsx_templates: PDUXlsxTemplates,
     ) -> None:
         periodic_data_update_template = PDUXlsxTemplateFactory(
             program=program,
@@ -196,34 +198,35 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
 
-        pagePDUXlsxTemplates.getPduTemplatesBtn().click()
-        assert str(index) in pagePDUXlsxTemplates.getTemplateId(index).text
+        page_pdu_xlsx_templates.get_pdu_templates_btn().click()
+        assert str(index) in page_pdu_xlsx_templates.get_template_id(index).text
         assert (
-            str(periodic_data_update_template.number_of_records) in pagePDUXlsxTemplates.getTemplateRecords(index).text
+            str(periodic_data_update_template.number_of_records)
+            in page_pdu_xlsx_templates.get_template_records(index).text
         )
         assert (
             f"{periodic_data_update_template.created_at:%-d %b %Y}"
-            in pagePDUXlsxTemplates.getTemplateCreatedAt(index).text
+            in page_pdu_xlsx_templates.get_template_created_at(index).text
         )
         assert (
             periodic_data_update_template.created_by.get_full_name()
-            in pagePDUXlsxTemplates.getTemplateCreatedBy(index).text
+            in page_pdu_xlsx_templates.get_template_created_by(index).text
         )
 
-        assert "EXPORTED" in pagePDUXlsxTemplates.getTemplateStatus(index).text
+        assert "EXPORTED" in page_pdu_xlsx_templates.get_template_status(index).text
 
     @pytest.mark.night
     def test_periodic_data_template_details(
         self,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePDUXlsxTemplates: PDUXlsxTemplates,
+        page_individuals: Individuals,
+        page_pdu_xlsx_templates: PDUXlsxTemplates,
         individual: Individual,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
@@ -246,67 +249,72 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
 
-        pagePDUXlsxTemplates.getPduTemplatesBtn().click()
+        page_pdu_xlsx_templates.get_pdu_templates_btn().click()
 
-        btn = pagePDUXlsxTemplates.getTemplateDetailsBtn(index)
+        btn = page_pdu_xlsx_templates.get_template_details_btn(index)
         btn.find_element(By.TAG_NAME, "button").click()
-        pagePDUXlsxTemplates.getDetailModal()
+        page_pdu_xlsx_templates.get_detail_modal()
 
-        assert string_attribute.label["English(EN)"] in pagePDUXlsxTemplates.getTemplateField(0).text
-        assert str(rounds_data[0]["round"]) in pagePDUXlsxTemplates.getTemplateRoundNumber(0).text
-        assert rounds_data[0]["round_name"] in pagePDUXlsxTemplates.getTemplateRoundName(0).text
-        assert str(rounds_data[0]["number_of_records"]) in pagePDUXlsxTemplates.getTemplateNumberOfIndividuals(0).text
+        assert string_attribute.label["English(EN)"] in page_pdu_xlsx_templates.get_template_field(0).text
+        assert str(rounds_data[0]["round"]) in page_pdu_xlsx_templates.get_template_round_number(0).text
+        assert rounds_data[0]["round_name"] in page_pdu_xlsx_templates.get_template_round_name(0).text
+        assert (
+            str(rounds_data[0]["number_of_records"])
+            in page_pdu_xlsx_templates.get_template_number_of_individuals(0).text
+        )
 
     @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePDUXlsxTemplates: PDUXlsxTemplates,
-        pagePDUXlsxTemplatesDetails: PDUXlsxTemplatesDetails,
+        page_individuals: Individuals,
+        page_pdu_xlsx_templates: PDUXlsxTemplates,
+        page_pdu_xlsx_templates_details: PDUXlsxTemplatesDetails,
         individual: Individual,
         download_path: str,
         clear_downloaded_files: None,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
 
-        pagePDUXlsxTemplates.getNewTemplateButton().click()
-        pagePDUXlsxTemplatesDetails.getFiltersRegistrationDataImport().click()
+        page_pdu_xlsx_templates.get_new_template_button().click()
+        page_pdu_xlsx_templates_details.get_filters_registration_data_import().click()
 
-        pagePDUXlsxTemplatesDetails.select_listbox_element(individual.registration_data_import.name)
-        pagePDUXlsxTemplatesDetails.getSubmitButton().click()
-        pagePDUXlsxTemplatesDetails.getCheckbox(string_attribute.name).click()
-        pagePDUXlsxTemplatesDetails.getSubmitButton().click()
-        pagePDUXlsxTemplates.getNewTemplateButton()  # wait for the page to load
+        page_pdu_xlsx_templates_details.select_listbox_element(individual.registration_data_import.name)
+        page_pdu_xlsx_templates_details.get_submit_button().click()
+        page_pdu_xlsx_templates_details.get_checkbox(string_attribute.name).click()
+        page_pdu_xlsx_templates_details.get_submit_button().click()
+        page_pdu_xlsx_templates.get_new_template_button()  # wait for the page to load
         assert PDUXlsxTemplate.objects.count() == 1
         periodic_data_update_template = PDUXlsxTemplate.objects.first()
         assert (
             str(periodic_data_update_template.id)
-            in pagePDUXlsxTemplates.getTemplateId(periodic_data_update_template.id).text
+            in page_pdu_xlsx_templates.get_template_id(periodic_data_update_template.id).text
         )
 
         for _ in range(10):
-            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            status = page_individuals.get_template_status(periodic_data_update_template.pk).text
             if status == "EXPORTED":
                 break
             sleep(1)
         else:
             assert status == "EXPORTED"
 
-        pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
+        page_individuals.get_download_btn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (
-            pageIndividuals.check_file_exists(os.path.join(download_path, periodic_data_update_template.file.file.name))
+            page_individuals.check_file_exists(
+                os.path.join(download_path, periodic_data_update_template.file.file.name)
+            )
             is True
         )

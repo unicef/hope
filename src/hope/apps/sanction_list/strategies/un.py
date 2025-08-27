@@ -1,10 +1,10 @@
 import contextlib
-import os
-import xml.etree.ElementTree as ET
 from datetime import date, datetime
+import os
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.request import urlopen
+import xml.etree.ElementTree as ET
 
 import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist

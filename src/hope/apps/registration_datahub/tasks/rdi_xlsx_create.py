@@ -1,17 +1,17 @@
-import logging
-import uuid
 from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
+import logging
 from typing import TYPE_CHECKING, Any, Callable
+import uuid
 
-import openpyxl
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
 from django_countries.fields import Country
+import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -399,8 +399,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _validate_birth_date(obj_to_create: Any) -> Any:
         birth_date = obj_to_create.birth_date
 
-        if obj_to_create.birth_date < datetime(1923, 1, 1):
-            obj_to_create.birth_date = datetime(1923, 1, 1)
+        obj_to_create.birth_date = max(obj_to_create.birth_date, datetime(1923, 1, 1))
         if obj_to_create.birth_date > datetime.today():
             obj_to_create.birth_date = datetime(2022, 4, 25)
 

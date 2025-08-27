@@ -1,9 +1,7 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button } from '@mui/material';
-import { clearCache } from '@utils/utils';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getClient } from '../../../apollo/client';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
 import HopeLogo from './something_went_wrong_hope_logo.png';
 import { FC } from 'react';
@@ -63,9 +61,7 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleGoBackAndClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
+  const handleGoBackAndClearCache =  () => {
     if (location.state?.lastSuccessfulPage) {
       navigate(location.state.lastSuccessfulPage);
     } else {

@@ -1,6 +1,3 @@
-import {
-  XlsxRowErrorNode,
-} from '@generated/graphql';
 import { ImportCounters } from '../ImportCounters';
 import { XlsxErrors } from './XlsxErrors';
 import { ReactElement } from 'react';
@@ -20,7 +17,7 @@ export function XlsxImportDataRepresentation({
   return (
     <>
       <XlsxErrors
-        errors={xlsxImportData.xlsxValidationErrors as XlsxRowErrorNode[]}
+        errors={xlsxImportData.xlsxValidationErrors}
       />
       <ImportCounters
         numberOfHouseholds={xlsxImportData.numberOfHouseholds}

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from extras.test_utils.factories.core import (
@@ -10,6 +9,7 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from pytz import utc
 
 from hope.apps.account.models import User
@@ -60,7 +60,7 @@ def add_household() -> Household:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
-    yield household
+    return household
 
 
 @pytest.mark.usefixtures("login")
@@ -69,61 +69,64 @@ class TestSmokeHouseholds:
         self,
         create_programs: None,
         add_household: Household,
-        pageHouseholds: Households,
+        page_households: Households,
     ) -> None:
-        pageHouseholds.selectGlobalProgramFilter("Test Programm")
-        pageHouseholds.getNavProgrammePopulation().click()
-        pageHouseholds.getNavHouseholds().click()
-        assert len(pageHouseholds.getHouseholdsRows()) == 1
-        assert "Items Groups" in pageHouseholds.getTableTitle().text
-        assert "Items Group ID" in pageHouseholds.getHouseholdId().text
-        assert "Status" in pageHouseholds.getStatus().text
-        assert "Head of Items Group" in pageHouseholds.getHouseholdHeadName().text
-        assert "Items Group Size" in pageHouseholds.getHouseholdSize().text
-        assert "Administrative Level 2" in pageHouseholds.getHouseholdLocation().text
-        assert "Residence Status" in pageHouseholds.getHouseholdResidenceStatus().text
-        assert "Total Cash Received" in pageHouseholds.getHouseholdTotalCashReceived().text
-        assert "Registration Date" in pageHouseholds.getHouseholdRegistrationDate().text
+        page_households.select_global_program_filter("Test Programm")
+        page_households.get_nav_programme_population().click()
+        page_households.get_nav_households().click()
+        assert len(page_households.get_households_rows()) == 1
+        assert "Items Groups" in page_households.get_table_title().text
+        assert "Items Group ID" in page_households.get_household_id().text
+        assert "Status" in page_households.get_status().text
+        assert "Head of Items Group" in page_households.get_household_head_name().text
+        assert "Items Group Size" in page_households.get_household_size().text
+        assert "Administrative Level 2" in page_households.get_household_location().text
+        assert "Residence Status" in page_households.get_household_residence_status().text
+        assert "Total Cash Received" in page_households.get_household_total_cash_received().text
+        assert "Registration Date" in page_households.get_household_registration_date().text
 
     def test_smoke_page_households_details(
         self,
         create_programs: None,
         add_household: Household,
-        pageHouseholds: Households,
-        pageHouseholdsDetails: HouseholdsDetails,
+        page_households: Households,
+        page_households_details: HouseholdsDetails,
     ) -> None:
-        pageHouseholds.selectGlobalProgramFilter("Test Programm")
-        pageHouseholds.getNavProgrammePopulation().click()
-        pageHouseholds.getNavHouseholds().click()
-        pageHouseholds.getHouseholdsRowByNumber(0).click()
-        assert "7" in pageHouseholdsDetails.getLabelHouseholdSize().text
-        assert "Displaced | Refugee / Asylum Seeker" in pageHouseholdsDetails.getLabelResidenceStatus().text
-        assert "Agata Kowalska" in pageHouseholdsDetails.getLabelHeadOfHousehold().text
-        assert "Afghanistan" in pageHouseholdsDetails.getLabelCountry().text
-        assert "Afghanistan" in pageHouseholdsDetails.getLabelCountryOfOrigin().text
-        assert "938 Luna Cliffs Apt. 551 Jameschester, SC 24934" in pageHouseholdsDetails.getLabelAddress().text
-        assert "Small One" in pageHouseholdsDetails.getLabelVillage().text
-        assert "-" in pageHouseholdsDetails.getLabelZipCode().text
-        assert "Kabul" in pageHouseholdsDetails.getLabelAdministrativeLevel1().text
-        assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel2().text
-        assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel3().text
-        assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel4().text
-        assert "-" in pageHouseholdsDetails.getLabelGeolocation().text
-        assert "-" in pageHouseholdsDetails.getLabelUnhcrCaseId().text
-        assert "-" in pageHouseholdsDetails.getLabelLengthOfTimeSinceArrival().text
-        assert "-" in pageHouseholdsDetails.getLabelNumberOfTimesDisplaced().text
-        assert "-" in pageHouseholdsDetails.getLabelLinkedGrievances().text
-        assert "USD 0.00" in pageHouseholdsDetails.getLabelCashReceived().text
-        assert "USD 0.00" in pageHouseholdsDetails.getLabelTotalCashReceived().text
-        assert "Items Group Members" in pageHouseholdsDetails.getTableTitle().text
-        assert "Item ID" in pageHouseholdsDetails.getTableLabel().text
-        assert "ACTIVE" in pageHouseholdsDetails.getStatusContainer().text
-        assert "No results" in pageHouseholdsDetails.getTableRow().text
-        assert add_household.registration_data_import.data_source in pageHouseholdsDetails.getLabelSource().text
-        assert add_household.registration_data_import.name in pageHouseholdsDetails.getLabelImportName().text
+        page_households.select_global_program_filter("Test Programm")
+        page_households.get_nav_programme_population().click()
+        page_households.get_nav_households().click()
+        page_households.get_households_row_by_number(0).click()
+        assert "7" in page_households_details.get_label_household_size().text
+        assert "Displaced | Refugee / Asylum Seeker" in page_households_details.get_label_residence_status().text
+        assert "Agata Kowalska" in page_households_details.get_label_head_of_household().text
+        assert "Afghanistan" in page_households_details.get_label_country().text
+        assert "Afghanistan" in page_households_details.get_label_country_of_origin().text
+        assert "938 Luna Cliffs Apt. 551 Jameschester, SC 24934" in page_households_details.get_label_address().text
+        assert "Small One" in page_households_details.get_label_village().text
+        assert "-" in page_households_details.get_label_zip_code().text
+        assert "Kabul" in page_households_details.get_label_administrative_level_1().text
+        assert "-" in page_households_details.get_label_administrative_level_2().text
+        assert "-" in page_households_details.get_label_administrative_level_3().text
+        assert "-" in page_households_details.get_label_administrative_level_4().text
+        assert "-" in page_households_details.get_label_geolocation().text
+        assert "-" in page_households_details.get_label_unhcr_case_id().text
+        assert "-" in page_households_details.get_label_length_of_time_since_arrival().text
+        assert "-" in page_households_details.get_label_number_of_times_displaced().text
+        assert "-" in page_households_details.get_label_linked_grievances().text
+        assert "USD 0.00" in page_households_details.get_label_cash_received().text
+        assert "USD 0.00" in page_households_details.get_label_total_cash_received().text
+        assert "Items Group Members" in page_households_details.get_table_title().text
+        assert "Item ID" in page_households_details.get_table_label().text
+        assert "ACTIVE" in page_households_details.get_status_container().text
+        assert "No results" in page_households_details.get_table_row().text
+        assert add_household.registration_data_import.data_source in page_households_details.get_label_source().text
+        assert add_household.registration_data_import.name in page_households_details.get_label_import_name().text
 
         assert (
             add_household.last_registration_date.strftime("%-d %b %Y")
-            in pageHouseholdsDetails.getLabelRegistrationDate().text
+            in page_households_details.get_label_registration_date().text
         )
-        assert add_household.registration_data_import.imported_by.email in pageHouseholdsDetails.getLabelUserName().text
+        assert (
+            add_household.registration_data_import.imported_by.email
+            in page_households_details.get_label_user_name().text
+        )
