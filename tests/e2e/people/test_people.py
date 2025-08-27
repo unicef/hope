@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import List
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from e2e.page_object.filters import Filters
@@ -17,6 +16,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from selenium.webdriver.common.by import By
 
 from hope.apps.core.models import BusinessArea, DataCollectingType

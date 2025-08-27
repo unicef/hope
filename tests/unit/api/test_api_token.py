@@ -1,5 +1,5 @@
-import json
 from datetime import datetime
+import json
 from typing import Any
 from unittest.mock import patch
 
@@ -9,10 +9,10 @@ from django.http import HttpRequest
 from django.test import TestCase, override_settings
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from unit.api.factories import APITokenFactory
 
 from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
 from hope.api.models import Grant
+from unit.api.factories import APITokenFactory
 
 
 class TestApiToken(TestCase):
@@ -66,7 +66,15 @@ class TestApiToken(TestCase):
                             },
                         ],
                         "Cc": [],
-                        "TextPart": f"\nDear {self.user.first_name},\n\nplease find below API token infos\n\nName: {self.token}\nKey: {self.token.key}\nGrants: {self.token.grants}\nExpires: {self.token.valid_to}\nBusiness Areas: {', '.join(self.token.valid_for.values_list('name', flat=True))}\n\nRegards\n\nThe HOPE Team\n",
+                        "TextPart": f"\nDear {self.user.first_name},\n\n"
+                        f"please find below API token infos\n\n"
+                        f"Name: {self.token}\n"
+                        f"Key: {self.token.key}\n"
+                        f"Grants: {self.token.grants}\n"
+                        f"Expires: {self.token.valid_to}\n"
+                        f"Business Areas: {', '.join(self.token.valid_for.values_list('name', flat=True))}\n\n"
+                        f"Regards\n\n"
+                        f"The HOPE Team\n",
                     }
                 ]
             }

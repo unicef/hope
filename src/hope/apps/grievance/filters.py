@@ -10,8 +10,8 @@ from django_filters import (
     MultipleChoiceFilter,
     OrderingFilter,
     UUIDFilter,
+    rest_framework as filters,
 )
-from django_filters import rest_framework as filters
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea

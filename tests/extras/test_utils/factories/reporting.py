@@ -2,11 +2,11 @@ from datetime import timedelta
 from random import randint
 
 import factory
-from extras.test_utils.factories.account import UserFactory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 from pytz import utc
 
+from extras.test_utils.factories.account import UserFactory
 from hope.apps.core.models import BusinessArea
 from hope.apps.reporting.models import DashboardReport, Report
 

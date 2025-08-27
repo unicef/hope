@@ -1,5 +1,5 @@
-import logging
 from functools import partial
+import logging
 from typing import Any
 
 from django.db import transaction

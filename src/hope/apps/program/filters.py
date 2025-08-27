@@ -1,6 +1,6 @@
+from _decimal import Decimal
 from typing import Any
 
-from _decimal import Decimal
 from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.functions import Coalesce, Lower

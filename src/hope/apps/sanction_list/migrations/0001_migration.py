@@ -2,9 +2,9 @@
 
 import uuid
 
+from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
-from django.db import migrations, models
 
 
 class Migration(migrations.Migration):

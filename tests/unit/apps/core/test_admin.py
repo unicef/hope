@@ -123,7 +123,8 @@ class TestDataCollectingTypeForm(TestCase):
         assert not form.is_valid()
         assert (
             form.errors["compatible_types"][0]
-            == f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: ['{str(standard_dct.label)}']"
+            == f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: "
+            f"['{str(standard_dct.label)}']"
         )
 
 

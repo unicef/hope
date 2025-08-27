@@ -1,7 +1,7 @@
-import random
-import string
 from datetime import date
 from decimal import Decimal
+import random
+import string
 from typing import Any, Collection
 
 from django.conf import settings

@@ -1,7 +1,6 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
-import pytest
 from constance.test import override_config
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
@@ -25,6 +24,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

@@ -1,6 +1,6 @@
 import base64
-import logging
 from dataclasses import dataclass
+import logging
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 

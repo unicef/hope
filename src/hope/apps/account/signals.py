@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group, Permission
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save, post_delete
+from django.db.models.signals import m2m_changed, post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 

@@ -1,9 +1,9 @@
+from _decimal import Decimal
 import dataclasses
-import logging
 from enum import Enum
+import logging
 from typing import Any
 
-from _decimal import Decimal
 from django.utils.timezone import now
 from rest_framework import serializers
 

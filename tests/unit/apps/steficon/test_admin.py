@@ -1,7 +1,6 @@
 from typing import Tuple
 from uuid import uuid4
 
-import pytest
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client as DjangoClient
@@ -11,6 +10,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.steficon import RuleFactory
+import pytest
 
 from hope.admin.steficon import AutocompleteWidget
 from hope.apps.program.models import Program

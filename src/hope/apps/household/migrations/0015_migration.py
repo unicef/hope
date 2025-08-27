@@ -3,11 +3,11 @@
 import django.contrib.postgres.fields.citext
 import django.contrib.postgres.search
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.deletion
 import multiselectfield.db.fields
 import phonenumber_field.modelfields
 import sorl.thumbnail.fields
-from django.db import migrations, models
 
 import hope.apps.core.utils
 
