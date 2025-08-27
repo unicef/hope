@@ -24,7 +24,7 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
             for item in self.pdu_online_edit.edit_data:
                 individual = individuals.get(item["individual_uuid"])
                 if not individual:
-                    raise ValidationError(f"Individual with UNICEF ID {item.get('individual_uuid')} not found.")
+                    continue
 
                 for pdu_field_name, field_data in item.get("pdu_fields", {}).items():
                     value = field_data.get("value")
