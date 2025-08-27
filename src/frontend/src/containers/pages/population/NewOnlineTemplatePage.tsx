@@ -131,7 +131,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
 
   const initialValues = {
     roundsData: mappedRoundsData,
-    authorizedUserIds: [],
+    authorizedUsers: [],
     name: '',
   };
 
@@ -208,7 +208,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
     const payload = {
       roundsData: roundsDataToSend,
       filters: filtersToSend,
-      authorizedUserIds: values.authorizedUserIds,
+      authorizedUsers: values.authorizedUsers,
       name: values.name,
     };
 

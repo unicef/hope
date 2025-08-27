@@ -26,13 +26,13 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
 
   const { mutateAsync: updateAuthorizedUsers } = useMutation({
-    mutationFn: (values: { authorizedUserIds: string[] }) => {
+    mutationFn: (values: { authorizedUsers: string[] }) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdateAuthorizedUsersCreate(
         {
           businessAreaSlug: businessAreaSlug,
           programSlug: programSlug,
           id: id ? Number(id) : undefined,
-          requestBody: { authorizedUsers: values.authorizedUserIds },
+          requestBody: { authorizedUsers: values.authorizedUsers },
         },
       );
     },
@@ -62,7 +62,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
 
   return (
     <Formik
-      initialValues={{ authorizedUserIds: [] }}
+      initialValues={{ authorizedUsers: [] }}
       onSubmit={async (values, { setSubmitting }) => {
         await updateAuthorizedUsers(values);
         setSubmitting(false);
@@ -78,7 +78,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
               variant="contained"
               color="primary"
               type="submit"
-              disabled={isSubmitting || values.authorizedUserIds.length === 0}
+              disabled={isSubmitting || values.authorizedUsers.length === 0}
             >
               {t('Save')}
             </Button>

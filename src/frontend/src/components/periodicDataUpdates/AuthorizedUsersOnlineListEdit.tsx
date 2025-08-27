@@ -98,8 +98,9 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
 
   // List of all available users (useMemo for stable reference)
   const users: AuthorizedUser[] = React.useMemo(() => {
-    return availableUsersData?.results
-      ? availableUsersData.results.map(mapPermissions)
+    return availableUsersData
+      ? //@ts-ignore endpoint does not return data results
+        availableUsersData.map(mapPermissions)
       : [];
   }, [availableUsersData]);
 
@@ -114,7 +115,7 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
   React.useEffect(() => {
     if (users.length > 0 && alreadyAuthorizedIds.length > 0) {
       setSelected(alreadyAuthorizedIds);
-      setFieldValue('authorizedUserIds', alreadyAuthorizedIds);
+      setFieldValue('authorizedUsers', alreadyAuthorizedIds);
     }
   }, [users, alreadyAuthorizedIds, setSelected, setFieldValue]);
 
@@ -138,7 +139,7 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
       const newSelected = prev.includes(userId)
         ? prev.filter((sid) => sid !== userId)
         : [...prev, userId];
-      setFieldValue('authorizedUserIds', newSelected);
+      setFieldValue('authorizedUsers', newSelected);
       return newSelected;
     });
   };

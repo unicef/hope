@@ -189,6 +189,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
       <TableCell data-cy={`template-status-${row.id}`}>
         <StatusBox
           status={row.status}
+          statusDisplay={row.statusDisplay}
           statusToColor={periodicDataUpdateTemplateStatusToColor}
         />
       </TableCell>

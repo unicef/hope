@@ -139,6 +139,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         <StatusBox
           status={row.status}
           statusToColor={periodicDataUpdatesUpdatesStatusToColor}
+          statusDisplay={row.statusDisplay}
         />
       </TableCell>
     </ClickableTableRow>
