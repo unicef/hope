@@ -128,7 +128,7 @@ def add_people(program: Program) -> Individual:
             },
         ],
     )
-    yield individuals[0]
+    return individuals[0]
 
 
 def create_flexible_attribute(
