@@ -31,7 +31,6 @@ pytestmark = pytest.mark.django_db()
 @pytest.fixture
 def create_programs() -> None:
     create_program("Test Programm")
-    yield
 
 
 @pytest.fixture(autouse=True)
