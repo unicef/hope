@@ -331,8 +331,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
         # Find individual in edit_data
         individual_data = next(
-            (item for item in pdu_online_edit.edit_data if item.get("individual_uuid") == individual_uuid),
-            None
+            (item for item in pdu_online_edit.edit_data if item.get("individual_uuid") == individual_uuid), None
         )
 
         if not individual_data:
@@ -347,9 +346,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
             required_keys = {"value", "subtype", "is_editable", "round_number"}
             if not required_keys.issubset(field_data.keys()):
-                raise serializers.ValidationError(
-                    f"Field '{field_name}' must contain keys: {required_keys}"
-                )
+                raise serializers.ValidationError(f"Field '{field_name}' must contain keys: {required_keys}")
 
             subtype = field_data.get("subtype")
             field_value = field_data.get("value")
@@ -357,15 +354,13 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
             existing_pdu_fields = individual_data.get("pdu_fields", {})
             if field_name not in existing_pdu_fields:
-                raise serializers.ValidationError(f"Field '{field_name}' is not part of the editable fields")
+                raise serializers.ValidationError(f"Field '{field_name}' is not within fields selected for this edit")
 
             # For non-editable fields, check if the value is being changed
             if not is_editable:
                 existing_value = existing_pdu_fields[field_name].get("value")
                 if field_value != existing_value:
-                    raise serializers.ValidationError(
-                        f"Field '{field_name}' is not editable and cannot be modified"
-                    )
+                    raise serializers.ValidationError(f"Field '{field_name}' is not editable and cannot be modified")
                 # Skip type validation for non-editable fields since they won't be updated
                 continue
 
@@ -378,15 +373,15 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     f"Field '{field_name}' expects a boolean value, got {type(field_value).__name__}"
                 )
-            elif subtype == PeriodicFieldData.DECIMAL and not isinstance(field_value, (int, float)):
+            if subtype == PeriodicFieldData.DECIMAL and not isinstance(field_value, int | float):
                 raise serializers.ValidationError(
                     f"Field '{field_name}' expects a number value, got {type(field_value).__name__}"
                 )
-            elif subtype == PeriodicFieldData.STRING and not isinstance(field_value, str):
+            if subtype == PeriodicFieldData.STRING and not isinstance(field_value, str):
                 raise serializers.ValidationError(
                     f"Field '{field_name}' expects a string value, got {type(field_value).__name__}"
                 )
-            elif subtype == PeriodicFieldData.DATE:
+            if subtype == PeriodicFieldData.DATE:
                 if not isinstance(field_value, str):
                     raise serializers.ValidationError(
                         f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"

@@ -283,8 +283,7 @@ class PDUOnlineEditViewSet(
         pdu_fields_update = serializer.validated_data["pdu_fields"]
 
         individual_data = next(
-            (item for item in instance.edit_data if item.get("individual_uuid") == individual_uuid),
-            None
+            (item for item in instance.edit_data if item.get("individual_uuid") == individual_uuid), None
         )
 
         current_pdu_fields = individual_data.get("pdu_fields", {})
@@ -300,10 +299,7 @@ class PDUOnlineEditViewSet(
 
         instance.save(update_fields=["edit_data"])
 
-        return Response(
-            status=status.HTTP_200_OK,
-            data={"message": "Edit data saved successfully."}
-        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Edit data saved successfully."})
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
