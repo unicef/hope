@@ -277,8 +277,8 @@ class TestGrievanceUtils(TestCase):
             )
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
             assert (
-                str(e.value)
-                == f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
+                str(e.value) == f"The selected individual {individuals[0].unicef_id} is not valid, "
+                f"must be one of those attached to the ticket"
             )
 
         ticket_details.possible_duplicates.add(individuals[0])
@@ -334,8 +334,8 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
             assert (
-                str(e.value)
-                == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+                str(e.value) == "Close ticket is possible when at least one individual is flagged as distinct or one "
+                "of the individuals is withdrawn or duplicate"
             )
 
         with pytest.raises(ValidationError) as e:
@@ -521,7 +521,8 @@ class TestGrievanceUtils(TestCase):
             close_needs_adjudication_ticket_service(gr, user)
             assert (
                 str(e.value)
-                == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+                == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
+                "individuals is withdrawn or duplicate"
             )
 
     @patch.dict(
@@ -532,7 +533,10 @@ class TestGrievanceUtils(TestCase):
         },
     )
     @patch(
-        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_false_positive_duplicate"
     )
     def test_close_needs_adjudication_ticket_service_for_biometrics(
         self, report_false_positive_duplicate_mock: MagicMock

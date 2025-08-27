@@ -324,8 +324,8 @@ class TestUpdateIndividualDataService(TestCase):
         with self.assertRaises(DRFValidationError) as e:
             service.close(self.user)
         assert (
-            f"Document with number {existing_document.document_number} of type {self.document_type_unique_for_individual} already exists"
-            in str(e.exception)
+            f"Document with number {existing_document.document_number} of type "
+            f"{self.document_type_unique_for_individual} already exists" in str(e.exception)
         )
 
         document_to_edit.refresh_from_db()

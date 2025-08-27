@@ -66,7 +66,15 @@ class TestApiToken(TestCase):
                             },
                         ],
                         "Cc": [],
-                        "TextPart": f"\nDear {self.user.first_name},\n\nplease find below API token infos\n\nName: {self.token}\nKey: {self.token.key}\nGrants: {self.token.grants}\nExpires: {self.token.valid_to}\nBusiness Areas: {', '.join(self.token.valid_for.values_list('name', flat=True))}\n\nRegards\n\nThe HOPE Team\n",
+                        "TextPart": f"\nDear {self.user.first_name},\n\n"
+                        f"please find below API token infos\n\n"
+                        f"Name: {self.token}\n"
+                        f"Key: {self.token.key}\n"
+                        f"Grants: {self.token.grants}\n"
+                        f"Expires: {self.token.valid_to}\n"
+                        f"Business Areas: {', '.join(self.token.valid_for.values_list('name', flat=True))}\n\n"
+                        f"Regards\n\n"
+                        f"The HOPE Team\n",
                     }
                 ]
             }

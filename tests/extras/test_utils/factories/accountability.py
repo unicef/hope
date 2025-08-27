@@ -143,7 +143,8 @@ def generate_messages() -> None:
         {
             "unicef_id": "MSG-22-0004",
             "title": "You got credit of USD 200",
-            "body": "Greetings {recipient_full_name}, we have sent you USD 200 in your registered account on {rp_timestamp}",
+            "body": "Greetings {recipient_full_name}, we have sent you USD 200 in your registered account on "
+            "{rp_timestamp}",
             "created_by": user_root,
             "program": program,
             "number_of_recipients": 2,

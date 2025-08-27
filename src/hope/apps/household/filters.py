@@ -498,7 +498,7 @@ class IndividualFilter(UpdatedAtFilter):
 
 
 class MergedHouseholdFilter(FilterSet):
-    """Filter emulates ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged."""
+    """Emulate ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged."""
 
     business_area = CharFilter(field_name="business_area__slug")
     rdi_id = CharFilter(method="filter_rdi_id")

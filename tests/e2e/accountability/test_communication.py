@@ -95,7 +95,8 @@ class TestSmokeAccountabilityCommunication:
         )
 
         assert (
-            "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC"
+            "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on "
+            "2022-09-19 20:00:00 UTC"
             in page_accountability_communication_details.get_communication_message_details().text.replace("\n", " ")
         )
 

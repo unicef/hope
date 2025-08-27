@@ -92,7 +92,8 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
         if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
             raise serializers.ValidationError(
-                f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+                f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
+                f"supporting documents."
             )
         return data
 

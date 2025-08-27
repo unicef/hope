@@ -821,8 +821,7 @@ def clear_cache_for_key(key: str) -> None:
             cache.delete(k)
 
 
-"""Constants for the identification type field to key mapping, used until other systems are updated to use the new keys"""
-
+# Constants for the identification type field to key mapping, used until other systems are updated to use the new keys
 IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
 IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
 IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"

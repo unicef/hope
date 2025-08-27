@@ -150,13 +150,11 @@ class TestSmokeGrievanceDashboard:
             "75" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
         assert "40" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text
-        assert (
-            "15"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        assert "15" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
         )
-        assert (
-            "25"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        assert "25" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
         )
         assert "421.25 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
         assert (
@@ -190,22 +188,18 @@ class TestSmokeGrievanceDashboard:
             "2" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
         assert "0" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text
-        assert (
-            "0"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
         )
-        assert (
-            "0"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
         )
         assert "0 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
-        assert (
-            "0 days"
-            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
+        assert "0 days" in (
+            page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
         )
-        assert (
-            "0 days"
-            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
+        assert "0 days" in (
+            page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
         )
 
         page_grievance_tickets.get_nav_grievance().click()
@@ -225,13 +219,11 @@ class TestSmokeGrievanceDashboard:
         assert (
             "2" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
-        assert (
-            "0"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
         )
-        assert (
-            "1"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        assert "1" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
         )
         assert "20.00 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
         assert (

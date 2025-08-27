@@ -754,7 +754,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             }
                         )
                     elif count > 1:
-                        message = f"Sheet: 'Individuals', There are multiple head of households for household with id: {household_id}"
+                        message = (
+                            f"Sheet: 'Individuals', "
+                            f"There are multiple head of households for household with id: {household_id}"
+                        )
                         invalid_rows.append(
                             {
                                 "row_number": 0,

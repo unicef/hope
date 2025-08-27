@@ -780,10 +780,12 @@ class TestProgrammeDetails:
 
         # ToDo: Lack of information about wrong date 212579
         # for _ in range(50):
-        #     if "Programme Cycles' timeframes must not overlap with the provided start date." in page_programme_details.get_start_date_cycle_div().text:
+        #     if ("Programme Cycles' timeframes must not overlap with the provided start date."
+        #             in page_programme_details.get_start_date_cycle_div().text):
         #         break
         #     sleep(0.1)
-        # assert "Programme Cycles' timeframes must not overlap with the provided start date." in page_programme_details.get_start_date_cycle_div().text
+        # assert ("Programme Cycles' timeframes must not overlap with the provided start date."
+        #         in page_programme_details.get_start_date_cycle_div().text)
 
         page_programme_details.get_start_date_cycle().click()
         page_programme_details.get_start_date_cycle().send_keys(

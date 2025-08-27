@@ -720,7 +720,8 @@ class PaymentPlan(
             self.unsuccessful_payments()
             .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
             .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan
+                # within the same cycle (contains excluded from other follow-ups)
                 household_id__in=Payment.objects.filter(
                     is_follow_up=True,
                     parent__source_payment_plan=self,
@@ -1949,7 +1950,8 @@ class Payment(
         max_length=64,
         blank=True,
         null=True,
-        help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector",
+        help_text="Use this field for reconciliation data when funds are collected by someone other than "
+        "the designated collector or the alternate collector",
     )
     additional_document_type = models.CharField(
         max_length=128,

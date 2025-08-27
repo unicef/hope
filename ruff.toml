@@ -1,4 +1,4 @@
-target-version = "py312"
+target-version = "py313"
 line-length = 120
 exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py"]
 
@@ -74,8 +74,6 @@ ignore = [
 
     "ERA001",  # e2e comments..
 
-    "E501",  # long strings
-
     "N805",  #  First argument of a method should be named `self`
 
     "PLR0911",  # too many returns
@@ -97,6 +95,7 @@ line-ending = "auto"
 [lint.per-file-ignores]
 "tests/**.py" = ["S101", "PLR2004", "S", "SIM117", "D", "UP", "PLR0913", "ANN", "N999"]
 "src/**/versioning/**.py" = ["N999", ]
+"src/**/migrations/**.py" = ["E501", ]
 "src/**/one_time_scripts/**.py" = ["T201", ]
 
 [lint.isort]

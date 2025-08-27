@@ -1154,8 +1154,8 @@ class TestPartnerForGrievanceChoices:
             name="UNICEF Partner for afghanistan", parent=partner_unicef
         )
 
-        # partner with access to Test Program - should be returned if Program is passed or if neither program nor household/individual is passed
-        # (because it has access to ANY program in this BA)
+        # partner with access to Test Program - should be returned if Program is passed or if neither program nor
+        # household/individual is passed (because it has access to ANY program in this BA)
         self.partner_with_access_to_test_program = PartnerFactory(name="Partner with access to Test Program")
         create_partner_role_with_permissions(
             self.partner_with_access_to_test_program, [], self.afghanistan, self.program

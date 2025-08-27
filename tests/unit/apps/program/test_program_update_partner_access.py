@@ -111,7 +111,8 @@ class TestProgramUpdatePartnerAccess:
             ],
         }
 
-        # TODO: due to temporary solution in program mutations, Partners need to already have a role in the BA to be able to be granted access to program
+        # TODO: due to temporary solution in program mutations,
+        # Partners need to already have a role in the BA to be able to be granted access to program
         # (created role in program is the same role as the Partner already held in the BA.
         # For each held role, the same role is now applied for the new program.
         # After removing this solution, below lines of setup can be deleted.

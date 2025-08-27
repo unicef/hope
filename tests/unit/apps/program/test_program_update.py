@@ -1322,7 +1322,8 @@ class TestProgramUpdate:
         }
 
     def test_update_pdu_fields_when_program_has_rdi(self, create_user_role_with_permissions: Callable) -> None:
-        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields - only possible to increase number of rounds and add names for new rounds
+        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields -
+        # only possible to increase number of rounds and add names for new rounds
         create_user_role_with_permissions(
             self.user,
             [Permissions.PROGRAMME_UPDATE],

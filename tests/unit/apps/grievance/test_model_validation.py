@@ -137,7 +137,8 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         assert not form.is_valid()
         with self.assertRaisesMessage(
             ValidationError,
-            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
+            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider "
+            "Test FSP (123): API']",
         ):
             form.clean()
 
@@ -155,7 +156,8 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         assert not form.is_valid()
         with self.assertRaisesMessage(
             ValidationError,
-            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
+            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider "
+            "Test FSP (123): API']",
         ):
             form.clean()
 

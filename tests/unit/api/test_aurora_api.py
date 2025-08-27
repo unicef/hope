@@ -85,7 +85,11 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert org["hope_id"] == str(self.business_area.pk)
         assert org["aurora_id"] == 777
 
-        cache_key = f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}"
+        cache_key = (
+            f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:"
+            f"{Organization.objects.latest('updated_at').updated_at}:"
+            f"{Organization.objects.all().count()}"
+        )
         assert cache.get(cache_key)
         assert len(queries) > 0
         # second call
@@ -113,7 +117,11 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert project["hope_id"] == str(self.program.pk)
         assert project["organization"] == "test_organization"
 
-        cache_key = f"{ProjectListVersionsKeyBit.specific_view_cache_key}:{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}"
+        cache_key = (
+            f"{ProjectListVersionsKeyBit.specific_view_cache_key}:"
+            f"{Project.objects.latest('updated_at').updated_at}:"
+            f"{Project.objects.all().count()}"
+        )
         assert cache.get(cache_key) is not None
         assert len(queries) > 0
         # second call

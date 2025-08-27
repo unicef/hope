@@ -7,7 +7,10 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots[
-    "TestDashboardQueries::test_charts_individuals_with_disability_reached_by_age_0_chartIndividualsWithDisabilityReachedByAge 1"
+    (
+        "TestDashboardQueries::test_charts_individuals_with_disability_reached_by_age_0_"
+        "chartIndividualsWithDisabilityReachedByAge 1"
+    )
 ] = {
     "data": {
         "chartIndividualsWithDisabilityReachedByAge": {
@@ -42,7 +45,10 @@ snapshots[
 }
 
 snapshots[
-    "TestDashboardQueries::test_charts_individuals_with_disability_reached_by_age_1_chartPeopleWithDisabilityReachedByAge 1"
+    (
+        "TestDashboardQueries::"
+        "test_charts_individuals_with_disability_reached_by_age_1_chartPeopleWithDisabilityReachedByAge 1"
+    )
 ] = {
     "data": {
         "chartPeopleWithDisabilityReachedByAge": {
