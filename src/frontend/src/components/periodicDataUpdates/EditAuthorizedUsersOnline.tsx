@@ -38,9 +38,11 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
     },
     onSuccess: () => {
       showMessage(t('Authorized users updated successfully.'));
-      setSelected([]);
       queryClient.invalidateQueries({
-        queryKey: ['authorizedUsersOnline', businessAreaSlug, programSlug],
+        queryKey: ['onlineEdit', businessAreaSlug, programSlug, id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['availableUsers', businessAreaSlug, programSlug],
       });
     },
     onError: (error: any) => {

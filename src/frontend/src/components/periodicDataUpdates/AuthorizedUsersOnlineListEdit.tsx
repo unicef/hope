@@ -166,109 +166,135 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
       )}
       title={t('Authorized Users Online')}
     >
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 8 }}>
-          <TextField
-            label={t('Search')}
-            variant="outlined"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            size="small"
-            fullWidth
-          />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <FormControl size="small" sx={{ minWidth: 300 }} fullWidth>
-            <InputLabel>{t('Permission Type')}</InputLabel>
-            <Select
-              label={t('Permission Type')}
-              multiple
-              value={permission}
-              onChange={(e) => {
-                const value = e.target.value;
-                setPermission(
-                  typeof value === 'string' ? value.split(',') : value,
-                );
-              }}
-              input={<OutlinedInput label={t('Permission Type')} />}
-              renderValue={(selectedPermissions) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selectedPermissions.length === 0
-                    ? t('All')
-                    : selectedPermissions.map((value: string) => (
-                        <Chip
-                          key={value}
-                          label={
-                            value === 'canEdit'
-                              ? t('Authorized for Edit')
-                              : value === 'canApprove'
-                                ? t('Authorized for Approve')
-                                : t('Authorized for Merge')
-                          }
-                        />
-                      ))}
-                </Box>
-              )}
-            >
-              <MenuItem value="canEdit">{t('Authorized for Edit')}</MenuItem>
-              <MenuItem value="canApprove">
-                {t('Authorized for Approve')}
-              </MenuItem>
-              <MenuItem value="canMerge">{t('Authorized for Merge')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-      </Grid>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell></TableCell>
-              <TableCell>{t('Users')}</TableCell>
-              <TableCell>{t('Authorized for Edit')}</TableCell>
-              <TableCell>{t('Authorized for Approve')}</TableCell>
-              <TableCell>{t('Authorized for Merge')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <Checkbox
-                    checked={selected.includes(user.id)}
-                    onChange={() => handleSelect(user.id)}
-                  />
-                </TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell align="center">
-                  {user.canEdit ? (
-                    <CheckIcon color="success" />
-                  ) : (
-                    <CloseIcon color="disabled" />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          minHeight: 0,
+        }}
+      >
+        <Box sx={{ mb: 2 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 8 }}>
+              <TextField
+                label={t('Search')}
+                variant="outlined"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                size="small"
+                fullWidth
+              />
+            </Grid>
+            <Grid size={{ xs: 4 }}>
+              <FormControl size="small" sx={{ minWidth: 300 }} fullWidth>
+                <InputLabel>{t('Permission Type')}</InputLabel>
+                <Select
+                  label={t('Permission Type')}
+                  multiple
+                  value={permission}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setPermission(
+                      typeof value === 'string' ? value.split(',') : value,
+                    );
+                  }}
+                  input={<OutlinedInput label={t('Permission Type')} />}
+                  renderValue={(selectedPermissions) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selectedPermissions.length === 0
+                        ? t('All')
+                        : selectedPermissions.map((value: string) => (
+                            <Chip
+                              key={value}
+                              label={
+                                value === 'canEdit'
+                                  ? t('Authorized for Edit')
+                                  : value === 'canApprove'
+                                    ? t('Authorized for Approve')
+                                    : t('Authorized for Merge')
+                              }
+                            />
+                          ))}
+                    </Box>
                   )}
-                </TableCell>
-                <TableCell align="center">
-                  {user.canApprove ? (
-                    <CheckIcon color="success" />
-                  ) : (
-                    <CloseIcon color="disabled" />
-                  )}
-                </TableCell>
-                <TableCell align="center">
-                  {user.canMerge ? (
-                    <CheckIcon color="success" />
-                  ) : (
-                    <CloseIcon color="disabled" />
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {filteredUsers.length === 0 && (
-        <Box sx={{ mt: 2 }}>{t('No authorized users found.')}</Box>
-      )}
+                >
+                  <MenuItem value="canEdit">
+                    {t('Authorized for Edit')}
+                  </MenuItem>
+                  <MenuItem value="canApprove">
+                    {t('Authorized for Approve')}
+                  </MenuItem>
+                  <MenuItem value="canMerge">
+                    {t('Authorized for Merge')}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Box>
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <TableContainer
+            sx={{ flex: 1, minHeight: 0, height: '100%', overflowY: 'auto' }}
+          >
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell>{t('Users')}</TableCell>
+                  <TableCell>{t('Authorized for Edit')}</TableCell>
+                  <TableCell>{t('Authorized for Approve')}</TableCell>
+                  <TableCell>{t('Authorized for Merge')}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.includes(user.id)}
+                        onChange={() => handleSelect(user.id)}
+                      />
+                    </TableCell>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell align="center">
+                      {user.canEdit ? (
+                        <CheckIcon color="success" />
+                      ) : (
+                        <CloseIcon color="disabled" />
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      {user.canApprove ? (
+                        <CheckIcon color="success" />
+                      ) : (
+                        <CloseIcon color="disabled" />
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      {user.canMerge ? (
+                        <CheckIcon color="success" />
+                      ) : (
+                        <CloseIcon color="disabled" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {filteredUsers.length === 0 && (
+            <Box sx={{ mt: 2 }}>{t('No authorized users found.')}</Box>
+          )}
+        </Box>
+      </Box>
     </BaseSection>
   );
 };
