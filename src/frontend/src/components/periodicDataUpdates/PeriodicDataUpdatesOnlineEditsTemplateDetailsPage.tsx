@@ -182,8 +182,6 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     enabled: !!businessArea && !!programId && !!numericId,
   });
 
-  console.log('data', data);
-
   // All hooks must be called before any return
   const individuals = useMemo(() => {
     if (!data) return [];
@@ -194,16 +192,15 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     const fields = [];
     individuals.forEach((ind) => {
       if (ind.pduFields) {
-        Object.values(ind.pduFields).forEach((_field) => {
+        Object.entries(ind.pduFields).forEach(([objKey, _field]) => {
           const field = _field as PduField;
-          const key = `${field.subtype}|${field.roundNumber}|${field.roundName}|${field.columnName || field.subtype}`;
-          if (!fields.some((f) => f.key === key)) {
+          if (!fields.some((f) => f.key === objKey)) {
             fields.push({
-              key,
+              key: objKey,
               subtype: field.subtype,
               roundNumber: field.roundNumber,
               roundName: field.roundName,
-              columnName: field.columnName || field.subtype,
+              columnName: objKey,
             });
           }
         });
@@ -551,31 +548,32 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                     <StickyHeaderCell shouldScroll={shouldScroll}>
                       {t('Last Name')}
                     </StickyHeaderCell>
-                    {allPduFields.map((field) => (
-                      <StickyHeaderCell
-                        shouldScroll={shouldScroll}
-                        key={field.key}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            minWidth: 120,
-                          }}
+                    {allPduFields.map((field) => {
+                      let roundInfo = '';
+                      if (field.roundNumber) {
+                        roundInfo = field.roundName
+                          ? `${t('Round')} ${field.roundNumber} (${field.roundName})`
+                          : `${t('Round')} ${field.roundNumber}`;
+                      }
+                      return (
+                        <StickyHeaderCell
+                          shouldScroll={shouldScroll}
+                          key={field.key}
                         >
-                          <span style={{ fontWeight: 600 }}>
-                            {field.columnName}
-                          </span>
-                          <span>
-                            {t('Round')} {field.roundNumber} ({field.roundName})
-                          </span>
-                          <span style={{ fontSize: 12, color: '#888' }}>
-                            {field.subtype}
-                          </span>
-                        </div>
-                      </StickyHeaderCell>
-                    ))}
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              minWidth: 120,
+                            }}
+                          >
+                            <span style={{ fontWeight: 600 }}>{field.key}</span>
+                            {roundInfo && <span>{roundInfo}</span>}
+                          </div>
+                        </StickyHeaderCell>
+                      );
+                    })}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -613,24 +611,14 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                           <TableCell>{individual.firstName}</TableCell>
                           <TableCell>{individual.lastName}</TableCell>
                           {allPduFields.map((col) => {
-                            // Find the matching pduField for this column
-                            const pduFieldArr: PduField[] = individual.pduFields
-                              ? Object.values(individual.pduFields).map(
-                                  (f) => f as PduField,
-                                )
-                              : [];
-                            const fieldIdx = pduFieldArr.findIndex(
-                              (f) =>
-                                `${f.subtype}|${f.roundNumber}|${f.roundName}|${f.columnName || f.subtype}` ===
-                                col.key,
-                            );
-                            const field =
-                              fieldIdx !== -1 ? pduFieldArr[fieldIdx] : null;
+                            const field = individual.pduFields
+                              ? individual.pduFields[col.key]
+                              : null;
                             return (
-                              <TableCell key={col.key}>
+                              <TableCell key={col.key} align="center">
                                 {field ? (
                                   isEditing && field.isEditable ? (
-                                    field.subtype === 'date' ? (
+                                    field.subtype === 'DATE' ? (
                                       <DatePicker
                                         value={field.value || null}
                                         onChange={(newValue) => {
@@ -639,20 +627,40 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                                             const pduFieldsObj = {
                                               ...updated[idx].pduFields,
                                             };
-                                            const fieldKey =
-                                              Object.keys(pduFieldsObj)[
-                                                fieldIdx
-                                              ];
-                                            if (fieldKey) {
-                                              pduFieldsObj[fieldKey] = {
-                                                ...pduFieldsObj[fieldKey],
-                                                value: newValue,
-                                              };
-                                              updated[idx] = {
-                                                ...updated[idx],
-                                                pduFields: pduFieldsObj,
-                                              };
-                                            }
+                                            pduFieldsObj[col.key] = {
+                                              ...pduFieldsObj[col.key],
+                                              value: newValue,
+                                            };
+                                            updated[idx] = {
+                                              ...updated[idx],
+                                              pduFields: pduFieldsObj,
+                                            };
+                                            return updated;
+                                          });
+                                        }}
+                                      />
+                                    ) : field.subtype === 'BOOL' ? (
+                                      <input
+                                        type="checkbox"
+                                        checked={Boolean(field.value)}
+                                        style={{
+                                          margin: '0 auto',
+                                          display: 'block',
+                                        }}
+                                        onChange={(e) => {
+                                          setEditRows((prev) => {
+                                            const updated = [...prev];
+                                            const pduFieldsObj = {
+                                              ...updated[idx].pduFields,
+                                            };
+                                            pduFieldsObj[col.key] = {
+                                              ...pduFieldsObj[col.key],
+                                              value: e.target.checked,
+                                            };
+                                            updated[idx] = {
+                                              ...updated[idx],
+                                              pduFields: pduFieldsObj,
+                                            };
                                             return updated;
                                           });
                                         }}
@@ -663,14 +671,14 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                                         fullWidth
                                         size="small"
                                         type={
-                                          field.subtype === 'number'
+                                          field.subtype === 'NUMBER'
                                             ? 'number'
                                             : 'text'
                                         }
                                         value={field.value ?? ''}
                                         onChange={(e) => {
                                           const newValue =
-                                            field.subtype === 'number'
+                                            field.subtype === 'NUMBER'
                                               ? Number(e.target.value)
                                               : e.target.value;
                                           setEditRows((prev) => {
@@ -678,27 +686,21 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                                             const pduFieldsObj = {
                                               ...updated[idx].pduFields,
                                             };
-                                            const fieldKey =
-                                              Object.keys(pduFieldsObj)[
-                                                fieldIdx
-                                              ];
-                                            if (fieldKey) {
-                                              pduFieldsObj[fieldKey] = {
-                                                ...pduFieldsObj[fieldKey],
-                                                value: newValue,
-                                              };
-                                              updated[idx] = {
-                                                ...updated[idx],
-                                                pduFields: pduFieldsObj,
-                                              };
-                                            }
+                                            pduFieldsObj[col.key] = {
+                                              ...pduFieldsObj[col.key],
+                                              value: newValue,
+                                            };
+                                            updated[idx] = {
+                                              ...updated[idx],
+                                              pduFields: pduFieldsObj,
+                                            };
                                             return updated;
                                           });
                                         }}
                                       />
                                     )
                                   ) : // Display mode: show value as plain text for non-editable fields, and for editable fields when not editing
-                                  field.subtype === 'date' ? (
+                                  field.subtype === 'DATE' ? (
                                     field.value ? (
                                       <UniversalMoment>
                                         {field.value}
@@ -708,10 +710,18 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                                         {t('-')}
                                       </span>
                                     )
+                                  ) : field.subtype === 'BOOL' ? (
+                                    <span>
+                                      {field.value === true
+                                        ? t('True')
+                                        : field.value === false
+                                          ? t('False')
+                                          : t('-')}
+                                    </span>
                                   ) : field.value !== undefined &&
                                     field.value !== null &&
                                     field.value !== '' ? (
-                                    String(field.value)
+                                    <span>{String(field.value)}</span>
                                   ) : (
                                     <span style={{ color: '#aaa' }}>
                                       {t('-')}
