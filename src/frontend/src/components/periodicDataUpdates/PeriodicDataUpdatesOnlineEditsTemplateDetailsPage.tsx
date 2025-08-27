@@ -182,6 +182,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     enabled: !!businessArea && !!programId && !!numericId,
   });
 
+  console.log('data', data);
+
   // All hooks must be called before any return
   const individuals = useMemo(() => {
     if (!data) return [];
@@ -266,6 +268,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     approvedAt,
     createdBy,
     sentBackComment,
+    isCreator,
   } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -460,14 +463,16 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               </TableContainer>
             </DialogContent>
             <DialogActions>
-              <Button
-                component={Link}
-                to={`/${baseUrl}/population/individuals/online-templates/${numericId}/edit-authorised-users`}
-                variant="text"
-                color="primary"
-              >
-                {t('Edit')}
-              </Button>
+              {isCreator && (
+                <Button
+                  component={Link}
+                  to={`/${baseUrl}/population/individuals/online-templates/${numericId}/edit-authorised-users`}
+                  variant="text"
+                  color="primary"
+                >
+                  {t('Edit')}
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color="primary"

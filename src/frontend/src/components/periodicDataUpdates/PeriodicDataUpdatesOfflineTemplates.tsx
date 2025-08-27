@@ -28,8 +28,15 @@ const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
     id: 'id',
     numeric: false,
     disablePadding: false,
-    label: 'Template ID',
+    label: 'ID',
     dataCy: 'head-cell-template-id',
+  },
+  {
+    id: 'name',
+    numeric: false,
+    disablePadding: false,
+    label: 'Name',
+    dataCy: 'head-cell-template-name',
   },
   {
     id: 'number_of_records',
@@ -118,7 +125,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
 
   const initialQueryVariables = useMemo(
     () => ({
-      ordering: 'created_at',
+      ordering: '-created_at',
       businessAreaSlug,
       programSlug: programId,
     }),
@@ -164,6 +171,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const renderTemplateRow = (row: PDUXlsxTemplateList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
+      <TableCell data-cy={`template-name-${row.id}`}>{row.name}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">
         {row.numberOfRecords}
       </TableCell>
@@ -230,7 +238,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
         isOnPaper={true}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
-        data={templatesData?.results ?? []}
+        data={templatesData ?? {}}
         isLoading={isLoading}
         error={error}
         queryVariables={queryVariables}

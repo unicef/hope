@@ -18,5 +18,6 @@ export type PDUOnlineEditDetail = {
     sentBackComment: PDUOnlineEditSentBackComment;
     editData?: any;
     authorizedUsers: Array<AuthorizedUser>;
+    readonly isCreator: boolean;
 };
 

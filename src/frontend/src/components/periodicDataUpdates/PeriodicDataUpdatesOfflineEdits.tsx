@@ -157,7 +157,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         isOnPaper={true}
         renderRow={renderUpdateRow}
         headCells={updatesHeadCells}
-        data={updatesData?.results ?? []}
+        data={updatesData ?? {}}
         isLoading={isLoading}
         error={error}
         queryVariables={queryVariables}

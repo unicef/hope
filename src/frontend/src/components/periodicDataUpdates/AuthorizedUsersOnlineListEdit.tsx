@@ -50,7 +50,12 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
   const [search, setSearch] = React.useState('');
   const [permission, setPermission] = React.useState<string[]>([]);
 
-  const { data, isLoading, error } = useQuery({
+  // Fetch authorized users for the template (already selected)
+  const {
+    data: editData,
+    isLoading: isEditLoading,
+    error: editError,
+  } = useQuery({
     queryKey: ['onlineEdit', businessAreaSlug, programSlug, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
@@ -63,8 +68,25 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     enabled: Boolean(businessAreaSlug && programSlug && id),
   });
 
+  // Fetch all available users
+  const {
+    data: availableUsersData,
+    isLoading: isAvailableLoading,
+    error: availableError,
+  } = useQuery({
+    queryKey: ['availableUsers', businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
+        {
+          businessAreaSlug: businessAreaSlug,
+          programSlug: programSlug,
+        },
+      ),
+    enabled: Boolean(businessAreaSlug && programSlug),
+  });
+
   // Map API permissions to UI flags
-  function mapPermissions(user: AuthorizedUser) {
+  function mapPermissions(user) {
     return {
       ...user,
       canEdit: user.pduPermissions.includes('PDU_ONLINE_SAVE_DATA'),
@@ -74,11 +96,27 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     };
   }
 
-  const users: AuthorizedUser[] = data?.authorizedUsers
-    ? data.authorizedUsers.map(mapPermissions)
-    : [];
+  // List of all available users (useMemo for stable reference)
+  const users: AuthorizedUser[] = React.useMemo(() => {
+    return availableUsersData?.results
+      ? availableUsersData.results.map(mapPermissions)
+      : [];
+  }, [availableUsersData]);
 
-  console.log('users', users);
+  // List of already authorized user IDs for this template (useMemo for stable reference)
+  const alreadyAuthorizedIds = React.useMemo(() => {
+    return editData?.authorizedUsers
+      ? editData.authorizedUsers.map((user) => user.id)
+      : [];
+  }, [editData]);
+
+  // On mount or when users change, check checkboxes for already authorized users
+  React.useEffect(() => {
+    if (users.length > 0 && alreadyAuthorizedIds.length > 0) {
+      setSelected(alreadyAuthorizedIds);
+      setFieldValue('authorizedUserIds', alreadyAuthorizedIds);
+    }
+  }, [users, alreadyAuthorizedIds, setSelected, setFieldValue]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -105,14 +143,14 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     });
   };
 
-  if (isLoading) {
+  if (isEditLoading || isAvailableLoading) {
     return (
       <BaseSection title={t('Authorized Users Online')}>
         <Box>{t('Loading...')}</Box>
       </BaseSection>
     );
   }
-  if (error) {
+  if (editError || availableError) {
     return (
       <BaseSection title={t('Authorized Users Online')}>
         <Box color="error.main">{t('Failed to load authorized users.')}</Box>

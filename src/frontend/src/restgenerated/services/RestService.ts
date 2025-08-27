@@ -10769,7 +10769,7 @@ export class RestService {
          */
         id: number,
         programSlug: string,
-        requestBody?: PDUOnlineEditUpdateAuthorizedUsers,
+        requestBody: PDUOnlineEditUpdateAuthorizedUsers,
     }): CancelablePromise<PDUOnlineEditUpdateAuthorizedUsers> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -10911,6 +10911,7 @@ export class RestService {
         offset,
         ordering,
         permission,
+        search,
         status,
         updatedAtAfter,
         updatedAtBefore,
@@ -10933,6 +10934,10 @@ export class RestService {
          * Filter by permission
          */
         permission?: 'PDU_ONLINE_APPROVE' | 'PDU_ONLINE_MERGE' | 'PDU_ONLINE_SAVE_DATA',
+        /**
+         * Search users by first name, last name, username, or email.
+         */
+        search?: string,
         /**
          * * `PENDING_CREATE` - Pending create
          * * `NEW` - New
@@ -10965,6 +10970,7 @@ export class RestService {
                 'offset': offset,
                 'ordering': ordering,
                 'permission': permission,
+                'search': search,
                 'status': status,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
