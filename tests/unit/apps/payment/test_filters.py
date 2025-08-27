@@ -9,11 +9,9 @@ from extras.test_utils.factories.payment import (
 )
 
 from hope.models.business_area import BusinessArea
-from hope.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-)
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 
 
 class TestFinancialServiceProviderXlsxTemplateFilter(TestCase):

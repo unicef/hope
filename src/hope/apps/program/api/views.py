@@ -38,7 +38,8 @@ from hope.apps.core.api.mixins import (
 )
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan, PaymentPlan
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )

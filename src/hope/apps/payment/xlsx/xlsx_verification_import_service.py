@@ -6,7 +6,8 @@ from django.core.exceptions import ValidationError
 from openpyxl.utils import get_column_letter
 from xlwt import Row, Worksheet
 
-from hope.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.utils import from_received_yes_no_to_status, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError

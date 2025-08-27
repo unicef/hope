@@ -3,7 +3,7 @@ from typing import Any
 from django.utils import timezone
 
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import PaymentVerification
+from hope.models.payment_verification import PaymentVerification
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.utils.exceptions import log_and_raise
 

@@ -34,7 +34,7 @@ from hope.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hope.models.individual import Individual
-from hope.models import PaymentVerification
+from hope.models.payment_verification import PaymentVerification
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
 

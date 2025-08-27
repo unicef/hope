@@ -4,11 +4,9 @@ import django_filters
 from django.db.models import Q, QuerySet
 from django_filters import FilterSet
 
-from hope.models import (
-    DeliveryMechanism,
-    PaymentPlan,
-    PaymentVerificationSummary,
-)
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification_summary import PaymentVerificationSummary
 
 
 class PaymentPlanFilter(FilterSet):

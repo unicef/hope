@@ -19,9 +19,8 @@ from hope.models.household import (
     NEEDS_ADJUDICATION,
     Household,
     PendingHousehold,
-    PendingIndividual,
 )
-from hope.models.individual import Individual
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
@@ -166,7 +165,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         choices=DATA_SOURCE_CHOICE,
     )
     import_data = models.OneToOneField(
-        "models.import_data.ImportData",
+        "registration_data.ImportData",
         related_name="registration_data_import_hope",
         on_delete=models.CASCADE,
         null=True,

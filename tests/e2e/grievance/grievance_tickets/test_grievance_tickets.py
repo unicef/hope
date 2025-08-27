@@ -38,7 +38,7 @@ from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.models.household import HOST, Household
 from hope.models.individual import Individual
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.models.program import Program
 from hope.models.beneficiary_group import BeneficiaryGroup
 

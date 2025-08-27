@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class Config(AppConfig):
-    name = "hope.apps.universal_update_script"
+class ApiConfig(AppConfig):
+    name = "hope.api"
 
     def ready(self) -> None:
         import hope.models  # noqa

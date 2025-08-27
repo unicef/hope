@@ -20,14 +20,11 @@ from openpyxl import Workbook
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.models import (
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-    build_summary,
-)
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.payment_verification_summary import PaymentVerificationSummary, build_summary
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db

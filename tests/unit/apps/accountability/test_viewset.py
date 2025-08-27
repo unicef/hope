@@ -28,7 +28,7 @@ from rest_framework import status
 from hope.apps.account.permissions import Permissions
 from hope.models.survey import Survey
 from hope.apps.core.services.rapid_pro.api import TokenNotProvidedError
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db

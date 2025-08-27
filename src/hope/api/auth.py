@@ -8,14 +8,15 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
-from hope.api.models import APIToken
 from hope.models.user import User
 
 
 class HOPEAuthentication(TokenAuthentication):
+
     keyword = "Token"
 
-    def authenticate_credentials(self, key: str) -> tuple[User, APIToken]:
+    def authenticate_credentials(self, key: str) -> tuple[User, "APIToken"]:
+        from hope.models.api_token import APIToken
         try:
             token = (
                 APIToken.objects.select_related("user")

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from hope.apps.core.api.serializers import FieldAttributeSerializer
 from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hope.apps.targeting.choices import FlexFieldClassification

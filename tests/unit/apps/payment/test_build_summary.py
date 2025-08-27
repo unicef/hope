@@ -9,12 +9,11 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.models.area import Area
-from hope.models import (
+from hope.models.payment_verification_plan import (
     PaymentVerificationPlan,
-    PaymentVerificationSummary,
     build_summary,
 )
-
+from hope.models.payment_verification_summary import PaymentVerificationSummary
 
 class TestBuildSummary(TestCase):
     @classmethod

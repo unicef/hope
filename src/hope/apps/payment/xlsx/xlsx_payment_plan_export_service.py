@@ -6,11 +6,9 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
 from hope.models.file_temp import FileTemp
-from hope.models import (
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-)
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,

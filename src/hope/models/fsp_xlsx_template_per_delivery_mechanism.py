@@ -19,7 +19,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="fsp_xlsx_template_per_delivery_mechanisms",
     )
-    delivery_mechanism = models.ForeignKey("models.delivery_mechanism.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     xlsx_template = models.ForeignKey(
         "payment.FinancialServiceProviderXlsxTemplate",
         on_delete=models.CASCADE,

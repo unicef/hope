@@ -7,7 +7,7 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
-from hope.api.models import Grant
+from hope.models.grant import Grant
 from hope.models.business_area import BusinessArea
 from hope.models.program import Program
 

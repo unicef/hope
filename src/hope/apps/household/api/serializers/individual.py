@@ -29,7 +29,7 @@ from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
 from hope.models.document import Document
 from hope.models.document_type import DocumentType
-from hope.models import Account
+from hope.models.account import Account
 from hope.apps.program.api.serializers import ProgramSmallSerializer
 
 

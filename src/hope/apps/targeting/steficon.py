@@ -8,7 +8,8 @@ from django.db.transaction import atomic
 from django.template.response import TemplateResponse
 
 from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.steficon.debug import get_error_info
 
 
@@ -16,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 try:  # pragma: no cover
-    from hope.models.rule_commit import RuleCommit
+    from hope.models.rule import RuleCommit
+
 
     class RuleReRunForm(forms.Form):
         rule = forms.ModelChoiceField(

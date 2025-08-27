@@ -2,7 +2,7 @@ import logging
 
 from hope.models.household import Household
 from hope.models.individual import Individual
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,

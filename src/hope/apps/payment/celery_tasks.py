@@ -21,12 +21,10 @@ from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
-from hope.models import (
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -112,7 +110,7 @@ def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30
 @sentry_tags
 def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
     try:
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
             XlsxPaymentPlanExportService,
         )
@@ -152,7 +150,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
     fsp_xlsx_template_id: str | None = None,
 ) -> None:
     try:
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
@@ -193,7 +191,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
     user_id: str,
 ) -> None:
     try:
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
@@ -213,7 +211,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
 @sentry_tags
 def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
     try:
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
             XlsxPaymentPlanImportService,
         )
@@ -252,7 +250,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -293,7 +291,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-    from hope.models import Payment, PaymentPlan
+    from hope.models.payment import Payment
+    from hope.models.payment_plan import PaymentPlan
     from hope.models.rule import Rule
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
@@ -350,7 +349,7 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
     """Remove old Payment Plan Payment List XLSX files."""
     try:
         from hope.models.business_area import FileTemp
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
 
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
@@ -370,7 +369,7 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
-    from hope.models import PaymentPlan
+    from hope.models.payment_plan import PaymentPlan
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
     cache_key = generate_cache_key(
@@ -418,7 +417,7 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 @sentry_tags
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -447,7 +446,8 @@ def payment_plan_exclude_beneficiaries(
     try:
         from django.db.models import Q
 
-        from hope.models import Payment, PaymentPlan
+        from hope.models.payment import Payment
+        from hope.models.payment_plan import PaymentPlan
 
         payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=payment_plan_id)
         # for social worker program exclude Individual unicef_id
@@ -556,7 +556,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
     """Create PDF file with summary and sent an email to request user."""
     try:
         from hope.models.business_area import FileTemp
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -710,7 +710,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-    from hope.models import Payment, PaymentPlan
+    from hope.models.payment import Payment, PaymentPlan
     from hope.models.rule import Rule
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)

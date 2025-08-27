@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
-import models.partner
+from hope.models.partner import Partner
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.models.business_area import BusinessArea
@@ -27,7 +27,7 @@ class ProgramAreaForm(forms.Form):
     areas = TreeNodeMultipleChoiceField(queryset=Area.objects.all(), widget=CheckboxSelectMultiple(), required=False)
 
 
-@admin.register(models.partner.Partner)
+@admin.register(Partner)
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
@@ -41,7 +41,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
 
-    def get_inline_instances(self, request: Any, obj: models.partner.Partner | None = None) -> list:
+    def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
@@ -60,22 +60,22 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         rel_list += "</ul>"
         return format_html(rel_list)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: models.partner.Partner | None = None) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Partner | None = None) -> Sequence[str]:
         additional_fields = []
         if obj and (obj.is_unicef or obj.is_unicef_subpartner):
             additional_fields.extend(["name", "parent"])
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: models.partner.Partner | None = None, change: bool = False, **kwargs: Any
+        self, request: HttpRequest, obj: Partner | None = None, change: bool = False, **kwargs: Any
     ) -> type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
         if not (obj and (obj.is_unicef_subpartner or obj.is_unicef)):
-            queryset = models.partner.Partner.objects.filter(level=0)
+            queryset = Partner.objects.filter(level=0)
             if obj:
                 if obj.is_parent:
-                    queryset = models.partner.Partner.objects.none()
+                    queryset = Partner.objects.none()
                 else:
                     queryset = queryset.exclude(id=obj.id)
 

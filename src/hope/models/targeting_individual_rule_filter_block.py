@@ -9,7 +9,7 @@ class TargetingIndividualRuleFilterBlock(
     TargetingIndividualRuleFilterBlockBase,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "models.targeting_criteria_rule.TargetingCriteriaRule",
+        "targeting.TargetingCriteriaRule",
         on_delete=models.CASCADE,
         related_name="individuals_filters_blocks",
     )

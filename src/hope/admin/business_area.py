@@ -29,7 +29,7 @@ from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.models.document_type import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
-from hope.models import AcceptanceProcessThreshold
+from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
 
 

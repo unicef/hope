@@ -15,7 +15,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         related_name="delivery_mechanisms_per_payment_plan",
         null=True,
     )
-    delivery_mechanism = models.ForeignKey("models.delivery_mechanism.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     delivery_mechanism_order = models.PositiveIntegerField()
     sent_to_payment_gateway = models.BooleanField(default=False)
 

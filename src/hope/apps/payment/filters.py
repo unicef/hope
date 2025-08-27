@@ -21,16 +21,14 @@ from django_filters import (
 from hope.apps.activity_log.filters import LogEntryFilter
 from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.payment_verification_summary import PaymentVerificationSummary
 
 
 class PaymentOrderingFilter(OrderingFilter):

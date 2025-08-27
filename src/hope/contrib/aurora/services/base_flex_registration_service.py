@@ -12,7 +12,8 @@ from django.db.transaction import atomic
 from django.forms import modelform_factory
 
 from hope.models.business_area import BusinessArea
-from hope.models.household import PendingHousehold, PendingIndividual
+from hope.models.household import PendingHousehold
+from hope.models.individual import PendingIndividual
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.import_data import ImportData
 from hope.apps.registration_datahub.celery_tasks import rdi_deduplication_task

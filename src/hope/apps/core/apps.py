@@ -6,3 +6,5 @@ class CoreConfig(AppConfig):
 
     def ready(self) -> None:
         import hope.apps.core.signals  # noqa: F401
+
+        import hope.models  # noqa

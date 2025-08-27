@@ -39,13 +39,11 @@ from test_utils.factories.household import create_household_and_individuals
 from hope.apps.account.permissions import Permissions
 from hope.models.file_temp import FileTemp
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hope.models import (
-    Approval,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
+from hope.models.approval import Approval
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
 from hope.models.rule import Rule

@@ -11,7 +11,7 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models import AccountType
+from hope.models.account_type import AccountType
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,

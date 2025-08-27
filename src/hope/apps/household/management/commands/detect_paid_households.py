@@ -11,7 +11,7 @@ from django.db.models import Q, QuerySet
 from hope.models.storage_file import StorageFile
 from hope.models.household import Household
 from hope.models.document import Document
-from hope.models import Payment
+from hope.models.payment import Payment
 
 
 def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> dict[str, list[str]]:

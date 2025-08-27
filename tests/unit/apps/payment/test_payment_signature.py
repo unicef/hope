@@ -26,7 +26,9 @@ from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.household import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import prepare_payment_plan_task
-from hope.models import DeliveryMechanism, Payment, PaymentPlan
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )

@@ -6,7 +6,7 @@ import django.contrib.postgres.fields
 import model_utils.fields
 from django.db import migrations
 
-import models.utils
+from hope.models.utils
 
 
 class Migration(migrations.Migration):

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     collector_block_filters = models.ForeignKey(
-        "models.targeting_collector_rule_filter_block.TargetingCollectorRuleFilterBlock",
+        "targeting.TargetingCollectorRuleFilterBlock",
         related_name="collector_block_filters",
         on_delete=models.CASCADE,
     )

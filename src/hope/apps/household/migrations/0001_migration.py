@@ -14,7 +14,6 @@ import sorl.thumbnail.fields
 from django.db import migrations, models
 
 import hope.apps.core.utils
-import models.utils
 
 
 class Migration(migrations.Migration):

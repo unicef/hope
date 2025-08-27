@@ -24,7 +24,7 @@ from hope.apps.administration.widgets import JsonWidget
 from hope.apps.core.celery import app as celery_app
 from hope.models.business_area import BusinessArea
 from hope.models.file_temp import FileTemp
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.utils.celery_utils import get_task_in_queue_or_running
 from hope.apps.utils.security import is_root

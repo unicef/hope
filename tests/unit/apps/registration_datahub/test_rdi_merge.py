@@ -32,10 +32,9 @@ from hope.models.household import (
     ROLE_ALTERNATE,
     Household,
     PendingHousehold,
-    PendingIndividual,
 )
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.individual import Individual
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.registration_data_import import (
     RegistrationDataImport,
 )

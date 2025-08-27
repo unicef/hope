@@ -26,7 +26,7 @@ from hope.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hope.models.household import FEMALE, MALE
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )

@@ -13,12 +13,12 @@ from django.urls import reverse
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-import models.incompatible_roles
-import models.role
+from hope.models.role import Role
 from hope.admin.account_filters import IncompatibleRoleFilter, PermissionFilter
 from hope.admin.account_forms import RoleAdminForm
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.permissions import Permissions
+from hope.models.incompatible_roles import IncompatibleRoles
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class RoleResource(resources.ModelResource):
     class Meta:
-        model = models.role.Role
+        model = Role
         fields = ("name", "subsystem", "permissions")
         import_id_fields = ("name", "subsystem")
 
@@ -40,7 +40,7 @@ class UnrelatedForeignKeysProtocol(LoadDumpProtocol):
     collector_class = UnrelatedForeignKeysCollector
 
 
-@admin.register(models.role.Role)
+@admin.register(Role)
 class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
@@ -61,7 +61,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted(str(x.value) for x in Permissions)
-        roles = models.role.Role.objects.order_by("name").filter(subsystem="HOPE")
+        roles = Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []
             for role in roles:
@@ -112,7 +112,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         return change_message
 
 
-@admin.register(models.incompatible_roles.IncompatibleRoles)
+@admin.register(IncompatibleRoles)
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)

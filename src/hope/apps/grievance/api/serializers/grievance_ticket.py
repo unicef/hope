@@ -29,7 +29,7 @@ from hope.models.individual import Individual
 from hope.models.document import Document
 from hope.models.document_type import DocumentType
 from hope.apps.payment.api.serializers import PaymentSmallSerializer
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.apps.program.api.serializers import ProgramSmallSerializer
 from hope.models.program import Program
 

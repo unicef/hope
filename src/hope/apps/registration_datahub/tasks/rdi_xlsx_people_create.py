@@ -19,11 +19,11 @@ from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.document_type import DocumentType
-from hope.models import Account
+from hope.models.account import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport

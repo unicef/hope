@@ -11,8 +11,8 @@ import mptt.fields
 from django.conf import settings
 from django.db import migrations
 
-import models.business_area
-import models.flexible_attribute
+from hope.models.business_area
+from hope.models.flexible_attribute
 
 
 class Migration(migrations.Migration):

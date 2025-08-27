@@ -6,7 +6,8 @@ from django.db.models.functions import Coalesce
 
 from hope.models.area import Area
 from hope.models.household import Household
-from hope.models import Payment, PaymentVerification
+from hope.models.payment import Payment
+from hope.models.payment_verification import PaymentVerification
 from hope.apps.payment.utils import get_payment_items_for_dashboard
 
 

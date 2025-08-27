@@ -6,7 +6,7 @@ from django.db.models import Model
 
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.document_type import DocumentType
-from hope.models import AccountType
+from hope.models.account_type import AccountType
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,

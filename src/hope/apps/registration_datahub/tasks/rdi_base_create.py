@@ -4,8 +4,9 @@ from functools import reduce
 from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes
-from hope.models.household import PendingIndividual
-from hope.models import AccountType, PendingAccount
+from hope.models.individual import PendingIndividual
+from hope.models.account_type import AccountType
+from hope.models.account import PendingAccount
 from hope.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,

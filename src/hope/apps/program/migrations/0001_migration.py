@@ -11,7 +11,7 @@ import model_utils.fields
 from django.conf import settings
 from django.db import migrations
 
-import models.utils
+from hope.models.utils
 
 
 class Migration(migrations.Migration):

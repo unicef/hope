@@ -31,18 +31,16 @@ from hope.models.household import (
     Household,
 )
 from hope.models.individual import Individual
-from hope.models import (
-    Approval,
-    ApprovalProcess,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
+from hope.models.approval import Approval
+from hope.models.approval_process import ApprovalProcess
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.payment_plan_supporting_document import PaymentPlanSupportingDocument
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.payment_verification_summary import PaymentVerificationSummary
 from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 from hope.models.delivery_mechanism import DeliveryMechanism

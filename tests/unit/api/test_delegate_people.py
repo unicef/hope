@@ -8,15 +8,15 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase
 
-from hope.api.models import Grant
+from hope.models.grant import Grant
 from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.individual import PendingIndividual
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport

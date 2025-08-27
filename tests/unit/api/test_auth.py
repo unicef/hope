@@ -13,7 +13,8 @@ from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import APIToken, Grant
+from hope.models.grant import Grant
+from hope.models.api_token import APIToken
 
 
 class HOPEPermissionTest(TestCase):

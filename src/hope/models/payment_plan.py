@@ -34,7 +34,7 @@ from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import MALE, FEMALE, Household
 from hope.models.individual import Individual
 from hope.models.payment import Payment
-from hope.models.rule_commit import RuleCommit
+from hope.models.rule import RuleCommit
 from hope.models.rule import Rule
 from hope.models.storage_file import StorageFile
 from hope.models.utils import TimeStampedUUIDModel, InternalDataFieldModel, ConcurrencyModel, UnicefIdentifiedModel, \
@@ -649,7 +649,7 @@ class PaymentPlan(
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
     def _get_last_approval_process_data(self) -> ModifiedData:
-        from hope.models import Approval
+        from hope.models.approval import Approval
 
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
@@ -1246,7 +1246,7 @@ class PaymentPlan(
         target=Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self) -> None:
-        from hope.models import PaymentVerificationSummary
+        from hope.models.payment_verification_summary import PaymentVerificationSummary
 
         self.status_date = timezone.now()
 

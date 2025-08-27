@@ -61,6 +61,7 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     all_objects = ActiveIndividualsManager(active_only=False)
 
     class Meta:
+        app_label = "sanction_list"
         ordering = ["-listed_on"]
         verbose_name = "Individual"
         verbose_name_plural = "Individuals"

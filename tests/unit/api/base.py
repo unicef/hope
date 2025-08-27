@@ -12,7 +12,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from unit.api.factories import APITokenFactory
 
-from hope.api.models import APIToken, Grant
+from hope.models.grant import Grant
+from hope.models.api_token import APIToken
 from hope.models.business_area import BusinessArea
 
 

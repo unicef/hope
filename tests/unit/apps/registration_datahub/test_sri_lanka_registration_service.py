@@ -4,8 +4,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-import models.area
-import models.area_type
+from hope.models.area
+from hope.models.area_type
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -20,10 +20,10 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record

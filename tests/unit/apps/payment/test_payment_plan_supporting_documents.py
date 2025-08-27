@@ -15,7 +15,7 @@ from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
-from hope.models import PaymentPlan, PaymentPlanSupportingDocument
+from hope.models.payment_plan import PaymentPlan, PaymentPlanSupportingDocument
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):

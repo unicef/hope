@@ -17,7 +17,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 
 pytestmark = pytest.mark.django_db()
 

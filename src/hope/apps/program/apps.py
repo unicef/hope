@@ -6,6 +6,8 @@ class ProgramConfig(AppConfig):
     verbose_name = "Programme"
 
     def ready(self) -> None:
+        import hope.models  # noqa
+
         from hope.apps.grievance import signals as grievance_signals
         from hope.apps.household import signals as household_signals
         from hope.apps.program import signals as program_signals

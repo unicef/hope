@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
-import models.role
+from hope import models
 from hope.apps.account.permissions import Permissions
 from hope.models.business_area import BusinessArea
 

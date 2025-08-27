@@ -34,7 +34,7 @@ from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.household import HOST, SEEING
 from hope.models.individual import Individual
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,
 )

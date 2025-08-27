@@ -18,13 +18,12 @@ from hope.apps.grievance.models import (
 )
 from hope.models.household import (
     Household,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
-from hope.models.individual import Individual
+from hope.models.document import PendingDocument
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.document import Document
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel

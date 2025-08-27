@@ -10,10 +10,10 @@ from hope.admin.steficon import AutocompleteWidget
 from hope.models.business_area import BusinessArea
 from hope.models.household import (
     Household,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.xlsx_update_file import XlsxUpdateFile
 from hope.models.individual import Individual
 from hope.models.program import Program

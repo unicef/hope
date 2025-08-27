@@ -26,10 +26,10 @@ from hope.models.household import (
     UNICEF,
     Household,
     HouseholdCollection,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold, PendingIndividualRoleInHousehold
 from hope.models.individual_identity import IndividualIdentity, PendingIndividualIdentity
 from hope.models.entitlement_card import EntitlementCard

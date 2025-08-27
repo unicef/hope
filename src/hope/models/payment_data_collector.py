@@ -106,6 +106,7 @@ class PaymentDataCollector(Account):
         return True
 
     class Meta:
+        app_label = "payment"
         proxy = True
         verbose_name = "Payment Data Collector"
         verbose_name_plural = "Payment Data Collectors"

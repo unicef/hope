@@ -64,7 +64,8 @@ from hope.models.household import (
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.document_type import DocumentType
-from hope.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel

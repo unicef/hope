@@ -22,7 +22,7 @@ from hope.models.individual_identity import IndividualIdentity
 from hope.models.entitlement_card import EntitlementCard
 from hope.models.individual import IndividualCollection, Individual
 from hope.models.document import Document
-from hope.models import Account
+from hope.models.account import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle

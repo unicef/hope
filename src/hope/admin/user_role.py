@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-import models.role_assignment
+from hope.models.role_assignment import RoleAssignment
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class RoleAssignmentInline(admin.TabularInline):
-    model = models.role_assignment.RoleAssignment
+    model = RoleAssignment
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
@@ -71,7 +71,7 @@ class RoleAssignmentInline(admin.TabularInline):
         return True
 
 
-@admin.register(models.role_assignment.RoleAssignment)
+@admin.register(RoleAssignment)
 class RoleAssignmentAdmin(HOPEModelAdminBase):
     list_display = ("user", "partner", "role", "business_area", "program")
     form = RoleAssignmentAdminForm

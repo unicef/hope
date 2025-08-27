@@ -28,9 +28,10 @@ from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Payment, PaymentPlan
-from hope.models import PaymentVerification
-from hope.models import PaymentVerificationPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.program import Program
 from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.registration_data_import import RegistrationDataImport

@@ -21,17 +21,18 @@ from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 
-import models.incompatible_roles
-import models.partner
-import models.role
-import models.role_assignment
+from hope import models
+from hope.models.user import User
+from hope.models.incompatible_roles import IncompatibleRoles
+from hope.models import partner
+from hope.models import role
+from hope.models import role_assignment
 from hope.admin.account_filters import BusinessAreaFilter, HasKoboAccount
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.account_mixins import KoboAccessMixin
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
-from models import user as account_models
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.models.user import User
 from hope.models.partner import Partner
@@ -156,20 +157,20 @@ class ADUSerMixin:
             partner = form.cleaned_data["partner"]
             users_to_bulk_create = []
             users_role_to_bulk_create = []
-            existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
+            existing = set(User.objects.filter(email__in=emails).values_list("email", flat=True))
             results = self.Results([], [], [], [])
             try:
                 ms_graph = MicrosoftGraphAPI()
                 for email in emails:
                     try:
                         if email in existing:
-                            user = account_models.User.objects.get(email=email)
+                            user = User.objects.get(email=email)
                             self._sync_ad_data(user)
                             results.updated.append(user)
                         else:
                             user_data = ms_graph.get_user_data(email=email)
                             user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                            user = account_models.User(**user_args, partner=partner)
+                            user = User(**user_args, partner=partner)
                             if user.first_name is None:
                                 user.first_name = ""
                             if user.last_name is None:
@@ -200,7 +201,7 @@ class ADUSerMixin:
                         results.missing.append(email)
                     except Http404:
                         results.missing.append(email)
-                account_models.User.objects.bulk_create(users_to_bulk_create)
+                User.objects.bulk_create(users_to_bulk_create)
                 models.role_assignment.RoleAssignment.objects.bulk_create(
                     users_role_to_bulk_create, ignore_conflicts=True
                 )
@@ -213,7 +214,7 @@ class ADUSerMixin:
         return TemplateResponse(request, "admin/load_users.html", ctx)
 
 
-@admin.register(account_models.User)
+@admin.register(User)
 class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
@@ -351,7 +352,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     @button(permission="auth.view_permission")
     def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk)
-        user: account_models.User = context["original"]
+        user: User = context["original"]
         all_perms = user.get_all_permissions()
         context["permissions"] = [p.split(".") for p in sorted(all_perms)]
         ba_perms = defaultdict(list)
@@ -389,7 +390,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                         for role in roles:
                             if crud == "ADD":
                                 try:
-                                    models.incompatible_roles.IncompatibleRoles.objects.validate_user_role(u, ba, role)
+                                    IncompatibleRoles.objects.validate_user_role(u, ba, role)
                                     ur, is_new = u.role_assignments.get_or_create(business_area=ba, role=role)
                                     if is_new:
                                         added += 1
@@ -469,7 +470,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                     username = row["username"].strip()
                                 else:
                                     username = row["email"].replace("@", "_").replace(".", "_").lower()
-                                u, isnew = account_models.User.objects.get_or_create(
+                                u, isnew = User.objects.get_or_create(
                                     email=email,
                                     partner=partner,
                                     defaults={"username": username},
@@ -480,7 +481,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
-                                        models.incompatible_roles.IncompatibleRoles.objects.validate_user_role(
+                                        IncompatibleRoles.objects.validate_user_role(
                                             u, business_area, role
                                         )
                                         u.role_assignments.get_or_create(business_area=business_area, role=role)

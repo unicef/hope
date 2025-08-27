@@ -46,6 +46,9 @@ class IndividualCollection(UnicefIdentifiedModel):
     def business_area(self) -> BusinessArea | None:
         return self.individuals.first().business_area if self.individuals.first() else None
 
+    class Meta:
+        app_label = "household"
+
 
 class Individual(
     InternalDataFieldModel,
@@ -609,6 +612,7 @@ class PendingIndividual(Individual):
         return PendingHousehold.objects.get(pk=self.household.pk)
 
     class Meta:
+        app_label = "household"
         proxy = True
         verbose_name = "Imported Individual"
         verbose_name_plural = "Imported Individuals"

@@ -31,7 +31,7 @@ from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.area import Area
-from hope.models import PaymentVerification
+from hope.models.payment_verification import PaymentVerification
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )

@@ -25,7 +25,8 @@ from hope.apps.grievance.constants import (
     URGENCY_NOT_SET,
 )
 from hope.models.individual import Individual
-from hope.models import Payment, PaymentVerification
+from hope.models.payment import Payment
+from hope.models.payment_verification import PaymentVerification
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,

@@ -8,7 +8,8 @@ from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificatio
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.models.individual import Individual
 from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
-from hope.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,

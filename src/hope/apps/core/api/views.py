@@ -38,13 +38,11 @@ from hope.apps.core.utils import (
     to_choice_object,
 )
 from hope.models.country import Country
-from hope.models import (
-    AccountType,
-    DeliveryMechanism,
-    PaymentPlan,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
+from hope.models.account_type import AccountType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.payment_verification_summary import PaymentVerificationSummary
 
 
 class BusinessAreaViewSet(

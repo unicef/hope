@@ -21,10 +21,10 @@ from hope.models.household import (
     MALE,
     NOT_DISABLED,
     PRIVATE_PARTNER,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record

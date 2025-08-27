@@ -10,7 +10,8 @@ from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.document import Document
 from hope.models.document_type import DocumentType
-from hope.models import Account, AccountType
+from hope.models.account import Account
+from hope.models.account_type import AccountType
 from hope.models.program import Program
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,

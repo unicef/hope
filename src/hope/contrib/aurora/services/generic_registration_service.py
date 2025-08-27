@@ -11,13 +11,14 @@ from hope.models.household import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.document_type import DocumentType
-from hope.models import AccountType, PendingAccount
+from hope.models.account_type import AccountType
+from hope.models.account import PendingAccount
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,

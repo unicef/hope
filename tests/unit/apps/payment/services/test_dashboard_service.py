@@ -15,7 +15,8 @@ from pytz import utc
 
 from hope.models.area import Area
 from hope.models.household import Household
-from hope.models import DeliveryMechanism, Payment
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.payment import Payment
 from hope.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )

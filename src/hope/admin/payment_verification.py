@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models import PaymentVerification
+from hope.models.payment_verification import PaymentVerification
 
 
 @admin.register(PaymentVerification)

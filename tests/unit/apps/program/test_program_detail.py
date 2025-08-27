@@ -19,7 +19,7 @@ from rest_framework.reverse import reverse
 
 from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db

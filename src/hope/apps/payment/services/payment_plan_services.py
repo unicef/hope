@@ -34,16 +34,14 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_to_payment_gateway,
 )
-from hope.models import (
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentDataCollector,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
+from hope.models.approval import Approval
+from hope.models.approval_process import ApprovalProcess
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment import Payment
+from hope.models.payment_data_collector import PaymentDataCollector
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )

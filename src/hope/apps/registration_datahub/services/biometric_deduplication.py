@@ -10,9 +10,8 @@ from hope.models.household import (
     DUPLICATE_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    PendingIndividual,
 )
-from hope.models.individual import Individual
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.program import Program
 from hope.models.registration_data_import import (
     RegistrationDataImport,

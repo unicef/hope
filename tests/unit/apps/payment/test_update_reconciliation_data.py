@@ -14,7 +14,7 @@ from pytz import utc
 
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )

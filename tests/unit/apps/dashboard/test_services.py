@@ -27,7 +27,8 @@ from hope.apps.dashboard.services import (
     get_pwd_count_expression,
 )
 from hope.models.household import Household
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan, PaymentPlan
 from hope.models.program import Program
 
 CACHE_CONFIG = [

@@ -41,6 +41,7 @@ class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):
     objects = PendingManager()
 
     class Meta:
+        app_label = "household"
         proxy = True
         verbose_name = "Imported Individual Role In Household"
         verbose_name_plural = "Imported Individual Roles In Household"

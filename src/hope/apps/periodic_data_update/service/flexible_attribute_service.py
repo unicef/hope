@@ -3,7 +3,7 @@ from typing import Any
 from rest_framework.exceptions import ValidationError
 
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.periodic_data_update.signals import (
     increment_periodic_field_version_cache,
 )

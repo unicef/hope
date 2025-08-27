@@ -17,8 +17,8 @@ from hope.models.household import (
     SON_DAUGHTER,
     UNIQUE,
     WIFE_HUSBAND,
-    PendingIndividual,
 )
+from hope.models.individual import PendingIndividual
 from hope.models.individual import Individual
 from hope.models.registration_data_import import (
     DUPLICATE_IN_BATCH,

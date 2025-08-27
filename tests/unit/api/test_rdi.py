@@ -12,7 +12,7 @@ from rest_framework.reverse import reverse
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import UserFactory
 
-from hope.api.models import Grant
+from hope.models.grant import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.models.household import (
     HEAD,
@@ -22,7 +22,9 @@ from hope.models.household import (
     PendingHousehold,
 )
 from hope.models.document_type import DocumentType
-from hope.models import AccountType, FinancialInstitution, PendingAccount
+from hope.models.account_type import AccountType
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.account import PendingAccount
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
 

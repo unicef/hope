@@ -23,7 +23,8 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.models.area import Area
-from hope.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 from hope.apps.utils.phone import is_valid_phone_number
 

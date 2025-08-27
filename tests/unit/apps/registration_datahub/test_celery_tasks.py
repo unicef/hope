@@ -43,10 +43,10 @@ from hope.models.household import (
     MALE,
     NOT_DISABLED,
     SON_DAUGHTER,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.registration_data_import import (

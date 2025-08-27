@@ -17,7 +17,7 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializer,
 )
-from hope.api.models import Grant
+from hope.models.grant import Grant
 from hope.models.country import Country
 from hope.models.area import Area
 from hope.models.household import (
@@ -28,8 +28,8 @@ from hope.models.household import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.individual import PendingIndividual
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.registration_data_import import RegistrationDataImport
 

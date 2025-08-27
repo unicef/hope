@@ -22,7 +22,7 @@ from hope.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hope.models.individual import Individual
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.models.periodic_data_update_template import PeriodicDataUpdateTemplate
 
 

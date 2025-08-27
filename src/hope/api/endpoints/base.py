@@ -13,7 +13,8 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import APILogEntry, Grant
+from hope.models.grant import Grant
+from hope.models.api_log_entry import APILogEntry
 from hope.models.business_area import BusinessArea
 
 

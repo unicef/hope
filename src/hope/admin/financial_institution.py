@@ -2,7 +2,8 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models import FinancialInstitution, FinancialInstitutionMapping
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_institution_mapping import FinancialInstitutionMapping
 
 
 class FinancialInstitutionMappingInline(admin.TabularInline):

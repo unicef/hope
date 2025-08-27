@@ -16,7 +16,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
-from hope.models import Approval, PaymentPlan
+from hope.models.approval import Approval
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.notifications import PaymentNotification
 
 

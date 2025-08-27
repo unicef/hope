@@ -14,12 +14,10 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
-from hope.models import (
-    Payment,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSupportingDocument,
-)
+from hope.models.payment import Payment
+from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_supporting_document import PaymentPlanSupportingDocument
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
 

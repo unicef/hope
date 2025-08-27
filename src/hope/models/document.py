@@ -11,8 +11,11 @@ from hope.models.utils import TimeStampedUUIDModel, AbstractSyncable, SoftDeleta
 
 
 class DocumentValidator(TimeStampedUUIDModel):
-    type = models.ForeignKey("models.document_type.DocumentType", related_name="validators", on_delete=models.CASCADE)
+    type = models.ForeignKey("household.DocumentType", related_name="validators", on_delete=models.CASCADE)
     regex = models.CharField(max_length=100, default=".*")
+
+    class Meta:
+        app_label = "household"
 
 
 class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDModel):
@@ -27,10 +30,10 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
         (STATUS_INVALID, _("Invalid")),
     )
 
-    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    individual = models.ForeignKey("household.Individual", related_name="documents", on_delete=models.CASCADE)
     program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
     document_number = models.CharField(max_length=255, blank=True, db_index=True)
-    type = models.ForeignKey("models.document_type.DocumentType", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("household.DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     photo = models.ImageField(blank=True)
@@ -102,6 +105,7 @@ class PendingDocument(Document):
     objects = PendingManager()
 
     class Meta:
+        app_label = "household"
         proxy = True
         verbose_name = "Imported Document"
         verbose_name_plural = "Imported Documents"

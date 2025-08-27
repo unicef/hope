@@ -20,7 +20,7 @@ from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
-import models.user_group
+from hope.models.user_group import UserGroup
 from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         return change_message
 
 
-@admin.register(models.user_group.UserGroup)
+@admin.register(UserGroup)
 class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
     list_display = ("user", "group", "business_area")
     autocomplete_fields = ("group",)
@@ -117,7 +117,7 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         objs = []
         for qs in [groups]:
             objs.extend(qs)
-        objs.extend(models.user_group.UserGroup.objects.filter(pk=record.pk))
+        objs.extend(UserGroup.objects.filter(pk=record.pk))
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(

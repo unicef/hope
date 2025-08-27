@@ -31,7 +31,7 @@ from hope.models.household import (
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual import Individual
-from hope.models import AccountType
+from hope.models.account_type import AccountType
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,

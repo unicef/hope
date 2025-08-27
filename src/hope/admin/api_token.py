@@ -14,8 +14,8 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
-from hope.api.models import APIToken
-from hope.models.user import ChoiceArrayField
+from hope.models.api_token import APIToken
+from hope.apps.account.fields import ChoiceArrayField
 from hope.models.business_area import BusinessArea
 from hope.apps.utils.security import is_root
 

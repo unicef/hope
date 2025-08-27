@@ -11,7 +11,9 @@ from hope.models.household import MALE
 from hope.models.individual import Individual
 from hope.models.document import Document
 from hope.models.document_type import DocumentType
-from hope.models import Account, AccountType, DeliveryMechanism
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.models.program import Program
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,

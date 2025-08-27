@@ -311,6 +311,9 @@ class HouseholdCollection(UnicefIdentifiedModel):
     def business_area(self) -> BusinessArea | None:
         return self.households.first().business_area if self.households.first() else None
 
+    class Meta:
+        app_label = "household"
+
 
 class Household(
     InternalDataFieldModel,
@@ -492,7 +495,7 @@ class Household(
         help_text="Household administrative area level 4",
     )
     head_of_household = models.OneToOneField(
-        "models.individual.Individual",
+        "household.Individual",
         related_name="heading_household",
         on_delete=models.CASCADE,
         null=True,
@@ -923,6 +926,7 @@ class PendingHousehold(Household):
         return self.pending_representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     class Meta:
+        app_label = "household"
         proxy = True
         verbose_name = "Imported Household"
         verbose_name_plural = "Imported Households"

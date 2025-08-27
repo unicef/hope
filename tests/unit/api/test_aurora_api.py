@@ -11,7 +11,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
-from hope.api.models import Grant
+from hope.models.grant import Grant
 from hope.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,

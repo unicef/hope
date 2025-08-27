@@ -14,7 +14,8 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models import AccountType, PaymentPlan
+from hope.models.account_type import AccountType
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )

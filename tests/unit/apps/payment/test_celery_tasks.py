@@ -26,11 +26,10 @@ from hope.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
 )
-from hope.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-)
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment_plan import PaymentPlan
+
 from hope.apps.payment.utils import generate_cache_key
 from hope.models.rule import Rule
 

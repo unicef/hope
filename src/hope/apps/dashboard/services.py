@@ -12,7 +12,8 @@ from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.models.household import Household
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 
 CACHE_TIMEOUT = 60 * 60 * 24
 GLOBAL_SLUG = "global"

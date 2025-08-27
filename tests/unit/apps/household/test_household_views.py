@@ -41,7 +41,7 @@ from hope.models.household import (
     Household,
 )
 from hope.models.document_type import DocumentType
-from hope.models import Payment
+from hope.models.payment import Payment
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel

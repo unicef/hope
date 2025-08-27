@@ -444,7 +444,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
 
 
 def decode_and_get_payment_object(encoded_id: str, required: bool) -> Any | None:
-    from hope.models import Payment
+    from hope.models.payment import Payment
 
     if required or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)

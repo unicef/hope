@@ -36,7 +36,7 @@ from hope.models.household import (
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import IndividualCollection, Individual
-from hope.models import Account
+from hope.models.account import Account
 from hope.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)

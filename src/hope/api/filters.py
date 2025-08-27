@@ -10,7 +10,7 @@ from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.models.country import Country
 from hope.models.area import Area
 from hope.models.area_type import AreaType
-from hope.models import FinancialInstitution
+from hope.models.financial_institution import FinancialInstitution
 from hope.contrib.aurora.models import Project, Registration
 
 

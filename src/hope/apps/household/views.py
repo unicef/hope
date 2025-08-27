@@ -11,10 +11,10 @@ from hope.apps.household.filters import _prepare_kobo_asset_id_value
 from hope.models.household import (
     IDENTIFICATION_TYPE_TAX_ID,
     Household,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.apps.household.serializers import (
     serialize_by_household,
     serialize_by_individual,

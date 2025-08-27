@@ -24,7 +24,8 @@ from hope.models.household import (
     ROLE_NO_ROLE,
 )
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan, PaymentPlan
 
 
 # used for ease of assertions, so it imitates serializer's behaviour

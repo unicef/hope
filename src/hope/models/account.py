@@ -6,7 +6,7 @@ from django.db import models, transaction, IntegrityError
 from django.db.models import JSONField, Q, QuerySet
 
 from hope.models.financial_institution import FinancialInstitution
-from hope.models.utils import MergeStatusModel, TimeStampedUUIDModel, SignatureMixin, MergedManager
+from hope.models.utils import MergeStatusModel, TimeStampedUUIDModel, SignatureMixin, MergedManager, PendingManager
 
 
 class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):

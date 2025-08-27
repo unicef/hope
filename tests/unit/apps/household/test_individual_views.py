@@ -69,7 +69,8 @@ from hope.models.household import (
 )
 from hope.models.individual import Individual
 from hope.models.document_type import DocumentType
-from hope.models import AccountType, FinancialInstitution
+from hope.models.account_type import AccountType
+from hope.models.financial_institution import FinancialInstitution
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.program import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index

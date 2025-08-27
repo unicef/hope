@@ -29,15 +29,11 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.models import (
-    Approval,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
-from hope.models.payment import (
-    Payment,
-)
+from hope.models.approval import Approval
+from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.payment import Payment
 from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
 from hope.models.financial_service_provider import FinancialServiceProvider
 

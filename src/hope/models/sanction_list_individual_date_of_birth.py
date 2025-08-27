@@ -6,7 +6,7 @@ from hope.models.utils import TimeStampedUUIDModel
 class SanctionListIndividualDateOfBirth(TimeStampedUUIDModel):
     date = models.DateField()
     individual = models.ForeignKey(
-        "models.sanction_list_individual.SanctionListIndividual",
+        "sanction_list.SanctionListIndividual",
         on_delete=models.CASCADE,
         related_name="dates_of_birth",
     )

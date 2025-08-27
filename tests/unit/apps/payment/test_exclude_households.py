@@ -22,7 +22,7 @@ from hope.apps.core.utils import encode_id_base64
 from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 
 
 class TestExcludeHouseholds(BaseTestCase):

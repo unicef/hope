@@ -25,7 +25,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
     )
     individuals_filters_block = models.ForeignKey(
-        "models.targeting_individual_rule_filter_block.TargetingIndividualRuleFilterBlock",
+        "targeting.TargetingIndividualRuleFilterBlock",
         related_name="individual_block_filters",
         on_delete=models.CASCADE,
     )

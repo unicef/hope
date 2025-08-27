@@ -18,8 +18,8 @@ from django.db import migrations
 import hope.apps.payment.fields
 import hope.apps.payment.models
 import hope.apps.payment.validators
-import models.financial_service_provider_xlsx_template
-import models.utils
+from hope.models.financial_service_provider_xlsx_template
+from hope.models.utils
 
 
 class Migration(migrations.Migration):

@@ -52,7 +52,7 @@ from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
 from hope.models.document import Document
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models import Account
+from hope.models.account import Account
 from hope.apps.utils.phone import is_valid_phone_number
 
 

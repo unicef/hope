@@ -9,7 +9,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan, PaymentPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db

@@ -10,7 +10,7 @@ from parameterized import parameterized
 from rest_framework import status
 
 from hope.models.user import User
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
 
 

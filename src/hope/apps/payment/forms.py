@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.postgres.forms import DecimalRangeField
 
-from hope.models import AcceptanceProcessThreshold
+from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
 
 
 class AcceptanceProcessThresholdForm(forms.ModelForm):

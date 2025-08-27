@@ -15,11 +15,9 @@ from freezegun import freeze_time
 
 from hope.models.household import ROLE_PRIMARY
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models import (
-    AccountType,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-)
+from hope.models.account_type import AccountType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.apps.payment.services import payment_household_snapshot_service
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,

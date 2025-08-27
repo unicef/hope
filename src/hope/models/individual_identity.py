@@ -5,7 +5,7 @@ from hope.models.utils import SoftDeletableMergeStatusModel, PendingManager
 
 
 class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
-    individual = models.ForeignKey("models.individual.Individual", related_name="identities", on_delete=models.CASCADE)
+    individual = models.ForeignKey("household.Individual", related_name="identities", on_delete=models.CASCADE)
     partner = models.ForeignKey(
         "account.Partner",
         related_name="individual_identities",
@@ -35,6 +35,7 @@ class PendingIndividualIdentity(IndividualIdentity):
     objects = PendingManager()
 
     class Meta:
+        app_label = "household"
         proxy = True
         verbose_name = "Imported Individual Identity"
         verbose_name_plural = "Imported Individual Identities"

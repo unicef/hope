@@ -37,11 +37,9 @@ from sorl.thumbnail.conf import settings
 
 from hope.models.user import User
 from hope.models.data_collecting_type import DataCollectingType
-from hope.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-)
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
 from hope.models.beneficiary_group import BeneficiaryGroup

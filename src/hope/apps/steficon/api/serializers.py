@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.models.rule_commit import RuleCommit
+from hope.models.rule import RuleCommit
 from hope.models.rule import Rule
 
 

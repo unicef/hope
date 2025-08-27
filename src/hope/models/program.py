@@ -22,7 +22,8 @@ from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
-from hope.models.payment import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.program.collision_detectors import collision_detectors_registry
 from hope.models.sanction_list import SanctionList
 from hope.models.utils import (
@@ -33,7 +34,6 @@ from hope.models.utils import (
     TimeStampedUUIDModel,
 )
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.models.program_cycle import ProgramCycle
 from hope.models.program_partner_through import ProgramPartnerThrough
 
 
@@ -337,4 +337,6 @@ class Program(
 
     @property
     def can_finish(self) -> bool:
+        from hope.models.program_cycle import ProgramCycle
+
         return not self.cycles.filter(status=ProgramCycle.ACTIVE).exists()

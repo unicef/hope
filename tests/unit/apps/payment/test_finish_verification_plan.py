@@ -27,7 +27,8 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import Household
-from hope.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )

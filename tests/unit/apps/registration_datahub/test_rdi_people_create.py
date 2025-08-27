@@ -26,9 +26,9 @@ from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     PendingHousehold,
-    PendingIndividual,
 )
-from hope.models import PendingAccount
+from hope.models.individual import PendingIndividual
+from hope.models.account import PendingAccount
 from hope.models.program import Program
 from hope.models.import_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index

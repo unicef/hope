@@ -19,7 +19,7 @@ from hope.models.household import (
     ROLE_CHOICE,
     SEX_CHOICE,
 )
-from hope.models import FinancialInstitution
+from hope.models.financial_institution import FinancialInstitution
 from hope.models.program import Program
 
 

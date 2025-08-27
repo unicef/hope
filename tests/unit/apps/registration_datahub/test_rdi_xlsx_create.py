@@ -35,13 +35,13 @@ from hope.models.country import Country as GeoCountry
 from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.individual_identity import PendingIndividualIdentity
 from hope.models.document_type import DocumentType
-from hope.models import PendingAccount
+from hope.models.account import PendingAccount
 from hope.models.program import Program
 from hope.models.import_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index

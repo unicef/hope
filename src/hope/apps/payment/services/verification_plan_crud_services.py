@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.payment.celery_tasks import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hope.models import PaymentVerificationPlan
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
@@ -15,7 +15,7 @@ from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlan  # pragma: no cover
+    from hope.models.payment_plan import PaymentPlan  # pragma: no cover
 
 
 def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:

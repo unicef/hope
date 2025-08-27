@@ -21,13 +21,13 @@ from hope.models.household import (
     NEEDS_ADJUDICATION,
     Household,
     HouseholdCollection,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.individual import IndividualCollection, Individual
-from hope.models import PendingAccount
+from hope.models.account import PendingAccount
 from hope.models.registration_data_import import (
     RegistrationDataImport,
 )

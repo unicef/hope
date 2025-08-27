@@ -15,12 +15,10 @@ from hope.models.household import (
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual import Individual
-from hope.models import (
-    Payment,
-    PaymentDataCollector,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-)
+from hope.models.payment import Payment
+from hope.models.payment_data_collector import PaymentDataCollector
+from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
+from hope.models.payment_plan import PaymentPlan
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]

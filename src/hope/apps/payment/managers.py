@@ -23,7 +23,8 @@ class ArraySubquery(Subquery):
 
 class PaymentQuerySet(SoftDeletableQuerySet):
     def with_payment_plan_conflicts(self) -> QuerySet:
-        from hope.models import Payment, PaymentPlan
+        from hope.models.payment import Payment
+        from hope.models.payment_plan import PaymentPlan
 
         def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
             return qs.annotate(

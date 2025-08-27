@@ -10,13 +10,11 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models import (
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspNameMapping,
-    FspXlsxTemplatePerDeliveryMechanism,
-    PaymentPlan,
-)
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.fsp_name_mapping import FspNameMapping
+from hope.models.fsp_xlsx_template_per_delivery_mechanism import FspXlsxTemplatePerDeliveryMechanism
+from hope.models.payment_plan import PaymentPlan
 
 if TYPE_CHECKING:
     from django.forms import Form

@@ -17,7 +17,7 @@ from hope.apps.payment.api.serializers import (
     FullListSerializer,
     RandomSamplingSerializer,
 )
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )

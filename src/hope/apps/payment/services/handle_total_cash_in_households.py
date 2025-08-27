@@ -4,7 +4,7 @@ from django.db.models import F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 
 from hope.models.household import Household
-from hope.models import Payment
+from hope.models.payment import Payment
 
 
 def handle_total_cash_in_specific_households(id_list: list[UUID]) -> None:

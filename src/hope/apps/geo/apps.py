@@ -6,3 +6,5 @@ class Config(AppConfig):
 
     def ready(self) -> None:
         import hope.apps.geo.signals  # noqa: F401
+
+        import hope.models  # noqa

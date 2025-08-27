@@ -51,19 +51,18 @@ from hope.models.household import (
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hope.models import (
-    Account,
-    AccountType,
-    Approval,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialInstitution,
-    FinancialServiceProviderXlsxTemplate,
-    FspNameMapping,
-    Payment,
-    PaymentDataCollector,
-    PaymentPlan,
-)
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.approval import Approval
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.fsp_name_mapping import FspNameMapping
+from hope.models.payment import Payment
+from hope.models.payment_data_collector import PaymentDataCollector
+from hope.models.payment_plan import PaymentPlan
+
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )

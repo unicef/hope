@@ -21,7 +21,7 @@ from hope.models.household import (
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual import IndividualCollection, Individual
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.rule import Rule

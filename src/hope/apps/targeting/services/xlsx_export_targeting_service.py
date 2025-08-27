@@ -10,7 +10,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from hope.apps.core.utils import nested_getattr
 from hope.models.individual import Individual
 from hope.models.document import Document
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 
 
 class XlsxExportTargetingService:

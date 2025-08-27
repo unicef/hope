@@ -23,7 +23,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
     )
     targeting_criteria_rule = models.ForeignKey(
-        "models.targeting_criteria_rule.TargetingCriteriaRule",
+        "targeting.TargetingCriteriaRule",
         related_name="filters",
         on_delete=models.CASCADE,
     )

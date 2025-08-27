@@ -11,7 +11,7 @@ from hope.models.user import User
 from hope.models.message import Message
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
-from hope.models import PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()

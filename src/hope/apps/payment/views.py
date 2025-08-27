@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404, redirect
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan, PaymentVerificationPlan
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:

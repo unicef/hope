@@ -50,10 +50,8 @@ from hope.models.household import (
     Household,
 )
 from hope.models.individual import Individual
-from hope.models import (
+from hope.models.delivery_mechanism import (
     DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.periodic_data_update.utils import (

@@ -45,7 +45,8 @@ from hope.models.household import Household
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual import Individual
 from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.models import Payment, PaymentPlan
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 
 

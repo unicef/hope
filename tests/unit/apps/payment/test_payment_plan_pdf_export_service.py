@@ -13,7 +13,8 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.models.data_collecting_type import DataCollectingType
-from hope.models import Approval, DeliveryMechanism
+from hope.models.approval import Approval
+from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )

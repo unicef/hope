@@ -49,7 +49,8 @@ from hope.models.household import (
     SINGLE,
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models import PaymentVerification, PaymentVerificationPlan
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.program import Program
 from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth

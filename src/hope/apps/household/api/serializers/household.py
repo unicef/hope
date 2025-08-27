@@ -34,7 +34,8 @@ from hope.models.document_type import DocumentType
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hope.models import AccountType, FinancialInstitution
+from hope.models.account_type import AccountType
+from hope.models.financial_institution import FinancialInstitution
 from hope.apps.program.api.serializers import ProgramSmallSerializer
 
 

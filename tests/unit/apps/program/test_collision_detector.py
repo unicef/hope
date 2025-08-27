@@ -16,7 +16,8 @@ from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
 from hope.models.document import Document
 from hope.models.document_type import DocumentType
-from hope.models import Account, AccountType
+from hope.models.account import Account
+from hope.models.account_type import AccountType
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models.program import Program
 

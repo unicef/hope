@@ -14,8 +14,8 @@ from django.forms import model_to_dict
 from django.test import TestCase
 from django_countries.fields import Country
 
-import models.area
-import models.area_type
+from hope.models.area
+from hope.models.area_type
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
@@ -27,12 +27,12 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_CHOICE,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
+from hope.models.document import PendingDocument
+from hope.models.individual import PendingIndividual
 from hope.models.document_type import DocumentType
-from hope.models import PendingAccount
+from hope.models.account import PendingAccount
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.import_data import ImportData
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index

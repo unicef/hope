@@ -12,7 +12,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from unit.api.factories import APITokenFactory
 
 from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
-from hope.api.models import Grant
+from hope.models.grant import Grant
 
 
 class TestApiToken(TestCase):

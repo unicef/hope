@@ -125,7 +125,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     def validate_payment_plan_status(self) -> None:
         """Validate status for Finishing Cycle."""
-        from hope.models import PaymentPlan
+        from hope.models.payment_plan import PaymentPlan
 
         if (
             PaymentPlan.objects.filter(program_cycle=self)
