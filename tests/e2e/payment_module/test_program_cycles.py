@@ -20,7 +20,7 @@ pytestmark = pytest.mark.django_db()
 def create_test_program() -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    yield ProgramFactory(
+    return ProgramFactory(
         name="Test Program",
         programme_code="1234",
         start_date=datetime.now() - relativedelta(months=1),
@@ -53,7 +53,7 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
     )
     PaymentPlanFactory(program_cycle=program_cycle, total_entitled_quantity_usd=333.99)
     PaymentPlanFactory(program_cycle=program_cycle, total_entitled_quantity_usd=1500.00)
-    yield program_cycle
+    return program_cycle
 
 
 @pytest.fixture
@@ -75,7 +75,7 @@ def create_program_cycle_without_payment_plan(
         status=ProgramCycle.DRAFT,
         program=create_test_program,
     )
-    yield program_cycle
+    return program_cycle
 
 
 @pytest.mark.usefixtures("login")
