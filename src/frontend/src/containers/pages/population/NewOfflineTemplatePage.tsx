@@ -6,6 +6,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FieldsToUpdateOffline } from '@components/periodicDataUpdates/FieldsToUpdateOffline';
 import { FilterIndividualsOffline } from '@components/periodicDataUpdates/FilterIndividualsOffline';
 import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
+import { TemplateNameOnline } from '@components/periodicDataUpdates/TemplateNameOnline';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -56,6 +57,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
   const steps = [
     `Filter ${isPeople ? 'People' : beneficiaryGroup?.memberLabelPlural}`,
     'Fields to Update',
+    'Template Name (optional)',
   ];
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
@@ -120,20 +122,26 @@ const NewOfflineTemplatePage = (): ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  // Helper functions
+  const yesNoToBoolean = (value) =>
+    value === 'YES' ? true : value === 'NO' ? false : null;
+  const isEmpty = (value) => {
+    if (value == null) return true;
+    if (typeof value === 'string') return value.trim() === '';
+    if (Array.isArray(value)) return value.length === 0;
+    if (typeof value === 'object') {
+      if (Object.keys(value).length === 0) return true;
+      if ('from' in value || 'to' in value) return !value.from && !value.to;
+    }
+    return false;
+  };
+
   const handleSubmit = (values) => {
-    const yesNoToBoolean = (value) => {
-      if (value === 'YES') {
-        return true;
-      }
-      if (value === 'NO') {
-        return false;
-      }
-      return null;
-    };
+    // Build filters object
     const filters = {
       registration_data_import_id:
-        filter.registrationDataImportId?.value || null,
-      target_population_id: filter.targetPopulationId?.value || null,
+        filter.registrationDataImportId?.value ?? null,
+      target_population_id: filter.targetPopulationId?.value ?? null,
       gender: filter.gender,
       age: {
         from: filter.ageFrom ? Number(filter.ageFrom) : null,
@@ -153,45 +161,29 @@ const NewOfflineTemplatePage = (): ReactElement => {
       received_assistance: yesNoToBoolean(filter.receivedAssistance),
     };
 
-    const isEmpty = (value) => {
-      return (
-        value == null ||
-        (typeof value === 'string' && value.trim() === '') ||
-        (Array.isArray(value) && value.length === 0) ||
-        (typeof value === 'object' &&
-          !Array.isArray(value) &&
-          Object.keys(value).length === 0) ||
-        (typeof value === 'object' &&
-          !Array.isArray(value) &&
-          !value.from &&
-          !value.to)
-      );
-    };
-
+    // Remove empty filters
     const filtersToSend = Object.fromEntries(
       Object.entries(filters).filter(([, value]) => !isEmpty(value)),
     );
 
+    // Prepare rounds data
     const roundsDataToSend = values.roundsData
-      .filter((el) => checkedFields[el.field] === true)
+      .filter((el) => checkedFields[el.field])
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
         round_name: data.roundName,
       }));
 
-    const payload = {
-      rounds_data: roundsDataToSend,
-      filters: filtersToSend,
-    };
-
+    // Send payload
     uploadTemplate.mutate(
       {
         businessAreaSlug: businessArea,
         programSlug: programId,
         requestBody: {
-          rounds_data: payload.rounds_data,
-          filters: payload.filters,
+          rounds_data: roundsDataToSend,
+          filters: filtersToSend,
+          name: values.name,
         },
       },
       {
@@ -212,17 +204,9 @@ const NewOfflineTemplatePage = (): ReactElement => {
       enableReinitialize
     >
       {({ values, setFieldValue, submitForm }) => {
-        const roundsDataToSend = values.roundsData
-          .filter((el) => checkedFields[el.field] === true)
-          .map((data) => ({
-            field: data.field,
-            rounds: data.rounds
-              .filter((round) => round.checked)
-              .map((round) => ({
-                round: round.round,
-                round_name: round.round_name,
-              })),
-          }));
+        // At step 1, allow next only if at least one field is checked
+        const checkedFieldsCount =
+          Object.values(checkedFields).filter(Boolean).length;
         return (
           <form onSubmit={handleSubmit}>
             <PageHeader
@@ -259,6 +243,12 @@ const NewOfflineTemplatePage = (): ReactElement => {
                   setCheckedFields={setCheckedFields}
                 />
               )}
+              {activeStep === 2 && (
+                <TemplateNameOnline
+                  setFieldValue={setFieldValue}
+                  value={values.name}
+                />
+              )}
               <Box
                 display="flex"
                 mt={4}
@@ -293,12 +283,10 @@ const NewOfflineTemplatePage = (): ReactElement => {
                       variant="contained"
                       color="primary"
                       data-cy="submit-button"
-                      disabled={
-                        activeStep === 1 && roundsDataToSend.length === 0
-                      }
-                      onClick={activeStep === 1 ? submitForm : handleNext}
+                      disabled={activeStep === 2 && checkedFieldsCount === 0}
+                      onClick={activeStep === 2 ? submitForm : handleNext}
                     >
-                      {activeStep === 1 ? 'Generate Template' : 'Next'}
+                      {activeStep === 2 ? 'Generate Template' : 'Next'}
                     </Button>
                   </Box>
                 </Box>

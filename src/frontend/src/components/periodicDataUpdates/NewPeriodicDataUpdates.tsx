@@ -80,7 +80,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
     () => ({
       businessAreaSlug,
       programSlug: programId,
-      ordering: 'created_at',
+      ordering: '-created_at',
       status: ['NEW' as const],
     }),
     [businessAreaSlug, programId],

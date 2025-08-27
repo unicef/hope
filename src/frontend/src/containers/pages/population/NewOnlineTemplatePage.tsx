@@ -150,20 +150,26 @@ const NewOnlineTemplatePage = (): ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  // Helper functions
+  const yesNoToBoolean = (value) =>
+    value === 'YES' ? true : value === 'NO' ? false : null;
+  const isEmpty = (value) => {
+    if (value == null) return true;
+    if (typeof value === 'string') return value.trim() === '';
+    if (Array.isArray(value)) return value.length === 0;
+    if (typeof value === 'object') {
+      if (Object.keys(value).length === 0) return true;
+      if ('from' in value || 'to' in value) return !value.from && !value.to;
+    }
+    return false;
+  };
+
   const handleSubmit = async (values) => {
-    const yesNoToBoolean = (value) => {
-      if (value === 'YES') {
-        return true;
-      }
-      if (value === 'NO') {
-        return false;
-      }
-      return null;
-    };
+    // Build filters object
     const filters = {
       registration_data_import_id:
-        filter.registrationDataImportId?.value || null,
-      target_population_id: filter.targetPopulationId?.value || null,
+        filter.registrationDataImportId?.value ?? null,
+      target_population_id: filter.targetPopulationId?.value ?? null,
       gender: filter.gender,
       age: {
         from: filter.ageFrom ? Number(filter.ageFrom) : null,
@@ -183,57 +189,35 @@ const NewOnlineTemplatePage = (): ReactElement => {
       received_assistance: yesNoToBoolean(filter.receivedAssistance),
     };
 
-    const isEmpty = (value) => {
-      return (
-        value == null ||
-        (typeof value === 'string' && value.trim() === '') ||
-        (Array.isArray(value) && value.length === 0) ||
-        (typeof value === 'object' &&
-          !Array.isArray(value) &&
-          Object.keys(value).length === 0) ||
-        (typeof value === 'object' &&
-          !Array.isArray(value) &&
-          !value.from &&
-          !value.to)
-      );
-    };
-
+    // Remove empty filters
     const filtersToSend = Object.fromEntries(
       Object.entries(filters).filter(([, value]) => !isEmpty(value)),
     );
 
+    // Prepare rounds data
     const roundsDataToSend = values.roundsData
-      .filter((el) => checkedFields[el.field] === true)
+      .filter((el) => checkedFields[el.field])
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
         round_name: data.roundName,
+        id: data.id ?? undefined, // Fix: ensure id is included if present
       }));
 
+    // Prepare payload with camelCase keys
     const payload = {
-      rounds_data: roundsDataToSend,
+      roundsData: roundsDataToSend,
       filters: filtersToSend,
-      authorized_users: values.authorizedUserIds,
+      authorizedUserIds: values.authorizedUserIds,
       name: values.name,
     };
-
-    // Log all submit data
-    console.log('Formik values:', values);
-    console.log('Filters to send:', filtersToSend);
-    console.log('Rounds data to send:', roundsDataToSend);
-    console.log('Payload:', payload);
 
     try {
       await createTemplateMutation({
         businessAreaSlug: businessArea,
         programSlug: programId,
-        //@ts-ignore ID not needed in request body
-        requestBody: {
-          roundsData: payload.rounds_data,
-          filters: payload.filters,
-          authorizedUsers: payload.authorized_users,
-          name: payload.name,
-        },
+        //@ts-ignore (id not needed in payload)
+        requestBody: payload,
       });
     } catch (error) {
       showApiErrorMessages(error, showMessage, t('Failed to create template.'));

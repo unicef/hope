@@ -390,6 +390,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    NEW: theme.hctPalette.gray,
     EXPORTED: theme.hctPalette.green,
     FAILED: theme.hctPalette.red,
     TO_EXPORT: theme.hctPalette.gray,
