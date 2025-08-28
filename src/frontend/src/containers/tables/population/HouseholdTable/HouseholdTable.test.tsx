@@ -46,6 +46,7 @@ describe('HouseholdTable', () => {
         sanctionListConfirmedMatch: false,
         programId: 'test-program',
         programName: 'Test Program',
+        programSlug: 'test-program',
       },
     ],
   };
