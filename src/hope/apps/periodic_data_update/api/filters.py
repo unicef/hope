@@ -1,6 +1,7 @@
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django_filters import rest_framework as filters
 
+from hope.apps.account.models import User
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.periodic_data_update.models import PDUOnlineEdit
 
@@ -18,7 +19,7 @@ class UserAvailableFilter(filters.FilterSet):
         method="search_filter", help_text="Search users by first name, last name, username, or email."
     )
 
-    def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet[User]:
         values = value.split()
         q_obj = Q()
         for v in values:
