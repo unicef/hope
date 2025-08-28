@@ -1,9 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
-from hope.models.user import USER_STATUS_CHOICES
+from hope.models.user import USER_STATUS_CHOICES, User
 from hope.models.role import Role
 from hope.models.partner import Partner
 from hope.apps.core.utils import CustomOrderingFilter
@@ -22,7 +21,7 @@ class UsersFilter(FilterSet):
     is_feedback_creator = BooleanFilter(method="is_feedback_creator_filter")
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = {"status": ["exact"], "partner": ["exact"]}
 
     order_by = CustomOrderingFilter(

@@ -1,10 +1,12 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from hope.models.account import Account
 from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
-from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.fsp_name_mapping import FspNameMapping
 from hope.models.individual import Individual
+
+if TYPE_CHECKING:
+    from hope.models.financial_service_provider import FinancialServiceProvider
 
 
 class PaymentDataCollector(Account):

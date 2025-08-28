@@ -37,7 +37,7 @@ from hope.models.business_area import (
 from hope.models.file_temp import FileTemp
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,

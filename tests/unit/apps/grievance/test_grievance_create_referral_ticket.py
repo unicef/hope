@@ -12,7 +12,7 @@ from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
 from hope.models.business_area import BusinessArea
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.program import Program
 

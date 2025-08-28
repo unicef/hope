@@ -33,7 +33,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.household import (
     DISABLED,
     FEMALE,

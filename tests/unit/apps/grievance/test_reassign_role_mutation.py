@@ -16,7 +16,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import ROLE_PRIMARY
 from hope.models.individual_role_in_household import IndividualRoleInHousehold

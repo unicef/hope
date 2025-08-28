@@ -13,7 +13,7 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.models.data_collecting_type import DataCollectingType
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.household import (
     DISABLED,
     FEMALE,

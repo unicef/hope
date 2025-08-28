@@ -1,7 +1,10 @@
 from django.db import models
 
-from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.utils import TimeStampedUUIDModel
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hope.models.financial_service_provider import FinancialServiceProvider
 
 
 class PaymentPlanSplit(TimeStampedUUIDModel):

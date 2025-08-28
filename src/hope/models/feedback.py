@@ -81,5 +81,3 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Feedback")
-
-

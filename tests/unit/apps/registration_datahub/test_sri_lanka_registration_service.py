@@ -17,7 +17,7 @@ from freezegun import freeze_time
 
 from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     PendingHousehold,

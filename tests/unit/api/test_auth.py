@@ -14,7 +14,10 @@ from unit.api.factories import APITokenFactory
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.models.grant import Grant
-from hope.models.api_token import APIToken
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hope.models.api_token import APIToken
 
 
 class HOPEPermissionTest(TestCase):

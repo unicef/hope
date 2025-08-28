@@ -14,6 +14,7 @@ from hope.models.utils import TimeStampedUUIDModel, SoftDeletionTreeManager, Sof
 
 import mptt
 
+
 def label_contains_english_en_validator(data: dict) -> None:
     if "English(EN)" not in data:
         raise ValidationError('The "English(EN)" key is required in the label.')

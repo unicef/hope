@@ -14,7 +14,7 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.models.data_collecting_type import DataCollectingType
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.area import Area
 from hope.models.area_type import AreaType
 from hope.models.household import (

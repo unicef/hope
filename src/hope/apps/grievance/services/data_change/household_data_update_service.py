@@ -9,7 +9,7 @@ from django_countries.fields import Country
 from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails
 from hope.apps.grievance.services.data_change.data_change_service import (

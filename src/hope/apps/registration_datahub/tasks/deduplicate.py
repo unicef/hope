@@ -23,7 +23,7 @@ from hope.models.household import (
     SIMILAR_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    Household
+    Household,
 )
 from hope.models.individual import PendingIndividual
 from hope.models.individual import Individual

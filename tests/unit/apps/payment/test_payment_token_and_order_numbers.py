@@ -9,7 +9,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.models.country import Country
 from hope.models.household import Household
 from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan, PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     check_if_token_or_order_number_exists_per_program,

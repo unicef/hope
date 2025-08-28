@@ -27,13 +27,45 @@ from hope.apps.household.signals import individual_deleted, individual_withdrawn
 from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
 from hope.models.business_area import BusinessArea
 from hope.models.document import Document
-from hope.models.household import SEX_CHOICE, MARITAL_STATUS_CHOICE, BLANK, RELATIONSHIP_CHOICE, WORK_STATUS_CHOICE, \
-    NOT_PROVIDED, DISABILITY_CHOICES, NOT_DISABLED, OBSERVED_DISABILITY_CHOICE, NONE, SEVERITY_OF_DISABILITY_CHOICES, \
-    UNIQUE, DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE, UNIQUE_IN_BATCH, DEDUPLICATION_BATCH_STATUS_CHOICE, \
-    NOT_PROCESSED, ROLE_NO_ROLE, STATUS_DUPLICATE, STATUS_WITHDRAWN, STATUS_ACTIVE, STATUS_INACTIVE, DISABLED, \
-    CANNOT_DO, LOT_DIFFICULTY, ROLE_PRIMARY, DUPLICATE, PendingHousehold
-from hope.models.utils import UnicefIdentifiedModel, InternalDataFieldModel, SoftDeletableMergeStatusModel, \
-    TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin, PendingManager
+from hope.models.household import (
+    SEX_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    BLANK,
+    RELATIONSHIP_CHOICE,
+    WORK_STATUS_CHOICE,
+    NOT_PROVIDED,
+    DISABILITY_CHOICES,
+    NOT_DISABLED,
+    OBSERVED_DISABILITY_CHOICE,
+    NONE,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    UNIQUE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+    UNIQUE_IN_BATCH,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
+    NOT_PROCESSED,
+    ROLE_NO_ROLE,
+    STATUS_DUPLICATE,
+    STATUS_WITHDRAWN,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+    DISABLED,
+    CANNOT_DO,
+    LOT_DIFFICULTY,
+    ROLE_PRIMARY,
+    DUPLICATE,
+    PendingHousehold,
+)
+from hope.models.utils import (
+    UnicefIdentifiedModel,
+    InternalDataFieldModel,
+    SoftDeletableMergeStatusModel,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    AdminUrlMixin,
+    PendingManager,
+)
 
 
 class IndividualCollection(UnicefIdentifiedModel):

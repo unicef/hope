@@ -9,7 +9,7 @@ from openpyxl.cell import Cell
 
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan, PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError

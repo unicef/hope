@@ -17,7 +17,7 @@ from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
-    PendingHousehold
+    PendingHousehold,
 )
 from hope.models.individual import PendingIndividual
 from hope.models.document_type import DocumentType

@@ -16,7 +16,7 @@ from rest_framework.reverse import reverse
 
 from hope.apps.account.permissions import Permissions
 from hope.models.business_area import BusinessArea
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import Household
 from hope.models.individual import Individual

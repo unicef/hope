@@ -20,7 +20,7 @@ from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
 from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import (
     FEMALE,

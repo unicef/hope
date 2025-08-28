@@ -12,11 +12,11 @@ from hope.models.user import User
 
 
 class HOPEAuthentication(TokenAuthentication):
-
     keyword = "Token"
 
     def authenticate_credentials(self, key: str) -> tuple[User, "APIToken"]:
         from hope.models.api_token import APIToken
+
         try:
             token = (
                 APIToken.objects.select_related("user")

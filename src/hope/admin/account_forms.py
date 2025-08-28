@@ -83,14 +83,8 @@ class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
                 business_area = form.cleaned_data["business_area"]
                 role = form.cleaned_data["role"]
                 incompatible_roles = list(
-                    IncompatibleRoles.objects.filter(role_one=role).values_list(
-                        "role_two", flat=True
-                    )
-                ) + list(
-                    IncompatibleRoles.objects.filter(role_two=role).values_list(
-                        "role_one", flat=True
-                    )
-                )
+                    IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+                ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
                 error_forms = [
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms

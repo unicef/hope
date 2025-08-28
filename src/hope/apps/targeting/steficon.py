@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 try:  # pragma: no cover
     from hope.models.rule import RuleCommit
 
-
     class RuleReRunForm(forms.Form):
         rule = forms.ModelChoiceField(
             queryset=RuleCommit.objects.filter(enabled=True, deprecated=False, is_release=True)

@@ -24,9 +24,6 @@ from requests import HTTPError
 from hope import models
 from hope.models.user import User
 from hope.models.incompatible_roles import IncompatibleRoles
-from hope.models import partner
-from hope.models import role
-from hope.models import role_assignment
 from hope.admin.account_filters import BusinessAreaFilter, HasKoboAccount
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.account_mixins import KoboAccessMixin
@@ -34,7 +31,6 @@ from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hope.models.user import User
 from hope.models.partner import Partner
 from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import build_arg_dict_from_dict
@@ -481,9 +477,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
-                                        IncompatibleRoles.objects.validate_user_role(
-                                            u, business_area, role
-                                        )
+                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
                                         u.role_assignments.get_or_create(business_area=business_area, role=role)
                                         self.log_addition(request, ur, "User Role added")
                                     except ValidationError as e:

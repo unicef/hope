@@ -6,8 +6,13 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hope.models.household import logger
-from hope.models.utils import TimeStampedUUIDModel, AbstractSyncable, SoftDeletableMergeStatusModel, MergeStatusModel, \
-    PendingManager
+from hope.models.utils import (
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    SoftDeletableMergeStatusModel,
+    MergeStatusModel,
+    PendingManager,
+)
 
 
 class DocumentValidator(TimeStampedUUIDModel):

@@ -15,6 +15,7 @@ from hope.models.payment_verification_plan import (
 )
 from hope.models.payment_verification_summary import PaymentVerificationSummary
 
+
 class TestBuildSummary(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

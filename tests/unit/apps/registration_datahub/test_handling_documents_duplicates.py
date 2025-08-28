@@ -14,7 +14,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 from hope.models.business_area import BusinessArea
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.models.household import (
     FEMALE,

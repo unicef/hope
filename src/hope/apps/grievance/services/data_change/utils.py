@@ -27,7 +27,7 @@ from hope.apps.core.utils import (
     encode_id_base64_required,
     serialize_flex_attributes,
 )
-from models import country as geo_models
+from hope.models.country import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.models.household import (
     HEAD,
@@ -157,7 +157,7 @@ def handle_add_document(document_data: dict, individual: Individual) -> Document
     ):
         raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
 
     return Document(
         document_number=number,
@@ -211,7 +211,7 @@ def handle_edit_document(document_data: dict) -> Document:
 
     document.document_number = number
     document.type = document_type
-    document.country = geo_models.Country.objects.get(iso_code3=country_code)
+    document.country = Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
     return document
@@ -220,7 +220,7 @@ def handle_edit_document(document_data: dict) -> Document:
 def handle_add_identity(identity: dict, individual: Individual) -> IndividualIdentity:
     partner_name = identity.get("partner")
     country_code = identity.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
@@ -244,7 +244,7 @@ def handle_edit_identity(identity_data: dict) -> IndividualIdentity:
     identity_id = updated_identity.get("id")
     country_code = updated_identity.get("country")
 
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
     identity = get_object_or_404(IndividualIdentity, id=identity_id)
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 

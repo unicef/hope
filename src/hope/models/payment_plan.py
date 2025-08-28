@@ -7,8 +7,12 @@ from typing import Optional, Any, Callable
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator, \
-    MinValueValidator
+from django.core.validators import (
+    MinLengthValidator,
+    MaxLengthValidator,
+    ProhibitNullCharactersValidator,
+    MinValueValidator,
+)
 from django.db import models
 from django.db.models import Count, Q, Sum, QuerySet
 from django.db.models.functions import Coalesce
@@ -37,8 +41,13 @@ from hope.models.payment import Payment
 from hope.models.rule import RuleCommit
 from hope.models.rule import Rule
 from hope.models.storage_file import StorageFile
-from hope.models.utils import TimeStampedUUIDModel, InternalDataFieldModel, ConcurrencyModel, UnicefIdentifiedModel, \
-    AdminUrlMixin
+from hope.models.utils import (
+    TimeStampedUUIDModel,
+    InternalDataFieldModel,
+    ConcurrencyModel,
+    UnicefIdentifiedModel,
+    AdminUrlMixin,
+)
 
 
 @dataclass

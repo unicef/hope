@@ -41,7 +41,7 @@ from hope.models.admin_area_limited_to import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
 from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,

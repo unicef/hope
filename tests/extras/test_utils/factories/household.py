@@ -11,7 +11,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from models import country as geo_models
+from hope.models import country as geo_models
 from hope.models.household import (
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_CHOICE,
