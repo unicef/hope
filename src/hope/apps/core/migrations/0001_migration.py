@@ -11,7 +11,7 @@ import mptt.fields
 from django.conf import settings
 from django.db import migrations, models
 
-import hope.models
+from hope.models.flexible_attribute import label_contains_english_en_validator
 
 
 class Migration(migrations.Migration):
@@ -319,7 +319,7 @@ class Migration(migrations.Migration):
                     "label",
                     models.JSONField(
                         default=dict,
-                        validators=[models.flexible_attribute.label_contains_english_en_validator],
+                        validators=[label_contains_english_en_validator],
                     ),
                 ),
                 ("hint", models.JSONField(default=dict)),

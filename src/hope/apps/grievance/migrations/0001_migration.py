@@ -6,9 +6,9 @@ from decimal import Decimal
 import concurrency.fields
 import django.core.validators
 import model_utils.fields
-from django.db import migrations
+from django.db import migrations, models
 
-from hope.models.utils
+from hope.models.utils import AdminUrlMixin
 
 
 class Migration(migrations.Migration):
@@ -170,7 +170,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Grievance Ticket",
                 "ordering": ("status", "created_at"),
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="GrievanceTicketThrough",
