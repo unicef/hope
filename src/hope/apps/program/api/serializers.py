@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from django.db.models import F, Q, Value, Exists, OuterRef
+from django.db.models import Exists, F, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema_field
@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.api.serializers import PartnerForProgramSerializer
-from hope.apps.account.models import Partner, AdminAreaLimitedTo
+from hope.apps.account.models import AdminAreaLimitedTo, Partner
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.api.serializers import DataCollectingTypeSerializer
 from hope.apps.core.models import (
