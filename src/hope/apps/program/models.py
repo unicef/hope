@@ -1,7 +1,7 @@
-import random
-import string
 from datetime import date
 from decimal import Decimal
+import secrets
+import string
 from typing import Any, Collection
 
 from django.conf import settings
@@ -289,7 +289,7 @@ class Program(
         super().save(*args, **kwargs)
 
     def generate_programme_code(self) -> str:
-        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
+        programme_code = "".join(secrets.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
         if Program.objects.filter(business_area_id=self.business_area_id, programme_code=programme_code).exists():
             return self.generate_programme_code()
         return programme_code

@@ -1,9 +1,9 @@
 import logging
 from typing import Any
 
-import requests
 from django.conf import settings
 from django.http import Http404
+import requests
 
 from hope.apps.utils.exceptions import log_and_raise
 
@@ -64,7 +64,10 @@ class MicrosoftGraphAPI:
                 q = f"https://graph.microsoft.com/v1.0/users/{uuid}"
                 value = self.get_results(q)
             elif email:
-                q = f"https://graph.microsoft.com/v1.0/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
+                q = (
+                    f"https://graph.microsoft.com/v1.0/users/?$filter=userType in "
+                    f"['Member','guest'] and mail eq '{email}'"
+                )
                 data = self.get_results(q)
                 value = data["value"][0]
             else:

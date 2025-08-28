@@ -7,6 +7,7 @@ from django.test import TestCase
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
@@ -62,10 +63,10 @@ class TestRegistrationXlsxImportTask(TestCase):
             "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
             new=_mock,
         ):
-            with self.assertRaises(Exception) as context:
+            with pytest.raises(Exception) as context:
                 self._run_task(rdi.id)
 
-        assert str(context.exception) == "something went wrong"
+        assert str(context.value) == "something went wrong"
 
     def _run_task(self, rdi_id: str) -> None:
         registration_xlsx_import_task(

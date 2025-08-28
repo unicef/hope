@@ -13,6 +13,7 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import (
@@ -176,9 +177,9 @@ class TestIndividualBlockFilter(TestCase):
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(payment_plan.get_query())
-        assert "There is no Flex Field Attributes associated with this fieldName flex_field_2" in str(e.exception)
+        assert "There is no Flex Field Attributes associated with this fieldName flex_field_2" in str(e.value)
 
     def test_filter_on_flex_field(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
@@ -228,11 +229,11 @@ class TestIndividualBlockFilter(TestCase):
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
         )
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(payment_plan.get_query())
         assert (
             "There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program"
-            in str(e.exception)
+            in str(e.value)
         )
 
     def test_filter_on_pdu_flex_field_no_round_number(self) -> None:
@@ -260,9 +261,9 @@ class TestIndividualBlockFilter(TestCase):
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
         )
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(payment_plan.get_query())
-        assert "Round number is missing for PDU Flex Field Attribute pdu_field_1" in str(e.exception)
+        assert "Round number is missing for PDU Flex Field Attribute pdu_field_1" in str(e.value)
 
     def test_filter_on_pdu_flex_field_incorrect_round_number(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
@@ -290,10 +291,10 @@ class TestIndividualBlockFilter(TestCase):
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
         )
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(payment_plan.get_query())
         assert "Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1" in str(
-            e.exception
+            e.value
         )
 
     def test_filter_on_pdu_flex_field(self) -> None:

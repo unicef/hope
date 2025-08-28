@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from extras.test_utils.factories.core import (
@@ -10,6 +9,7 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from pytz import utc
 
 from hope.apps.account.models import User
@@ -60,7 +60,7 @@ def add_household() -> Household:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
-    yield household
+    return household
 
 
 @pytest.mark.usefixtures("login")

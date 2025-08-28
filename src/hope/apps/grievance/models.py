@@ -1,6 +1,6 @@
-import logging
 from decimal import Decimal
 from itertools import chain
+import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings

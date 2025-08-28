@@ -1,10 +1,9 @@
-import os
-import uuid
 from decimal import Decimal
+import os
 from unittest import mock
 from unittest.mock import patch
+import uuid
 
-import pytest
 from django.conf import settings
 from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
@@ -15,6 +14,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.household.models import (
     DUPLICATE,
@@ -168,7 +168,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
 
         mock_process_deduplication.return_value = ({}, 409)
-        with self.assertRaises(BiometricDeduplicationService.BiometricDeduplicationServiceError):
+        with pytest.raises(BiometricDeduplicationService.BiometricDeduplicationServiceError):
             service.process_deduplication_set(
                 str(self.program.deduplication_set_id),
                 RegistrationDataImport.objects.all(),

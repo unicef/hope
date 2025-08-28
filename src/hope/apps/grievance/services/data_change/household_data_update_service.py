@@ -3,7 +3,6 @@ from typing import Any
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
-
 from django_countries.fields import Country
 
 from hope.apps.activity_log.models import log_create

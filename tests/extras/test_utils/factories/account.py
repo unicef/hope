@@ -3,12 +3,12 @@ import random
 import time
 from typing import Any, List
 
-import factory
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from extras.test_utils.factories.program import ProgramFactory
+import factory
 from factory.django import DjangoModelFactory
 
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.models import (
     AdminAreaLimitedTo,
     Partner,

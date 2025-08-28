@@ -2,7 +2,6 @@ import operator
 from typing import Tuple
 from unittest import mock
 
-import openpyxl
 from django.conf import settings
 from django.core.management import call_command
 from extras.test_utils.factories.core import (
@@ -12,6 +11,7 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+import openpyxl
 from parameterized import parameterized
 
 from hope.apps.core.base_test_case import BaseTestCase
@@ -336,7 +336,8 @@ class TestXLSXValidatorsMethods(BaseTestCase):
                     # {
                     #     "row_number": 4,
                     #     "header": "preferred_language_i_c",
-                    #     "message": "Sheet: 'Individuals', Unexpected value: Test for type select one of field preferred_language_i_c",
+                    #     "message": "Sheet: 'Individuals', Unexpected value:
+                    #     Test for type select one of field preferred_language_i_c",
                     # },
                     {
                         "row_number": 8,
@@ -558,12 +559,14 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             {
                 "row_number": 3,
                 "header": "Individuals",
-                "message": "Individual from row: 3 cannot be the primary and the alternate collector for households: 992630574 at the same time.",
+                "message": "Individual from row: 3 cannot be the primary and the alternate collector for households: "
+                "992630574 at the same time.",
             },
             {
                 "row_number": 4,
                 "header": "Individuals",
-                "message": "Individual from row: 4 cannot be the primary and the alternate collector for households: 853780211 at the same time.",
+                "message": "Individual from row: 4 cannot be the primary and the alternate collector for households: "
+                "853780211 at the same time.",
             },
         ]
 
@@ -625,7 +628,8 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             {
                 "row_number": 1,
                 "header": "People",
-                "message": "Invalid value in field 'pp_primary_collector_id' for Individual with index_id 1. Value cannot be empty for relationship NON_BENEFICIARY",
+                "message": "Invalid value in field 'pp_primary_collector_id' for Individual with index_id 1. "
+                "Value cannot be empty for relationship NON_BENEFICIARY",
             },
             {
                 "row_number": 1,

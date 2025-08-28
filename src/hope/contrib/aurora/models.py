@@ -1,8 +1,8 @@
 import json
 
-import swapper
 from django.db import models
 from strategy_field.fields import StrategyField
+import swapper
 
 from hope.apps.registration_datahub.utils import combine_collections
 from hope.apps.utils.models import TimeStampedModel

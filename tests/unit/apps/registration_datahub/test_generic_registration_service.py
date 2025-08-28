@@ -169,7 +169,9 @@ class TestGenericRegistrationService(TestCase):
         cls.files = {
             "individuals": [
                 {
-                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP///////////////////////////////////"
+                    "///////////////////////////////////////////////////wgALCAABAAEBAREA/8Q"
+                    "AFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }
