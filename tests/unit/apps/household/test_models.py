@@ -438,7 +438,5 @@ class TestIndividualModel(TestCase):
         doc_2.document_number = "123456ABC"
         doc_2.save()
 
-        with pytest.raises(Exception) as error:
+        with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
             ind.mark_as_distinct()
-
-        assert str(error.value) == "IND-333: Valid Document already exists: 123456ABC."

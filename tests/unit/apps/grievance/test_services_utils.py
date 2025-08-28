@@ -101,13 +101,11 @@ class TestGrievanceUtils(TestCase):
         assert flex_fields["decimal_field"] == 321.11
 
     def test_verify_flex_fields(self) -> None:
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="associated_with argument must be one of ['household', 'individual']"):
             verify_flex_fields({"key": "value"}, "associated_with")
-        assert str(e.value) == "associated_with argument must be one of ['household', 'individual']"
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="key is not a correct `flex field"):
             verify_flex_fields({"key": "value"}, "individuals")
-        assert str(e.value) == "key is not a correct `flex field"
 
     def test_verify_flex_fields_with_date_type(self) -> None:
         national_id_issue_date_i_f = Core_FlexibleAttribute(
@@ -120,9 +118,8 @@ class TestGrievanceUtils(TestCase):
 
         verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
             verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
-        assert str(e.value) == "time data 'invalid' does not match format '%Y-%m-%d'"
 
     def test_handle_role(self) -> None:
         create_afghanistan()
