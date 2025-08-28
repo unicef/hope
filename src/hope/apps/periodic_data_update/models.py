@@ -119,9 +119,7 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
             return self.Status.FAILED
         if self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED:
             return self.Status.NOT_SCHEDULED
-        if self.get_celery_status() == self.CELERY_STATUS_RECEIVED:
-            return self.Status.TO_EXPORT
-        if self.get_celery_status() == self.CELERY_STATUS_RETRY:
+        if self.get_celery_status() in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RETRY]:
             return self.Status.TO_EXPORT
         if self.get_celery_status() in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
             return self.Status.CANCELED
@@ -191,14 +189,9 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
             return self.Status.FAILED
         if self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED:
             return self.Status.NOT_SCHEDULED
-        if self.get_celery_status() == self.CELERY_STATUS_RECEIVED:
+        if self.get_celery_status() in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RETRY]:
             return self.Status.PENDING
-        if self.get_celery_status() == self.CELERY_STATUS_RETRY:
-            return self.Status.PENDING
-        if self.get_celery_status() in [
-            self.CELERY_STATUS_REVOKED,
-            self.CELERY_STATUS_CANCELED,
-        ]:
+        if self.get_celery_status() in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
             return self.Status.CANCELED
 
         return self.status
