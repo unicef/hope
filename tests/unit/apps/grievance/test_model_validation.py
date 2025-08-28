@@ -1,8 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import TestCase
-
-import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -10,6 +8,7 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     generate_delivery_mechanisms,
 )
+import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.admin.fsp import FspXlsxTemplatePerDeliveryMechanismForm
@@ -138,7 +137,8 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         assert not form.is_valid()
         with self.assertRaisesMessage(
             ValidationError,
-            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
+            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider "
+            "Test FSP (123): API']",
         ):
             form.clean()
 
@@ -156,7 +156,8 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         assert not form.is_valid()
         with self.assertRaisesMessage(
             ValidationError,
-            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
+            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider "
+            "Test FSP (123): API']",
         ):
             form.clean()
 

@@ -3,7 +3,6 @@ from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Dict
 from unittest.mock import patch
 
-import requests
 from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
@@ -15,6 +14,8 @@ from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 from extras.test_utils.factories.account import UserFactory
+import pytest
+import requests
 
 from hope.admin.kobo_template import XLSXKoboTemplateAdmin
 from hope.apps.core.base_test_case import BaseTestCase
@@ -154,11 +155,8 @@ class TestKoboErrorHandling(BaseTestCase):
             "hope.apps.core.kobo.api.KoboAPI.create_template_from_file",
             mock_create_template_from_file,
         ):
-            self.assertRaises(
-                KoboRetriableError,
-                UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute,
-                xlsx_kobo_template_id=empty_template.id,
-            )
+            with pytest.raises(KoboRetriableError):
+                UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.CONNECTION_FAILED
             assert empty_template.first_connection_failed_time is not None
@@ -189,11 +187,8 @@ class TestKoboErrorHandling(BaseTestCase):
             "hope.apps.core.kobo.api.KoboAPI.create_template_from_file",
             mock_create_template_from_file,
         ):
-            self.assertRaises(
-                KoboRetriableError,
-                UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute,
-                xlsx_kobo_template_id=empty_template.id,
-            )
+            with pytest.raises(KoboRetriableError):
+                UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.CONNECTION_FAILED
             assert empty_template.first_connection_failed_time is not None
@@ -209,11 +204,8 @@ class TestKoboErrorHandling(BaseTestCase):
             "hope.apps.core.kobo.api.KoboAPI.create_template_from_file",
             mock_create_template_from_file,
         ):
-            self.assertRaises(
-                Exception,
-                UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute,
-                xlsx_kobo_template_id=empty_template.id,
-            )
+            with pytest.raises(Exception):  # noqa
+                UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.UNSUCCESSFUL
             assert empty_template.first_connection_failed_time is None

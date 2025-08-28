@@ -1,6 +1,5 @@
 from typing import List
 
-import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
@@ -12,6 +11,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo import models as geo_models

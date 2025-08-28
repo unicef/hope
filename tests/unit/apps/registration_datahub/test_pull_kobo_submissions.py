@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-import pytest
 from django.conf import settings
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.registration_data.models import KoboImportData
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (

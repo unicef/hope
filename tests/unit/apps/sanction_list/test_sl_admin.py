@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-import responses
 from django.urls import reverse
+import responses
 
 if TYPE_CHECKING:
     from django_webtest import DjangoTestApp

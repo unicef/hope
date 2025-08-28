@@ -1,11 +1,11 @@
 from typing import Any
 
-import pytest
 from django.core.cache import cache
 from django.urls import reverse
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
+import pytest
 from rest_framework import status
 
 pytestmark = pytest.mark.django_db

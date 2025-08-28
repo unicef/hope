@@ -2,7 +2,6 @@ from datetime import date
 from io import BytesIO
 from pathlib import Path
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
@@ -18,6 +17,7 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.core.models import DataCollectingType, PeriodicFieldData
 from hope.apps.geo.models import Country as GeoCountry

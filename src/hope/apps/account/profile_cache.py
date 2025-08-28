@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Iterable
+
 from django.core.cache import cache
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase

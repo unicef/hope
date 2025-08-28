@@ -187,7 +187,10 @@ class TestExcludeHouseholds(BaseTestCase):
             self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
         )
 
-        error_msg = f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        error_msg = (
+            f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} "
+            f"because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        )
         assert self.payment_plan.exclude_household_error == error_msg
 
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)

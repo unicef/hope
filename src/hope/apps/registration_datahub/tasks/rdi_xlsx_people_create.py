@@ -1,9 +1,9 @@
-import logging
 from functools import partial
+import logging
 from typing import Any, Callable
 
-import openpyxl
 from django.db import transaction
+import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -12,8 +12,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.models import BusinessArea, FlexibleAttribute
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
-from hope.apps.geo.models import Area
-from hope.apps.geo.models import Country as GeoCountry
+from hope.apps.geo.models import Area, Country as GeoCountry
 from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,

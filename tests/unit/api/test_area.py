@@ -2,9 +2,9 @@ from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 from hope.api.models import Grant
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIAreaTests(HOPEApiTestCase):

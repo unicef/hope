@@ -1,6 +1,6 @@
+from itertools import chain
 import logging
 import re
-from itertools import chain
 from typing import Any, Iterable
 from uuid import UUID
 

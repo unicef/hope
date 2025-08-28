@@ -1,5 +1,5 @@
 import re
-from random import randint
+from secrets import randbelow
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -578,5 +578,5 @@ def generate_rdi_unique_name(program: Program) -> str:
     # add random 4 digits if needed and check if exists RDI name
     default_name = f"RDI for enroll households to Programme: {program.name}"
     while RegistrationDataImport.objects.filter(business_area=program.business_area, name=default_name).exists():
-        default_name = f"{default_name} ({randint(1000, 9999)})"
+        default_name = f"{default_name} ({randbelow(9000) + 1000})"
     return default_name

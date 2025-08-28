@@ -1,6 +1,6 @@
 import binascii
-import os
 from enum import Enum, auto, unique
+import os
 from typing import Any
 
 from django.db import models

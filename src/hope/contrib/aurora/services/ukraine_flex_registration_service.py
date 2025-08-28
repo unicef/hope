@@ -1,5 +1,5 @@
-import uuid
 from typing import TYPE_CHECKING, Any
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory

@@ -1,8 +1,8 @@
 from typing import Any
 
-import pytest
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 

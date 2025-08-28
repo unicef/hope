@@ -1,7 +1,6 @@
 from typing import Any, Optional
 from unittest.mock import patch
 
-import pytest
 from django.test import TestCase
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -15,6 +14,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.apps.household.models import (
     HEAD,
@@ -161,7 +161,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
     def test_registration_program_population_import_task_error(self) -> None:
         rdi_id = self.registration_data_import.id
         self.registration_data_import.delete()
-        with self.assertRaises(RegistrationDataImport.DoesNotExist):
+        with pytest.raises(RegistrationDataImport.DoesNotExist):
             self._run_task(str(rdi_id))
 
     def test_registration_program_population_import_ba_postpone_deduplication(

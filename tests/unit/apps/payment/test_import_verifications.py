@@ -1,9 +1,9 @@
 import io
-import uuid
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, List
 from unittest.mock import patch
+import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
