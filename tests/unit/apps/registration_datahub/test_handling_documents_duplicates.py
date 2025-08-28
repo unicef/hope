@@ -5,14 +5,14 @@ from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
+import pytest
+
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails

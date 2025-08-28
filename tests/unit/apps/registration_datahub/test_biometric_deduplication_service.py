@@ -6,6 +6,8 @@ import uuid
 
 from django.conf import settings
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -14,8 +16,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,

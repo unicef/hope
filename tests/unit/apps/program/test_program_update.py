@@ -1,6 +1,10 @@
 import copy
 from typing import Any, Callable
 
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -22,10 +26,6 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
 )
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import (
     DataCollectingType,

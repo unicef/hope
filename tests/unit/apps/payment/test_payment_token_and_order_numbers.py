@@ -1,12 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-
 from hope.apps.geo.models import Country
 from hope.apps.household.models import Household
 from hope.apps.payment.models import Payment, PaymentPlan

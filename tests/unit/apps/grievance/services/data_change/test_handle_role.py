@@ -1,8 +1,8 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.grievance.services.data_change.utils import handle_role
 from hope.apps.household.models import (
     ROLE_ALTERNATE,
