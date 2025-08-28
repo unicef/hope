@@ -3,7 +3,6 @@ from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
@@ -23,6 +22,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from freezegun import freeze_time
 from parameterized import parameterized
+import pytest
 
 from hope.apps.household.models import (
     BROTHER_SISTER,

@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Any, List
 from unittest.mock import patch
 
-import pytest
 from django.conf import settings
 from django.urls import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+import pytest
 from rest_framework import status
 
 from hope.apps.account.permissions import Permissions

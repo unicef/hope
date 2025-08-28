@@ -1,4 +1,3 @@
-import pytest
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.communication import AccountabilityCommunication
 from e2e.page_object.accountability.comunication_details import (
@@ -6,6 +5,7 @@ from e2e.page_object.accountability.comunication_details import (
 )
 from extras.test_utils.factories.accountability import CommunicationMessageFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
+import pytest
 
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Message
@@ -95,7 +95,8 @@ class TestSmokeAccountabilityCommunication:
         )
 
         assert (
-            "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC"
+            "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on "
+            "2022-09-19 20:00:00 UTC"
             in page_accountability_communication_details.get_communication_message_details().text.replace("\n", " ")
         )
 

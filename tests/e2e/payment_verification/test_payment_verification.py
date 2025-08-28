@@ -1,10 +1,8 @@
-import os
 from datetime import datetime
 from decimal import Decimal
+import os
 from time import sleep
 
-import openpyxl
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
@@ -29,14 +27,20 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import openpyxl
+import pytest
 from selenium.webdriver.common.by import By
 
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
-from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hope.apps.payment.models import PaymentVerification
-from hope.apps.payment.models import PaymentVerificationPlan
+from hope.apps.payment.models import (
+    DeliveryMechanism,
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
@@ -73,7 +77,7 @@ def create_program(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    yield ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code="1234",
         start_date=datetime.now() - relativedelta(months=1),
@@ -90,7 +94,7 @@ def create_program(
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
+    return create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
 @pytest.fixture
@@ -186,12 +190,12 @@ def empty_payment_verification(social_worker_program: Program) -> None:
 
 @pytest.fixture
 def add_payment_verification() -> PaymentVerification:
-    yield payment_verification_creator()
+    return payment_verification_creator()
 
 
 @pytest.fixture
 def add_payment_verification_xlsx() -> PaymentVerification:
-    yield payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
+    return payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
 
 
 def payment_verification_creator(

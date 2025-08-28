@@ -1,5 +1,5 @@
-import logging
 from decimal import Decimal
+import logging
 from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.admin.options import get_content_type_for_model

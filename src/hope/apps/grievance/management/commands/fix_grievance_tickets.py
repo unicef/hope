@@ -45,7 +45,8 @@ def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: A
                     new_disability_value = NOT_DISABLED
                 if new_disability_value is not None:
                     logging.info(
-                        f"Found ticket (id={ticket.id}) with disability: '{disability_value}'. Changing to '{new_disability_value}'"
+                        f"Found ticket (id={ticket.id}) with disability: '{disability_value}'. "
+                        f"Changing to '{new_disability_value}'"
                     )
                     ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] = (
                         new_disability_value

@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
@@ -12,6 +11,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_active_test_program() -> Program:
-    yield create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
+    return create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
 
 
 @pytest.fixture

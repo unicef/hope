@@ -2,8 +2,8 @@ import logging
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
 
-import coreapi
 from constance import config
+import coreapi
 from coreapi import codecs
 from coreapi.exceptions import NoCodecAvailable
 from django.db.transaction import atomic

@@ -7,7 +7,6 @@ from django.urls import reverse
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
-from unit.api.base import HOPEApiTestCase
 
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -23,6 +22,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class PushLaxToRDITests(HOPEApiTestCase):

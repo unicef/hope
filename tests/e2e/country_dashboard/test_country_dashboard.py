@@ -2,14 +2,14 @@ from datetime import timedelta
 from random import choice
 from typing import Callable
 
-import factory
-import pytest
 from django.utils import timezone
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+import factory
+import pytest
 from selenium.webdriver.common.by import By
 
 from hope.apps.dashboard.services import DashboardDataCache
