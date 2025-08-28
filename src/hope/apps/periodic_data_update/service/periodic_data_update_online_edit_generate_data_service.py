@@ -34,7 +34,8 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
                 subtype = field_subtype_map.get(pdu_field_name)
                 if not subtype:
                     raise ValidationError(
-                        f"PDU field '{pdu_field_name}' not found in flexible attributes for program '{self.program.name}'."
+                        f"PDU field '{pdu_field_name}' not found in flexible attributes for program "
+                        f"'{self.program.name}'."
                     )
 
                 round_number = round_info["round"]

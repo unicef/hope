@@ -61,8 +61,7 @@ def update_rounds_covered_for_template(pdu_template: PDUXlsxTemplate | PDUOnline
         new_round = field_to_round_map.get(field.name)
         pdu_data = field.pdu_data
         if new_round <= pdu_data.rounds_covered:
-            raise ValidationError(
-                f"Template for round {new_round} of field '{(field.label.get('English(EN)') or field.name)}' has already been created."
-            )
+            field_label = field.label.get("English(EN)") or field.name
+            raise ValidationError(f"Template for round {new_round} of field '{field_label}' has already been created.")
         pdu_data.rounds_covered = new_round
         pdu_data.save(update_fields=["rounds_covered"])

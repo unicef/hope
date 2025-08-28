@@ -73,8 +73,12 @@ class UniversalUpdate(
     )
 
     celery_task_names = {
-        "generate_universal_individual_update_template": "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template",
-        "run_universal_individual_update": "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update",
+        "generate_universal_individual_update_template": (
+            "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template"
+        ),
+        "run_universal_individual_update": (
+            "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update"
+        ),
     }
 
     class Meta:
