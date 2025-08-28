@@ -382,7 +382,7 @@ class SignatureMixin(models.Model):
 
     def update_signature_hash(self) -> None:
         if hasattr(self, "signature_fields") and isinstance(self.signature_fields, list | tuple):
-            sha1 = hashlib.sha1()
+            sha1 = hashlib.sha1()  # noqa
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
 

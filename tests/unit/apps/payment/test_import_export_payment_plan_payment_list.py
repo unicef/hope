@@ -10,6 +10,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
+import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import UserFactory
@@ -461,12 +462,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             == 0
         )
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             export_service.get_template(self.fsp_1, self.dm_atm_card)
         assert (
             f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
             f"Plan {self.payment_plan.unicef_id} for FSP {self.fsp_1.name} and delivery "
-            f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}." in str(e.exception)
+            f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}." in str(e.value)
         )
 
     def test_flex_fields_admin_visibility(self) -> None:

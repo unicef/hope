@@ -1,6 +1,11 @@
 import base64
 from io import BytesIO
-from typing import Any
+
+from parameterized import parameterized
+from PIL import Image
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from parameterized import parameterized
 from PIL import Image
@@ -273,7 +278,7 @@ class TestPushPeople(HOPEApiTestCase):
         ]
     )
     def test_upload_single_person_with_phone_number(
-        self, _: Any, field_name: str, phone_number: str, expected_value: bool
+        self, helper: str, field_name: str, phone_number: str, expected_value: bool
     ) -> None:
         data = [
             {
@@ -306,7 +311,7 @@ class TestPushPeople(HOPEApiTestCase):
             ("null-village", None, ""),
         ]
     )
-    def test_push_single_person_with_village(self, _: Any, village: str, expected_value: str) -> None:
+    def test_push_single_person_with_village(self, helper: str, village: str, expected_value: str) -> None:
         data = [
             {
                 "residence_status": "IDP",

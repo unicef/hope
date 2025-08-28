@@ -1,4 +1,4 @@
-from typing import Any
+from parameterized import parameterized
 
 from parameterized import parameterized
 
@@ -79,7 +79,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             ("test_wrong_column_name", "invalid_column_name"),
         ]
     )
-    def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
+    def test_get_column_value_from_payment(self, helper: str, field_name: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
             individual_args={

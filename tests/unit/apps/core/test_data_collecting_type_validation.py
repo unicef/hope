@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
@@ -26,11 +27,10 @@ class TestDCTValidation(TestCase):
 
         dct_full.type = DataCollectingType.Type.SOCIAL
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             dct_full.save()
         assert (
-            str(error.exception.messages[0])
-            == "Type of DCT cannot be changed if it has compatible DCTs of different type."
+            str(error.value.messages[0]) == "Type of DCT cannot be changed if it has compatible DCTs of different type."
         )
 
     def test_add_compatible_type_with_different_type(self) -> None:
@@ -42,6 +42,6 @@ class TestDCTValidation(TestCase):
             type=DataCollectingType.Type.SOCIAL,
         )
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             dct_full.compatible_types.add(dct_social)
-        assert str(error.exception.messages[0]) == "DCTs of different types cannot be compatible with each other."
+        assert str(error.value.messages[0]) == "DCTs of different types cannot be compatible with each other."

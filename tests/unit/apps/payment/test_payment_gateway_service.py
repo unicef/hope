@@ -935,9 +935,8 @@ class TestPaymentGatewayService(BaseTestCase):
         s = Mock()
         bad_status = "bad_status"
         s.value = bad_status
-        with self.assertRaisesRegex(
-            PaymentGatewayAPI.PaymentGatewayAPIError,
-            "Can't set invalid Payment Instruction status:",
+        with pytest.raises(
+            PaymentGatewayAPI.PaymentGatewayAPIError, match="Can't set invalid Payment Instruction status:"
         ):
             PaymentGatewayAPI().change_payment_instruction_status(
                 s,
