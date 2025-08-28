@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 import os
-import random
+import secrets
 from typing import Any
 
 from django.conf import settings
@@ -10,7 +10,7 @@ import openpyxl
 
 faker = Faker()
 
-random_number = lambda: random.randint(1, 2**31)
+random_number = lambda: secrets.randbelow(2**31) + 1
 date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()

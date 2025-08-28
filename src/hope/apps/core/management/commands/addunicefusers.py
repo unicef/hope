@@ -27,11 +27,7 @@ class Command(BaseCommand):
         role = Role.objects.get(name="Role with all permissions")
         for username in emails:
             email = username + "@unicef.org"
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password="PaymentModule123",
-                is_staff=True,
-                is_superuser=True,
-            )
+            user = User.objects.create_user(username=username, email=email, is_staff=True, is_superuser=True)
+            user.set_unusable_password()
+            user.save()
             RoleAssignment.objects.create(business_area=afg, user=user, role=role)
