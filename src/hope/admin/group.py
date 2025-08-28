@@ -7,7 +7,6 @@ from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
-from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group, Permission
 from django.db.models import QuerySet
@@ -21,6 +20,8 @@ from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
 from hope.models.user_group import UserGroup
+from hope.models.user import User
+
 from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,6 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
     @button(permission="auth.view_group")
     def users(self, request: HttpRequest, pk: str) -> HttpResponse:
-        User = get_user_model()  # noqa
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
         users = User.objects.filter(groups=group).distinct()

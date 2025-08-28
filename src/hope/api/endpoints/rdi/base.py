@@ -1,7 +1,6 @@
 from dataclasses import asdict
 from typing import Any
 
-from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest
@@ -17,6 +16,7 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.models.grant import Grant
+from hope.models.user import User
 from hope.api.utils import humanize_errors
 from hope.models.country import Country
 from hope.models.household import PendingHousehold
@@ -54,7 +54,6 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     @atomic()
     def perform_create(self, serializer: serializers.BaseSerializer) -> None:
         imported_by_email = serializer.validated_data.get("imported_by_email")
-        User = get_user_model()  # noqa
         try:
             imported_by = User.objects.get(email=imported_by_email)
         except User.DoesNotExist:

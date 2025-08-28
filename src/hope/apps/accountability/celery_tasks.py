@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from hope.models.survey import Survey
@@ -21,9 +20,10 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def export_survey_sample_task(survey_id: str, user_id: str) -> None:
+    from hope.models.user import User
     try:
         survey = Survey.objects.get(id=survey_id)
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         set_sentry_business_area_tag(survey.business_area.name)
 
         service = ExportSurveySampleService(survey, user)

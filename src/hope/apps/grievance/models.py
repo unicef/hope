@@ -4,7 +4,6 @@ from itertools import chain
 from typing import Any, Iterable, Optional
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -24,6 +23,7 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
+from hope.models.user import User
 from hope.models.individual import Individual
 from hope.models.payment import Payment
 from hope.models.payment_verification import PaymentVerification
@@ -1059,7 +1059,7 @@ class GrievanceDocument(UUIDModel):
         related_name="support_documents",
         on_delete=models.SET_NULL,
     )
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, null=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)
     content_type = models.CharField(max_length=100, null=False)
     file_size = models.IntegerField(null=True)

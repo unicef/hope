@@ -302,7 +302,7 @@ SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY")
 SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-# AUTH_USER_MODEL = "account.User" # FIXME
+AUTH_USER_MODEL = "account.User"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
 GRAPHENE = {

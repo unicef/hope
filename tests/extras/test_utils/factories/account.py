@@ -5,7 +5,6 @@ from typing import Any, List
 
 import factory
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 
@@ -45,7 +44,7 @@ class BusinessAreaFactory(DjangoModelFactory):
 
 class UserFactory(DjangoModelFactory):
     class Meta:
-        model = get_user_model()
+        model = User
         django_get_or_create = ("username", "email")
 
     first_name = factory.Faker("first_name")
@@ -58,7 +57,7 @@ class UserFactory(DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> User:
-        user_model = get_user_model()
+        user_model = User
         manager = cls._get_manager(model_class)
         keyword_arguments = kwargs.copy()
         if "password" not in keyword_arguments:

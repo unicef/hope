@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
@@ -18,7 +17,7 @@ from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
 from hope.models.program import Program
-
+from hope.models.user import User
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
@@ -80,7 +79,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     cross_area_filter_available = serializers.SerializerMethodField()
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = (
             "id",
             "username",
@@ -144,7 +143,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ("id", "first_name", "last_name", "email", "username")
 
 

@@ -4,6 +4,7 @@ import re
 import sys
 from pathlib import Path
 from time import sleep
+import pytest
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser

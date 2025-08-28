@@ -25,12 +25,12 @@ def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any
         instance.user.save()
 
 
-@receiver(pre_save, sender=get_user_model())
+@receiver(pre_save, sender=User)
 def pre_save_user(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     instance.last_modify_date = timezone.now()
 
 
-@receiver(post_save, sender=get_user_model())
+@receiver(post_save, sender=User)
 def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwargs: Any) -> None:
     if created is False:
         return

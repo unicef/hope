@@ -9,10 +9,9 @@ import django.utils.timezone
 import model_utils.fields
 import mptt.fields
 from django.conf import settings
-from django.db import migrations
+from django.db import migrations, models
 
-from hope.models.business_area
-from hope.models.flexible_attribute
+import hope.models
 
 
 class Migration(migrations.Migration):

@@ -9,7 +9,7 @@ class TargetingCollectorRuleFilterBlock(
     TargetingCollectorRuleFilterBlockBase,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "sanction_list.TargetingCriteriaRule",
+        "targeting.TargetingCriteriaRule",
         on_delete=models.CASCADE,
         related_name="collectors_filters_blocks",
     )

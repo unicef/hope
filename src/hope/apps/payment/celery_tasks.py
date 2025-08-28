@@ -4,8 +4,6 @@ from typing import Any
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -13,18 +11,12 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from hope.models.user import User
 from hope.apps.core.celery import app
-from hope.models.file_temp import FileTemp
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -62,8 +54,10 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
+    from hope.models.user import User
+    from hope.models.payment_verification_plan import PaymentVerificationPlan
     try:
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
 
         set_sentry_business_area_tag(payment_verification_plan.business_area.name)
@@ -89,6 +83,8 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 @sentry_tags
 def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Verification report XLSX files."""
+    from django.contrib.contenttypes.models import ContentType
+    from hope.models.file_temp import FileTemp
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
@@ -114,8 +110,9 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
             XlsxPaymentPlanExportService,
         )
+        from hope.models.user import User
 
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
@@ -154,8 +151,9 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
+        from hope.models.user import User
 
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
@@ -195,8 +193,9 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
+        from hope.models.user import User
 
-        user: User = get_user_model().objects.get(pk=user_id)
+        user: User = User.objects.get(pk=user_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
@@ -293,12 +292,12 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
     from hope.models.payment import Payment
     from hope.models.payment_plan import PaymentPlan
-    from hope.models.rule import Rule
+    from hope.models.rule import Rule, RuleCommit
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: "RuleCommit" | None = engine_rule.latest
+    rule: RuleCommit | None = engine_rule.latest
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
         payment_plan.save()
@@ -557,10 +556,11 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
     try:
         from hope.models.business_area import FileTemp
         from hope.models.payment_plan import PaymentPlan
+        from hope.models.user import User
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
 
         with transaction.atomic():
             # regenerate PDF always
@@ -630,11 +630,13 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
 @sentry_tags
 def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayService
+    from hope.models.user import User
+    from hope.models.payment_plan import PaymentPlan
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        user = get_user_model().objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
 
         payment_plan.background_action_status_send_to_payment_gateway()
         payment_plan.save(update_fields=["background_action_status"])
@@ -679,6 +681,8 @@ def send_payment_notification_emails(
     action_date_formatted: str,
 ) -> None:
     from hope.apps.payment.notifications import PaymentNotification
+    from hope.models.user import User
+    from hope.models.payment_plan import PaymentPlan
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -710,13 +714,14 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-    from hope.models.payment import Payment, PaymentPlan
-    from hope.models.rule import Rule
+    from hope.models.payment import Payment
+    from hope.models.payment_plan import PaymentPlan
+    from hope.models.rule import Rule, RuleCommit
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: "RuleCommit" | None = engine_rule.latest
+    rule: RuleCommit | None = engine_rule.latest
     if rule and rule.id != payment_plan.steficon_rule_targeting_id:
         payment_plan.steficon_rule_targeting = rule
         payment_plan.save(update_fields=["steficon_rule_targeting"])
@@ -753,6 +758,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
 @log_start_and_end
 @sentry_tags
 def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
+    from hope.models.payment_plan import PaymentPlan
     with cache.lock(
         f"payment_plan_rebuild_stats_{payment_plan_id}",
         blocking_timeout=60 * 10,
@@ -778,6 +784,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
 @sentry_tags
 def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models.payment_plan import PaymentPlan
 
     with cache.lock(
         f"payment_plan_full_rebuild_{payment_plan_id}",
@@ -800,16 +807,9 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
             raise self.retry(exc=e)
 
 
-def does_payment_record_have_right_hoh_phone_number(record: Payment) -> bool:
-    hoh = record.head_of_household
-    if not hoh:
-        logging.warning("Payment record has no head of household")
-        return False
-    return hoh.phone_no_valid or hoh.phone_no_alternative_valid
-
-
 class CheckRapidProVerificationTask:
     def execute(self) -> None:
+        from hope.models.payment_verification_plan import PaymentVerificationPlan
         active_rapidpro_verifications = PaymentVerificationPlan.objects.filter(
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
@@ -820,7 +820,9 @@ class CheckRapidProVerificationTask:
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan) -> None:
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: Any) -> None:
+        from hope.models.payment_verification import PaymentVerification
+
         payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
             "payment__head_of_household"
         )
@@ -851,7 +853,7 @@ class CheckRapidProVerificationTask:
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict: Any, rapid_pro_result: Any
-    ) -> PaymentVerification | None:
+    ) -> Any | None:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")

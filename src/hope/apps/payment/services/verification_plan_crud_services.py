@@ -1,11 +1,9 @@
+import logging
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.payment.celery_tasks import (
-    does_payment_record_have_right_hoh_phone_number,
-)
 from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
@@ -16,6 +14,18 @@ from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVeri
 
 if TYPE_CHECKING:
     from hope.models.payment_plan import PaymentPlan  # pragma: no cover
+    from hope.models.payment import Payment
+
+
+logger = logging.getLogger(__name__)
+
+
+def does_payment_record_have_right_hoh_phone_number(record: "Payment") -> bool:
+    hoh = record.head_of_household
+    if not hoh:
+        logging.warning("Payment record has no head of household")
+        return False
+    return hoh.phone_no_valid or hoh.phone_no_alternative_valid
 
 
 def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:

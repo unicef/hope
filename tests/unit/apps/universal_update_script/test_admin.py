@@ -5,12 +5,12 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
 from hope.models.program import Program
+from hope.models.user import User
 from hope.models.universal_update_script import UniversalUpdate
 
 
 class UniversalUpdateAdminTest(TestCase):
     def setUp(self) -> None:
-        User = get_user_model()  # noqa
         self.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
         self.client.login(username=self.admin_user.username, password="password")
         self.business_area = create_afghanistan()
