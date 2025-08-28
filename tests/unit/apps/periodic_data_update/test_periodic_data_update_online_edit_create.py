@@ -436,7 +436,8 @@ class TestPDUOnlineEditCreate:
             program=self.program,
         )
 
-        # individual already has a value for vaccination_records_update in round 2 - value should be retrieved and is_editable should be False
+        # individual already has a value for vaccination_records_update in round 2 - value should be
+        # retrieved and is_editable should be False
         self.individual2.flex_fields["vaccination_records_update"]["2"]["value"] = 1.0
         self.individual2.save()
 
