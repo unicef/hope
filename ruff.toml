@@ -65,20 +65,15 @@ ignore = [
     "PLR2004", # Magic value used in comparison
     "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
 
-    "PT019",  # pytest.mark.usefixtures
-    "PT027",  # pytest.raises
-
-    "ERA001",  # e2e comments..
-
-    "N805",  #  First argument of a method should be named `self`
-
     "PLR0911",  # too many returns
     "PLR0912", # too many branches
     "PLR0913",  # too many arguments
     "PLR0915",  # too many statements
-    "PLC0415",  # `import` should be at the top-level of a file
-
     "C901",  # too complex
+    "PLC0415",  # `import` should be at the top-level of a file
+    "ERA001",  # e2e comments..
+
+    "N805",  #  First argument of a method should be named `self`
     "BLE001",  # Do not catch blind exception: `BaseException`
 ]
 

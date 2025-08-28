@@ -24,7 +24,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
         return_value=None,
     )
-    def test_task_start_importing(self, _: Any) -> None:
+    def test_task_start_importing(self, mock_execute: Any) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORT_SCHEDULED)
 
         self._run_task(rdi.id)

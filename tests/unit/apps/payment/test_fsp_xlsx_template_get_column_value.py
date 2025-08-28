@@ -1,5 +1,3 @@
-from typing import Any
-
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -79,7 +77,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             ("test_wrong_column_name", "invalid_column_name"),
         ]
     )
-    def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
+    def test_get_column_value_from_payment(self, helper: str, field_name: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
             individual_args={
