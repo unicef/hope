@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from e2e.page_object.programme_population.households import Households
-from e2e.page_object.programme_population.households_details import HouseholdsDetails
 import pytest
 from pytz import utc
 
+from e2e.page_object.programme_population.households import Households
+from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,

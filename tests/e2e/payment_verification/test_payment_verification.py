@@ -4,6 +4,10 @@ import os
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+import openpyxl
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.payment_verification.payment_record import PaymentRecord
@@ -14,10 +18,6 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.payment_module.test_payment_plans import find_file
-import openpyxl
-import pytest
-from selenium.webdriver.common.by import By
-
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import (

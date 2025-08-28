@@ -1,13 +1,13 @@
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
+import pytest
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-import pytest
-
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,

@@ -1,10 +1,10 @@
+import pytest
+
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.communication import AccountabilityCommunication
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
-import pytest
-
 from extras.test_utils.factories.accountability import CommunicationMessageFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from hope.apps.account.models import User

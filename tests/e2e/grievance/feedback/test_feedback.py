@@ -1,3 +1,5 @@
+import pytest
+
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -5,8 +7,6 @@ from e2e.page_object.grievance.feedback import Feedback
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-import pytest
-
 from extras.test_utils.factories.accountability import generate_feedback
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,

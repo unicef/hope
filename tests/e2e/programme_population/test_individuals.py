@@ -1,8 +1,8 @@
-from e2e.page_object.programme_population.individuals import Individuals
-from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from freezegun import freeze_time
 import pytest
 
+from e2e.page_object.programme_population.individuals import Individuals
+from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
