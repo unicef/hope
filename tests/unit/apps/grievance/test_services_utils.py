@@ -5,6 +5,9 @@ import uuid
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -26,9 +29,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
-
 from hope.apps.account.models import AdminAreaLimitedTo
 from hope.apps.core.models import BusinessArea, FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket

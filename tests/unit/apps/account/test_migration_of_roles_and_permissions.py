@@ -3,6 +3,8 @@ from importlib import import_module
 from django.apps import apps
 from django.test import TestCase
 from django.utils import timezone
+import pytest
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -10,8 +12,6 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, Role, RoleAssignment
 from hope.apps.core.models import BusinessAreaPartnerThrough
 from hope.apps.program.models import ProgramPartnerThrough

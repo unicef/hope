@@ -4,6 +4,8 @@ from constance.test import override_config
 from django.conf import settings
 from django.urls import reverse
 from django_webtest import WebTest
+import responses
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -11,8 +13,6 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
-import responses
-
 from hope.admin.account_mixins import get_valid_kobo_username
 from hope.apps.account.models import IncompatibleRoles, Role, User
 from hope.apps.core.models import BusinessArea

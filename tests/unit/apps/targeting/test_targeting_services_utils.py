@@ -1,10 +1,10 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.household.models import Household, Individual
 from hope.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,

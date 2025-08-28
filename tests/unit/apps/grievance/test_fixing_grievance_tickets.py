@@ -1,5 +1,7 @@
 from typing import Any
 
+from parameterized import parameterized
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
@@ -7,8 +9,6 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from parameterized import parameterized
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.management.commands.fix_grievance_tickets import (
     fix_disability_fields,

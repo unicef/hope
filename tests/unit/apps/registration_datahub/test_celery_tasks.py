@@ -13,6 +13,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.functional import classproperty
+import pytest
+
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
@@ -28,8 +30,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING

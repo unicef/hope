@@ -1,10 +1,10 @@
 from django.core.management import call_command
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.models import (

@@ -2,20 +2,20 @@ from datetime import datetime
 from time import sleep
 
 from django.conf import settings
+from elasticsearch_dsl import connections
+import pytest
+
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from e2e.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport as RegistrationDataImportComponent,
 )
-from elasticsearch_dsl import connections
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-
 from hope.apps.account.models import Partner, User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area, AreaType, Country

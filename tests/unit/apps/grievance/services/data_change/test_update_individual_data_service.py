@@ -2,6 +2,9 @@ import uuid
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
@@ -19,9 +22,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
-
 from hope.apps.geo.models import Country
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,

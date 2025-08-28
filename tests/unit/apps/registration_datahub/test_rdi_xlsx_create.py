@@ -12,6 +12,9 @@ from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
 from django_countries.fields import Country
+from PIL import Image
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     create_afghanistan,
@@ -25,9 +28,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from PIL import Image
-import pytest
-
 from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
 from hope.apps.geo.models import Country as GeoCountry

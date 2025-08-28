@@ -8,6 +8,8 @@ from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 from django_countries.fields import Country
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     create_afghanistan,
@@ -17,8 +19,6 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.core.models import DataCollectingType, PeriodicFieldData
 from hope.apps.geo.models import Country as GeoCountry
 from hope.apps.household.models import (

@@ -4,6 +4,10 @@ from typing import Any, Callable
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -16,10 +20,6 @@ from extras.test_utils.factories.geo import (
     CountryFactory,
     generate_area_types,
 )
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.geo.models import Area, AreaType, Country
 

@@ -5,11 +5,11 @@ from typing import Any
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
+from faker import Faker
+
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from faker import Faker
-
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.household.models import (

@@ -2,14 +2,14 @@ from typing import Any, Dict, Optional
 
 from django.core.management import call_command
 from django.urls import reverse
+import pytest
+from rest_framework import status
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-from rest_framework import status
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo import models as geo_models

@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
 from extras.test_utils.factories.household import (
@@ -5,8 +7,6 @@ from extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from parameterized import parameterized
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.models import Household
