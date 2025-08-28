@@ -2,7 +2,6 @@ from datetime import datetime
 from decimal import Decimal
 from time import sleep
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
@@ -17,6 +16,7 @@ from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 from selenium.common.exceptions import NoSuchElementException
 
 from hope.apps.account.models import User
@@ -31,7 +31,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def standard_program() -> Program:
-    yield get_program_with_dct_type_and_name("Test For Edit", "TEST")
+    return get_program_with_dct_type_and_name("Test For Edit", "TEST")
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def program_with_three_cycles() -> Program:
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     program.save()
-    yield program
+    return program
 
 
 @pytest.fixture
@@ -69,7 +69,7 @@ def program_with_different_cycles() -> Program:
         end_date=datetime.now() + relativedelta(days=20),
     )
     program.save()
-    yield program
+    return program
 
 
 def get_program_with_dct_type_and_name(
@@ -104,7 +104,7 @@ def get_program_with_dct_type_and_name(
 
 @pytest.fixture
 def standard_program_with_draft_programme_cycle() -> Program:
-    yield get_program_without_cycle_end_date(
+    return get_program_without_cycle_end_date(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -114,7 +114,7 @@ def standard_program_with_draft_programme_cycle() -> Program:
 
 @pytest.fixture
 def standard_active_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -125,7 +125,7 @@ def standard_active_program() -> Program:
 
 @pytest.fixture
 def standard_active_program_cycle_draft() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -136,7 +136,7 @@ def standard_active_program_cycle_draft() -> Program:
 
 @pytest.fixture
 def standard_active_program_with_draft_program_cycle() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme And DRAFT Programme Cycle",
         "LILI",
         status=Program.ACTIVE,
@@ -222,7 +222,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         is_follow_up=False,
         program_cycle=cycle,
     )
-    yield payment_plan[0]
+    return payment_plan[0]
 
 
 @pytest.fixture
@@ -780,10 +780,12 @@ class TestProgrammeDetails:
 
         # ToDo: Lack of information about wrong date 212579
         # for _ in range(50):
-        #     if "Programme Cycles' timeframes must not overlap with the provided start date." in page_programme_details.get_start_date_cycle_div().text:
+        #     if ("Programme Cycles' timeframes must not overlap with the provided start date."
+        #             in page_programme_details.get_start_date_cycle_div().text):
         #         break
         #     sleep(0.1)
-        # assert "Programme Cycles' timeframes must not overlap with the provided start date." in page_programme_details.get_start_date_cycle_div().text
+        # assert ("Programme Cycles' timeframes must not overlap with the provided start date."
+        #         in page_programme_details.get_start_date_cycle_div().text)
 
         page_programme_details.get_start_date_cycle().click()
         page_programme_details.get_start_date_cycle().send_keys(

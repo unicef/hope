@@ -1,5 +1,5 @@
-import logging
 from datetime import date, timedelta
+import logging
 from typing import Any
 
 from constance import config
@@ -13,8 +13,8 @@ from django_filters import (
     FilterSet,
     MultipleChoiceFilter,
     OrderingFilter,
+    rest_framework as filters,
 )
-from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError
@@ -498,7 +498,7 @@ class IndividualFilter(UpdatedAtFilter):
 
 
 class MergedHouseholdFilter(FilterSet):
-    """Filter emulates ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged."""
+    """Emulate ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged."""
 
     business_area = CharFilter(field_name="business_area__slug")
     rdi_id = CharFilter(method="filter_rdi_id")

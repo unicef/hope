@@ -1,6 +1,5 @@
 from typing import Any, Callable
 
-import pytest
 from django.db.models import Q
 from extras.test_utils.factories.account import (
     PartnerFactory,
@@ -10,6 +9,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -111,7 +111,8 @@ class TestProgramUpdatePartnerAccess:
             ],
         }
 
-        # TODO: due to temporary solution in program mutations, Partners need to already have a role in the BA to be able to be granted access to program
+        # TODO: due to temporary solution in program mutations,
+        # Partners need to already have a role in the BA to be able to be granted access to program
         # (created role in program is the same role as the Partner already held in the BA.
         # For each held role, the same role is now applied for the new program.
         # After removing this solution, below lines of setup can be deleted.

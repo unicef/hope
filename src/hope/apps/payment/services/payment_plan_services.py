@@ -1,7 +1,7 @@
 import datetime
-import logging
 from functools import partial
 from itertools import groupby
+import logging
 from typing import IO, TYPE_CHECKING, Callable, Union
 
 from constance import config

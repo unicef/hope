@@ -3,6 +3,7 @@ from django.core.management import call_command
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
@@ -122,11 +123,11 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 "individual": str(self.primary_collector_individual.id),
             },
         }
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        assert str(error.exception.messages[0]) == "Cannot reassign role to individual from different program"
+        assert str(error.value.messages[0]) == "Cannot reassign role to individual from different program"
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(
         self,
@@ -147,12 +148,12 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             },
         }
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0])
+            str(error.value.messages[0])
             == f"Individual ({self.primary_collector_individual.unicef_id}) was not marked as duplicated"
         )
 
@@ -177,12 +178,12 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             },
         }
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0])
+            str(error.value.messages[0])
             == f"Individual({self.no_role_individual.unicef_id}) which get role PRIMARY was marked as duplicated"
         )
 
@@ -240,13 +241,12 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             },
         }
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0])
-            == "Cannot reassign the role. Selected individual has primary collector role."
+            str(error.value.messages[0]) == "Cannot reassign the role. Selected individual has primary collector role."
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wrong_role(
@@ -267,11 +267,11 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 "individual": str(self.primary_collector_individual.id),
             },
         }
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        assert str(error.exception.messages[0]) == "Invalid role name"
+        assert str(error.value.messages[0]) == "Invalid role name"
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_wrong_person(
         self,
@@ -291,13 +291,14 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 "individual": str(self.primary_collector_individual.id),
             },
         }
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0])
-            == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY in household with unicef_id {self.household.unicef_id}"
+            str(error.value.messages[0])
+            == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY "
+            f"in household with unicef_id {self.household.unicef_id}"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_not_reassigned(
@@ -312,13 +313,15 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 "individual": str(self.primary_collector_individual.id),
             },
         }
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0]) == ""
-            f"Role for head of household in household with unicef_id {self.household.unicef_id} was not reassigned, when individual ({self.primary_collector_individual.unicef_id}) was marked as duplicated"
+            str(error.value.messages[0]) == f"Role for head of household in household with unicef_id "
+            f"{self.household.unicef_id} was not reassigned, when individual "
+            f"({self.primary_collector_individual.unicef_id}) was marked as "
+            f"duplicated"
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
@@ -333,11 +336,12 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 "individual": str(self.primary_collector_individual.id),
             },
         }
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.exception.messages[0])
-            == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated individual({self.primary_collector_individual.unicef_id})"
+            str(error.value.messages[0])
+            == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated "
+            f"individual({self.primary_collector_individual.unicef_id})"
         )

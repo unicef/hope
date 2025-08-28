@@ -1,7 +1,7 @@
-import itertools
-import logging
 from collections import defaultdict
 from dataclasses import dataclass, fields
+import itertools
+import logging
 from typing import Any, Iterable
 
 from constance import config

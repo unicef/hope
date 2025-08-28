@@ -1,9 +1,9 @@
 import factory
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import BusinessArea
 from hope.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,

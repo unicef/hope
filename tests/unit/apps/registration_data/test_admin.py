@@ -1,4 +1,3 @@
-import pytest
 from django.test import TestCase
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
@@ -9,6 +8,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import pytest
 
 from hope.admin.registration_data import RegistrationDataImportAdmin
 from hope.apps.grievance.models import (
@@ -86,7 +86,7 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
         RegistrationDataImportAdmin._delete_rdi(self.rdi)
 
         assert RegistrationDataImport.objects.count() == 0
-        with self.assertRaises(RegistrationDataImport.DoesNotExist):
+        with pytest.raises(RegistrationDataImport.DoesNotExist):
             RegistrationDataImport.objects.get(id=self.rdi.id)
 
         assert PendingHousehold.objects.count() == 0

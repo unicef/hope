@@ -1,8 +1,7 @@
-import uuid
 from typing import Dict
 from unittest.mock import MagicMock, patch
+import uuid
 
-import requests
 from django.core.cache import cache
 from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
@@ -20,6 +19,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import requests
 
 from hope.apps.geo.models import Area
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan

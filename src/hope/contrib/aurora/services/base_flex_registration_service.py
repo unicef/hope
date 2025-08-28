@@ -2,8 +2,8 @@ import abc
 import base64
 import hashlib
 import logging
-import uuid
 from typing import TYPE_CHECKING, Any, Iterable
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -203,6 +203,6 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
     def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> ContentFile | Any:
         if certificate_picture:
             format_image = "jpg"
-            name = hashlib.md5(document_number.encode()).hexdigest()
+            name = hashlib.sha256(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture

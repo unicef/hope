@@ -2,11 +2,11 @@ import random
 from random import choice
 from typing import Any
 
-import factory.fuzzy
-from extras.test_utils.factories.account import UserFactory
 from factory.django import DjangoModelFactory
+import factory.fuzzy
 from pytz import utc
 
+from extras.test_utils.factories.account import UserFactory
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Feedback, FeedbackMessage, Message, Survey
 from hope.apps.core.models import BusinessArea
@@ -143,7 +143,8 @@ def generate_messages() -> None:
         {
             "unicef_id": "MSG-22-0004",
             "title": "You got credit of USD 200",
-            "body": "Greetings {recipient_full_name}, we have sent you USD 200 in your registered account on {rp_timestamp}",
+            "body": "Greetings {recipient_full_name}, we have sent you USD 200 in your registered account on "
+            "{rp_timestamp}",
             "created_by": user_root,
             "program": program,
             "number_of_recipients": 2,

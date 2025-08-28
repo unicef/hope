@@ -96,7 +96,8 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         assert "non_field_errors" in serializer.errors
         assert (
             serializer.errors["non_field_errors"][0]
-            == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+            == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
+            f"supporting documents."
         )
 
 

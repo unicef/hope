@@ -1,5 +1,5 @@
-import enum
 from datetime import datetime
+import enum
 from typing import Any
 
 from django.core.files.uploadedfile import InMemoryUploadedFile

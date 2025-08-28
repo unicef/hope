@@ -1,5 +1,5 @@
-import logging
 from enum import auto
+import logging
 from typing import TYPE_CHECKING, Any, Callable
 
 from constance import config

@@ -5,6 +5,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+import pytest
 
 from hope.apps.geo.models import Country
 from hope.apps.household.models import Household
@@ -71,7 +72,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
     def test_validation_token_must_not_has_the_same_digit_more_than_three_times(
         self,
     ) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             payment_token_and_order_number_validator(1111111)
 
     def test_validation_save_payment_with_exists_token_or_order_number(self) -> None:
@@ -85,7 +86,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         payment_1.order_number = order_number
         payment_1.save()
 
-        with self.assertRaises(IntegrityError):
-            payment_2.token_number = token_number
-            payment_2.order_number = order_number
+        payment_2.token_number = token_number
+        payment_2.order_number = order_number
+        with pytest.raises(IntegrityError):
             payment_2.save(update_fields=["order_number", "token_number"])
