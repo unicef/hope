@@ -3,6 +3,8 @@ import os
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+import pytest
+
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
 from e2e.page_object.programme_population.individuals import Individuals
@@ -25,8 +27,6 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.core.models import (
     BusinessArea,
     DataCollectingType,

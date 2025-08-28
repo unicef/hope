@@ -4,10 +4,10 @@ from typing import Any
 from unittest import mock
 
 from django.conf import settings
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import ProgramFactory
 import pytest
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_data.models import KoboImportData
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,

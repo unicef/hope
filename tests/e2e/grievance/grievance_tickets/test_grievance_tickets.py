@@ -4,6 +4,11 @@ from time import sleep
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
+import pytest
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+
 from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
 from e2e.filters.test_filters import create_grievance
 from e2e.helpers.date_time_format import FormatTime
@@ -26,11 +31,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area

@@ -1,12 +1,13 @@
 import sys
 from time import sleep
 
-from e2e.helpers.helper import Common
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+
+from e2e.helpers.helper import Common
 
 
 class BaseComponents(Common):

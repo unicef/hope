@@ -1,6 +1,8 @@
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
@@ -11,8 +13,6 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Country
@@ -438,7 +438,5 @@ class TestIndividualModel(TestCase):
         doc_2.document_number = "123456ABC"
         doc_2.save()
 
-        with pytest.raises(Exception) as error:
+        with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
             ind.mark_as_distinct()
-
-        assert str(error.value) == "IND-333: Valid Document already exists: 123456ABC."

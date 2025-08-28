@@ -1,10 +1,10 @@
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-
 from hope.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea

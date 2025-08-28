@@ -5,6 +5,8 @@ from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
 
+import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -19,8 +21,6 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-import pytest
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import ROLE_PRIMARY
