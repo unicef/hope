@@ -3,14 +3,14 @@ from typing import Iterator
 
 from django.core.cache import cache
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from rest_framework import status
-from rest_framework.test import APITestCase
-
 from hope.api.models import APIToken, Grant
 from hope.apps.core.models import BusinessArea
 from unit.api.factories import APITokenFactory

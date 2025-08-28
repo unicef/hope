@@ -4,6 +4,9 @@ from unittest import mock
 
 from django.conf import settings
 from django.core.management import call_command
+import openpyxl
+from parameterized import parameterized
+
 from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
@@ -11,9 +14,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
-import openpyxl
-from parameterized import parameterized
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import DataCollectingType, PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader

@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from django.core.management import BaseCommand, call_command
+
 from extras.test_utils.factories.geo import generate_area_types, generate_areas
 
 logger = logging.getLogger(__name__)
