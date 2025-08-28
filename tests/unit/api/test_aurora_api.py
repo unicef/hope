@@ -2,14 +2,14 @@ from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from rest_framework import status
+
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-
 from hope.api.models import Grant
 from hope.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,

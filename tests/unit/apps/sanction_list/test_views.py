@@ -5,12 +5,12 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.urls import reverse
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 import pytest
 from rest_framework import status
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.registration_datahub.validators import XlsxError
 from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet

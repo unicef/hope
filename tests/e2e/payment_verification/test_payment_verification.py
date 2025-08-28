@@ -4,6 +4,10 @@ import os
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+import openpyxl
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.payment_verification.payment_record import PaymentRecord
@@ -27,10 +31,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import openpyxl
-import pytest
-from selenium.webdriver.common.by import By
-
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area

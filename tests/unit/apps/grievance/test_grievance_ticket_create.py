@@ -3,16 +3,16 @@ from typing import Any
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING

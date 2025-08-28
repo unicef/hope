@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -11,7 +12,6 @@ from extras.test_utils.factories.payment import (
     generate_reconciled_payment_plan,
     update_fsps,
 )
-
 from hope.apps.core.models import DataCollectingType
 
 

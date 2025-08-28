@@ -4,9 +4,9 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TransactionTestCase
 from django.utils import timezone
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-
 from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
