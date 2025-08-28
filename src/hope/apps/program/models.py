@@ -520,3 +520,4 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         if self.status == ProgramCycle.ACTIVE:
             self.status = ProgramCycle.FINISHED
             self.save()
+
