@@ -53,6 +53,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     sanction_list_possible_match = serializers.BooleanField(source="annotate_has_sanction_list_possible_match")
     sanction_list_confirmed_match = serializers.BooleanField(source="annotate_has_sanction_list_confirmed_match")
     program_name = serializers.CharField(source="program.name")
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Household
@@ -75,6 +76,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "sanction_list_confirmed_match",
             "program_id",
             "program_name",
+            "program_slug",
         ]
 
 

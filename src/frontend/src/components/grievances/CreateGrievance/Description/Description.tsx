@@ -85,13 +85,18 @@ function Description({
 
   // Set program value based on selected household or individual
   useEffect(() => {
-    if (values.selectedHousehold?.program?.id) {
-      setFieldValue('program', values.selectedHousehold.program.id);
-    } else if (values.selectedIndividual?.program?.id) {
+    console.log(
+      'xdDDDDDDD',
+      values.selectedHousehold,
+      values.selectedIndividual,
+    );
+    if (values.selectedIndividual?.program.id) {
       setFieldValue('program', values.selectedIndividual.program.id);
+    } else if (values.selectedHousehold?.programId) {
+      setFieldValue('program', values.selectedHousehold.programId);
     }
   }, [values.selectedHousehold, values.selectedIndividual, setFieldValue]);
-
+  console.log('values', values);
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
