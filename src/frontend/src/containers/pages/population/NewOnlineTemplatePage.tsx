@@ -204,12 +204,11 @@ const NewOnlineTemplatePage = (): ReactElement => {
         id: data.id ?? undefined, // Fix: ensure id is included if present
       }));
 
-    // Prepare payload with camelCase keys
     const payload = {
       roundsData: roundsDataToSend,
       filters: filtersToSend,
       authorizedUsers: values.authorizedUsers,
-      name: values.name,
+      name: values.name || null,
     };
 
     try {

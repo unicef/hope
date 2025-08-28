@@ -251,6 +251,7 @@ export type { PDUFieldsUpdate as PDUFieldsUpdateCamelCase } from './models/PDUFi
 export type { PDUOnlineEditCreate as PDUOnlineEditCreateCamelCase } from './models/PDUOnlineEditCreate';
 export type { PDUOnlineEditDetail as PDUOnlineEditDetailCamelCase } from './models/PDUOnlineEditDetail';
 export type { PDUOnlineEditList as PDUOnlineEditListCamelCase } from './models/PDUOnlineEditList';
+export type { PDUOnlineEditSaveData as PDUOnlineEditSaveDataCamelCase } from './models/PDUOnlineEditSaveData';
 export type { PDUOnlineEditSendBack as PDUOnlineEditSendBackCamelCase } from './models/PDUOnlineEditSendBack';
 export type { PDUOnlineEditSentBackComment as PDUOnlineEditSentBackCommentCamelCase } from './models/PDUOnlineEditSentBackComment';
 export type { PDUOnlineEditUpdateAuthorizedUsers as PDUOnlineEditUpdateAuthorizedUsersCamelCase } from './models/PDUOnlineEditUpdateAuthorizedUsers';

@@ -1,6 +1,6 @@
 import { BlackLink } from '@components/core/BlackLink';
 import React, { useState, ReactElement } from 'react';
-import { TableCell, Checkbox, Button } from '@mui/material';
+import { TableCell, Checkbox, Button, Tooltip } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -17,6 +17,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -76,6 +78,11 @@ const PeriodicDataUpdatePendingForApproval = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const permissions = usePermissions();
+  const canApprove = hasPermissions(
+    PERMISSIONS.PDU_ONLINE_APPROVE,
+    permissions,
+  );
 
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
@@ -178,12 +185,25 @@ const PeriodicDataUpdatePendingForApproval = () => {
       style={{ cursor: 'pointer' }}
     >
       <TableCell padding="checkbox">
-        <Checkbox
-          checked={selected.includes(row.id)}
-          onChange={() => handleSelectOne(row.id)}
-          onClick={(e) => e.stopPropagation()}
-          slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
-        />
+        {row.isAuthorized ? (
+          <Checkbox
+            checked={selected.includes(row.id)}
+            onChange={() => handleSelectOne(row.id)}
+            onClick={(e) => e.stopPropagation()}
+            slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
+          />
+        ) : (
+          <Tooltip title="You are not within authorized users for this Edit">
+            <span>
+              <Checkbox
+                checked={selected.includes(row.id)}
+                disabled
+                onClick={(e) => e.stopPropagation()}
+                slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
+              />
+            </span>
+          </Tooltip>
+        )}
       </TableCell>
       <TableCell>
         <BlackLink
@@ -249,23 +269,27 @@ const PeriodicDataUpdatePendingForApproval = () => {
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      title="Pending Periodic Data Updates for Approval"
+      title="Periodic Data Updates pending for Approval"
       onSelectAllClick={handleSelectAllClick}
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
       hidePagination={true}
-      actions={[
-        <Button
-          key="approve-selected"
-          variant="outlined"
-          color="primary"
-          onClick={handleApprove}
-          disabled={selected.length === 0}
-          sx={{ mr: 1 }}
-        >
-          {t('Approve')}
-        </Button>,
-      ]}
+      actions={
+        canApprove
+          ? [
+              <Button
+                key="approve-selected"
+                variant="outlined"
+                color="primary"
+                onClick={handleApprove}
+                disabled={selected.length === 0}
+                sx={{ mr: 1 }}
+              >
+                {t('Approve')}
+              </Button>,
+            ]
+          : []
+      }
     />
   );
 };

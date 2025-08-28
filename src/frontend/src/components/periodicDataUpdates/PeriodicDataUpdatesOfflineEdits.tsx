@@ -63,7 +63,6 @@ const updatesHeadCells: HeadCell<PDUXlsxUploadList>[] = [
 
 export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
   const initialQueryVariables = useMemo(
@@ -100,6 +99,18 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         ),
       );
     },
+  });
+
+  const { data: uploadsCountData } = useQuery({
+    queryKey: ['periodicDataUpdateUploadsCount', businessAreaSlug, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+        },
+      ),
+    enabled: !!businessAreaSlug && !!programId,
   });
 
   const handleDialogOpen = (uploadId) => {
@@ -163,6 +174,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        itemsCount={uploadsCountData?.count}
       />
     </>
   );

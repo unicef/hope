@@ -15,7 +15,7 @@ import {
   TextField,
   Grid2 as Grid,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import PeriodicDataUpdateEditableTable from './PeriodicDataUpdateEditableTable';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BaseSection } from '@components/core/BaseSection';
@@ -24,7 +24,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useParams, Link } from 'react-router-dom';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -38,8 +38,10 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useProgramContext } from 'src/programContext';
 import SentBackComment from './SentBackComment';
 import { ConfirmationDialog } from '../../components/core/ConfirmationDialog/ConfirmationDialog';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { usePermissions } from '@hooks/usePermissions';
 
-type PduField = {
+export type PduField = {
   value: any;
   subtype: string;
   roundName: string;
@@ -47,23 +49,6 @@ type PduField = {
   roundNumber: number;
   columnName?: string;
 };
-
-const StickyHeaderCell = ({ shouldScroll, children }) => (
-  <TableCell
-    style={
-      shouldScroll
-        ? {
-            position: 'sticky',
-            top: 0,
-            background: '#fff',
-            zIndex: 3,
-          }
-        : {}
-    }
-  >
-    {children}
-  </TableCell>
-);
 
 function getUserRoles(
   user: { pduPermissions?: string[] },
@@ -94,12 +79,41 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const numericId = id ? parseInt(id, 10) : undefined;
   const queryClient = useQueryClient();
+  const permissions = usePermissions();
+  const canSave = hasPermissions(PERMISSIONS.PDU_ONLINE_SAVE_DATA, permissions);
+  const canApprove = hasPermissions(
+    PERMISSIONS.PDU_ONLINE_APPROVE,
+    permissions,
+  );
+  const canMerge = hasPermissions(PERMISSIONS.PDU_ONLINE_MERGE, permissions);
 
   // Confirmation dialog state for Send Back
   const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
   const [sendBackComment, setSendBackComment] = useState('');
   const [sendBackLoading, setSendBackLoading] = useState(false);
   const [sendForApprovalLoading, setSendForApprovalLoading] = useState(false);
+
+  const { mutateAsync: bulkApprove } = useMutation({
+    mutationFn: (ids: number[]) => {
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          requestBody: { ids },
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage(t('Template approved successfully.'));
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
+  const handleApprove = async () => {
+    await bulkApprove([numericId]);
+  };
 
   const handleSendBackConfirm = async () => {
     setSendBackLoading(true);
@@ -158,6 +172,28 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     } finally {
       setSendForApprovalLoading(false);
     }
+  };
+
+  const { mutateAsync: bulkMerge } = useMutation({
+    mutationFn: (ids: number[]) => {
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          requestBody: { ids },
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage('Template merged successfully.');
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
+  const handleMerge = async () => {
+    await bulkMerge([numericId]);
   };
 
   // Modal state for Authorized Users
@@ -247,8 +283,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         return updated;
       });
     } catch (e) {
-      // @ts-ignore
-      showMessage('An error occurred while updating the data');
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -267,6 +302,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     createdBy,
     sentBackComment,
     isCreator,
+    isAuthorized,
   } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -276,21 +312,6 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   ];
 
-  //TODO: Fake sent back comments data
-  // const sentBackComments = [
-  //   {
-  //     comment:
-  //       'Missing Date for Individual ID: 69023-3455, please update before sending for approval again',
-  //     date: '13 May 2025',
-  //     author: 'Jon Snow',
-  //   },
-  //   {
-  //     comment: 'Please verify the address for Individual ID: 69023-3456.',
-  //     date: '10 May 2025',
-  //     author: 'Arya Stark',
-  //   },
-  // ];
-
   return (
     <>
       <PageHeader
@@ -298,7 +319,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         breadCrumbs={breadCrumbsItems}
       >
         <>
-          {status === 'NEW' && (
+          {status === 'NEW' && canSave && isAuthorized && (
             <Box px={6} pt={2} pb={2}>
               <Button
                 variant="contained"
@@ -311,7 +332,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               </Button>
             </Box>
           )}
-          {status === 'READY' && (
+          {status === 'READY' && canApprove && isAuthorized && (
             <Box px={6} pt={2} pb={2} display="flex" gap={2}>
               <Button
                 variant="contained"
@@ -324,26 +345,22 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               <Button
                 variant="contained"
                 color="primary"
-                // Add approve handler here
+                onClick={handleApprove}
                 data-cy="approve"
               >
                 {t('Approve')}
               </Button>
             </Box>
           )}
-          {/* Show Send for Approval button if status is OPEN */}
-          {status === 'OPEN' && (
-            <Box px={6} pt={2} pb={2}>
+          {status === 'APPROVED' && canMerge && isAuthorized && (
+            <Box px={6} pt={2} pb={2} display="flex" gap={2}>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSendForApproval}
-                disabled={sendForApprovalLoading}
-                data-cy="send-for-approval"
+                onClick={handleMerge}
+                data-cy="merge"
               >
-                {sendForApprovalLoading
-                  ? t('Sending...')
-                  : t('Send for Approval')}
+                {t('Merge')}
               </Button>
             </Box>
           )}
@@ -499,294 +516,31 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         </Grid>
       </BaseSection>
 
-      {/* //TODO: example */}
-      {/* Sent Back Comments */}
-      {/* {sentBackComments.map((c, idx) => (
-        <SentBackComment
-          key={idx}
-          comment={c.comment}
-          date={c.date}
-          author={c.author}
-        />
-      ))} */}
-      {sendBackComment && (
-        <SentBackComment
-          key={sentBackComment.comment}
-          comment={sentBackComment.comment}
-          date={sentBackComment.createdAt}
-          author={sentBackComment.createdBy}
-        />
-      )}
+      <Box pl={12} pt={6}>
+        {sentBackComment &&
+          typeof sentBackComment === 'object' &&
+          sentBackComment.comment && (
+            <SentBackComment
+              key={sentBackComment.comment}
+              comment={sentBackComment.comment}
+              date={sentBackComment.createdAt}
+              author={sentBackComment.createdBy}
+            />
+          )}
+      </Box>
 
       {/* Periodic Data Update Table */}
-      <Box p={6}>
-        <BaseSection title="Periodic Data Update">
-          {(() => {
-            const shouldScroll =
-              editRows.length > 10 || allPduFields.length > 6;
-            const TableContent = (
-              <Table>
-                <TableHead>
-                  <TableRow
-                    style={
-                      shouldScroll
-                        ? {
-                            position: 'sticky',
-                            top: 0,
-                            zIndex: 2,
-                            background: '#fff',
-                          }
-                        : {}
-                    }
-                  >
-                    <StickyHeaderCell shouldScroll={shouldScroll}>
-                      {t('Individual ID')}
-                    </StickyHeaderCell>
-                    <StickyHeaderCell shouldScroll={shouldScroll}>
-                      {t('First Name')}
-                    </StickyHeaderCell>
-                    <StickyHeaderCell shouldScroll={shouldScroll}>
-                      {t('Last Name')}
-                    </StickyHeaderCell>
-                    {allPduFields.map((field) => {
-                      let roundInfo = '';
-                      if (field.roundNumber) {
-                        roundInfo = field.roundName
-                          ? `${t('Round')} ${field.roundNumber} (${field.roundName})`
-                          : `${t('Round')} ${field.roundNumber}`;
-                      }
-                      return (
-                        <StickyHeaderCell
-                          shouldScroll={shouldScroll}
-                          key={field.key}
-                        >
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              minWidth: 120,
-                            }}
-                          >
-                            <span style={{ fontWeight: 600 }}>{field.key}</span>
-                            {roundInfo && <span>{roundInfo}</span>}
-                          </div>
-                        </StickyHeaderCell>
-                      );
-                    })}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {editRows.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={3 + allPduFields.length}
-                        align="center"
-                      >
-                        {t('No data available')}
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    editRows.map((individual, idx) => {
-                      const isEditing = editingRows.has(idx);
-                      // Only show Edit button if at least one PDU field is editable
-                      const hasEditableField =
-                        individual.pduFields &&
-                        Object.values(individual.pduFields).some(
-                          (f: any) => f.isEditable,
-                        );
-                      return (
-                        <TableRow key={individual.individualUuid || idx}>
-                          <TableCell>
-                            {individual.individualUuid ? (
-                              <BlackLink
-                                to={`/population/individuals/${individual.individualUuid}`}
-                              >
-                                {individual.unicefId}
-                              </BlackLink>
-                            ) : (
-                              t('-')
-                            )}
-                          </TableCell>
-                          <TableCell>{individual.firstName}</TableCell>
-                          <TableCell>{individual.lastName}</TableCell>
-                          {allPduFields.map((col) => {
-                            const field = individual.pduFields
-                              ? individual.pduFields[col.key]
-                              : null;
-                            return (
-                              <TableCell key={col.key} align="center">
-                                {field ? (
-                                  isEditing && field.isEditable ? (
-                                    field.subtype === 'DATE' ? (
-                                      <DatePicker
-                                        value={field.value || null}
-                                        onChange={(newValue) => {
-                                          setEditRows((prev) => {
-                                            const updated = [...prev];
-                                            const pduFieldsObj = {
-                                              ...updated[idx].pduFields,
-                                            };
-                                            pduFieldsObj[col.key] = {
-                                              ...pduFieldsObj[col.key],
-                                              value: newValue,
-                                            };
-                                            updated[idx] = {
-                                              ...updated[idx],
-                                              pduFields: pduFieldsObj,
-                                            };
-                                            return updated;
-                                          });
-                                        }}
-                                      />
-                                    ) : field.subtype === 'BOOL' ? (
-                                      <input
-                                        type="checkbox"
-                                        checked={Boolean(field.value)}
-                                        style={{
-                                          margin: '0 auto',
-                                          display: 'block',
-                                        }}
-                                        onChange={(e) => {
-                                          setEditRows((prev) => {
-                                            const updated = [...prev];
-                                            const pduFieldsObj = {
-                                              ...updated[idx].pduFields,
-                                            };
-                                            pduFieldsObj[col.key] = {
-                                              ...pduFieldsObj[col.key],
-                                              value: e.target.checked,
-                                            };
-                                            updated[idx] = {
-                                              ...updated[idx],
-                                              pduFields: pduFieldsObj,
-                                            };
-                                            return updated;
-                                          });
-                                        }}
-                                      />
-                                    ) : (
-                                      <TextField
-                                        variant="outlined"
-                                        fullWidth
-                                        size="small"
-                                        type={
-                                          field.subtype === 'NUMBER'
-                                            ? 'number'
-                                            : 'text'
-                                        }
-                                        value={field.value ?? ''}
-                                        onChange={(e) => {
-                                          const newValue =
-                                            field.subtype === 'NUMBER'
-                                              ? Number(e.target.value)
-                                              : e.target.value;
-                                          setEditRows((prev) => {
-                                            const updated = [...prev];
-                                            const pduFieldsObj = {
-                                              ...updated[idx].pduFields,
-                                            };
-                                            pduFieldsObj[col.key] = {
-                                              ...pduFieldsObj[col.key],
-                                              value: newValue,
-                                            };
-                                            updated[idx] = {
-                                              ...updated[idx],
-                                              pduFields: pduFieldsObj,
-                                            };
-                                            return updated;
-                                          });
-                                        }}
-                                      />
-                                    )
-                                  ) : // Display mode: show value as plain text for non-editable fields, and for editable fields when not editing
-                                  field.subtype === 'DATE' ? (
-                                    field.value ? (
-                                      <UniversalMoment>
-                                        {field.value}
-                                      </UniversalMoment>
-                                    ) : (
-                                      <span style={{ color: '#aaa' }}>
-                                        {t('-')}
-                                      </span>
-                                    )
-                                  ) : field.subtype === 'BOOL' ? (
-                                    <span>
-                                      {field.value === true
-                                        ? t('True')
-                                        : field.value === false
-                                          ? t('False')
-                                          : t('-')}
-                                    </span>
-                                  ) : field.value !== undefined &&
-                                    field.value !== null &&
-                                    field.value !== '' ? (
-                                    <span>{String(field.value)}</span>
-                                  ) : (
-                                    <span style={{ color: '#aaa' }}>
-                                      {t('-')}
-                                    </span>
-                                  )
-                                ) : (
-                                  <span style={{ color: '#aaa' }}>
-                                    {t('-')}
-                                  </span>
-                                )}
-                              </TableCell>
-                            );
-                          })}
-                          <TableCell>
-                            {hasEditableField ? (
-                              isEditing ? (
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  onClick={() => handleSaveRow(idx)}
-                                >
-                                  {t('Save')}
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="outlined"
-                                  color="primary"
-                                  size="small"
-                                  onClick={() =>
-                                    setEditingRows((prev) => {
-                                      const updated = new Set(prev);
-                                      updated.add(idx);
-                                      return updated;
-                                    })
-                                  }
-                                >
-                                  {t('Edit')}
-                                </Button>
-                              )
-                            ) : null}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            );
-            if (shouldScroll) {
-              return (
-                <div
-                  style={{
-                    maxHeight: 800,
-                    overflow: 'auto',
-                    border: '1px solid #eee',
-                  }}
-                >
-                  {TableContent}
-                </div>
-              );
-            }
-            return TableContent;
-          })()}
-        </BaseSection>
+      <Box p={3}>
+        <PeriodicDataUpdateEditableTable
+          allPduFields={allPduFields}
+          editRows={editRows}
+          setEditRows={setEditRows}
+          editingRows={editingRows}
+          setEditingRows={setEditingRows}
+          handleSaveRow={handleSaveRow}
+          canSave={canSave}
+          templateStatus={status}
+        />
       </Box>
     </>
   );

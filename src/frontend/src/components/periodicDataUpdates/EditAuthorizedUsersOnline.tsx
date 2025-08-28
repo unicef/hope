@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import React, { ReactElement } from 'react';
 import { Formik } from 'formik';
 import Button from '@mui/material/Button';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { showApiErrorMessages } from '@utils/utils';
@@ -24,6 +24,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const { mutateAsync: updateAuthorizedUsers } = useMutation({
     mutationFn: (values: { authorizedUsers: string[] }) => {
@@ -44,6 +45,8 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
       queryClient.invalidateQueries({
         queryKey: ['availableUsers', businessAreaSlug, programSlug],
       });
+      const url = `/${baseUrl}/population/individuals/online-templates/${id}`;
+      navigate(url);
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

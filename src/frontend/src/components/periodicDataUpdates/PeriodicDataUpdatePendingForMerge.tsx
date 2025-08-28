@@ -1,5 +1,5 @@
 import React, { useState, ReactElement } from 'react';
-import { TableCell, Checkbox, Button } from '@mui/material';
+import { TableCell, Checkbox, Button, Tooltip } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -16,6 +16,8 @@ import {
 } from '@utils/utils';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 const pendingHeadCells: HeadCell<any>[] = [
   {
@@ -72,6 +74,8 @@ const pendingHeadCells: HeadCell<any>[] = [
 
 const PeriodicDataUpdatePendingForMerge = () => {
   const { showMessage } = useSnackbar();
+  const permissions = usePermissions();
+  const canMerge = hasPermissions(PERMISSIONS.PDU_ONLINE_MERGE, permissions);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
@@ -174,14 +178,26 @@ const PeriodicDataUpdatePendingForMerge = () => {
       style={{ cursor: 'pointer' }}
     >
       <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
-        <Checkbox
-          checked={selected.includes(row.id)}
-          onChange={(e) => {
-            e.stopPropagation();
-            handleSelectOne(row.id);
-          }}
-          slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
-        />
+        {row.isAuthorized ? (
+          <Checkbox
+            checked={selected.includes(row.id)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleSelectOne(row.id);
+            }}
+            slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
+          />
+        ) : (
+          <Tooltip title="You are not within authorized users for this Edit">
+            <span>
+              <Checkbox
+                checked={selected.includes(row.id)}
+                disabled
+                slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
+              />
+            </span>
+          </Tooltip>
+        )}
       </TableCell>
       <TableCell>
         <BlackLink
@@ -249,23 +265,27 @@ const PeriodicDataUpdatePendingForMerge = () => {
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      title="Pending Periodic Data Updates for Merge"
+      title="Periodic Data Updates pending for Merge"
       onSelectAllClick={handleSelectAllClick}
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
       hidePagination={true}
-      actions={[
-        <Button
-          key="merge-selected"
-          variant="outlined"
-          color="primary"
-          onClick={handleMerge}
-          disabled={selected.length === 0}
-          sx={{ mr: 1 }}
-        >
-          Merge
-        </Button>,
-      ]}
+      actions={
+        canMerge
+          ? [
+              <Button
+                key="merge-selected"
+                variant="outlined"
+                color="primary"
+                onClick={handleMerge}
+                disabled={selected.length === 0}
+                sx={{ mr: 1 }}
+              >
+                Merge
+              </Button>,
+            ]
+          : []
+      }
     />
   );
 };

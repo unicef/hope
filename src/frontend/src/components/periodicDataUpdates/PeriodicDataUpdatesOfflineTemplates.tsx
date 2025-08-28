@@ -87,6 +87,19 @@ const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
 export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+
+  const { data: templateCountData } = useQuery({
+    queryKey: ['periodicDataUpdateTemplatesCount', businessAreaSlug, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesCountRetrieve(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+        },
+      ),
+    enabled: !!businessAreaSlug && !!programId,
+  });
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const permissions = usePermissions();
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
@@ -236,6 +249,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   return (
     <>
       <UniversalRestTable
+        itemsCount={templateCountData?.count}
         isOnPaper={true}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}

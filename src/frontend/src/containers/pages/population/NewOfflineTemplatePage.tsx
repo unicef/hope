@@ -183,7 +183,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
         requestBody: {
           rounds_data: roundsDataToSend,
           filters: filtersToSend,
-          name: values.name,
+          name: values.name || null,
         },
       },
       {
