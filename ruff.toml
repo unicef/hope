@@ -29,7 +29,7 @@ select = [
     "Q", # flake8-quotes
     "R", # PyLint Refactor
     "RET", # flake8-return
-#    "S", # bandit,
+    "S", # bandit,
     "SIM", # flake8-simplify
     "T10", # flake8-debugger
     "T20", # flake8-print
@@ -77,10 +77,10 @@ ignore = [
     "PLR0912", # too many branches
     "PLR0913",  # too many arguments
     "PLR0915",  # too many statements
+    "PLC0415",  # `import` should be at the top-level of a file
 
     "C901",  # too complex
     "BLE001",  # Do not catch blind exception: `BaseException`
-    "PLC0415",  # `import` should be at the top-level of a file
 ]
 
 [format]
