@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -7,7 +8,6 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     generate_delivery_mechanisms,
 )
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.payment.models import (
     DeliveryMechanism,

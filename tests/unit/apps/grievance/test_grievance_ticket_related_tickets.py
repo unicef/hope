@@ -1,4 +1,5 @@
 from django.core.management import call_command
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -9,7 +10,6 @@ from extras.test_utils.factories.household import (
     IndividualFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING

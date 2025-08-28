@@ -8,6 +8,12 @@ from aniso8601 import parse_date
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django_fsm import TransitionNotAllowed
+from flaky import flaky
+from freezegun import freeze_time
+import pytest
+from pytz import utc
+from rest_framework.exceptions import ValidationError
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -28,12 +34,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from flaky import flaky
-from freezegun import freeze_time
-import pytest
-from pytz import utc
-from rest_framework.exceptions import ValidationError
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import FileTemp
@@ -816,9 +816,8 @@ class TestPaymentPlanServices(BaseTestCase):
             assert p_unicef_id not in old_payment_unicef_ids
 
     def test_get_approval_type_by_action_value_error(self) -> None:
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError, match="Action cannot be None"):
             PaymentPlanService(payment_plan=self.payment_plan).get_approval_type_by_action()
-        assert str(error.value) == "Action cannot be None"
 
     def test_validate_action_not_implemented(self) -> None:
         with pytest.raises(ValidationError) as e:

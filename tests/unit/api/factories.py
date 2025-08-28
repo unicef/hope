@@ -1,8 +1,8 @@
 from django.utils import timezone
-from extras.test_utils.factories.account import UserFactory
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 
+from extras.test_utils.factories.account import UserFactory
 from hope.api.models import APIToken, Grant
 
 
