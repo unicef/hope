@@ -13,9 +13,9 @@ from django.core.management import call_command
 from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
-from extras.test_utils.factories.account import UserFactory
 import requests
 
+from extras.test_utils.factories.account import UserFactory
 from hope.admin.kobo_template import XLSXKoboTemplateAdmin
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import XLSXKoboTemplate

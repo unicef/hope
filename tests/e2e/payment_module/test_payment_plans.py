@@ -10,6 +10,14 @@ from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
+import factory
+import openpyxl
+import pytest
+from pytz import utc
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.webdriver.common.by import By
+from sorl.thumbnail.conf import settings
+
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
@@ -27,14 +35,6 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-import factory
-import openpyxl
-import pytest
-from pytz import utc
-from selenium.common.exceptions import ElementClickInterceptedException
-from selenium.webdriver.common.by import By
-from sorl.thumbnail.conf import settings
-
 from hope.apps.account.models import User
 from hope.apps.core.models import DataCollectingType
 from hope.apps.payment.models import (

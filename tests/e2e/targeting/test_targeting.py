@@ -6,6 +6,13 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
+import factory
+import pytest
+from pytz import utc
+from selenium.common import NoSuchElementException
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -28,13 +35,6 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-import factory
-import pytest
-from pytz import utc
-from selenium.common import NoSuchElementException
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
-
 from hope.apps.account.models import User
 from hope.apps.core.models import (
     BusinessArea,

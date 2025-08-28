@@ -4,12 +4,12 @@ from tempfile import NamedTemporaryFile
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.base import ContentFile
 from django.utils import timezone
+import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
 )
-import pytest
-
 from hope.apps.core.models import FileTemp
 from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,

@@ -1,12 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TransactionTestCase
+
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import BusinessArea, FlexibleAttribute
 from hope.apps.program.models import Program
 

@@ -5,6 +5,8 @@ from typing import Union
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+from parameterized import parameterized
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -13,8 +15,6 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-from parameterized import parameterized
-
 from hope.apps.core.models import DataCollectingType
 from hope.apps.household.models import (
     ROLE_PRIMARY,

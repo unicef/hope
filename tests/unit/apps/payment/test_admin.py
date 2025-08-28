@@ -5,6 +5,8 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -12,8 +14,6 @@ from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-import pytest
-
 from hope.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 

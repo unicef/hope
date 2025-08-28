@@ -4,7 +4,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory, RoleAssignmentFactory, RoleFactory
+from extras.test_utils.factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions

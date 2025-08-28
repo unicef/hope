@@ -1,4 +1,6 @@
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import (
@@ -8,8 +10,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.admin.registration_data import RegistrationDataImportAdmin
 from hope.apps.grievance.models import (
     GrievanceTicket,

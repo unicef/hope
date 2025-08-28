@@ -1,10 +1,10 @@
 from typing import Tuple
 from unittest.mock import Mock
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.household import HouseholdFactory
 import pytest
 
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.household import HouseholdFactory
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
 from hope.apps.account.models import User

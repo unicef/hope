@@ -5,6 +5,9 @@ from django.core.management import call_command
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.utils import timezone
+from freezegun import freeze_time
+from pytz import utc
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -21,9 +24,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from freezegun import freeze_time
-from pytz import utc
-
 from hope.apps.core.models import PeriodicFieldData
 from hope.apps.household.models import (
     ROLE_PRIMARY,

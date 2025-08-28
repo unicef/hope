@@ -6,9 +6,9 @@ from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.periodic_data_update.models import (
+    PDUOnlineEdit,
     PDUXlsxTemplate,
     PDUXlsxUpload,
-    PDUOnlineEdit,
 )
 
 

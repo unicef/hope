@@ -1,6 +1,6 @@
-from django.db.models import QuerySet
-
 from typing import Any
+
+from django.db.models import QuerySet
 
 from hope.apps.core.attributes_qet_queries import age_to_birth_date_query
 from hope.apps.grievance.models import (

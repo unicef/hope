@@ -1,12 +1,12 @@
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
 from faker.generator import random
 from flaky import flaky
 import pytest
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,

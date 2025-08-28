@@ -10,6 +10,8 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework.exceptions import ValidationError
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import DocumentFactory, create_household
@@ -25,8 +27,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework.exceptions import ValidationError
-
 from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import (

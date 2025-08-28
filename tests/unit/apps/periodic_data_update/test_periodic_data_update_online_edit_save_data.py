@@ -1,7 +1,7 @@
 from typing import Any, List
 
-import pytest
 from freezegun import freeze_time
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
