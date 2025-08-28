@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+import pytest
 from xlrd import XLRDError
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
@@ -165,7 +166,8 @@ class TestFlexibles(TestCase):
             },
         )
 
-        self.assertRaises(ValidationError, self.load_xls, "flex_update_invalid_types.xls")
+        with pytest.raises(ValidationError):
+            self.load_xls("flex_update_invalid_types.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         assert len(group) == 1
@@ -196,7 +198,8 @@ class TestFlexibles(TestCase):
         assert len(attribs) == 0
 
     def test_load_invalid_file(self) -> None:
-        self.assertRaises(XLRDError, self.load_xls, "erd arrows.jpg")
+        with pytest.raises(XLRDError):
+            self.load_xls("erd arrows.jpg")
 
     def test_reimport_soft_deleted_objects(self) -> None:
         self.load_xls("flex_init_valid_types.xls")
