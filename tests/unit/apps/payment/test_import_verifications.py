@@ -95,7 +95,7 @@ class TestXlsxVerificationImport(BaseTestCase):
             ),
         ]
     )
-    def test_export_received_from_pending(self, _: Any, initial_status: str, result: Any) -> None:
+    def test_export_received_from_pending(self, helper: str, initial_status: str, result: Any) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.PAYMENT_VERIFICATION_IMPORT],

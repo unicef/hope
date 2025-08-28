@@ -86,7 +86,7 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
         RegistrationDataImportAdmin._delete_rdi(self.rdi)
 
         assert RegistrationDataImport.objects.count() == 0
-        with self.assertRaises(RegistrationDataImport.DoesNotExist):
+        with pytest.raises(RegistrationDataImport.DoesNotExist):
             RegistrationDataImport.objects.get(id=self.rdi.id)
 
         assert PendingHousehold.objects.count() == 0

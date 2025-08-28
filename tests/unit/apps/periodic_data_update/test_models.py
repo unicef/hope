@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TransactionTestCase
+import pytest
 
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -48,44 +49,40 @@ class TestFlexibleAttribute(TransactionTestCase):
         assert FlexibleAttribute.objects.filter(name=pdu_field2.name).count() == 2
 
         # Not possible to have flex fields with the same name in the same program
-        with self.assertRaises(IntegrityError) as ie_context:
+        with pytest.raises(IntegrityError) as ie_context:
             FlexibleAttributeForPDUFactory(
                 program=self.program1,
                 label="PDU Field 1",
             )
-        assert 'duplicate key value violates unique constraint "unique_name_program"' in str(ie_context.exception)
+        assert 'duplicate key value violates unique constraint "unique_name_program"' in str(ie_context.value)
 
         # Not possible to have flex fields with the same name without a program
-        with self.assertRaises(IntegrityError) as ie_context:
+        with pytest.raises(IntegrityError) as ie_context:
             FlexibleAttribute.objects.create(
                 name=self.flex_field.name,
                 type=FlexibleAttribute.STRING,
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 label={"English(EN)": "value"},
             )
-        assert 'duplicate key value violates unique constraint "unique_name_without_program"' in str(
-            ie_context.exception
-        )
+        assert 'duplicate key value violates unique constraint "unique_name_without_program"' in str(ie_context.value)
 
         # Not possible to have flex fields with the same name in a program and without a program
-        with self.assertRaises(ValidationError) as ve_context:
+        with pytest.raises(ValidationError) as ve_context:
             FlexibleAttribute.objects.create(
                 name=self.pdu_field.name,
                 type=FlexibleAttribute.STRING,
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 label={"English(EN)": "value"},
             )
-        assert f'Flex field with name "{self.pdu_field.name}" already exists inside a program.' in str(
-            ve_context.exception
-        )
+        assert f'Flex field with name "{self.pdu_field.name}" already exists inside a program.' in str(ve_context.value)
 
-        with self.assertRaises(ValidationError) as ve_context:
+        with pytest.raises(ValidationError) as ve_context:
             FlexibleAttributeForPDUFactory(
                 program=self.program1,
                 label="Flex Field 1",
             )
         assert f'Flex field with name "{self.flex_field.name}" already exists without a program.' in str(
-            ve_context.exception
+            ve_context.value
         )
 
     def test_flexible_attribute_label_without_english_en_key(self) -> None:

@@ -10,6 +10,7 @@ from django.utils import timezone
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
+import pytest
 from pytz import utc
 from rest_framework.exceptions import ValidationError
 
@@ -111,9 +112,9 @@ class TestPaymentPlanServices(BaseTestCase):
     def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan=pp).delete()
-        assert e.exception.detail[0] == "Deletion is only allowed when the status is 'Open'"
+        assert e.value.detail[0] == "Deletion is only allowed when the status is 'Open'"
 
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -243,9 +244,9 @@ class TestPaymentPlanServices(BaseTestCase):
             "dispersion_end_date": parse_date("2020-09-11"),
             "currency": "USD",
         }
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
-        assert str(e.exception) == "Can't switch from state 'TP_OPEN' using method 'status_open'"
+        assert str(e.value) == "Can't switch from state 'TP_OPEN' using method 'status_open'"
 
         pp.status = PaymentPlan.Status.DRAFT
         pp.save()
@@ -485,9 +486,9 @@ class TestPaymentPlanServices(BaseTestCase):
         )
         dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
         dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
-        assert e.exception.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
+        assert e.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
 
     def test_update_follow_up_dates_and_not_currency(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -815,12 +816,11 @@ class TestPaymentPlanServices(BaseTestCase):
             assert p_unicef_id not in old_payment_unicef_ids
 
     def test_get_approval_type_by_action_value_error(self) -> None:
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(ValueError, match="Action cannot be None"):
             PaymentPlanService(payment_plan=self.payment_plan).get_approval_type_by_action()
-        assert str(error.exception) == "Action cannot be None"
 
     def test_validate_action_not_implemented(self) -> None:
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(self.payment_plan).execute_update_status_action(
                 input_data={"action": "INVALID_ACTION"}, user=self.user
             )
@@ -841,7 +841,7 @@ class TestPaymentPlanServices(BaseTestCase):
             "SEND_TO_PAYMENT_GATEWAY",
             "SEND_XLSX_PASSWORD",
         ]
-        assert e.exception.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
+        assert e.value.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
 
     def test_tp_lock_invalid_pp_status(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -849,9 +849,9 @@ class TestPaymentPlanServices(BaseTestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_lock()
-        assert str(e.exception) == "Can't switch from state 'DRAFT' using method 'status_tp_lock'"
+        assert str(e.value) == "Can't switch from state 'DRAFT' using method 'status_tp_lock'"
 
     def test_tp_unlock(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -859,9 +859,9 @@ class TestPaymentPlanServices(BaseTestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_unlock()
-        assert str(e.exception) == "Can't switch from state 'DRAFT' using method 'status_tp_open'"
+        assert str(e.value) == "Can't switch from state 'DRAFT' using method 'status_tp_open'"
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
         payment_plan.save()
         PaymentPlanService(payment_plan).tp_unlock()
@@ -877,9 +877,9 @@ class TestPaymentPlanServices(BaseTestCase):
             status=PaymentPlan.Status.DRAFT,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).tp_rebuild()
-        assert e.exception.detail[0] == "Can only Rebuild Population for Locked or Open Population status"
+        assert e.value.detail[0] == "Can only Rebuild Population for Locked or Open Population status"
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
         payment_plan.save()
         PaymentPlanService(payment_plan).tp_rebuild()
@@ -894,17 +894,17 @@ class TestPaymentPlanServices(BaseTestCase):
             created_by=self.user,
             status=PaymentPlan.Status.TP_LOCKED,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).draft()
-        assert "Can only promote to Payment Plan if DM/FSP is chosen." in str(e.exception)
+        assert "Can only promote to Payment Plan if DM/FSP is chosen." in str(e.value)
 
         payment_plan.status = PaymentPlan.Status.DRAFT
         payment_plan.financial_service_provider = self.fsp
         payment_plan.save()
 
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).draft()
-        assert str(e.exception) == "Can't switch from state 'DRAFT' using method 'status_draft'"
+        assert str(e.value) == "Can't switch from state 'DRAFT' using method 'status_draft'"
 
     def test_lock_if_no_valid_payments(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -912,9 +912,9 @@ class TestPaymentPlanServices(BaseTestCase):
             created_by=self.user,
             status=PaymentPlan.Status.OPEN,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock()
-        assert e.exception.detail[0] == "At least one valid Payment should exist in order to Lock the Payment Plan"
+        assert e.value.detail[0] == "At least one valid Payment should exist in order to Lock the Payment Plan"
 
     def test_update_pp_validation_errors(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -922,24 +922,24 @@ class TestPaymentPlanServices(BaseTestCase):
             created_by=self.user,
             status=PaymentPlan.Status.LOCKED,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
-        assert e.exception.detail[0] == f"Not Allow edit targeting criteria within status {payment_plan.status}"
+        assert e.value.detail[0] == f"Not Allow edit targeting criteria within status {payment_plan.status}"
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
         assert (
-            e.exception.detail[0]
+            e.value.detail[0]
             == "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
         )
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"currency": "test_data"})
-        assert e.exception.detail[0] == f"Not Allow edit Payment Plan within status {payment_plan.status}"
+        assert e.value.detail[0] == f"Not Allow edit Payment Plan within status {payment_plan.status}"
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
-        assert e.exception.detail[0] == "Name can be changed only within Open status"
+        assert e.value.detail[0] == "Name can be changed only within Open status"
 
         payment_plan.status = PaymentPlan.Status.TP_OPEN
         payment_plan.save()
@@ -949,15 +949,15 @@ class TestPaymentPlanServices(BaseTestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
-        assert e.exception.detail[0] == f"Name 'test_data' and program '{self.cycle.program.name}' already exists."
+        assert e.value.detail[0] == f"Name 'test_data' and program '{self.cycle.program.name}' already exists."
 
         self.cycle.status = ProgramCycle.FINISHED
         self.cycle.save()
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"program_cycle_id": str(self.cycle.id)})
-        assert e.exception.detail[0] == "Not possible to assign Finished Program Cycle"
+        assert e.value.detail[0] == "Not possible to assign Finished Program Cycle"
 
     def test_rebuild_payment_plan_population(self) -> None:
         pp = PaymentPlanFactory(
@@ -1007,16 +1007,16 @@ class TestPaymentPlanServices(BaseTestCase):
             delivered_quantity_usd=None,
         )
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
-        assert e.exception.detail[0] == "Payment Plan doesn't have FSP / DeliveryMechanism assigned."
+        assert e.value.detail[0] == "Payment Plan doesn't have FSP / DeliveryMechanism assigned."
         payment_plan.financial_service_provider = self.fsp
         payment_plan.delivery_mechanism = self.dm_transfer_to_account
         payment.save()
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
-        assert e.exception.detail[0] == "All Payments must have entitlement quantity set."
+        assert e.value.detail[0] == "All Payments must have entitlement quantity set."
         payment.entitlement_quantity = 100
         payment.save()
 
@@ -1194,18 +1194,18 @@ class TestPaymentPlanServices(BaseTestCase):
         assert hh_qs.first().unicef_id == household.unicef_id
 
         with transaction.atomic():
-            with self.assertRaises(IntegrityError) as error:
+            with pytest.raises(IntegrityError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
-            assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(error.exception)
+            assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(error.value)
 
         with transaction.atomic():
             IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
 
-            with self.assertRaises(ValidationError) as error:
+            with pytest.raises(ValidationError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
-            assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.exception)
+            assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.value)
 
     def test_acceptance_process_validation_error(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1214,10 +1214,10 @@ class TestPaymentPlanServices(BaseTestCase):
             business_area=self.business_area,
             program_cycle=self.cycle,
         )
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             PaymentPlanService(payment_plan=payment_plan).acceptance_process()
 
-        assert f"Approval Process object not found for PaymentPlan {payment_plan.id}" in str(error.exception)
+        assert f"Approval Process object not found for PaymentPlan {payment_plan.id}" in str(error.value)
 
     def test_update_rules_tp_open(self) -> None:
         payment_plan = PaymentPlanFactory(

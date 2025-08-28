@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -105,7 +106,7 @@ class TestReassignRolesOnDisableIndividual(BaseTestCase):
             },
         }
 
-        with self.assertRaises(ValidationError) as context:
+        with pytest.raises(ValidationError) as context:
             reassign_roles_on_disable_individual_service(
                 self.alternate_collector_individual,
                 role_reassign_data,
@@ -113,7 +114,7 @@ class TestReassignRolesOnDisableIndividual(BaseTestCase):
                 self.program_one,
             )
 
-        assert "Cannot reassign the role" in str(context.exception)
+        assert "Cannot reassign the role" in str(context.value)
 
     def test_reassign_alternate_role(self) -> None:
         individual = IndividualFactory(household=self.household, program=self.program_one)

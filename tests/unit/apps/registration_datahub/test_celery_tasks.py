@@ -718,7 +718,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
             # NotImplementedError
             if registration_id in [999, 18, 19]:
-                with self.assertRaises(NotImplementedError):
+                with pytest.raises(NotImplementedError):
                     run_automate_rdi_creation_task(
                         registration_id=registration_id,
                         page_size=page_size,
@@ -848,7 +848,7 @@ class TestAutomatingRDICreationTask(TestCase):
             def process_flex_records_task(cls) -> str:
                 raise NotImplementedError
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
 
 
