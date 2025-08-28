@@ -10,6 +10,8 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.orange;
     case 'APPROVED':
       return theme.hctPalette.green;
+    case 'MERGED':
+      return theme.hctPalette.darkerBlue;
     default:
       return theme.hctPalette.gray;
   }

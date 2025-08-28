@@ -116,6 +116,7 @@ import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificati
 import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
 import type { PDUOnlineEditCreate } from '../models/PDUOnlineEditCreate';
 import type { PDUOnlineEditDetail } from '../models/PDUOnlineEditDetail';
+import type { PDUOnlineEditSaveData } from '../models/PDUOnlineEditSaveData';
 import type { PDUOnlineEditSendBack } from '../models/PDUOnlineEditSendBack';
 import type { PDUOnlineEditUpdateAuthorizedUsers } from '../models/PDUOnlineEditUpdateAuthorizedUsers';
 import type { PDUXlsxTemplateCreate } from '../models/PDUXlsxTemplateCreate';
@@ -641,6 +642,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -702,6 +704,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedChoiceList
      * @throws ApiError
      */
@@ -763,6 +766,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -829,6 +833,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -910,6 +915,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -931,6 +937,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -954,6 +961,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -981,6 +989,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -1008,6 +1017,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1077,6 +1087,10 @@ export class RestService {
         });
     }
     /**
+     * Mixin to allow using the same viewset for both internal and external endpoints.
+     *
+     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
+     * variable token_permission.
      * @returns PaginatedAreaListList
      * @throws ApiError
      */
@@ -1123,6 +1137,10 @@ export class RestService {
         });
     }
     /**
+     * Mixin to allow using the same viewset for both internal and external endpoints.
+     *
+     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
+     * variable token_permission.
      * @returns PaginatedAreaTreeList
      * @throws ApiError
      */
@@ -4573,6 +4591,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -4610,6 +4629,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaymentChoices
      * @throws ApiError
      */
@@ -4627,6 +4647,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4652,6 +4673,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentPlanList
      * @throws ApiError
      */
@@ -4778,6 +4800,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaymentPlanBulkAction
      * @throws ApiError
      */
@@ -4875,7 +4898,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        search?: any,
+        search?: string,
         /**
          * Program sector
          *
@@ -4953,6 +4976,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -5017,6 +5041,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedChoiceList
      * @throws ApiError
      */
@@ -5081,6 +5106,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5171,7 +5197,7 @@ export class RestService {
          */
         ordering?: string,
         program?: string,
-        search?: any,
+        search?: string,
         startDate?: string,
         /**
          * * `DRAFT` - Draft
@@ -5430,7 +5456,7 @@ export class RestService {
          */
         ordering?: string,
         program?: string,
-        search?: any,
+        search?: string,
         startDate?: string,
         /**
          * * `DRAFT` - Draft
@@ -5471,6 +5497,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -5555,6 +5582,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -5579,6 +5607,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -5605,6 +5634,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -5635,6 +5665,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -5665,6 +5696,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -10690,6 +10722,40 @@ export class RestService {
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PDUOnlineEditSaveData
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+        requestBody: PDUOnlineEditSaveData,
+    }): CancelablePromise<PDUOnlineEditSaveData> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/save_data/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
      * @returns PDUOnlineEditSendBack
      * @throws ApiError
      */
@@ -13034,7 +13100,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        search?: any,
+        search?: string,
         /**
          * Program sector
          *
@@ -13199,7 +13265,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        search?: any,
+        search?: string,
         /**
          * Program sector
          *

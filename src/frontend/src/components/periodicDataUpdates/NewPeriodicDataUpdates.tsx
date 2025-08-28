@@ -14,6 +14,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 const onlineEditsHeadCells: HeadCell<any>[] = [
   {
@@ -72,6 +74,12 @@ const NewPeriodicDataUpdates = (): ReactElement => {
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
+  const permissions = usePermissions();
+
+  const canCreatePDUTemplate = hasPermissions(
+    PERMISSIONS.PDU_TEMPLATE_CREATE,
+    permissions,
+  );
 
   const newTemplatePath = isSocialDctType
     ? `/${baseUrl}/population/people/new-online-template`
@@ -157,6 +165,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
           startIcon={<AddIcon />}
           component={Link}
           to={newTemplatePath}
+          disabled={!canCreatePDUTemplate}
         >
           {t('New Online Edit')}
         </Button>,

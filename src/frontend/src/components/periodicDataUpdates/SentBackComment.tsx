@@ -2,6 +2,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CommentIcon from '@mui/icons-material/Comment';
+import { format } from 'date-fns';
 
 interface SentBackCommentProps {
   comment: string;
@@ -14,6 +15,12 @@ const SentBackComment: React.FC<SentBackCommentProps> = ({
   date,
   author,
 }) => {
+  let formattedDate = date;
+  try {
+    formattedDate = format(new Date(date), 'yyyy-MM-dd HH:mm');
+  } catch (e) {
+    // fallback to original date string if parsing fails
+  }
   return (
     <Box
       sx={{
@@ -21,11 +28,11 @@ const SentBackComment: React.FC<SentBackCommentProps> = ({
         borderRadius: 3,
         p: 2.5,
         display: 'flex',
-        alignItems: 'center', // Center icon vertically in the bar
+        alignItems: 'center',
         gap: 2,
         mb: 2,
         maxWidth: 900,
-        minHeight: 64, // Ensures enough height for vertical centering
+        minHeight: 64,
       }}
       data-testid="sent-back-comment"
     >
@@ -37,7 +44,7 @@ const SentBackComment: React.FC<SentBackCommentProps> = ({
           variant="subtitle1"
           sx={{ color: '#7B5E3B', fontWeight: 600 }}
         >
-          Sent Back Comment | {date} | {author}
+          Sent Back Comment | {formattedDate} | {author}
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: 700, mt: 0.5 }}>
           {comment}
