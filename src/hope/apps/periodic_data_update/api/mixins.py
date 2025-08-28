@@ -29,5 +29,7 @@ class PDUOnlineEditAuthorizedUserMixin:
 
                 queryset_unauthorized = queryset.exclude(authorized_users__pk=user.pk)
                 if queryset_unauthorized.exists():
-                    unauthorized_ids = ", ".join(str(id) for id in queryset_unauthorized.values_list("id", flat=True))
+                    unauthorized_ids = ", ".join(
+                        str(unauthorized_id) for unauthorized_id in queryset_unauthorized.values_list("id", flat=True)
+                    )
                     raise PermissionDenied(f"You are not an authorized user for PDU Online Edit: {unauthorized_ids}")
