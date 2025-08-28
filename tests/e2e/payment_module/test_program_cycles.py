@@ -2,11 +2,11 @@ from datetime import datetime
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
-from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
-from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 import pytest
 from selenium.webdriver.common.by import By
 
+from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
+from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory

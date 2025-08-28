@@ -4,6 +4,11 @@ from time import sleep
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
+import pytest
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+
 from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
 from e2e.filters.test_filters import create_grievance
 from e2e.helpers.date_time_format import FormatTime
@@ -14,11 +19,6 @@ from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-import pytest
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,

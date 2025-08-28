@@ -1,14 +1,14 @@
 import os
 from time import sleep
 
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
     PDUXlsxTemplates,
     PDUXlsxTemplatesDetails,
 )
-import pytest
-from selenium.webdriver.common.by import By
-
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (

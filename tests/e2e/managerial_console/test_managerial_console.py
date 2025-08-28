@@ -3,11 +3,11 @@ from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
+from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import (

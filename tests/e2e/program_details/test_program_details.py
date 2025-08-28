@@ -3,14 +3,14 @@ from decimal import Decimal
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
+import pytest
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-import pytest
-from selenium.common.exceptions import NoSuchElementException
-
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,

@@ -3,15 +3,15 @@ from typing import List
 
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-import pytest
-from selenium.webdriver.common.by import By
-
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     create_household,

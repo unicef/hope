@@ -2,10 +2,6 @@ from datetime import datetime
 from typing import Callable
 
 from dateutil.relativedelta import relativedelta
-from e2e.page_object.filters import Filters
-from e2e.page_object.targeting.targeting import Targeting
-from e2e.page_object.targeting.targeting_create import TargetingCreate
-from e2e.page_object.targeting.targeting_details import TargetingDetails
 import factory
 import pytest
 from pytz import utc
@@ -13,6 +9,10 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
+from e2e.page_object.filters import Filters
+from e2e.page_object.targeting.targeting import Targeting
+from e2e.page_object.targeting.targeting_create import TargetingCreate
+from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,

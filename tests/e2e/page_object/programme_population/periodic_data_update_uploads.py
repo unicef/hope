@@ -1,8 +1,9 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
+from e2e.page_object.base_components import BaseComponents
 
-class PeriodicDataUpdateXlsxUploads(BaseComponents):
+
+class PDUXlsxUploads(BaseComponents):
     nav_program_population = 'a[data-cy="nav-Programme Population"]'
     nav_program_details = 'a[data-cy="nav-Programme Details"]'
     page_header_container = 'div[data-cy="page-header-container"]'

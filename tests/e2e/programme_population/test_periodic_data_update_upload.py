@@ -2,6 +2,9 @@ import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
+import openpyxl
+import pytest
+
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
     PDUXlsxTemplates,
@@ -9,9 +12,6 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
-import openpyxl
-import pytest
-
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
