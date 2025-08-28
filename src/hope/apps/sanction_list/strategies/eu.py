@@ -2,8 +2,9 @@ import io
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
-import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element
 
+from defusedxml import ElementTree
 from elasticsearch import NotFoundError
 import requests
 
@@ -40,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class EUParser:
-    def __init__(self, root: ET.Element) -> None:
+    def __init__(self, root: Element) -> None:
         self.root = root
 
     def __iter__(self) -> "Generator[Entry]":
@@ -102,17 +103,17 @@ class EUParser:
 
 class EUSanctionList(BaseSanctionList):
     def load_from_file(self, file_path: str | Path) -> None:
-        tree = ET.parse(str(file_path))
+        tree = ElementTree.parse(str(file_path))
         root = tree.getroot()
         self.parse(root)
 
     def load_from_url(self) -> None:
         response = requests.get(self.context.config["url"], timeout=10)
-        tree = ET.parse(io.BytesIO(response.content))
+        tree = ElementTree.parse(io.BytesIO(response.content))
         root = tree.getroot()
         self.parse(root)
 
-    def parse(self, root: ET.Element) -> int:
+    def parse(self, root: Element) -> int:
         parser = EUParser(root)
         _i = 0
         for _i, entry in enumerate(parser):

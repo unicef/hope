@@ -421,10 +421,11 @@ class CustomOrderingFilter(OrderingFilter):
             raise ValueError("'fields' must be an iterable (e.g., a list, tuple, or mapping).")
 
         # fields is an iterable of field names
-        assert all(
+        if not all(
             isinstance(field, str | Lower) or is_iterable(field) and len(field) == 2  # may need to be wrapped in parens
             for field in fields
-        ), "'fields' must contain strings or (field name, param name) pairs."
+        ):
+            raise AssertionError("'fields' must contain strings or (field name, param name) pairs.")
 
         new_fields = []
         self.lower_dict = {}

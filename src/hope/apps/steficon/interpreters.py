@@ -85,7 +85,7 @@ class PythonExec(Interpreter):
         locals_["context"] = context
         locals_["result"] = pts
         try:
-            exec(self.init_string, gl, locals_)
+            exec(self.init_string, gl, locals_)  # noqa
         except SyntaxError as err:
             error_class = err.__class__.__name__
             detail = err.args[0]
@@ -140,7 +140,7 @@ class PythonExec(Interpreter):
 
 
 def get_env(**options: Any) -> Environment:
-    env = Environment(**options)
+    env = Environment(autoescape=True, **options)
     env.filters.update({"adults": engine.adults})
     return env
 

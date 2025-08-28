@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 import logging
 from typing import Any
-import xml.etree.ElementTree as ET
 
+from defusedxml import ElementTree
 from django.conf import settings
 from django.core.management import BaseCommand
 
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         :return:
         """
         file = options["file"]
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         root = tree.getroot()
 
         for business_area_tag in root:
