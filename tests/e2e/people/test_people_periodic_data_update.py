@@ -13,6 +13,8 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
 from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
+import pytest
+
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -25,8 +27,6 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.core.models import (
     BusinessArea,
     DataCollectingType,

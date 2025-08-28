@@ -2,6 +2,9 @@ from typing import Any
 
 from django.core.management import call_command
 from django.urls import reverse
+import pytest
+from rest_framework import status
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -12,9 +15,6 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-from rest_framework import status
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket

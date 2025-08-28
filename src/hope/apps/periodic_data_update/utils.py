@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PDUXlsxTemplate, PDUOnlineEdit
+from hope.apps.periodic_data_update.models import PDUOnlineEdit, PDUXlsxTemplate
 from hope.apps.program.models import Program
 
 

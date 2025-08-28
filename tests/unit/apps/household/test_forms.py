@@ -1,11 +1,11 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.household.models import Household
 from hope.apps.program.models import Program

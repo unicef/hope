@@ -8,6 +8,11 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
+import pytest
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -16,11 +21,6 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
-
 from hope.apps.account.models import Partner
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.program.models import BeneficiaryGroup, Program

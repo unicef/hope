@@ -1,13 +1,13 @@
 import json
 
 from django.conf import settings
-from django.core.validators import MinLengthValidator, ProhibitNullCharactersValidator, MaxLengthValidator
+from django.core.validators import MaxLengthValidator, MinLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
 from hope.apps.core.models import FileTemp
 from hope.apps.utils.models import CeleryEnabledModel, TimeStampedModel
-from hope.apps.utils.validators import StartEndSpaceValidator, DoubleSpaceValidator
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
 class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
@@ -123,10 +123,7 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
             return self.Status.TO_EXPORT
         if self.get_celery_status() == self.CELERY_STATUS_RETRY:
             return self.Status.TO_EXPORT
-        if self.get_celery_status() in [
-            self.CELERY_STATUS_REVOKED,
-            self.CELERY_STATUS_CANCELED
-        ]:
+        if self.get_celery_status() in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
             return self.Status.CANCELED
         return self.status
 
@@ -301,22 +298,17 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
         status_create = self.get_celery_status(task_name="generate_edit_data")
         status_merge = self.get_celery_status(task_name="merge")
 
-        if (
-            self.status
-            in [
-                self.Status.NEW,
-                self.Status.READY,
-                self.Status.APPROVED,
-                self.Status.MERGED,
-                self.Status.FAILED_CREATE,
-                self.Status.FAILED_MERGE,
-            ]
-            or status_create == self.CELERY_STATUS_SUCCESS
-            or status_merge == self.CELERY_STATUS_SUCCESS
-        ):
+        if self.status in [
+            self.Status.NEW,
+            self.Status.READY,
+            self.Status.APPROVED,
+            self.Status.MERGED,
+            self.Status.FAILED_CREATE,
+            self.Status.FAILED_MERGE,
+        ] or self.CELERY_STATUS_SUCCESS in [status_create, status_merge]:
             return self.status
 
-        if status_create == self.CELERY_STATUS_RECEIVED or status_create == self.CELERY_STATUS_RETRY:
+        if status_create in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RETRY]:
             return self.Status.PENDING_CREATE
         if status_create == self.CELERY_STATUS_STARTED:
             return self.Status.CREATING
@@ -324,10 +316,10 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
             return self.Status.FAILED_CREATE
         if status_create == self.CELERY_STATUS_NOT_SCHEDULED:
             return self.Status.NOT_SCHEDULED_CREATE
-        if status_create == self.CELERY_STATUS_REVOKED or status_create == self.CELERY_STATUS_CANCELED:
+        if status_create in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
             return self.Status.CANCELED_CREATE
 
-        if status_merge == self.CELERY_STATUS_RECEIVED or status_merge == self.CELERY_STATUS_RECEIVED:
+        if status_merge in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RECEIVED]:
             return self.Status.PENDING_MERGE
         if status_merge == self.CELERY_STATUS_STARTED:
             return self.Status.MERGING
@@ -335,7 +327,7 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
             return self.Status.FAILED_MERGE
         if status_merge == self.CELERY_STATUS_NOT_SCHEDULED:
             return self.Status.NOT_SCHEDULED_MERGE
-        if status_merge == self.CELERY_STATUS_REVOKED or status_merge == self.CELERY_STATUS_CANCELED:
+        if status_merge in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
             return self.Status.CANCELED_MERGE
 
         return self.status

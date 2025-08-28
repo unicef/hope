@@ -4,6 +4,10 @@ from typing import Optional
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
+import pytest
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import (
@@ -11,10 +15,6 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-import pytest
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-
 from hope.apps.account.models import Partner, User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.payment.models import PaymentPlan

@@ -3,10 +3,10 @@ from e2e.page_object.accountability.communication import AccountabilityCommunica
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
-from extras.test_utils.factories.accountability import CommunicationMessageFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
 import pytest
 
+from extras.test_utils.factories.accountability import CommunicationMessageFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Message
 from hope.apps.core.models import BusinessArea, DataCollectingType

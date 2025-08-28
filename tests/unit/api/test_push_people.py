@@ -2,6 +2,12 @@ import base64
 from io import BytesIO
 from typing import Any
 
+from parameterized import parameterized
+from PIL import Image
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -9,12 +15,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from parameterized import parameterized
-from PIL import Image
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hope.api.models import Grant
 from hope.apps.core.models import DataCollectingType

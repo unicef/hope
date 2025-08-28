@@ -1,27 +1,25 @@
-from unittest.mock import patch
 from typing import Any, List
-
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.payment import PaymentFactory
-
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.payment.models import Payment
+from unittest.mock import patch
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory, RoleFactory, RoleAssignmentFactory
+from extras.test_utils.factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import (
-    create_afghanistan,
-    PeriodicFieldDataFactory,
     FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
 )
+from extras.test_utils.factories.household import create_household_and_individuals
+from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import PeriodicFieldData
+from hope.apps.payment.models import Payment
+from hope.apps.periodic_data_update.models import PDUOnlineEdit
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.program.models import Program
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

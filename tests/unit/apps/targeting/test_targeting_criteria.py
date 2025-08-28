@@ -3,6 +3,8 @@ from typing import Any, Dict, List
 
 from dateutil.relativedelta import relativedelta
 from django.core.management import call_command
+from flaky import flaky
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -11,8 +13,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from flaky import flaky
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import Household, Individual

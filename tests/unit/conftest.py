@@ -13,9 +13,9 @@ from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
-from extras.test_utils.fixtures import *  # noqa: F403, F401
 import pytest
 
+from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.apps.account.models import Partner, Role
 
 

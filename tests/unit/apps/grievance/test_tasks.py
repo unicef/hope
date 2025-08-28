@@ -2,12 +2,12 @@ from typing import Any
 from unittest.mock import patch
 
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,

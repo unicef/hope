@@ -2,11 +2,11 @@ from django.db import transaction
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
+import pytest
+
 from extras.test_utils.factories.accountability import SurveyFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentPlanFactory
-import pytest
-
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Survey
 from hope.apps.core.models import BusinessArea, DataCollectingType

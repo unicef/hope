@@ -10,10 +10,6 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
 from environ import Env
-from extras.test_utils.factories.account import RoleFactory, UserFactory
-from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from flags.models import FlagState
 import pytest
 from pytest_django.live_server_helper import LiveServer
@@ -76,6 +72,10 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
+from extras.test_utils.factories.account import RoleFactory, UserFactory
+from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.factories.household import DocumentTypeFactory
+from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from hope.apps.account.models import Partner, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea, DataCollectingType

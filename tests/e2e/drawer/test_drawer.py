@@ -5,11 +5,11 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
 import pytest
 from selenium.common.exceptions import NoSuchElementException
 
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import DataCollectingType
 from hope.apps.program.models import BeneficiaryGroup, Program
 

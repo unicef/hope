@@ -3,6 +3,8 @@ import datetime
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+import pytz
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -10,8 +12,6 @@ from extras.test_utils.factories.aurora import (
     RegistrationFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-import pytz
-
 from hope.apps.core.models import DataCollectingType
 from hope.apps.geo import models as geo_models
 from hope.apps.household.models import (

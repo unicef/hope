@@ -1,5 +1,6 @@
 from django.core.management import call_command
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -13,7 +14,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import (
     FEMALE,

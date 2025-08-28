@@ -5,10 +5,10 @@ from pathlib import Path
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import (

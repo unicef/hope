@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from django.urls import reverse
 from django_webtest import WebTest
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory

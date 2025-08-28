@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory

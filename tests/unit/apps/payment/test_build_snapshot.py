@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from django.test import TestCase
+from freezegun import freeze_time
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import (
@@ -11,8 +13,6 @@ from extras.test_utils.factories.payment import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from freezegun import freeze_time
-
 from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.models import (
     AccountType,
