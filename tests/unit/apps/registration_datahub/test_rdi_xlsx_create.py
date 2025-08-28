@@ -403,7 +403,7 @@ class TestRdiXlsxCreateTask(TestCase):
         "hope.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
         return_value=parse_datetime("2020-06-22 12:00:00-0000"),
     )
-    def test_handle_document_photo_fields(self, _) -> None:
+    def test_handle_document_photo_fields(self, mock_now) -> None:
         task = self.RdiXlsxCreateTask()
         task.image_loader = ImageLoaderMock()
         task.documents = {}

@@ -1,3 +1,4 @@
+import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 import uuid
@@ -101,7 +102,9 @@ class TestGrievanceUtils(TestCase):
         assert flex_fields["decimal_field"] == 321.11
 
     def test_verify_flex_fields(self) -> None:
-        with pytest.raises(ValueError, match="associated_with argument must be one of ['household', 'individual']"):
+        with pytest.raises(
+            ValueError, match=re.escape("associated_with argument must be one of ['household', 'individual']")
+        ):
             verify_flex_fields({"key": "value"}, "associated_with")
 
         with pytest.raises(ValueError, match="key is not a correct `flex field"):

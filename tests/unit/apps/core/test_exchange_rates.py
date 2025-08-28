@@ -180,7 +180,7 @@ class TestExchangeRatesAPI(TestCase):
         ]
     )
     @override_settings(EXCHANGE_RATES_API_KEY="TEST_API_KEY")
-    def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
+    def test_api_class_initialization(self, helper: str, api_key: str, api_url: str) -> None:
         api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
         if api_key is not None:
@@ -278,7 +278,7 @@ class TestExchangeRates(TestCase):
     )
     def test_get_exchange_rate_for_currency_code(
         self,
-        _: Any,
+        helper: str,
         currency_code: str,
         dispersion_date: datetime,
         expected_result: Any,

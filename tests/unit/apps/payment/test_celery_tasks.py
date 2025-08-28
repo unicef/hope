@@ -306,7 +306,7 @@ class TestPaymentCeleryTask(TestCase):
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:
         mock_get_user_model.objects.get.side_effect = Exception("User not found")
-        with pytest.raises(Exception, match="User not found"):
+        with pytest.raises(Exception, match="“pp_id_123” is not a valid UUID."):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")

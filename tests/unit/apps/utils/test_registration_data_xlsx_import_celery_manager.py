@@ -16,7 +16,7 @@ class TestRegistrationDataXlsxImportCeleryManager(BaseTestCase):
         call_command("loadbusinessareas")
 
     @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
-    def test_querysets(self, _: mock.MagicMock) -> None:
+    def test_querysets(self, mock_get_all_tasks: mock.MagicMock) -> None:
         from hope.apps.utils.celery_manager import (
             RegistrationDataXlsxImportCeleryManager,
         )
