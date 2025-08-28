@@ -1,7 +1,7 @@
 from typing import Any
 
 from constance import config
-from django.db.models import Prefetch, Q, QuerySet, Exists, OuterRef
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -41,7 +41,7 @@ from hope.apps.household.api.serializers.individual import (
     IndividualPhotoDetailSerializer,
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
-from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold, DUPLICATE
+from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program

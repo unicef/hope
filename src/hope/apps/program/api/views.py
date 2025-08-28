@@ -4,7 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When, Count, Q
+from django.db.models import Case, Count, IntegerField, Prefetch, Q, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
