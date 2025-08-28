@@ -63,10 +63,8 @@ class TestRegistrationXlsxImportTask(TestCase):
             "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
             new=_mock,
         ):
-            with pytest.raises(Exception) as context:
+            with pytest.raises(Exception, match="something went wrong"):
                 self._run_task(rdi.id)
-
-        assert str(context.value) == "something went wrong"
 
     def _run_task(self, rdi_id: str) -> None:
         registration_xlsx_import_task(

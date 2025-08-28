@@ -816,9 +816,8 @@ class TestPaymentPlanServices(BaseTestCase):
             assert p_unicef_id not in old_payment_unicef_ids
 
     def test_get_approval_type_by_action_value_error(self) -> None:
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError, match="Action cannot be None"):
             PaymentPlanService(payment_plan=self.payment_plan).get_approval_type_by_action()
-        assert str(error.value) == "Action cannot be None"
 
     def test_validate_action_not_implemented(self) -> None:
         with pytest.raises(ValidationError) as e:
