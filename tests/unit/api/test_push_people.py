@@ -7,12 +7,6 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from parameterized import parameterized
-from PIL import Image
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
