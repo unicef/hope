@@ -5,6 +5,9 @@ from unittest.mock import Mock, patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APIClient
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import create_household_and_individuals
@@ -15,9 +18,6 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportFactory,
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from rest_framework import status
-from rest_framework.test import APIClient
-
 from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.models import Household, Individual

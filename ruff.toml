@@ -90,7 +90,7 @@ line-ending = "auto"
 "src/**/one_time_scripts/**.py" = ["T201", ]
 
 [lint.isort]
-known-first-party = ["hope"]
+known-first-party = ["hope", "extras", "e2e"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 combine-as-imports = true
 force-sort-within-sections = true

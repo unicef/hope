@@ -2,6 +2,8 @@ from typing import Any, Optional
 from unittest.mock import patch
 
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
@@ -14,8 +16,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.household.models import (
     HEAD,
     MALE,

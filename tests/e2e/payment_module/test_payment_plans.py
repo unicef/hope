@@ -4,6 +4,14 @@ from time import sleep
 import zipfile
 
 from dateutil.relativedelta import relativedelta
+import factory
+import openpyxl
+import pytest
+from pytz import utc
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.webdriver.common.by import By
+from sorl.thumbnail.conf import settings
+
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
@@ -27,14 +35,6 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-import factory
-import openpyxl
-import pytest
-from pytz import utc
-from selenium.common.exceptions import ElementClickInterceptedException
-from selenium.webdriver.common.by import By
-from sorl.thumbnail.conf import settings
-
 from hope.apps.account.models import User
 from hope.apps.core.models import DataCollectingType
 from hope.apps.payment.models import (

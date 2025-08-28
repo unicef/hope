@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -8,7 +9,6 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import IndividualFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import (
     HouseholdDataUpdateService,
