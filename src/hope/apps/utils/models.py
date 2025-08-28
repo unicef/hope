@@ -76,7 +76,7 @@ class SoftDeletableManagerMixin:
                 "https://django-model-utils.readthedocs.io/en/stable/models.html"
                 "#softdeletablemodel for more information."
             )
-            warnings.warn(warning_message, stacklevel=DeprecationWarning)
+            warnings.warn(warning_message, DeprecationWarning, stacklevel=2)
 
         kwargs = {"model": self.model, "using": self._db}
         if hasattr(self, "_hints"):
@@ -492,7 +492,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             if isinstance(result, Exception):
                 error = str(result)
             elif task_status == self.CELERY_STATUS_CANCELED:
-                error = _("Query execution cancelled.")
+                error = str(_("Query execution cancelled."))
             else:
                 error = ""
 

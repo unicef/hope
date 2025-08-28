@@ -295,8 +295,7 @@ def nested_dict_get(dictionary: dict, path: str) -> str | None:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
-        # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
+        lambda d, key: d.get(key) if isinstance(d, dict) else None,
         path.split("."),
         dictionary,
     )
@@ -919,7 +918,7 @@ class JSONBSet(Func):
         create_missing: bool = True,
         **extra: Any,
     ) -> None:
-        create_missing = Value("true") if create_missing else Value("false")  # type: ignore
+        create_missing = Value("true") if create_missing else Value("false")
         super().__init__(expression, path, new_value, create_missing, **extra)
 
 

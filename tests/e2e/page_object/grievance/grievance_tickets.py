@@ -75,7 +75,7 @@ class GrievanceTickets(BaseComponents):
     def get_dropdown(self) -> WebElement:
         return self.wait_for(self.dropdown)
 
-    def get_status_container(self) -> [WebElement]:
+    def get_status_container(self) -> list[WebElement]:
         self.wait_for(self.status_container)
         return self.get_elements(self.status_container)
 
@@ -213,11 +213,11 @@ class GrievanceTickets(BaseComponents):
     def get_tab_user_generated(self) -> WebElement:
         return self.wait_for(self.tab_user_generated)
 
-    def get_ticket_list_row(self) -> [WebElement]:
+    def get_ticket_list_row(self) -> list[WebElement]:
         self.wait_for(self.ticket_list_row)
         return self.get_elements(self.ticket_list_row)
 
-    def get_table_label(self) -> [WebElement]:
+    def get_table_label(self) -> list[WebElement]:
         return self.get_elements(self.table_label)
 
     def get_date_title_filter_popup(self) -> WebElement:

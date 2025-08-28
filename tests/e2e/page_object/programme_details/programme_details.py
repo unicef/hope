@@ -55,55 +55,55 @@ class ProgrammeDetails(BaseComponents):
     button_delete = 'button[data-cy="button-delete"]'
     button_cancel = 'button[data-cy="button-cancel"]'
 
-    def get_program_cycle_row(self) -> [WebElement]:
+    def get_program_cycle_row(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_row)
         return self.get_elements(self.program_cycle_row)
 
-    def get_delete_programme_cycle(self) -> [WebElement]:
+    def get_delete_programme_cycle(self) -> list[WebElement]:
         self.wait_for(self.delete_programme_cycle)
         return self.get_elements(self.delete_programme_cycle)
 
-    def get_program_cycle_id(self) -> [WebElement]:
+    def get_program_cycle_id(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_id)
         return self.get_elements(self.program_cycle_id)
 
-    def get_program_cycle_title(self) -> [WebElement]:
+    def get_program_cycle_title(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_title)
         return self.get_elements(self.program_cycle_title)
 
-    def get_program_cycle_status(self) -> [WebElement]:
+    def get_program_cycle_status(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_status)
         return self.get_elements(self.program_cycle_status)
 
-    def get_status_container(self) -> [WebElement]:
+    def get_status_container(self) -> list[WebElement]:
         self.wait_for(self.status_container)
         return self.get_elements(self.status_container)
 
-    def get_program_cycle_total_entitled_quantity_usd(self) -> [WebElement]:
+    def get_program_cycle_total_entitled_quantity_usd(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_total_entitled_quantity_usd)
         return self.get_elements(self.program_cycle_total_entitled_quantity_usd)
 
-    def get_program_cycle_total_undelivered_quantity_usd(self) -> [WebElement]:
+    def get_program_cycle_total_undelivered_quantity_usd(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_total_undelivered_quantity_usd)
         return self.get_elements(self.program_cycle_total_undelivered_quantity_usd)
 
-    def get_program_cycle_total_delivered_quantity_usd(self) -> [WebElement]:
+    def get_program_cycle_total_delivered_quantity_usd(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_total_delivered_quantity_usd)
         return self.get_elements(self.program_cycle_total_delivered_quantity_usd)
 
-    def get_program_cycle_start_date(self) -> [WebElement]:
+    def get_program_cycle_start_date(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_start_date)
         return self.get_elements(self.program_cycle_start_date)
 
-    def get_program_cycle_end_date(self) -> [WebElement]:
+    def get_program_cycle_end_date(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_end_date)
         return self.get_elements(self.program_cycle_end_date)
 
-    def get_program_cycle_details_btn(self) -> [WebElement]:
+    def get_program_cycle_details_btn(self) -> list[WebElement]:
         self.wait_for(self.program_cycle_details_btn)
         return self.get_elements(self.program_cycle_details_btn)
 
-    def get_button_edit_program_cycle(self) -> [WebElement]:
+    def get_button_edit_program_cycle(self) -> list[WebElement]:
         self.wait_for(self.button_edit_program_cycle)
         return self.get_elements(self.button_edit_program_cycle)
 
