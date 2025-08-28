@@ -419,7 +419,7 @@ class TestPaymentModel(TestCase):
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         PaymentFactory(parent=pp, household=hh1, currency="PLN")
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             PaymentFactory(parent=pp, household=hh1, currency="PLN")
 
     def test_household_admin2_property(self) -> None:
@@ -465,9 +465,9 @@ class TestPaymentModel(TestCase):
             delivered_quantity_usd=22,
             status=Payment.STATUS_DISTRIBUTION_PARTIAL,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment_invalid_status.mark_as_failed()
-        assert "Status shouldn't be failed" in e.exception
+        assert "Status shouldn't be failed" in e.value
 
         payment.mark_as_failed()
         payment.save()
@@ -495,13 +495,13 @@ class TestPaymentModel(TestCase):
         )
         date = timezone.now().date()
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment_invalid_status.revert_mark_as_failed(999, date)
-        assert "Only payment marked as force failed can be reverted" in e.exception
+        assert "Only payment marked as force failed can be reverted" in e.value
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment_entitlement_quantity_none.revert_mark_as_failed(999, date)
-        assert "Entitlement quantity need to be set in order to revert" in e.exception
+        assert "Entitlement quantity need to be set in order to revert" in e.value
 
         payment.revert_mark_as_failed(999, date)
         payment.save()
@@ -521,9 +521,9 @@ class TestPaymentModel(TestCase):
             result_status = payment.get_revert_mark_as_failed_status(delivered_quantity)
             assert result_status == status
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment.get_revert_mark_as_failed_status(1000)
-        assert "Wrong delivered quantity 1000 for entitlement quantity 999" in e.exception
+        assert "Wrong delivered quantity 1000 for entitlement quantity 999" in e.value
 
     def test_manager_annotations_pp_conflicts(self) -> None:
         program = RealProgramFactory()
@@ -1100,7 +1100,7 @@ class TestAccountModel(TestCase):
                 }
                 if should_raise:
                     with transaction.atomic():
-                        with self.assertRaises(IntegrityError):
+                        with pytest.raises(IntegrityError):
                             AccountFactory(**kwargs)
                 else:
                     AccountFactory(**kwargs)

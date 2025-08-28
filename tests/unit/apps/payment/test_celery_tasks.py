@@ -16,6 +16,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+import pytest
 
 from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import (
@@ -122,7 +123,7 @@ class TestPaymentCeleryTask(TestCase):
 
         mock_create_payments.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             prepare_payment_plan_task(payment_plan_id=str(payment_plan.pk))
 
         payment_plan.refresh_from_db()
@@ -169,7 +170,7 @@ class TestPaymentCeleryTask(TestCase):
 
         mock_rule_execute.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             payment_plan_apply_steficon_hh_selection(str(payment_plan.pk), str(engine_rule.id))
 
         mock_retry.assert_called_once()
@@ -206,7 +207,7 @@ class TestPaymentCeleryTask(TestCase):
         PaymentFactory(parent=payment_plan)
         mock_update_population_count_fields.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             payment_plan_rebuild_stats(str(payment_plan.pk))
 
         mock_retry.assert_called_once()
@@ -240,7 +241,7 @@ class TestPaymentCeleryTask(TestCase):
         PaymentFactory(parent=payment_plan)
         mock_full_rebuild.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             payment_plan_full_rebuild(str(payment_plan.pk))
 
         mock_retry.assert_called_once()
@@ -305,7 +306,7 @@ class TestPaymentCeleryTask(TestCase):
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:
         mock_get_user_model.objects.get.side_effect = Exception("User not found")
-        with self.assertRaises(Exception):  # noqa: B017
+        with pytest.raises(Exception):  # noqa: B017
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
