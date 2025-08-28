@@ -6,6 +6,10 @@ from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
@@ -19,10 +23,6 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.accountability.models import Message

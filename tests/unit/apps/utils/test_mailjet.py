@@ -7,10 +7,10 @@ from unittest.mock import patch
 from constance.test import override_config
 from django.conf import settings
 from django.test import TestCase, override_settings
-from extras.test_utils.factories.account import UserFactory
 from openpyxl import Workbook
 import pytest
 
+from extras.test_utils.factories.account import UserFactory
 from hope.apps.utils.mailjet import MailjetClient
 
 

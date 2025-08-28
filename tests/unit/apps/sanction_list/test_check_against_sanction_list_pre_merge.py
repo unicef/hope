@@ -4,6 +4,9 @@ from constance.test import override_config
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
+import pytest
+from strategy_field.utils import fqn
+
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -11,9 +14,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-from strategy_field.utils import fqn
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models

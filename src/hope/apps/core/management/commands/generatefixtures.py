@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
+
 from extras.test_utils.factories.account import UserFactory, create_superuser
 from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
@@ -30,7 +31,6 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-
 from hope.apps.account.models import RoleAssignment
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo.models import Area

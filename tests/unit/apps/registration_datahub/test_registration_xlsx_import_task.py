@@ -4,11 +4,11 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 

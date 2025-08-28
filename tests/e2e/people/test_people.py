@@ -3,6 +3,9 @@ from typing import List
 
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
@@ -16,9 +19,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-from selenium.webdriver.common.by import By
-
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.household.models import HOST, SEEING, Individual
 from hope.apps.payment.models import Payment
