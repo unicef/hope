@@ -1,5 +1,14 @@
+from typing import TYPE_CHECKING
+
 from django.urls import reverse
 import responses
+
+if TYPE_CHECKING:
+    from django_webtest import DjangoTestApp
+    from responses import RequestsMock
+
+    from hope.models.sanction_list import SanctionList
+    from hope.models.user import User
 
 
 def test_sanction_list_refresh(
