@@ -31,6 +31,7 @@ from hope.models.household import (
 from hope.models.individual import PendingIndividual
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class TestPushPeople(HOPEApiTestCase):

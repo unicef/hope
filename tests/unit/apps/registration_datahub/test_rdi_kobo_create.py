@@ -5,7 +5,6 @@ import secrets
 from typing import Any, Dict
 from unittest import mock
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
@@ -13,29 +12,27 @@ from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
 from django_countries.fields import Country
+import pytest
 
-from hope.models.area
-from hope.models.area_type
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import country as geo_models
+from hope.models.account import PendingAccount
+from hope.models.business_area import BusinessArea
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     IDENTIFICATION_TYPE_CHOICE,
     PendingHousehold,
 )
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.document_type import DocumentType
-from hope.models.account import PendingAccount
-from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.import_data import ImportData
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models.individual import PendingIndividual
+from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

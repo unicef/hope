@@ -58,6 +58,7 @@ from hope.models.household import (
     Household,
 )
 from hope.models.individual import Individual
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
 from hope.models.rule import Rule

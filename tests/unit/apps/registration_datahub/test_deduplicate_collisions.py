@@ -9,7 +9,8 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.models.country import Country
-from hope.models.household import Household, PendingIndividual
+from hope.models.household import Household
+from hope.models.individual import PendingIndividual
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
 
