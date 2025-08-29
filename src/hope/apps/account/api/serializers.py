@@ -18,6 +18,7 @@ from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
 from hope.models.program import Program
 
+
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
     is_accountability_applicable = serializers.SerializerMethodField()

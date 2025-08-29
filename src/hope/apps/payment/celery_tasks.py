@@ -56,6 +56,7 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
     from hope.models.user import User
     from hope.models.payment_verification_plan import PaymentVerificationPlan
+
     try:
         user = User.objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
@@ -85,6 +86,7 @@ def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30
     """Remove old Payment Verification report XLSX files."""
     from django.contrib.contenttypes.models import ContentType
     from hope.models.file_temp import FileTemp
+
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
@@ -759,6 +761,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
 @sentry_tags
 def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     from hope.models.payment_plan import PaymentPlan
+
     with cache.lock(
         f"payment_plan_rebuild_stats_{payment_plan_id}",
         blocking_timeout=60 * 10,
@@ -810,6 +813,7 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
 class CheckRapidProVerificationTask:
     def execute(self) -> None:
         from hope.models.payment_verification_plan import PaymentVerificationPlan
+
         active_rapidpro_verifications = PaymentVerificationPlan.objects.filter(
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             status=PaymentVerificationPlan.STATUS_ACTIVE,

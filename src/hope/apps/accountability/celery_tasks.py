@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def export_survey_sample_task(survey_id: str, user_id: str) -> None:
     from hope.models.user import User
+
     try:
         survey = Survey.objects.get(id=survey_id)
         user = User.objects.get(pk=user_id)

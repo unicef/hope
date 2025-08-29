@@ -19,8 +19,8 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
     )
-    try:
 
+    try:
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError as exc:
         from datetime import timedelta
@@ -44,6 +44,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
         KoboRetriableError,
     )
+
     try:
         from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,

@@ -44,6 +44,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
 
     def xlsx_update_stage2(self, request: HttpRequest, old_form: Form) -> TemplateResponse:
         from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
+
         xlsx_update_file = XlsxUpdateFile(
             file=old_form.cleaned_data["file"],
             business_area=old_form.cleaned_data["business_area"],
@@ -99,6 +100,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
 
     def xlsx_update(self, request: HttpRequest) -> Any:
         from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
+
         form: forms.Form
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
