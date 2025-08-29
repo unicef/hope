@@ -170,11 +170,13 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "area_access", "areas")
 
     def get_area_access(self, obj: Partner) -> str:
-        if obj.has_area_limits_in_program(obj.partner_program):
+        if obj.annotate_has_admin_area_limit:
             return "ADMIN_AREA"
         return "BUSINESS_AREA"
 
     def get_areas(self, obj: Partner) -> ReturnDict:
+        if not obj.annotate_has_admin_area_limit:
+            return None
         areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")
         return AreaLevelSerializer(areas_qs, many=True).data
 

@@ -195,46 +195,19 @@ class TestProgramUpdate:
                 {
                     "id": self.partner.id,
                     "name": self.partner.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
                 {
                     "id": self.unicef_hq.id,
                     "name": self.unicef_hq.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
                 {
                     "id": self.unicef_partner_in_afghanistan.id,
                     "name": self.unicef_partner_in_afghanistan.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
             ],

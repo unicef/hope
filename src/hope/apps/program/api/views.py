@@ -4,7 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
+from django.db.models import Case, Count, IntegerField, Prefetch, Q, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -125,11 +125,15 @@ class ProgramViewSet(
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
         user = self.request.user
-        allowed_programs = queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id))
+        allowed_programs = list(
+            queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id)).values_list(
+                "id", flat=True
+            )
+        )
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
-                id__in=allowed_programs.values_list("id", flat=True),
+                id__in=allowed_programs,
             )
             .exclude(data_collecting_type__code="unknown")
             .annotate(
@@ -138,6 +142,13 @@ class ProgramViewSet(
                     When(status=Program.ACTIVE, then=Value(2)),
                     When(status=Program.FINISHED, then=Value(3)),
                     output_field=IntegerField(),
+                )
+            )
+            .annotate(
+                annotate_number_of_households_with_tp_in_program=Count(
+                    "payment__household_id",
+                    filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
+                    distinct=True,
                 )
             )
             .prefetch_related(
