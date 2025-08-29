@@ -3,19 +3,19 @@ import random
 import time
 from typing import Any, List
 
-import factory
 from django.conf import settings
-from extras.test_utils.factories.program import ProgramFactory
+import factory
 from factory.django import DjangoModelFactory
 
+from extras.test_utils.factories.program import ProgramFactory
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 from hope.models.user import (
     User,
 )
-from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
-from hope.models.partner import Partner
-from hope.models.business_area import BusinessArea
 
 
 class PartnerFactory(DjangoModelFactory):

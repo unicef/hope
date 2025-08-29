@@ -8,13 +8,13 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TargetingCriteriaSerializerTest(TestCase):

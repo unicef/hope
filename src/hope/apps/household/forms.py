@@ -8,17 +8,16 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.admin.steficon import AutocompleteWidget
 from hope.models.business_area import BusinessArea
+from hope.models.document import PendingDocument
 from hope.models.household import (
     Household,
     PendingHousehold,
 )
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.xlsx_update_file import XlsxUpdateFile
-from hope.models.individual import Individual
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
 from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.xlsx_update_file import XlsxUpdateFile
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:

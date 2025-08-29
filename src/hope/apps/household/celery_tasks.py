@@ -12,15 +12,15 @@ from django.utils import timezone
 
 from hope.apps.core.celery import app
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models.household import Household
-from hope.models.individual import Individual
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models.program import Program
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.phone import calculate_phone_numbers_validity
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.program import Program
 
 logger = logging.getLogger(__name__)
 

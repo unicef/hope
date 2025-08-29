@@ -5,17 +5,16 @@ from django.db.models import JSONField, Q
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 
-from hope.models.household import (
-    ROLE_PRIMARY,
-)
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.individual import Individual
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
 )
+from hope.models.household import (
+    ROLE_PRIMARY,
+)
+from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.utils import TimeStampedUUIDModel
-
 
 logger = logging.getLogger(__name__)
 

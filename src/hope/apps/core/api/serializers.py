@@ -2,12 +2,12 @@ from typing import Any, Callable
 
 from rest_framework import serializers
 
+from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 from hope.models.business_area import (
     BusinessArea,
 )
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice
-from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 
 
 class BusinessAreaSerializer(serializers.ModelSerializer):

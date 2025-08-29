@@ -10,14 +10,12 @@ from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.user import User
 from hope.apps.steficon.forms import RuleCommitAdminForm
-from hope.models.rule import RuleCommit
-from hope.models.rule import Rule
 from hope.apps.utils.security import is_root
+from hope.models.rule import Rule, RuleCommit
+from hope.models.user import User
 
 from .steficon import TestRuleMixin
-
 
 logger = logging.getLogger(__name__)
 

@@ -1,70 +1,66 @@
 from datetime import date, datetime
 from typing import Any, Optional
 
-from hope.apps.household.mixins import IndividualDeliveryDataMixin
-
-from hope.apps.activity_log.utils import create_mapping_dict
 from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.fields import CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator
-from django.db import models, IntegrityError
-from django.db.models import JSONField, UniqueConstraint, Q, QuerySet
+from django.db import IntegrityError, models
+from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 
+from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
-
 from hope.apps.core.utils import FlexFieldsEncoder
-
+from hope.apps.household.mixins import IndividualDeliveryDataMixin
 from hope.apps.household.signals import individual_deleted, individual_withdrawn
-
 from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
 from hope.models.business_area import BusinessArea
 from hope.models.document import Document
 from hope.models.household import (
-    SEX_CHOICE,
-    MARITAL_STATUS_CHOICE,
     BLANK,
-    RELATIONSHIP_CHOICE,
-    WORK_STATUS_CHOICE,
-    NOT_PROVIDED,
-    DISABILITY_CHOICES,
-    NOT_DISABLED,
-    OBSERVED_DISABILITY_CHOICE,
-    NONE,
-    SEVERITY_OF_DISABILITY_CHOICES,
-    UNIQUE,
-    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
-    UNIQUE_IN_BATCH,
-    DEDUPLICATION_BATCH_STATUS_CHOICE,
-    NOT_PROCESSED,
-    ROLE_NO_ROLE,
-    STATUS_DUPLICATE,
-    STATUS_WITHDRAWN,
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
-    DISABLED,
     CANNOT_DO,
-    LOT_DIFFICULTY,
-    ROLE_PRIMARY,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+    DISABILITY_CHOICES,
+    DISABLED,
     DUPLICATE,
+    LOT_DIFFICULTY,
+    MARITAL_STATUS_CHOICE,
+    NONE,
+    NOT_DISABLED,
+    NOT_PROCESSED,
+    NOT_PROVIDED,
+    OBSERVED_DISABILITY_CHOICE,
+    RELATIONSHIP_CHOICE,
+    ROLE_NO_ROLE,
+    ROLE_PRIMARY,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    SEX_CHOICE,
+    STATUS_ACTIVE,
+    STATUS_DUPLICATE,
+    STATUS_INACTIVE,
+    STATUS_WITHDRAWN,
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+    WORK_STATUS_CHOICE,
     PendingHousehold,
 )
 from hope.models.utils import (
-    UnicefIdentifiedModel,
+    AbstractSyncable,
+    AdminUrlMixin,
+    ConcurrencyModel,
     InternalDataFieldModel,
+    PendingManager,
     SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
-    AbstractSyncable,
-    ConcurrencyModel,
-    AdminUrlMixin,
-    PendingManager,
+    UnicefIdentifiedModel,
 )
 
 

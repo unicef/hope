@@ -1,12 +1,12 @@
 from decimal import Decimal
 from typing import Optional
 
-from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
 

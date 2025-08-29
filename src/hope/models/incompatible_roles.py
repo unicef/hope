@@ -1,12 +1,12 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from natural_keys import NaturalKeyModel
 
-from hope.models.user import User, logger
 from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User, logger
 from hope.models.utils import TimeStampedUUIDModel
 
 if TYPE_CHECKING:

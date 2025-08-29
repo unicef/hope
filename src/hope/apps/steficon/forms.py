@@ -9,12 +9,11 @@ from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
-from hope.models.payment_plan import PaymentPlan
 from hope.apps.steficon.config import config
 from hope.apps.steficon.interpreters import Interpreter, mapping
-from hope.models.rule import RuleCommit
-from hope.models.rule import Rule
 from hope.apps.steficon.widget import ContentTypeChoiceField, PythonFormatterEditor
+from hope.models.payment_plan import PaymentPlan
+from hope.models.rule import Rule, RuleCommit
 
 if TYPE_CHECKING:
     from django.contrib.contenttypes.models import ContentType

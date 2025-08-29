@@ -3,9 +3,6 @@ import abc
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-from hope.models.feedback import Feedback
-from hope.models.log_entry import log_create
-from hope.models.business_area import BusinessArea
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -22,6 +19,9 @@ from hope.apps.grievance.services.ticket_based_on_payment_record_services import
 )
 from hope.apps.grievance.utils import create_grievance_documents
 from hope.apps.grievance.validators import validate_grievance_documents_size
+from hope.models.business_area import BusinessArea
+from hope.models.feedback import Feedback
+from hope.models.log_entry import log_create
 
 
 class TicketDetailsCreator(abc.ABC):

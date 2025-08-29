@@ -8,15 +8,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
-from hope.apps.payment.fields import DynamicChoiceArrayField
-
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
-
-from hope.apps.core.field_attributes.fields_types import _INDIVIDUAL, _HOUSEHOLD
+from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.models.area import Area
 from hope.models.country import Country
 from hope.models.document_type import DocumentType
-
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.payment import Payment, logger
 from hope.models.utils import TimeStampedUUIDModel

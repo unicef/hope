@@ -15,12 +15,22 @@ import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.models.partner import Partner
-from hope.models.log_entry import log_create
-from hope.models.business_area import BusinessArea
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader, timezone_datetime
+from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
+    PeriodicDataUpdateImportService,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
+from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hope.apps.utils.age_at_registration import calculate_age_at_registration
+from hope.apps.utils.phone import is_valid_phone_number
+from hope.models.account import Account
 from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.household import (
     HEAD,
     NON_BENEFICIARY,
@@ -28,23 +38,13 @@ from hope.models.household import (
     ROLE_PRIMARY,
     PendingHousehold,
 )
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.individual_identity import PendingIndividualIdentity
-from hope.models.document_type import DocumentType
-from hope.models.account import Account
-from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
-    PeriodicDataUpdateImportService,
-)
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.import_data import ImportData
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
-from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
-from hope.apps.utils.age_at_registration import calculate_age_at_registration
-from hope.apps.utils.phone import is_valid_phone_number
+from hope.models.individual import PendingIndividual
+from hope.models.individual_identity import PendingIndividualIdentity
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.log_entry import log_create
+from hope.models.partner import Partner
+from hope.models.registration_data_import import RegistrationDataImport
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet

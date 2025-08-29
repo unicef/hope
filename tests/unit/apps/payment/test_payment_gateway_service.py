@@ -22,21 +22,9 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.business_area import BusinessArea
-from hope.models.household import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
 )
-from hope.models.account_type import AccountType
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.financial_institution_mapping import FinancialInstitutionMapping
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.fsp_name_mapping import FspNameMapping
-from hope.models.payment import Payment
-from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_plan_split import PaymentPlanSplit
 from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
     AddRecordsResponseData,
@@ -51,6 +39,18 @@ from hope.apps.payment.services.payment_gateway import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
+from hope.models.account_type import AccountType
+from hope.models.business_area import BusinessArea
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_institution_mapping import FinancialInstitutionMapping
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.fsp_name_mapping import FspNameMapping
+from hope.models.household import ROLE_PRIMARY
+from hope.models.payment import Payment
+from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
 
 
 @pytest.fixture(autouse=True)

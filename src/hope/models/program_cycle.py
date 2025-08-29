@@ -2,17 +2,17 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from hope.apps.activity_log.utils import create_mapping_dict
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import UniqueConstraint, Sum
+from django.db.models import Sum, UniqueConstraint
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
+from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.program import Program
-from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel
+from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):

@@ -1,10 +1,10 @@
 from django.utils import timezone
-from extras.test_utils.factories.account import UserFactory
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 
-from hope.models.grant import Grant
+from extras.test_utils.factories.account import UserFactory
 from hope.models.api_token import APIToken
+from hope.models.grant import Grant
 
 
 class APITokenFactory(DjangoModelFactory):

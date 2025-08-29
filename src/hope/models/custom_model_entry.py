@@ -1,7 +1,7 @@
 from typing import Any
 
 from django_celery_beat.models import PeriodicTask
-from django_celery_beat.schedulers import ModelEntry, DatabaseScheduler
+from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 
 
 class CustomModelEntry(ModelEntry):

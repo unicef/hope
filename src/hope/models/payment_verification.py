@@ -1,13 +1,13 @@
 from decimal import Decimal
 
-from hope.apps.activity_log.utils import create_mapping_dict
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.business_area import BusinessArea
-from hope.models.utils import TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin
 from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
 
 
 class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):

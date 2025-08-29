@@ -47,17 +47,19 @@ This command initializes demo data for the application by performing the followi
 - `INITDEMO_TESTER_LIST`: Comma-separated list of emails to be added as testers.
 """
 
+from argparse import ArgumentParser
 import logging
 import os
 import time
-from argparse import ArgumentParser
 from typing import Any
 
-import elasticsearch
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
+import elasticsearch
+from flags.models import FlagState
+
 from extras.test_utils.factories.account import (
     create_superuser,
     generate_unicef_partners,
@@ -88,13 +90,11 @@ from extras.test_utils.factories.program import (
 )
 from extras.test_utils.factories.registration_data import generate_rdi
 from extras.test_utils.factories.steficon import generate_rule_formulas
-from flags.models import FlagState
-
-from hope.models.user import User
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
-from hope.models.partner import Partner
 from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

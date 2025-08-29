@@ -13,13 +13,13 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.business_area import BusinessArea
 from hope.models.file_temp import FileTemp
+from hope.models.payment_verification_summary import build_summary
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-from hope.models.payment_verification_summary import build_summary
 
 logger = logging.getLogger(__name__)
 

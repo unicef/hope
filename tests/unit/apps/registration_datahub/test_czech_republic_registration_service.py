@@ -12,9 +12,14 @@ from extras.test_utils.factories.aurora import (
     RegistrationFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hope.models.data_collecting_type import DataCollectingType
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.czech_republic_flex_registration_service import (
+    CzechRepublicFlexRegistration,
+)
 from hope.models import country as geo_models
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     DISABLED,
     FEMALE,
@@ -24,14 +29,8 @@ from hope.models.household import (
     PRIVATE_PARTNER,
     PendingHousehold,
 )
-from hope.models.document import PendingDocument
 from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.document_type import DocumentType
-from hope.contrib.aurora.models import Record
-from hope.contrib.aurora.services.czech_republic_flex_registration_service import (
-    CzechRepublicFlexRegistration,
-)
 
 
 class TestCzechRepublicRegistrationService(TestCase):

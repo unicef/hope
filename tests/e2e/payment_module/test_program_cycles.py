@@ -10,10 +10,10 @@ from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDet
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
-from hope.models.beneficiary_group import BeneficiaryGroup
 
 pytestmark = pytest.mark.django_db()
 

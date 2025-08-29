@@ -22,9 +22,6 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
-from hope.models.individual import Individual, PendingIndividual
-from hope.models.payment import Payment
-from hope.models.registration_data_import import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
@@ -32,6 +29,9 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.security import is_root
+from hope.models.individual import Individual, PendingIndividual
+from hope.models.payment import Payment
+from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

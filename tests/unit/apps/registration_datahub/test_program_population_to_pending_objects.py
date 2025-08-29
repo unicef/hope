@@ -15,6 +15,13 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
+)
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.document import Document
 from hope.models.household import (
     HEAD,
     MALE,
@@ -22,16 +29,9 @@ from hope.models.household import (
     ROLE_PRIMARY,
     Household,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
-from hope.models.document import Document
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.apps.registration_datahub.tasks.import_program_population import (
-    import_program_population,
-)
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 
 HOUSEHOLD_FIELDS = (

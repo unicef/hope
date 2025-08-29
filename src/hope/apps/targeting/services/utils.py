@@ -8,10 +8,10 @@ from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,
 )
 from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 logger = logging.getLogger(__name__)
 

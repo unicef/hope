@@ -21,12 +21,12 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.models.area import Area
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hope.models.area import Area
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 
 
 class TestPhoneNumberVerification(TestCase):

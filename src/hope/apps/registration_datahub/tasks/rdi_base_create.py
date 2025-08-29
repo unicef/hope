@@ -4,9 +4,6 @@ import logging
 from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes
-from hope.models.individual import PendingIndividual
-from hope.models.account_type import AccountType
-from hope.models.account import PendingAccount
 from hope.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
@@ -17,6 +14,9 @@ from hope.apps.registration_datahub.value_caster import (
     SelectOneValueCaster,
     StringValueCaster,
 )
+from hope.models.account import PendingAccount
+from hope.models.account_type import AccountType
+from hope.models.individual import PendingIndividual
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)

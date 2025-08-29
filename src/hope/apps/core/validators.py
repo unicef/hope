@@ -25,7 +25,6 @@ from hope.models.household import (
     RELATIONSHIP_UNKNOWN,
 )
 
-
 logger = logging.getLogger(__name__)
 
 

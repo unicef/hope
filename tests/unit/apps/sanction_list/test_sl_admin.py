@@ -1,4 +1,3 @@
-import responses
 from django.urls import reverse
 import responses
 

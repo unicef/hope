@@ -8,10 +8,9 @@ from rest_framework import status
 
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
-from unit.api.base import HOPEApiTestCase
-
-from hope.models.grant import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.models.document_type import DocumentType
+from hope.models.grant import Grant
 from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -21,9 +20,9 @@ from hope.models.household import (
     SON_DAUGHTER,
     PendingHousehold,
 )
-from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class PushLaxToRDITests(HOPEApiTestCase):

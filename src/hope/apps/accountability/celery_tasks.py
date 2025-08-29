@@ -2,16 +2,16 @@ import logging
 
 from django.db.models import Q
 
-from hope.models.survey import Survey
 from hope.apps.accountability.services.export_survey_sample_service import (
     ExportSurveySampleService,
 )
 from hope.apps.core.celery import app
-from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import send_email_notification
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.models.business_area import BusinessArea
+from hope.models.survey import Survey
 
 logger = logging.getLogger(__name__)
 

@@ -5,11 +5,11 @@ from typing import Any
 from django.db.models import Q
 from django.utils import timezone
 
-from hope.models.user import User
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
+from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

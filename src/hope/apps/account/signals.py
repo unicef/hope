@@ -11,11 +11,11 @@ from django.utils import timezone
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.profile_cache import profile_cache
-from hope.models.user import User
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
-from hope.models.partner import Partner
 from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 @receiver(post_save, sender=RoleAssignment)
@@ -142,6 +142,7 @@ def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **k
 
 
 # Profile cache
+
 
 # invalidate every UserProfile (Global)
 @receiver(post_save, sender=Role)

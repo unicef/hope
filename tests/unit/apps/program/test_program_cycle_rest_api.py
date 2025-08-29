@@ -18,20 +18,19 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from unit.api.base import HOPEApiTestCase
-
-from hope.models.user import User
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from hope.models.payment_plan import PaymentPlan
 from hope.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
+from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
+from unit.api.base import HOPEApiTestCase
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):

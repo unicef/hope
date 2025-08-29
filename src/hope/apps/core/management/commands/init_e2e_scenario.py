@@ -1,16 +1,15 @@
-import os
 from argparse import ArgumentParser
 from datetime import timedelta
+import os
 from typing import Any
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
+from faker import Faker
+
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from faker import Faker
-
-from hope.models.user import User
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import (
@@ -19,14 +18,15 @@ from hope.models.household import (
     Household,
     HouseholdCollection,
 )
+from hope.models.individual import Individual, IndividualCollection
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.individual import IndividualCollection, Individual
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.rule import Rule
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.user import User
 from hope.models.utils import MergeStatusModel
 
 faker = Faker()

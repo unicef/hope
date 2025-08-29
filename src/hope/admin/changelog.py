@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.db import models
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.changelog import Changelog
 from hope.apps.changelog.widget import HTMLEditor
+from hope.models.changelog import Changelog
 
 
 class ChangelogAdminForm(forms.ModelForm):

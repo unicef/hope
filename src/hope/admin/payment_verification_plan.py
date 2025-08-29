@@ -11,10 +11,10 @@ from django.urls import reverse
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 
 if TYPE_CHECKING:
     from uuid import UUID

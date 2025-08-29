@@ -10,7 +10,6 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import decode_id_string, resolve_flex_fields_choices_to_string
-from hope.models.country import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
     HouseholdSimpleSerializer,
@@ -19,18 +18,19 @@ from hope.apps.household.api.serializers.household import (
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
+from hope.apps.program.api.serializers import ProgramSmallSerializer
+from hope.models.account import Account
+from hope.models.country import Country
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     ROLE_NO_ROLE,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
-from hope.models.account import Account
-from hope.apps.program.api.serializers import ProgramSmallSerializer
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):

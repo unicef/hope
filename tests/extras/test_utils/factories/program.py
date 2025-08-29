@@ -4,18 +4,18 @@ from random import randint
 import string
 from typing import Any
 
-import factory
 from dateutil.relativedelta import relativedelta
-from extras.test_utils.factories.core import DataCollectingTypeFactory
+import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
-from hope.models.beneficiary_group import BeneficiaryGroup
 
 fake = Faker()
 
@@ -173,7 +173,6 @@ def generate_people_program() -> None:
         create_household,
         create_individual_document,
     )
-
     from hope.models.household import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")

@@ -3,7 +3,6 @@ import logging
 from typing import Any
 
 from hope.apps.core.celery import app
-from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
     DashboardDataCache,
@@ -11,6 +10,7 @@ from hope.apps.dashboard.services import (
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.models.business_area import BusinessArea
 
 logger = logging.getLogger(__name__)
 

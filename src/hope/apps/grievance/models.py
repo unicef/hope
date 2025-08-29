@@ -1,6 +1,6 @@
-import logging
 from decimal import Decimal
 from itertools import chain
+import logging
 from typing import Any, Iterable, Optional
 
 from django.conf import settings
@@ -23,17 +23,16 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hope.models.user import User
 from hope.models.individual import Individual
 from hope.models.payment import Payment
 from hope.models.payment_verification import PaymentVerification
+from hope.models.user import User
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-
 
 logger = logging.getLogger(__name__)
 

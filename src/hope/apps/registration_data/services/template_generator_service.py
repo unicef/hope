@@ -5,9 +5,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import serialize_flex_attributes
 from hope.models.area import Area
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.program import Program
 
 

@@ -1,26 +1,26 @@
-import json
 from io import BytesIO
+import json
 from typing import Callable, Tuple
 
-import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from django.core.files.base import ContentFile
+from openpyxl import Workbook
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-from openpyxl import Workbook
-
-from hope.models.country import Country
-from hope.models.area import Area
-from hope.models.area_type import AreaType
-from hope.models.household import MALE
-from hope.models.individual import Individual
-from hope.models.program import Program
-from hope.models.universal_update_script import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
     create_snapshot_content,
 )
+from hope.models.area import Area
+from hope.models.area_type import AreaType
+from hope.models.country import Country
+from hope.models.household import MALE
+from hope.models.individual import Individual
+from hope.models.program import Program
+from hope.models.universal_update_script import UniversalUpdate
 
 pytestmark = pytest.mark.django_db()
 

@@ -4,8 +4,8 @@ from django.core.management import BaseCommand
 from django.db import transaction
 
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.household import IDENTIFICATION_TYPE_CHOICE
 from hope.models.document_type import DocumentType
+from hope.models.household import IDENTIFICATION_TYPE_CHOICE
 
 
 class Command(BaseCommand):

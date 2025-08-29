@@ -54,8 +54,8 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
-    from hope.models.user import User
     from hope.models.payment_verification_plan import PaymentVerificationPlan
+    from hope.models.user import User
 
     try:
         user = User.objects.get(pk=user_id)
@@ -85,6 +85,7 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Verification report XLSX files."""
     from django.contrib.contenttypes.models import ContentType
+
     from hope.models.file_temp import FileTemp
 
     try:
@@ -108,10 +109,10 @@ def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30
 @sentry_tags
 def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
     try:
-        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
             XlsxPaymentPlanExportService,
         )
+        from hope.models.payment_plan import PaymentPlan
         from hope.models.user import User
 
         user = User.objects.get(pk=user_id)
@@ -149,10 +150,10 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
     fsp_xlsx_template_id: str | None = None,
 ) -> None:
     try:
-        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
+        from hope.models.payment_plan import PaymentPlan
         from hope.models.user import User
 
         user = User.objects.get(pk=user_id)
@@ -191,10 +192,10 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
     user_id: str,
 ) -> None:
     try:
-        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
+        from hope.models.payment_plan import PaymentPlan
         from hope.models.user import User
 
         user: User = User.objects.get(pk=user_id)
@@ -212,10 +213,10 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
 @sentry_tags
 def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
     try:
-        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
             XlsxPaymentPlanImportService,
         )
+        from hope.models.payment_plan import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -251,8 +252,8 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+        from hope.models.payment_plan import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -370,8 +371,8 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
-    from hope.models.payment_plan import PaymentPlan
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models.payment_plan import PaymentPlan
 
     cache_key = generate_cache_key(
         {
@@ -418,8 +419,8 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 @sentry_tags
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hope.models.payment_plan import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+        from hope.models.payment_plan import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -635,8 +636,8 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
 @sentry_tags
 def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayService
-    from hope.models.user import User
     from hope.models.payment_plan import PaymentPlan
+    from hope.models.user import User
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -686,8 +687,8 @@ def send_payment_notification_emails(
     action_date_formatted: str,
 ) -> None:
     from hope.apps.payment.notifications import PaymentNotification
-    from hope.models.user import User
     from hope.models.payment_plan import PaymentPlan
+    from hope.models.user import User
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)

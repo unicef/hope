@@ -4,8 +4,6 @@ from typing import Sequence
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 
-from hope.models.log_entry import log_create
-from hope.models.business_area import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
@@ -20,17 +18,18 @@ from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
 )
 from hope.apps.household.documents import get_individual_doc
-from hope.models.household import UNIQUE, UNIQUE_IN_BATCH, Household
-from hope.models.individual import Individual
-from hope.models.registration_data_import import (
-    RegistrationDataImport,
-)
-from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
-
+from hope.models.business_area import BusinessArea
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
+from hope.models.household import UNIQUE, UNIQUE_IN_BATCH, Household
+from hope.models.individual import Individual
+from hope.models.log_entry import log_create
+from hope.models.registration_data_import import (
+    RegistrationDataImport,
+)
 
 logger = logging.getLogger(__name__)
 

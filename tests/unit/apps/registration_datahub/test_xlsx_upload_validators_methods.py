@@ -15,10 +15,10 @@ from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.flexible_attribute import PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader
 from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import PeriodicFieldData
 
 
 class TestXLSXValidatorsMethods(BaseTestCase):

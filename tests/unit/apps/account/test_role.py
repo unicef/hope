@@ -1,10 +1,10 @@
+from typing import TYPE_CHECKING
+
 from django.urls import reverse
 from django_webtest import WebTest
 
 from extras.test_utils.factories.account import UserFactory
-
 from hope.models.role import Role
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from hope.models.user import User

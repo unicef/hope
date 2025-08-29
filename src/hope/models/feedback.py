@@ -1,9 +1,9 @@
-from hope.apps.activity_log.utils import create_mapping_dict
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from hope.models.utils import TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel
+from hope.apps.activity_log.utils import create_mapping_dict
+from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):

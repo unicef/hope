@@ -12,8 +12,8 @@ from hope.models.household import (
     ROLE_PRIMARY,
     Household,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.program import Program
 
 

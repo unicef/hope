@@ -8,10 +8,10 @@ import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models.kobo_import_data import KoboImportData
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
+from hope.models.kobo_import_data import KoboImportData
 
 pytestmark = pytest.mark.django_db(databases=(("default",)), transaction=True)
 

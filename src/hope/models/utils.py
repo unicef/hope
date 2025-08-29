@@ -4,9 +4,8 @@ import hashlib
 import json
 import logging
 import sys
-import warnings
-
 from typing import Any, Callable, Iterable, Sequence, T
+import warnings
 
 import celery
 from celery import states
@@ -29,7 +28,6 @@ from mptt.models import MPTTModel
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
-
 
 logger = logging.getLogger(__name__)
 

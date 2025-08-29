@@ -20,6 +20,7 @@ from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -35,7 +36,6 @@ from hope.models.household import (
     Household,
 )
 from hope.models.individual import Individual
-from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.utils import MergeStatusModel
 

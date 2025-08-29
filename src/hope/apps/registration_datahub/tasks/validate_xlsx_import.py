@@ -4,9 +4,9 @@ import operator
 from django.db import transaction
 import openpyxl
 
-from hope.models.program import Program
-from hope.models.import_data import ImportData
 from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from hope.models.import_data import ImportData
+from hope.models.program import Program
 
 
 class ValidateXlsxImport:

@@ -2,8 +2,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from hope.models.country import Country
-from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_service_provider import FinancialServiceProvider
 
 
 class DeliveryMechanismConfig(models.Model):

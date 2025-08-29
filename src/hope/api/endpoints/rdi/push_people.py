@@ -17,9 +17,10 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializer,
 )
-from hope.models.grant import Grant
-from hope.models.country import Country
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.area import Area
+from hope.models.country import Country
+from hope.models.grant import Grant
 from hope.models.household import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -30,9 +31,7 @@ from hope.models.household import (
     PendingHousehold,
 )
 from hope.models.individual import PendingIndividual
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.registration_data_import import RegistrationDataImport
-
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),

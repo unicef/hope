@@ -8,15 +8,15 @@ from django.core.files import File
 from django.db import transaction
 import openpyxl
 
+from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+    PeriodicDataUpdateExportTemplateService,
+)
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.individual import Individual
 from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,
 )
 from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
-from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
-)
 
 
 class PeriodicDataUpdateBaseForm(forms.Form):

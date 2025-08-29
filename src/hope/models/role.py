@@ -1,13 +1,11 @@
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
+from django.core.validators import MaxLengthValidator, MinLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from natural_keys import NaturalKeyModel
 
-from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-
 from hope.apps.account.fields import ChoiceArrayField
-
 from hope.apps.account.permissions import Permissions
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.utils import TimeStampedUUIDModel
 
 

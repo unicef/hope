@@ -1,9 +1,8 @@
 from django.test import TestCase
 
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory
-
-from hope.models.partner import Partner
 from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
 
 
 class TestSignalCreateBusinessArea(TestCase):

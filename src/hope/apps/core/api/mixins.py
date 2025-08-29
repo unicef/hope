@@ -1,5 +1,5 @@
-import os
 from functools import cached_property
+import os
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q, QuerySet
@@ -285,6 +285,7 @@ class CountActionMixin:
 
 class PermissionsMixin:
     from hope.models.grant import Grant
+
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
         If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to

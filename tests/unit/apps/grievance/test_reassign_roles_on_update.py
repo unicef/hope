@@ -10,10 +10,10 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.business_area import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_update_service,
 )
+from hope.models.business_area import BusinessArea
 from hope.models.household import (
     HEAD,
     ROLE_ALTERNATE,

@@ -1,10 +1,12 @@
 from typing import Any
 
-import pytest
 from constance.test import override_config
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
+import pytest
+from strategy_field.utils import fqn
+
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -12,21 +14,18 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from strategy_field.utils import fqn
-
-from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID
-from hope.models.individual import Individual
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-
+from hope.models import country as geo_models
+from hope.models.business_area import BusinessArea
+from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID
+from hope.models.individual import Individual
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

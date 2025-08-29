@@ -1,12 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 
-from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
 from hope.models.individual import Individual
+from hope.models.log_entry import log_create
 
 
 def close_system_flagging_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:

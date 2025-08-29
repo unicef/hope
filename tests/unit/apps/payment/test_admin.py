@@ -2,9 +2,10 @@ import os
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 from django.test import TestCase
 from django.urls import reverse
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -12,7 +13,6 @@ from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.payment_plan import PaymentPlan
 from hope.models.user import User

@@ -5,9 +5,11 @@ import pytest
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hope.models.business_area import BusinessArea
 from hope.apps.household.documents import get_individual_doc
+from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
+from hope.apps.utils.querysets import evaluate_qs
+from hope.models.business_area import BusinessArea
 from hope.models.household import (
     DUPLICATE,
     FEMALE,
@@ -18,16 +20,12 @@ from hope.models.household import (
     UNIQUE,
     WIFE_HUSBAND,
 )
-from hope.models.individual import PendingIndividual
-from hope.models.individual import Individual
+from hope.models.import_data import ImportData
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.registration_data_import import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
-from hope.models.import_data import ImportData
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
-from hope.apps.utils.querysets import evaluate_qs
 from unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

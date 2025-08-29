@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from hope.models.periodic_data_update_template import PeriodicDataUpdateTemplate
-from hope.models.utils import TimeStampedModel, CeleryEnabledModel
+from hope.models.utils import CeleryEnabledModel, TimeStampedModel
 
 
 class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):

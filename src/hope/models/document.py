@@ -1,17 +1,17 @@
 import re
 
 from django.db import models
-from django.db.models import UniqueConstraint, Q, Func, F, Value, BooleanField
+from django.db.models import BooleanField, F, Func, Q, UniqueConstraint, Value
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hope.models.household import logger
 from hope.models.utils import (
-    TimeStampedUUIDModel,
     AbstractSyncable,
-    SoftDeletableMergeStatusModel,
     MergeStatusModel,
     PendingManager,
+    SoftDeletableMergeStatusModel,
+    TimeStampedUUIDModel,
 )
 
 

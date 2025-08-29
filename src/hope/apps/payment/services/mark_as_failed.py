@@ -3,8 +3,8 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from hope.models.payment import Payment
 from hope.apps.payment.utils import get_quantity_in_usd
+from hope.models.payment import Payment
 
 
 def mark_as_failed(payment_item: Payment) -> None:

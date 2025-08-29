@@ -1,9 +1,9 @@
 from typing import Any, Callable, Optional
 
 import pytest
-from extras.test_utils.factories.account import UserFactory
 from rest_framework.test import APIClient
 
+from extras.test_utils.factories.account import UserFactory
 from hope.models.user import User
 
 

@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING, Any
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
 from hope.apps.payment.services.process_verification import ProcessVerification
 from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.models.payment_plan import PaymentPlan  # pragma: no cover
     from hope.models.payment import Payment
+    from hope.models.payment_plan import PaymentPlan  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)

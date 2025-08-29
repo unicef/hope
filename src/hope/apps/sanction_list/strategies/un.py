@@ -18,18 +18,18 @@ from django.utils.functional import cached_property
 from elasticsearch.exceptions import NotFoundError
 
 from hope.apps.core.countries import SanctionListCountries as Countries
-from hope.models.country import Country
-from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
-from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
-from hope.models.sanction_list_individual_countries import SanctionListIndividualCountries
-from hope.models.sanction_list_Individual_nationalities import SanctionListIndividualNationalities
-from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
-from hope.models.sanction_list_individual import SanctionListIndividual
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
-
+from hope.models.country import Country
 from hope.models.program import Program
+from hope.models.sanction_list_individual import SanctionListIndividual
+from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
+from hope.models.sanction_list_individual_countries import SanctionListIndividualCountries
+from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
+from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
+from hope.models.sanction_list_Individual_nationalities import SanctionListIndividualNationalities
+
 from ._base import BaseSanctionList
 
 logger = logging.getLogger(__name__)

@@ -1,14 +1,12 @@
 from typing import Any
 
-from hope.apps.targeting.services.targeting_service import TargetingCriteriaFilterBase
 from django.db import models
-
-from hope.apps.targeting.choices import FlexFieldClassification
 from django.db.models import JSONField
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
-
 from hope.apps.core.field_attributes.fields_types import Scope
+from hope.apps.targeting.choices import FlexFieldClassification
+from hope.apps.targeting.services.targeting_service import TargetingCriteriaFilterBase
 from hope.models.utils import TimeStampedUUIDModel
 
 

@@ -6,10 +6,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
-from hope.models.payment_plan import PaymentPlan
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
+from hope.models.payment_plan import PaymentPlan
 
 if TYPE_CHECKING:
     from uuid import UUID

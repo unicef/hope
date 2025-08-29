@@ -1,15 +1,22 @@
+from contextlib import suppress
+from datetime import datetime
 import logging
 import os
 import re
-from contextlib import suppress
-from datetime import datetime
 from typing import Any
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
+from environ import Env
+from flags.models import FlagState
+import pytest
+from pytest_django.live_server_helper import LiveServer
+from pytest_html_reporter import attach
+from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options
+
 from e2e.page_object.accountability.communication import AccountabilityCommunication
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
@@ -65,27 +72,20 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from environ import Env
 from extras.test_utils.factories.account import RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
-from flags.models import FlagState
-from pytest_django.live_server_helper import LiveServer
-from pytest_html_reporter import attach
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import Options
-
-from hope.models.user import User
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
-from hope.models.partner import Partner
 from hope.apps.account.permissions import Permissions
-from hope.models.business_area import BusinessArea
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.country import Country
-from hope.models.document_type import DocumentType
 from hope.config.env import env
+from hope.models.business_area import BusinessArea
+from hope.models.country import Country
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document_type import DocumentType
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 def pytest_addoption(parser) -> None:  # type: ignore

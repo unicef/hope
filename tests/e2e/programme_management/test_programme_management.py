@@ -21,11 +21,11 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.models.partner import Partner
+from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
+from hope.models.partner import Partner
 from hope.models.program import Program
-from hope.models.beneficiary_group import BeneficiaryGroup
 
 pytestmark = pytest.mark.django_db()
 

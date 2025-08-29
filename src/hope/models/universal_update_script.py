@@ -2,8 +2,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
 
-from hope.models.document_type import DocumentType
 from hope.models.account_type import AccountType
+from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.utils import CeleryEnabledModel, TimeStampedModel
 

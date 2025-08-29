@@ -14,8 +14,8 @@ from extras.test_utils.factories.core import (
 )
 from hope.admin.business_area import AcceptanceProcessThresholdFormset
 from hope.admin.data_collecting_type import DataCollectingTypeForm
-from hope.models.role_assignment import RoleAssignment
 from hope.models.data_collecting_type import DataCollectingType
+from hope.models.role_assignment import RoleAssignment
 
 
 class TestAcceptanceProcessThreshold(TestCase):

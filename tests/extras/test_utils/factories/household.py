@@ -1,17 +1,20 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-import factory
 from django.conf import settings
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import factory
 from factory import enums, fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.models import country as geo_models
+from hope.models.document import Document, PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.entitlement_card import EntitlementCard
 from hope.models.household import (
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_CHOICE,
@@ -28,14 +31,9 @@ from hope.models.household import (
     HouseholdCollection,
     PendingHousehold,
 )
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold, PendingIndividualRoleInHousehold
+from hope.models.individual import Individual, IndividualCollection, PendingIndividual
 from hope.models.individual_identity import IndividualIdentity, PendingIndividualIdentity
-from hope.models.entitlement_card import EntitlementCard
-from hope.models.individual import IndividualCollection, Individual
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
+from hope.models.individual_role_in_household import IndividualRoleInHousehold, PendingIndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 
 faker = Faker()

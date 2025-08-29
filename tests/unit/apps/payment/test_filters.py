@@ -8,7 +8,6 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     generate_delivery_mechanisms,
 )
-
 from hope.models.business_area import BusinessArea
 from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.models.financial_service_provider import FinancialServiceProvider

@@ -11,19 +11,19 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.account_type import AccountType
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
-from hope.models.universal_update_script import UniversalUpdate
-from hope.models.document_type import DocumentType
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
     get_individual_flex_fields,
     household_fields,
     individual_fields,
 )
+from hope.models.account_type import AccountType
+from hope.models.document_type import DocumentType
+from hope.models.universal_update_script import UniversalUpdate
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):

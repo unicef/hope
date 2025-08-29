@@ -1,5 +1,5 @@
-import logging
 from functools import lru_cache
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -15,8 +15,8 @@ from natural_keys import NaturalKeyModel
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.account.utils import test_conditional
-from hope.models.business_area import BusinessArea
 from hope.apps.utils.mailjet import MailjetClient
+from hope.models.business_area import BusinessArea
 from hope.models.partner import Partner
 from hope.models.role import Role
 from hope.models.role_assignment import RoleAssignment

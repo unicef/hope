@@ -7,8 +7,8 @@ from django.contrib import admin
 from django.http import HttpRequest
 from smart_admin.decorators import smart_register
 
-from hope.models.program import Program
 from hope.contrib.aurora import models
+from hope.models.program import Program
 
 
 @smart_register(models.Project)

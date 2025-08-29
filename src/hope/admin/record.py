@@ -24,7 +24,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.registration_data_import import RegistrationDataImport
 from hope.apps.utils.security import is_root
 from hope.contrib.aurora.celery_tasks import fresh_extract_records_task
 from hope.contrib.aurora.models import Record, Registration
@@ -33,6 +32,7 @@ from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class StatusFilter(ChoicesFieldComboFilter):

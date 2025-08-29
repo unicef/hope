@@ -35,11 +35,19 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.models.user import User
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.periodic_data_update.utils import (
+    field_label_to_field_name,
+    populate_pdu_with_null_values,
+)
+from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.business_area import (
     BusinessArea,
 )
 from hope.models.data_collecting_type import DataCollectingType
+from hope.models.delivery_mechanism import (
+    DeliveryMechanism,
+)
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.household import (
     HEARING,
@@ -50,18 +58,10 @@ from hope.models.household import (
     Household,
 )
 from hope.models.individual import Individual
-from hope.models.delivery_mechanism import (
-    DeliveryMechanism,
-)
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.periodic_data_update.utils import (
-    field_label_to_field_name,
-    populate_pdu_with_null_values,
-)
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
-from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.rule import Rule
+from hope.models.user import User
 
 pytestmark = pytest.mark.django_db()
 

@@ -7,12 +7,11 @@ from django.db.models import JSONField, Q
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+import mptt
 from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 
-from hope.models.utils import TimeStampedUUIDModel, SoftDeletionTreeManager, SoftDeletionTreeModel
-
-import mptt
+from hope.models.utils import SoftDeletionTreeManager, SoftDeletionTreeModel, TimeStampedUUIDModel
 
 
 def label_contains_english_en_validator(data: dict) -> None:

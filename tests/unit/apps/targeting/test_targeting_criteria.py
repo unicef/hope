@@ -18,10 +18,10 @@ from hope.models.business_area import BusinessArea
 from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.payment_plan import PaymentPlan
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TestTargetingCriteriaQuery(BaseTestCase):

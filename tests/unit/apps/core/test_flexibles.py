@@ -7,7 +7,7 @@ import pytest
 from xlrd import XLRDError
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeGroup, FlexibleAttributeChoice
+from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
 class MockSuperUser:

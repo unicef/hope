@@ -14,20 +14,20 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.household import (
-    IDENTIFICATION_TYPE_TAX_ID,
-    PendingHousehold,
-)
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     Registration2024,
     UkraineBaseRegistrationService,
 )
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.household import (
+    IDENTIFICATION_TYPE_TAX_ID,
+    PendingHousehold,
+)
+from hope.models.individual import PendingIndividual
 
 
 class BaseTestUkrainianRegistrationService(TestCase):

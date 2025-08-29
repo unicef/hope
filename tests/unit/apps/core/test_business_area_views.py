@@ -17,11 +17,11 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.utils import get_fields_attr_generators
 from hope.models.business_area import (
     BusinessArea,
 )
 from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice, PeriodicFieldData
-from hope.apps.core.utils import get_fields_attr_generators
 
 pytestmark = pytest.mark.django_db
 

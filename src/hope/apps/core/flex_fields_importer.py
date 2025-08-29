@@ -20,7 +20,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_ONE,
     TYPE_STRING,
 )
-from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeGroup, FlexibleAttributeChoice
+from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 logger = logging.getLogger(__name__)
 

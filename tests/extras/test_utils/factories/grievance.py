@@ -13,9 +13,6 @@ from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentVerificationFactory,
 )
-
-from hope.models.business_area import BusinessArea
-from hope.models.area import Area
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -34,6 +31,8 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
 from hope.models.individual import Individual
 from hope.models.payment_verification import PaymentVerification
 from hope.models.program import Program

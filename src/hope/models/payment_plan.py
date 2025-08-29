@@ -2,51 +2,46 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Optional, Any, Callable
+from typing import Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import (
-    MinLengthValidator,
     MaxLengthValidator,
-    ProhibitNullCharactersValidator,
+    MinLengthValidator,
     MinValueValidator,
+    ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Q, Sum, QuerySet
+from django.db.models import Count, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils.models import SoftDeletableModel
-
-from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
-
-from hope.apps.activity_log.utils import create_mapping_dict
-
-from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-
-from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
 from psycopg2._range import NumericRange
 
+from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.household import MALE, FEMALE, Household
+from hope.models.household import FEMALE, MALE, Household
 from hope.models.individual import Individual
 from hope.models.payment import Payment
-from hope.models.rule import RuleCommit
-from hope.models.rule import Rule
+from hope.models.rule import Rule, RuleCommit
 from hope.models.storage_file import StorageFile
 from hope.models.utils import (
-    TimeStampedUUIDModel,
-    InternalDataFieldModel,
-    ConcurrencyModel,
-    UnicefIdentifiedModel,
     AdminUrlMixin,
+    ConcurrencyModel,
+    InternalDataFieldModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
 )
 
 

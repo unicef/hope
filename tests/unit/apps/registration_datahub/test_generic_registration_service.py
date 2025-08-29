@@ -15,24 +15,23 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-
-from hope.models.data_collecting_type import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.generic_registration_service import (
+    GenericRegistrationService,
+)
 from hope.models.country import Country
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     PendingHousehold,
 )
-from hope.models.document import PendingDocument
 from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.document_type import DocumentType
-from hope.contrib.aurora.models import Record
-from hope.contrib.aurora.services.generic_registration_service import (
-    GenericRegistrationService,
-)
 
 
 class TestGenericRegistrationService(TestCase):

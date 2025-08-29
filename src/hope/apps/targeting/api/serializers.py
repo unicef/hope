@@ -3,19 +3,19 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.core.api.serializers import FieldAttributeSerializer
+from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
+from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
-from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
-from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,
 )
 from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TargetPopulationListSerializer(serializers.ModelSerializer):

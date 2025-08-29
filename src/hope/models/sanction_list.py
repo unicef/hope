@@ -3,9 +3,8 @@ from typing import TYPE_CHECKING
 from django.db import models
 from strategy_field.fields import StrategyField
 
-from hope.models.utils import TimeStampedModel, TimeStampedUUIDModel
-
 from hope.apps.sanction_list.strategies import registry
+from hope.models.utils import TimeStampedModel, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from hope.apps.sanction_list.strategies._base import BaseSanctionList

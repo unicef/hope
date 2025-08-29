@@ -11,16 +11,16 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.program import Program
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.validators import (
     TargetingCriteriaInputValidator,
     TargetingCriteriaRuleFilterInputValidator,
 )
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db
 

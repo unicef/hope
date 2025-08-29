@@ -1,23 +1,20 @@
-from typing import Sequence, Any, Optional, Callable
+from typing import Any, Callable, Optional, Sequence
 
-from hope.apps.core.mixins import LimitBusinessAreaModelMixin
-
-from hope.apps.steficon.interpreters import interpreters, Interpreter, mapping
 from concurrency.fields import AutoIncVersionField
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, ArrayField
+from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
-
-from hope.apps.steficon.validators import StartEndSpaceValidator, DoubleSpaceValidator
 from django.db import models
-
-from hope.apps.steficon.config import SAFETY_NONE, SAFETY_STANDARD, SAFETY_HIGH
 from django.db.models import JSONField, QuerySet
 from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
+from hope.apps.core.mixins import LimitBusinessAreaModelMixin
+from hope.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
+from hope.apps.steficon.interpreters import Interpreter, interpreters, mapping
 from hope.apps.steficon.result import Result
+from hope.apps.steficon.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
 class Rule(LimitBusinessAreaModelMixin):

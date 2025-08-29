@@ -15,20 +15,19 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.household import (
-    ROLE_PRIMARY,
-    PendingHousehold,
-)
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.document_type import DocumentType
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.people_registration_service import (
     PeopleRegistrationService,
 )
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.household import (
+    ROLE_PRIMARY,
+    PendingHousehold,
+)
+from hope.models.individual import PendingIndividual
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 
 
 class TestPeopleRegistrationService(TestCase):

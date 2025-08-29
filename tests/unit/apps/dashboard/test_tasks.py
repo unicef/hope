@@ -5,13 +5,13 @@ from unittest.mock import Mock, call, patch
 import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory
-from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
     update_dashboard_figures,
     update_recent_dashboard_figures,
 )
 from hope.apps.dashboard.services import DashboardDataCache
+from hope.models.business_area import BusinessArea
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)

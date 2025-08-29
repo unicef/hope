@@ -1,10 +1,9 @@
 import logging
 import os
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from time import sleep
-import pytest
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
@@ -12,10 +11,11 @@ from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
-from extras.test_utils.fixtures import *  # noqa: F403, F401
+import pytest
 
-from hope.models.role import Role
+from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.models.partner import Partner
+from hope.models.role import Role
 
 
 @pytest.fixture(autouse=True)

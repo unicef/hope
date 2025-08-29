@@ -11,8 +11,8 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
-from hope.models.grant import Grant
 from hope.apps.core.api.filters import UpdatedAtFilter
+from hope.models.grant import Grant
 from hope.models.program import Program
 
 

@@ -1,13 +1,13 @@
 from typing import Any
 
 import factory
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.program import ProgramFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hope.models.program import Program
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.contrib.aurora.models import Organization, Project, Registration
+from hope.models.program import Program
 
 faker = Faker()
 

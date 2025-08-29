@@ -2,24 +2,24 @@ from typing import List
 from uuid import UUID
 
 from django.core.management import call_command
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
 
-from hope.models.grant import Grant
-from hope.models.data_collecting_type import DataCollectingType
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document_type import DocumentType
+from hope.models.grant import Grant
 from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     PendingHousehold,
 )
 from hope.models.individual import PendingIndividual
-from hope.models.document_type import DocumentType
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class TestDelegatePeople(HOPEApiTestCase):

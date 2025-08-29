@@ -22,16 +22,15 @@ from django.urls import reverse
 from jsoneditor.forms import JSONEditor
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
-from hope.models.role_assignment import RoleAssignment
-from hope.models.partner import Partner
 from hope.apps.administration.widgets import JsonWidget
-from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.models.document_type import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
-from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
-
+from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
+from hope.models.business_area import BusinessArea
+from hope.models.document_type import DocumentType
+from hope.models.partner import Partner
+from hope.models.role_assignment import RoleAssignment
 
 logger = logging.getLogger(__name__)
 

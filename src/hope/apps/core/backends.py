@@ -11,11 +11,11 @@ from hope.apps.account.caches import (
     get_user_permissions_cache_key,
     get_user_permissions_version_key,
 )
-from hope.models.user import User
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
 from hope.models.business_area import BusinessArea
 from hope.models.program import Program
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 class PermissionsBackend(BaseBackend):

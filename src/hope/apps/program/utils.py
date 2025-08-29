@@ -5,29 +5,29 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.models.user import User
-from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.role_assignment import RoleAssignment
-from hope.models.partner import Partner
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.area import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models.account import Account
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.area import Area
+from hope.models.document import Document
+from hope.models.entitlement_card import EntitlementCard
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.household import (
     ROLE_PRIMARY,
     Household,
     HouseholdCollection,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.individual import Individual, IndividualCollection
 from hope.models.individual_identity import IndividualIdentity
-from hope.models.entitlement_card import EntitlementCard
-from hope.models.individual import IndividualCollection, Individual
-from hope.models.document import Document
-from hope.models.account import Account
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.partner import Partner
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
 from hope.models.registration_data_import import RegistrationDataImport
-from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 from hope.models.utils import MergeStatusModel
 
 

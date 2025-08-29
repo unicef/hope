@@ -3,8 +3,8 @@ import factory.fuzzy
 from faker import Faker
 from pytz import utc
 
-from hope.models.business_area import BusinessArea
 from hope.contrib.vision.models import FundsCommitment
+from hope.models.business_area import BusinessArea
 
 fake = Faker()
 

@@ -13,18 +13,17 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.models.business_area import BusinessArea
 from hope.models.country import Country
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
     Household,
 )
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
 from hope.models.utils import MergeStatusModel
 
 

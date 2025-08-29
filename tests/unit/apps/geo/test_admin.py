@@ -10,10 +10,10 @@ from webtest import Upload
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from hope.admin.geo import AreaAdmin
-from hope.models.user import User
-from hope.models.partner import Partner
 from hope.models.area import Area
 from hope.models.area_type import AreaType
+from hope.models.partner import Partner
+from hope.models.user import User
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

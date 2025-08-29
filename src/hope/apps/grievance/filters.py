@@ -14,9 +14,9 @@ from django_filters import (
 )
 
 from hope.apps.account.permissions import Permissions
-from hope.models.business_area import BusinessArea
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.models.business_area import BusinessArea
 from hope.models.household import HEAD
 from hope.models.individual import Individual
 from hope.models.program import Program

@@ -1,7 +1,6 @@
 from typing import Any
 from uuid import UUID
 
-from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -12,10 +11,10 @@ from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 
 from hope.apps.account.permissions import Permissions
-
+from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.apps.core.visibility_backends import VisibilityBackend
-from hope.models.role_assignment import RoleAssignment
 from hope.models.area import Area
+from hope.models.role_assignment import RoleAssignment
 
 
 class Partner(LimitBusinessAreaModelMixin, MPTTModel):

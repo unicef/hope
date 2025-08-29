@@ -15,12 +15,7 @@ from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-
-from hope.models.user import User
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
-from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
@@ -31,12 +26,16 @@ from hope.apps.payment.api.serializers import (
     VolumeByDeliveryMechanismSerializer,
 )
 from hope.models.approval import Approval
+from hope.models.business_area import BusinessArea
+from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment import Payment
 from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
 from hope.models.payment_plan import PaymentPlan
 from hope.models.payment_plan_split import PaymentPlanSplit
-from hope.models.payment import Payment
-from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
-from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 class TPHouseholdListSerializerTest(TestCase):

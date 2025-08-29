@@ -6,14 +6,14 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.models.individual import Individual
 from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
+from hope.models.individual import Individual
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 
 
 class VerificationPlanStatusChangeServices:

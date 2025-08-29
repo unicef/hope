@@ -6,11 +6,10 @@ from django.db.models import Count, Q, Sum
 from django.urls import reverse
 
 from hope.apps.core.utils import encode_id_base64
+from hope.apps.utils.pdf_generator import generate_pdf_from_html
 from hope.models.approval import Approval
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
-from hope.apps.utils.pdf_generator import generate_pdf_from_html
-
 
 logger = logging.getLogger(__name__)
 

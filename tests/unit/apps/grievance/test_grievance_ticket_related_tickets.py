@@ -11,14 +11,14 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.models import country as geo_models
+from hope.models.business_area import BusinessArea
+from hope.models.document_type import DocumentType
 from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
 )
-from hope.models.document_type import DocumentType
 
 
 class TestGrievanceTicketRelatedTickets(BaseTestCase):

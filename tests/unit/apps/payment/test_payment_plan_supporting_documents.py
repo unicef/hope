@@ -11,12 +11,12 @@ from rest_framework.test import APIClient, APIRequestFactory
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from hope.models.role_assignment import RoleAssignment
-from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
 from hope.models.payment_plan import PaymentPlan
 from hope.models.payment_plan_supporting_document import PaymentPlanSupportingDocument
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):

@@ -10,8 +10,6 @@ class AccountConfig(AppConfig):
     label = "account"
 
     def ready(self) -> None:
-        import hope.models
-
         from hijack.signals import hijack_started
 
         import hope.apps.account.signals  # noqa

@@ -6,14 +6,13 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hope.models.user import User
-from hope.models.partner import Partner
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
+from hope.models.partner import Partner
 from hope.models.program import Program
+from hope.models.user import User
 
 
 class TestHouseholdRegistrationIdTrigger(BaseTestCase):

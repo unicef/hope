@@ -7,15 +7,15 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from hope.models.role_assignment import RoleAssignment
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.role import Role
-from hope.models.partner import Partner
 from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 
 logger = logging.getLogger(__name__)
 

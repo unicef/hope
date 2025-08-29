@@ -4,7 +4,6 @@ import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
-
 from hope.models.data_collecting_type import DataCollectingType
 
 

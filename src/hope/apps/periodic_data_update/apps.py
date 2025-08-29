@@ -6,5 +6,4 @@ class PeriodicDataUpdateConfig(AppConfig):
 
     def ready(self) -> None:
         import hope.apps.periodic_data_update.signals  # noqa: F401
-
         import hope.models  # noqa

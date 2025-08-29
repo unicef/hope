@@ -1,7 +1,7 @@
 from django.db import models
 
 from hope.models.household import ROLE_CHOICE
-from hope.models.utils import SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable, PendingManager
+from hope.models.utils import AbstractSyncable, PendingManager, SoftDeletableMergeStatusModel, TimeStampedUUIDModel
 
 
 class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):

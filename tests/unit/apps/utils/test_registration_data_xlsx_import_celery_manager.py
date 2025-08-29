@@ -6,8 +6,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
-from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.import_data import ImportData
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class TestRegistrationDataXlsxImportCeleryManager(BaseTestCase):

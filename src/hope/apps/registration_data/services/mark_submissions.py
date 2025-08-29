@@ -5,10 +5,10 @@ from django.db.models import QuerySet
 
 from hope.models.business_area import BusinessArea
 from hope.models.household import Household
+from hope.models.kobo_imported_submission import KoboImportedSubmission
 from hope.models.registration_data_import import (
     RegistrationDataImport,
 )
-from hope.models.kobo_imported_submission import KoboImportedSubmission
 
 
 class MarkSubmissions:

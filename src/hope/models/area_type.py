@@ -6,7 +6,7 @@ from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 from natural_keys import NaturalKeyModel
 
-from hope.models.country import UpgradeModel, Country, ValidityManager
+from hope.models.country import Country, UpgradeModel, ValidityManager
 from hope.models.utils import TimeStampedUUIDModel
 
 

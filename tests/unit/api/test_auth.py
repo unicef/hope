@@ -1,20 +1,20 @@
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock
 
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-from unit.api.base import HOPEApiTestCase
-from unit.api.factories import APITokenFactory
-
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.models.grant import Grant
-from typing import TYPE_CHECKING
+from unit.api.base import HOPEApiTestCase
+from unit.api.factories import APITokenFactory
 
 if TYPE_CHECKING:
     from hope.models.api_token import APIToken

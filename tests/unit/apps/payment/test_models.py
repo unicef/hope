@@ -42,30 +42,29 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.currencies import USDC
+from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
+from hope.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.approval import Approval
 from hope.models.business_area import BusinessArea
-from hope.models.file_temp import FileTemp
 from hope.models.data_collecting_type import DataCollectingType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
+from hope.models.file_temp import FileTemp
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.fsp_name_mapping import FspNameMapping
 from hope.models.household import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.approval import Approval
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
-from hope.models.fsp_name_mapping import FspNameMapping
 from hope.models.payment import Payment
 from hope.models.payment_data_collector import PaymentDataCollector
 from hope.models.payment_plan import PaymentPlan
-
-from hope.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
 from hope.models.program_cycle import ProgramCycle
 from hope.models.rule import Rule
 

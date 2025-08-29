@@ -23,14 +23,14 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models.user import INACTIVE, USER_STATUS_CHOICES
-from hope.models.role import Role
-from hope.models.partner import Partner
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
-from hope.models.message import Message
-from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import to_choice_object
+from hope.models.business_area import BusinessArea
+from hope.models.message import Message
+from hope.models.partner import Partner
 from hope.models.program import Program
+from hope.models.role import Role
+from hope.models.user import INACTIVE, USER_STATUS_CHOICES
 
 pytestmark = pytest.mark.django_db
 

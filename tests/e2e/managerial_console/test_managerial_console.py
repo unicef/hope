@@ -15,14 +15,13 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-
-from hope.models.user import User
-from hope.models.partner import Partner
+from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
+from hope.models.partner import Partner
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
-from hope.models.beneficiary_group import BeneficiaryGroup
+from hope.models.user import User
 
 pytestmark = pytest.mark.django_db()
 

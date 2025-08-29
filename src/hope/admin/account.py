@@ -4,9 +4,9 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.business_area import BusinessArea
 from hope.models.account import Account
 from hope.models.account_type import AccountType
+from hope.models.business_area import BusinessArea
 from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
 from hope.models.program import Program

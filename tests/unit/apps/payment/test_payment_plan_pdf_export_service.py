@@ -12,13 +12,12 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.approval import Approval
-from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
+from hope.models.approval import Approval
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.delivery_mechanism import DeliveryMechanism
 
 
 class TestPaymentPlanPDFExportService(TestCase):

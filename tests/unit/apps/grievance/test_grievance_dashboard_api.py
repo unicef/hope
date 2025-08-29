@@ -12,9 +12,9 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.models import GrievanceTicket
 from hope.models.business_area import BusinessArea
 from hope.models.country import Country
-from hope.apps.grievance.models import GrievanceTicket
 
 pytestmark = pytest.mark.django_db
 

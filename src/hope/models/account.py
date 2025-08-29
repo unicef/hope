@@ -1,12 +1,12 @@
-import hashlib
 from functools import cached_property
+import hashlib
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models, transaction, IntegrityError
+from django.db import IntegrityError, models, transaction
 from django.db.models import JSONField, Q, QuerySet
 
 from hope.models.financial_institution import FinancialInstitution
-from hope.models.utils import MergeStatusModel, TimeStampedUUIDModel, SignatureMixin, MergedManager, PendingManager
+from hope.models.utils import MergedManager, MergeStatusModel, PendingManager, SignatureMixin, TimeStampedUUIDModel
 
 
 class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):

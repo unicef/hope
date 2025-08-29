@@ -13,9 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from hope.models.role_assignment import RoleAssignment
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.celery_tasks import generate_dash_report_task
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -24,6 +22,8 @@ from hope.apps.dashboard.services import (
     DashboardGlobalDataCache,
 )
 from hope.apps.utils.sentry import sentry_tags
+from hope.models.business_area import BusinessArea
+from hope.models.role_assignment import RoleAssignment
 
 log = logging.getLogger(__name__)
 

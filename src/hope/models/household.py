@@ -1,6 +1,5 @@
-from datetime import date, datetime, timedelta
+from datetime import timedelta
 import logging
-import re
 from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.postgres.fields import CICharField
@@ -20,9 +19,6 @@ from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.currencies import CURRENCY_CHOICES
-from hope.models.business_area import BusinessArea
-from hope.models.storage_file import StorageFile
-from hope.models.area import Area
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
 )
@@ -30,6 +26,9 @@ from hope.apps.household.signals import (
     household_deleted,
     household_withdrawn,
 )
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.storage_file import StorageFile
 from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,

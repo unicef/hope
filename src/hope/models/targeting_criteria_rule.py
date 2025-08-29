@@ -1,7 +1,7 @@
-from hope.apps.targeting.services.targeting_service import TargetingCriteriaRuleQueryingBase
 from django.db import models
 from django.db.models import Q
 
+from hope.apps.targeting.services.targeting_service import TargetingCriteriaRuleQueryingBase
 from hope.models.utils import TimeStampedUUIDModel
 
 

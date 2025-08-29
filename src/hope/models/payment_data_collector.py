@@ -1,4 +1,4 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from hope.models.account import Account
 from hope.models.delivery_mechanism_config import DeliveryMechanismConfig

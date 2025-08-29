@@ -31,12 +31,11 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-
-from hope.models.role_assignment import RoleAssignment
-from hope.models.business_area import BusinessArea
-from hope.models.area import Area
-from hope.models.document_type import DocumentType
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.document_type import DocumentType
+from hope.models.role_assignment import RoleAssignment
 
 if TYPE_CHECKING:
     from hope.apps.grievance.models import GrievanceTicket

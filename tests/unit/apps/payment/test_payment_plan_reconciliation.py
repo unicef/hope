@@ -25,15 +25,15 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
+    XlsxPaymentPlanImportPerFspService,
+)
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import ROLE_PRIMARY
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
 from hope.models.payment_verification import PaymentVerification
 from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
-)
 from hope.models.program import Program
 
 

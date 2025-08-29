@@ -1,13 +1,12 @@
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
 from faker.generator import random
 from flaky import flaky
 import pytest
 
-from hope.models.business_area import BusinessArea
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_NOT_SET,
@@ -18,6 +17,7 @@ from hope.apps.grievance.documents import GrievanceTicketDocument
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models.business_area import BusinessArea
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

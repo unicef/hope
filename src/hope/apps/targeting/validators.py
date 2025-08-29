@@ -4,13 +4,13 @@ from django.core.exceptions import ValidationError
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
+from hope.apps.core.utils import get_attr_value
+from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute
-from hope.apps.core.utils import get_attr_value
 from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.program import Program
-from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
 
 logger = logging.getLogger(__name__)

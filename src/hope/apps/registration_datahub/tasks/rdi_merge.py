@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import chunks
 from hope.apps.grievance.models import GrievanceTicket
@@ -16,22 +15,6 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
 )
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models.household import (
-    DUPLICATE,
-    NEEDS_ADJUDICATION,
-    Household,
-    HouseholdCollection,
-    PendingHousehold,
-)
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.individual import IndividualCollection, Individual
-from hope.models.account import PendingAccount
-from hope.models.registration_data_import import (
-    RegistrationDataImport,
-)
-from hope.models.kobo_imported_submission import KoboImportedSubmission
 from hope.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -45,8 +28,24 @@ from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hope.models.utils import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
+from hope.models.account import PendingAccount
+from hope.models.document import PendingDocument
+from hope.models.household import (
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
+    Household,
+    HouseholdCollection,
+    PendingHousehold,
+)
+from hope.models.individual import Individual, IndividualCollection, PendingIndividual
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.kobo_imported_submission import KoboImportedSubmission
+from hope.models.log_entry import log_create
+from hope.models.registration_data_import import (
+    RegistrationDataImport,
+)
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 

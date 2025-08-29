@@ -11,11 +11,10 @@ from django.utils import timezone
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
+from hope.apps.registration_data.services.mark_submissions import MarkSubmissions
 from hope.models.business_area import BusinessArea
 from hope.models.import_data import ImportData
 from hope.models.kobo_imported_submission import KoboImportedSubmission
-from hope.apps.registration_data.services.mark_submissions import MarkSubmissions
 
 
 class TestMarkSubmissions(TestCase):

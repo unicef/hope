@@ -13,11 +13,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.models.business_area import BusinessArea
-from hope.models.payment_plan import PaymentPlan
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
+from hope.models.business_area import BusinessArea
+from hope.models.payment_plan import PaymentPlan
 
 
 def file_without_delivery_dates() -> BytesIO:

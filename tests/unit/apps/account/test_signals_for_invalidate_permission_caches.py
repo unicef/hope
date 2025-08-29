@@ -15,9 +15,9 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.caches import get_user_permissions_version_key
-from hope.models.user import User
 from hope.models.business_area import BusinessArea
 from hope.models.program import Program
+from hope.models.user import User
 
 
 class TestSignalsForInvalidatePermissionCaches(TestCase):

@@ -1,6 +1,6 @@
-from hope.apps.targeting.services.targeting_service import TargetingCollectorRuleFilterBlockBase
 from django.db import models
 
+from hope.apps.targeting.services.targeting_service import TargetingCollectorRuleFilterBlockBase
 from hope.models.utils import TimeStampedUUIDModel
 
 

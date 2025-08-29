@@ -4,20 +4,20 @@ from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
-from hope.models.country import Country
-from hope.models.household import (
-    HEAD,
-    ROLE_PRIMARY,
-)
-from hope.models.document import PendingDocument
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.document_type import DocumentType
-from hope.models.registration_data_import import RegistrationDataImport
 from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
     mergedicts,
 )
+from hope.models.country import Country
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.household import (
+    HEAD,
+    ROLE_PRIMARY,
+)
+from hope.models.individual import PendingIndividual
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class NigeriaPeopleRegistrationService(GenericRegistrationService):

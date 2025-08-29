@@ -5,7 +5,6 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 
 from hope.apps.core.celery import app
-from hope.models.universal_update_script import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
 )
@@ -14,6 +13,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.unive
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
+from hope.models.universal_update_script import UniversalUpdate
 
 SOFT_TIME_LIMIT = 30 * 60
 HARD_TIME_LIMIT = 35 * 60

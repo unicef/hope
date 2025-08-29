@@ -8,10 +8,10 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from hope.models.business_area import BusinessArea
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
+from hope.models.business_area import BusinessArea
 
 
 class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):

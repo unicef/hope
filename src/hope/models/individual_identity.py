@@ -1,7 +1,7 @@
 from django.db import models
 from model_utils.models import TimeStampedModel
 
-from hope.models.utils import SoftDeletableMergeStatusModel, PendingManager
+from hope.models.utils import PendingManager, SoftDeletableMergeStatusModel
 
 
 class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):

@@ -9,9 +9,9 @@ from extras.test_utils.factories.household import (
 from hope.apps.household.management.commands.fixdocumentsstatus import (
     fix_documents_statuses,
 )
+from hope.models.document import Document
 from hope.models.household import Household
 from hope.models.individual import Individual
-from hope.models.document import Document
 
 
 class TestDocumentStatusFixer(TestCase):

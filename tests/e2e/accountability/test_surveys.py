@@ -7,14 +7,13 @@ from e2e.page_object.accountability.surveys_details import AccountabilitySurveys
 from extras.test_utils.factories.accountability import SurveyFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentPlanFactory
-
-from hope.models.user import User
-from hope.models.survey import Survey
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import REFUGEE, Household
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
+from hope.models.survey import Survey
+from hope.models.user import User
 
 pytestmark = pytest.mark.django_db()
 

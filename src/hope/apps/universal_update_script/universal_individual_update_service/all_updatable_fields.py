@@ -4,9 +4,6 @@ from typing import Any
 
 from django.db.models import Model
 
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.document_type import DocumentType
-from hope.models.account_type import AccountType
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
@@ -22,6 +19,9 @@ from hope.apps.universal_update_script.universal_individual_update_service.valid
     validate_phone_number,
     validate_string,
 )
+from hope.models.account_type import AccountType
+from hope.models.document_type import DocumentType
+from hope.models.flexible_attribute import FlexibleAttribute
 
 individual_fields: dict[str, tuple[str, Any, Any]] = {
     "full_name": ("full_name", validate_string, handle_simple_field),

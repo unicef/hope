@@ -1,4 +1,4 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.core.management import call_command
 from django.urls import reverse
@@ -15,11 +15,11 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.models import country as geo_models
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import country as geo_models
 from hope.models.household import AUNT_UNCLE, BROTHER_SISTER, HEAD
 from hope.models.program import Program
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 if TYPE_CHECKING:
     from hope.models.individual import Individual

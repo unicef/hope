@@ -24,6 +24,8 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
+from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.household import (
     BROTHER_SISTER,
     COUSIN,
@@ -33,14 +35,12 @@ from hope.models.household import (
     Household,
     PendingHousehold,
 )
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.individual import Individual, PendingIndividual
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.kobo_imported_submission import KoboImportedSubmission
 from hope.models.registration_data_import import (
     RegistrationDataImport,
 )
-from hope.models.kobo_imported_submission import KoboImportedSubmission
-from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

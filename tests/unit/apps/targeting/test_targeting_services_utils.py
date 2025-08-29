@@ -5,21 +5,20 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-
+from hope.apps.targeting.services.utils import (
+    from_input_to_targeting_criteria,
+    get_existing_unicef_ids,
+)
 from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,
 )
 from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
-from hope.apps.targeting.services.utils import (
-    from_input_to_targeting_criteria,
-    get_existing_unicef_ids,
-)
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TestPaymentPlanModel(TestCase):

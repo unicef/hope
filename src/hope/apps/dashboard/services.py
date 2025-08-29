@@ -9,8 +9,8 @@ from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 
-from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
+from hope.models.business_area import BusinessArea
 from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan

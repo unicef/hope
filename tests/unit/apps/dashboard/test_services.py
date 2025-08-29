@@ -17,8 +17,6 @@ from extras.test_utils.factories.payment import (
     create_payment_verification_plan_with_status,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -27,6 +25,7 @@ from hope.apps.dashboard.services import (
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
+from hope.models.business_area import BusinessArea
 from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan

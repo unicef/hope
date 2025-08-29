@@ -17,11 +17,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.models.flexible_attribute import PeriodicFieldData
-from hope.models.periodic_data_update_template import (
-    PeriodicDataUpdateTemplate,
-)
-from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
@@ -29,6 +24,11 @@ from hope.apps.periodic_data_update.service.periodic_data_update_import_service 
     PeriodicDataUpdateImportService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models.periodic_data_update_template import (
+    PeriodicDataUpdateTemplate,
+)
+from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
 from hope.models.program import Program
 
 

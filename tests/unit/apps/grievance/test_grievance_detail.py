@@ -42,6 +42,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.models.household import (
     DUPLICATE,
     ROLE_ALTERNATE,
@@ -52,7 +53,6 @@ from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.payment_verification import PaymentVerification
 from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.program import Program
-from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
 from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
 from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
 

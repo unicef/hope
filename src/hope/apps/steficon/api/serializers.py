@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from hope.models.rule import RuleCommit
-from hope.models.rule import Rule
+from hope.models.rule import Rule, RuleCommit
 
 
 class RuleSerializer(serializers.ModelSerializer):

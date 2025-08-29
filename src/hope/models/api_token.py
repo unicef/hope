@@ -1,5 +1,4 @@
 import binascii
-from enum import Enum, auto, unique
 import os
 from typing import Any
 
@@ -7,10 +6,10 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from hope.models.grant import Grant
-from hope.models.business_area import BusinessArea
-from hope.models.user import User
 from hope.apps.account.fields import ChoiceArrayField
+from hope.models.business_area import BusinessArea
+from hope.models.grant import Grant
+from hope.models.user import User
 
 
 class APIToken(models.Model):

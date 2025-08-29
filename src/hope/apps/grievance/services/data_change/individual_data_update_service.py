@@ -7,11 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
-from hope.models.country import Country
-from hope.models.area import Area
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
@@ -44,16 +41,19 @@ from hope.apps.grievance.services.data_change.utils import (
     update_es,
     verify_flex_fields,
 )
+from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.apps.utils.phone import is_valid_phone_number
+from hope.models.account import Account
+from hope.models.area import Area
+from hope.models.country import Country
+from hope.models.document import Document
 from hope.models.household import (
     HEAD,
     Household,
 )
-from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
-from hope.models.document import Document
-from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models.account import Account
-from hope.apps.utils.phone import is_valid_phone_number
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.log_entry import log_create
 
 
 @dataclasses.dataclass

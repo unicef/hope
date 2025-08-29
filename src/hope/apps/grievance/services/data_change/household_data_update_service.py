@@ -5,11 +5,8 @@ from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 from django_countries.fields import Country
 
-from hope.models.log_entry import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import to_snake_case
-from hope.models import country as geo_models
-from hope.models.area import Area
 from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
     DataChangeService,
@@ -21,11 +18,14 @@ from hope.apps.grievance.services.data_change.utils import (
     to_date_string,
     verify_flex_fields,
 )
-from hope.models.household import Household
-from hope.models.individual import Individual
 from hope.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hope.models import country as geo_models
+from hope.models.area import Area
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.log_entry import log_create
 
 
 def _prepare_roles_with_approve_status(roles_data: list[dict[Any, Any]]) -> list[dict[str, Any]]:

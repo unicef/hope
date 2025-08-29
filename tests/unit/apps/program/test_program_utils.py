@@ -19,19 +19,19 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.program.utils import (
+    enroll_households_to_program,
+    generate_rdi_unique_name,
+)
+from hope.models.document import Document
 from hope.models.household import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual
-from hope.models.document import Document
-from hope.apps.program.utils import (
-    enroll_households_to_program,
-    generate_rdi_unique_name,
-)
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.registration_data_import import RegistrationDataImport
 
 

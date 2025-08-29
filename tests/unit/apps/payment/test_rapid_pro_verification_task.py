@@ -20,13 +20,13 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.models.area import Area
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 from hope.apps.utils.phone import is_valid_phone_number
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
 
 
 class TestRapidProVerificationTask(TestCase):

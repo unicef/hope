@@ -6,12 +6,12 @@ from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
 from hope.api.caches import get_or_create_cache_key
-from hope.models.program import Program
-from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
+from hope.models.beneficiary_group import BeneficiaryGroup
+from hope.models.program import Program
 
 program_copied = Signal()
 

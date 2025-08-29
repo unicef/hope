@@ -1,6 +1,6 @@
-import logging
 from datetime import datetime
 from decimal import Decimal
+import logging
 
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -14,9 +14,9 @@ from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
-from hope.models.individual import Individual
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
+from hope.models.individual import Individual
 from hope.models.utils import (
     AdminUrlMixin,
     InternalDataFieldModel,

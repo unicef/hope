@@ -6,9 +6,8 @@ from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
 from hope.models.household import Household
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.individual import Individual
-
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 
 # only for typing purposes
 

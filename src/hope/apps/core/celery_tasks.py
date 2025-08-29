@@ -2,9 +2,9 @@ import logging
 from typing import Any
 
 from hope.apps.core.celery import app
-from hope.models.xlsx_kobo_template import XLSXKoboTemplate
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
+from hope.models.xlsx_kobo_template import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +15,6 @@ logger = logging.getLogger(__name__)
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
         KoboRetriableError,
-    )
-    from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
     )
 

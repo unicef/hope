@@ -3,10 +3,9 @@ from django.urls import reverse
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.models.program import Program
-from hope.models.user import User
 from hope.models.universal_update_script import UniversalUpdate
+from hope.models.user import User
 
 
 class UniversalUpdateAdminTest(TestCase):
