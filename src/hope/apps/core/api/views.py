@@ -19,7 +19,7 @@ from hope.apps.account.models import RoleAssignment
 from hope.apps.accountability.models import Feedback
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
-from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin
+from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
 from hope.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
@@ -49,6 +49,7 @@ from hope.apps.payment.models import (
 
 class BusinessAreaViewSet(
     CountActionMixin,
+    PermissionsMixin,
     RetrieveModelMixin,
     ListModelMixin,
     BaseViewSet,
