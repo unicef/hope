@@ -10,6 +10,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
+from django.db import Error
 from django.db.models import JSONField, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -233,7 +234,7 @@ class IndividualAdmin(
             ids = queryset.values_list("id", flat=True)
             revalidate_phone_number_task(ids)
             self.message_user(request, f"Updated {len(ids)} records", messages.SUCCESS)
-        except Exception as e:
+        except Error as e:
             self.message_user(request, str(e), messages.ERROR)
 
     revalidate_phone_number_sync.short_description = "Re-validate phone number (sync)"

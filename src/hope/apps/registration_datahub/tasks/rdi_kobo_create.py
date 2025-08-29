@@ -4,9 +4,10 @@ import logging
 from typing import Any
 
 from dateutil.parser import parse
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.files.storage import default_storage
-from django.db import transaction
+from django.db import Error, transaction
 from django_countries.fields import Country
 
 from hope.apps.activity_log.models import log_create
@@ -335,7 +336,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         elif i_field.endswith(("_h_c", "_h_f")):
                             try:
                                 self._cast_and_assign(i_value, i_field, household_obj)
-                            except Exception as e:
+                            except (Error, ValidationError, ValueError, TypeError) as e:
+                                logger.warning(e)
                                 self._handle_exception("Household", i_field, e)
                         elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
                             self._handle_delivery_mechanism_fields(
@@ -347,7 +349,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         else:
                             try:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
-                            except Exception as e:
+                            except (Error, ValidationError, ValueError, TypeError) as e:
+                                logger.warning(e)
                                 self._handle_exception("Individual", i_field, e)
                     individual_obj.last_registration_date = individual_obj.first_registration_date
                     individual_obj.registration_data_import = self.registration_data_import
@@ -390,7 +393,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             else:
                 try:
                     self._cast_and_assign(hh_value, hh_field, household_obj)
-                except Exception as e:
+                except (Error, ValidationError, ValueError, TypeError) as e:
+                    logger.warning(e)
                     self._handle_exception("Household", hh_field, e)
         household_obj.first_registration_date = registration_date
         household_obj.last_registration_date = registration_date
