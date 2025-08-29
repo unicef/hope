@@ -4,7 +4,7 @@ requires = [ "setuptools", "wheel" ]
 
 [project]
 name = "hope"
-version = "3.6.0"
+version = "3.4.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
 license = { text = "None" }
@@ -90,7 +90,6 @@ dependencies = [
   "nested-multipart-parser",
   "openpyxl==3.1.5",
   "openpyxl-image-loader>=1.0.5,<2",
-  "paramiko>=4",
   "phonenumbers>=8.12.49,<9",
   "pillow>=10.2,<11",
   "prompt-toolkit>=3.0.29,<4",
@@ -138,6 +137,7 @@ dev = [
   "ipdb>=0.13.9,<1",
   "openpyxl-stubs>=0.1.24,<1",
   "parameterized>=0.8.1,<1",
+  "paramiko>=4",
   "parso>=0.8.3,<1",
   "pre-commit>=3.1.1,<4",
   "pytest>=7.4.4,<8",
