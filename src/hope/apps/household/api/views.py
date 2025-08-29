@@ -22,7 +22,6 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.serializers import FieldAttributeSerializer
-from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
@@ -41,12 +40,9 @@ from hope.apps.household.api.serializers.individual import (
     IndividualPhotoDetailSerializer,
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
-from hope.models.household import DUPLICATE, Household
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.household import Household
+from hope.models.household import DUPLICATE, Household
 from hope.models.individual import Individual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.payment import Payment
