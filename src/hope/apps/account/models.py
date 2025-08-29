@@ -1,14 +1,30 @@
-# without this file I got
-# File "/app/.venv/lib/python3.13/site-packages/explorer/models.py", line 11, in <module>
-#  from explorer.utils import (
-#  ...<2 lines>...
-#  )
-#  File "/app/.venv/lib/python3.13/site-packages/explorer/utils.py", line 6, in <module>
-#       from django.contrib.auth.forms import AuthenticationForm
-#     File "/app/.venv/lib/python3.13/site-packages/django/contrib/auth/forms.py", line 21, in <module>
-#       UserModel = get_user_model()
-#     File "/app/.venv/lib/python3.13/site-packages/django/contrib/auth/__init__.py", line 164, in get_user_model
-#      raise ImproperlyConfigured(
-#           "AUTH_USER_MODEL refers to model '%s' that has not been installed" % settings.AUTH_USER_MODEL
-#      )
-#   django.core.exceptions.ImproperlyConfigured: AUTH_USER_MODEL refers to model 'account.User' that has not been installed
+"""This file is required so that Django recognizes our custom User model
+and other models that belong to the "account" app.
+
+Why do we need this?
+--------------------
+Django expects every app listed in INSTALLED_APPS to have either:
+  - a `models.py` file, OR
+  - a `models/` package with an __init__.py
+
+When Django runs migrations or loads AUTH_USER_MODEL ("account.User"),
+it imports `account.models`. If this file does not import the actual
+User model, Django cannot find it, and you'll get:
+
+    django.core.exceptions.ImproperlyConfigured:
+    AUTH_USER_MODEL refers to model 'account.User'
+    that has not been installed
+
+Even though we keep our models in a shared folder (`hope/models/`),
+this "bridge file" ensures Django can still discover them correctly
+under the `account` app label.
+
+Example:
+-------
+- Actual model code lives in `hope/models/user.py`
+- This file imports `User` so Django knows
+  `account.User` exists for AUTH_USER_MODEL.
+
+"""
+
+from hope.models.user import User  # noqa: F401
