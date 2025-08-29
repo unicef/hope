@@ -1,10 +1,17 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from django.urls import reverse
 import pytest
 from webtest import Upload
 
 from hope.models.sanction_list import UploadedXLSXFile
+
+if TYPE_CHECKING:
+    from django_webtest import DjangoTestApp
+
+    from hope.models.sanction_list import SanctionList
+    from hope.models.user import User
 
 
 @pytest.fixture

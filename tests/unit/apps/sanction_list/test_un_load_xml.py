@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -11,6 +11,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hope.models.sanction_list_individual import SanctionListIndividual
+
+if TYPE_CHECKING:
+    from hope.models.program import Program
+    from hope.models.sanction_list import SanctionList
+
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
