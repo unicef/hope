@@ -16,7 +16,7 @@ from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
 from django.utils.crypto import get_random_string
 import requests
-from requests import Response
+from requests import RequestException, Response
 
 from hope.apps.account.models import User
 
@@ -114,7 +114,7 @@ class DjAdminManager:
                     },
                 )
                 self.assert_response(302, self.admin_url)
-            except Exception as e:
+            except self.ResponseError as e:
                 raise self.ResponseError(
                     f"Unable to login to Kobo at "
                     f"{self.login_url}: {e.__class__.__name__} {e}. "
@@ -158,7 +158,7 @@ class DjAdminManager:
         try:
             m = regex.search(self._last_response.content.decode("utf8"))
             return m.groups()[0]
-        except Exception:
+        except (AttributeError, IndexError):
             raise ValueError("Unable to get CSRF token from Kobo")
 
     def delete_user(self, username: str, pk: UUID) -> None:
@@ -219,7 +219,7 @@ class KoboAccessMixin:
         for user in queryset.all():
             try:
                 self._grant_kobo_accesss_to_user(user)
-            except Exception as e:
+            except RequestException as e:
                 logger.warning(e)
                 self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
         self.message_user(
@@ -236,7 +236,7 @@ class KoboAccessMixin:
         try:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
             self.message_user(request, f"Granted access to {settings.KOBO_URL}", messages.SUCCESS)
-        except Exception as e:
+        except RequestException as e:
             logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
@@ -258,7 +258,7 @@ class KoboAccessMixin:
                     "This action will also delete linked Kobo account",
                     messages.WARNING,
                 )
-            except Exception as e:
+            except RequestException as e:
                 extra_context["kobo_failed"] = True
                 self.message_user(request, str(e), messages.ERROR)
             res = super().delete_view(request, object_id, extra_context)
@@ -294,7 +294,7 @@ class KoboAccessMixin:
                 f"Kobo Access removed from {settings.KOBO_URL}",
                 messages.WARNING,
             )
-        except Exception as e:
+        except RequestException as e:
             logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
@@ -334,7 +334,7 @@ class KoboAccessMixin:
                         users.append([entry[0], entry[1], entry[2], local])
                 ctx["users"] = users
 
-            except Exception as e:
+            except (RequestException, ValueError) as e:
                 logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)

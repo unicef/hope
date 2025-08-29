@@ -2,6 +2,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 import pytest
+from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -424,7 +425,7 @@ class TestSmokeFilters:
             for locator in locators:
                 try:
                     filters.wait_for(locator, timeout=20)
-                except BaseException:
+                except TimeoutException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
     @pytest.mark.xfail(reason="UNSTABLE")

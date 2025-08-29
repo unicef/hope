@@ -252,7 +252,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                             f"Area with p_code {p_code} already exists but with different data",
                             messages.ERROR,
                         )
-                except Exception as e:
+                except (Country.DoesNotExist, AreaType.DoesNotExist, Area.DoesNotExist) as e:
                     logger.warning(e)
                     self.message_user(
                         request,
