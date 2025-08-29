@@ -1,7 +1,8 @@
 from datetime import datetime
 
-import pytest
 from dateutil.relativedelta import relativedelta
+import pytest
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets

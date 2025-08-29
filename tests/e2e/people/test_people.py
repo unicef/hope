@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import List
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
@@ -17,8 +19,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
-
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import HOST, SEEING
@@ -58,7 +58,7 @@ def add_people(social_worker_program: Program) -> List:
         )
         individual = individuals[0]
         create_individual_document(individual)
-    yield [individual, household]
+    return [individual, household]
 
 
 @pytest.fixture

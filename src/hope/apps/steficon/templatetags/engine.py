@@ -1,6 +1,6 @@
 import difflib
-import json
 from difflib import _mdiff
+import json
 from typing import Any, Sequence
 
 from django import template

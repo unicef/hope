@@ -1,7 +1,7 @@
 from typing import Any
 
-import django_filters
 from django.db.models import Q, QuerySet
+import django_filters
 from django_filters import FilterSet
 
 from hope.models.delivery_mechanism import DeliveryMechanism

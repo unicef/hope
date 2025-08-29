@@ -1,7 +1,7 @@
-import json
-import secrets
 from io import BytesIO
+import json
 from pathlib import Path
+import secrets
 from typing import Any, Dict
 from unittest import mock
 

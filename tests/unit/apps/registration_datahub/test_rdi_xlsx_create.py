@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
@@ -13,6 +12,9 @@ from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
 from django_countries.fields import Country
+from PIL import Image
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     create_afghanistan,
@@ -26,8 +28,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from PIL import Image
-
 from hope.models.business_area import BusinessArea
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
@@ -404,7 +404,7 @@ class TestRdiXlsxCreateTask(TestCase):
         "hope.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
         return_value=parse_datetime("2020-06-22 12:00:00-0000"),
     )
-    def test_handle_document_photo_fields(self, _) -> None:
+    def test_handle_document_photo_fields(self, mock_now) -> None:
         task = self.RdiXlsxCreateTask()
         task.image_loader = ImageLoaderMock()
         task.documents = {}

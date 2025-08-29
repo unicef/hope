@@ -4,8 +4,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from hope.models.area
-from hope.models.area_type
+# from hope.models.area
+# from hope.models.area_type
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,

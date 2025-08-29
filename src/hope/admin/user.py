@@ -1,6 +1,6 @@
+from collections import defaultdict, namedtuple
 import csv
 import logging
-from collections import defaultdict, namedtuple
 from typing import Any, Sequence, Union
 
 from admin_extra_buttons.decorators import button

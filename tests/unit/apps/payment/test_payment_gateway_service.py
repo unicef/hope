@@ -1,11 +1,12 @@
+from decimal import Decimal
 import json
 import os
-from decimal import Decimal
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -20,7 +21,6 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.household import ROLE_PRIMARY
@@ -933,9 +933,8 @@ class TestPaymentGatewayService(BaseTestCase):
         s = Mock()
         bad_status = "bad_status"
         s.value = bad_status
-        with self.assertRaisesRegex(
-            PaymentGatewayAPI.PaymentGatewayAPIError,
-            "Can't set invalid Payment Instruction status:",
+        with pytest.raises(
+            PaymentGatewayAPI.PaymentGatewayAPIError, match="Can't set invalid Payment Instruction status:"
         ):
             PaymentGatewayAPI().change_payment_instruction_status(
                 s,

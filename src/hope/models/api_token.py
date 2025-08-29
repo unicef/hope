@@ -1,4 +1,5 @@
 import binascii
+from enum import Enum, auto, unique
 import os
 from typing import Any
 

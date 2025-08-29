@@ -1,9 +1,10 @@
-import uuid
 from decimal import Decimal
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
+import uuid
 
 from django.test import TestCase
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -19,7 +20,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.models.business_area import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.models.area import Area

@@ -1,10 +1,10 @@
+from builtins import __build_class__  # noqa
 import datetime
+from decimal import Decimal
 import importlib
 import logging
 import sys
 import traceback
-from builtins import __build_class__  # noqa
-from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -85,7 +85,7 @@ class PythonExec(Interpreter):
         locals_["context"] = context
         locals_["result"] = pts
         try:
-            exec(self.init_string, gl, locals_)
+            exec(self.init_string, gl, locals_)  # noqa
         except SyntaxError as err:
             error_class = err.__class__.__name__
             detail = err.args[0]
@@ -140,7 +140,7 @@ class PythonExec(Interpreter):
 
 
 def get_env(**options: Any) -> Environment:
-    env = Environment(**options)
+    env = Environment(autoescape=True, **options)
     env.filters.update({"adults": engine.adults})
     return env
 

@@ -1,5 +1,7 @@
-import openpyxl
 from django.test import TestCase
+from freezegun import freeze_time
+import openpyxl
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
@@ -11,8 +13,6 @@ from extras.test_utils.factories.periodic_data_update import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
-from freezegun import freeze_time
-
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,

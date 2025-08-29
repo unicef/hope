@@ -9,11 +9,6 @@ from django.urls import include, path, re_path
 import hope.admin
 import hope.apps.account.views
 import hope.apps.accountability.views
-import hope.apps.household.views
-import hope.apps.payment.views
-import hope.apps.registration_data.views
-import hope.apps.sanction_list.views
-import hope.apps.targeting.views
 from hope.apps.core.rest_api import all_fields_attributes
 from hope.apps.core.views import (
     UploadFile,
@@ -21,6 +16,11 @@ from hope.apps.core.views import (
     logout_view,
     trigger_error,
 )
+import hope.apps.household.views
+import hope.apps.payment.views
+import hope.apps.registration_data.views
+import hope.apps.sanction_list.views
+import hope.apps.targeting.views
 from hope.apps.web.views import react_main
 
 # register all adminactions

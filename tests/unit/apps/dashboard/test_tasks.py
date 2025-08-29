@@ -3,8 +3,8 @@ from typing import Callable
 from unittest.mock import Mock, call, patch
 
 import pytest
-from extras.test_utils.factories.account import BusinessAreaFactory
 
+from extras.test_utils.factories.account import BusinessAreaFactory
 from hope.models.business_area import BusinessArea
 from hope.apps.dashboard.celery_tasks import (
     generate_dash_report_task,

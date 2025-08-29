@@ -36,13 +36,13 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj: BusinessArea) -> list:
         user = self.context["user_obj"]
         if user:
-            return user.permissions_in_business_area(obj.slug)
+            return user.all_permissions_in_business_areas[str(obj.id)]
         return []
 
     def get_is_accountability_applicable(self, obj: BusinessArea) -> bool:
         return all(
             [
-                bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")),
+                self.context["allow_accountability_module"],
                 obj.is_accountability_applicable,
             ]
         )
@@ -99,17 +99,25 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_partner_roles(user: User) -> ReturnDict:
-        role_assignments = user.partner.role_assignments.order_by("business_area__slug", "role__name")
+        role_assignments = user.partner.role_assignments.order_by("business_area__slug", "role__name").select_related(
+            "business_area", "role"
+        )
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
     def get_user_roles(user: User) -> ReturnDict:
-        role_assignments = user.role_assignments.order_by("business_area__slug", "role__name")
+        role_assignments = user.role_assignments.order_by("business_area__slug", "role__name").select_related(
+            "business_area", "role"
+        )
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
     def get_business_areas(user: User) -> ReturnDict:
-        return UserBusinessAreaSerializer(user.business_areas, context={"user_obj": user}, many=True).data
+        return UserBusinessAreaSerializer(
+            user.business_areas,
+            context={"user_obj": user, "allow_accountability_module": bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE"))},
+            many=True,
+        ).data
 
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})

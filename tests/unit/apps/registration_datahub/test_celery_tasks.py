@@ -1,19 +1,20 @@
+from abc import ABC, abstractmethod
 import base64
+from contextlib import contextmanager
 import datetime
 import json
-import uuid
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
+import uuid
 
-import pytest
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.functional import classproperty
+import pytest
+
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
@@ -29,7 +30,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -718,7 +718,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
             # NotImplementedError
             if registration_id in [999, 18, 19]:
-                with self.assertRaises(NotImplementedError):
+                with pytest.raises(NotImplementedError):
                     run_automate_rdi_creation_task(
                         registration_id=registration_id,
                         page_size=page_size,
@@ -848,7 +848,7 @@ class TestAutomatingRDICreationTask(TestCase):
             def process_flex_records_task(cls) -> str:
                 raise NotImplementedError
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
 
 

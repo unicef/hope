@@ -1,6 +1,5 @@
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.steficon import RuleFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.steficon.forms import RuleForm
 from hope.models.rule import Rule

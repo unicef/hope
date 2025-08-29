@@ -1,6 +1,8 @@
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import DocumentTypeFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
@@ -42,6 +44,6 @@ class TestDocumentConstraint(TestCase):
             self.fail("Shouldn't raise any errors!")
 
     def test_disallow_create_the_same_document_for_the_same_program(self) -> None:
-        with self.assertRaises(IntegrityError):
-            Document.objects.create(program=self.programs[0], **self.document_data)
+        Document.objects.create(program=self.programs[0], **self.document_data)
+        with pytest.raises(IntegrityError):
             Document.objects.create(program=self.programs[0], **self.document_data)

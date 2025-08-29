@@ -1,14 +1,15 @@
 import datetime
-import json
-import uuid
 from io import BytesIO
+import json
 from tempfile import _TemporaryFileWrapper
 from typing import Any
+import uuid
 
-import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.test import TestCase
+import openpyxl
+
 from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
@@ -16,7 +17,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.models.flexible_attribute import PeriodicFieldData
 from hope.models.periodic_data_update_template import (
     PeriodicDataUpdateTemplate,

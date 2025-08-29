@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -37,7 +38,7 @@ class TestPartnerAccessChangeSignal(TestCase):
             business_area=cls.business_area,
             program=None,
         )
-        # TODO: After proper solution is applied, the above can be removed and partner can just be allowed in business area.
+        # TODO: After proper solution is applied, the above can be removed and partner can just be allowed in BA.
 
         cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner without role in Afg")
 

@@ -147,13 +147,12 @@ def test_snapshot_json_generation_with_mocking(monkeypatch: MonkeyPatch, program
 
 def test_snapshot_json_too_many_unicef_ids(program: Program, individuals: Tuple[Individual]) -> None:
     log_message: Callable[[str], None] = lambda message_log: None
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception, match="Some unicef ids are not in the program"):
         create_snapshot_content(
             log_message,
             str(program.id),
             ["IND-00-0000.0022", "IND-00-0000.0033", "IND-00-0000.0044"],
         )
-    assert "Some unicef ids are not in the program" in str(exc_info.value)
 
 
 def test_snapshot_json_generation_no_unicef_id(monkeypatch: MonkeyPatch, program: Program) -> None:
@@ -178,6 +177,5 @@ def test_snapshot_json_generation_no_unicef_id(monkeypatch: MonkeyPatch, program
         dummy_create_snapshot_content,
     )
 
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception, match="The column 'unicef_id' was not found in the header row."):
         create_and_save_snapshot_chunked(uu)
-    assert "The column 'unicef_id' was not found in the header row." in str(exc_info.value)

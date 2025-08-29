@@ -2,9 +2,9 @@ from typing import TYPE_CHECKING, List
 
 from django.forms.models import inlineformset_factory
 from django.test import TestCase
+
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,

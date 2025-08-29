@@ -59,7 +59,7 @@ class HOPEAuthenticationTest(HOPEApiTestCase):
     def test_auth_fails(self) -> None:
         p = HOPEAuthentication()
         request = MagicMock(META={"HTTP_AUTHORIZATION": "Token 123"})
-        with self.assertRaises(AuthenticationFailed):
+        with pytest.raises(AuthenticationFailed):
             p.authenticate(request)
 
 

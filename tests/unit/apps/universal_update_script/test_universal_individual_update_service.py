@@ -1,12 +1,12 @@
 from io import BytesIO
 
+from django.core.files.base import ContentFile
 import openpyxl
 import pytest
-from django.core.files.base import ContentFile
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.country import Country
 from hope.models.area import Area
@@ -436,7 +436,7 @@ Row: 2 - TEST String for column birth_date is not a valid date
 Row: 2 - TEST String for column phone_no is not a valid phone number
 Row: 2 - Country not found for field national_id_country_i_c and value TEST String
 Row: 2 - Financial institution ID must be a number for field account__mobile__financial_institution_pk
-"""
+"""  # noqa
         assert universal_update.saved_logs == expected_update_log
         assert universal_update.saved_logs == universal_update.logs
         assert individual.given_name == given_name_old

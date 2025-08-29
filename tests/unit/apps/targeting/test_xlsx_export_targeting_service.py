@@ -12,7 +12,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.account_type import AccountType
 from hope.models.payment_plan import PaymentPlan
@@ -142,5 +141,7 @@ class TestXlsxExportTargetingService(BaseTestCase):
 
         assert (
             service._accounts_info(individual) == "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
-            " 'name_of_cardholder': 'Marek', 'number': '123'}, {'provider': 'Provider', 'delivery_phone_number': '123456789', 'service_provider_code': 'ABC', 'number': '321'}"
+            " 'name_of_cardholder': 'Marek', 'number': '123'}, "
+            "{'provider': 'Provider', 'delivery_phone_number': '123456789', "
+            "'service_provider_code': 'ABC', 'number': '321'}"
         )

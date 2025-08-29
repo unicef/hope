@@ -3,8 +3,8 @@
 import uuid
 
 import django.contrib.postgres.fields
-import model_utils.fields
 from django.db import migrations, models
+import model_utils.fields
 
 from hope.models.utils import AdminUrlMixin
 

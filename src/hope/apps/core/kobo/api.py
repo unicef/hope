@@ -1,11 +1,11 @@
+from io import BytesIO
 import logging
 import time
 import typing
-from io import BytesIO
 from urllib.parse import urlparse
 
-import requests
 from django.conf import settings
+import requests
 from requests import Response
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RetryError

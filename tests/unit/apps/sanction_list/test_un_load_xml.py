@@ -2,9 +2,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import pytest
 from django.core.management import call_command
 from django.utils import timezone
+import pytest
 from extras.test_utils.factories.core import create_afghanistan
 from strategy_field.utils import fqn
 

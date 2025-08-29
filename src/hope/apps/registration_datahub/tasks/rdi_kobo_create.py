@@ -1,6 +1,6 @@
+from collections import defaultdict
 import json
 import logging
-from collections import defaultdict
 from typing import Any
 
 from dateutil.parser import parse

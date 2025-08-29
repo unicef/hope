@@ -1,5 +1,6 @@
 import responses
 from django.urls import reverse
+import responses
 
 
 def test_sanction_list_refresh(

@@ -1,6 +1,6 @@
-import logging
 from collections import defaultdict
 from functools import reduce
+import logging
 from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes

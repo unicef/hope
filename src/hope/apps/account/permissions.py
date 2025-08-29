@@ -1,5 +1,5 @@
-import logging
 from enum import Enum, auto, unique
+import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
 from django.core.exceptions import PermissionDenied

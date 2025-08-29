@@ -4,6 +4,9 @@ from unittest import mock
 
 from django.conf import settings
 from django.utils import timezone
+from freezegun import freeze_time
+from pytz import utc
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -19,9 +22,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from freezegun import freeze_time
-from pytz import utc
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.household import ROLE_PRIMARY

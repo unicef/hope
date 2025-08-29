@@ -1,14 +1,15 @@
 from datetime import datetime
 
-import pytest
 from dateutil.relativedelta import relativedelta
+import pytest
+from selenium.common.exceptions import NoSuchElementException
+
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.common.exceptions import NoSuchElementException
 
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.program import Program
@@ -19,27 +20,27 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield get_social_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
+    return get_social_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
 
 
 @pytest.fixture
 def normal_program() -> Program:
-    yield get_program_with_dct_type_and_name("Normal Program", "NORM", DataCollectingType.Type.STANDARD)
+    return get_program_with_dct_type_and_name("Normal Program", "NORM", DataCollectingType.Type.STANDARD)
 
 
 @pytest.fixture
 def active_program() -> Program:
-    yield get_program_with_dct_type_and_name("Active Program", "ACTI", status=Program.ACTIVE)
+    return get_program_with_dct_type_and_name("Active Program", "ACTI", status=Program.ACTIVE)
 
 
 @pytest.fixture
 def draft_program() -> Program:
-    yield get_program_with_dct_type_and_name("Draft Program", "DRAF", status=Program.DRAFT)
+    return get_program_with_dct_type_and_name("Draft Program", "DRAF", status=Program.DRAFT)
 
 
 @pytest.fixture
 def finished_program() -> Program:
-    yield get_program_with_dct_type_and_name("Finished Program", "FINI", status=Program.FINISHED)
+    return get_program_with_dct_type_and_name("Finished Program", "FINI", status=Program.FINISHED)
 
 
 def get_program_with_dct_type_and_name(

@@ -1,5 +1,5 @@
-import factory.fuzzy
 from factory.django import DjangoModelFactory
+import factory.fuzzy
 from faker import Faker
 from pytz import utc
 

@@ -2,11 +2,14 @@ import datetime
 import json
 from typing import Any
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
@@ -20,9 +23,6 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.models.user import INACTIVE, USER_STATUS_CHOICES
 from hope.models.role import Role
 from hope.models.partner import Partner
@@ -1156,8 +1156,8 @@ class TestPartnerForGrievanceChoices:
             name="UNICEF Partner for afghanistan", parent=partner_unicef
         )
 
-        # partner with access to Test Program - should be returned if Program is passed or if neither program nor household/individual is passed
-        # (because it has access to ANY program in this BA)
+        # partner with access to Test Program - should be returned if Program is passed or if neither program nor
+        # household/individual is passed (because it has access to ANY program in this BA)
         self.partner_with_access_to_test_program = PartnerFactory(name="Partner with access to Test Program")
         create_partner_role_with_permissions(
             self.partner_with_access_to_test_program, [], self.afghanistan, self.program

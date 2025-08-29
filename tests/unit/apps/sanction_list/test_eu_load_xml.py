@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Any
 
-import pytest
 from django.core.management import call_command
+import pytest
 
 from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
 from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName

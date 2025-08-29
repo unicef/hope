@@ -2,11 +2,11 @@ import datetime
 import json
 from typing import Any
 
-import openpyxl
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
+import openpyxl
 
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.individual import Individual

@@ -1,6 +1,6 @@
 import copy
-import logging
 from functools import reduce
+import logging
 from typing import Any, Iterable
 
 from hope.apps.core.attributes_qet_queries import (

@@ -1,5 +1,6 @@
-import pytest
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -9,7 +10,6 @@ from extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.models.household import ROLE_PRIMARY, Household
 from hope.models.program import Program

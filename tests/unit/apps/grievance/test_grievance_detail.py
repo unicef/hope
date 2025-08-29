@@ -1,11 +1,15 @@
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 
-import pytest
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.base import ContentFile
 from django.utils import timezone
+from freezegun import freeze_time
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -36,10 +40,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
-from freezegun import freeze_time
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models.household import (
@@ -780,8 +780,12 @@ class TestGrievanceTicketDetail:
                 "address": golden_records_individual.household.address,
                 "village": golden_records_individual.household.village,
                 "geopoint": golden_records_individual.household.geopoint,
-                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": (
+                    f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                ),
+                "last_registration_date": (
+                    f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                ),
                 "total_cash_received": golden_records_individual.household.total_cash_received,
                 "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -1081,8 +1085,12 @@ class TestGrievanceTicketDetail:
                 "address": golden_records_individual.household.address,
                 "village": golden_records_individual.household.village,
                 "geopoint": golden_records_individual.household.geopoint,
-                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": (
+                    f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                ),
+                "last_registration_date": (
+                    f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                ),
                 "total_cash_received": golden_records_individual.household.total_cash_received,
                 "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -1156,8 +1164,12 @@ class TestGrievanceTicketDetail:
                 "address": self.individuals2[0].household.address,
                 "village": self.individuals2[0].household.village,
                 "geopoint": self.individuals2[0].household.geopoint,
-                "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": (
+                    f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                ),
+                "last_registration_date": (
+                    f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                ),
                 "total_cash_received": self.individuals2[0].household.total_cash_received,
                 "total_cash_received_usd": self.individuals2[0].household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -1203,8 +1215,12 @@ class TestGrievanceTicketDetail:
                     "address": self.individuals2[0].household.address,
                     "village": self.individuals2[0].household.village,
                     "geopoint": self.individuals2[0].household.geopoint,
-                    "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "first_registration_date": (
+                        f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                    ),
+                    "last_registration_date": (
+                        f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                    ),
                     "total_cash_received": self.individuals2[0].household.total_cash_received,
                     "total_cash_received_usd": self.individuals2[0].household.total_cash_received_usd,
                     "delivered_quantities": [

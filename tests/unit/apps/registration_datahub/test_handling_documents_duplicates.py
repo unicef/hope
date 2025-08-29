@@ -1,11 +1,12 @@
 from typing import List
 
-import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
+import pytest
+
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,

@@ -2,10 +2,10 @@
 
 import uuid
 
-import django.db.models.deletion
-import model_utils.fields
 from constance import config
 from django.db import migrations, models
+import django.db.models.deletion
+import model_utils.fields
 
 from hope.models.data_collecting_type import DataCollectingType
 

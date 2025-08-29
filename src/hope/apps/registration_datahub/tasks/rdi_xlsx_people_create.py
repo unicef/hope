@@ -1,9 +1,9 @@
-import logging
 from functools import partial
+import logging
 from typing import Any, Callable
 
-import openpyxl
 from django.db import transaction
+import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 

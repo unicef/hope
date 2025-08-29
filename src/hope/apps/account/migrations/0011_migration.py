@@ -13,7 +13,10 @@ BATCH_SIZE_SMALL = 20
 
 
 def create_constant_objects(apps, schema_editor):
-    """Create constant objects for the migration. This is necessary for tests but already present on all the environments."""
+    """Create constant objects for the migration.
+
+    This is necessary for tests but already present on all the environments.
+    """
     Role = apps.get_model("account", "Role")
     Partner = apps.get_model("account", "Partner")
     register(Partner)

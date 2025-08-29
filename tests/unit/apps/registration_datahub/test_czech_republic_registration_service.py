@@ -1,9 +1,10 @@
 import datetime
 
-import pytz
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+import pytz
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,

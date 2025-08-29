@@ -1,10 +1,11 @@
 import base64
+from functools import cached_property
 import hashlib
 import json
 import logging
 import sys
 import warnings
-from functools import cached_property
+
 from typing import Any, Callable, Iterable, Sequence, T
 
 import celery
@@ -384,7 +385,7 @@ class SignatureMixin(models.Model):
 
     def update_signature_hash(self) -> None:
         if hasattr(self, "signature_fields") and isinstance(self.signature_fields, list | tuple):
-            sha1 = hashlib.sha1()
+            sha1 = hashlib.sha1()  # noqa
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
 

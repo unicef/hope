@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.core import StorageFileFactory
 from extras.test_utils.factories.household import (
     DocumentAllowDuplicatesFactory,
@@ -113,7 +114,8 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
     def test_detecting_paid_hhs_loaded_via_sf(self) -> None:
         hhs = find_paid_households(self.storage_file.pk)
 
-        # hh1 and hh3 were loaded via SF and hh2 (e.g. from RDI) was already paid and had the same doc number for individual
+        # hh1 and hh3 were loaded via SF and hh2 (e.g. from RDI)
+        # was already paid and had the same doc number for individual
         # so we see hh2 as a "paid household"
         assert str(self.household_1.id) not in hhs
         assert str(self.household_2.id) in hhs

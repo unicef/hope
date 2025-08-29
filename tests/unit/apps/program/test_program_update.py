@@ -2,6 +2,9 @@ import copy
 from typing import Any, Callable
 
 import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -23,9 +26,6 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
 )
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
@@ -1320,7 +1320,8 @@ class TestProgramUpdate:
         }
 
     def test_update_pdu_fields_when_program_has_rdi(self, create_user_role_with_permissions: Callable) -> None:
-        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields - only possible to increase number of rounds and add names for new rounds
+        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields -
+        # only possible to increase number of rounds and add names for new rounds
         create_user_role_with_permissions(
             self.user,
             [Permissions.PROGRAMME_UPDATE],

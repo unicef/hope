@@ -22,6 +22,7 @@ from hope.apps.account.filters import UsersFilter
 from hope.models.user import User
 from hope.models.partner import Partner
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
+from hope.apps.account.profile_cache import ProfileEtagKey, ProfileKeyConstructor
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
@@ -86,10 +87,12 @@ class UserViewSet(
 
     @extend_schema(parameters=[OpenApiParameter(name="program")])
     @action(detail=False, methods=["get"], url_path="profile", url_name="profile")
+    @etag_decorator(ProfileEtagKey)
+    @cache_response(timeout=config.REST_API_TTL, key_func=ProfileKeyConstructor())
     def profile(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
+        data = self.get_serializer(user).data
+        return Response(data)
 
     @extend_schema(parameters=[OpenApiParameter(name="serializer", type=str)])
     @etag_decorator(UserListKeyConstructor)

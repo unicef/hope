@@ -1,7 +1,7 @@
 import base64
-import io
 from contextlib import suppress
 from datetime import date, datetime
+import io
 from itertools import permutations
 
 import dateutil.parser

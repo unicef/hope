@@ -1,5 +1,5 @@
-import uuid
 from typing import Any, Sequence
+import uuid
 from uuid import UUID
 
 from admin_extra_buttons.buttons import Button

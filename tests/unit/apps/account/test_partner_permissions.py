@@ -1,5 +1,6 @@
-import pytest
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory

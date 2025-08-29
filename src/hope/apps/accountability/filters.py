@@ -2,8 +2,7 @@ import re
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
-from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet
-from django_filters import rest_framework as filters
+from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet, rest_framework as filters
 
 from hope.models.survey import Survey
 from hope.models.feedback import Feedback

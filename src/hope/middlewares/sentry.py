@@ -2,8 +2,8 @@ import re
 import sys
 from typing import Any, Callable
 
-import pycountry
 from django.http import HttpRequest
+import pycountry
 from sentry_sdk import configure_scope
 
 

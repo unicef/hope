@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory
 
 from hope.models.partner import Partner

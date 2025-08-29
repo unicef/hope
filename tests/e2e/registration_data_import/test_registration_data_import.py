@@ -1,21 +1,21 @@
 from datetime import datetime
 from time import sleep
 
-import pytest
 from django.conf import settings
+from elasticsearch_dsl import connections
+import pytest
+
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from e2e.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport as RegistrationDataImportComponent,
 )
-from elasticsearch_dsl import connections
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.models.user import User
 from hope.models.partner import Partner
 from hope.models.business_area import BusinessArea
@@ -97,27 +97,27 @@ def add_rdi() -> None:
 
 @pytest.fixture
 def unicef_partner() -> Partner:
-    yield PartnerFactory(name="UNICEF")
+    return PartnerFactory(name="UNICEF")
 
 
 @pytest.fixture
 def unicef_hq() -> Partner:
-    yield PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
+    return PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
 
 
 @pytest.fixture
 def unhcr_partner() -> Partner:
-    yield PartnerFactory(name="UNHCR")
+    return PartnerFactory(name="UNHCR")
 
 
 @pytest.fixture
 def wfp_partner() -> Partner:
-    yield PartnerFactory(name="WFP")
+    return PartnerFactory(name="WFP")
 
 
 @pytest.fixture
 def country() -> Country:
-    yield Country.objects.get(name="Afghanistan")
+    return Country.objects.get(name="Afghanistan")
 
 
 @pytest.fixture

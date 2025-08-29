@@ -4,6 +4,7 @@ from typing import Any
 
 import openpyxl
 import pytest
+
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,

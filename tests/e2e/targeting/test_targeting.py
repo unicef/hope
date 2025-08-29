@@ -1,9 +1,14 @@
 from datetime import datetime
 from typing import Callable
 
+from dateutil.relativedelta import relativedelta
 import factory
 import pytest
-from dateutil.relativedelta import relativedelta
+from pytz import utc
+from selenium.common import NoSuchElementException
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
@@ -30,11 +35,6 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from pytz import utc
-from selenium.common import NoSuchElementException
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
-
 from hope.models.user import User
 from hope.models.business_area import (
     BusinessArea,
@@ -68,7 +68,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.SOCIAL,
         status=Program.ACTIVE,
@@ -78,7 +78,7 @@ def sw_program() -> Program:
 
 @pytest.fixture
 def non_sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.STANDARD,
         status=Program.ACTIVE,
@@ -219,17 +219,17 @@ def create_custom_household(
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
+    return create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
+    return create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
 
 
 @pytest.fixture
 def household_refugee() -> Household:
-    yield create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
+    return create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
 
 
 def get_program_with_dct_type_and_name(
@@ -391,7 +391,7 @@ def create_targeting() -> PaymentPlan:
     PaymentPlanService.create_payments(pp)
     pp.update_population_count_fields()
     pp.refresh_from_db()
-    yield pp
+    return pp
 
 
 @pytest.fixture
@@ -550,7 +550,10 @@ class TestCreateTargeting:
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
-        disability_expected_criteria_text = "Does the Social Worker have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
+        disability_expected_criteria_text = (
+            "Does the Social Worker have disability?: Difficulty hearing (even if "
+            "using a hearing aid), Difficulty seeing (even if wearing glasses)"
+        )
         assert page_targeting_create.get_criteria_container().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
         page_targeting_create.get_field_name().send_keys(targeting_name)
@@ -1498,8 +1501,8 @@ class TestTargeting:
         assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
         assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
-            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-            in page_targeting_create.get_criteria_container().text
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing "
+            "(even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
         page_targeting_create.get_button_edit().click()
         page_targeting_create.get_targeting_criteria_auto_complete_individual()
@@ -1517,8 +1520,8 @@ class TestTargeting:
         assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
         assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
-            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
-            in page_targeting_create.get_criteria_container().text
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), "
+            "Difficulty seeing (even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
         assert (
             "Males age 0 - 5 with disability: 1 -10"

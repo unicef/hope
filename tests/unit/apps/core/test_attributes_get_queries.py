@@ -1,10 +1,10 @@
 import datetime as dt
 import uuid
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+import pytest
 
 from hope.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,

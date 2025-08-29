@@ -4,6 +4,7 @@ from unittest import mock
 from constance.test import override_config
 from django.test import override_settings
 from django.utils import timezone
+
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -12,7 +13,6 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea

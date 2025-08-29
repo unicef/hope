@@ -3,12 +3,12 @@
 import uuid
 
 import concurrency.fields
+from django.conf import settings
 import django.contrib.postgres.fields.citext
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
-from django.conf import settings
-from django.db import migrations, models
 
 import hope.apps.targeting.services.targeting_service
 from hope.models.utils import AdminUrlMixin

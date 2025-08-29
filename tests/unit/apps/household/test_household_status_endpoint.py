@@ -2,6 +2,8 @@ import datetime
 
 from django.core.management import call_command
 from django.test import TestCase
+from rest_framework.test import APIClient
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
@@ -14,7 +16,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework.test import APIClient
 
 from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
+
 from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory

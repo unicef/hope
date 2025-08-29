@@ -2,8 +2,9 @@ from datetime import timedelta
 from random import choice
 from typing import Optional
 
-import pytest
 from django.utils import timezone
+import pytest
+
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
@@ -150,13 +151,11 @@ class TestSmokeGrievanceDashboard:
             "75" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
         assert "40" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text
-        assert (
-            "15"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        assert "15" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
         )
-        assert (
-            "25"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        assert "25" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
         )
         assert "421.25 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
         assert (
@@ -190,22 +189,18 @@ class TestSmokeGrievanceDashboard:
             "2" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
         assert "0" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text
-        assert (
-            "0"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
         )
-        assert (
-            "0"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
         )
         assert "0 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
-        assert (
-            "0 days"
-            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
+        assert "0 days" in (
+            page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
         )
-        assert (
-            "0 days"
-            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
+        assert "0 days" in (
+            page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
         )
 
         page_grievance_tickets.get_nav_grievance().click()
@@ -225,13 +220,11 @@ class TestSmokeGrievanceDashboard:
         assert (
             "2" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
-        assert (
-            "0"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
         )
-        assert (
-            "1"
-            in page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        assert "1" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
         )
         assert "20.00 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
         assert (

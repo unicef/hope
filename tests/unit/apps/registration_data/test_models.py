@@ -2,6 +2,8 @@ import datetime
 
 from django.core.management import call_command
 from django.test import TestCase
+from freezegun import freeze_time
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -15,8 +17,6 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from freezegun import freeze_time
-
 from hope.models.household import Household
 from hope.models.individual_identity import IndividualIdentity
 from hope.models.individual import Individual

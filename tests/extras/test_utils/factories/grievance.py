@@ -1,17 +1,18 @@
-import random
 from io import BytesIO
+import random
 from typing import Any
 
-import factory
 from django.core.files.uploadedfile import InMemoryUploadedFile
+import factory
+from factory.django import DjangoModelFactory
+from pytz import utc
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentVerificationFactory,
 )
-from factory.django import DjangoModelFactory
-from pytz import utc
 
 from hope.models.business_area import BusinessArea
 from hope.models.area import Area

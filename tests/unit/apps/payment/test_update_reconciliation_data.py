@@ -4,14 +4,14 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-import pytz
 from django.conf import settings
+import pytz
+from pytz import utc
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from pytz import utc
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.payment_plan import PaymentPlan

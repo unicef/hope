@@ -1,9 +1,10 @@
-import os
 from datetime import datetime
+import os
 from time import sleep
 
-import pytest
 from dateutil.relativedelta import relativedelta
+import pytest
+
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
 from e2e.page_object.programme_population.individuals import Individuals
@@ -129,7 +130,7 @@ def add_people(program: Program) -> Individual:
             },
         ],
     )
-    yield individuals[0]
+    return individuals[0]
 
 
 def create_flexible_attribute(

@@ -1,9 +1,9 @@
 from unittest import mock
 
 from django.core.management import call_command
+
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models.business_area import BusinessArea
 from hope.models.registration_data_import import RegistrationDataImport
@@ -17,7 +17,7 @@ class TestRegistrationDataXlsxImportCeleryManager(BaseTestCase):
         call_command("loadbusinessareas")
 
     @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
-    def test_querysets(self, _: mock.MagicMock) -> None:
+    def test_querysets(self, mock_get_all_tasks: mock.MagicMock) -> None:
         from hope.apps.utils.celery_manager import (
             RegistrationDataXlsxImportCeleryManager,
         )

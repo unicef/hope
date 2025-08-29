@@ -3,6 +3,7 @@ from typing import Dict, Tuple
 
 from django.core.management import call_command
 from django.test import TestCase
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 
@@ -765,15 +766,18 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is required, "
+                "when any document data are provided",
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is required, "
+                "when any document data are provided",
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is required, "
+                "when any document data are provided",
             },
             # TODO: fix this? (rebase issue?)
             # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},

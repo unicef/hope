@@ -1,7 +1,7 @@
 from pathlib import Path
 
-import pytest
 from django.urls import reverse
+import pytest
 from webtest import Upload
 
 from hope.models.sanction_list import UploadedXLSXFile

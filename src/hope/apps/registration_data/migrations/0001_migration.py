@@ -3,13 +3,13 @@
 import uuid
 
 import concurrency.fields
+from django.conf import settings
 import django.contrib.postgres.fields.citext
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.deletion
 import django.db.models.expressions
 import model_utils.fields
-from django.conf import settings
-from django.db import migrations, models
 
 from hope.models.utils import AdminUrlMixin
 

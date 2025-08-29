@@ -5,17 +5,18 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedF
 from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.payment import PaymentPlanFactory
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.payment import PaymentPlanFactory
 from hope.models.role_assignment import RoleAssignment
 from hope.models.role import Role
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
-from hope.models.payment_plan import PaymentPlan, PaymentPlanSupportingDocument
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_supporting_document import PaymentPlanSupportingDocument
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):
@@ -97,7 +98,8 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         assert "non_field_errors" in serializer.errors
         assert (
             serializer.errors["non_field_errors"][0]
-            == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+            == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
+            f"supporting documents."
         )
 
 

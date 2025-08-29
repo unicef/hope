@@ -4,6 +4,7 @@ import json
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,

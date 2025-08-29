@@ -92,7 +92,8 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
         ).first()
         if role is None:
             raise ValidationError(
-                f"Individual with unicef_id {individual_which_loses_role.unicef_id} does not have role {role_name} in household with unicef_id {household.unicef_id}"
+                f"Individual with unicef_id {individual_which_loses_role.unicef_id} does not have role {role_name} "
+                f"in household with unicef_id {household.unicef_id}"
             )
         role.individual = new_individual
         roles_to_bulk_update.append(role)
@@ -109,7 +110,8 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             continue
         if str(household_to_check.head_of_household.id) in duplicated_individuals_ids:
             raise ValidationError(
-                f"Role for head of household in household with unicef_id {household_to_check.unicef_id} was not reassigned, when individual ({individual.unicef_id}) was marked as duplicated"
+                f"Role for head of household in household with unicef_id {household_to_check.unicef_id} "
+                f"was not reassigned, when individual ({individual.unicef_id}) was marked as duplicated"
             )
 
     # check if all households have primary role:
@@ -122,7 +124,8 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             raise ValidationError(f"Household with id {household_id} was left without primary role")  # pragma: no cover
         if str(primary_role.individual.id) in duplicated_individuals_ids:
             raise ValidationError(
-                f"Primary role in household with unicef_id {primary_role.household.unicef_id} is still assigned to duplicated individual({primary_role.individual.unicef_id})"
+                f"Primary role in household with unicef_id {primary_role.household.unicef_id} is still assigned to "
+                f"duplicated individual({primary_role.individual.unicef_id})"
             )
 
 

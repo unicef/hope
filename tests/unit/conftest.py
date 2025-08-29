@@ -53,7 +53,7 @@ def pytest_addoption(parser: Parser) -> None:
 
 @pytest.fixture(autouse=True)
 def clear_default_cache() -> None:
-    from django.core.cache import cache
+    from django.core.cache import cache  # noqa
 
     cache.clear()
 
@@ -65,7 +65,7 @@ def pytest_configure(config: Config) -> None:
     sys.path.append(str(utils))
 
     sys._called_from_pytest = True
-    from django.conf import settings
+    from django.conf import settings  # noqa
 
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = [
@@ -143,7 +143,7 @@ def pytest_configure(config: Config) -> None:
 
 
 def pytest_unconfigure(config: Config) -> None:
-    import sys
+    import sys  # noqa
 
     del sys._called_from_pytest
 
@@ -206,9 +206,9 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
 @pytest.fixture(scope="session", autouse=True)
 def register_custom_sql_signal() -> None:
-    from django.db import connections
-    from django.db.migrations.loader import MigrationLoader
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db import connections  # noqa
+    from django.db.migrations.loader import MigrationLoader  # noqa
+    from django.db.models.signals import post_migrate, pre_migrate  # noqa
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -224,7 +224,7 @@ def register_custom_sql_signal() -> None:
         apps.add(app_label)
 
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL
+            from django.db.migrations.operations.special import RunSQL  # noqa
 
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]

@@ -1,15 +1,15 @@
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute

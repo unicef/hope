@@ -1,10 +1,10 @@
-import pytest
 from django.core.management import call_command
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from unit.conftest import disabled_locally_test
 
 from hope.models.business_area import BusinessArea
 from hope.apps.household.documents import get_individual_doc
@@ -28,6 +28,7 @@ from hope.models.import_data import ImportData
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
 from hope.apps.utils.querysets import evaluate_qs
+from unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

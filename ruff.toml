@@ -1,6 +1,6 @@
-target-version = "py312"
+target-version = "py313"
 line-length = 120
-exclude = ["src/frontend", "src/hope/one_time_scripts"]
+exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py"]
 
 [lint]
 select = [
@@ -29,7 +29,7 @@ select = [
     "Q", # flake8-quotes
     "R", # PyLint Refactor
     "RET", # flake8-return
-#    "S", # bandit,
+    "S", # bandit,
     "SIM", # flake8-simplify
     "T10", # flake8-debugger
     "T20", # flake8-print
@@ -58,7 +58,6 @@ ignore = [
     "ISC001",  # conflicts with ruff format command
     "RUF005",  # collection-literal-concatenation: syntax not compatible with py2
     "RUF012", # mutable-class-default: typing is not available for py2
-    "I001", # unsorted imports https://docs.astral.sh/ruff/rules/unsorted-imports/#unsorted-imports-i001
     "UP037", # [*] Remove quotes from type annotation
     "UP035", # Import from `collections.abc` instead: `Sequence`
     "UP031", # Use format specifiers instead of percent format
@@ -66,27 +65,16 @@ ignore = [
     "PLR2004", # Magic value used in comparison
     "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
 
-    "PT011",  # pytest.raises match
-    "PT019",  # pytest.mark.usefixtures
-    "PT012",  # pytest.raises single statement
-    "PT027",  # pytest.raises
-    "PT022",  # yield
-    "PT015",  # pytest.fail
-
-    "ERA001",  # e2e comments..
-
-    "E501",  # long strings
-
-    "N805",  #  First argument of a method should be named `self`
-
     "PLR0911",  # too many returns
     "PLR0912", # too many branches
     "PLR0913",  # too many arguments
     "PLR0915",  # too many statements
-    "PLC0415",  # `import` should be at the top-level of a file
-
     "C901",  # too complex
-    "BLE001",  # catch blind exceptions
+    "PLC0415",  # `import` should be at the top-level of a file
+    "ERA001",  # e2e comments..
+
+    "N805",  #  First argument of a method should be named `self`
+    "BLE001",  # Do not catch blind exception: `BaseException`
 ]
 
 [format]
@@ -98,4 +86,12 @@ line-ending = "auto"
 [lint.per-file-ignores]
 "tests/**.py" = ["S101", "PLR2004", "S", "SIM117", "D", "UP", "PLR0913", "ANN", "N999"]
 "src/**/versioning/**.py" = ["N999", ]
+"src/**/migrations/**.py" = ["E501", ]
 "src/**/one_time_scripts/**.py" = ["T201", ]
+
+[lint.isort]
+known-first-party = ["hope", "extras", "e2e"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+combine-as-imports = true
+force-sort-within-sections = true
+force-to-top = ["import"]

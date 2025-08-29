@@ -2,13 +2,14 @@ from datetime import date
 from io import BytesIO
 from pathlib import Path
 
-import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 from django_countries.fields import Country
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     create_afghanistan,
@@ -18,7 +19,6 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import PeriodicFieldData
 from hope.models.country import Country as GeoCountry

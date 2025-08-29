@@ -6,12 +6,12 @@ import concurrency.fields
 import django.contrib.postgres.fields
 import django.contrib.postgres.search
 import django.core.validators
+from django.db import migrations, models
 import django.utils.timezone
 import model_utils.fields
 import multiselectfield.db.fields
 import phonenumber_field.modelfields
 import sorl.thumbnail.fields
-from django.db import migrations, models
 
 from hope.apps.core.utils import FlexFieldsEncoder
 from hope.models.utils import AdminUrlMixin

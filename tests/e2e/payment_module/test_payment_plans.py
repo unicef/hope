@@ -1,12 +1,17 @@
-import os
-import zipfile
 from datetime import datetime
+import os
 from time import sleep
+import zipfile
 
+from dateutil.relativedelta import relativedelta
 import factory
 import openpyxl
 import pytest
-from dateutil.relativedelta import relativedelta
+from pytz import utc
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.webdriver.common.by import By
+from sorl.thumbnail.conf import settings
+
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
@@ -30,11 +35,6 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from pytz import utc
-from selenium.common.exceptions import ElementClickInterceptedException
-from selenium.webdriver.common.by import By
-from sorl.thumbnail.conf import settings
-
 from hope.models.user import User
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.delivery_mechanism import DeliveryMechanism
@@ -63,12 +63,12 @@ def find_file(
 
 @pytest.fixture
 def create_test_program() -> Program:
-    yield create_program()
+    return create_program()
 
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
+    return create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
 def create_program(
@@ -174,19 +174,19 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
     )
-    yield payment_plan
+    return payment_plan
 
 
 @pytest.fixture
 def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
-    yield payment_plan_create(create_test_program)
+    return payment_plan_create(create_test_program)
 
 
 @pytest.fixture
 def create_payment_plan_lock_social_worker(
     social_worker_program: Program,
 ) -> PaymentPlan:
-    yield payment_plan_create(social_worker_program)
+    return payment_plan_create(social_worker_program)
 
 
 @pytest.fixture
@@ -245,7 +245,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         delivery_mechanism=dm_cash,
     )
 
-    yield payment_plan
+    return payment_plan
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:

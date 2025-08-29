@@ -1,7 +1,7 @@
+from io import BytesIO
 import json
 import operator
 import time
-from io import BytesIO
 
 from django.core.files import File
 from django.db import transaction

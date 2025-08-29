@@ -52,7 +52,7 @@ class TestSettingTypesForCalculateFields(TestCase):
             ),
         ]
     )
-    def test_setting_calculate_field_types(self, _: Any, file_name: Any, validation_error: BaseException) -> None:
+    def test_setting_calculate_field_types(self, helper: str, file_name: Any, validation_error: BaseException) -> None:
         if validation_error is not None:
             self.assertRaisesMessage(
                 ValidationError,

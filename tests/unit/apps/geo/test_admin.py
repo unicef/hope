@@ -3,12 +3,12 @@ from django.contrib.admin.options import ModelAdmin
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from django_webtest import WebTest
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from factory import fuzzy
 from flaky import flaky
 from webtest import Upload
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from hope.admin.geo import AreaAdmin
 from hope.models.user import User
 from hope.models.partner import Partner

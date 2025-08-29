@@ -1,7 +1,8 @@
 from typing import Any, Callable, Iterable, List, Optional
 
-import pytest
 from django.conf import settings
+import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.program import ProgramFactory
 
