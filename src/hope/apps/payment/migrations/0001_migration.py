@@ -13,13 +13,11 @@ import model_utils.fields
 import multiselectfield.db.fields
 import psycopg2.extras
 from django.conf import settings
-from django.db import migrations
+from django.db import migrations, models
 
 import hope.apps.payment.fields
-import hope.apps.payment.models
 import hope.apps.payment.validators
-from hope.models.financial_service_provider_xlsx_template
-from hope.models.utils
+from hope.models.utils import AdminUrlMixin, HorizontalChoiceArrayField
 
 
 class Migration(migrations.Migration):
@@ -234,7 +232,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Cash Plan",
                 "ordering": ["created_at"],
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="DeliveryMechanism",
@@ -318,7 +316,7 @@ class Migration(migrations.Migration):
                 ("vision_vendor_number", models.CharField(max_length=100, unique=True)),
                 (
                     "delivery_mechanisms_choices",
-                    models.utils.HorizontalChoiceArrayField(
+                    HorizontalChoiceArrayField(
                         base_field=models.CharField(
                             choices=[
                                 (
@@ -520,7 +518,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "flex_fields",
-                    models.financial_service_provider_xlsx_template.FlexFieldArrayField(
+                    hope.models.financial_service_provider_xlsx_template.FlexFieldArrayField(
                         base_field=models.CharField(blank=True, max_length=255),
                         blank=True,
                         default=list,
@@ -772,7 +770,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="PaymentPlan",
@@ -1248,7 +1246,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Payment Plan",
                 "ordering": ["created_at"],
             },
-            bases=(models.Model, models.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentPlanSplit",
@@ -1467,7 +1465,7 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ("created_at",),
             },
-            bases=(models.Model, models.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentVerification",
@@ -1528,7 +1526,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            bases=(models.Model, models.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="PaymentRecord",
@@ -1724,7 +1722,7 @@ class Migration(migrations.Migration):
             options={
                 "abstract": False,
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="PaymentPlanSupportingDocument",

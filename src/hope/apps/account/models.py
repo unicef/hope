@@ -1,4 +1,3 @@
-from hope.models.user import User
 
 # without this line I got
 # File "/app/.venv/lib/python3.13/site-packages/explorer/models.py", line 11, in <module>

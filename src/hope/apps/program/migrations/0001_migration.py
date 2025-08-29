@@ -9,9 +9,9 @@ import django.core.validators
 import django.db.models.deletion
 import model_utils.fields
 from django.conf import settings
-from django.db import migrations
+from django.db import migrations, models
 
-from hope.models.utils
+from hope.models.utils import AdminUrlMixin
 
 
 class Migration(migrations.Migration):
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Programme",
                 "permissions": [("enroll_beneficiaries", "Can enroll beneficiaries")],
             },
-            bases=(models.Model, models.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="ProgramPartnerThrough",
@@ -325,7 +325,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Programme Cycle",
                 "ordering": ["start_date"],
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.AddField(
             model_name="program",

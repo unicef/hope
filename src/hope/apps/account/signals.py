@@ -1,6 +1,5 @@
 from typing import Any, Iterable
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.cache import cache
 from django.db.models import Q

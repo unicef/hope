@@ -17,7 +17,6 @@ from hope.models.business_area import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
 from hope.models.program import Program
-from hope.models.user import User
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()

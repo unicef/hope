@@ -4,9 +4,9 @@ import uuid
 
 import django.contrib.postgres.fields
 import model_utils.fields
-from django.db import migrations
+from django.db import migrations, models
 
-from hope.models.utils
+from hope.models.utils import AdminUrlMixin
 
 
 class Migration(migrations.Migration):
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Feedback",
                 "ordering": ("created_at",),
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="FeedbackMessage",
@@ -129,7 +129,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Message",
                 "ordering": ("created_at",),
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="Survey",
@@ -189,6 +189,6 @@ class Migration(migrations.Migration):
                 "verbose_name": "Survey",
                 "ordering": ("created_at",),
             },
-            bases=(models.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
     ]
