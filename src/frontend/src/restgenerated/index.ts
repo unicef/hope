@@ -203,6 +203,7 @@ export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationList
 export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
 export type { Partner as PartnerCamelCase } from './models/Partner';
 export { PartnerAccessEnum as PartnerAccessEnumCamelCase } from './models/PartnerAccessEnum';
+export type { PartnerForProgram as PartnerForProgramCamelCase } from './models/PartnerForProgram';
 export type { PartnersData as PartnersDataCamelCase } from './models/PartnersData';
 export type { PatchedFeedbackUpdate as PatchedFeedbackUpdateCamelCase } from './models/PatchedFeedbackUpdate';
 export type { PatchedPaymentPlanCreateUpdate as PatchedPaymentPlanCreateUpdateCamelCase } from './models/PatchedPaymentPlanCreateUpdate';
