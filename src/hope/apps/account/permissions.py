@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(  # type: ignore # https://github.com/python/mypy/issues/7591
-        name: str, start: int, count: int, last_values: list[Any]
-    ) -> Any:
+    @staticmethod
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
         return name
 
     # RDI

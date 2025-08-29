@@ -845,7 +845,7 @@ class TestAutomatingRDICreationTask(TestCase):
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
             @classproperty
             @abstractmethod
-            def process_flex_records_task(cls) -> str:
+            def process_flex_records_task(cls) -> str:  # noqa: N805
                 raise NotImplementedError
 
         with pytest.raises(NotImplementedError):
