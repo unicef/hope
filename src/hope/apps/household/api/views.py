@@ -1,7 +1,7 @@
 from typing import Any
 
 from constance import config
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -22,6 +22,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.serializers import FieldAttributeSerializer
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
@@ -40,6 +41,9 @@ from hope.apps.household.api.serializers.individual import (
     IndividualPhotoDetailSerializer,
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
+from hope.models.household import DUPLICATE, Household
+from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.household import Household
@@ -100,10 +104,43 @@ class HouseholdViewSet(
     filterset_class = HouseholdFilter
     admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
+    def get_list_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("head_of_household", "admin1", "admin2", "program")
+            .annotate(
+                annotate_has_sanction_list_possible_match=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        sanction_list_possible_match=True,
+                    )
+                )
+            )
+            .annotate(
+                annotate_has_sanction_list_confirmed_match=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        sanction_list_confirmed_match=True,
+                    )
+                )
+            )
+            .annotate(
+                annotate_has_duplicates=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        deduplication_golden_record_status=DUPLICATE,
+                    )
+                )
+            )
+            .order_by("created_at")
+        )
+
     def get_queryset(self) -> QuerySet:
         if self.program.status == Program.DRAFT:
             return Household.objects.none()
-
+        if self.action == "list":
+            return self.get_list_queryset()
         return (
             super()
             .get_queryset()
@@ -241,7 +278,40 @@ class HouseholdGlobalViewSet(
     filterset_class = HouseholdFilter
     admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
+    def get_list_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("head_of_household", "admin1", "admin2", "program")
+            .annotate(
+                annotate_has_sanction_list_possible_match=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        sanction_list_possible_match=True,
+                    )
+                )
+            )
+            .annotate(
+                annotate_has_sanction_list_confirmed_match=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        sanction_list_confirmed_match=True,
+                    )
+                )
+            )
+            .annotate(
+                annotate_has_duplicates=Exists(
+                    Individual.objects.filter(
+                        household_id=OuterRef("pk"),
+                        deduplication_golden_record_status=DUPLICATE,
+                    )
+                )
+            )
+        )
+
     def get_queryset(self) -> QuerySet:
+        if self.action == "list":
+            return self.get_list_queryset()
         return (
             super()
             .get_queryset()

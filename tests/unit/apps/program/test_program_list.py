@@ -291,7 +291,7 @@ class TestProgramList:
             self.afghanistan,
             program_afghanistan2,
         )
-        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions + 1)
+        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
         # cached data with another call
         _test_response_len_and_queries(2, no_queries_cached)
 
