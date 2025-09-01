@@ -75,7 +75,12 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
+    type = serializers.SlugRelatedField(
+        source="account_type",
+        slug_field="key",
+        required=True,
+        queryset=AccountType.objects.all(),
+    )
     number = serializers.CharField(allow_blank=True, required=False)
     financial_institution = serializers.PrimaryKeyRelatedField(
         required=False, queryset=FinancialInstitution.objects.all()
@@ -84,7 +89,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PendingAccount
-        fields = ["account_type", "number", "financial_institution", "data"]
+        fields = ["type", "number", "financial_institution", "data"]
 
 
 class IndividualSerializer(serializers.ModelSerializer):
