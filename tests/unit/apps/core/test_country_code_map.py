@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.management import call_command
 from django.test import TestCase
 from parameterized import parameterized
@@ -22,7 +20,7 @@ class TestCountryCodeMap(TestCase):
             ("custom_code", "AUS", "AUL"),
         ]
     )
-    def test_get_code(self, _: Any, iso_code: str, expected: str) -> None:
+    def test_get_code(self, helper: str, iso_code: str, expected: str) -> None:
         assert CountryCodeMap.objects.get_code(iso_code) == expected
 
     @parameterized.expand(
@@ -32,7 +30,7 @@ class TestCountryCodeMap(TestCase):
             ("custom_code", "AUL", "AU"),
         ]
     )
-    def test_get_iso2_code_from_ca_code(self, _: Any, ca_code: str, expected: str) -> None:
+    def test_get_iso2_code_from_ca_code(self, helper: str, ca_code: str, expected: str) -> None:
         assert CountryCodeMap.objects.get_iso2_code(ca_code) == expected
 
     @parameterized.expand(
@@ -42,7 +40,7 @@ class TestCountryCodeMap(TestCase):
             ("custom_code", "AUL", "AUS"),
         ]
     )
-    def test_get_iso3_code_from_ca_code(self, _: Any, ca_code: str, expected: str) -> None:
+    def test_get_iso3_code_from_ca_code(self, helper: str, ca_code: str, expected: str) -> None:
         assert CountryCodeMap.objects.get_iso3_code(ca_code) == expected
 
     def test_cache(self) -> None:

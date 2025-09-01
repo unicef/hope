@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, Any
 
 from django.core.management import call_command
 from django.utils import timezone
-from extras.test_utils.factories.core import create_afghanistan
 import pytest
 from strategy_field.utils import fqn
 
+from extras.test_utils.factories.core import create_afghanistan
 from hope.apps.sanction_list.models import SanctionList, SanctionListIndividual
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask

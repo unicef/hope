@@ -58,6 +58,8 @@ from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
 import elasticsearch
+from flags.models import FlagState
+
 from extras.test_utils.factories.account import (
     create_superuser,
     generate_unicef_partners,
@@ -88,8 +90,6 @@ from extras.test_utils.factories.program import (
 )
 from extras.test_utils.factories.registration_data import generate_rdi
 from extras.test_utils.factories.steficon import generate_rule_formulas
-from flags.models import FlagState
-
 from hope.apps.account.models import Partner, Role, RoleAssignment, User
 from hope.apps.core.models import BusinessArea
 

@@ -1,3 +1,4 @@
+import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 import uuid
@@ -5,6 +6,9 @@ import uuid
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -26,9 +30,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-from rest_framework.exceptions import ValidationError as DRFValidationError
-
 from hope.apps.account.models import AdminAreaLimitedTo
 from hope.apps.core.models import BusinessArea, FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket
@@ -101,13 +102,13 @@ class TestGrievanceUtils(TestCase):
         assert flex_fields["decimal_field"] == 321.11
 
     def test_verify_flex_fields(self) -> None:
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(
+            ValueError, match=re.escape("associated_with argument must be one of ['household', 'individual']")
+        ):
             verify_flex_fields({"key": "value"}, "associated_with")
-        assert str(e.value) == "associated_with argument must be one of ['household', 'individual']"
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="key is not a correct `flex field"):
             verify_flex_fields({"key": "value"}, "individuals")
-        assert str(e.value) == "key is not a correct `flex field"
 
     def test_verify_flex_fields_with_date_type(self) -> None:
         national_id_issue_date_i_f = Core_FlexibleAttribute(
@@ -120,9 +121,8 @@ class TestGrievanceUtils(TestCase):
 
         verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
             verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
-        assert str(e.value) == "time data 'invalid' does not match format '%Y-%m-%d'"
 
     def test_handle_role(self) -> None:
         create_afghanistan()

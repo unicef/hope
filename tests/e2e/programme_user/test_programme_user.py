@@ -1,7 +1,7 @@
-from e2e.helpers.fixtures import get_program_with_dct_type_and_name
-from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 import pytest
 
+from e2e.helpers.fixtures import get_program_with_dct_type_and_name
+from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from hope.apps.core.models import DataCollectingType
 from hope.apps.program.models import Program
 

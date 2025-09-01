@@ -13,7 +13,6 @@ from extras.test_utils.factories.payment import (
     RealProgramFactory,
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea, DataCollectingType

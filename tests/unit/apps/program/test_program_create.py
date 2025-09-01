@@ -1,5 +1,9 @@
 from typing import Any
 
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -14,10 +18,6 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-import pytest
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import (
     DataCollectingType,
@@ -92,31 +92,13 @@ class TestProgramCreate:
                 {
                     "id": self.unicef_hq.id,
                     "name": self.unicef_hq.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
                 {
                     "id": self.unicef_partner_in_afghanistan.id,
                     "name": self.unicef_partner_in_afghanistan.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
             ],
@@ -395,16 +377,7 @@ class TestProgramCreate:
                 {
                     "id": self.partner2.id,
                     "name": self.partner2.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
                 *self.expected_response_standard["partners"],

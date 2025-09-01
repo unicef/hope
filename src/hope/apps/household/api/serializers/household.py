@@ -35,7 +35,6 @@ from hope.apps.household.services.household_programs_with_delivered_quantity imp
     delivered_quantity_service,
 )
 from hope.apps.payment.models import AccountType, FinancialInstitution
-from hope.apps.program.api.serializers import ProgramSmallSerializer
 
 
 class DeliveredQuantitySerializer(serializers.Serializer):
@@ -49,9 +48,12 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     admin2 = AreaSimpleSerializer()
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
-    has_duplicates = serializers.SerializerMethodField()
-    program = ProgramSmallSerializer()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    has_duplicates = serializers.BooleanField(source="annotate_has_duplicates")
+    sanction_list_possible_match = serializers.BooleanField(source="annotate_has_sanction_list_possible_match")
+    sanction_list_confirmed_match = serializers.BooleanField(source="annotate_has_sanction_list_confirmed_match")
+    program_name = serializers.CharField(source="program.name")
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Household
@@ -61,7 +63,6 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "head_of_household",
             "admin1",
             "admin2",
-            "program",
             "status",
             "size",
             "residence_status",
@@ -73,10 +74,10 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "has_duplicates",
             "sanction_list_possible_match",
             "sanction_list_confirmed_match",
+            "program_id",
+            "program_name",
+            "program_slug",
         ]
-
-    def get_has_duplicates(self, obj: Household) -> bool:
-        return obj.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
 
 class HeadOfHouseholdSerializer(serializers.ModelSerializer):

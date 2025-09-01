@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from extras.test_utils.factories.core import StorageFileFactory
 from extras.test_utils.factories.household import (
     DocumentAllowDuplicatesFactory,
@@ -6,7 +7,6 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.management.commands.detect_paid_households import (
     find_paid_households,

@@ -13,6 +13,8 @@ from django.db import models, transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
+import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -39,8 +41,6 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-import pytest
-
 from hope.apps.core.currencies import USDC
 from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
 from hope.apps.household.models import (
