@@ -49,10 +49,10 @@ from hope.apps.payment.models import (
 
 class BusinessAreaViewSet(
     CountActionMixin,
-    PermissionsMixin,
     RetrieveModelMixin,
     ListModelMixin,
     BaseViewSet,
+    PermissionsMixin,
 ):
     permission_classes = [IsAuthenticated]
     serializer_class = BusinessAreaSerializer
