@@ -7,6 +7,10 @@ from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
+from freezegun import freeze_time
+from parameterized import parameterized
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import (
@@ -20,10 +24,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from freezegun import freeze_time
-from parameterized import parameterized
-import pytest
-
 from hope.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,

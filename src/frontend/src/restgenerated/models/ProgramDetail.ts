@@ -6,6 +6,7 @@ import type { BeneficiaryGroup } from './BeneficiaryGroup';
 import type { DataCollectingType } from './DataCollectingType';
 import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
 import type { PartnerAccessEnum } from './PartnerAccessEnum';
+import type { PartnerForProgram } from './PartnerForProgram';
 import type { PeriodicField } from './PeriodicField';
 import type { ProgramStatusEnum } from './ProgramStatusEnum';
 import type { SectorEnum } from './SectorEnum';
@@ -77,7 +78,7 @@ export type ProgramDetail = {
      * Program household count [sys]
      */
     householdCount?: number;
-    readonly numberOfHouseholdsWithTpInProgram: number;
+    numberOfHouseholdsWithTpInProgram: number;
     readonly adminUrl: string;
     /**
      * Program description
@@ -91,7 +92,7 @@ export type ProgramDetail = {
      * record revision number
      */
     version?: number;
-    readonly partners: Record<string, any>;
+    readonly partners: Array<PartnerForProgram>;
     /**
      * Program partner access
      *

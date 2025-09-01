@@ -7,10 +7,10 @@ from unittest.mock import patch
 from constance.test import override_config
 from django.conf import settings
 from django.test import TestCase, override_settings
-from extras.test_utils.factories.account import UserFactory
 from openpyxl import Workbook
 import pytest
 
+from extras.test_utils.factories.account import UserFactory
 from hope.apps.utils.mailjet import MailjetClient
 
 
@@ -315,10 +315,9 @@ class TestMailjet(TestCase):
             ccs=["testcc@email.com"],
             variables={"key": "value"},
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You cannot use both template and custom email body"):
             mailjet.send_email()
         mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You cannot use both template and custom email body"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
@@ -331,10 +330,9 @@ class TestMailjet(TestCase):
             ccs=["testcc@email.com"],
             variables={"key": "value"},
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You cannot use both template and custom email body"):
             mailjet.send_email()
         mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You cannot use both template and custom email body"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
@@ -345,10 +343,9 @@ class TestMailjet(TestCase):
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You need to provide body variables for template email"):
             mailjet.send_email()
         mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You need to provide body variables for template email"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
@@ -360,10 +357,9 @@ class TestMailjet(TestCase):
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You need to provide either template or custom email body"):
             mailjet.send_email()
         mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You need to provide either template or custom email body"
 
     @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")

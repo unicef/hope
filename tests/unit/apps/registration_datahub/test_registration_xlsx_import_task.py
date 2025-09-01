@@ -4,11 +4,11 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-import pytest
-
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 
@@ -24,7 +24,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
         return_value=None,
     )
-    def test_task_start_importing(self, _: Any) -> None:
+    def test_task_start_importing(self, mock_execute: Any) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORT_SCHEDULED)
 
         self._run_task(rdi.id)
@@ -63,10 +63,8 @@ class TestRegistrationXlsxImportTask(TestCase):
             "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
             new=_mock,
         ):
-            with pytest.raises(Exception) as context:
+            with pytest.raises(Exception, match="something went wrong"):
                 self._run_task(rdi.id)
-
-        assert str(context.value) == "something went wrong"
 
     def _run_task(self, rdi_id: str) -> None:
         registration_xlsx_import_task(

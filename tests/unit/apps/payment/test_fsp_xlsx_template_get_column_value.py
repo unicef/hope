@@ -1,4 +1,4 @@
-from typing import Any
+from parameterized import parameterized
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -14,8 +14,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from parameterized import parameterized
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.models import (
@@ -79,7 +77,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             ("test_wrong_column_name", "invalid_column_name"),
         ]
     )
-    def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
+    def test_get_column_value_from_payment(self, helper: str, field_name: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
             individual_args={

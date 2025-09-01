@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-import pytest
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
