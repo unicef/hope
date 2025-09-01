@@ -33,6 +33,9 @@ logger = logging.getLogger(__name__)
 
 
 class BiometricDeduplicationService:
+    DEDUP_STATE_READY = "Ready"
+    DEDUP_STATE_FAILED = "Failed"
+
     class BiometricDeduplicationServiceException(Exception):
         pass
 
@@ -57,7 +60,7 @@ class BiometricDeduplicationService:
 
     def get_deduplication_set(self, deduplication_set_id: str) -> DeduplicationSetData:
         response_data = self.api.get_deduplication_set(deduplication_set_id)
-        return DeduplicationSetData(state=response_data["state"])
+        return DeduplicationSetData(state=response_data["state"], error=response_data["error"])
 
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (
@@ -347,7 +350,7 @@ class BiometricDeduplicationService:
     def fetch_biometric_deduplication_results_and_process(self, deduplication_set_id: str) -> None:
         deduplication_set_data = self.get_deduplication_set(deduplication_set_id)
 
-        if deduplication_set_data.state == "Clean":
+        if deduplication_set_data.state == self.DEDUP_STATE_READY:
             try:
                 data = self.get_deduplication_set_results(deduplication_set_id)
                 similarity_pairs = [
@@ -372,6 +375,12 @@ class BiometricDeduplicationService:
             except Exception:
                 logger.exception(f"Dedupe Engine processing results error for dedupe_set_id {deduplication_set_id}")
                 self.mark_rdis_as_error(deduplication_set_id)
+
+        elif deduplication_set_data.state == self.DEDUP_STATE_FAILED:
+            logger.error(
+                f"Dedupe Engine error for dedupe_set_id {deduplication_set_id} \n {deduplication_set_data.error}"
+            )
+            self.mark_rdis_as_error(deduplication_set_id)
 
     def report_false_positive_duplicate(
         self, individual1_photo: str, individual2_photo: str, deduplication_set_id: str
