@@ -1,7 +1,7 @@
 from datetime import datetime
 import decimal
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.urls import reverse
@@ -11,6 +11,11 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 from hope.apps.core.utils import encode_id_base64
+
+if TYPE_CHECKING:
+    from openpyxl.worksheet.worksheet import Worksheet
+
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,13 @@
 from pathlib import Path
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any, Generator
 
 import pytest
 from responses import RequestsMock
 
 from hope.apps.core.celery import app
+
+if TYPE_CHECKING:
+    from hope.models.sanction_list import SanctionList
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from admin_extra_buttons.api import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -25,6 +25,9 @@ from hope.apps.core.celery_tasks import (
 )
 from hope.apps.core.validators import KoboTemplateValidator
 from hope.models.xlsx_kobo_template import XLSXKoboTemplate
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 

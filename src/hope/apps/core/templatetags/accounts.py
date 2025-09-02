@@ -1,10 +1,15 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django import template
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse
 
 from hope.apps.utils.security import is_root
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest
+
+    from hope.models.user import User
 
 register = template.Library()
 

@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from datetime import date, datetime
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -34,6 +34,11 @@ from hope.models.household import (
 from hope.models.individual import PendingIndividual
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+
+    from hope.models.business_area import BusinessArea
 
 logger = logging.getLogger(__name__)
 

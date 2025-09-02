@@ -28,7 +28,11 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
+    from django.db.models import Model, QuerySet
     from django.http import HttpHeaders
+    from openpyxl.worksheet.worksheet import Cell, Worksheet
+
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
@@ -13,6 +14,9 @@ from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseServic
 from hope.models.file_temp import FileTemp
 from hope.models.payment_verification import PaymentVerification
 from hope.models.payment_verification_plan import PaymentVerificationPlan
+
+if TYPE_CHECKING:
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

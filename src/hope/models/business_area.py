@@ -108,7 +108,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     deduplication_possible_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
-        help_text="Results equal or above this score are considered possible duplicates (needs adjudication) must be lower than deduplication_duplicate_score",
+        help_text="Results equal or above this score are considered possible duplicates (needs adjudication) "
+        "must be lower than deduplication_duplicate_score",
     )
 
     deduplication_batch_duplicates_percentage = models.IntegerField(

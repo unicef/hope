@@ -29,7 +29,8 @@ class IncompatibleRolesManager(models.Manager):
             raise ValidationError(
                 {
                     "role": _(
-                        f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+                        f"This role is incompatible with "
+                        f"{', '.join([userrole.role.name for userrole in incompatible_userroles])}"
                     )
                 }
             )

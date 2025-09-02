@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
@@ -7,6 +9,11 @@ from hope.models.partner import Partner
 from hope.models.program import Program
 from hope.models.role import Role
 from hope.models.user import USER_STATUS_CHOICES, User
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models import QuerySet
 
 
 class UsersFilter(FilterSet):

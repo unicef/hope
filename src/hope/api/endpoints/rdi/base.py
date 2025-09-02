@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from django.db.transaction import atomic
@@ -22,6 +22,9 @@ from hope.models.household import PendingHousehold
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
 from hope.models.user import User
+
+if TYPE_CHECKING:
+    from hope.models.business_area import BusinessArea
 
 
 class RDISerializer(serializers.ModelSerializer):

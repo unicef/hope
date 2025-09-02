@@ -15,6 +15,7 @@ from hope.models.role import Role
 from hope.models.role_assignment import RoleAssignment
 
 if TYPE_CHECKING:
+    from hope.models.business_area import BusinessArea
     from hope.models.user import User
 
 

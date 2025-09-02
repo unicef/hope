@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
@@ -21,6 +23,9 @@ from hope.models.household import (
     SEX_CHOICE,
 )
 from hope.models.program import Program
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 
 class DocumentType(HOPEAPIView):

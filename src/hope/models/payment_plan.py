@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -43,6 +43,13 @@ from hope.models.utils import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+if TYPE_CHECKING:
+    from hope.apps.core.exchange_rates.api import ExchangeRateClient
+    from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
+    from hope.models.payment_verification_plan import PaymentVerificationPlan
+    from hope.models.program import Program
+    from hope.models.user import User
 
 
 @dataclass
@@ -637,7 +644,8 @@ class PaymentPlan(
             self.unsuccessful_payments()
             .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
             .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan
+                # within the same cycle (contains excluded from other follow-ups)
                 household_id__in=Payment.objects.filter(
                     is_follow_up=True,
                     parent__source_payment_plan=self,

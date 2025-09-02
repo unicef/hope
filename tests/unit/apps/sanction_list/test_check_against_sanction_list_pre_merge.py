@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from constance.test import override_config
 from django.conf import settings
@@ -26,6 +26,10 @@ from hope.models import country as geo_models
 from hope.models.business_area import BusinessArea
 from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.models.individual import Individual
+
+if TYPE_CHECKING:
+    from hope.models.sanction_list import SanctionList
+
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

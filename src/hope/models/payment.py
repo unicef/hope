@@ -196,7 +196,8 @@ class Payment(
         max_length=64,
         blank=True,
         null=True,
-        help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector",
+        help_text="Use this field for reconciliation data when funds are collected by someone other than "
+        "the designated collector or the alternate collector",
     )
     additional_document_type = models.CharField(
         max_length=128,

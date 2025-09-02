@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -35,6 +35,11 @@ from hope.models.household import (
 from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.registration_data_import import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
+    from hope.models.role import Role
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):

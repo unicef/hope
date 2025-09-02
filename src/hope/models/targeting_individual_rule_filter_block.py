@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
 
 from hope.apps.targeting.services.targeting_service import TargetingIndividualRuleFilterBlockBase
 from hope.models.utils import TimeStampedUUIDModel
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class TargetingIndividualRuleFilterBlock(

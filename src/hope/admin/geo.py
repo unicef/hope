@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import Any, Callable, Generator, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, Union
 
 from admin_extra_buttons.decorators import button
 from admin_sync.mixin import SyncMixin
@@ -20,6 +20,9 @@ from hope.admin.utils import HOPEModelAdminBase
 from hope.models.area import Area
 from hope.models.area_type import AreaType
 from hope.models.country import Country
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 

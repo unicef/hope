@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from drf_spectacular.utils import extend_schema
@@ -8,6 +9,9 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.models.grant import Grant
 from hope.models.household import ROLE_PRIMARY
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 
 class DelegateSerializer(serializers.Serializer):

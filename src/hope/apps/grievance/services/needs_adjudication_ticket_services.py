@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -30,6 +30,9 @@ from hope.models.log_entry import log_create
 from hope.models.registration_data_import import (
     RegistrationDataImport,
 )
+
+if TYPE_CHECKING:
+    from hope.models.program import Program
 
 logger = logging.getLogger(__name__)
 

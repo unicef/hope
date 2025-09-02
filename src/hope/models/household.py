@@ -42,6 +42,7 @@ from hope.models.utils import (
 
 if TYPE_CHECKING:
     from hope.contrib.aurora.models import Record
+    from hope.models.individual import Individual
 
 BLANK = ""
 IDP = "IDP"

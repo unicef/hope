@@ -8,7 +8,11 @@ from hope.apps.core.utils import get_program_id_from_headers
 from hope.models.business_area import BusinessArea
 
 if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
+
     from hope.models.program import Program
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

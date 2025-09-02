@@ -18,6 +18,9 @@ from hope.models.rule import Rule, RuleCommit
 if TYPE_CHECKING:
     from django.contrib.contenttypes.models import ContentType
 
+    if TYPE_CHECKING:
+        from django.db.models.fields import _ChoicesCallable
+
 logger = logging.getLogger(__name__)
 
 

@@ -23,6 +23,9 @@ class APIToken(models.Model):
     valid_for = models.ManyToManyField(BusinessArea)
     allowed_ips = models.CharField(_("IPs"), max_length=200, blank=True, null=True)
 
+    class Meta:
+        app_label = "api"
+
     def __str__(self) -> str:
         return f"Token #{self.pk}"
 
@@ -34,6 +37,3 @@ class APIToken(models.Model):
     @classmethod
     def generate_key(cls) -> str:
         return binascii.hexlify(os.urandom(20)).decode()
-
-    class Meta:
-        app_label = "api"

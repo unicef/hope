@@ -3,7 +3,7 @@ from datetime import date, datetime
 import logging
 import os
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from xml.etree.ElementTree import Element
@@ -28,9 +28,12 @@ from hope.models.sanction_list_individual_alias_name import SanctionListIndividu
 from hope.models.sanction_list_individual_countries import SanctionListIndividualCountries
 from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
 from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
-from hope.models.sanction_list_Individual_nationalities import SanctionListIndividualNationalities
+from hope.models.sanction_list_individual_nationalities import SanctionListIndividualNationalities
 
 from ._base import BaseSanctionList
+
+if TYPE_CHECKING:
+    from hope.models.sanction_list import SanctionList
 
 logger = logging.getLogger(__name__)
 

@@ -19,8 +19,8 @@ class FspNameMapping(models.Model):
         related_name="names_mappings",
     )
 
-    def __str__(self) -> str:
-        return self.external_name  # pragma: no cover
-
     class Meta:
         app_label = "payment"
+
+    def __str__(self) -> str:
+        return self.external_name  # pragma: no cover

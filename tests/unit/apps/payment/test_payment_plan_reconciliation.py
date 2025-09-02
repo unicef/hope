@@ -2,7 +2,7 @@ from collections import namedtuple
 import datetime
 from decimal import Decimal
 import io
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
 
 from parameterized import parameterized
 import pytz
@@ -35,6 +35,10 @@ from hope.models.payment_plan import PaymentPlan
 from hope.models.payment_verification import PaymentVerification
 from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.program import Program
+
+if TYPE_CHECKING:
+    from hope.models.household import Household
+    from hope.models.individual import Individual
 
 
 class TestPaymentPlanReconciliation(BaseTestCase):

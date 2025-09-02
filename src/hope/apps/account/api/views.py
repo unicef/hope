@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from constance import config
 from django.db.models import Q, QuerySet
@@ -35,6 +35,9 @@ from hope.models.individual import Individual
 from hope.models.partner import Partner
 from hope.models.program import Program
 from hope.models.user import User
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 
 class UserViewSet(

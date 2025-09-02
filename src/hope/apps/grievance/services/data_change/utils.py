@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import secrets
 import string
-from typing import Any, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 import urllib.parse
 
 from django.core.files.storage import default_storage
@@ -44,6 +44,9 @@ from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.log_entry import log_create
 from hope.models.partner import Partner
 from hope.models.utils import MergeStatusModel
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 

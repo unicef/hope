@@ -23,6 +23,8 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import country as geo_models
 from hope.models.account import PendingAccount
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 from hope.models.business_area import BusinessArea
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
@@ -85,11 +87,11 @@ class TestRdiKoboCreateTask(TestCase):
 
         country = geo_models.Country.objects.first()
 
-        admin1_type = models.area_type.AreaType.objects.create(name="Bakool", area_level=1, country=country)
-        admin1 = models.area.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
+        admin1_type = AreaType.objects.create(name="Bakool", area_level=1, country=country)
+        admin1 = Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
 
-        admin2_type = models.area_type.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
-        models.area.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
+        admin2_type = AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
+        Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
 
         cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -600,11 +602,9 @@ class TestRdiKoboCreateTask(TestCase):
         self.registration_data_import.program = program
         self.registration_data_import.save()
         country = geo_models.Country.objects.first()
-        admin4_type = models.area_type.AreaType.objects.create(name="Bakool", area_level=4, country=country)
-        admin4 = models.area.Area.objects.create(p_code="CD8309ZS01AS01", name="CD8309ZS01AS01", area_type=admin4_type)
-        admin4_mapped = models.area.Area.objects.create(
-            p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type
-        )
+        admin4_type = AreaType.objects.create(name="Bakool", area_level=4, country=country)
+        admin4 = Area.objects.create(p_code="CD8309ZS01AS01", name="CD8309ZS01AS01", area_type=admin4_type)
+        admin4_mapped = Area.objects.create(p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type)
 
         households_to_create = []
         collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = (

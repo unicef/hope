@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.core.cache import cache
 from django.db import transaction
@@ -22,6 +22,11 @@ from hope.models.document import Document
 from hope.models.household import Household
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

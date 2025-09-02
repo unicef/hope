@@ -1,10 +1,13 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
 
 from hope.models.utils import TimeStampedUUIDModel
+
+if TYPE_CHECKING:
+    from hope.models.payment_plan import PaymentPlan
 
 
 def build_summary(payment_plan: Optional["PaymentPlan"]) -> None:

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -18,6 +18,9 @@ from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.utils.security import is_root
 from hope.models.api_token import APIToken
 from hope.models.business_area import BusinessArea
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 TOKEN_INFO_EMAIL = """
 Dear {friendly_name},

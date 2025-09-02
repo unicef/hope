@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib.admin import register
@@ -16,6 +17,9 @@ from hope.models.rule import Rule, RuleCommit
 from hope.models.user import User
 
 from .steficon import TestRuleMixin
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

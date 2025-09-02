@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -32,6 +32,10 @@ from hope.models.household import (
 )
 from hope.models.individual import PendingIndividual
 from hope.models.registration_data_import import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),

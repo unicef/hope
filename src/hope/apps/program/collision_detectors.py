@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
 from django.db.transaction import atomic
@@ -9,7 +9,8 @@ from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 
-# only for typing purposes
+if TYPE_CHECKING:
+    from hope.models.program import Program
 
 
 class AbstractCollisionDetector:

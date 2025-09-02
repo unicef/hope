@@ -1,6 +1,6 @@
 from enum import auto
 import logging
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from constance import config
 from django.conf import settings
@@ -11,6 +11,9 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models.role_assignment import RoleAssignment
 from hope.models.user import User
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

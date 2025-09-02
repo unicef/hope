@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
@@ -18,6 +18,11 @@ from hope.models.household import (
 from hope.models.individual import Individual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.log_entry import log_create
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractUser
+
+    from hope.models.program import Program
 
 """
 Reassing data structure:

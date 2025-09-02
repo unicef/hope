@@ -8,6 +8,9 @@ class AccountType(models.Model):
     unique_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
     payment_gateway_id = models.CharField(max_length=255, blank=True, null=True)
 
+    class Meta:
+        app_label = "payment"
+
     def __str__(self) -> str:
         return self.key
 
@@ -18,6 +21,3 @@ class AccountType(models.Model):
             for _account_type in cls.objects.all()
             for field_name in _account_type.unique_fields
         ]
-
-    class Meta:
-        app_label = "payment"

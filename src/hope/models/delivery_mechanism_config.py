@@ -12,8 +12,8 @@ class DeliveryMechanismConfig(models.Model):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True)
     required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
 
-    def __str__(self) -> str:
-        return f"{self.delivery_mechanism.code} - {self.fsp.name}"  # pragma: no cover
-
     class Meta:
         app_label = "payment"
+
+    def __str__(self) -> str:
+        return f"{self.delivery_mechanism.code} - {self.fsp.name}"  # pragma: no cover

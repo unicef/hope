@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 from itertools import groupby
 import logging
-from typing import IO, Callable, Union
+from typing import IO, TYPE_CHECKING, Callable, Union
 
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
@@ -52,6 +52,14 @@ from hope.models.program_cycle import ProgramCycle
 from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AbstractUser, AnonymousUser
+
+    from hope.models.user import User
 
 
 class PaymentPlanService:

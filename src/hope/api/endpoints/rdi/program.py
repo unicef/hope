@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,6 +14,10 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.models.grant import Grant
 from hope.models.program import Program
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+    from rest_framework.serializers import BaseSerializer
 
 
 class ProgramAPISerializer(serializers.ModelSerializer):

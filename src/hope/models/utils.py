@@ -4,7 +4,7 @@ import hashlib
 import json
 import logging
 import sys
-from typing import Any, Callable, Iterable, Sequence, T
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
 import warnings
 
 import celery
@@ -28,6 +28,10 @@ from mptt.models import MPTTModel
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
 
 logger = logging.getLogger(__name__)
 

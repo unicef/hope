@@ -17,7 +17,7 @@ from ..tasks.check_against_sanction_list_pre_merge import (
 from ._base import BaseSanctionList
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import TypedDict
+    from typing import Generator, TypedDict
 
     class Alias(TypedDict):
         first_name: str

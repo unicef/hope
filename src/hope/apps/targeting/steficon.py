@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from admin_extra_buttons.decorators import button
 from django import forms
@@ -11,6 +12,11 @@ from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_select
 from hope.apps.steficon.debug import get_error_info
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
 

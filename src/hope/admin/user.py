@@ -1,7 +1,7 @@
 from collections import defaultdict, namedtuple
 import csv
 import logging
-from typing import Any, Sequence, Union
+from typing import TYPE_CHECKING, Any, Sequence, Union
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -34,6 +34,11 @@ from hope.models.business_area import BusinessArea
 from hope.models.incompatible_roles import IncompatibleRoles
 from hope.models.partner import Partner
 from hope.models.user import User
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models.query import _QuerySet
 
 logger = logging.getLogger(__name__)
 

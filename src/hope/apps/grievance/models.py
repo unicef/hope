@@ -1,7 +1,7 @@
 from decimal import Decimal
 from itertools import chain
 import logging
-from typing import Any, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
 from django.core.cache import cache
@@ -33,6 +33,9 @@ from hope.models.utils import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+if TYPE_CHECKING:
+    from hope.models.household import Household
 
 logger = logging.getLogger(__name__)
 

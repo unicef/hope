@@ -1,6 +1,6 @@
 from collections import defaultdict
 import logging
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 from django.core.exceptions import ValidationError
 import xlrd
@@ -24,6 +24,9 @@ from hope.models.household import (
     NOT_PROVIDED,
     RELATIONSHIP_UNKNOWN,
 )
+
+if TYPE_CHECKING:
+    from openpyxl.worksheet.worksheet import Worksheet
 
 logger = logging.getLogger(__name__)
 

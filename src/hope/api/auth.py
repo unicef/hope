@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -9,6 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
 from hope.models.user import User
+
+if TYPE_CHECKING:
+    from hope.models.api_token import APIToken
 
 
 class HOPEAuthentication(TokenAuthentication):

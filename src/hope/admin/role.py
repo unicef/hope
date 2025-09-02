@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.collector import ForeignKeysCollector
@@ -19,6 +19,9 @@ from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.permissions import Permissions
 from hope.models.incompatible_roles import IncompatibleRoles
 from hope.models.role import Role
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 

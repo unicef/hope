@@ -48,6 +48,7 @@ from hope.models.data_collecting_type import DataCollectingType
 from hope.models.delivery_mechanism import (
     DeliveryMechanism,
 )
+from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.household import (
     HEARING,

@@ -2,7 +2,7 @@ import abc
 import base64
 import hashlib
 import logging
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -20,6 +20,9 @@ from hope.models.household import PendingHousehold
 from hope.models.import_data import ImportData
 from hope.models.individual import PendingIndividual
 from hope.models.registration_data_import import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 

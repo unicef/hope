@@ -7,7 +7,7 @@ import pytest
 from hope.models.sanction_list_individual import SanctionListIndividual
 from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
 from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
-from hope.models.sanction_list_Individual_nationalities import SanctionListIndividualNationalities
+from hope.models.sanction_list_individual_nationalities import SanctionListIndividualNationalities
 
 if TYPE_CHECKING:
     from hope.apps.sanction_list.strategies.eu import EUSanctionList

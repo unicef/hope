@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from django_filters import CharFilter, FilterSet
 
 from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import decode_id_string
 from hope.models.area import Area
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class AreaFilter(FilterSet):

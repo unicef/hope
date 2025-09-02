@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
 from django.db.models import Q
 
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaRuleQueryingBase
 from hope.models.utils import TimeStampedUUIDModel
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingBase):

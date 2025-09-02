@@ -40,7 +40,7 @@ from hope.models.user import User
 from .steficon import TestRuleMixin
 
 if TYPE_CHECKING:
-    from django import forms
+    from django.forms import ModelForm
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +249,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         )
         if request.method == "POST":
             rule: Rule | None = self.get_object(request, str(pk))
-            form: forms.Form
+            form: Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
                 if form.is_valid():

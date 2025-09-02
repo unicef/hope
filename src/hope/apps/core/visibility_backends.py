@@ -5,6 +5,7 @@ from django.db.models import QuerySet
 
 if TYPE_CHECKING:
     from hope.models.area import Area
+    from hope.models.partner import Partner
 
 
 class VisibilityBackend:

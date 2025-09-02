@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.db.models import DateTimeField
 
@@ -6,6 +6,9 @@ from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
 from hope.models.utils import MergeStatusModel
+
+if TYPE_CHECKING:
+    from hope.models.individual import Individual
 
 
 def get_household_status(

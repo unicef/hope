@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
 from django.test import TestCase
 
@@ -9,6 +9,13 @@ from hope.models.document_type import DocumentType
 from hope.models.household import IDENTIFICATION_TYPE_CHOICE
 from hope.models.role import Role
 from hope.models.role_assignment import RoleAssignment
+
+if TYPE_CHECKING:
+    from hope.models.area import Area
+    from hope.models.business_area import BusinessArea
+    from hope.models.partner import Partner
+    from hope.models.program import Program
+    from hope.models.user import User
 
 
 class BaseTestCase(TestCase):

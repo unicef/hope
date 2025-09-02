@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
@@ -31,6 +31,12 @@ from hope.models.business_area import BusinessArea
 from hope.models.document_type import DocumentType
 from hope.models.partner import Partner
 from hope.models.role_assignment import RoleAssignment
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

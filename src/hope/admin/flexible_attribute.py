@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -11,6 +12,9 @@ from jsoneditor.forms import JSONEditor
 
 from hope.admin.utils import SoftDeletableAdminMixin
 from hope.models.flexible_attribute import FlexibleAttribute
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

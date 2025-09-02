@@ -18,6 +18,8 @@ from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
 from hope.models import country as geo_models
+from hope.models.area import Area
+from hope.models.area_type import AreaType
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
@@ -49,29 +51,29 @@ class TestSriLankaRegistrationService(TestCase):
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
-        area_type1 = models.area_type.AreaType.objects.create(country=country, name="admin1")
-        area_type2 = models.area_type.AreaType.objects.create(country=country, name="admin2")
-        area_type3 = models.area_type.AreaType.objects.create(country=country, name="admin3")
-        area_type4 = models.area_type.AreaType.objects.create(country=country, name="admin4")
+        area_type1 = AreaType.objects.create(country=country, name="admin1")
+        area_type2 = AreaType.objects.create(country=country, name="admin2")
+        area_type3 = AreaType.objects.create(country=country, name="admin3")
+        area_type4 = AreaType.objects.create(country=country, name="admin4")
 
-        admin1 = models.area.Area(
+        admin1 = Area(
             name="SriLanka admin1",
             p_code="LK1",
             area_type=area_type1,
         )
         admin1.save()
-        admin2 = models.area.Area(name="SriLanka admin2", p_code="LK11", area_type=area_type2, parent=admin1)
+        admin2 = Area(name="SriLanka admin2", p_code="LK11", area_type=area_type2, parent=admin1)
         admin2.save()
-        admin3 = models.area.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
+        admin3 = Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
         admin3.save()
-        admin4 = models.area.Area(
+        admin4 = Area(
             name="SriLanka admin4",
             p_code="LK1163020",
             area_type=area_type4,
             parent=admin3,
         )
         admin4.save()
-        models.area.Area.objects.rebuild()
+        Area.objects.rebuild()
 
         children_info = [
             {

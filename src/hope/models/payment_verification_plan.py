@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.postgres.fields import ArrayField
@@ -20,6 +20,9 @@ from hope.models.utils import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+if TYPE_CHECKING:
+    from hope.models.program import Program
 
 logger = logging.getLogger(__name__)
 
