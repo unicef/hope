@@ -533,7 +533,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         return None
 
     @classproperty
-    def task_handlers(cls) -> dict[str, Callable[[Any], Any]]:
+    def task_handlers(cls) -> dict[str, Callable[[Any], Any]]:  # pragma: no cover
         import importlib
 
         handlers = {}
