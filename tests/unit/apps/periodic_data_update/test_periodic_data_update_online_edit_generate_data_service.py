@@ -122,6 +122,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                 "last_name": self.individuals[0].family_name,
                 "pdu_fields": {
                     "muac": {
+                        "field_name": "muac",
                         "round_number": 2,
                         "round_name": "February",
                         "value": None,
@@ -131,6 +132,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "is_editable": True,
                     },
                     "month_worked": {
+                        "field_name": "month_worked",
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
@@ -148,6 +150,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                 "last_name": self.individuals[1].family_name,
                 "pdu_fields": {
                     "muac": {
+                        "field_name": "muac",
                         "round_number": 2,
                         "round_name": "February",
                         "value": None,
@@ -157,6 +160,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "is_editable": True,
                     },
                     "month_worked": {
+                        "field_name": "month_worked",
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
@@ -196,6 +200,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                 "last_name": individual.family_name,
                 "pdu_fields": {
                     "muac": {
+                        "field_name": "muac",
                         "round_number": 2,
                         "round_name": "February",
                         "value": 20,  # value is already set
@@ -205,6 +210,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "is_editable": False,
                     },
                     "month_worked": {
+                        "field_name": "month_worked",
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
@@ -222,6 +228,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                 "last_name": self.individuals[1].family_name,
                 "pdu_fields": {
                     "muac": {
+                        "field_name": "muac",
                         "round_number": 2,
                         "round_name": "February",
                         "value": None,
@@ -231,6 +238,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "is_editable": True,
                     },
                     "month_worked": {
+                        "field_name": "month_worked",
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
