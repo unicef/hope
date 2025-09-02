@@ -46,6 +46,7 @@ class TestPDUOnlineEditSaveData:
                             "collection_date": None,
                             "subtype": PeriodicFieldData.DECIMAL,
                             "label": "Vaccination Records",
+                            "field_name": "vaccination_records",
                             "is_editable": True,
                         },
                         "health_check": {
@@ -55,6 +56,7 @@ class TestPDUOnlineEditSaveData:
                             "collection_date": "2024-01-19",
                             "subtype": PeriodicFieldData.STRING,
                             "label": "Health Check",
+                            "field_name": "health_check",
                             "is_editable": True,
                         },
                         "visit_date": {
@@ -64,6 +66,7 @@ class TestPDUOnlineEditSaveData:
                             "collection_date": None,
                             "subtype": PeriodicFieldData.DATE,
                             "label": "Visit Date",
+                            "field_name": "visit_date",
                             "is_editable": True,
                         },
                         "health_status": {
@@ -73,6 +76,7 @@ class TestPDUOnlineEditSaveData:
                             "collection_date": None,
                             "subtype": PeriodicFieldData.BOOL,
                             "label": "Health Status",
+                            "field_name": "health_status",
                             "is_editable": True,
                         },
                         "completed_vaccination": {
@@ -82,6 +86,7 @@ class TestPDUOnlineEditSaveData:
                             "collection_date": "2024-01-01",
                             "subtype": PeriodicFieldData.BOOL,
                             "label": "Completed Vaccination",
+                            "field_name": "completed_vaccination",
                             "is_editable": False,  # Not editable
                         },
                     },
@@ -95,6 +100,7 @@ class TestPDUOnlineEditSaveData:
                 "value": None,
                 "subtype": PeriodicFieldData.DECIMAL,
                 "label": "Vaccination Records",
+                "field_name": "vaccination_records",
                 "is_editable": True,
             },
             "health_check": {
@@ -102,6 +108,7 @@ class TestPDUOnlineEditSaveData:
                 "value": "value 1",
                 "subtype": PeriodicFieldData.STRING,
                 "label": "Health Check",
+                "field_name": "health_check",
                 "is_editable": True,
             },
             "visit_date": {
@@ -109,6 +116,7 @@ class TestPDUOnlineEditSaveData:
                 "value": None,
                 "subtype": PeriodicFieldData.DATE,
                 "label": "Visit Date",
+                "field_name": "visit_date",
                 "is_editable": True,
             },
             "health_status": {
@@ -116,6 +124,7 @@ class TestPDUOnlineEditSaveData:
                 "value": None,
                 "subtype": PeriodicFieldData.BOOL,
                 "label": "Health Status",
+                "field_name": "health_status",
                 "is_editable": True,
             },
             "completed_vaccination": {
@@ -123,6 +132,7 @@ class TestPDUOnlineEditSaveData:
                 "value": True,
                 "subtype": PeriodicFieldData.BOOL,
                 "label": "Completed Vaccination",
+                "field_name": "completed_vaccination",
                 "is_editable": False,
             },
         }

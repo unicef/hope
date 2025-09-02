@@ -46,6 +46,7 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
                 if round_value is None:
                     is_individual_allowed = True
                 pdu_fields[pdu_field_name] = {
+                    "field_name": pdu_field_name,  # Needed for frontend because of snake-camel default conversion
                     "round_number": round_number,
                     "round_name": round_info["round_name"],
                     "value": round_value,
