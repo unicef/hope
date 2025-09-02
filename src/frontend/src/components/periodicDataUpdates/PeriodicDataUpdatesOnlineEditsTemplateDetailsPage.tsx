@@ -1,4 +1,15 @@
-import React, { ReactElement, useMemo, useEffect, useState } from 'react';
+import { BaseSection } from '@components/core/BaseSection';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,6 +17,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   Table,
   TableBody,
   TableCell,
@@ -13,33 +25,21 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Grid2 as Grid,
 } from '@mui/material';
-import PeriodicDataUpdateEditableTable from './PeriodicDataUpdateEditableTable';
-import { BlackLink } from '@components/core/BlackLink';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import { BaseSection } from '@components/core/BaseSection';
-import { LabelizedField } from '@components/core/LabelizedField';
-import { StatusBox } from '@components/core/StatusBox';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { useParams, Link } from 'react-router-dom';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '@hooks/useSnackBar';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  periodicDataUpdatesOnlineEditsStatusToColor,
   showApiErrorMessages,
-  periodicDataUpdateTemplateStatusToColor,
 } from '@utils/utils';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useProgramContext } from 'src/programContext';
-import SentBackComment from './SentBackComment';
-import { ConfirmationDialog } from '../../components/core/ConfirmationDialog/ConfirmationDialog';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
+import { useProgramContext } from 'src/programContext';
+import { ConfirmationDialog } from '../../components/core/ConfirmationDialog/ConfirmationDialog';
+import PeriodicDataUpdateEditableTable from './PeriodicDataUpdateEditableTable';
+import SentBackComment from './SentBackComment';
 
 export type PduField = {
   value: any;
@@ -241,7 +241,13 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   }, [data]);
 
   const allPduFields = useMemo(() => {
-    const fields = [];
+    const fields: Array<{
+      key: string;
+      subtype: string;
+      roundNumber: number;
+      roundName: string;
+      columnName: string;
+    }> = [];
     individuals.forEach((ind) => {
       if (ind.pduFields) {
         Object.entries(ind.pduFields).forEach(([objKey, _field]) => {
@@ -283,14 +289,42 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
 
   // Save handler: call API and exit edit mode for row
   const handleSaveRow = async (rowIdx: number) => {
-    const rowData = editRows[rowIdx];
+    const row = editRows[rowIdx];
+    // Build payload in camelCase, only for the selected row
+    const payload = {
+      individualUuid: row.individualUuid,
+      pduFields: Object.entries(row.pduFields || {}).reduce(
+        (acc, [key, field]) => {
+          const f = field as PduField;
+          acc[key] = {
+            roundNumber: f.roundNumber,
+            value: f.value,
+            subtype: f.subtype,
+            isEditable: f.isEditable,
+          };
+          return acc;
+        },
+        {},
+      ),
+    };
+    if (row.pduFields) {
+      Object.entries(row.pduFields).forEach(([key, field]) => {
+        const typedField = field as PduField;
+        payload.pduFields[key] = {
+          roundNumber: typedField.roundNumber,
+          value: typedField.value,
+          subtype: typedField.subtype,
+          isEditable: typedField.isEditable,
+        };
+      });
+    }
     try {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate(
         {
           businessAreaSlug: businessArea,
           programSlug: programId,
           id: numericId,
-          requestBody: rowData,
+          requestBody: payload,
         },
       );
       setEditingRows((prev) => {
@@ -412,7 +446,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
             <LabelizedField label={t('Status')}>
               <StatusBox
                 status={status}
-                statusToColor={periodicDataUpdateTemplateStatusToColor}
+                statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
                 statusDisplay={statusDisplay}
               />
             </LabelizedField>
