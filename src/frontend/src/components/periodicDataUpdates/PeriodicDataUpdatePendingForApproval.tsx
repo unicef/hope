@@ -1,6 +1,13 @@
 import { BlackLink } from '@components/core/BlackLink';
 import React, { useState, ReactElement } from 'react';
-import { TableCell, Checkbox, Button, Tooltip } from '@mui/material';
+import {
+  TableCell,
+  Checkbox,
+  Button,
+  Tooltip,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -232,8 +239,8 @@ const PeriodicDataUpdatePendingForApproval = () => {
   }: {
     headCells: HeadCell<any>[];
   }) => (
-    <thead>
-      <tr>
+    <TableHead>
+      <TableRow>
         {headCells.map((headCell) => (
           <TableCell
             key={String(headCell.id)}
@@ -251,12 +258,12 @@ const PeriodicDataUpdatePendingForApproval = () => {
                 slotProps={{ input: { 'aria-label': 'select all rows' } }}
               />
             ) : (
-              headCell.label
+              <div style={{ fontSize: 12 }}>{headCell.label}</div>
             )}
           </TableCell>
         ))}
-      </tr>
-    </thead>
+      </TableRow>
+    </TableHead>
   );
 
   return (
