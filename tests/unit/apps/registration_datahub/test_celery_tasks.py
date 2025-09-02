@@ -10,9 +10,11 @@ import uuid
 
 from django.conf import settings
 from django.core.management import call_command
+from django.db import Error
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.functional import classproperty
+from openpyxl.utils.exceptions import InvalidFileException
 import pytest
 
 from extras.test_utils.factories.aurora import (
@@ -981,7 +983,7 @@ class TestRegistrationImportCeleryTasks(BaseTestCase):
         mock_rdi_merge_task: Mock,
     ) -> None:
         mock_rdi_merge_task_instance = mock_rdi_merge_task.return_value
-        mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
+        mock_rdi_merge_task_instance.execute.side_effect = Error("Test Exception")
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
@@ -1003,7 +1005,9 @@ class TestRegistrationImportCeleryTasks(BaseTestCase):
         mock_deduplicate_task: Mock,
     ) -> None:
         mock_deduplicate_task_task_instance = mock_deduplicate_task.return_value
-        mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
+        mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = InvalidFileException(
+            "Test Exception"
+        )
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()

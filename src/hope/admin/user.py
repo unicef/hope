@@ -11,6 +11,7 @@ from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.db import Error
 from django.db.models import JSONField, QuerySet
 from django.db.transaction import atomic
 from django.forms.forms import Form
@@ -122,7 +123,7 @@ class ADUSerMixin:
                     "Active Directory data successfully fetched",
                     messages.SUCCESS,
                 )
-        except Exception as e:
+        except (HTTPError, Http404) as e:
             logger.warning(e)
             self.message_user(request, str(e), messages.ERROR)
 
@@ -131,7 +132,7 @@ class ADUSerMixin:
         try:
             self._sync_ad_data(self.get_object(request, pk))
             self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
-        except Exception as e:
+        except (HTTPError, Http404) as e:
             logger.warning(e)
             self.message_user(request, str(e), messages.ERROR)
 
@@ -203,7 +204,7 @@ class ADUSerMixin:
                 account_models.RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
                 ctx["results"] = results
                 return TemplateResponse(request, "admin/load_users.html", ctx)
-            except Exception as e:
+            except (HTTPError, Http404) as e:
                 logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
         ctx["form"] = form
@@ -453,7 +454,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                             for row in reader:
                                 try:
                                     email = row["email"].strip()
-                                except Exception as e:
+                                except KeyError as e:
                                     raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
 
                                 user_info = {
@@ -495,7 +496,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                 context["results"].append(user_info)
                         except Exception:
                             raise
-                except Exception as e:
+                except (csv.Error, HTTPError, Error) as e:
                     logger.warning(e)
                     context["form"] = form
                     context["errors"] = [str(e)]

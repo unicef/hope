@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.utils.translation import get_language
 
 from hope.apps.payment.models import PaymentPlan
+from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import RuleTestForm
 from hope.apps.steficon.models import Rule, RuleCommit
 
@@ -146,7 +147,7 @@ class TestRuleMixin:
                             row["result"] = rule.interpreter.execute({"data": values})
                         else:
                             row["result"] = rule.execute({"data": values})
-                    except Exception as e:
+                    except (ValueError, RuleError) as e:
                         row["error"] = f"{e.__class__.__name__}: {str(e)}"
                         row["success"] = False
                     results.append(row)
