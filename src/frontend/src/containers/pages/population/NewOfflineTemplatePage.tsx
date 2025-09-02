@@ -13,6 +13,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
@@ -192,6 +193,13 @@ const NewOfflineTemplatePage = (): ReactElement => {
           navigate(`/${baseUrl}/population/individuals`, {
             state: { isNewTemplateJustCreated: true },
           });
+        },
+        onError: (error: any) => {
+          showApiErrorMessages(
+            error,
+            showMessage,
+            t('Failed to create template.'),
+          );
         },
       },
     );
