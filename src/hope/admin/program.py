@@ -208,10 +208,7 @@ class ProgramAdmin(
                         limits_to_update.append((partner, areas_ids))
 
                 if limits_to_delete:
-                    AdminAreaLimitedTo.objects.filter(
-                        partner__in=limits_to_delete,
-                        program=program
-                    ).delete()
+                    AdminAreaLimitedTo.objects.filter(partner__in=limits_to_delete, program=program).delete()
 
                 for partner, areas_ids in limits_to_update:
                     program_partner, _ = AdminAreaLimitedTo.objects.update_or_create(
@@ -222,7 +219,7 @@ class ProgramAdmin(
 
                 return HttpResponseRedirect(reverse("admin:program_program_area_limits", args=[pk]))
 
-        admin_area_limits = program.admin_area_limits.select_related('partner').prefetch_related('areas')
+        admin_area_limits = program.admin_area_limits.select_related("partner").prefetch_related("areas")
         partner_area_data = [
             {
                 "partner": area_limit.partner,
@@ -236,10 +233,9 @@ class ProgramAdmin(
         context["program_area_formset"] = partner_area_form_set
         context["business_area"] = program.business_area
         context["areas"] = Area.objects.filter(
-            area_type__country__business_areas__id=program.business_area.id,
-            area_type__area_level__lt=3
-        ).select_related('area_type__country')
-        
+            area_type__country__business_areas__id=program.business_area.id, area_type__area_level__lt=3
+        ).select_related("area_type__country")
+
         # it's only possible to create area limits for partners that have a role in this program
         context["partners"] = (
             Partner.objects.filter(
@@ -247,7 +243,7 @@ class ProgramAdmin(
                 | (Q(role_assignments__business_area=program.business_area) & Q(role_assignments__program__isnull=True))
             )
             .exclude(parent__name="UNICEF")
-            .select_related('parent')
+            .select_related("parent")
             .order_by("name")
             .distinct()
         )
