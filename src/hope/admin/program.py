@@ -192,8 +192,8 @@ class ProgramAdmin(
         if request.method == "POST" and is_editable:
             partner_area_form_set = PartnerAreaLimitFormSet(request.POST, prefix="program_areas")
             if partner_area_form_set.is_valid():
-                limits_to_update = []
-                limits_to_delete = []
+                partners_for_limits_to_update = []
+                partners_for_limits_to_delete = []
 
                 for partner_area_form in partner_area_form_set:
                     form_data = partner_area_form.cleaned_data
@@ -202,15 +202,15 @@ class ProgramAdmin(
 
                     partner = form_data["partner"]
                     if form_data.get("DELETE"):
-                        limits_to_delete.append(partner)
+                        partners_for_limits_to_delete.append(partner)
                     else:
                         areas_ids = [str(area.id) for area in form_data["areas"]]
-                        limits_to_update.append((partner, areas_ids))
+                        partners_for_limits_to_update.append((partner, areas_ids))
 
-                if limits_to_delete:
-                    AdminAreaLimitedTo.objects.filter(partner__in=limits_to_delete, program=program).delete()
+                if partners_for_limits_to_delete:
+                    AdminAreaLimitedTo.objects.filter(partner__in=partners_for_limits_to_delete, program=program).delete()
 
-                for partner, areas_ids in limits_to_update:
+                for partner, areas_ids in partners_for_limits_to_update:
                     program_partner, _ = AdminAreaLimitedTo.objects.update_or_create(
                         partner=partner,
                         program=program,
