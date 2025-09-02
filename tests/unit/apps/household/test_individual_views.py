@@ -1044,6 +1044,8 @@ class TestIndividualDetail:
             "service_provider_code__mobile": "ABC",
             "delivery_phone_number__mobile": "123456789",
             "provider__mobile": "Provider",
+            "financial_institution": '',
+            "number": ""
         }
 
         assert data["linked_grievances"] == [
