@@ -435,4 +435,4 @@ class IndividualGlobalViewSet(
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
+        return Response(data=self.get_serializer(instance={}, context={"business_area": self.business_area}).data)
