@@ -660,12 +660,20 @@ class PaymentPlanViewSet(
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
         "apply_engine_formula": [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
+        "lock": [Permissions.PM_LOCK_AND_UNLOCK],
+        "unlock": [Permissions.PM_LOCK_AND_UNLOCK],
+        "lock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
+        "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+        "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
         "generate_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
+        "reconciliation_export_xlsx": [Permissions.PM_VIEW_LIST],
         "split": [Permissions.PM_SPLIT],
         "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
@@ -787,7 +795,7 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK])
+    @action(detail=True, methods=["get"])
     @transaction.atomic
     def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -805,7 +813,7 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan locked"})
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK])
+    @action(detail=True, methods=["get"])
     @transaction.atomic
     def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -826,7 +834,6 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP],
         url_path="lock-fsp",
     )
     @transaction.atomic
@@ -849,7 +856,6 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP],
         url_path="unlock-fsp",
     )
     @transaction.atomic
@@ -916,7 +922,6 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.PM_VIEW_LIST],
         url_path="entitlement-export-xlsx",
     )
     @transaction.atomic
@@ -948,7 +953,6 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["post"],
-        PERMISSIONS=[Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
         url_path="entitlement-import-xlsx",
     )
     @transaction.atomic
@@ -995,7 +999,6 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.PM_SEND_FOR_APPROVAL],
         url_path="send-for-approval",
     )
     @transaction.atomic
@@ -1200,7 +1203,6 @@ class PaymentPlanViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.PM_VIEW_LIST],
         url_path="reconciliation-export-xlsx",
     )
     @transaction.atomic
@@ -1413,6 +1415,10 @@ class TargetPopulationViewSet(
         "copy": [Permissions.TARGETING_DUPLICATE],
         "apply_engine_formula": [Permissions.TARGETING_UPDATE],
         "pending_payments": [Permissions.TARGETING_VIEW_DETAILS],
+        "lock": [Permissions.TARGETING_LOCK],
+        "unlock": [Permissions.TARGETING_UNLOCK],
+        "rebuild": [Permissions.TARGETING_LOCK],
+        "mark_ready": [Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND],
     }
     filterset_class = TargetPopulationFilter
 
@@ -1439,7 +1445,7 @@ class TargetPopulationViewSet(
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_LOCK])
+    @action(detail=True, methods=["get"])
     @transaction.atomic
     def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
@@ -1457,7 +1463,7 @@ class TargetPopulationViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Target Population locked"})
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_UNLOCK])
+    @action(detail=True, methods=["get"])
     @transaction.atomic
     def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
@@ -1476,7 +1482,7 @@ class TargetPopulationViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Target Population unlocked"})
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_LOCK])
+    @action(detail=True, methods=["get"])
     @transaction.atomic
     def rebuild(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
@@ -1500,7 +1506,6 @@ class TargetPopulationViewSet(
         detail=True,
         methods=["get"],
         url_path="pending-payments",
-        PERMISSIONS=[Permissions.TARGETING_VIEW_DETAILS],
         filter_backends=(),
     )
     @transaction.atomic
@@ -1513,7 +1518,6 @@ class TargetPopulationViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND],
         url_path="mark-ready",
     )
     @transaction.atomic
@@ -1795,10 +1799,6 @@ class PaymentViewSet(
     BaseViewSet,
 ):
     lookup_field = "payment_id"
-    PERMISSIONS = [
-        Permissions.PM_VIEW_DETAILS,
-        Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
-    ]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
         "retrieve": PaymentDetailSerializer,
@@ -1807,10 +1807,14 @@ class PaymentViewSet(
     permissions_by_action = {
         "list": [
             Permissions.PM_VIEW_DETAILS,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
         ],
         "retrieve": [
             Permissions.PM_VIEW_DETAILS,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
         ],
+        "mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
+        "revert_mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
     }
 
     def get_object(self) -> Payment:
@@ -1823,7 +1827,6 @@ class PaymentViewSet(
     @action(
         detail=True,
         methods=["get"],
-        PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED],
         url_path="mark-as-failed",
     )
     @transaction.atomic
@@ -1838,7 +1841,6 @@ class PaymentViewSet(
     @action(
         detail=True,
         methods=["post"],
-        PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED],
         serializer_class=PaymentDetailSerializer,
         url_path="revert-mark-as-failed",
     )

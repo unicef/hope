@@ -17,7 +17,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 from hope.api.caches import etag_decorator
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
-from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin
+from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
 from hope.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
@@ -50,6 +50,7 @@ class BusinessAreaViewSet(
     RetrieveModelMixin,
     ListModelMixin,
     BaseViewSet,
+    PermissionsMixin,
 ):
     permission_classes = [IsAuthenticated]
     serializer_class = BusinessAreaSerializer
