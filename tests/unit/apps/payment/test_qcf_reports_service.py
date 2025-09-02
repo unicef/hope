@@ -15,8 +15,9 @@ from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.models import (
     PaymentPlan,
-    WesternUnionQCFFile,
-    WesternUnionQCFFileReport,
+    WesternUnionInvoice,
+    WesternUnionInvoicePayment,
+    WesternUnionPaymentPlanReport,
 )
 from hct_mis_api.apps.payment.services.qcf_reports_service import QCFReportsService
 from hct_mis_api.apps.payment.services.western_union_ftp import WesternUnionFTPClient
@@ -92,13 +93,15 @@ class TestQCFReportsService(TestCase):
             service = QCFReportsService()
             service.process_files_since(datetime(2025, 1, 1))
 
-            self.assertEqual(WesternUnionQCFFile.objects.count(), 1)
-            qcf_file = WesternUnionQCFFile.objects.first()
+            self.assertEqual(WesternUnionInvoice.objects.count(), 1)
+            qcf_file = WesternUnionInvoice.objects.first()
             self.assertEqual(qcf_file.name, filename)
-            self.assertEqual(WesternUnionQCFFile.objects.count(), 1)
+            self.assertEqual(WesternUnionInvoice.objects.count(), 1)
 
-            self.assertEqual(WesternUnionQCFFileReport.objects.count(), 1)
-            report = WesternUnionQCFFileReport.objects.first()
+            self.assertEqual(WesternUnionInvoicePayment.objects.filter(transaction_status="2").count(), 3)
+
+            self.assertEqual(WesternUnionPaymentPlanReport.objects.count(), 1)
+            report = WesternUnionPaymentPlanReport.objects.first()
             self.assertEqual(report.qcf_file, qcf_file)
             self.assertEqual(report.payment_plan, self.payment_plan)
 

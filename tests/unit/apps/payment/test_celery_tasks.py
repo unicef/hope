@@ -33,8 +33,8 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
-    WesternUnionQCFFile,
-    WesternUnionQCFFileReport,
+    WesternUnionInvoice,
+    WesternUnionPaymentPlanReport,
 )
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.steficon.models import Rule
@@ -334,10 +334,10 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         mock_service_cls: Mock,
     ) -> None:
         create_afghanistan()
-        wu_qcf_file = WesternUnionQCFFile.objects.create(
+        wu_qcf_file = WesternUnionInvoice.objects.create(
             name="TEST",
         )
-        qcf_report = WesternUnionQCFFileReport.objects.create(
+        qcf_report = WesternUnionPaymentPlanReport.objects.create(
             qcf_file=wu_qcf_file,
             payment_plan=PaymentPlanFactory(),
         )

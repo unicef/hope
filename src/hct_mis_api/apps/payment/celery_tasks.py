@@ -828,7 +828,7 @@ def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
-    from hct_mis_api.apps.payment.models.payment import WesternUnionQCFFileReport
+    from hct_mis_api.apps.payment.models.payment import WesternUnionPaymentPlanReport
     from hct_mis_api.apps.payment.services.qcf_reports_service import QCFReportsService
 
     with cache.lock(
@@ -836,7 +836,7 @@ def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
-        qcf_report = WesternUnionQCFFileReport.objects.get(id=qcf_report_id)
+        qcf_report = WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id)
         try:
             set_sentry_business_area_tag(qcf_report.payment_plan.business_area.name)
 
