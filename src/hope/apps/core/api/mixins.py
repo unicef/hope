@@ -137,8 +137,7 @@ class ProgramMixin:
             .get_queryset()
             .filter(
                 **{
-                    f"{self.program_model_field}__slug__in": [self.program_slug],
-                    f"{self.program_model_field}__business_area__slug": self.business_area_slug,
+                    f"{self.program_model_field}_id": self.program.id,
                 }
             )
         )
