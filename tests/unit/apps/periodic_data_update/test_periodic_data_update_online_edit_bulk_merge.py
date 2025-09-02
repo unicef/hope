@@ -112,10 +112,10 @@ class TestPDUOnlineEditBulkMerge:
                             "round_number": 1,
                             "collection_date": "2024-01-15",
                             "is_editable": True,
-                        }
-                    }
+                        },
+                    },
                 }
-            ]
+            ],
         )
 
         self.pdu_edit_approved_2 = PDUOnlineEditFactory(
@@ -141,10 +141,10 @@ class TestPDUOnlineEditBulkMerge:
                             "round_number": 1,
                             "collection_date": "2024-01-16",
                             "is_editable": True,
-                        }
-                    }
+                        },
+                    },
                 }
-            ]
+            ],
         )
 
         self.pdu_edit_approved_not_authorized = PDUOnlineEditFactory(
@@ -169,10 +169,10 @@ class TestPDUOnlineEditBulkMerge:
                             "round_number": 1,
                             "collection_date": "2024-01-16",
                             "is_editable": True,
-                        }
-                    }
+                        },
+                    },
                 }
-            ]
+            ],
         )
 
         self.pdu_edit_ready = PDUOnlineEditFactory(
@@ -466,7 +466,9 @@ class TestPDUOnlineEditBulkMerge:
         # Verify status changed to MERGED
         assert self.pdu_edit_approved_1.status == PDUOnlineEdit.Status.MERGED
 
-    def test_bulk_merge_updates_individual_data_string_and_decimal(self, create_user_role_with_permissions: Any) -> None:
+    def test_bulk_merge_updates_individual_data_string_and_decimal(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
         create_user_role_with_permissions(
             user=self.user,
             permissions=[Permissions.PDU_ONLINE_MERGE],
@@ -522,7 +524,9 @@ class TestPDUOnlineEditBulkMerge:
         assert self.individual2.flex_fields[self.date_attribute.name]["1"]["value"] == "2024-01-20"
         assert self.individual2.flex_fields[self.date_attribute.name]["1"]["collection_date"] == "2024-01-16"
 
-    def test_bulk_merge_multiple_edits_updates_multiple_individuals(self, create_user_role_with_permissions: Any) -> None:
+    def test_bulk_merge_multiple_edits_updates_multiple_individuals(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
         create_user_role_with_permissions(
             user=self.user,
             permissions=[Permissions.PDU_ONLINE_MERGE],
@@ -582,9 +586,9 @@ class TestPDUOnlineEditBulkMerge:
                             "collection_date": "2024-01-15",
                             "is_editable": False,  # Non-editable field
                         }
-                    }
+                    },
                 }
-            ]
+            ],
         )
 
         # Verify initial state
@@ -637,5 +641,7 @@ class TestPDUOnlineEditBulkMerge:
         # Verify individual data was NOT updated
         self.individual1.refresh_from_db()
         assert self.individual1.flex_fields[self.string_attribute.name]["1"]["value"] == initial_value
-        assert self.individual1.flex_fields[self.string_attribute.name]["1"]["collection_date"] == initial_collection_date
+        assert (
+            self.individual1.flex_fields[self.string_attribute.name]["1"]["collection_date"] == initial_collection_date
+        )
         assert self.individual1.flex_fields[self.decimal_attribute.name]["1"]["value"] is None

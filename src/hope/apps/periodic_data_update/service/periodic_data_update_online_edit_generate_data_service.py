@@ -16,8 +16,11 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
     def generate_edit_data(self) -> list:
         """Generate the initial structure for the edit_data field."""
         field_names = {rd["field"] for rd in self.rounds_data}
-        field_subtype_map = {
-            pdu_field.name: pdu_field.pdu_data.subtype
+        pdu_fields_data = {
+            pdu_field.name: {
+                "subtype": pdu_field.pdu_data.subtype,
+                "label": pdu_field.label.get("English(EN)", ""),
+            }
             for pdu_field in FlexibleAttribute.objects.filter(
                 program=self.program, name__in=field_names, type=FlexibleAttribute.PDU
             )
@@ -31,8 +34,8 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
             is_individual_allowed = False
             for round_info in self.rounds_data:
                 pdu_field_name = round_info["field"]
-                subtype = field_subtype_map.get(pdu_field_name)
-                if not subtype:
+                field_data = pdu_fields_data.get(pdu_field_name)
+                if not field_data:
                     raise ValidationError(
                         f"PDU field '{pdu_field_name}' not found in flexible attributes for program "
                         f"'{self.program.name}'."
@@ -47,7 +50,8 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
                     "round_name": round_info["round_name"],
                     "value": round_value,
                     "collection_date": None,
-                    "subtype": subtype,
+                    "subtype": field_data["subtype"],
+                    "label": field_data["label"],
                     "is_editable": round_value is None,
                 }
 
