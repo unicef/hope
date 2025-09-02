@@ -15,7 +15,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.program.models import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

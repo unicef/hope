@@ -185,7 +185,6 @@ PROJECT_APPS = [
     "hope.apps.registration_data.apps.RegistrationDataConfig",
     "hope.apps.sanction_list.apps.SanctionListConfig",
     "hope.apps.steficon.apps.SteficonConfig",
-    "hope.apps.reporting.apps.ReportingConfig",
     "hope.apps.activity_log.apps.ActivityLogConfig",
     "hope.apps.dashboard.apps.DashboardConfig",
     "hope.apps.accountability.apps.AccountabilityConfig",

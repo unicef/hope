@@ -16,11 +16,12 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hope.apps.program.models import Program
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import country as geo_models
+from hope.models.household import ROLE_PRIMARY
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.program import Program
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 

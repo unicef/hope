@@ -16,7 +16,8 @@ from elasticsearch_dsl import connections
 import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
-from hope.apps.account.models import Partner, Role
+from hope.models.partner import Partner
+from hope.models.role import Role
 
 
 @pytest.fixture(autouse=True)

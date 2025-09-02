@@ -28,32 +28,8 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FileTemp,
-    FlexibleAttribute,
-)
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    ROLE_PRIMARY,
-    Document,
-    Household,
-    IndividualRoleInHousehold,
-)
 from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
@@ -69,6 +45,30 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
+from hope.models import country as geo_models
+from hope.models.business_area import (
+    BusinessArea,
+)
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.document import Document
+from hope.models.file_temp import FileTemp
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.fsp_xlsx_template_per_delivery_mechanism import FspXlsxTemplatePerDeliveryMechanism
+from hope.models.household import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
+    Household,
+)
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 def valid_file() -> File:

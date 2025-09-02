@@ -36,22 +36,22 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import FileTemp
-from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hope.apps.payment.models import (
-    AccountType,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.program.models import Program, ProgramCycle
+from hope.models.account_type import AccountType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.file_temp import FileTemp
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.household import ROLE_PRIMARY
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
 
 
 class TestPaymentPlanServices(BaseTestCase):

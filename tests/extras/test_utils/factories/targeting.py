@@ -7,11 +7,9 @@ from factory.django import DjangoModelFactory
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.household.models import RESIDENCE_STATUS_CHOICE
-from hope.apps.targeting.models import (
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
+from hope.models.household import RESIDENCE_STATUS_CHOICE
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
 
 
 def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:

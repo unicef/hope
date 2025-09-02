@@ -16,15 +16,16 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.models.business_area import BusinessArea
+from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_NO_ROLE,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Payment, PaymentPlan
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 
 
 # used for ease of assertions, so it imitates serializer's behaviour

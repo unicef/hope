@@ -35,34 +35,35 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.periodic_data_update.utils import (
+    field_label_to_field_name,
+    populate_pdu_with_null_values,
 )
-from hope.apps.household.models import (
+from hope.models.beneficiary_group import BeneficiaryGroup
+from hope.models.business_area import (
+    BusinessArea,
+)
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.delivery_mechanism import (
+    DeliveryMechanism,
+)
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
+from hope.models.household import (
     HEARING,
     HOST,
     REFUGEE,
     ROLE_PRIMARY,
     SEEING,
     Household,
-    Individual,
 )
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-)
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.periodic_data_update.utils import (
-    field_label_to_field_name,
-    populate_pdu_with_null_values,
-)
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.steficon.models import Rule
+from hope.models.individual import Individual
+from hope.models.payment_plan import PaymentPlan
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.rule import Rule
+from hope.models.user import User
 
 pytestmark = pytest.mark.django_db()
 

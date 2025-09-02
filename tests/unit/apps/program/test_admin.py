@@ -10,8 +10,10 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
-from hope.apps.geo.models import Area
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.area import Area
+from hope.models.partner import Partner
+from hope.models.role_assignment import RoleAssignment
 
 pytestmark = pytest.mark.django_db()
 

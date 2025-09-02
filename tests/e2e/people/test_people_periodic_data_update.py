@@ -27,23 +27,24 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hope.apps.household.models import HOST, SEEING, Individual
-from hope.apps.payment.models import Payment
-from hope.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
-)
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program
+from hope.models.beneficiary_group import BeneficiaryGroup
+from hope.models.business_area import (
+    BusinessArea,
+)
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
+from hope.models.household import HOST, SEEING
+from hope.models.individual import Individual
+from hope.models.payment import Payment
+from hope.models.periodic_data_update_template import (
+    PeriodicDataUpdateTemplate,
+)
+from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

@@ -16,13 +16,14 @@ from extras.test_utils.factories.household import (
     IndividualIdentityFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Partner
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import (
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import country as geo_models
+from hope.models.business_area import BusinessArea
+from hope.models.document_type import DocumentType
+from hope.models.household import (
     FEMALE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -31,10 +32,9 @@ from hope.apps.household.models import (
     SINGLE,
     UNHCR,
     WIDOWED,
-    DocumentType,
 )
-from hope.apps.program.models import Program
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models.partner import Partner
+from hope.models.program import Program
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()

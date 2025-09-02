@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 import requests
 
-from hope.apps.core.models import BusinessArea
+from hope.models.business_area import BusinessArea
 
 logger = logging.getLogger(__name__)
 

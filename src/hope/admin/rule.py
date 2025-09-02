@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.forms import Form, ModelForm
+from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -27,20 +27,20 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account.models import User
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.steficon.forms import (
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
     RuleForm,
 )
-from hope.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hope.apps.utils.security import is_root
+from hope.models.rule import MONITORED_FIELDS, Rule, RuleCommit
+from hope.models.user import User
 
 from .steficon import TestRuleMixin
 
 if TYPE_CHECKING:
-    from django import forms
+    from django.forms import ModelForm
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +249,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         )
         if request.method == "POST":
             rule: Rule | None = self.get_object(request, str(pk))
-            form: forms.Form
+            form: Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
                 if form.is_valid():
