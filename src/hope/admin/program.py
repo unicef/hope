@@ -233,7 +233,7 @@ class ProgramAdmin(
         context["program_area_formset"] = partner_area_form_set
         context["business_area"] = program.business_area
         context["areas"] = Area.objects.filter(
-            area_type__country__business_areas__id=program.business_area.id, area_type__area_level__lt=3
+            area_type__country__business_areas__id=program.business_area.id, area_type__area_level__lte=3
         ).select_related("area_type__country")
 
         # it's only possible to create area limits for partners that have a role in this program
