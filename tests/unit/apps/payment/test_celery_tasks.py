@@ -374,8 +374,8 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         mock_logger_exception: Mock,
     ) -> None:
         create_afghanistan()
-        wu_qcf_file = WesternUnionQCFFile.objects.create(name="TEST")
-        qcf_report = WesternUnionQCFFileReport.objects.create(
+        wu_qcf_file = WesternUnionInvoice.objects.create(name="TEST")
+        qcf_report = WesternUnionPaymentPlanReport.objects.create(
             qcf_file=wu_qcf_file,
             payment_plan=PaymentPlanFactory(),
         )
