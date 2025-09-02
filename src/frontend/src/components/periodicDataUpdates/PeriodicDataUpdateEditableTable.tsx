@@ -311,16 +311,18 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                 allPduFields.forEach((col) => {
                                   const field = pduFieldsObj[col.key];
                                   if (field && field.isEditable) {
+                                    // Only set to null for empty strings in text/number fields
                                     if (
-                                      field.value === undefined ||
-                                      field.value === null ||
                                       (typeof field.value === 'string' &&
-                                        field.value.trim() === '')
+                                        field.value.trim() === '') ||
+                                      field.value === undefined
                                     ) {
-                                      pduFieldsObj[col.key] = {
-                                        ...field,
-                                        value: null,
-                                      };
+                                      if (field.subtype !== 'BOOL') {
+                                        pduFieldsObj[col.key] = {
+                                          ...field,
+                                          value: null,
+                                        };
+                                      }
                                     }
                                   }
                                 });
