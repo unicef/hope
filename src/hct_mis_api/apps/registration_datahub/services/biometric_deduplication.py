@@ -60,7 +60,7 @@ class BiometricDeduplicationService:
 
     def get_deduplication_set(self, deduplication_set_id: str) -> DeduplicationSetData:
         response_data = self.api.get_deduplication_set(deduplication_set_id)
-        return DeduplicationSetData(state=response_data["state"], error=response_data["error"])
+        return DeduplicationSetData(state=response_data["state"], error=response_data.get("error", ""))
 
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (

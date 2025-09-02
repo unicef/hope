@@ -20,7 +20,7 @@ class SimilarityPair:
 @dataclasses.dataclass
 class DeduplicationSetData:
     state: str
-    error: str
+    error: str = ""
 
 
 @dataclasses.dataclass
