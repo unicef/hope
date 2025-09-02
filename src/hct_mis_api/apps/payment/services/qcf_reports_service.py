@@ -23,8 +23,9 @@ from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.celery_tasks import send_qcf_report_email_notifications
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models.payment import (
-    WesternUnionQCFFile,
-    WesternUnionQCFFileReport,
+    WesternUnionInvoice,
+    WesternUnionInvoicePayment,
+    WesternUnionPaymentPlanReport,
 )
 from hct_mis_api.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 
@@ -65,7 +66,7 @@ class QCFReportsService:
     class QCFReportsServiceException(Exception):
         pass
 
-    def process_zip_file(self, file_content: io.BytesIO, wu_qcf_file: WesternUnionQCFFile) -> None:
+    def process_zip_file(self, file_content: io.BytesIO, wu_qcf_file: WesternUnionInvoice) -> None:
         with zipfile.ZipFile(file_content) as z:
             for zip_info in z.infolist():
                 if zip_info.filename.endswith(".cf") or zip_info.filename.endswith(".CF"):
@@ -76,7 +77,7 @@ class QCFReportsService:
         ftp_client = WesternUnionFTPClient()
         files: List[Tuple[str, io.BytesIO]] = ftp_client.get_files_since(date_from)
         for filename, file_like in files:
-            if not WesternUnionQCFFile.objects.filter(name=filename).exists():
+            if not WesternUnionInvoice.objects.filter(name=filename).exists():
                 wu_qcf_file = self.store_qcf_file(filename, file_like)
                 self.process_zip_file(file_like, wu_qcf_file)
 
@@ -85,9 +86,9 @@ class QCFReportsService:
         wu_qcf_file = self.store_qcf_file(filename, file_like)
         self.process_zip_file(file_like, wu_qcf_file)
 
-    def store_qcf_file(self, filename: str, file_like: io.BytesIO) -> WesternUnionQCFFile:
+    def store_qcf_file(self, filename: str, file_like: io.BytesIO) -> WesternUnionInvoice:
         content_file = ContentFile(file_like.read(), name=filename)
-        wu_qcf_file, created = WesternUnionQCFFile.objects.get_or_create(
+        wu_qcf_file, created = WesternUnionInvoice.objects.get_or_create(
             name=filename,
         )
         if created:
@@ -102,7 +103,22 @@ class QCFReportsService:
 
         return wu_qcf_file
 
-    def process_qcf_report_file(self, filename: str, txt_file: IO[bytes], wu_qcf_file: WesternUnionQCFFile) -> None:
+    def link_payments_with_invoice(
+        self, wu_qcf_file: WesternUnionInvoice, payment_raw_data: List[Tuple[Payment, list]]
+    ) -> None:
+        objs = []
+        for payment, fields in payment_raw_data:
+            transaction_status = fields[18]
+            objs.append(
+                WesternUnionInvoicePayment(
+                    western_union_invoice=wu_qcf_file,
+                    payment=payment,
+                    transaction_status=transaction_status,
+                )
+            )
+        WesternUnionInvoicePayment.objects.bulk_create(objs)
+
+    def process_qcf_report_file(self, filename: str, txt_file: IO[bytes], wu_qcf_file: WesternUnionInvoice) -> None:
         file_content = txt_file.read()
         payment_plan_id_payments_lines_map = defaultdict(list)
 
@@ -113,24 +129,23 @@ class QCFReportsService:
 
         lines = list(csv.reader(io.StringIO(decoded_content)))
         for fields in lines[1:-1]:
-            record_type = fields[0]
             payment_unicef_id = f"RC{fields[9].strip('\"')}"
 
-            if int(record_type) == 1:  # regular transaction
-                try:
-                    payment = Payment.objects.get(unicef_id=payment_unicef_id)
-                    payment_plan_id_payments_lines_map[payment.parent_id].append((payment, fields))
-                except Payment.DoesNotExist:
-                    logger.error(f"{wu_qcf_file}: File:{filename}, Payment {payment_unicef_id} does not exist")
-                    continue
+            try:
+                payment = Payment.objects.get(unicef_id=payment_unicef_id)
+                payment_plan_id_payments_lines_map[payment.parent_id].append((payment, fields))
+            except Payment.DoesNotExist:
+                logger.error(f"{wu_qcf_file}: File:{filename}, Payment {payment_unicef_id} does not exist")
+                continue
 
         for payment_plan_id, payment_raw_data in payment_plan_id_payments_lines_map.items():
             payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
 
             with transaction.atomic():
+                self.link_payments_with_invoice(wu_qcf_file, payment_raw_data)
                 report_name, report = self.generate_report(payment_plan, payment_raw_data)
 
-                wu_qcf_report = WesternUnionQCFFileReport.objects.create(
+                wu_qcf_report = WesternUnionPaymentPlanReport.objects.create(
                     qcf_file=wu_qcf_file,
                     payment_plan=payment_plan,
                 )
@@ -155,7 +170,7 @@ class QCFReportsService:
     def generate_report(
         self, payment_plan: PaymentPlan, payment_raw_data: List[Tuple[Payment, list]]
     ) -> Tuple[str, openpyxl.Workbook]:
-        no_of_qcf_reports_for_pp = WesternUnionQCFFileReport.objects.filter(payment_plan=payment_plan).count()
+        no_of_qcf_reports_for_pp = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
         report_filename = (
             f"QCF_{payment_plan.business_area.slug}_{payment_plan.unicef_id}_{no_of_qcf_reports_for_pp + 1}.xlsx"
         )
@@ -242,7 +257,7 @@ class QCFReportsService:
 
         return wb
 
-    def send_notification_emails(self, report: WesternUnionQCFFileReport) -> None:
+    def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
         """
         # TODO refactor to 'dev' new perms
         role_assignments = RoleAssignment.objects.filter(
@@ -264,7 +279,7 @@ class QCFReportsService:
         for user in users:
             self.send_report_email_to_user(user, report)
 
-    def send_report_email_to_user(self, user: User, report: WesternUnionQCFFileReport) -> None:
+    def send_report_email_to_user(self, user: User, report: WesternUnionPaymentPlanReport) -> None:
         text_template = "payment/qcf_report_email.txt"
         html_template = "payment/qcf_report_email.html"
 

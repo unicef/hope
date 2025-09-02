@@ -121,7 +121,7 @@ class Permissions(Enum):
     PM_UPLOAD_SUPPORTING_DOCUMENT = auto()
     PM_DELETE_SUPPORTING_DOCUMENT = auto()
 
-    # WesternUnionQCFFileReport
+    # WesternUnionPaymentPlanReport
     RECEIVE_PARSED_WU_QCF = auto()
 
     # Payment Module Admin

@@ -1,17 +1,18 @@
 import io
-import os
 import re
 from datetime import datetime
 from typing import List, Tuple
+
+from django.conf import settings
 
 from hct_mis_api.apps.core.services.ftp_client import FTPClient
 
 
 class WesternUnionFTPClient(FTPClient):
-    HOST = os.getenv("FTP_WESTERN_UNION_SERVER", "")
-    PORT = int(os.getenv("FTP_WESTERN_UNION_PORT", "22"))
-    USERNAME = os.getenv("FTP_WESTERN_UNION_USERNAME", "")
-    PASSWORD = os.getenv("FTP_WESTERN_UNION_PASSWORD", "")
+    HOST = getattr(settings, "WESTERN_UNION_FTP_SERVER", "")
+    PORT = getattr(settings, "WESTERN_UNION_FTP_PORT", 22)
+    USERNAME = getattr(settings, "WESTERN_UNION_FTP_USERNAME", "")
+    PASSWORD = getattr(settings, "WESTERN_UNION_FTP_PASSWORD", "")
 
     QCF_PREFIX_PATTERN = re.compile(r"^QCF-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
 

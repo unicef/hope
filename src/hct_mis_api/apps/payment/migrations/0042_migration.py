@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='WesternUnionQCFFile',
+            name='WesternUnionInvoice',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, unique=True)),
@@ -25,12 +25,12 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='WesternUnionQCFFileReport',
+            name='WesternUnionPaymentPlanReport',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('sent', models.BooleanField(default=False)),
                 ('payment_plan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='qcf_reports', to='payment.paymentplan')),
-                ('qcf_file', models.ForeignKey(help_text='WU QCF File', on_delete=django.db.models.deletion.DO_NOTHING, related_name='reports', to='payment.westernunionqcffile')),
+                ('qcf_file', models.ForeignKey(help_text='WU QCF File', on_delete=django.db.models.deletion.DO_NOTHING, related_name='reports', to='payment.westernunioninvoice')),
                 ('report_file', models.ForeignKey(help_text='WU QCF Report File', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='core.filetemp')),
             ],
             options={
