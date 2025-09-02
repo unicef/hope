@@ -49,8 +49,8 @@ class BusinessAreaViewSet(
     CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,
-    BaseViewSet,
     PermissionsMixin,
+    BaseViewSet,
 ):
     permission_classes = [IsAuthenticated]
     serializer_class = BusinessAreaSerializer
