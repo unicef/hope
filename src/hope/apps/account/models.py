@@ -1,4 +1,5 @@
-"""This file is required so that Django recognizes our custom User model
+"""The file is required so that Django recognizes our custom User model.
+
 and other models that belong to the "account" app.
 
 Why do we need this?
