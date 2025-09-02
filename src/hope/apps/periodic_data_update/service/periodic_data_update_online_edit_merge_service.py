@@ -1,5 +1,6 @@
 import datetime
 from typing import Any
+import uuid
 
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
@@ -22,7 +23,8 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
             individuals = Individual.objects.in_bulk(individual_ids, field_name="id")
 
             for item in self.pdu_online_edit.edit_data:
-                individual = individuals.get(item["individual_uuid"])
+                individual_uuid = uuid.UUID(item["individual_uuid"])
+                individual = individuals.get(individual_uuid)
                 if not individual:
                     continue
 
