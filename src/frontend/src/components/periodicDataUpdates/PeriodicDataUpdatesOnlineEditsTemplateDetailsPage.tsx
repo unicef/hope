@@ -381,7 +381,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`Online Edits Template Details: ${name}`}
+        title={`Online Edits Template Details${name ? `: ${name}` : ''}`}
         breadCrumbs={breadCrumbsItems}
       >
         <>
