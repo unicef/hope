@@ -186,41 +186,60 @@ class ProgramAdmin(
     def area_limits(self, request: HttpRequest, pk: int) -> TemplateResponse | HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Admin Area Limits")
         program: Program = context["original"]
+        is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
         PartnerAreaLimitFormSet = formset_factory(PartnerAreaLimitForm, extra=0, can_delete=True)  # noqa
 
-        is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
-
-        if request.method == "GET" or not is_editable:
-            partner_area_data = [
-                {
-                    "partner": area_limits.partner,
-                    "areas": [str(area_id) for area_id in area_limits.areas.values_list("id", flat=True)],
-                }
-                for area_limits in program.admin_area_limits.all()
-            ]
-            partner_area_form_set = PartnerAreaLimitFormSet(initial=partner_area_data, prefix="program_areas")
-        elif request.method == "POST":
-            partner_area_form_set = PartnerAreaLimitFormSet(request.POST or None, prefix="program_areas")
+        if request.method == "POST" and is_editable:
+            partner_area_form_set = PartnerAreaLimitFormSet(request.POST, prefix="program_areas")
             if partner_area_form_set.is_valid():
+                limits_to_update = []
+                limits_to_delete = []
+
                 for partner_area_form in partner_area_form_set:
-                    form = partner_area_form.cleaned_data
-                    if form and not form["DELETE"]:
-                        areas_ids = [str(area.id) for area in form["areas"]]
-                        (
-                            program_partner,
-                            _,
-                        ) = AdminAreaLimitedTo.objects.update_or_create(
-                            partner=form["partner"],
-                            program=program,
-                        )
-                        program_partner.areas.set(areas_ids)
-                    elif form and form["DELETE"]:
-                        AdminAreaLimitedTo.objects.filter(partner=form["partner"], program=program).delete()
+                    form_data = partner_area_form.cleaned_data
+                    if not form_data:
+                        continue
+
+                    partner = form_data["partner"]
+                    if form_data.get("DELETE"):
+                        limits_to_delete.append(partner)
+                    else:
+                        areas_ids = [str(area.id) for area in form_data["areas"]]
+                        limits_to_update.append((partner, areas_ids))
+
+                if limits_to_delete:
+                    AdminAreaLimitedTo.objects.filter(
+                        partner__in=limits_to_delete,
+                        program=program
+                    ).delete()
+
+                for partner, areas_ids in limits_to_update:
+                    program_partner, _ = AdminAreaLimitedTo.objects.update_or_create(
+                        partner=partner,
+                        program=program,
+                    )
+                    program_partner.areas.set(areas_ids)
+
                 return HttpResponseRedirect(reverse("admin:program_program_area_limits", args=[pk]))
+
+        admin_area_limits = program.admin_area_limits.select_related('partner').prefetch_related('areas')
+        partner_area_data = [
+            {
+                "partner": area_limit.partner,
+                "areas": [str(area.id) for area in area_limit.areas.all()],
+            }
+            for area_limit in admin_area_limits
+        ]
+
+        partner_area_form_set = PartnerAreaLimitFormSet(initial=partner_area_data, prefix="program_areas")
 
         context["program_area_formset"] = partner_area_form_set
         context["business_area"] = program.business_area
-        context["areas"] = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
+        context["areas"] = Area.objects.filter(
+            area_type__country__business_areas__id=program.business_area.id,
+            area_type__area_level__lt=3
+        ).select_related('area_type__country')
+        
         # it's only possible to create area limits for partners that have a role in this program
         context["partners"] = (
             Partner.objects.filter(
@@ -228,7 +247,9 @@ class ProgramAdmin(
                 | (Q(role_assignments__business_area=program.business_area) & Q(role_assignments__program__isnull=True))
             )
             .exclude(parent__name="UNICEF")
+            .select_related('parent')
             .order_by("name")
+            .distinct()
         )
         context["program"] = program
 
