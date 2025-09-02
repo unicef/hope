@@ -37,7 +37,6 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         response = self.client.get(self.list_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
-            self.client.force_authenticate(self.user)
             response = self.client.get(self.list_url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 3
