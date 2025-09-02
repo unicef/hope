@@ -47,7 +47,8 @@ export type PduField = {
   roundName: string;
   isEditable: boolean;
   roundNumber: number;
-  columnName?: string;
+  fieldName?: string;
+  label?: string;
 };
 
 function getUserRoles(
@@ -246,7 +247,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       subtype: string;
       roundNumber: number;
       roundName: string;
-      columnName: string;
+      fieldName: string;
+      label: string;
     }> = [];
     individuals.forEach((ind) => {
       if (ind.pduFields) {
@@ -258,7 +260,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               subtype: field.subtype,
               roundNumber: field.roundNumber,
               roundName: field.roundName,
-              columnName: objKey,
+              fieldName: field.fieldName,
+              label: field.label,
             });
           }
         });
@@ -268,10 +271,21 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   }, [individuals]);
 
   const [editRows, setEditRows] = useState(() => {
-    return individuals.map((ind) => ({
-      ...ind,
-      pduFields: ind.pduFields ? { ...ind.pduFields } : {},
-    }));
+    return individuals.map((ind) => {
+      // Remap pduFields to use backend fieldName as key
+      const newPduFields: { [key: string]: PduField } = {};
+      if (ind.pduFields) {
+        Object.entries(ind.pduFields).forEach(([key, field]) => {
+          const f = field as PduField;
+          const backendKey = f.fieldName || key;
+          newPduFields[backendKey] = { ...f, fieldName: backendKey };
+        });
+      }
+      return {
+        ...ind,
+        pduFields: newPduFields,
+      };
+    });
   });
 
   // Track which rows are in edit mode
@@ -279,10 +293,21 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
 
   useEffect(() => {
     setEditRows(
-      individuals.map((ind) => ({
-        ...ind,
-        pduFields: ind.pduFields ? { ...ind.pduFields } : {},
-      })),
+      individuals.map((ind) => {
+        // Remap pduFields to use backend fieldName as key
+        const newPduFields: { [key: string]: PduField } = {};
+        if (ind.pduFields) {
+          Object.entries(ind.pduFields).forEach(([key, field]) => {
+            const f = field as PduField;
+            const backendKey = f.fieldName || key;
+            newPduFields[backendKey] = { ...f, fieldName: backendKey };
+          });
+        }
+        return {
+          ...ind,
+          pduFields: newPduFields,
+        };
+      }),
     );
     setEditingRows(new Set()); // Reset edit mode on data change
   }, [individuals]);
@@ -290,34 +315,25 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   // Save handler: call API and exit edit mode for row
   const handleSaveRow = async (rowIdx: number) => {
     const row = editRows[rowIdx];
-    // Build payload in camelCase, only for the selected row
     const payload = {
       individualUuid: row.individualUuid,
       pduFields: Object.entries(row.pduFields || {}).reduce(
-        (acc, [key, field]) => {
+        (acc, [, field]) => {
           const f = field as PduField;
-          acc[key] = {
+          const backendKey = f.fieldName;
+          acc[backendKey] = {
             roundNumber: f.roundNumber,
             value: f.value,
             subtype: f.subtype,
             isEditable: f.isEditable,
+            fieldName: backendKey,
           };
           return acc;
         },
         {},
       ),
     };
-    if (row.pduFields) {
-      Object.entries(row.pduFields).forEach(([key, field]) => {
-        const typedField = field as PduField;
-        payload.pduFields[key] = {
-          roundNumber: typedField.roundNumber,
-          value: typedField.value,
-          subtype: typedField.subtype,
-          isEditable: typedField.isEditable,
-        };
-      });
-    }
+
     try {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate(
         {
