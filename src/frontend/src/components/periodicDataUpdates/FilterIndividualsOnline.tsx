@@ -4,7 +4,7 @@ import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
-import { AdminAreaAutocompleteMultipleRest } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRest';
+import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { t } from 'i18next';
 import { FC } from 'react';
@@ -129,25 +129,25 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <AdminAreaAutocompleteMultipleRest
-            value={filter.admin1}
+          <AdminAreaAutocompleteMultipleRestFilter
+            value={filter.admin1 || []}
             onChange={(_, option) => {
               handleStateFilterChange('admin1', option);
             }}
             level={1}
             dataCy="filter-admin1"
-            disabled={filter.admin2.length > 0}
+            disabled={filter.admin2?.length > 0}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <AdminAreaAutocompleteMultipleRest
-            value={filter.admin2}
+          <AdminAreaAutocompleteMultipleRestFilter
+            value={filter.admin2 || []}
             onChange={(_, option) => {
               handleStateFilterChange('admin2', option);
             }}
             level={2}
             dataCy="filter-admin2"
-            disabled={filter.admin1.length > 0}
+            disabled={filter.admin1?.length > 0}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>

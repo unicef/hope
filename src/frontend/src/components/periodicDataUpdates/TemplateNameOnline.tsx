@@ -10,8 +10,11 @@ export const TemplateNameOnline: React.FC<TemplateNameOnlineProps> = ({
   setFieldValue,
   value,
 }) => {
+  const [error, setError] = React.useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFieldValue('name', e.target.value);
+    const newValue = e.target.value;
+    setError(newValue.length > 0 && newValue.length < 3);
+    setFieldValue('name', newValue);
   };
   return (
     <TextField
@@ -22,6 +25,9 @@ export const TemplateNameOnline: React.FC<TemplateNameOnlineProps> = ({
       margin="normal"
       value={value}
       onChange={handleChange}
+      error={error}
+      helperText={error ? 'Minimum 3 characters required' : ''}
+      slotProps={{ input: { inputProps: { minLength: 3 } } }}
     />
   );
 };
