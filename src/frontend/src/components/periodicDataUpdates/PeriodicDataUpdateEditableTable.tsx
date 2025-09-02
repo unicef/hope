@@ -209,30 +209,66 @@ const PeriodicDataUpdateEditableTable: React.FC<
                               }}
                             />
                           ) : field.subtype === 'BOOL' ? (
-                            <Checkbox
-                              checked={Boolean(field.value)}
-                              onChange={(e) => {
-                                setEditRows((prev) => {
-                                  const updated = [...prev];
-                                  const pduFieldsObj = {
-                                    ...updated[idx].pduFields,
-                                  };
-                                  pduFieldsObj[fieldKey] = {
-                                    ...pduFieldsObj[fieldKey],
-                                    value: e.target.checked,
-                                  };
-                                  updated[idx] = {
-                                    ...updated[idx],
-                                    pduFields: pduFieldsObj,
-                                  };
-                                  return updated;
-                                });
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                               }}
-                              sx={{
-                                display: 'block',
-                                margin: '0 auto',
-                              }}
-                            />
+                            >
+                              <Checkbox
+                                checked={field.value === true}
+                                indeterminate={
+                                  field.value === null ||
+                                  field.value === undefined
+                                }
+                                onChange={(e) => {
+                                  setEditRows((prev) => {
+                                    const updated = [...prev];
+                                    const pduFieldsObj = {
+                                      ...updated[idx].pduFields,
+                                    };
+                                    pduFieldsObj[fieldKey] = {
+                                      ...pduFieldsObj[fieldKey],
+                                      value: e.target.checked,
+                                    };
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      pduFields: pduFieldsObj,
+                                    };
+                                    return updated;
+                                  });
+                                }}
+                                sx={{
+                                  display: 'block',
+                                  margin: '0 auto',
+                                }}
+                              />
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                  setEditRows((prev) => {
+                                    const updated = [...prev];
+                                    const pduFieldsObj = {
+                                      ...updated[idx].pduFields,
+                                    };
+                                    pduFieldsObj[fieldKey] = {
+                                      ...pduFieldsObj[fieldKey],
+                                      value: null,
+                                    };
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      pduFields: pduFieldsObj,
+                                    };
+                                    return updated;
+                                  });
+                                }}
+                                title={t('Clear')}
+                              >
+                                {t('Clear')}
+                              </Button>
+                            </div>
                           ) : (
                             <TextField
                               variant="outlined"
