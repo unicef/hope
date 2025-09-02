@@ -36,7 +36,8 @@ type PeriodicDataUpdateEditableTableProps = {
     subtype: string;
     roundNumber?: number;
     roundName?: string;
-    columnName?: string;
+    fieldName?: string;
+    label?: string;
   }>;
   handleSaveRow: (rowIdx: number) => void;
   canSave: boolean;
@@ -109,7 +110,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                     minWidth: 120,
                   }}
                 >
-                  <span style={{ fontWeight: 600 }}>{field.key}</span>
+                  <span style={{ fontWeight: 600 }}>{field.label}</span>
                   {field.roundNumber && (
                     <span style={{ fontSize: 13, color: '#888' }}>
                       {t('Round')} {field.roundNumber || ''}
@@ -161,11 +162,12 @@ const PeriodicDataUpdateEditableTable: React.FC<
                 <TableCell>{individual.firstName}</TableCell>
                 <TableCell>{individual.lastName}</TableCell>
                 {allPduFields.map((col) => {
+                  const fieldKey = col.fieldName;
                   const field = individual.pduFields
-                    ? individual.pduFields[col.key]
+                    ? individual.pduFields[fieldKey]
                     : null;
                   return (
-                    <TableCell key={col.key} align="center">
+                    <TableCell key={fieldKey} align="center">
                       {field ? (
                         isEditing && field.isEditable ? (
                           field.subtype === 'DATE' ? (
@@ -187,8 +189,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                       'yyyy-MM-dd',
                                     );
                                   }
-                                  pduFieldsObj[col.key] = {
-                                    ...pduFieldsObj[col.key],
+                                  pduFieldsObj[fieldKey] = {
+                                    ...pduFieldsObj[fieldKey],
                                     value: formattedValue,
                                   };
                                   updated[idx] = {
@@ -215,8 +217,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                   const pduFieldsObj = {
                                     ...updated[idx].pduFields,
                                   };
-                                  pduFieldsObj[col.key] = {
-                                    ...pduFieldsObj[col.key],
+                                  pduFieldsObj[fieldKey] = {
+                                    ...pduFieldsObj[fieldKey],
                                     value: e.target.checked,
                                   };
                                   updated[idx] = {
@@ -250,8 +252,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                   const pduFieldsObj = {
                                     ...updated[idx].pduFields,
                                   };
-                                  pduFieldsObj[col.key] = {
-                                    ...pduFieldsObj[col.key],
+                                  pduFieldsObj[fieldKey] = {
+                                    ...pduFieldsObj[fieldKey],
                                     value: newValue,
                                   };
                                   updated[idx] = {
