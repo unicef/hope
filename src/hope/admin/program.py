@@ -208,10 +208,12 @@ class ProgramAdmin(
                         partners_for_limits_to_update.append((partner, areas_ids))
 
                 if partners_for_limits_to_delete:
-                    AdminAreaLimitedTo.objects.filter(partner__in=partners_for_limits_to_delete, program=program).delete()
+                    AdminAreaLimitedTo.objects.filter(
+                        partner__in=partners_for_limits_to_delete, program=program
+                    ).delete()
 
                 for partner, areas_ids in partners_for_limits_to_update:
-                    program_partner, _ = AdminAreaLimitedTo.objects.update_or_create(
+                    program_partner, _ = AdminAreaLimitedTo.objects.get_or_create(
                         partner=partner,
                         program=program,
                     )
