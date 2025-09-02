@@ -55,7 +55,7 @@ from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
-from django.db import OperationalError, connections
+from django.db import Error, OperationalError, connections
 from django.utils import timezone
 import elasticsearch
 from flags.models import FlagState
@@ -267,7 +267,7 @@ class Command(BaseCommand):
                         user.set_unusable_password()
                         user.save()
                         self.stdout.write(self.style.SUCCESS(f"Created user: {email}"))
-                    except Exception as e:
+                    except Error as e:
                         logger.warning(f"Failed to create user {email}: {e}")
         else:
             self.stdout.write("No email lists provided. Skipping user creation.")

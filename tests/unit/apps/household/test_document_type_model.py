@@ -7,8 +7,6 @@ from hope.apps.household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
 
 
 class TestDocumentTypeModel(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

@@ -109,9 +109,9 @@ export function LookUpHouseholdTableRow({
       </TableCell>
       {isAllPrograms && (
         <TableCell align="left">
-          {household.program ? (
-            <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
-              {household.program.name}
+          {household.programId ? (
+            <BlackLink to={`/${baseUrl}/details/${household.programId}`}>
+              {household.programName}
             </BlackLink>
           ) : (
             '-'

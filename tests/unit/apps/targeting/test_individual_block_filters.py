@@ -348,7 +348,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_collector_blocks(self) -> None:
         query = Household.objects.all().order_by("unicef_id")
-        hh = query.first()
+        hh = self.household_1_indiv
         IndividualRoleInHousehold.objects.create(
             individual=hh.individuals.first(),
             household=hh,
@@ -375,4 +375,4 @@ class TestIndividualBlockFilter(TestCase):
         payment_plan.rules.set([tcr])
         query = query.filter(payment_plan.get_query())
         assert query.count() == 1
-        assert query.first().unicef_id == self.household_1_indiv.unicef_id
+        assert query.first().id == self.household_1_indiv.id

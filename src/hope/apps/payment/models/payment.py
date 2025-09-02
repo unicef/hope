@@ -678,8 +678,8 @@ class PaymentPlan(
 
     def get_criteria_string(self) -> str:
         try:
-            return self.get_criteria_string()
-        except Exception:
+            return super().get_criteria_string()
+        except ValueError:
             return ""
 
     def remove_export_file_entitlement(self) -> None:

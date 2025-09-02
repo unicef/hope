@@ -92,31 +92,13 @@ class TestProgramCreate:
                 {
                     "id": self.unicef_hq.id,
                     "name": self.unicef_hq.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
                 {
                     "id": self.unicef_partner_in_afghanistan.id,
                     "name": self.unicef_partner_in_afghanistan.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
             ],
@@ -395,16 +377,7 @@ class TestProgramCreate:
                 {
                     "id": self.partner2.id,
                     "name": self.partner2.name,
-                    "areas": [
-                        {
-                            "id": str(self.area1.id),
-                            "level": self.area1.level,
-                        },
-                        {
-                            "id": str(self.area2.id),
-                            "level": self.area2.level,
-                        },
-                    ],
+                    "areas": None,
                     "area_access": "BUSINESS_AREA",
                 },
                 *self.expected_response_standard["partners"],

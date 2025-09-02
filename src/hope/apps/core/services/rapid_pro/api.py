@@ -8,6 +8,7 @@ from constance import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
 import requests
+from requests.exceptions import JSONDecodeError
 
 from hope.apps.core.models import BusinessArea
 
@@ -85,7 +86,7 @@ class RapidProAPI:
                 return False
             return [f"{phone_numbers[int(index)]} - phone number is incorrect" for index in urns]
 
-        except Exception:
+        except (JSONDecodeError, AttributeError):
             return False
 
     def _get_url(self) -> str:
@@ -132,7 +133,7 @@ class RapidProAPI:
                         urns=urns,
                     )
                 )
-            except Exception as e:
+            except (requests.exceptions.HTTPError, ValidationError) as e:
                 return successful_flows, e
         return successful_flows, None
 
@@ -197,7 +198,7 @@ class RapidProAPI:
                 ), None
             response, _ = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
-        except Exception as e:
+        except (requests.exceptions.HTTPError, ValidationError) as e:
             logger.warning(e)
             return str(e), None
 
@@ -232,7 +233,7 @@ class RapidProAPI:
                 "not_responded": not_responded_count,
                 "flow_start_status": flow_start_status,
             }
-        except Exception as e:
+        except requests.exceptions.HTTPError as e:
             logger.warning(e)
             return str(e), None
 
