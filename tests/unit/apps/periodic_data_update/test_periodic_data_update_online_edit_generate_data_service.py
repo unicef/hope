@@ -72,7 +72,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            label="muac",
+            label="MUAC",
             pdu_data=muac_data,
         )
         month_worked_data = PeriodicFieldDataFactory(
@@ -82,7 +82,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            label="month worked",
+            label="Month worked",
             pdu_data=month_worked_data,
         )
         cls.periodic_data_update_online_Edit = PDUOnlineEditFactory(
@@ -127,6 +127,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
+                        "label": "MUAC",
                         "is_editable": True,
                     },
                     "month_worked": {
@@ -135,6 +136,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.BOOL,
+                        "label": "Month worked",
                         "is_editable": True,
                     },
                 },
@@ -151,6 +153,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
+                        "label": "MUAC",
                         "is_editable": True,
                     },
                     "month_worked": {
@@ -159,6 +162,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.BOOL,
+                        "label": "Month worked",
                         "is_editable": True,
                     },
                 },
@@ -197,6 +201,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": 20,  # value is already set
                         "collection_date": None,  # collection date is not needed as the value will not be edited
                         "subtype": PeriodicFieldData.DECIMAL,
+                        "label": "MUAC",
                         "is_editable": False,
                     },
                     "month_worked": {
@@ -205,6 +210,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.BOOL,
+                        "label": "Month worked",
                         "is_editable": True,
                     },
                 },
@@ -221,6 +227,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
+                        "label": "MUAC",
                         "is_editable": True,
                     },
                     "month_worked": {
@@ -229,6 +236,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.BOOL,
+                        "label": "Month worked",
                         "is_editable": True,
                     },
                 },
@@ -272,6 +280,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.DECIMAL,
+                        "label": "MUAC",
                         "is_editable": True,
                     },
                     "month_worked": {
@@ -280,6 +289,7 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
                         "value": None,
                         "collection_date": None,
                         "subtype": PeriodicFieldData.BOOL,
+                        "label": "Month worked",
                         "is_editable": True,
                     },
                 },
