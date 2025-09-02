@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from django.core.management import BaseCommand
+from django.db import Error
 from django_countries import countries
 
 from hope.apps.geo.missing_countries import missing_countries
@@ -48,7 +49,7 @@ def initialize_countries() -> dict:
             else:
                 country = Country(iso_code2=c.get("iso_code2"), **data)
             country.save()
-    except Exception as e:
+    except Error as e:
         logger.warning(e)
         results["errors"].append(e)
     return results

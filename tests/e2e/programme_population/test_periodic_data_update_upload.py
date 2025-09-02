@@ -4,6 +4,7 @@ from typing import Any
 
 import openpyxl
 import pytest
+from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
@@ -233,7 +234,7 @@ class TestPeriodicDataUpdateUpload:
         page_individuals.get_nav_programme_population().click()
         try:
             page_individuals.get_nav_individuals().click()
-        except BaseException:
+        except TimeoutException:
             page_individuals.get_nav_programme_population().click()
             page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
@@ -329,7 +330,7 @@ class TestPeriodicDataUpdateUpload:
         page_individuals.get_nav_programme_population().click()
         try:
             page_individuals.get_nav_individuals().click()
-        except BaseException:
+        except TimeoutException:
             page_individuals.get_nav_programme_population().click()
             page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
