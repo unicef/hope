@@ -112,12 +112,11 @@ const PeriodicDataUpdateEditableTable: React.FC<
                   <span style={{ fontWeight: 600 }}>{field.key}</span>
                   {field.roundNumber && (
                     <span style={{ fontSize: 13, color: '#888' }}>
-                      {t('Round')}{' '}
-                      {field.roundNumber ? `(${field.roundNumber})` : ''}
+                      {t('Round')} {field.roundNumber || ''}
                     </span>
                   )}
                   {field.roundName && (
-                    <span style={{ fontSize: 13, color: '#888' }}>
+                    <span style={{ fontSize: 11, color: '#888' }}>
                       {field.roundName}
                     </span>
                   )}
@@ -199,7 +198,13 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                   return updated;
                                 });
                               }}
-                              slotProps={{ textField: { fullWidth: true } }}
+                              format="yyyy-MM-dd"
+                              slotProps={{
+                                textField: {
+                                  fullWidth: true,
+                                  inputProps: { mask: '____-__-__' },
+                                },
+                              }}
                             />
                           ) : field.subtype === 'BOOL' ? (
                             <Checkbox
@@ -292,25 +297,41 @@ const PeriodicDataUpdateEditableTable: React.FC<
                     templateStatus === 'NEW' &&
                     (isEditing ? (
                       (() => {
-                        // Check if any editable field value is empty
-                        const hasEmptyEditable = allPduFields.some((col) => {
-                          const field = individual.pduFields?.[col.key];
-                          if (!field || !field.isEditable) return false;
-                          // Consider empty for: null, undefined, empty string
-                          return (
-                            field.value === undefined ||
-                            field.value === null ||
-                            (typeof field.value === 'string' &&
-                              field.value.trim() === '')
-                          );
-                        });
                         return (
                           <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            onClick={() => handleSaveRow(idx)}
-                            disabled={hasEmptyEditable}
+                            onClick={() => {
+                              setEditRows((prev) => {
+                                const updated = [...prev];
+                                const pduFieldsObj = {
+                                  ...updated[idx].pduFields,
+                                };
+                                allPduFields.forEach((col) => {
+                                  const field = pduFieldsObj[col.key];
+                                  if (field && field.isEditable) {
+                                    if (
+                                      field.value === undefined ||
+                                      field.value === null ||
+                                      (typeof field.value === 'string' &&
+                                        field.value.trim() === '')
+                                    ) {
+                                      pduFieldsObj[col.key] = {
+                                        ...field,
+                                        value: null,
+                                      };
+                                    }
+                                  }
+                                });
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  pduFields: pduFieldsObj,
+                                };
+                                return updated;
+                              });
+                              handleSaveRow(idx);
+                            }}
                           >
                             {t('Save')}
                           </Button>

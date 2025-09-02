@@ -105,6 +105,14 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
     onSuccess: () => {
       showMessage(t('Template approved successfully.'));
+      queryClient.invalidateQueries({
+        queryKey: [
+          'onlineEditsTemplateDetails',
+          businessArea,
+          programId,
+          numericId,
+        ],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -186,6 +194,14 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
     onSuccess: () => {
       showMessage('Template merged successfully.');
+      queryClient.invalidateQueries({
+        queryKey: [
+          'onlineEditsTemplateDetails',
+          businessArea,
+          programId,
+          numericId,
+        ],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -269,12 +285,12 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const handleSaveRow = async (rowIdx: number) => {
     const rowData = editRows[rowIdx];
     try {
-      await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdate(
+      await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate(
         {
           businessAreaSlug: businessArea,
           programSlug: programId,
           id: numericId,
-          ...rowData,
+          requestBody: rowData,
         },
       );
       setEditingRows((prev) => {
