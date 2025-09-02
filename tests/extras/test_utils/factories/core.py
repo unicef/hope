@@ -400,7 +400,6 @@ def generate_pdu_data() -> None:
         rounds_names=["test1", "test2", "test3..."],
     )
     FlexibleAttributeForPDUFactory(
-        name="test_1_i_f",
         program=test_program,
         pdu_data=pdu_data,
         label="Test pdu 1",
