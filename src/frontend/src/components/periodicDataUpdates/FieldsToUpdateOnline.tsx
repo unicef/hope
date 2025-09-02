@@ -72,7 +72,6 @@ export const FieldsToUpdateOnline: FC<FieldsToUpdateOnlineProps> = ({
     };
     setCheckedFields(updatedCheckedFields);
   };
-  console.log('roundsData:', values.roundsData);
 
   return (
     <FieldArray
