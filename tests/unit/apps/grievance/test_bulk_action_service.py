@@ -26,8 +26,6 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
 @pytest.mark.skip("Too flaky, hard to pass, need to fix")
 class TestGrievanceApproveAutomaticMutation(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

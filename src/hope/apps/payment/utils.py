@@ -159,7 +159,7 @@ def get_payment_delivered_quantity_status_and_value(
     delivered_quantity_decimal: Decimal = to_decimal(delivered_quantity)  # type: ignore
 
     if delivered_quantity_decimal is None:
-        raise Exception(f"Invalid delivered quantity {delivered_quantity}")
+        raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
     if delivered_quantity_decimal < 0:
         return Payment.STATUS_ERROR, None
@@ -173,7 +173,7 @@ def get_payment_delivered_quantity_status_and_value(
     if delivered_quantity_decimal == entitlement_quantity:
         return Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity_decimal
 
-    raise Exception(f"Invalid delivered quantity {delivered_quantity}")
+    raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
 def generate_cache_key(data: dict[str, Any]) -> str:

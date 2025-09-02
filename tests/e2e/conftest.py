@@ -14,6 +14,7 @@ from flags.models import FlagState
 import pytest
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -215,7 +216,7 @@ def download_path(worker_id: str) -> str:
     try:
         assert worker_id is not None
         yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
-    except BaseException:
+    except (AssertionError, TimeoutException):
         yield settings.DOWNLOAD_DIRECTORY
 
 

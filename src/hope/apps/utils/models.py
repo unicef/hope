@@ -9,6 +9,7 @@ import warnings
 import celery
 from celery import states
 from celery.contrib.abortable import AbortableAsyncResult
+from celery.exceptions import TimeoutError as CeleryTimeoutError
 from concurrency.fields import IntegerVersionField
 from django.conf import settings
 from django.db import models
@@ -21,6 +22,9 @@ from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+import redis
+import requests
+import sentry_sdk
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
@@ -258,8 +262,8 @@ class AbstractSession(models.Model):
 
             err = capture_exception(exc)
             self.sentry_id = err
-        except Exception:
-            logger.warning("Cannot log with Sentry")
+        except (sentry_sdk.integrations.exceptions.IntegrationError, requests.exceptions.ConnectionError) as e:
+            logger.warning(f"Cannot log with Sentry: {e}")
 
         try:
             from django.views.debug import ExceptionReporter
@@ -581,7 +585,8 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             else:
                 result = self.CELERY_STATUS_NOT_SCHEDULED
             return result
-        except Exception as e:
+        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError, CeleryTimeoutError) as e:
+            logger.warning(f"Error getting celery status: {e}")
             return str(e)
 
     def queue(self, task_name: str | None = None, *args: Any, **kwargs: Any) -> str | None:

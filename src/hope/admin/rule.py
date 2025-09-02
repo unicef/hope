@@ -29,6 +29,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.models import User
 from hope.apps.administration.widgets import JsonWidget
+from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import (
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
@@ -267,7 +268,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                             result = rule.execute(entry, only_enabled=False, only_release=False)
                             for attr in form.cleaned_data["results"]:
                                 entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
-                        except Exception as e:
+                        except (ValueError, RuleError) as e:
                             entry[info_col] = str(e)
                         results.append(entry)
                     context["results"] = results
@@ -345,7 +346,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                     state.revert(["definition"])
             url = reverse("admin:steficon_rule_change", args=[self.object.id])
             return HttpResponseRedirect(url)
-        except Exception as e:
+        except RuleCommit.DoesNotExist as e:
             logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
@@ -378,7 +379,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 f"Change #{state.version} on {state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
             )
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
-        except Exception as e:
+        except RuleCommit.DoesNotExist as e:
             logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
