@@ -239,14 +239,20 @@ const PeriodicDataUpdateEditableTable: React.FC<
                               fullWidth
                               size="small"
                               type={
-                                field.subtype === 'NUMBER' ? 'number' : 'text'
+                                field.subtype === 'DECIMAL' ? 'number' : 'text'
                               }
                               value={field.value ?? ''}
                               onChange={(e) => {
-                                const newValue =
-                                  field.subtype === 'NUMBER'
-                                    ? Number(e.target.value)
-                                    : e.target.value;
+                                let newValue;
+                                if (field.subtype === 'DECIMAL') {
+                                  // If input is empty, set to null
+                                  newValue =
+                                    e.target.value === ''
+                                      ? null
+                                      : Number(e.target.value);
+                                } else {
+                                  newValue = e.target.value;
+                                }
                                 setEditRows((prev) => {
                                   const updated = [...prev];
                                   const pduFieldsObj = {
