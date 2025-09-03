@@ -4,7 +4,7 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 
 
-def populate_rounds_covered(apps, schema_editor):
+def populate_rounds_covered(apps, schema_editor):  # pragma: no cover
     Program = apps.get_model("program", "Program")
     PDUXlsxTemplate = apps.get_model("periodic_data_update", "PDUXlsxTemplate")
     FlexibleAttribute = apps.get_model("core", "FlexibleAttribute")
