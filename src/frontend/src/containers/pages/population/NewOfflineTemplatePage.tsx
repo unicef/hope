@@ -111,7 +111,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: beneficiaryGroup?.memberLabelPlural,
-      to: `/${baseUrl}/population/individuals`,
+      to: `/${baseUrl}/population/${isPeople ? 'people' : 'individuals'}`,
     },
   ];
 
@@ -191,7 +191,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
         onSuccess: () => {
           showMessage(t('Template created successfully.'));
           navigate(
-            `/${baseUrl}/population/individuals?tab=periodic-data-updates&subtab=offline-templates`,
+            `/${baseUrl}/population/${isPeople ? 'people' : 'individuals'}?tab=periodic-data-updates&subtab=offline-templates`,
           );
         },
         onError: (error: any) => {
