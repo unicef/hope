@@ -205,7 +205,7 @@ class TestPDUXlsxUpload:
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
-        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "SUCCESSFUL"
+        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Successful"
 
     @pytest.mark.night
     def test_periodic_data_update_upload_form_error(
@@ -244,12 +244,11 @@ class TestPDUXlsxUpload:
         page_individuals.get_dialog_import()
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_tab_offline_edits().click()
         page_individuals.get_status_container()
         periodic_data_update_upload = PDUXlsxUpload.objects.first()
         assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
-        assert page_individuals.get_status_container().text == "FAILED"
-        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "FAILED"
+        assert page_individuals.get_status_container().text == "Failed"
+        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Failed"
         page_individuals.get_update_details_btn(periodic_data_update_upload.pk).click()
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert page_individuals.get_pdu_form_errors().text == error_text
