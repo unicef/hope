@@ -85,7 +85,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             ],
             "accounts": [
                 {
-                    "account_type": "bank",
+                    "type": self.account_type.key,
                     "number": "123456789",
                     "financial_institution": self.fi.id,
                     "data": {"field_name": "field_value"},
