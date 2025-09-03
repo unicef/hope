@@ -360,7 +360,7 @@ class PeriodicFieldData(models.Model):
     rounds_covered = models.PositiveSmallIntegerField(
         default=0,
         blank=True,
-        help_text="Number of rounds already used in templates and cannot be used again in template creation again.",
+        help_text="Number of rounds already used in templates and cannot be used in template creation again.",
     )
 
     class Meta:

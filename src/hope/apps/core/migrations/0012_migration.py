@@ -24,9 +24,6 @@ def populate_rounds_covered(apps, schema_editor):
 
         templates = PDUXlsxTemplate.objects.filter(program=program)
         for template in templates.iterator():
-            if not template.rounds_data:
-                continue
-
             for item in template.rounds_data:
                 field_name = item.get("field")
                 round_used_in_template = item.get("round", 0)
@@ -69,7 +66,7 @@ class Migration(migrations.Migration):
             field=models.PositiveSmallIntegerField(
                 blank=True,
                 default=0,
-                help_text="Number of rounds already used in templates and cannot be used again in template creation again.",
+                help_text="Number of rounds already used in templates and cannot be used in template creation again.",
             ),
         ),
         migrations.RunPython(populate_rounds_covered, reverse_code=migrations.RunPython.noop),
