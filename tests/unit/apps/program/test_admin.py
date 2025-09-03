@@ -1,6 +1,7 @@
-import pytest
 from django.urls import reverse
 from django_webtest import WebTest
+import pytest
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -9,7 +10,6 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
 from hope.apps.geo.models import Area
 

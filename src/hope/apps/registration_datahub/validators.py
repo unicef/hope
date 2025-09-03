@@ -1,22 +1,22 @@
-import itertools
-import logging
-import re
 from collections import Counter, defaultdict
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+import itertools
 from itertools import zip_longest
+import logging
 from operator import itemgetter
 from pathlib import Path
+import re
 from typing import Any, Callable, Sequence
 from zipfile import BadZipfile
 
-import openpyxl
-import phonenumbers
 from dateutil import parser
 from django.core import validators as django_core_validators
+import openpyxl
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
+import phonenumbers
 from PIL.Image import Image
 
 from hope.apps.core.field_attributes.core_fields_attributes import (
@@ -51,7 +51,7 @@ from hope.apps.registration_datahub.utils import (
 logger = logging.getLogger(__name__)
 
 
-class XlsxException(Exception):
+class XlsxError(Exception):
     def __init__(self, errors: list) -> None:
         self.errors = errors
 
@@ -68,7 +68,7 @@ class XLSXValidator(BaseValidator):
 
         if errors_list:
             errors_list.sort(key=itemgetter("header"))
-            raise XlsxException(errors_list)
+            raise XlsxError(errors_list)
 
     @classmethod
     def validate_file_extension(cls, *args: Any, **kwargs: Any) -> list:
@@ -229,7 +229,8 @@ class ImportDataInstanceValidator:
                         if value and not issuing_country:
                             error = {
                                 "header": key_name,
-                                "message": f"Issuing country for {key_name} is required, when any document data are provided",
+                                "message": f"Issuing country for {key_name} is required,"
+                                f" when any document data are provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
@@ -467,11 +468,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         selected_choices = value.split(" ")
                 else:
                     selected_choices = [value]
-                for choice in selected_choices:
-                    if isinstance(choice, str):
-                        choice = choice.strip()
+                for unstrip_choice in selected_choices:
+                    if isinstance(unstrip_choice, str):
+                        choice = unstrip_choice.strip()
                         if choice in choices or choice.upper() in choices:
                             return True
+                    else:
+                        choice = unstrip_choice
                     if choice in choices:
                         return True
                 return False
@@ -751,7 +754,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             }
                         )
                     elif count > 1:
-                        message = f"Sheet: 'Individuals', There are multiple head of households for household with id: {household_id}"
+                        message = (
+                            f"Sheet: 'Individuals', "
+                            f"There are multiple head of households for household with id: {household_id}"
+                        )
                         invalid_rows.append(
                             {
                                 "row_number": 0,
@@ -1011,7 +1017,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         {
                             "row_number": row,
                             "header": "Individuals",
-                            "message": f"Individual from row: {row} cannot be the primary and the alternate collector for households: {', '.join(households_ids)} at the same time.",
+                            "message": f"Individual from row: {row} cannot be the primary and the alternate collector"
+                            f" for households: {', '.join(households_ids)} at the same time.",
                         }
                     )
             return errors
@@ -1043,7 +1050,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"There are duplicates with id(s): {duplicates}. Number have to be unique in the field pp_index_id.",
+                            "message": f"There are duplicates with id(s): {duplicates}."
+                            f" Number have to be unique in the field pp_index_id.",
                         }
                     )
                     return
@@ -1115,7 +1123,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Invalid value in field 'pp_primary_collector_id' for Individual with index_id {index_id}. "
+                            "message": f"Invalid value in field 'pp_primary_collector_id' "
+                            f"for Individual with index_id {index_id}. "
                             f"Value cannot be empty for relationship {NON_BENEFICIARY}",
                         }
                     )
@@ -1407,8 +1416,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 if custom_validate_choices_method is not None:
                     return None if custom_validate_choices_method(str_value) is True else message
 
-                for choice in selected_choices:
-                    choice = choice.strip()
+                for unstrip_choice in selected_choices:
+                    choice = unstrip_choice.strip()
                     if choice not in choices and choice.upper() not in choices:
                         return message
                 return None
@@ -1482,7 +1491,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             if collector_data in collectors_unique_data:
                 return {
                     "header": "role_i_c",
-                    "message": "The same individual cannot be a primary and alternate collector for the same household.",
+                    "message": "The same individual cannot be a primary and alternate collector"
+                    " for the same household.",
                 }
             collectors_unique_data.append(collector_data)
         return None

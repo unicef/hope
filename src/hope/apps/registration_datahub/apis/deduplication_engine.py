@@ -44,14 +44,14 @@ class DeduplicationEngineAPI(BaseAPI):
     API_KEY_ENV_NAME = "DEDUPLICATION_ENGINE_API_KEY"
     API_URL_ENV_NAME = "DEDUPLICATION_ENGINE_API_URL"
 
-    class DeduplicationEngineAPIException(Exception):
+    class DeduplicationEngineAPIError(Exception):
         pass
 
-    class DeduplicationEngineMissingAPICredentialsException(Exception):
+    class DeduplicationEngineMissingAPICredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = DeduplicationEngineAPIException  # type: ignore
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsException  # type: ignore
+    API_EXCEPTION_CLASS = DeduplicationEngineAPIError  # type: ignore
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsError  # type: ignore
 
     class Endpoints:
         GET_DEDUPLICATION_SETS = "deduplication_sets/"  # GET - List view
@@ -61,7 +61,8 @@ class DeduplicationEngineAPI(BaseAPI):
         PROCESS_DEDUPLICATION = "deduplication_sets/{pk}/process/"  # POST - Start processing a deduplication set
 
         BULK_UPLOAD_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/"  # POST - Create view
-        BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"  # DELETE - Delete all images for a deduplication set
+        # DELETE - Delete all images for a deduplication set
+        BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"
 
         GET_DUPLICATES = "deduplication_sets/{deduplication_set_pk}/duplicates/"  # GET - List view
         IGNORED_KEYS = "deduplication_sets/{deduplication_set_pk}/ignored/reference_pks/"  # POST/GET

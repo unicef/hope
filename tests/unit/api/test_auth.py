@@ -2,18 +2,19 @@ from unittest.mock import MagicMock, Mock
 
 from django.test import TestCase
 from django.urls import reverse
+import pytest
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-from unit.api.base import HOPEApiTestCase
-from unit.api.factories import APITokenFactory
-
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.api.models import APIToken, Grant
+from unit.api.base import HOPEApiTestCase
+from unit.api.factories import APITokenFactory
 
 
 class HOPEPermissionTest(TestCase):
@@ -55,7 +56,7 @@ class HOPEAuthenticationTest(HOPEApiTestCase):
     def test_auth_fails(self) -> None:
         p = HOPEAuthentication()
         request = MagicMock(META={"HTTP_AUTHORIZATION": "Token 123"})
-        with self.assertRaises(AuthenticationFailed):
+        with pytest.raises(AuthenticationFailed):
             p.authenticate(request)
 
 

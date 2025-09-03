@@ -3,8 +3,8 @@ from typing import Callable
 from unittest.mock import Mock, call, patch
 
 import pytest
-from extras.test_utils.factories.account import BusinessAreaFactory
 
+from extras.test_utils.factories.account import BusinessAreaFactory
 from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
@@ -167,7 +167,6 @@ def test_update_recent_dashboard_figures_ba_error_continues(
         if slug == afghanistan.slug:
             raise Exception("BA refresh error for afghanistan")
         # For other BAs (e.g., iraq), the mock should behave normally (return None)
-        return
 
     mock_ba_refresh.side_effect = ba_refresh_side_effect_func
 

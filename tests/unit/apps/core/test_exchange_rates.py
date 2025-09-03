@@ -1,12 +1,12 @@
-import os
 from datetime import datetime, timedelta
+import os
 from typing import Any, Optional
 from unittest import mock
 
-import requests_mock
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from parameterized import parameterized
+import requests_mock
 
 from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy
@@ -180,7 +180,7 @@ class TestExchangeRatesAPI(TestCase):
         ]
     )
     @override_settings(EXCHANGE_RATES_API_KEY="TEST_API_KEY")
-    def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
+    def test_api_class_initialization(self, helper: str, api_key: str, api_url: str) -> None:
         api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
         if api_key is not None:
@@ -278,7 +278,7 @@ class TestExchangeRates(TestCase):
     )
     def test_get_exchange_rate_for_currency_code(
         self,
-        _: Any,
+        helper: str,
         currency_code: str,
         dispersion_date: datetime,
         expected_result: Any,

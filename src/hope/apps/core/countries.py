@@ -1,5 +1,5 @@
-import logging
 from functools import cache
+import logging
 from typing import Any
 
 from django_countries import countries as internal_countries

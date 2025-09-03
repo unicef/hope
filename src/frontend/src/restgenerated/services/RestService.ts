@@ -686,6 +686,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -747,6 +748,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedChoiceList
      * @throws ApiError
      */
@@ -808,6 +810,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -874,6 +877,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -955,6 +959,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -976,6 +981,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -999,6 +1005,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -1026,6 +1033,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -1053,6 +1061,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1774,7 +1783,7 @@ export class RestService {
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        formData: GrievanceHouseholdDataChangeApprove,
+        formData?: GrievanceHouseholdDataChangeApprove,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -4618,6 +4627,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -4655,6 +4665,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaymentChoices
      * @throws ApiError
      */
@@ -4672,6 +4683,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4697,6 +4709,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentPlanList
      * @throws ApiError
      */
@@ -4823,6 +4836,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaymentPlanBulkAction
      * @throws ApiError
      */
@@ -4920,7 +4934,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        search?: any,
+        search?: string,
         /**
          * Program sector
          *
@@ -4998,6 +5012,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -5062,6 +5077,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedChoiceList
      * @throws ApiError
      */
@@ -5126,6 +5142,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5216,7 +5233,7 @@ export class RestService {
          */
         ordering?: string,
         program?: string,
-        search?: any,
+        search?: string,
         startDate?: string,
         /**
          * * `DRAFT` - Draft
@@ -5475,7 +5492,7 @@ export class RestService {
          */
         ordering?: string,
         program?: string,
-        search?: any,
+        search?: string,
         startDate?: string,
         /**
          * * `DRAFT` - Draft
@@ -5516,6 +5533,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -5600,6 +5618,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -5624,6 +5643,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -5650,6 +5670,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -5680,6 +5701,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -5710,6 +5732,7 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -12532,7 +12555,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        search?: any,
+        search?: string,
         /**
          * Program sector
          *
@@ -12697,7 +12720,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        search?: any,
+        search?: string,
         /**
          * Program sector
          *

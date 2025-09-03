@@ -1,6 +1,8 @@
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
@@ -11,7 +13,6 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Country
@@ -141,7 +142,7 @@ class TestHousehold(TestCase):
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         HouseholdFactory(unicef_id="HH-123", program=self.program)
         HouseholdFactory(unicef_id="HH-000", program=self.program)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             HouseholdFactory(unicef_id="HH-123", program=self.program)
 
     def test_geopoint(self) -> None:
@@ -188,7 +189,7 @@ class TestDocument(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="213123",
                 individual=self.individual,
@@ -254,7 +255,7 @@ class TestDocument(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="213123",
                 individual=self.individual,
@@ -317,7 +318,7 @@ class TestDocument(TestCase):
             program=self.program,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="11111",
                 individual=self.individual,
@@ -348,7 +349,7 @@ class TestDocument(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="456",
                 individual=self.individual,
@@ -411,7 +412,7 @@ class TestIndividualModel(TestCase):
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         IndividualFactory(unicef_id="IND-123", program=self.program)
         IndividualFactory(unicef_id="IND-000", program=self.program)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             IndividualFactory(unicef_id="IND-123", program=self.program)
 
     def test_mark_as_distinct_raise_errors(self) -> None:
@@ -437,7 +438,5 @@ class TestIndividualModel(TestCase):
         doc_2.document_number = "123456ABC"
         doc_2.save()
 
-        with self.assertRaises(Exception) as error:
+        with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
             ind.mark_as_distinct()
-
-        assert str(error.exception) == "IND-333: Valid Document already exists: 123456ABC."

@@ -1,19 +1,20 @@
 from time import sleep
 from typing import List
 
-from e2e.page_object.base_components import BaseComponents
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class CountryDashboard(BaseComponents):
-    navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
-    mainContent = 'div[data-cy="main-content"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
+    nav_resources_release_note = 'a[data-cy="nav-resources-Release Note"]'
+    main_content = 'div[data-cy="main-content"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
     iframe_locator = 'iframe[title="Dashboard"]'
     total_amount_paid = "div#total-amount-paid"
     total_amount_paid_local = "div#total-amount-paid-local"
@@ -32,7 +33,7 @@ class CountryDashboard(BaseComponents):
         for _ in range(retries):
             try:
                 iframe = WebDriverWait(self.driver, 30).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Dashboard"]'))
+                    expected_conditions.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Dashboard"]'))
                 )
                 self.driver.switch_to.frame(iframe)
                 return
@@ -45,16 +46,16 @@ class CountryDashboard(BaseComponents):
         self.driver.switch_to.default_content()
 
     def get_nav_resources_release_note(self) -> WebElement:
-        return self.wait_for(self.navResourcesReleaseNote)
+        return self.wait_for(self.nav_resources_release_note)
 
     def get_main_content(self) -> WebElement:
-        return self.wait_for(self.mainContent)
+        return self.wait_for(self.main_content)
 
     def get_page_header_container(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+        return self.wait_for(self.page_header_container)
 
     def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+        return self.wait_for(self.page_header_title)
 
     def get_total_amount_paid(self) -> WebElement:
         return self.wait_for(self.total_amount_paid)
@@ -77,9 +78,9 @@ class CountryDashboard(BaseComponents):
     def get_children_reached(self) -> WebElement:
         return self.wait_for(self.children_reached)
 
-    def getTableLabel(self) -> [WebElement]:
-        self.wait_for(self.tableLabel)
-        return self.get_elements(self.tableLabel)
+    def get_table_label(self) -> [WebElement]:
+        self.wait_for(self.table_label)
+        return self.get_elements(self.table_label)
 
     def get_individuals_reached(self) -> WebElement:
         return self.wait_for(self.individuals_reached)

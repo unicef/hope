@@ -118,11 +118,11 @@ class TargetingCriteriaRuleQueryingBase:
         individuals_filters_blocks_strings = [x.get_criteria_string() for x in individuals_filters_blocks]
         collectors_filters_blocks_strings = [x.get_criteria_string() for x in collectors_filters_blocks]
         all_strings = []
-        if len(filters_strings):
+        if filters_strings:
             all_strings.append(f"H({' AND '.join(filters_strings).strip()})")
-        if len(individuals_filters_blocks_strings):
+        if individuals_filters_blocks_strings:
             all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
-        if len(collectors_filters_blocks_strings):
+        if collectors_filters_blocks_strings:
             all_strings.append(f"C({' AND '.join(collectors_filters_blocks_strings).strip()})")
         return " AND ".join(all_strings).strip()
 
@@ -172,13 +172,13 @@ class TargetingIndividualRuleFilterBlockBase:
         filtered = False
         search_query = SearchQuery("")
 
-        for ruleFilter in filters:
+        for rule_filter in filters:
             filtered = True
-            if ruleFilter.field_name in ("observed_disability", "full_name"):
-                for arg in getattr(ruleFilter, "parametrizer", []):
+            if rule_filter.field_name in ("observed_disability", "full_name"):
+                for arg in getattr(rule_filter, "parametrizer", []):
                     search_query &= SearchQuery(arg)
             else:
-                individuals_query &= ruleFilter.get_query()
+                individuals_query &= rule_filter.get_query()
         if not filtered:
             return Q()
         if self.target_only_hoh:
@@ -407,10 +407,12 @@ class TargetingCriteriaFilterBase:
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
                 logger.warning(
-                    f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
+                    f"There is no PDU Flex Field Attribute associated with this fieldName"
+                    f" {self.field_name} in program {program.name}"
                 )
                 raise ValidationError(
-                    f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
+                    f"There is no PDU Flex Field Attribute associated with this fieldName"
+                    f" {self.field_name} in program {program.name}"
                 )
             if not self.round_number:
                 logger.warning(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
@@ -418,10 +420,12 @@ class TargetingCriteriaFilterBase:
             flex_field_attr_rounds_number = flex_field_attr.pdu_data.number_of_rounds
             if self.round_number > flex_field_attr_rounds_number:
                 logger.warning(
-                    f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
+                    f"Round number {self.round_number} is greater than the number of rounds for PDU"
+                    f" Flex Field Attribute {self.field_name}"
                 )
                 raise ValidationError(
-                    f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
+                    f"Round number {self.round_number} is greater than the number of rounds for PDU"
+                    f" Flex Field Attribute {self.field_name}"
                 )
             field_name_combined = f"{flex_field_attr.name}__{self.round_number}__value"
         else:

@@ -1,6 +1,5 @@
 from typing import Any, Optional
 
-import mptt
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
@@ -14,6 +13,7 @@ from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from fernet_fields import EncryptedCharField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
+import mptt
 from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 
@@ -121,7 +121,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     deduplication_possible_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
-        help_text="Results equal or above this score are considered possible duplicates (needs adjudication) must be lower than deduplication_duplicate_score",
+        help_text="Results equal or above this score are considered possible duplicates (needs adjudication) "
+        "must be lower than deduplication_duplicate_score",
     )
 
     deduplication_batch_duplicates_percentage = models.IntegerField(
@@ -165,6 +166,12 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             ("ping_rapidpro", "Can test RapidPRO connection"),
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
         )
+        indexes = [
+            # Optimize queries filtering by active status
+            models.Index(fields=["active"], name="idx_ba_active"),
+            # Optimize queries by slug (already has db_index but adding compound index for performance)
+            models.Index(fields=["slug", "active"], name="idx_ba_slug_active"),
+        ]
 
     def __str__(self) -> str:
         return self.name

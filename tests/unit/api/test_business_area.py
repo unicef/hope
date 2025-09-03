@@ -1,9 +1,9 @@
-from extras.test_utils.factories.account import BusinessAreaFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase, token_grant_permission
 
+from extras.test_utils.factories.account import BusinessAreaFactory
 from hope.api.models import Grant
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):
@@ -37,7 +37,6 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         response = self.client.get(self.list_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
-            self.client.force_authenticate(self.user)
             response = self.client.get(self.list_url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 3

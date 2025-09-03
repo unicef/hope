@@ -1,5 +1,5 @@
-import logging
 from functools import wraps
+import logging
 from typing import Any, Callable
 
 logger = logging.getLogger(__name__)

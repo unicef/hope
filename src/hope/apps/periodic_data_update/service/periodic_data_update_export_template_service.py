@@ -1,10 +1,10 @@
 from tempfile import NamedTemporaryFile
 
-import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.db import transaction
 from django.db.models import Q, QuerySet
+import openpyxl
 from openpyxl.packaging.custom import StringProperty
 
 from hope.apps.core.attributes_qet_queries import age_to_birth_date_query
@@ -222,7 +222,7 @@ class PeriodicDataUpdateExportTemplateService:
                 .values_list(individual_field_name, flat=True)
             ]
             ticket_individual_ids.update(ids)
-        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
         ids = [
             str(x)
             for x in PossibleDuplicateThrough.objects.filter(individual__in=individuals_ids)

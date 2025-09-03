@@ -2,7 +2,6 @@ import base64
 from typing import Any, Generator
 from uuid import UUID
 
-import requests
 from admin_extra_buttons.decorators import button
 from adminactions.mass_update import mass_update
 from adminfilters.combo import ChoicesFieldComboFilter
@@ -21,6 +20,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase

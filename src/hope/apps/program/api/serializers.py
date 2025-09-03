@@ -1,14 +1,15 @@
 import re
 from typing import Any
 
-from django.db.models import Count, F, Q, Value
+from django.db.models import Exists, F, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.api.serializers import PartnerForProgramSerializer
-from hope.apps.account.models import Partner
+from hope.apps.account.models import AdminAreaLimitedTo, Partner
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.api.serializers import DataCollectingTypeSerializer
 from hope.apps.core.models import (
@@ -186,11 +187,10 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"start_date": "Programme Cycle start date must be between programme start and end dates."}
                 )
-        else:
-            if start_date < program.start_date:
-                raise serializers.ValidationError(
-                    {"start_date": "Programme Cycle start date cannot be before programme start date."}
-                )
+        elif start_date < program.start_date:
+            raise serializers.ValidationError(
+                {"start_date": "Programme Cycle start date cannot be before programme start date."}
+            )
 
         if end_date:
             if not program.end_date and end_date < program.start_date:
@@ -304,7 +304,9 @@ class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
-    number_of_households_with_tp_in_program = serializers.SerializerMethodField()
+    number_of_households_with_tp_in_program = serializers.IntegerField(
+        source="annotate_number_of_households_with_tp_in_program"
+    )
 
     class Meta:
         model = Program
@@ -332,21 +334,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
     def get_pdu_fields(self, obj: Program) -> list[str]:
         return [pdu_field.id for pdu_field in obj.pdu_fields.all()]  # to save queries
 
-    def get_number_of_households_with_tp_in_program(self, obj: Program) -> int:
-        return (
-            Household.objects.filter(payment__parent__program_cycle__program=obj)
-            .annotate(
-                valid_payment_count=Count(
-                    "payment",
-                    filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
-                    distinct=True,
-                )
-            )
-            .filter(valid_payment_count__gt=0)
-            .distinct()
-            .count()
-        )
-
 
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     partners = serializers.SerializerMethodField()
@@ -366,7 +353,6 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "registration_imports_total_count",
             "target_populations_count",
             "population_goal",
-            "version",
             "screen_beneficiary",
         )
 
@@ -376,6 +362,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     def get_target_populations_count(self, obj: Program) -> int:
         return PaymentPlan.objects.filter(program_cycle__program=obj).count()
 
+    @extend_schema_field(serializers.ListSerializer(child=PartnerForProgramSerializer()))
     def get_partners(self, obj: Program) -> ReturnDict:
         partners_qs = (
             Partner.objects.filter(
@@ -383,6 +370,14 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
                 | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
             )
             .annotate(partner_program=Value(obj.id))
+            .annotate(
+                annotate_has_admin_area_limit=Exists(
+                    AdminAreaLimitedTo.objects.filter(
+                        partner_id=OuterRef("pk"),
+                        program_id=obj.pk,
+                    )
+                )
+            )
             .order_by("name")
             .distinct()
         )
@@ -484,6 +479,14 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             Partner.objects.filter(
                 Q(role_assignments__program=obj)
                 | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
+            )
+            .annotate(
+                annotate_has_admin_area_limit=Exists(
+                    AdminAreaLimitedTo.objects.filter(
+                        partner_id=OuterRef("pk"),
+                        program_id=obj.pk,
+                    )
+                )
             )
             .annotate(partner_program=Value(obj.id))
             .order_by("name")
@@ -598,6 +601,14 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
                 | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
             )
             .annotate(partner_program=Value(obj.id))
+            .annotate(
+                annotate_has_admin_area_limit=Exists(
+                    AdminAreaLimitedTo.objects.filter(
+                        partner_id=OuterRef("pk"),
+                        program_id=obj.pk,
+                    )
+                )
+            )
             .order_by("name")
             .distinct()
         )

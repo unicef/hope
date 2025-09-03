@@ -29,12 +29,12 @@ from hope.apps.household.models import (
     DocumentType,
     Household,
     Individual,
+    IndividualRoleInHousehold,
 )
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
 from hope.apps.payment.models import AccountType, FinancialInstitution
-from hope.apps.program.api.serializers import ProgramSmallSerializer
 
 
 class DeliveredQuantitySerializer(serializers.Serializer):
@@ -48,9 +48,12 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     admin2 = AreaSimpleSerializer()
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
-    has_duplicates = serializers.SerializerMethodField()
-    program = ProgramSmallSerializer()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    has_duplicates = serializers.BooleanField(source="annotate_has_duplicates")
+    sanction_list_possible_match = serializers.BooleanField(source="annotate_has_sanction_list_possible_match")
+    sanction_list_confirmed_match = serializers.BooleanField(source="annotate_has_sanction_list_confirmed_match")
+    program_name = serializers.CharField(source="program.name")
+    program_slug = serializers.CharField(source="program.slug")
 
     class Meta:
         model = Household
@@ -60,7 +63,6 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "head_of_household",
             "admin1",
             "admin2",
-            "program",
             "status",
             "size",
             "residence_status",
@@ -72,10 +74,10 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "has_duplicates",
             "sanction_list_possible_match",
             "sanction_list_confirmed_match",
+            "program_id",
+            "program_name",
+            "program_slug",
         ]
-
-    def get_has_duplicates(self, obj: Household) -> bool:
-        return obj.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
 
 class HeadOfHouseholdSerializer(serializers.ModelSerializer):
@@ -193,6 +195,20 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualRoleInHouseholdForHouseholdSerializer(serializers.ModelSerializer):
+    from hope.apps.household.api.serializers.individual import IndividualSmallSerializer
+
+    individual = IndividualSmallSerializer()
+
+    class Meta:
+        model = IndividualRoleInHousehold
+        fields = (
+            "id",
+            "individual",
+            "role",
+        )
+
+
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
     admin1 = AreaSimpleSerializer()
@@ -213,6 +229,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     import_id = serializers.SerializerMethodField()
     delivered_quantities = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
+    roles_in_household = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -289,6 +306,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "org_name_enumerator",
             "registration_method",
             "consent_sharing",
+            "roles_in_household",
         )
 
     def get_has_duplicates(self, obj: Household) -> bool:
@@ -319,6 +337,11 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
 
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
+
+    def get_roles_in_household(self, obj: Household) -> dict:
+        return IndividualRoleInHouseholdForHouseholdSerializer(
+            obj.individuals_and_roles(manager="all_merge_status_objects"), many=True
+        ).data
 
 
 class HouseholdForTicketSerializer(serializers.ModelSerializer):
@@ -427,7 +450,12 @@ class IndividualChoicesSerializer(serializers.Serializer):
         return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
 
     def get_account_financial_institution_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()]
+        business_area = self.context.get("business_area")
+        fis = FinancialInstitution.objects.all()
+        if business_area:
+            fis = fis.filter(country__business_areas=business_area).distinct()
+
+        return [{"name": x.name, "value": x.id} for x in fis]
 
 
 class HouseholdSmallSerializer(serializers.ModelSerializer):

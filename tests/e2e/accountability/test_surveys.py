@@ -1,12 +1,12 @@
-import pytest
 from django.db import transaction
+import pytest
+
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from extras.test_utils.factories.accountability import SurveyFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentPlanFactory
-
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Survey
 from hope.apps.core.models import BusinessArea, DataCollectingType
@@ -65,73 +65,73 @@ class TestSmokeAccountabilitySurveys:
         self,
         test_program: Program,
         add_accountability_surveys_message: Survey,
-        pageAccountabilitySurveys: AccountabilitySurveys,
+        page_accountability_surveys: AccountabilitySurveys,
     ) -> None:
-        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program")
-        pageAccountabilitySurveys.getNavAccountability().click()
-        pageAccountabilitySurveys.getNavSurveys().click()
+        page_accountability_surveys.select_global_program_filter("Test Program")
+        page_accountability_surveys.get_nav_accountability().click()
+        page_accountability_surveys.get_nav_surveys().click()
 
-        assert "Surveys" in pageAccountabilitySurveys.getPageHeaderTitle().text
-        assert "NEW SURVEY" in pageAccountabilitySurveys.getButtonNewSurvey().text
-        assert "Search" in pageAccountabilitySurveys.getFiltersSearch().text
-        assert "Target Population" in pageAccountabilitySurveys.getTargetPopulationInput().text
-        assert "Created by" in pageAccountabilitySurveys.getFiltersCreatedByAutocomplete().text
-        assert "Created by" in pageAccountabilitySurveys.getCreatedByInput().text
-        assert "From" in pageAccountabilitySurveys.getFiltersCreationDateFrom().text
-        assert "To" in pageAccountabilitySurveys.getFiltersCreationDateTo().text
-        assert "CLEAR" in pageAccountabilitySurveys.getButtonFiltersClear().text
-        assert "APPLY" in pageAccountabilitySurveys.getButtonFiltersApply().text
-        assert "Surveys List" in pageAccountabilitySurveys.getTableTitle().text
-        assert "Survey ID" in pageAccountabilitySurveys.getTableLabel()[0].text
-        assert "Survey Title" in pageAccountabilitySurveys.getTableLabel()[1].text
-        assert "Category" in pageAccountabilitySurveys.getTableLabel()[2].text
-        assert "Number of Recipients" in pageAccountabilitySurveys.getTableLabel()[3].text
-        assert "Created by" in pageAccountabilitySurveys.getTableLabel()[4].text
-        assert "Creation Date" in pageAccountabilitySurveys.getTableLabel()[5].text
-        assert "10 1–1 of 1" in pageAccountabilitySurveys.getTablePagination().text.replace("\n", " ")
-        assert len(pageAccountabilitySurveys.getRows()) == 1
-        assert "SUR-24-0005" in pageAccountabilitySurveys.getRows()[0].text
-        assert "Test survey" in pageAccountabilitySurveys.getRows()[0].text
+        assert "Surveys" in page_accountability_surveys.get_page_header_title().text
+        assert "NEW SURVEY" in page_accountability_surveys.get_button_new_survey().text
+        assert "Search" in page_accountability_surveys.get_filters_search().text
+        assert "Target Population" in page_accountability_surveys.get_target_population_input().text
+        assert "Created by" in page_accountability_surveys.get_filters_created_by_autocomplete().text
+        assert "Created by" in page_accountability_surveys.get_created_by_input().text
+        assert "From" in page_accountability_surveys.get_filters_creation_date_from().text
+        assert "To" in page_accountability_surveys.get_filters_creation_date_to().text
+        assert "CLEAR" in page_accountability_surveys.get_button_filters_clear().text
+        assert "APPLY" in page_accountability_surveys.get_button_filters_apply().text
+        assert "Surveys List" in page_accountability_surveys.get_table_title().text
+        assert "Survey ID" in page_accountability_surveys.get_table_label()[0].text
+        assert "Survey Title" in page_accountability_surveys.get_table_label()[1].text
+        assert "Category" in page_accountability_surveys.get_table_label()[2].text
+        assert "Number of Recipients" in page_accountability_surveys.get_table_label()[3].text
+        assert "Created by" in page_accountability_surveys.get_table_label()[4].text
+        assert "Creation Date" in page_accountability_surveys.get_table_label()[5].text
+        assert "10 1–1 of 1" in page_accountability_surveys.get_table_pagination().text.replace("\n", " ")
+        assert len(page_accountability_surveys.get_rows()) == 1
+        assert "SUR-24-0005" in page_accountability_surveys.get_rows()[0].text
+        assert "Test survey" in page_accountability_surveys.get_rows()[0].text
 
     def test_smoke_accountability_surveys_details(
         self,
         test_program: Program,
         add_accountability_surveys_message: Survey,
         add_household: Household,
-        pageAccountabilitySurveys: AccountabilitySurveys,
-        pageAccountabilitySurveysDetails: AccountabilitySurveysDetails,
+        page_accountability_surveys: AccountabilitySurveys,
+        page_accountability_surveys_details: AccountabilitySurveysDetails,
     ) -> None:
         add_accountability_surveys_message.recipients.set([Household.objects.first()])
-        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program")
-        pageAccountabilitySurveys.getNavAccountability().click()
-        pageAccountabilitySurveys.getNavSurveys().click()
-        pageAccountabilitySurveys.getRows()[0].click()
+        page_accountability_surveys.select_global_program_filter("Test Program")
+        page_accountability_surveys.get_nav_accountability().click()
+        page_accountability_surveys.get_nav_surveys().click()
+        page_accountability_surveys.get_rows()[0].click()
 
-        assert "SUR-24-0005" in pageAccountabilitySurveysDetails.getPageHeaderTitle().text
-        assert "Survey with manual process" in pageAccountabilitySurveysDetails.getLabelCategory().text
-        assert "Test survey" in pageAccountabilitySurveysDetails.getLabelSurveyTitle().text
+        assert "SUR-24-0005" in page_accountability_surveys_details.get_page_header_title().text
+        assert "Survey with manual process" in page_accountability_surveys_details.get_label_category().text
+        assert "Test survey" in page_accountability_surveys_details.get_label_survey_title().text
         created_by = add_accountability_surveys_message.created_by
         assert (
             f"{created_by.first_name} {created_by.last_name}"
-            in pageAccountabilitySurveysDetails.getLabelCreatedBy().text
+            in page_accountability_surveys_details.get_label_created_by().text
         )
         assert (
             add_accountability_surveys_message.created_at.strftime("%-d %b %Y")
-            in pageAccountabilitySurveysDetails.getLabelDateCreated().text
+            in page_accountability_surveys_details.get_label_date_created().text
         )
-        assert "Test Program" in pageAccountabilitySurveysDetails.getLabelProgramme().text
-        assert "Items Group ID" in pageAccountabilitySurveysDetails.getHouseholdId().text
-        assert "Status" in pageAccountabilitySurveysDetails.getStatus().text
-        assert "Head of Items Group" in pageAccountabilitySurveysDetails.getHouseholdHeadName().text
-        assert "Items Group Size" in pageAccountabilitySurveysDetails.getHouseholdSize().text
-        assert "Administrative Level 2" in pageAccountabilitySurveysDetails.getHouseholdLocation().text
-        assert "Residence Status" in pageAccountabilitySurveysDetails.getHouseholdResidenceStatus().text
-        assert "Registration Date" in pageAccountabilitySurveysDetails.getHouseholdRegistrationDate().text
-        assert "Rows per page: 10 1–1 of 1" in pageAccountabilitySurveysDetails.getTablePagination().text.replace(
+        assert "Test Program" in page_accountability_surveys_details.get_label_programme().text
+        assert "Items Group ID" in page_accountability_surveys_details.get_household_id().text
+        assert "Status" in page_accountability_surveys_details.get_status().text
+        assert "Head of Items Group" in page_accountability_surveys_details.get_household_head_name().text
+        assert "Items Group Size" in page_accountability_surveys_details.get_household_size().text
+        assert "Administrative Level 2" in page_accountability_surveys_details.get_household_location().text
+        assert "Residence Status" in page_accountability_surveys_details.get_household_residence_status().text
+        assert "Registration Date" in page_accountability_surveys_details.get_household_registration_date().text
+        assert "Rows per page: 10 1–1 of 1" in page_accountability_surveys_details.get_table_pagination().text.replace(
             "\n", " "
         )
-        assert len(pageAccountabilitySurveys.getRows()) == 1
+        assert len(page_accountability_surveys.get_rows()) == 1
         assert (
             add_accountability_surveys_message.recipients.all()[0].unicef_id
-            in pageAccountabilitySurveys.getRows()[0].text
+            in page_accountability_surveys.get_rows()[0].text
         )

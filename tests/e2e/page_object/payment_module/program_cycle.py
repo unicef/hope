@@ -1,120 +1,121 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class ProgramCyclePage(BaseComponents):
-    mainContent = 'div[data-cy="main-content"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    datePickerFilter = 'div[data-cy="date-picker-filter-"]'
-    datePickerFilterFrom = 'div[data-cy="date-picker-filter-"]'
-    datePickerFilterTo = 'div[data-cy="date-picker-filter-"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    headCellId = 'th[data-cy="head-cell-id"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    headCellProgrammeCyclesTitle = 'th[data-cy="head-cell-programme-cycles-title"]'
-    headCellStatus = 'th[data-cy="head-cell-status"]'
-    headCellTotalEntitledQuantity = 'th[data-cy="head-cell-total-entitled-quantity"]'
-    headCellTotalEntitledQuantityUSD = 'th[data-cy="head-cell-total-entitled-quantity-usd"]'
-    headCellStartDate = 'th[data-cy="head-cell-start-date"]'
-    headCellEndDate = 'th[data-cy="head-cell-end-date"]'
-    headCellEmpty = 'th[data-cy="head-cell-empty"]'
-    programCycleRow = 'tr[data-cy="program-cycle-row"]'
-    programCycleId = 'td[data-cy="program-cycle-id"]'
-    programCycleTitle = 'td[data-cy="program-cycle-title"]'
-    programCycleStatus = 'td[data-cy="program-cycle-status"]'
-    programCycleTotalEntitledQuantityUSD = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
-    programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
-    programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
-    programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
+    main_content = 'div[data-cy="main-content"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    date_picker_filter = 'div[data-cy="date-picker-filter-"]'
+    date_picker_filter_from = 'div[data-cy="date-picker-filter-"]'
+    date_picker_filter_to = 'div[data-cy="date-picker-filter-"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_title = 'h6[data-cy="table-title"]'
+    head_cell_id = 'th[data-cy="head-cell-id"]'
+    table_label = 'span[data-cy="table-label"]'
+    head_cell_programme_cycles_title = 'th[data-cy="head-cell-programme-cycles-title"]'
+    head_cell_status = 'th[data-cy="head-cell-status"]'
+    head_cell_total_entitled_quantity = 'th[data-cy="head-cell-total-entitled-quantity"]'
+    head_cell_total_entitled_quantity_usd = 'th[data-cy="head-cell-total-entitled-quantity-usd"]'
+    head_cell_start_date = 'th[data-cy="head-cell-start-date"]'
+    head_cell_end_date = 'th[data-cy="head-cell-end-date"]'
+    head_cell_empty = 'th[data-cy="head-cell-empty"]'
+    program_cycle_row = 'tr[data-cy="program-cycle-row"]'
+    program_cycle_id = 'td[data-cy="program-cycle-id"]'
+    program_cycle_title = 'td[data-cy="program-cycle-title"]'
+    program_cycle_status = 'td[data-cy="program-cycle-status"]'
+    program_cycle_total_entitled_quantity_usd = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
+    program_cycle_start_date = 'td[data-cy="program-cycle-start-date"]'
+    program_cycle_end_date = 'td[data-cy="program-cycle-end-date"]'
+    program_cycle_details_btn = 'td[data-cy="program-cycle-details-btn"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getDatePickerFilter(self) -> WebElement:
-        return self.wait_for(self.datePickerFilter)
+    def get_date_picker_filter(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter)
 
-    def getDatePickerFilterFrom(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterFrom)
+    def get_date_picker_filter_from(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter_from)
 
-    def getDatePickerFilterTo(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterTo)
+    def get_date_picker_filter_to(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter_to)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getHeadCellId(self) -> WebElement:
-        return self.wait_for(self.headCellId)
+    def get_head_cell_id(self) -> WebElement:
+        return self.wait_for(self.head_cell_id)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getHeadCellProgrammeCyclesTitle(self) -> WebElement:
-        return self.wait_for(self.headCellProgrammeCyclesTitle)
+    def get_head_cell_programme_cycles_title(self) -> WebElement:
+        return self.wait_for(self.head_cell_programme_cycles_title)
 
-    def getHeadCellStatus(self) -> WebElement:
-        return self.wait_for(self.headCellStatus)
+    def get_head_cell_status(self) -> WebElement:
+        return self.wait_for(self.head_cell_status)
 
-    def getHeadCellTotalEntitledQuantityUSD(self) -> WebElement:
-        return self.wait_for(self.headCellTotalEntitledQuantityUSD)
+    def get_head_cell_total_entitled_quantity_usd(self) -> WebElement:
+        return self.wait_for(self.head_cell_total_entitled_quantity_usd)
 
-    def getHeadCellStartDate(self) -> WebElement:
-        return self.wait_for(self.headCellStartDate)
+    def get_head_cell_start_date(self) -> WebElement:
+        return self.wait_for(self.head_cell_start_date)
 
-    def getHeadCellEndDate(self) -> WebElement:
-        return self.wait_for(self.headCellEndDate)
+    def get_head_cell_end_date(self) -> WebElement:
+        return self.wait_for(self.head_cell_end_date)
 
-    def getHeadCellEmpty(self) -> WebElement:
-        return self.wait_for(self.headCellEmpty)
+    def get_head_cell_empty(self) -> WebElement:
+        return self.wait_for(self.head_cell_empty)
 
-    def getProgramCycleRow(self) -> [WebElement]:
-        self.wait_for(self.programCycleRow)
-        return self.get_elements(self.programCycleRow)
+    def get_program_cycle_row(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_row)
+        return self.get_elements(self.program_cycle_row)
 
-    def getProgramCycleStatus(self) -> WebElement:
-        return self.wait_for(self.programCycleStatus)
+    def get_program_cycle_status(self) -> WebElement:
+        return self.wait_for(self.program_cycle_status)
 
-    def getProgramCycleTotalEntitledQuantityUSD(self) -> WebElement:
-        return self.wait_for(self.programCycleTotalEntitledQuantityUSD)
+    def get_program_cycle_total_entitled_quantity_usd(self) -> WebElement:
+        return self.wait_for(self.program_cycle_total_entitled_quantity_usd)
 
-    def getProgramCycleStartDate(self) -> WebElement:
-        return self.wait_for(self.programCycleStartDate)
+    def get_program_cycle_start_date(self) -> WebElement:
+        return self.wait_for(self.program_cycle_start_date)
 
-    def getProgramCycleEndDate(self) -> WebElement:
-        return self.wait_for(self.programCycleEndDate)
+    def get_program_cycle_end_date(self) -> WebElement:
+        return self.wait_for(self.program_cycle_end_date)
 
-    def getProgramCycleStartDateList(self) -> [WebElement]:
-        self.wait_for(self.programCycleStartDate)
-        return self.get_elements(self.programCycleStartDate)
+    def get_program_cycle_start_date_list(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_start_date)
+        return self.get_elements(self.program_cycle_start_date)
 
-    def getProgramCycleEndDateList(self) -> [WebElement]:
-        self.wait_for(self.programCycleEndDate)
-        return self.get_elements(self.programCycleEndDate)
+    def get_program_cycle_end_date_list(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_end_date)
+        return self.get_elements(self.program_cycle_end_date)
 
-    def getProgramCycleDetailsBtn(self) -> WebElement:
-        return self.wait_for(self.programCycleDetailsBtn)
+    def get_program_cycle_details_btn(self) -> WebElement:
+        return self.wait_for(self.program_cycle_details_btn)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getTableProgramCycleTitle(self) -> [WebElement]:
-        return self.get_elements(self.programCycleTitle)
+    def get_table_program_cycle_title(self) -> [WebElement]:
+        return self.get_elements(self.program_cycle_title)
 
-    def getProgramCycleId(self) -> WebElement:
-        return self.wait_for(self.programCycleId)
+    def get_program_cycle_id(self) -> WebElement:
+        return self.wait_for(self.program_cycle_id)

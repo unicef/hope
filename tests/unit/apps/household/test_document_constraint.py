@@ -1,10 +1,11 @@
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import DocumentTypeFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.geo.models import Country
 from hope.apps.household.models import Document
 from hope.apps.utils.models import MergeStatusModel
@@ -14,7 +15,7 @@ class TestDocumentConstraint(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         create_afghanistan()
 
         cls.programs = ProgramFactory.create_batch(2)
@@ -42,6 +43,6 @@ class TestDocumentConstraint(TestCase):
             self.fail("Shouldn't raise any errors!")
 
     def test_disallow_create_the_same_document_for_the_same_program(self) -> None:
-        with self.assertRaises(IntegrityError):
-            Document.objects.create(program=self.programs[0], **self.document_data)
+        Document.objects.create(program=self.programs[0], **self.document_data)
+        with pytest.raises(IntegrityError):
             Document.objects.create(program=self.programs[0], **self.document_data)

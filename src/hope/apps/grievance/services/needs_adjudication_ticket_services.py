@@ -177,7 +177,11 @@ def create_grievance_ticket_with_details(
             dedup_engine_similarity_pair.similarity_score,
         )
         if dedup_engine_similarity_pair.status_code != DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value:
-            ticket.description = f"Error Status Code: {dedup_engine_similarity_pair.status_code} {dedup_engine_similarity_pair.get_status_code_display()}"
+            ticket.description = (
+                f"Error Status Code: "
+                f"{dedup_engine_similarity_pair.status_code} "
+                f"{dedup_engine_similarity_pair.get_status_code_display()}"
+            )
             ticket.save(update_fields=["description"])
     else:
         score_min, score_max = _get_min_max_score(golden_records)
@@ -245,7 +249,8 @@ def create_needs_adjudication_tickets(
         else:
             unique_individuals.add(possible_duplicate.id)
 
-    # Sometimes we have an old records in the Elasticsearch, this will resolve false positive signals if the individual is indeed unique
+    # Sometimes we have an old records in the Elasticsearch,
+    # this will resolve false positive signals if the individual is indeed unique
     Individual.objects.filter(id__in=unique_individuals).update(
         deduplication_golden_record_status=UNIQUE,
         deduplication_golden_record_results={},
@@ -271,18 +276,17 @@ def create_needs_adjudication_tickets_for_biometrics(
                 original_individual = pair.individual1
             else:
                 original_individual = pair.individual2  # pragma: no_cover
-
+        # if both individuals are from the same rdi mark second as duplicate
+        # if one of individuals is in already merged population mark it as original
+        elif pair.individual1.registration_data_import in [
+            pair.individual2.registration_data_import,
+            rdi,
+        ]:
+            original_individual = pair.individual1
+            duplicate_individual = pair.individual2
         else:
-            # if both individuals are from the same rdi mark second as duplicate
-            # if one of individuals is in already merged population mark it as original
-            if (
-                pair.individual1.registration_data_import == pair.individual2.registration_data_import
-            ) or pair.individual2.registration_data_import == rdi:
-                original_individual = pair.individual1
-                duplicate_individual = pair.individual2
-            else:
-                original_individual = pair.individual2
-                duplicate_individual = pair.individual1
+            original_individual = pair.individual2
+            duplicate_individual = pair.individual1
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=original_individual,

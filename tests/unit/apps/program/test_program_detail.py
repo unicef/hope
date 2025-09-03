@@ -1,6 +1,9 @@
 from typing import Any
 
 import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
@@ -14,9 +17,6 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.models import Partner
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import PaymentPlan
@@ -193,16 +193,7 @@ class TestProgramDetail:
                 "id": self.partner_with_all_area_access.id,
                 "name": self.partner_with_all_area_access.name,
                 "area_access": "BUSINESS_AREA",
-                "areas": [
-                    {
-                        "id": str(self.area1.id),
-                        "level": self.area1.area_type.level,
-                    },
-                    {
-                        "id": str(self.area2.id),
-                        "level": self.area2.area_type.level,
-                    },
-                ],
+                "areas": None,
             },
             {
                 "id": self.partner_with_area_limits.id,
@@ -219,31 +210,13 @@ class TestProgramDetail:
                 "id": partner_unicef_hq.id,
                 "name": partner_unicef_hq.name,
                 "area_access": "BUSINESS_AREA",
-                "areas": [
-                    {
-                        "id": str(self.area1.id),
-                        "level": self.area1.area_type.level,
-                    },
-                    {
-                        "id": str(self.area2.id),
-                        "level": self.area2.area_type.level,
-                    },
-                ],
+                "areas": None,
             },
             {
                 "id": partner_unicef_in_afg.id,
                 "name": partner_unicef_in_afg.name,
                 "area_access": "BUSINESS_AREA",
-                "areas": [
-                    {
-                        "id": str(self.area1.id),
-                        "level": self.area1.area_type.level,
-                    },
-                    {
-                        "id": str(self.area2.id),
-                        "level": self.area2.area_type.level,
-                    },
-                ],
+                "areas": None,
             },
         ]
         assert response_data["partner_access"] == self.program.partner_access

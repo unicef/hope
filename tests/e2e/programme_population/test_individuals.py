@@ -1,4 +1,6 @@
+from freezegun import freeze_time
 import pytest
+
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from extras.test_utils.factories.core import (
@@ -10,8 +12,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from freezegun import freeze_time
-
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
@@ -63,7 +63,7 @@ def add_household() -> Household:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
-    yield household
+    return household
 
 
 @pytest.mark.usefixtures("login")
@@ -72,60 +72,60 @@ class TestSmokeIndividuals:
         self,
         create_programs: None,
         add_household: Household,
-        pageIndividuals: Individuals,
+        page_individuals: Individuals,
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm")
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        assert "Items" in pageIndividuals.getTableTitle().text
-        assert "Item ID" in pageIndividuals.getIndividualId().text
-        assert "Item" in pageIndividuals.getIndividualName().text
-        assert "Items Group ID" in pageIndividuals.getHouseholdId().text
-        assert "Relationship to Head of Items Group" in pageIndividuals.getRelationship().text
-        assert "Age" in pageIndividuals.getIndividualAge().text
-        assert "Gender" in pageIndividuals.getIndividualSex().text
-        assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
-        assert len(add_household.active_individuals) == len(pageIndividuals.getIndividualTableRow())
+        page_individuals.select_global_program_filter("Test Programm")
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        assert "Items" in page_individuals.get_table_title().text
+        assert "Item ID" in page_individuals.get_individual_id().text
+        assert "Item" in page_individuals.get_individual_name().text
+        assert "Items Group ID" in page_individuals.get_household_id().text
+        assert "Relationship to Head of Items Group" in page_individuals.get_relationship().text
+        assert "Age" in page_individuals.get_individual_age().text
+        assert "Gender" in page_individuals.get_individual_sex().text
+        assert "Administrative Level 2" in page_individuals.get_individual_location().text
+        assert len(add_household.active_individuals) == len(page_individuals.get_individual_table_row())
 
     @freeze_time("2024-08-26")
     def test_smoke_page_individuals_details(
         self,
         create_programs: None,
         add_household: Household,
-        pageIndividuals: Individuals,
-        pageIndividualsDetails: IndividualsDetails,
+        page_individuals: Individuals,
+        page_individuals_details: IndividualsDetails,
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm")
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getIndividualTableRow()[0].click()
-        assert "Alicja Kowalska" in pageIndividualsDetails.getLabelFullName().text
-        assert "Alicja" in pageIndividualsDetails.getLabelGivenName().text
-        assert "-" in pageIndividualsDetails.getLabelMiddleName().text
-        assert "Kowalska" in pageIndividualsDetails.getLabelFamilyName().text
-        assert "Female" in pageIndividualsDetails.getLabelGender().text
-        assert "83" in pageIndividualsDetails.getLabelAge().text
-        assert "26 Aug 1941" in pageIndividualsDetails.getLabelDateOfBirth().text
-        assert "No" in pageIndividualsDetails.getLabelEstimatedDateOfBirth().text
-        assert "Married" in pageIndividualsDetails.getLabelMaritalStatus().text
-        assert "Not provided" in pageIndividualsDetails.getLabelWorkStatus().text
-        assert "Yes" in pageIndividualsDetails.getLabelPregnant().text
-        assert "-" in pageIndividualsDetails.getLabelHouseholdId().text
-        assert "Primary collector" in pageIndividualsDetails.getLabelRole().text
-        assert "Head of household (self)" in pageIndividualsDetails.getLabelRelationshipToHoh().text
-        assert "-" in pageIndividualsDetails.getLabelPreferredLanguage().text
-        assert "HH-00-0000.1380 -Primary collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
-        assert "None" in pageIndividualsDetails.getLabelObservedDisabilities().text
-        assert "None" in pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelHearingDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelPhysicalDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
-        assert "Not Disabled" in pageIndividualsDetails.getLabelDisability().text
-        assert "fake111test@email.com" in pageIndividualsDetails.getLabelEmail().text
-        assert "Invalid Phone Number" in pageIndividualsDetails.getLabelPhoneNumber().text
-        assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text
-        assert "-" in pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text
+        page_individuals.select_global_program_filter("Test Programm")
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_individual_table_row()[0].click()
+        assert "Alicja Kowalska" in page_individuals_details.get_label_full_name().text
+        assert "Alicja" in page_individuals_details.get_label_given_name().text
+        assert "-" in page_individuals_details.get_label_middle_name().text
+        assert "Kowalska" in page_individuals_details.get_label_family_name().text
+        assert "Female" in page_individuals_details.get_label_gender().text
+        assert "83" in page_individuals_details.get_label_age().text
+        assert "26 Aug 1941" in page_individuals_details.get_label_date_of_birth().text
+        assert "No" in page_individuals_details.get_label_estimated_date_of_birth().text
+        assert "Married" in page_individuals_details.get_label_marital_status().text
+        assert "Not provided" in page_individuals_details.get_label_work_status().text
+        assert "Yes" in page_individuals_details.get_label_pregnant().text
+        assert "-" in page_individuals_details.get_label_household_id().text
+        assert "Primary collector" in page_individuals_details.get_label_role().text
+        assert "Head of household (self)" in page_individuals_details.get_label_relationship_to_hoh().text
+        assert "-" in page_individuals_details.get_label_preferred_language().text
+        assert "HH-00-0000.1380 -Primary collector" in page_individuals_details.get_label_linked_households().text
+        assert "None" in page_individuals_details.get_label_observed_disabilities().text
+        assert "None" in page_individuals_details.get_label_seeing_disability_severity().text
+        assert "None" in page_individuals_details.get_label_hearing_disability_severity().text
+        assert "None" in page_individuals_details.get_label_physical_disability_severity().text
+        assert "None" in page_individuals_details.get_label_remembering_or_concentrating_disability_severity().text
+        assert "None" in page_individuals_details.get_label_communicating_disability_severity().text
+        assert "Not Disabled" in page_individuals_details.get_label_disability().text
+        assert "fake111test@email.com" in page_individuals_details.get_label_email().text
+        assert "Invalid Phone Number" in page_individuals_details.get_label_phone_number().text
+        assert "-" in page_individuals_details.get_label_alternative_phone_number().text
+        assert "-" in page_individuals_details.get_label_date_of_last_screening_against_sanctions_list().text
 
     @pytest.mark.skip(reason="ToDo")
     def test_check_data_after_grievance_ticket_processed(self) -> None:

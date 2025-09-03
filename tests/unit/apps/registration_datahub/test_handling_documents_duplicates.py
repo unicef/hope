@@ -1,18 +1,18 @@
 from typing import List
 
-import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
+import pytest
+
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
@@ -39,7 +39,7 @@ class TestGoldenRecordDeduplication(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

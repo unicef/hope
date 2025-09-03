@@ -1,16 +1,16 @@
-import logging
-import random
-import string
-import urllib.parse
 from collections import Counter
 from datetime import datetime
+import logging
+import secrets
+import string
 from typing import TYPE_CHECKING, Any, Iterable, Optional
+import urllib.parse
 
-from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.models import Partner
 from hope.apps.activity_log.models import log_create
@@ -84,7 +84,8 @@ def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> Non
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
 
-    for name, value in flex_fields_to_verify.items():
+    for name, _value in flex_fields_to_verify.items():
+        value = _value
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
             raise ValueError(f"{name} is not a correct `flex field")
@@ -409,7 +410,7 @@ def prepare_edit_identities(identities: list[dict]) -> list[dict]:
 
 
 def generate_filename() -> str:
-    file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+    file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits, k=3))
     return f"{file_name}-{timezone.now()}"
 
 
@@ -709,7 +710,7 @@ def save_images(flex_fields: dict, associated_with: str) -> None:
 
         if flex_field["type"] == TYPE_IMAGE:
             if isinstance(value, InMemoryUploadedFile):
-                file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+                file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits, k=3))
                 flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
             elif isinstance(value, str):
                 file_name = value.replace(default_storage.base_url, "")

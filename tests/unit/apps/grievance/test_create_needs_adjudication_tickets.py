@@ -1,15 +1,15 @@
 from typing import Any
 
-import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.urls import reverse
+import pytest
+from rest_framework import status
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea

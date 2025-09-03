@@ -1,10 +1,10 @@
 from typing import Any
 
-import pytest
 from django.core.management import call_command
 from django.urls import reverse
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
+import pytest
 
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hope.apps.core.languages import LANGUAGES, Languages
 
 pytestmark = pytest.mark.django_db

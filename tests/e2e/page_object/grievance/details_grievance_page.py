@@ -1,216 +1,217 @@
 from time import sleep
 
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class GrievanceDetailsPage(BaseComponents):
     # Locators
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
     title = 'h5[data-cy="page-header-title"]'
-    buttonEdit = 'a[data-cy="button-edit"]'
-    buttonSetInProgress = 'button[data-cy="button-set-to-in-progress"]'
-    buttonSendBack = 'button[data-cy="button-send-back"]'
-    buttonCloseTicket = 'button[data-cy="button-close-ticket"]'
-    buttonConfirm = 'button[data-cy="button-confirm"]'
-    buttonAssignToMe = 'button[data-cy="button-assign-to-me"]'
-    buttonSendForApproval = 'button[data-cy="button-send-for-approval"]'
-    buttonApproval = 'button[data-cy="button-approve"]'
-    ticketStatus = 'div[data-cy="label-Status"]'
-    ticketPriority = 'div[data-cy="label-Priority"]'
-    ticketUrgency = 'div[data-cy="label-Urgency"]'
-    ticketAssigment = 'div[data-cy="label-Assigned to"]'
-    ticketCategory = 'div[data-cy="label-Category"]'
-    labelIssueType = 'div[data-cy="label-Issue Type"]'
-    ticketHouseholdID = 'div[data-cy="label-Household ID"]'
-    ticketTargetID = 'div[data-cy="label-Target ID"]'
-    ticketIndividualID = 'div[data-cy="label-Individual ID"]'
-    ticketPaymentLabel = 'div[data-cy="label-Payment ID"]'
-    labelPaymentPlan = 'div[data-cy="label-Payment Plan"]'
-    labelPaymentPlanVerification = 'div[data-cy="label-Payment Plan Verification"]'
-    labelProgramme = 'div[data-cy="label-Programme"]'
-    ticketCategoryBy = 'div[data-cy="label-Created By"]'
-    dateCreation = 'div[data-cy="label-Date Created"]'
-    lastModifiedDate = 'div[data-cy="label-Last Modified Date"]'
-    administrativeLevel = 'div[data-cy="label-Administrative Level 2"]'
-    areaVillage = 'div[data-cy="label-Area / Village / Pay point"]'
-    languagesSpoken = 'div[data-cy="label-Languages Spoken"]'
+    button_edit = 'a[data-cy="button-edit"]'
+    button_set_in_progress = 'button[data-cy="button-set-to-in-progress"]'
+    button_send_back = 'button[data-cy="button-send-back"]'
+    button_close_ticket = 'button[data-cy="button-close-ticket"]'
+    button_confirm = 'button[data-cy="button-confirm"]'
+    button_assign_to_me = 'button[data-cy="button-assign-to-me"]'
+    button_send_for_approval = 'button[data-cy="button-send-for-approval"]'
+    button_approval = 'button[data-cy="button-approve"]'
+    ticket_status = 'div[data-cy="label-Status"]'
+    ticket_priority = 'div[data-cy="label-Priority"]'
+    ticket_urgency = 'div[data-cy="label-Urgency"]'
+    ticket_assigment = 'div[data-cy="label-Assigned to"]'
+    ticket_category = 'div[data-cy="label-Category"]'
+    label_issue_type = 'div[data-cy="label-Issue Type"]'
+    ticket_household_id = 'div[data-cy="label-Household ID"]'
+    ticket_target_id = 'div[data-cy="label-Target ID"]'
+    ticket_individual_id = 'div[data-cy="label-Individual ID"]'
+    ticket_payment_label = 'div[data-cy="label-Payment ID"]'
+    label_payment_plan = 'div[data-cy="label-Payment Plan"]'
+    label_payment_plan_verification = 'div[data-cy="label-Payment Plan Verification"]'
+    label_programme = 'div[data-cy="label-Programme"]'
+    ticket_category_by = 'div[data-cy="label-Created By"]'
+    date_creation = 'div[data-cy="label-Date Created"]'
+    last_modified_date = 'div[data-cy="label-Last Modified Date"]'
+    administrative_level = 'div[data-cy="label-Administrative Level 2"]'
+    area_village = 'div[data-cy="label-Area / Village / Pay point"]'
+    languages_spoken = 'div[data-cy="label-Languages Spoken"]'
     documentation = 'div[data-cy="label-Grievance Supporting Documents"]'
-    ticketDescription = 'div[data-cy="label-Description"]'
-    labelCreatedBy = 'div[data-cy="label-Created By"]'
+    ticket_description = 'div[data-cy="label-Description"]'
+    label_created_by = 'div[data-cy="label-Created By"]'
     comments = 'div[data-cy="label-Comments"]'
-    createLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
-    markDuplicate = 'button[data-cy="button-mark-duplicate"]'
-    cellIndividualID = 'th[data-cy="table-cell-individual-id"]'
-    cellHouseholdID = 'th[data-cy="table-cell-household-id"]'
-    cellFullName = 'th[data-cy="table-cell-full-name"]'
-    cellGender = 'th[data-cy="table-cell-gender"]'
-    cellDateOfBirth = 'th[data-cy="table-cell-date-of-birth"]'
-    cellSimilarityScore = 'th[data-cy="table-cell-similarity-score"]'
-    cellLastRegistrationDate = 'th[data-cy="table-cell-last-registration-date"]'
-    cellDocType = 'th[data-cy="table-cell-doc-type"]'
-    cellDoc = 'th[data-cy="table-cell-doc-number"]'
-    cellAdminLevel2 = 'th[data-cy="table-cell-admin-level2"]'
-    cellVillage = 'th[data-cy="table-cell-village"]'
-    newNoteField = 'textarea[data-cy="input-newNote"]'
-    buttonNewNote = 'button[data-cy="button-add-note"]'
-    labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"]'
-    labelDocumentation = 'div[data-cy="label-Grievance Supporting Documents"]'
-    labelDescription = 'div[data-cy="label-Description"]'
-    noteRow = '[data-cy="note-row"]'
-    noteName = '[data-cy="note-name"]'
-    labelGENDER = 'div[data-cy="label-GENDER"]'
-    labelRole = 'div[data-cy="label-role"]'
-    labelPhoneNo = 'div[data-cy="label-phone no"]'
-    labelPregnant = 'div[data-cy="label-pregnant"]'
-    labelFullName = 'div[data-cy="label-full name"]'
-    labelBirthDate = 'div[data-cy="label-birth date"]'
-    labelDisability = 'div[data-cy="label-disability"]'
-    labelGivenName = 'div[data-cy="label-given name"]'
-    labelFamilyName = 'div[data-cy="label-family name"]'
-    labelMiddleName = 'div[data-cy="label-middle name"]'
-    labelWorkStatus = 'div[data-cy="label-work status"]'
-    labelRelationship = 'div[data-cy="label-relationship"]'
-    labelMaritalStatus = 'div[data-cy="label-marital status"]'
-    labelCommsDisability = 'div[data-cy="label-comms disability"]'
-    labelCommsDisability1 = 'div[data-cy="label-comms disability"]'
-    labelSeeingDisability = 'div[data-cy="label-seeing disability"]'
-    labelWhoAnswersPhone = 'div[data-cy="label-who answers phone"]'
-    labelHearingDisability = 'div[data-cy="label-hearing disability"]'
-    labelObservedDisability = 'div[data-cy="label-observed disability"]'
-    labelPhysicalDisability = 'div[data-cy="label-physical disability"]'
-    labelSelfcareDisability = 'div[data-cy="label-selfcare disability"]'
-    labelEstimatedBirthDate = 'div[data-cy="label-estimated birth date"]'
-    labelPhoneNoAlternative = 'div[data-cy="label-phone no alternative"]'
-    labelWhoAnswersAltPhone = 'div[data-cy="label-who answers alt phone"]'
-    labelTickets = 'div[data-cy="label-Tickets"]'
+    create_linked_ticket = 'button[data-cy="button-create-linked-ticket"]'
+    mark_duplicate = 'button[data-cy="button-mark-duplicate"]'
+    cell_individual_id = 'th[data-cy="table-cell-individual-id"]'
+    cell_household_id = 'th[data-cy="table-cell-household-id"]'
+    cell_full_name = 'th[data-cy="table-cell-full-name"]'
+    cell_gender = 'th[data-cy="table-cell-gender"]'
+    cell_date_of_birth = 'th[data-cy="table-cell-date-of-birth"]'
+    cell_similarity_score = 'th[data-cy="table-cell-similarity-score"]'
+    cell_last_registration_date = 'th[data-cy="table-cell-last-registration-date"]'
+    cell_doc_type = 'th[data-cy="table-cell-doc-type"]'
+    cell_doc = 'th[data-cy="table-cell-doc-number"]'
+    cell_admin_level2 = 'th[data-cy="table-cell-admin-level2"]'
+    cell_village = 'th[data-cy="table-cell-village"]'
+    new_note_field = 'textarea[data-cy="input-newNote"]'
+    button_new_note = 'button[data-cy="button-add-note"]'
+    label_languages_spoken = 'div[data-cy="label-Languages Spoken"]'
+    label_documentation = 'div[data-cy="label-Grievance Supporting Documents"]'
+    label_description = 'div[data-cy="label-Description"]'
+    note_row = '[data-cy="note-row"]'
+    note_name = '[data-cy="note-name"]'
+    label_gender_up = 'div[data-cy="label-GENDER"]'
+    label_role = 'div[data-cy="label-role"]'
+    label_phone_no = 'div[data-cy="label-phone no"]'
+    label_pregnant = 'div[data-cy="label-pregnant"]'
+    label_full_name = 'div[data-cy="label-full name"]'
+    label_birth_date = 'div[data-cy="label-birth date"]'
+    label_disability = 'div[data-cy="label-disability"]'
+    label_given_name = 'div[data-cy="label-given name"]'
+    label_family_name = 'div[data-cy="label-family name"]'
+    label_middle_name = 'div[data-cy="label-middle name"]'
+    label_work_status = 'div[data-cy="label-work status"]'
+    label_relationship = 'div[data-cy="label-relationship"]'
+    label_marital_status = 'div[data-cy="label-marital status"]'
+    label_comms_disability = 'div[data-cy="label-comms disability"]'
+    label_comms_disability1 = 'div[data-cy="label-comms disability"]'
+    label_seeing_disability = 'div[data-cy="label-seeing disability"]'
+    label_who_answers_phone = 'div[data-cy="label-who answers phone"]'
+    label_hearing_disability = 'div[data-cy="label-hearing disability"]'
+    label_observed_disability = 'div[data-cy="label-observed disability"]'
+    label_physical_disability = 'div[data-cy="label-physical disability"]'
+    label_selfcare_disability = 'div[data-cy="label-selfcare disability"]'
+    label_estimated_birth_date = 'div[data-cy="label-estimated birth date"]'
+    label_phone_no_alternative = 'div[data-cy="label-phone no alternative"]'
+    label_who_answers_alt_phone = 'div[data-cy="label-who answers alt phone"]'
+    label_tickets = 'div[data-cy="label-Tickets"]'
     checkbox = 'tr[role="checkbox"]'
-    labelPartner = 'div[data-cy="label-Partner"]'
-    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
-    checkboxHouseholdData = 'span[data-cy="checkbox-household-data"]'
-    checkboxApprove = '//*[contains(@data, "checkbox")]'
-    checkboxIndividualData = 'span[data-cy="checkbox-requested-data-change"]'
-    checkboxRequestedDataChange = 'span[data-cy="checkbox-requested-data-change"]'
-    approveBoxNeedsAdjudicationTitle = 'h6[data-cy="approve-box-needs-adjudication-title"]'
-    buttonCreateLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
-    buttonMarkDistinct = 'button[data-cy="button-mark-distinct"]'
-    buttonMarkDuplicate = 'button[data-cy="button-mark-duplicate"]'
-    buttonClear = 'button[data-cy="button-clear"]'
-    selectAllCheckbox = 'span[data-cy="select-all-checkbox"]'
-    tableCellUniqueness = 'th[data-cy="table-cell-uniqueness"]'
-    tableCellIndividualId = 'th[data-cy="table-cell-individual-id"]'
-    tableCellHouseholdId = 'th[data-cy="table-cell-household-id"]'
-    tableCellFullName = 'th[data-cy="table-cell-full-name"]'
-    tableCellGender = 'th[data-cy="table-cell-gender"]'
-    tableCellDateOfBirth = 'th[data-cy="table-cell-date-of-birth"]'
-    tableCellSimilarityScore = 'th[data-cy="table-cell-similarity-score"]'
-    tableCellLastRegistrationDate = 'th[data-cy="table-cell-last-registration-date"]'
-    tableCellDocType = 'th[data-cy="table-cell-doc-type"]'
-    tableCellDocNumber = 'th[data-cy="table-cell-doc-number"]'
-    tableCellAdminLevel2 = 'th[data-cy="table-cell-admin-level2"]'
-    tableCellVillage = 'th[data-cy="table-cell-village"]'
-    checkboxIndividual = 'span[data-cy="checkbox-individual"]'
-    uniquenessCell = 'td[data-cy="uniqueness-cell"]'
-    distinctTooltip = 'svg[data-cy="distinct-tooltip"]'
-    individualIdCell = 'td[data-cy="individual-id-cell"]'
-    individualId = 'span[data-cy="individual-id"]'
-    householdIdCell = 'td[data-cy="household-id-cell"]'
-    householdId = 'span[data-cy="household-id"]'
-    fullNameCell = 'td[data-cy="full-name-cell"]'
-    genderCell = 'td[data-cy="gender-cell"]'
-    birthDateCell = 'td[data-cy="birth-date-cell"]'
-    similarityScoreCell = 'td[data-cy="similarity-score-cell"]'
-    lastRegistrationDateCell = 'td[data-cy="last-registration-date-cell"]'
-    docTypeCell = 'td[data-cy="doc-type-cell"]'
-    docNumberCell = 'td[data-cy="doc-number-cell"]'
-    adminLevel2Cell = 'td[data-cy="admin-level2-cell"]'
-    villageCell = 'td[data-cy="village-cell"]'
-    checkboxCell = 'td[data-cy="checkbox-cell"]'
-    selectCheckbox = 'span[data-cy="select-checkbox"]'
-    statusCell = 'td[data-cy="status-cell"]'
-    sexCell = 'td[data-cy="sex-cell"]'
-    similarityCell = 'td[data-cy="similarity-cell"]'
-    documentTypeCell = 'td[data-cy="document-type-cell"]'
-    documentNumberCell = 'td[data-cy="document-number-cell"]'
-    admin2NameCell = 'td[data-cy="admin2-name-cell"]'
-    duplicateTooltip = 'svg[data-cy="duplicate-tooltip"]'
-    inputNewnote = 'textarea[data-cy="input-newNote"]'
-    buttonAddNote = 'button[data-cy="button-add-note"]'
-    activityLogContainer = 'div[data-cy="activity-log-container"]'
-    activityLogTitle = 'h6[data-cy="activity-log-title"]'
-    expandCollapseButton = 'button[data-cy="expand-collapse-button"]'
-    activityLogTable = 'div[data-cy="activity-log-table"]'
-    headingCellTimestamp = 'div[data-cy="heading-cell-timestamp"]'
-    headingCellActor = 'div[data-cy="heading-cell-actor"]'
-    headingCellAction = 'div[data-cy="heading-cell-action"]'
-    headingCellChange_from = 'div[data-cy="heading-cell-change_from"]'
-    headingCellChange_to = 'div[data-cy="heading-cell-change_to"]'
+    label_partner = 'div[data-cy="label-Partner"]'
+    label_administrative_level2 = 'div[data-cy="label-Administrative Level 2"]'
+    checkbox_household_data = 'span[data-cy="checkbox-household-data"]'
+    checkbox_approve = '//*[contains(@data, "checkbox")]'
+    checkbox_individual_data = 'span[data-cy="checkbox-requested-data-change"]'
+    checkbox_requested_data_change = 'span[data-cy="checkbox-requested-data-change"]'
+    approve_box_needs_adjudication_title = 'h6[data-cy="approve-box-needs-adjudication-title"]'
+    button_create_linked_ticket = 'button[data-cy="button-create-linked-ticket"]'
+    button_mark_distinct = 'button[data-cy="button-mark-distinct"]'
+    button_mark_duplicate = 'button[data-cy="button-mark-duplicate"]'
+    button_clear = 'button[data-cy="button-clear"]'
+    select_all_checkbox = 'span[data-cy="select-all-checkbox"]'
+    table_cell_uniqueness = 'th[data-cy="table-cell-uniqueness"]'
+    table_cell_individual_id = 'th[data-cy="table-cell-individual-id"]'
+    table_cell_household_id = 'th[data-cy="table-cell-household-id"]'
+    table_cell_full_name = 'th[data-cy="table-cell-full-name"]'
+    table_cell_gender = 'th[data-cy="table-cell-gender"]'
+    table_cell_date_of_birth = 'th[data-cy="table-cell-date-of-birth"]'
+    table_cell_similarity_score = 'th[data-cy="table-cell-similarity-score"]'
+    table_cell_last_registration_date = 'th[data-cy="table-cell-last-registration-date"]'
+    table_cell_doc_type = 'th[data-cy="table-cell-doc-type"]'
+    table_cell_doc_number = 'th[data-cy="table-cell-doc-number"]'
+    table_cell_admin_level2 = 'th[data-cy="table-cell-admin-level2"]'
+    table_cell_village = 'th[data-cy="table-cell-village"]'
+    checkbox_individual = 'span[data-cy="checkbox-individual"]'
+    uniqueness_cell = 'td[data-cy="uniqueness-cell"]'
+    distinct_tooltip = 'svg[data-cy="distinct-tooltip"]'
+    individual_id_cell = 'td[data-cy="individual-id-cell"]'
+    individual_id = 'span[data-cy="individual-id"]'
+    household_id_cell = 'td[data-cy="household-id-cell"]'
+    household_id = 'span[data-cy="household-id"]'
+    full_name_cell = 'td[data-cy="full-name-cell"]'
+    gender_cell = 'td[data-cy="gender-cell"]'
+    birth_date_cell = 'td[data-cy="birth-date-cell"]'
+    similarity_score_cell = 'td[data-cy="similarity-score-cell"]'
+    last_registration_date_cell = 'td[data-cy="last-registration-date-cell"]'
+    doc_type_cell = 'td[data-cy="doc-type-cell"]'
+    doc_number_cell = 'td[data-cy="doc-number-cell"]'
+    admin_level2_cell = 'td[data-cy="admin-level2-cell"]'
+    village_cell = 'td[data-cy="village-cell"]'
+    checkbox_cell = 'td[data-cy="checkbox-cell"]'
+    select_checkbox = 'span[data-cy="select-checkbox"]'
+    status_cell = 'td[data-cy="status-cell"]'
+    sex_cell = 'td[data-cy="sex-cell"]'
+    similarity_cell = 'td[data-cy="similarity-cell"]'
+    document_type_cell = 'td[data-cy="document-type-cell"]'
+    document_number_cell = 'td[data-cy="document-number-cell"]'
+    admin2_name_cell = 'td[data-cy="admin2-name-cell"]'
+    duplicate_tooltip = 'svg[data-cy="duplicate-tooltip"]'
+    input_new_note = 'textarea[data-cy="input-newNote"]'
+    button_add_note = 'button[data-cy="button-add-note"]'
+    activity_log_container = 'div[data-cy="activity-log-container"]'
+    activity_log_title = 'h6[data-cy="activity-log-title"]'
+    expand_collapse_button = 'button[data-cy="expand-collapse-button"]'
+    activity_log_table = 'div[data-cy="activity-log-table"]'
+    heading_cell_timestamp = 'div[data-cy="heading-cell-timestamp"]'
+    heading_cell_actor = 'div[data-cy="heading-cell-actor"]'
+    heading_cell_action = 'div[data-cy="heading-cell-action"]'
+    heading_cell_change_from = 'div[data-cy="heading-cell-change_from"]'
+    heading_cell_change_to = 'div[data-cy="heading-cell-change_to"]'
     pagination = 'div[data-cy="pagination"]'
-    buttonAdmin = 'div[data-cy="button-admin"]'
-    logRow = 'div[data-cy="log-row"]'
-    paymentRecord = 'span[data-cy="payment-record"]'
-    labelGender = 'div[data-cy="label-GENDER"]'
-    grievanceVerify = '[data-cy="grievance-verify"]'
-    inputNewReceivedAmount = '[data-cy="input-newReceivedAmount"]'
-    buttonSubmit = 'button[data-cy="button-submit"]'
-    grievanceApprove = '[data-cy="grievance-approve"]'
+    button_admin = 'div[data-cy="button-admin"]'
+    log_row = 'div[data-cy="log-row"]'
+    payment_record = 'span[data-cy="payment-record"]'
+    label_gender = 'div[data-cy="label-GENDER"]'
+    grievance_verify = '[data-cy="grievance-verify"]'
+    input_new_received_amount = '[data-cy="input-newReceivedAmount"]'
+    button_submit = 'button[data-cy="button-submit"]'
+    grievance_approve = '[data-cy="grievance-approve"]'
 
     # Texts
-    textTitle = "Ticket ID: "
-    textStatusNew = "New"
-    textStatusAssigned = "Assigned"
-    textPriorityNotSet = "Not set"
-    textPriorityMedium = "Medium"
-    textPriorityLow = "Low"
-    textPriorityHigh = "High"
-    textUrgencyNotUrgent = "Not urgent"
-    textUrgencyUrgent = "Urgent"
-    textUrgencyVeryUrgent = "Very urgent"
-    textUrgencyNotSet = "Not set"
-    textNotAssigment = "-"
-    textAssigmentRootRootkowski = "Root Rootkowski"
-    textNoCategory = "Needs Adjudication"
-    possibleDuplicateRowTemplate = 'tr[data-cy="possible-duplicate-row-{}"]'
-    peopleIcon = 'svg[data-cy="people-icon"]'
-    personIcon = 'svg[data-cy="person-icon"]'
-    buttonRotateImage = 'button[data-cy="button-rotate-image"]'
-    buttonCancel = 'button[data-cy="button-cancel"]'
-    linkShowPhoto = 'a[data-cy="link-show-photo"]'
-    labelStatus = 'div[data-cy="label-Status"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    labelPriority = 'div[data-cy="label-Priority"]'
-    labelUrgency = 'div[data-cy="label-Urgency"]'
-    labelTicketId = '[data-cy="label-Ticket Id"]'
+    text_title = "Ticket ID: "
+    text_status_new = "New"
+    text_status_assigned = "Assigned"
+    text_priority_not_set = "Not set"
+    text_priority_medium = "Medium"
+    text_priority_low = "Low"
+    text_priority_high = "High"
+    text_urgency_not_urgent = "Not urgent"
+    text_urgency_urgent = "Urgent"
+    text_urgency_very_urgent = "Very urgent"
+    text_urgency_not_set = "Not set"
+    text_not_assigment = "-"
+    text_assigment_root_rootkowski = "Root Rootkowski"
+    text_no_category = "Needs Adjudication"
+    possible_duplicate_row_template = 'tr[data-cy="possible-duplicate-row-{}"]'
+    people_icon = 'svg[data-cy="people-icon"]'
+    person_icon = 'svg[data-cy="person-icon"]'
+    button_rotate_image = 'button[data-cy="button-rotate-image"]'
+    button_cancel = 'button[data-cy="button-cancel"]'
+    link_show_photo = 'a[data-cy="link-show-photo"]'
+    label_status = 'div[data-cy="label-Status"]'
+    status_container = 'div[data-cy="status-container"]'
+    label_priority = 'div[data-cy="label-Priority"]'
+    label_urgency = 'div[data-cy="label-Urgency"]'
+    label_ticket_id = '[data-cy="label-Ticket Id"]'
 
-    def getLabelGender(self) -> WebElement:
-        return self.wait_for(self.labelGender)
+    def get_label_gender(self) -> WebElement:
+        return self.wait_for(self.label_gender)
 
-    def getPersonIcon(self) -> WebElement:
-        return self.wait_for(self.personIcon)
+    def get_person_icon(self) -> WebElement:
+        return self.wait_for(self.person_icon)
 
-    def getLabelAdministrativeLevel2(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel2)
+    def get_label_administrative_level_2(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level2)
 
-    def getPeopleIcon(self) -> WebElement:
-        return self.wait_for(self.peopleIcon)
+    def get_people_icon(self) -> WebElement:
+        return self.wait_for(self.people_icon)
 
-    def disappearPeopleIcon(self) -> WebElement:
-        return self.wait_for_disappear(self.peopleIcon)
+    def disappear_people_icon(self) -> WebElement:
+        return self.wait_for_disappear(self.people_icon)
 
-    def disappearPersonIcon(self) -> WebElement:
-        return self.wait_for_disappear(self.peopleIcon)
+    def disappear_person_icon(self) -> WebElement:
+        return self.wait_for_disappear(self.people_icon)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getTitle(self) -> WebElement:
+    def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
-    def getGrievanceLinedTicket(self) -> WebElement:
-        return self.wait_for(self.labelTicketId)
+    def get_grievance_lined_ticket(self) -> WebElement:
+        return self.wait_for(self.label_ticket_id)
 
-    def getButtonCloseTicket(self) -> WebElement:
+    def get_button_close_ticket(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:
         self.driver.execute_script(
             """
@@ -219,9 +220,9 @@ class GrievanceDetailsPage(BaseComponents):
             """
         )
         sleep(2)
-        return self.wait_for(self.buttonCloseTicket)
+        return self.wait_for(self.button_close_ticket)
 
-    def getButtonAssignToMe(self) -> WebElement:
+    def get_button_assign_to_me(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:
         self.driver.execute_script(
             """
@@ -230,481 +231,481 @@ class GrievanceDetailsPage(BaseComponents):
             """
         )
         sleep(2)
-        return self.wait_for(self.buttonAssignToMe)
+        return self.wait_for(self.button_assign_to_me)
 
-    def getButtonSendForApproval(self) -> WebElement:
-        return self.wait_for(self.buttonSendForApproval)
+    def get_button_send_for_approval(self) -> WebElement:
+        return self.wait_for(self.button_send_for_approval)
 
-    def getButtonApproval(self) -> WebElement:
-        button = self.wait_for(self.buttonApproval)
+    def get_button_approval(self) -> WebElement:
+        button = self.wait_for(self.button_approval)
         # Force click using JavaScript if regular click might not work
         self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
         sleep(1)
         return button
 
-    def getButtonSetInProgress(self) -> WebElement:
-        return self.wait_for(self.buttonSetInProgress)
+    def get_button_set_in_progress(self) -> WebElement:
+        return self.wait_for(self.button_set_in_progress)
 
-    def getButtonSendBack(self) -> WebElement:
-        return self.wait_for(self.buttonSendBack)
+    def get_button_send_back(self) -> WebElement:
+        return self.wait_for(self.button_send_back)
 
-    def getButtonConfirm(self) -> WebElement:
-        return self.wait_for(self.buttonConfirm)
+    def get_button_confirm(self) -> WebElement:
+        return self.wait_for(self.button_confirm)
 
-    def disappearButtonConfirm(self) -> WebElement:
-        return self.wait_for_disappear(self.buttonConfirm)
+    def disappear_button_confirm(self) -> WebElement:
+        return self.wait_for_disappear(self.button_confirm)
 
-    def disappearButtonCloseTicket(self) -> WebElement:
-        return self.wait_for_disappear(self.buttonCloseTicket)
+    def disappear_button_close_ticket(self) -> WebElement:
+        return self.wait_for_disappear(self.button_close_ticket)
 
-    def getButtonEdit(self) -> WebElement:
-        return self.wait_for(self.buttonEdit)
+    def get_button_edit(self) -> WebElement:
+        return self.wait_for(self.button_edit)
 
-    def getTicketStatus(self) -> WebElement:
-        return self.wait_for(self.ticketStatus)
+    def get_ticket_status(self) -> WebElement:
+        return self.wait_for(self.ticket_status)
 
-    def getTicketPriority(self) -> WebElement:
-        return self.wait_for(self.ticketPriority)
+    def get_ticket_priority(self) -> WebElement:
+        return self.wait_for(self.ticket_priority)
 
-    def getTicketUrgency(self) -> WebElement:
-        return self.wait_for(self.ticketUrgency)
+    def get_ticket_urgency(self) -> WebElement:
+        return self.wait_for(self.ticket_urgency)
 
-    def getTicketAssigment(self) -> WebElement:
-        return self.wait_for(self.ticketAssigment)
+    def get_ticket_assigment(self) -> WebElement:
+        return self.wait_for(self.ticket_assigment)
 
-    def getTicketCategory(self) -> WebElement:
-        return self.wait_for(self.ticketCategory)
+    def get_ticket_category(self) -> WebElement:
+        return self.wait_for(self.ticket_category)
 
-    def getTicketHouseholdID(self) -> WebElement:
-        return self.wait_for(self.ticketHouseholdID)
+    def get_ticket_household_id(self) -> WebElement:
+        return self.wait_for(self.ticket_household_id)
 
-    def getTicketTargetID(self) -> WebElement:
-        return self.wait_for(self.ticketTargetID)
+    def get_ticket_target_id(self) -> WebElement:
+        return self.wait_for(self.ticket_target_id)
 
-    def getTicketIndividualID(self) -> WebElement:
-        return self.wait_for(self.ticketIndividualID)
+    def get_ticket_individual_id(self) -> WebElement:
+        return self.wait_for(self.ticket_individual_id)
 
-    def getTicketPaymentLabel(self) -> WebElement:
-        return self.wait_for(self.ticketPaymentLabel)
+    def get_ticket_payment_label(self) -> WebElement:
+        return self.wait_for(self.ticket_payment_label)
 
-    def getLabelPaymentPlan(self) -> WebElement:
-        return self.wait_for(self.labelPaymentPlan)
+    def get_label_payment_plan(self) -> WebElement:
+        return self.wait_for(self.label_payment_plan)
 
-    def getLabelPaymentPlanVerification(self) -> WebElement:
-        return self.wait_for(self.labelPaymentPlanVerification)
+    def get_label_payment_plan_verification(self) -> WebElement:
+        return self.wait_for(self.label_payment_plan_verification)
 
-    def getLabelProgramme(self) -> WebElement:
-        return self.wait_for(self.labelProgramme)
+    def get_label_programme(self) -> WebElement:
+        return self.wait_for(self.label_programme)
 
-    def getLabelPartner(self) -> WebElement:
-        return self.wait_for(self.labelPartner)
+    def get_label_partner(self) -> WebElement:
+        return self.wait_for(self.label_partner)
 
-    def getTicketCategoryBy(self) -> WebElement:
-        return self.wait_for(self.ticketCategoryBy)
+    def get_ticket_category_by(self) -> WebElement:
+        return self.wait_for(self.ticket_category_by)
 
-    def getDateCreation(self) -> WebElement:
-        return self.wait_for(self.dateCreation)
+    def get_date_creation(self) -> WebElement:
+        return self.wait_for(self.date_creation)
 
-    def getLastModifiedDate(self) -> WebElement:
-        return self.wait_for(self.lastModifiedDate)
+    def get_last_modified_date(self) -> WebElement:
+        return self.wait_for(self.last_modified_date)
 
-    def getAdministrativeLevel(self) -> WebElement:
-        return self.wait_for(self.administrativeLevel)
+    def get_administrative_level(self) -> WebElement:
+        return self.wait_for(self.administrative_level)
 
-    def getLabelLastModifiedDate(self) -> WebElement:
-        return self.wait_for(self.lastModifiedDate)
+    def get_label_last_modified_date(self) -> WebElement:
+        return self.wait_for(self.last_modified_date)
 
-    def getAreaVillage(self) -> WebElement:
-        return self.wait_for(self.areaVillage)
+    def get_area_village(self) -> WebElement:
+        return self.wait_for(self.area_village)
 
-    def getLanguagesSpoken(self) -> WebElement:
-        return self.wait_for(self.languagesSpoken)
+    def get_languages_spoken(self) -> WebElement:
+        return self.wait_for(self.languages_spoken)
 
-    def getDocumentation(self) -> WebElement:
+    def get_documentation(self) -> WebElement:
         return self.wait_for(self.documentation)
 
-    def getTicketDescription(self) -> WebElement:
-        return self.wait_for(self.ticketDescription)
+    def get_ticket_description(self) -> WebElement:
+        return self.wait_for(self.ticket_description)
 
-    def getLabelCreatedBy(self) -> WebElement:
-        return self.wait_for(self.labelCreatedBy)
+    def get_label_created_by(self) -> WebElement:
+        return self.wait_for(self.label_created_by)
 
-    def getLabelDateCreation(self) -> WebElement:
-        return self.wait_for(self.dateCreation)
+    def get_label_date_creation(self) -> WebElement:
+        return self.wait_for(self.date_creation)
 
-    def getLabelComments(self) -> WebElement:
+    def get_label_comments(self) -> WebElement:
         return self.wait_for(self.comments)
 
-    def getCreateLinkedTicket(self) -> WebElement:
-        return self.wait_for(self.createLinkedTicket)
+    def get_create_linked_ticket(self) -> WebElement:
+        return self.wait_for(self.create_linked_ticket)
 
-    def getMarkDuplicate(self) -> WebElement:
-        return self.wait_for(self.markDuplicate)
+    def get_mark_duplicate(self) -> WebElement:
+        return self.wait_for(self.mark_duplicate)
 
-    def getCellIndividualID(self) -> WebElement:
-        return self.wait_for(self.cellIndividualID)
+    def get_cell_individual_id(self) -> WebElement:
+        return self.wait_for(self.cell_individual_id)
 
-    def getCellHouseholdID(self) -> WebElement:
-        return self.wait_for(self.cellHouseholdID)
+    def get_cell_household_id(self) -> WebElement:
+        return self.wait_for(self.cell_household_id)
 
-    def getLabelIssueType(self) -> WebElement:
-        return self.wait_for(self.labelIssueType)
+    def get_label_issue_type(self) -> WebElement:
+        return self.wait_for(self.label_issue_type)
 
-    def getCellFullName(self) -> WebElement:
-        return self.wait_for(self.cellFullName)
+    def get_cell_full_name(self) -> WebElement:
+        return self.wait_for(self.cell_full_name)
 
-    def getCellGender(self) -> WebElement:
-        return self.wait_for(self.cellGender)
+    def get_cell_gender(self) -> WebElement:
+        return self.wait_for(self.cell_gender)
 
-    def getCellDateOfBirth(self) -> WebElement:
-        return self.wait_for(self.cellDateOfBirth)
+    def get_cell_date_of_birth(self) -> WebElement:
+        return self.wait_for(self.cell_date_of_birth)
 
-    def getCellSimilarityScore(self) -> WebElement:
-        return self.wait_for(self.cellSimilarityScore)
+    def get_cell_similarity_score(self) -> WebElement:
+        return self.wait_for(self.cell_similarity_score)
 
-    def getCellLastRegistrationDate(self) -> WebElement:
-        return self.wait_for(self.cellLastRegistrationDate)
+    def get_cell_last_registration_date(self) -> WebElement:
+        return self.wait_for(self.cell_last_registration_date)
 
-    def getCellDocType(self) -> WebElement:
-        return self.wait_for(self.cellDocType)
+    def get_cell_doc_type(self) -> WebElement:
+        return self.wait_for(self.cell_doc_type)
 
-    def getCellDoc(self) -> WebElement:
-        return self.wait_for(self.cellDoc)
+    def get_cell_doc(self) -> WebElement:
+        return self.wait_for(self.cell_doc)
 
-    def getCellAdminLevel2(self) -> WebElement:
-        return self.wait_for(self.cellAdminLevel2)
+    def get_cell_admin_level2(self) -> WebElement:
+        return self.wait_for(self.cell_admin_level2)
 
-    def getCellVillage(self) -> WebElement:
-        return self.wait_for(self.cellVillage)
+    def get_cell_village(self) -> WebElement:
+        return self.wait_for(self.cell_village)
 
-    def getNewNoteField(self) -> WebElement:
-        return self.wait_for(self.newNoteField)
+    def get_new_note_field(self) -> WebElement:
+        return self.wait_for(self.new_note_field)
 
-    def getButtonNewNote(self) -> WebElement:
-        return self.wait_for(self.buttonNewNote)
+    def get_button_new_note(self) -> WebElement:
+        return self.wait_for(self.button_new_note)
 
-    def getNoteRows(self) -> [WebElement]:
-        self.wait_for(self.noteRow)
-        return self.get_elements(self.noteRow)
+    def get_note_rows(self) -> [WebElement]:
+        self.wait_for(self.note_row)
+        return self.get_elements(self.note_row)
 
-    def getLabelLanguagesSpoken(self) -> WebElement:
-        return self.wait_for(self.labelLanguagesSpoken)
+    def get_label_languages_spoken(self) -> WebElement:
+        return self.wait_for(self.label_languages_spoken)
 
-    def getLabelDocumentation(self) -> WebElement:
-        return self.wait_for(self.labelDocumentation)
+    def get_label_documentation(self) -> WebElement:
+        return self.wait_for(self.label_documentation)
 
-    def getLabelDescription(self) -> WebElement:
-        return self.wait_for(self.labelDescription)
+    def get_label_description(self) -> WebElement:
+        return self.wait_for(self.label_description)
 
-    def getNoteName(self) -> WebElement:
-        return self.wait_for(self.noteName)
+    def get_note_name(self) -> WebElement:
+        return self.wait_for(self.note_name)
 
-    def getLabelGENDER(self) -> WebElement:
-        return self.wait_for(self.labelGENDER)
+    def get_label_gender_up(self) -> WebElement:
+        return self.wait_for(self.label_gender_up)
 
-    def getLabelRole(self) -> WebElement:
-        return self.wait_for(self.labelRole)
+    def get_label_role(self) -> WebElement:
+        return self.wait_for(self.label_role)
 
-    def getLabelPhoneNo(self) -> WebElement:
-        return self.wait_for(self.labelPhoneNo)
+    def get_label_phone_no(self) -> WebElement:
+        return self.wait_for(self.label_phone_no)
 
-    def getLabelPregnant(self) -> WebElement:
-        return self.wait_for(self.labelPregnant)
+    def get_label_pregnant(self) -> WebElement:
+        return self.wait_for(self.label_pregnant)
 
-    def getLabelFullName(self) -> WebElement:
-        return self.wait_for(self.labelFullName)
+    def get_label_full_name(self) -> WebElement:
+        return self.wait_for(self.label_full_name)
 
-    def getLabelBirthDate(self) -> WebElement:
-        return self.wait_for(self.labelBirthDate)
+    def get_label_birth_date(self) -> WebElement:
+        return self.wait_for(self.label_birth_date)
 
-    def getLabelDisability(self) -> WebElement:
-        return self.wait_for(self.labelDisability)
+    def get_label_disability(self) -> WebElement:
+        return self.wait_for(self.label_disability)
 
-    def getLabelGivenName(self) -> WebElement:
-        return self.wait_for(self.labelGivenName)
+    def get_label_given_name(self) -> WebElement:
+        return self.wait_for(self.label_given_name)
 
-    def getLabelFamilyName(self) -> WebElement:
-        return self.wait_for(self.labelFamilyName)
+    def get_label_family_name(self) -> WebElement:
+        return self.wait_for(self.label_family_name)
 
-    def getLabelMiddleName(self) -> WebElement:
-        return self.wait_for(self.labelMiddleName)
+    def get_label_middle_name(self) -> WebElement:
+        return self.wait_for(self.label_middle_name)
 
-    def getLabelWorkStatus(self) -> WebElement:
-        return self.wait_for(self.labelWorkStatus)
+    def get_label_work_status(self) -> WebElement:
+        return self.wait_for(self.label_work_status)
 
-    def getLabelRelationship(self) -> WebElement:
-        return self.wait_for(self.labelRelationship)
+    def get_label_relationship(self) -> WebElement:
+        return self.wait_for(self.label_relationship)
 
-    def getLabelMaritalStatus(self) -> WebElement:
-        return self.wait_for(self.labelMaritalStatus)
+    def get_label_marital_status(self) -> WebElement:
+        return self.wait_for(self.label_marital_status)
 
-    def getLabelCommsDisability(self) -> WebElement:
-        return self.wait_for(self.labelCommsDisability)
+    def get_label_comms_disability(self) -> WebElement:
+        return self.wait_for(self.label_comms_disability)
 
-    def getLabelCommsDisability1(self) -> WebElement:
-        return self.wait_for(self.labelCommsDisability1)
+    def get_label_comms_disability1(self) -> WebElement:
+        return self.wait_for(self.label_comms_disability1)
 
-    def getLabelSeeingDisability(self) -> WebElement:
-        return self.wait_for(self.labelSeeingDisability)
+    def get_label_seeing_disability(self) -> WebElement:
+        return self.wait_for(self.label_seeing_disability)
 
-    def getLabelWhoAnswersPhone(self) -> WebElement:
-        return self.wait_for(self.labelWhoAnswersPhone)
+    def get_label_who_answers_phone(self) -> WebElement:
+        return self.wait_for(self.label_who_answers_phone)
 
-    def getLabelHearingDisability(self) -> WebElement:
-        return self.wait_for(self.labelHearingDisability)
+    def get_label_hearing_disability(self) -> WebElement:
+        return self.wait_for(self.label_hearing_disability)
 
-    def getLabelObservedDisability(self) -> WebElement:
-        return self.wait_for(self.labelObservedDisability)
+    def get_label_observed_disability(self) -> WebElement:
+        return self.wait_for(self.label_observed_disability)
 
-    def getLabelPhysicalDisability(self) -> WebElement:
-        return self.wait_for(self.labelPhysicalDisability)
+    def get_label_physical_disability(self) -> WebElement:
+        return self.wait_for(self.label_physical_disability)
 
-    def getLabelSelfcareDisability(self) -> WebElement:
-        return self.wait_for(self.labelSelfcareDisability)
+    def get_label_selfcare_disability(self) -> WebElement:
+        return self.wait_for(self.label_selfcare_disability)
 
-    def getLabelEstimatedBirthDate(self) -> WebElement:
-        return self.wait_for(self.labelEstimatedBirthDate)
+    def get_label_estimated_birth_date(self) -> WebElement:
+        return self.wait_for(self.label_estimated_birth_date)
 
-    def getLabelPhoneNoAlternative(self) -> WebElement:
-        return self.wait_for(self.labelPhoneNoAlternative)
+    def get_label_phone_no_alternative(self) -> WebElement:
+        return self.wait_for(self.label_phone_no_alternative)
 
-    def getLabelWhoAnswersAltPhone(self) -> WebElement:
-        return self.wait_for(self.labelWhoAnswersAltPhone)
+    def get_label_who_answers_alt_phone(self) -> WebElement:
+        return self.wait_for(self.label_who_answers_alt_phone)
 
-    def getLabelTickets(self) -> WebElement:
-        return self.wait_for(self.labelTickets)
+    def get_label_tickets(self) -> WebElement:
+        return self.wait_for(self.label_tickets)
 
-    def getCheckbox(self) -> WebElement:
+    def get_checkbox(self) -> WebElement:
         return self.wait_for(self.checkbox)
 
-    def getApproveBoxNeedsAdjudicationTitle(self) -> WebElement:
-        return self.wait_for(self.approveBoxNeedsAdjudicationTitle)
+    def get_approve_box_needs_adjudication_title(self) -> WebElement:
+        return self.wait_for(self.approve_box_needs_adjudication_title)
 
-    def getCheckboxHouseholdData(self) -> WebElement:
-        return self.wait_for(self.checkboxHouseholdData)
+    def get_checkbox_household_data(self) -> WebElement:
+        return self.wait_for(self.checkbox_household_data)
 
-    def getCheckboxApprove(self) -> [WebElement]:
-        self.wait_for(self.checkboxApprove, By.XPATH)
-        return self.get_elements(self.checkboxApprove, By.XPATH)
+    def get_checkbox_approve(self) -> [WebElement]:
+        self.wait_for(self.checkbox_approve, By.XPATH)
+        return self.get_elements(self.checkbox_approve, By.XPATH)
 
-    def getCheckboxIndividualData(self) -> WebElement:
-        return self.wait_for(self.checkboxIndividualData)
+    def get_checkbox_individual_data(self) -> WebElement:
+        return self.wait_for(self.checkbox_individual_data)
 
-    def getCheckboxRequestedDataChange(self) -> [WebElement]:
-        self.wait_for(self.checkboxRequestedDataChange)
-        return self.get_elements(self.checkboxRequestedDataChange)
+    def get_checkbox_requested_data_change(self) -> [WebElement]:
+        self.wait_for(self.checkbox_requested_data_change)
+        return self.get_elements(self.checkbox_requested_data_change)
 
-    def getButtonCreateLinkedTicket(self) -> WebElement:
-        return self.wait_for(self.buttonCreateLinkedTicket)
+    def get_button_create_linked_ticket(self) -> WebElement:
+        return self.wait_for(self.button_create_linked_ticket)
 
-    def getButtonMarkDistinct(self) -> WebElement:
-        return self.wait_for(self.buttonMarkDistinct)
+    def get_button_mark_distinct(self) -> WebElement:
+        return self.wait_for(self.button_mark_distinct)
 
-    def getButtonMarkDuplicate(self) -> WebElement:
-        return self.wait_for(self.buttonMarkDuplicate)
+    def get_button_mark_duplicate(self) -> WebElement:
+        return self.wait_for(self.button_mark_duplicate)
 
-    def getButtonClear(self) -> WebElement:
-        return self.wait_for(self.buttonClear)
+    def get_button_clear(self) -> WebElement:
+        return self.wait_for(self.button_clear)
 
-    def getSelectAllCheckbox(self) -> WebElement:
-        return self.wait_for(self.selectAllCheckbox)
+    def get_select_all_checkbox(self) -> WebElement:
+        return self.wait_for(self.select_all_checkbox)
 
-    def getTableCellUniqueness(self) -> WebElement:
-        return self.wait_for(self.tableCellUniqueness)
+    def get_table_cell_uniqueness(self) -> WebElement:
+        return self.wait_for(self.table_cell_uniqueness)
 
-    def getTableCellIndividualId(self) -> WebElement:
-        return self.wait_for(self.tableCellIndividualId)
+    def get_table_cell_individual_id(self) -> WebElement:
+        return self.wait_for(self.table_cell_individual_id)
 
-    def getTableCellHouseholdId(self) -> WebElement:
-        return self.wait_for(self.tableCellHouseholdId)
+    def get_table_cell_household_id(self) -> WebElement:
+        return self.wait_for(self.table_cell_household_id)
 
-    def getTableCellFullName(self) -> WebElement:
-        return self.wait_for(self.tableCellFullName)
+    def get_table_cell_full_name(self) -> WebElement:
+        return self.wait_for(self.table_cell_full_name)
 
-    def getTableCellGender(self) -> WebElement:
-        return self.wait_for(self.tableCellGender)
+    def get_table_cell_gender(self) -> WebElement:
+        return self.wait_for(self.table_cell_gender)
 
-    def getTableCellDateOfBirth(self) -> WebElement:
-        return self.wait_for(self.tableCellDateOfBirth)
+    def get_table_cell_date_of_birth(self) -> WebElement:
+        return self.wait_for(self.table_cell_date_of_birth)
 
-    def getTableCellSimilarityScore(self) -> WebElement:
-        return self.wait_for(self.tableCellSimilarityScore)
+    def get_table_cell_similarity_score(self) -> WebElement:
+        return self.wait_for(self.table_cell_similarity_score)
 
-    def getTableCellLastRegistrationDate(self) -> WebElement:
-        return self.wait_for(self.tableCellLastRegistrationDate)
+    def get_table_cell_last_registration_date(self) -> WebElement:
+        return self.wait_for(self.table_cell_last_registration_date)
 
-    def getTableCellDocType(self) -> WebElement:
-        return self.wait_for(self.tableCellDocType)
+    def get_table_cell_doc_type(self) -> WebElement:
+        return self.wait_for(self.table_cell_doc_type)
 
-    def getTableCellDocNumber(self) -> WebElement:
-        return self.wait_for(self.tableCellDocNumber)
+    def get_table_cell_doc_number(self) -> WebElement:
+        return self.wait_for(self.table_cell_doc_number)
 
-    def getTableCellAdminLevel2(self) -> WebElement:
-        return self.wait_for(self.tableCellAdminLevel2)
+    def get_table_cell_admin_level2(self) -> WebElement:
+        return self.wait_for(self.table_cell_admin_level2)
 
-    def getTableCellVillage(self) -> WebElement:
-        return self.wait_for(self.tableCellVillage)
+    def get_table_cell_village(self) -> WebElement:
+        return self.wait_for(self.table_cell_village)
 
-    def getCheckboxIndividual(self) -> WebElement:
-        return self.wait_for(self.checkboxIndividual)
+    def get_checkbox_individual(self) -> WebElement:
+        return self.wait_for(self.checkbox_individual)
 
-    def getUniquenessCell(self) -> WebElement:
-        return self.wait_for(self.uniquenessCell)
+    def get_uniqueness_cell(self) -> WebElement:
+        return self.wait_for(self.uniqueness_cell)
 
-    def getDistinctTooltip(self) -> WebElement:
-        return self.wait_for(self.distinctTooltip)
+    def get_distinct_tooltip(self) -> WebElement:
+        return self.wait_for(self.distinct_tooltip)
 
-    def getIndividualIdCell(self) -> [WebElement]:
-        self.wait_for(self.individualIdCell)
-        return self.get_elements(self.individualIdCell)
+    def get_individual_id_cell(self) -> [WebElement]:
+        self.wait_for(self.individual_id_cell)
+        return self.get_elements(self.individual_id_cell)
 
-    def getIndividualId(self) -> WebElement:
-        return self.wait_for(self.individualId)
+    def get_individual_id(self) -> WebElement:
+        return self.wait_for(self.individual_id)
 
-    def getHouseholdIdCell(self) -> [WebElement]:
-        self.wait_for(self.householdIdCell)
-        return self.get_elements(self.householdIdCell)
+    def get_household_id_cell(self) -> [WebElement]:
+        self.wait_for(self.household_id_cell)
+        return self.get_elements(self.household_id_cell)
 
-    def getHouseholdId(self) -> [WebElement]:
-        self.wait_for(self.householdId)
-        return self.get_elements(self.householdId)
+    def get_household_id(self) -> [WebElement]:
+        self.wait_for(self.household_id)
+        return self.get_elements(self.household_id)
 
-    def getFullNameCell(self) -> [WebElement]:
-        return self.wait_for(self.fullNameCell)
+    def get_full_name_cell(self) -> [WebElement]:
+        return self.wait_for(self.full_name_cell)
 
-    def getGenderCell(self) -> WebElement:
-        return self.wait_for(self.genderCell)
+    def get_gender_cell(self) -> WebElement:
+        return self.wait_for(self.gender_cell)
 
-    def getBirthDateCell(self) -> [WebElement]:
-        return self.wait_for(self.birthDateCell)
+    def get_birth_date_cell(self) -> [WebElement]:
+        return self.wait_for(self.birth_date_cell)
 
-    def getSimilarityScoreCell(self) -> WebElement:
-        return self.wait_for(self.similarityScoreCell)
+    def get_similarity_score_cell(self) -> WebElement:
+        return self.wait_for(self.similarity_score_cell)
 
-    def getLastRegistrationDateCell(self) -> WebElement:
-        return self.wait_for(self.lastRegistrationDateCell)
+    def get_last_registration_date_cell(self) -> WebElement:
+        return self.wait_for(self.last_registration_date_cell)
 
-    def getDocTypeCell(self) -> WebElement:
-        return self.wait_for(self.docTypeCell)
+    def get_doc_type_cell(self) -> WebElement:
+        return self.wait_for(self.doc_type_cell)
 
-    def getDocNumberCell(self) -> WebElement:
-        return self.wait_for(self.docNumberCell)
+    def get_doc_number_cell(self) -> WebElement:
+        return self.wait_for(self.doc_number_cell)
 
-    def getAdminLevel2Cell(self) -> WebElement:
-        return self.wait_for(self.adminLevel2Cell)
+    def get_admin_level2_cell(self) -> WebElement:
+        return self.wait_for(self.admin_level2_cell)
 
-    def getVillageCell(self) -> [WebElement]:
-        self.wait_for(self.villageCell)
-        return self.get_elements(self.villageCell)
+    def get_village_cell(self) -> [WebElement]:
+        self.wait_for(self.village_cell)
+        return self.get_elements(self.village_cell)
 
-    def getPossibleDuplicateRowByUnicefId(self, unicef_id: str) -> WebElement:
-        return self.wait_for(self.possibleDuplicateRowTemplate.format(unicef_id))
+    def get_possible_duplicate_row_by_unicef_id(self, unicef_id: str) -> WebElement:
+        return self.wait_for(self.possible_duplicate_row_template.format(unicef_id))
 
-    def getCheckboxCell(self) -> [WebElement]:
-        self.wait_for(self.checkboxCell)
-        return self.get_elements(self.checkboxCell)
+    def get_checkbox_cell(self) -> [WebElement]:
+        self.wait_for(self.checkbox_cell)
+        return self.get_elements(self.checkbox_cell)
 
-    def getSelectCheckbox(self) -> [WebElement]:
-        self.wait_for(self.selectCheckbox)
-        return self.get_elements(self.selectCheckbox)
+    def get_select_checkbox(self) -> [WebElement]:
+        self.wait_for(self.select_checkbox)
+        return self.get_elements(self.select_checkbox)
 
-    def getStatusCell(self) -> [WebElement]:
-        self.wait_for(self.statusCell)
-        return self.get_elements(self.statusCell)
+    def get_status_cell(self) -> [WebElement]:
+        self.wait_for(self.status_cell)
+        return self.get_elements(self.status_cell)
 
-    def getSexCell(self) -> WebElement:
-        return self.wait_for(self.sexCell)
+    def get_sex_cell(self) -> WebElement:
+        return self.wait_for(self.sex_cell)
 
-    def getSimilarityCell(self) -> WebElement:
-        return self.wait_for(self.similarityCell)
+    def get_similarity_cell(self) -> WebElement:
+        return self.wait_for(self.similarity_cell)
 
-    def getDocumentTypeCell(self) -> WebElement:
-        return self.wait_for(self.documentTypeCell)
+    def get_document_type_cell(self) -> WebElement:
+        return self.wait_for(self.document_type_cell)
 
-    def getDocumentNumberCell(self) -> WebElement:
-        return self.wait_for(self.documentNumberCell)
+    def get_document_number_cell(self) -> WebElement:
+        return self.wait_for(self.document_number_cell)
 
-    def getAdmin2NameCell(self) -> WebElement:
-        return self.wait_for(self.admin2NameCell)
+    def get_admin2_name_cell(self) -> WebElement:
+        return self.wait_for(self.admin2_name_cell)
 
-    def getDuplicateTooltip(self) -> WebElement:
-        return self.wait_for(self.duplicateTooltip)
+    def get_duplicate_tooltip(self) -> WebElement:
+        return self.wait_for(self.duplicate_tooltip)
 
-    def getInputNewnote(self) -> WebElement:
-        return self.wait_for(self.inputNewnote)
+    def get_input_new_note(self) -> WebElement:
+        return self.wait_for(self.input_new_note)
 
-    def getButtonAddNote(self) -> WebElement:
-        return self.wait_for(self.buttonAddNote)
+    def get_button_add_note(self) -> WebElement:
+        return self.wait_for(self.button_add_note)
 
-    def getActivityLogContainer(self) -> WebElement:
-        return self.wait_for(self.activityLogContainer)
+    def get_activity_log_container(self) -> WebElement:
+        return self.wait_for(self.activity_log_container)
 
-    def getActivityLogTitle(self) -> WebElement:
-        return self.wait_for(self.activityLogTitle)
+    def get_activity_log_title(self) -> WebElement:
+        return self.wait_for(self.activity_log_title)
 
-    def getExpandCollapseButton(self) -> WebElement:
-        return self.wait_for(self.expandCollapseButton, timeout=120)
+    def get_expand_collapse_button(self) -> WebElement:
+        return self.wait_for(self.expand_collapse_button, timeout=120)
 
-    def getActivityLogTable(self) -> WebElement:
-        return self.wait_for(self.activityLogTable)
+    def get_activity_log_table(self) -> WebElement:
+        return self.wait_for(self.activity_log_table)
 
-    def getHeadingCellTimestamp(self) -> WebElement:
-        return self.wait_for(self.headingCellTimestamp)
+    def get_heading_cell_timestamp(self) -> WebElement:
+        return self.wait_for(self.heading_cell_timestamp)
 
-    def getHeadingCellActor(self) -> WebElement:
-        return self.wait_for(self.headingCellActor)
+    def get_heading_cell_actor(self) -> WebElement:
+        return self.wait_for(self.heading_cell_actor)
 
-    def getHeadingCellAction(self) -> WebElement:
-        return self.wait_for(self.headingCellAction)
+    def get_heading_cell_action(self) -> WebElement:
+        return self.wait_for(self.heading_cell_action)
 
-    def getHeadingCellChange_from(self) -> WebElement:
-        return self.wait_for(self.headingCellChange_from)
+    def get_heading_cell_change_from(self) -> WebElement:
+        return self.wait_for(self.heading_cell_change_from)
 
-    def getHeadingCellChange_to(self) -> WebElement:
-        return self.wait_for(self.headingCellChange_to)
+    def get_heading_cell_change_to(self) -> WebElement:
+        return self.wait_for(self.heading_cell_change_to)
 
-    def getPagination(self) -> WebElement:
+    def get_pagination(self) -> WebElement:
         return self.wait_for(self.pagination)
 
-    def getButtonCancel(self) -> WebElement:
-        return self.wait_for(self.buttonCancel)
+    def get_button_cancel(self) -> WebElement:
+        return self.wait_for(self.button_cancel)
 
-    def getButtonAdmin(self) -> WebElement:
-        return self.wait_for(self.buttonAdmin)
+    def get_button_admin(self) -> WebElement:
+        return self.wait_for(self.button_admin)
 
-    def getLogRow(self) -> [WebElement]:
-        self.wait_for(self.logRow)
-        return self.get_elements(self.logRow)
+    def get_log_row(self) -> [WebElement]:
+        self.wait_for(self.log_row)
+        return self.get_elements(self.log_row)
 
-    def getPaymentRecord(self) -> WebElement:
-        return self.wait_for(self.paymentRecord)
+    def get_payment_record(self) -> WebElement:
+        return self.wait_for(self.payment_record)
 
-    def getButtonRotateImage(self) -> WebElement:
-        return self.wait_for(self.buttonRotateImage)
+    def get_button_rotate_image(self) -> WebElement:
+        return self.wait_for(self.button_rotate_image)
 
-    def getLinkShowPhoto(self) -> WebElement:
-        return self.wait_for(self.linkShowPhoto)
+    def get_link_show_photo(self) -> WebElement:
+        return self.wait_for(self.link_show_photo)
 
-    def getGrievanceVerify(self) -> WebElement:
-        return self.wait_for(self.grievanceVerify)
+    def get_grievance_verify(self) -> WebElement:
+        return self.wait_for(self.grievance_verify)
 
-    def getInputNewReceivedAmount(self) -> WebElement:
-        return self.wait_for(self.inputNewReceivedAmount)
+    def get_input_new_received_amount(self) -> WebElement:
+        return self.wait_for(self.input_new_received_amount)
 
-    def getButtonSubmit(self) -> WebElement:
-        return self.wait_for(self.buttonSubmit)
+    def get_button_submit(self) -> WebElement:
+        return self.wait_for(self.button_submit)
 
-    def getGrievanceApprove(self) -> WebElement:
-        return self.wait_for(self.grievanceApprove)
+    def get_grievance_approve(self) -> WebElement:
+        return self.wait_for(self.grievance_approve)
 
-    def getLabelStatus(self) -> WebElement:
-        return self.wait_for(self.labelStatus)
+    def get_label_status(self) -> WebElement:
+        return self.wait_for(self.label_status)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getLabelPriority(self) -> WebElement:
-        return self.wait_for(self.labelPriority)
+    def get_label_priority(self) -> WebElement:
+        return self.wait_for(self.label_priority)
 
-    def getLabelUrgency(self) -> WebElement:
-        return self.wait_for(self.labelUrgency)
+    def get_label_urgency(self) -> WebElement:
+        return self.wait_for(self.label_urgency)

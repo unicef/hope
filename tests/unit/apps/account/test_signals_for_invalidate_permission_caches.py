@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.test import TestCase
 from django.utils import timezone
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -13,7 +14,6 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea

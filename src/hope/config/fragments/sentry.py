@@ -36,7 +36,7 @@ if SENTRY_DSN:
             "PermissionDenied",
             "Http404",
             "AuthCanceled",
-            "TokenNotProvided",
+            "TokenNotProvidedError",
         ],
         before_send=SentryFilter().before_send,
         environment=SENTRY_ENVIRONMENT,

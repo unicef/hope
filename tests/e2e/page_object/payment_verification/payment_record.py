@@ -1,45 +1,46 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class PaymentRecord(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonEdPlan = 'button[data-cy="button-ed-plan"]'
-    labelStatus = 'div[data-cy="label-STATUS"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    labelHousehold = 'div[data-cy="label-Items Group ID"]'
-    labelTargetPopulation = 'div[data-cy="label-TARGET POPULATION"]'
-    labelDistributionModality = 'div[data-cy="label-DISTRIBUTION MODALITY"]'
-    labelAmountReceived = 'div[data-cy="label-AMOUNT RECEIVED"]'
-    labelHouseholdId = 'div[data-cy="label-Items Group ID"]'
-    labelHeadOfHousehold = 'div[data-cy="label-HEAD OF Items Group"]'
-    labelTotalPersonCovered = 'div[data-cy="label-TOTAL PERSON COVERED"]'
-    labelPhoneNumber = 'div[data-cy="label-PHONE NUMBER"]'
-    labelAltPhoneNumber = 'div[data-cy="label-ALT. PHONE NUMBER"]'
-    labelEntitlementQuantity = 'div[data-cy="label-ENTITLEMENT QUANTITY"]'
-    labelDeliveredQuantity = 'div[data-cy="label-DELIVERED QUANTITY"]'
-    labelCurrency = 'div[data-cy="label-CURRENCY"]'
-    labelDeliveryType = 'div[data-cy="label-DELIVERY TYPE"]'
-    labelDeliveryDate = 'div[data-cy="label-DELIVERY DATE"]'
-    labelEntitlementCardId = 'div[data-cy="label-ENTITLEMENT CARD ID"]'
-    labelTransactionReferenceId = 'div[data-cy="label-TRANSACTION REFERENCE ID"]'
-    labelEntitlementCardIssueDate = 'div[data-cy="label-ENTITLEMENT CARD ISSUE DATE"]'
-    labelFsp = 'div[data-cy="label-FSP"]'
-    buttonSubmit = 'button[data-cy="button-submit"]'
-    inputReceivedamount = 'input[data-cy="input-receivedAmount"]'
-    choiceNotReceived = '[data-cy="choice-not-received"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    button_ed_plan = 'button[data-cy="button-ed-plan"]'
+    label_status = 'div[data-cy="label-STATUS"]'
+    status_container = 'div[data-cy="status-container"]'
+    label_household = 'div[data-cy="label-Items Group ID"]'
+    label_target_population = 'div[data-cy="label-TARGET POPULATION"]'
+    label_distribution_modality = 'div[data-cy="label-DISTRIBUTION MODALITY"]'
+    label_amount_received = 'div[data-cy="label-AMOUNT RECEIVED"]'
+    label_household_id = 'div[data-cy="label-Items Group ID"]'
+    label_head_of_household = 'div[data-cy="label-HEAD OF Items Group"]'
+    label_total_person_covered = 'div[data-cy="label-TOTAL PERSON COVERED"]'
+    label_phone_number = 'div[data-cy="label-PHONE NUMBER"]'
+    label_alt_phone_number = 'div[data-cy="label-ALT. PHONE NUMBER"]'
+    label_entitlement_quantity = 'div[data-cy="label-ENTITLEMENT QUANTITY"]'
+    label_delivered_quantity = 'div[data-cy="label-DELIVERED QUANTITY"]'
+    label_currency = 'div[data-cy="label-CURRENCY"]'
+    label_delivery_type = 'div[data-cy="label-DELIVERY TYPE"]'
+    label_delivery_date = 'div[data-cy="label-DELIVERY DATE"]'
+    label_entitlement_card_id = 'div[data-cy="label-ENTITLEMENT CARD ID"]'
+    label_transaction_reference_id = 'div[data-cy="label-TRANSACTION REFERENCE ID"]'
+    label_entitlement_card_issue_date = 'div[data-cy="label-ENTITLEMENT CARD ISSUE DATE"]'
+    label_fsp = 'div[data-cy="label-FSP"]'
+    button_submit = 'button[data-cy="button-submit"]'
+    input_received_amount = 'input[data-cy="input-receivedAmount"]'
+    choice_not_received = '[data-cy="choice-not-received"]'
 
-    def getInputReceivedamount(self) -> WebElement:
-        return self.wait_for(self.inputReceivedamount)
+    def get_input_received_amount(self) -> WebElement:
+        return self.wait_for(self.input_received_amount)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getButtonEdPlan(self) -> WebElement:
+    def get_button_ed_plan(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:
         self.driver.execute_script(
             """
@@ -47,77 +48,77 @@ class PaymentRecord(BaseComponents):
             container.scrollBy(0,-200)
             """
         )
-        return self.wait_for(self.buttonEdPlan)
+        return self.wait_for(self.button_ed_plan)
 
-    def getLabelStatus(self) -> [WebElement]:
-        return self.get_elements(self.labelStatus)
+    def get_label_status(self) -> [WebElement]:
+        return self.get_elements(self.label_status)
 
-    def getStatus(self) -> [WebElement]:
-        self.wait_for(self.statusContainer)
-        return self.get_elements(self.statusContainer)
+    def get_status(self) -> [WebElement]:
+        self.wait_for(self.status_container)
+        return self.get_elements(self.status_container)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def waitForStatusContainer(self, status: str, timeout: int = 20) -> []:
-        return self.wait_for_text_to_be_exact(status, self.statusContainer, timeout=timeout)
+    def wait_for_status_container(self, status: str, timeout: int = 20) -> []:
+        return self.wait_for_text_to_be_exact(status, self.status_container, timeout=timeout)
 
-    def getLabelHousehold(self) -> WebElement:
-        return self.wait_for(self.labelHousehold)
+    def get_label_household(self) -> WebElement:
+        return self.wait_for(self.label_household)
 
-    def getLabelTargetPopulation(self) -> WebElement:
-        return self.wait_for(self.labelTargetPopulation)
+    def get_label_target_population(self) -> WebElement:
+        return self.wait_for(self.label_target_population)
 
-    def getLabelDistributionModality(self) -> WebElement:
-        return self.wait_for(self.labelDistributionModality)
+    def get_label_distribution_modality(self) -> WebElement:
+        return self.wait_for(self.label_distribution_modality)
 
-    def getLabelAmountReceived(self) -> WebElement:
-        return self.wait_for(self.labelAmountReceived)
+    def get_label_amount_received(self) -> WebElement:
+        return self.wait_for(self.label_amount_received)
 
-    def getLabelHouseholdId(self) -> WebElement:
-        return self.wait_for(self.labelHouseholdId)
+    def get_label_household_id(self) -> WebElement:
+        return self.wait_for(self.label_household_id)
 
-    def getLabelHeadOfHousehold(self) -> WebElement:
-        return self.wait_for(self.labelHeadOfHousehold)
+    def get_label_head_of_household(self) -> WebElement:
+        return self.wait_for(self.label_head_of_household)
 
-    def getLabelTotalPersonCovered(self) -> WebElement:
-        return self.wait_for(self.labelTotalPersonCovered)
+    def get_label_total_person_covered(self) -> WebElement:
+        return self.wait_for(self.label_total_person_covered)
 
-    def getLabelPhoneNumber(self) -> WebElement:
-        return self.wait_for(self.labelPhoneNumber)
+    def get_label_phone_number(self) -> WebElement:
+        return self.wait_for(self.label_phone_number)
 
-    def getLabelAltPhoneNumber(self) -> WebElement:
-        return self.wait_for(self.labelAltPhoneNumber)
+    def get_label_alt_phone_number(self) -> WebElement:
+        return self.wait_for(self.label_alt_phone_number)
 
-    def getLabelEntitlementQuantity(self) -> WebElement:
-        return self.wait_for(self.labelEntitlementQuantity)
+    def get_label_entitlement_quantity(self) -> WebElement:
+        return self.wait_for(self.label_entitlement_quantity)
 
-    def getLabelDeliveredQuantity(self) -> WebElement:
-        return self.wait_for(self.labelDeliveredQuantity)
+    def get_label_delivered_quantity(self) -> WebElement:
+        return self.wait_for(self.label_delivered_quantity)
 
-    def getLabelCurrency(self) -> WebElement:
-        return self.wait_for(self.labelCurrency)
+    def get_label_currency(self) -> WebElement:
+        return self.wait_for(self.label_currency)
 
-    def getLabelDeliveryType(self) -> WebElement:
-        return self.wait_for(self.labelDeliveryType)
+    def get_label_delivery_type(self) -> WebElement:
+        return self.wait_for(self.label_delivery_type)
 
-    def getLabelDeliveryDate(self) -> WebElement:
-        return self.wait_for(self.labelDeliveryDate)
+    def get_label_delivery_date(self) -> WebElement:
+        return self.wait_for(self.label_delivery_date)
 
-    def getLabelEntitlementCardId(self) -> WebElement:
-        return self.wait_for(self.labelEntitlementCardId)
+    def get_label_entitlement_card_id(self) -> WebElement:
+        return self.wait_for(self.label_entitlement_card_id)
 
-    def getLabelTransactionReferenceId(self) -> WebElement:
-        return self.wait_for(self.labelTransactionReferenceId)
+    def get_label_transaction_reference_id(self) -> WebElement:
+        return self.wait_for(self.label_transaction_reference_id)
 
-    def getLabelEntitlementCardIssueDate(self) -> WebElement:
-        return self.wait_for(self.labelEntitlementCardIssueDate)
+    def get_label_entitlement_card_issue_date(self) -> WebElement:
+        return self.wait_for(self.label_entitlement_card_issue_date)
 
-    def getLabelFsp(self) -> WebElement:
-        return self.wait_for(self.labelFsp)
+    def get_label_fsp(self) -> WebElement:
+        return self.wait_for(self.label_fsp)
 
-    def getButtonSubmit(self) -> WebElement:
-        return self.wait_for(self.buttonSubmit)
+    def get_button_submit(self) -> WebElement:
+        return self.wait_for(self.button_submit)
 
-    def getChoiceNotReceived(self) -> WebElement:
-        return self.wait_for(self.choiceNotReceived)
+    def get_choice_not_received(self) -> WebElement:
+        return self.wait_for(self.choice_not_received)

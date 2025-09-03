@@ -1,230 +1,231 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class ProgrammeDetails(BaseComponents):
-    headerTitle = 'h5[data-cy="page-header-title"]'
-    copyProgram = 'a[data-cy="button-copy-program"]'
-    programStatus = 'div[data-cy="status-container"]'
-    labelStartDate = 'div[data-cy="label-START DATE"]'
-    labelEndDate = 'div[data-cy="label-END DATE"]'
-    labelSelector = 'div[data-cy="label-Sector"]'
-    labelDataCollectingType = 'div[data-cy="label-Data Collecting Type"]'
-    labelFreqOfPayment = 'div[data-cy="label-Frequency of Payment"]'
-    labelAdministrativeAreas = 'div[data-cy="label-Administrative Areas of implementation"]'
-    labelCashPlus = 'div[data-cy="label-CASH+"]'
-    labelProgramSize = 'div[data-cy="label-Programme size"]'
-    labelDescription = 'div[data-cy="label-Description"]'
-    labelAreaAccess = 'div[data-cy="label-Area Access"]'
-    labelAdminArea1 = 'div[data-cy="labelized-field-container-admin-area-1-total-count"]'
-    labelAdminArea2 = 'div[data-cy="label-Admin Area 2"]'
-    labelPartnerName = 'h6[data-cy="label-partner-name"]'
-    labelPartnerAccess = 'div[data-cy="label-Partner Access"]'
-    buttonRemoveProgram = 'button[data-cy="button-remove-program"]'
-    buttonEditProgram = 'button[data-cy="button-edit-program"]'
-    selectEditProgramDetails = 'li[data-cy="menu-item-edit-details"]'
-    selectEditProgramPartners = 'li[data-cy="menu-item-edit-partners"]'
-    buttonActivateProgram = 'button[data-cy="button-activate-program"]'
-    buttonActivateProgramModal = 'button[data-cy="button-activate-program-modal"]'
-    labelProgrammeCode = 'div[data-cy="label-Programme Code"]'
-    buttonFinishProgram = 'button[data-cy="button-finish-program"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    buttonAddNewProgrammeCycle = 'button[data-cy="button-add-new-programme-cycle"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    programCycleRow = 'tr[data-cy="program-cycle-row"]'
-    programCycleId = 'td[data-cy="program-cycle-id"]'
-    programCycleTitle = 'td[data-cy="program-cycle-title"]'
-    programCycleStatus = 'td[data-cy="program-cycle-status"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    programCycleTotalEntitledQuantityUSD = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
-    programCycleTotalUndeliveredQuantityUSD = 'td[data-cy="program-cycle-total-undelivered-quantity-usd"]'
-    programCycleTotalDeliveredQuantityUSD = 'td[data-cy="program-cycle-total-delivered-quantity-usd"]'
-    programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
-    programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
-    programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
-    buttonEditProgramCycle = 'button[data-cy="button-edit-program-cycle"]'
-    startDateCycle = 'div[data-cy="start-date-cycle"]'
-    dataPickerFilter = 'div[data-cy="date-picker-filter"]'
-    endDateCycle = 'div[data-cy="end-date-cycle"]'
-    buttonNext = 'button[data-cy="button-update-program-cycle-modal"]'
-    buttonSave = 'button[data-cy="button-save"]'
-    buttonCreateProgramCycle = 'button[data-cy="button-create-program-cycle"]'
-    inputTitle = 'input[data-cy="input-title"]'
-    deleteProgrammeCycle = 'button[data-cy="delete-programme-cycle"]'
-    buttonDelete = 'button[data-cy="button-delete"]'
-    buttonCancel = 'button[data-cy="button-cancel"]'
+    header_title = 'h5[data-cy="page-header-title"]'
+    copy_program = 'a[data-cy="button-copy-program"]'
+    program_status = 'div[data-cy="status-container"]'
+    label_start_date = 'div[data-cy="label-START DATE"]'
+    label_end_date = 'div[data-cy="label-END DATE"]'
+    label_selector = 'div[data-cy="label-Sector"]'
+    label_data_collecting_type = 'div[data-cy="label-Data Collecting Type"]'
+    label_freq_of_payment = 'div[data-cy="label-Frequency of Payment"]'
+    label_administrative_areas = 'div[data-cy="label-Administrative Areas of implementation"]'
+    label_cash_plus = 'div[data-cy="label-CASH+"]'
+    label_program_size = 'div[data-cy="label-Programme size"]'
+    label_description = 'div[data-cy="label-Description"]'
+    label_area_access = 'div[data-cy="label-Area Access"]'
+    label_admin_area1 = 'div[data-cy="labelized-field-container-admin-area-1-total-count"]'
+    label_admin_area2 = 'div[data-cy="label-Admin Area 2"]'
+    label_partner_name = 'h6[data-cy="label-partner-name"]'
+    label_partner_access = 'div[data-cy="label-Partner Access"]'
+    button_remove_program = 'button[data-cy="button-remove-program"]'
+    button_edit_program = 'button[data-cy="button-edit-program"]'
+    select_edit_program_details = 'li[data-cy="menu-item-edit-details"]'
+    select_edit_program_partners = 'li[data-cy="menu-item-edit-partners"]'
+    button_activate_program = 'button[data-cy="button-activate-program"]'
+    button_activate_program_modal = 'button[data-cy="button-activate-program-modal"]'
+    label_programme_code = 'div[data-cy="label-Programme Code"]'
+    button_finish_program = 'button[data-cy="button-finish-program"]'
+    table_title = 'h6[data-cy="table-title"]'
+    button_add_new_programme_cycle = 'button[data-cy="button-add-new-programme-cycle"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    program_cycle_row = 'tr[data-cy="program-cycle-row"]'
+    program_cycle_id = 'td[data-cy="program-cycle-id"]'
+    program_cycle_title = 'td[data-cy="program-cycle-title"]'
+    program_cycle_status = 'td[data-cy="program-cycle-status"]'
+    status_container = 'div[data-cy="status-container"]'
+    program_cycle_total_entitled_quantity_usd = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
+    program_cycle_total_undelivered_quantity_usd = 'td[data-cy="program-cycle-total-undelivered-quantity-usd"]'
+    program_cycle_total_delivered_quantity_usd = 'td[data-cy="program-cycle-total-delivered-quantity-usd"]'
+    program_cycle_start_date = 'td[data-cy="program-cycle-start-date"]'
+    program_cycle_end_date = 'td[data-cy="program-cycle-end-date"]'
+    program_cycle_details_btn = 'td[data-cy="program-cycle-details-btn"]'
+    button_edit_program_cycle = 'button[data-cy="button-edit-program-cycle"]'
+    start_date_cycle = 'div[data-cy="start-date-cycle"]'
+    data_picker_filter = 'div[data-cy="date-picker-filter"]'
+    end_date_cycle = 'div[data-cy="end-date-cycle"]'
+    button_next = 'button[data-cy="button-update-program-cycle-modal"]'
+    button_save = 'button[data-cy="button-save"]'
+    button_create_program_cycle = 'button[data-cy="button-create-program-cycle"]'
+    input_title = 'input[data-cy="input-title"]'
+    delete_programme_cycle = 'button[data-cy="delete-programme-cycle"]'
+    button_delete = 'button[data-cy="button-delete"]'
+    button_cancel = 'button[data-cy="button-cancel"]'
 
-    def getProgramCycleRow(self) -> [WebElement]:
-        self.wait_for(self.programCycleRow)
-        return self.get_elements(self.programCycleRow)
+    def get_program_cycle_row(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_row)
+        return self.get_elements(self.program_cycle_row)
 
-    def getDeleteProgrammeCycle(self) -> [WebElement]:
-        self.wait_for(self.deleteProgrammeCycle)
-        return self.get_elements(self.deleteProgrammeCycle)
+    def get_delete_programme_cycle(self) -> [WebElement]:
+        self.wait_for(self.delete_programme_cycle)
+        return self.get_elements(self.delete_programme_cycle)
 
-    def getProgramCycleId(self) -> [WebElement]:
-        self.wait_for(self.programCycleId)
-        return self.get_elements(self.programCycleId)
+    def get_program_cycle_id(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_id)
+        return self.get_elements(self.program_cycle_id)
 
-    def getProgramCycleTitle(self) -> [WebElement]:
-        self.wait_for(self.programCycleTitle)
-        return self.get_elements(self.programCycleTitle)
+    def get_program_cycle_title(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_title)
+        return self.get_elements(self.program_cycle_title)
 
-    def getProgramCycleStatus(self) -> [WebElement]:
-        self.wait_for(self.programCycleStatus)
-        return self.get_elements(self.programCycleStatus)
+    def get_program_cycle_status(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_status)
+        return self.get_elements(self.program_cycle_status)
 
-    def getStatusContainer(self) -> [WebElement]:
-        self.wait_for(self.statusContainer)
-        return self.get_elements(self.statusContainer)
+    def get_status_container(self) -> [WebElement]:
+        self.wait_for(self.status_container)
+        return self.get_elements(self.status_container)
 
-    def getProgramCycleTotalEntitledQuantityUSD(self) -> [WebElement]:
-        self.wait_for(self.programCycleTotalEntitledQuantityUSD)
-        return self.get_elements(self.programCycleTotalEntitledQuantityUSD)
+    def get_program_cycle_total_entitled_quantity_usd(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_total_entitled_quantity_usd)
+        return self.get_elements(self.program_cycle_total_entitled_quantity_usd)
 
-    def getProgramCycleTotalUndeliveredQuantityUSD(self) -> [WebElement]:
-        self.wait_for(self.programCycleTotalUndeliveredQuantityUSD)
-        return self.get_elements(self.programCycleTotalUndeliveredQuantityUSD)
+    def get_program_cycle_total_undelivered_quantity_usd(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_total_undelivered_quantity_usd)
+        return self.get_elements(self.program_cycle_total_undelivered_quantity_usd)
 
-    def getProgramCycleTotalDeliveredQuantityUSD(self) -> [WebElement]:
-        self.wait_for(self.programCycleTotalDeliveredQuantityUSD)
-        return self.get_elements(self.programCycleTotalDeliveredQuantityUSD)
+    def get_program_cycle_total_delivered_quantity_usd(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_total_delivered_quantity_usd)
+        return self.get_elements(self.program_cycle_total_delivered_quantity_usd)
 
-    def getProgramCycleStartDate(self) -> [WebElement]:
-        self.wait_for(self.programCycleStartDate)
-        return self.get_elements(self.programCycleStartDate)
+    def get_program_cycle_start_date(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_start_date)
+        return self.get_elements(self.program_cycle_start_date)
 
-    def getProgramCycleEndDate(self) -> [WebElement]:
-        self.wait_for(self.programCycleEndDate)
-        return self.get_elements(self.programCycleEndDate)
+    def get_program_cycle_end_date(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_end_date)
+        return self.get_elements(self.program_cycle_end_date)
 
-    def getProgramCycleDetailsBtn(self) -> [WebElement]:
-        self.wait_for(self.programCycleDetailsBtn)
-        return self.get_elements(self.programCycleDetailsBtn)
+    def get_program_cycle_details_btn(self) -> [WebElement]:
+        self.wait_for(self.program_cycle_details_btn)
+        return self.get_elements(self.program_cycle_details_btn)
 
-    def getButtonEditProgramCycle(self) -> [WebElement]:
-        self.wait_for(self.buttonEditProgramCycle)
-        return self.get_elements(self.buttonEditProgramCycle)
+    def get_button_edit_program_cycle(self) -> [WebElement]:
+        self.wait_for(self.button_edit_program_cycle)
+        return self.get_elements(self.button_edit_program_cycle)
 
-    def getDataPickerFilter(self) -> WebElement:
-        self.wait_for(self.dataPickerFilter)
-        return self.get_elements(self.dataPickerFilter)[0].find_elements("tag name", "input")[0]
+    def get_data_picker_filter(self) -> WebElement:
+        self.wait_for(self.data_picker_filter)
+        return self.get_elements(self.data_picker_filter)[0].find_elements("tag name", "input")[0]
 
-    def getButtonNext(self) -> WebElement:
-        return self.wait_for(self.buttonNext)
+    def get_button_next(self) -> WebElement:
+        return self.wait_for(self.button_next)
 
-    def getButtonSave(self) -> WebElement:
-        return self.wait_for(self.buttonSave)
+    def get_button_save(self) -> WebElement:
+        return self.wait_for(self.button_save)
 
-    def getInputTitle(self) -> WebElement:
-        return self.wait_for(self.inputTitle)
+    def get_input_title(self) -> WebElement:
+        return self.wait_for(self.input_title)
 
-    def getStartDateCycle(self) -> WebElement:
-        return self.wait_for(self.startDateCycle).find_elements("tag name", "input")[0]
+    def get_start_date_cycle(self) -> WebElement:
+        return self.wait_for(self.start_date_cycle).find_elements("tag name", "input")[0]
 
-    def getEndDateCycle(self) -> WebElement:
-        return self.wait_for(self.endDateCycle).find_elements("tag name", "input")[0]
+    def get_end_date_cycle(self) -> WebElement:
+        return self.wait_for(self.end_date_cycle).find_elements("tag name", "input")[0]
 
-    def getStartDateCycleDiv(self) -> WebElement:
-        return self.wait_for(self.startDateCycle)
+    def get_start_date_cycle_div(self) -> WebElement:
+        return self.wait_for(self.start_date_cycle)
 
-    def getEndDateCycleDiv(self) -> WebElement:
-        return self.wait_for(self.endDateCycle)
+    def get_end_date_cycle_div(self) -> WebElement:
+        return self.wait_for(self.end_date_cycle)
 
-    def getButtonCreateProgramCycle(self) -> WebElement:
-        return self.wait_for(self.buttonCreateProgramCycle)
+    def get_button_create_program_cycle(self) -> WebElement:
+        return self.wait_for(self.button_create_program_cycle)
 
-    def getLabelPartnerName(self) -> WebElement:
-        return self.wait_for(self.labelPartnerName)
+    def get_label_partner_name(self) -> WebElement:
+        return self.wait_for(self.label_partner_name)
 
-    def getLabelAreaAccess(self) -> WebElement:
-        return self.wait_for(self.labelAreaAccess)
+    def get_label_area_access(self) -> WebElement:
+        return self.wait_for(self.label_area_access)
 
-    def getLabelPartnerAccess(self) -> WebElement:
-        return self.wait_for(self.labelPartnerAccess)
+    def get_label_partner_access(self) -> WebElement:
+        return self.wait_for(self.label_partner_access)
 
-    def getLabelAdminArea1(self) -> WebElement:
-        return self.wait_for(self.labelAdminArea1)
+    def get_label_admin_area1(self) -> WebElement:
+        return self.wait_for(self.label_admin_area1)
 
-    def getLabelAdminArea2(self) -> WebElement:
-        return self.wait_for(self.labelAdminArea2)
+    def get_label_admin_area2(self) -> WebElement:
+        return self.wait_for(self.label_admin_area2)
 
-    def getProgramStatus(self) -> WebElement:
-        return self.wait_for(self.programStatus)
+    def get_program_status(self) -> WebElement:
+        return self.wait_for(self.program_status)
 
-    def getHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.headerTitle)
+    def get_header_title(self) -> WebElement:
+        return self.wait_for(self.header_title)
 
-    def getLabelStartDate(self) -> WebElement:
-        return self.wait_for(self.labelStartDate)
+    def get_label_start_date(self) -> WebElement:
+        return self.wait_for(self.label_start_date)
 
-    def getLabelEndDate(self) -> WebElement:
-        return self.wait_for(self.labelEndDate)
+    def get_label_end_date(self) -> WebElement:
+        return self.wait_for(self.label_end_date)
 
-    def getLabelSelector(self) -> WebElement:
-        return self.wait_for(self.labelSelector)
+    def get_label_selector(self) -> WebElement:
+        return self.wait_for(self.label_selector)
 
-    def getLabelDataCollectingType(self) -> WebElement:
-        return self.wait_for(self.labelDataCollectingType)
+    def get_label_data_collecting_type(self) -> WebElement:
+        return self.wait_for(self.label_data_collecting_type)
 
-    def getLabelFreqOfPayment(self) -> WebElement:
-        return self.wait_for(self.labelFreqOfPayment)
+    def get_label_freq_of_payment(self) -> WebElement:
+        return self.wait_for(self.label_freq_of_payment)
 
-    def getLabelAdministrativeAreas(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeAreas)
+    def get_label_administrative_areas(self) -> WebElement:
+        return self.wait_for(self.label_administrative_areas)
 
-    def getLabelCashPlus(self) -> WebElement:
-        return self.wait_for(self.labelCashPlus)
+    def get_label_cash_plus(self) -> WebElement:
+        return self.wait_for(self.label_cash_plus)
 
-    def getLabelProgramSize(self) -> WebElement:
-        return self.wait_for(self.labelProgramSize)
+    def get_label_program_size(self) -> WebElement:
+        return self.wait_for(self.label_program_size)
 
-    def getCopyProgram(self) -> WebElement:
-        return self.wait_for(self.copyProgram)
+    def get_copy_program(self) -> WebElement:
+        return self.wait_for(self.copy_program)
 
-    def getLabelDescription(self) -> WebElement:
-        return self.wait_for(self.labelDescription)
+    def get_label_description(self) -> WebElement:
+        return self.wait_for(self.label_description)
 
-    def getButtonRemoveProgram(self) -> WebElement:
-        return self.wait_for(self.buttonRemoveProgram)
+    def get_button_remove_program(self) -> WebElement:
+        return self.wait_for(self.button_remove_program)
 
-    def getButtonEditProgram(self) -> WebElement:
-        return self.wait_for(self.buttonEditProgram)
+    def get_button_edit_program(self) -> WebElement:
+        return self.wait_for(self.button_edit_program)
 
-    def getSelectEditProgramDetails(self) -> WebElement:
-        return self.wait_for(self.selectEditProgramDetails)
+    def get_select_edit_program_details(self) -> WebElement:
+        return self.wait_for(self.select_edit_program_details)
 
-    def getSselectEditProgramPartners(self) -> WebElement:
-        return self.wait_for(self.selectEditProgramPartners)
+    def get_sselect_edit_program_partners(self) -> WebElement:
+        return self.wait_for(self.select_edit_program_partners)
 
-    def getButtonActivateProgram(self) -> WebElement:
-        return self.wait_for(self.buttonActivateProgram)
+    def get_button_activate_program(self) -> WebElement:
+        return self.wait_for(self.button_activate_program)
 
-    def getButtonActivateProgramModal(self) -> WebElement:
-        return self.wait_for(self.buttonActivateProgramModal)
+    def get_button_activate_program_modal(self) -> WebElement:
+        return self.wait_for(self.button_activate_program_modal)
 
-    def getLabelProgrammeCode(self) -> WebElement:
-        return self.wait_for(self.labelProgrammeCode)
+    def get_label_programme_code(self) -> WebElement:
+        return self.wait_for(self.label_programme_code)
 
-    def getButtonFinishProgram(self) -> WebElement:
-        return self.wait_for(self.buttonFinishProgram)
+    def get_button_finish_program(self) -> WebElement:
+        return self.wait_for(self.button_finish_program)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getButtonAddNewProgrammeCycle(self) -> WebElement:
-        return self.wait_for(self.buttonAddNewProgrammeCycle)
+    def get_button_add_new_programme_cycle(self) -> WebElement:
+        return self.wait_for(self.button_add_new_programme_cycle)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getButtonDelete(self) -> WebElement:
-        return self.wait_for(self.buttonDelete)
+    def get_button_delete(self) -> WebElement:
+        return self.wait_for(self.button_delete)
 
-    def getButtonCancel(self) -> WebElement:
-        return self.wait_for(self.buttonCancel)
+    def get_button_cancel(self) -> WebElement:
+        return self.wait_for(self.button_cancel)
 
-    def clickButtonFinishProgramPopup(self) -> None:
+    def click_button_finish_program_popup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')
-        self.get_elements(self.buttonFinishProgram)[1].click()
+        self.get_elements(self.button_finish_program)[1].click()
         self.wait_for_disappear('[data-cy="dialog-actions-container"]')

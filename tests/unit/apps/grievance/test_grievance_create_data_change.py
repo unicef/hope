@@ -1,9 +1,11 @@
 from datetime import date
 from typing import Any
 
-import pytest
 from django.core.management import call_command
 from django.urls import reverse
+import pytest
+from rest_framework import status
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
@@ -14,8 +16,6 @@ from extras.test_utils.factories.household import (
     IndividualIdentityFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-
 from hope.apps.account.models import Partner
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea

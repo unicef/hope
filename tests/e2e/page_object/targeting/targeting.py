@@ -1,53 +1,54 @@
 from time import sleep
 
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class Targeting(BaseComponents):
     # Locators
-    titlePage = 'h5[data-cy="page-header-title"]'
-    searchFilter = 'div[data-cy="filters-search"]'
-    statusFilter = 'div[data-cy="filters-status"]'
-    programFilter = 'div[data-cy="filters-program"]'
-    minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]'
-    maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]'
-    buttonCreateNew = 'a[data-cy="button-new-tp"]'
-    buttonCreateNewByFilters = 'li[data-cy="menu-item-filters"]'
-    tabTitle = 'h6[data-cy="table-title"]'
-    tabColumnLabel = 'span[data-cy="table-label"]'
-    statusOptions = 'li[role="option"]'
+    title_page = 'h5[data-cy="page-header-title"]'
+    search_filter = 'div[data-cy="filters-search"]'
+    status_filter = 'div[data-cy="filters-status"]'
+    program_filter = 'div[data-cy="filters-program"]'
+    min_number_of_households = 'div[data-cy="filters-total-households-count-min"]'
+    max_number_of_households = 'div[data-cy="filters-total-households-count-max"]'
+    button_create_new = 'a[data-cy="button-new-tp"]'
+    button_create_new_by_filters = 'li[data-cy="menu-item-filters"]'
+    tab_title = 'h6[data-cy="table-title"]'
+    tab_column_label = 'span[data-cy="table-label"]'
+    status_options = 'li[role="option"]'
     rows = 'tr[role="checkbox"]'
-    createUserFilters = 'div[data-cy="menu-item-filters-text"]'
-    createUseIDs = 'div[data-cy="menu-item-ids-text"]'
-    buttonInactiveCreateNew = 'a[data-cy="button-target-population-create-new"]'
+    create_user_filters = 'div[data-cy="menu-item-filters-text"]'
+    create_use_ids = 'div[data-cy="menu-item-ids-text"]'
+    button_inactive_create_new = 'a[data-cy="button-target-population-create-new"]'
     tooltip = 'div[role="tooltip"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    loadingRows = 'tr[data-cy="table-row"]'
-    buttonTargetPopulation = 'button[data-cy="button-target-population-info"]'
-    buttonApply = 'button[data-cy="button-filters-apply"]'
-    buttonClear = 'button[data-cy="button-filters-clear"]'
-    tabFieldList = 'button[data-cy="tab-field-list"]'
-    tabTargetingDiagram = 'button[data-cy="tab-targeting-diagram"]'
+    status_container = 'div[data-cy="status-container"]'
+    loading_rows = 'tr[data-cy="table-row"]'
+    button_target_population = 'button[data-cy="button-target-population-info"]'
+    button_apply = 'button[data-cy="button-filters-apply"]'
+    button_clear = 'button[data-cy="button-filters-clear"]'
+    tab_field_list = 'button[data-cy="tab-field-list"]'
+    tab_targeting_diagram = 'button[data-cy="tab-targeting-diagram"]'
     name = 'th[data-cy="name"]'
     status = 'th[data-cy="status"]'
-    numOfHouseholds = 'th[data-cy="num-of-households"]'
-    dateCreated = 'th[data-cy="date-created"]'
-    lastEdited = 'th[data-cy="last-edited"]'
-    createdBy = 'th[data-cy="created-by"]'
+    num_of_households = 'th[data-cy="num-of-households"]'
+    date_created = 'th[data-cy="date-created"]'
+    last_edited = 'th[data-cy="last-edited"]'
+    created_by = 'th[data-cy="created-by"]'
 
     # Texts
-    textTitlePage = "Targeting"
-    textCreateNew = "Create new"
-    textTabTitle = "Target Populations"
-    textTabName = "Name"
-    textTabStatus = "Status"
-    textTabProgramme = "Programme"
-    textTabNOHouseholds = "Num. of Households"
-    textTabDateCreated = "Date Created"
-    textTabLastEdited = "Last Edited"
-    textTabCreatedBy = "Created by"
+    text_title_page = "Targeting"
+    text_create_new = "Create new"
+    text_tab_title = "Target Populations"
+    text_tab_name = "Name"
+    text_tab_status = "Status"
+    text_tab_programme = "Programme"
+    text_tab_no_households = "Num. of Households"
+    text_tab_date_created = "Date Created"
+    text_tab_last_edited = "Last Edited"
+    text_tab_created_by = "Created by"
 
     def navigate_to_page(self, business_area_slug: str, program_slug: str) -> None:
         self.driver.get(self.get_page_url(business_area_slug, program_slug))
@@ -58,52 +59,52 @@ class Targeting(BaseComponents):
 
     # Elements
 
-    def getTitlePage(self) -> WebElement:
-        return self.wait_for(self.titlePage)
+    def get_title_page(self) -> WebElement:
+        return self.wait_for(self.title_page)
 
-    def waitForTextTitlePage(self, text: str) -> bool:
-        return self.wait_for_text(text, self.titlePage)
+    def wait_for_text_title_page(self, text: str) -> bool:
+        return self.wait_for_text(text, self.title_page)
 
-    def getSearchFilter(self) -> WebElement:
-        return self.wait_for(self.searchFilter)
+    def get_search_filter(self) -> WebElement:
+        return self.wait_for(self.search_filter)
 
-    def getStatusFilter(self) -> WebElement:
-        return self.wait_for(self.statusFilter)
+    def get_status_filter(self) -> WebElement:
+        return self.wait_for(self.status_filter)
 
-    def getProgramFilter(self) -> WebElement:
-        return self.wait_for(self.programFilter)
+    def get_program_filter(self) -> WebElement:
+        return self.wait_for(self.program_filter)
 
-    def getMinNumberOfHouseholdsFilter(self) -> WebElement:
-        return self.wait_for(self.minNumberOfHouseholds)
+    def get_min_number_of_households_filter(self) -> WebElement:
+        return self.wait_for(self.min_number_of_households)
 
-    def getMaxNumberOfHouseholdsFilter(self) -> WebElement:
-        return self.wait_for(self.maxNumberOfHouseholds)
+    def get_max_number_of_households_filter(self) -> WebElement:
+        return self.wait_for(self.max_number_of_households)
 
-    def getButtonCreateNew(self) -> WebElement:
-        return self.wait_for(self.buttonCreateNew)
+    def get_button_create_new(self) -> WebElement:
+        return self.wait_for(self.button_create_new)
 
-    def getButtonCreateNewByFilters(self) -> WebElement:
-        return self.wait_for(self.buttonCreateNewByFilters)
+    def get_button_create_new_by_filters(self) -> WebElement:
+        return self.wait_for(self.button_create_new_by_filters)
 
-    def getTabTitle(self) -> WebElement:
-        return self.wait_for(self.tabTitle)
+    def get_tab_title(self) -> WebElement:
+        return self.wait_for(self.tab_title)
 
-    def getTabColumnLabel(self) -> list[WebElement]:
-        return self.get_elements(self.tabColumnLabel)
+    def get_tab_column_label(self) -> list[WebElement]:
+        return self.get_elements(self.tab_column_label)
 
-    def getStatusOption(self) -> WebElement:
-        return self.wait_for(self.statusOptions)
+    def get_status_option(self) -> WebElement:
+        return self.wait_for(self.status_options)
 
-    def getApply(self) -> WebElement:
-        return self.wait_for(self.buttonApply)
+    def get_apply(self) -> WebElement:
+        return self.wait_for(self.button_apply)
 
-    def getClear(self) -> WebElement:
-        return self.wait_for(self.buttonClear)
+    def get_clear(self) -> WebElement:
+        return self.wait_for(self.button_clear)
 
-    def getTargetPopulationsRows(self) -> list[WebElement]:
+    def get_target_populations_rows(self) -> list[WebElement]:
         return self.get_elements(self.rows)
 
-    def chooseTargetPopulations(self, number: int) -> WebElement:
+    def choose_target_populations(self, number: int) -> WebElement:
         try:
             self.wait_for(self.rows)
             return self.get_elements(self.rows)[number]
@@ -111,62 +112,62 @@ class Targeting(BaseComponents):
             sleep(1)
             return self.get_elements(self.rows)[number]
 
-    def countTargetPopulations(self, number: int) -> None:
+    def count_target_populations(self, number: int) -> None:
         for _ in range(50):
-            if len(self.getTargetPopulationsRows()) == number:
+            if len(self.get_target_populations_rows()) == number:
                 break
             sleep(0.1)
         else:
-            raise TimeoutError(f"{len(self.getTargetPopulationsRows())} target populations instead of {number}")
+            raise TimeoutError(f"{len(self.get_target_populations_rows())} target populations instead of {number}")
 
-    def getCreateUseFilters(self) -> WebElement:
-        return self.wait_for(self.createUserFilters)
+    def get_create_use_filters(self) -> WebElement:
+        return self.wait_for(self.create_user_filters)
 
-    def getCreateUseIDs(self) -> WebElement:
-        return self.wait_for(self.createUseIDs)
+    def get_create_use_ids(self) -> WebElement:
+        return self.wait_for(self.create_use_ids)
 
-    def getButtonInactiveCreateNew(self) -> WebElement:
-        return self.wait_for(self.buttonInactiveCreateNew)
+    def get_button_inactive_create_new(self) -> WebElement:
+        return self.wait_for(self.button_inactive_create_new)
 
-    def geTooltip(self) -> WebElement:
+    def get_tooltip(self) -> WebElement:
         return self.wait_for(self.tooltip)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTabFieldList(self) -> WebElement:
-        return self.wait_for(self.tabFieldList)
+    def get_tab_field_list(self) -> WebElement:
+        return self.wait_for(self.tab_field_list)
 
-    def getTabTargetingDiagram(self) -> WebElement:
-        return self.wait_for(self.tabTargetingDiagram)
+    def get_tab_targeting_diagram(self) -> WebElement:
+        return self.wait_for(self.tab_targeting_diagram)
 
-    def getButtonTargetPopulation(self) -> WebElement:
-        return self.wait_for(self.buttonTargetPopulation)
+    def get_button_target_population(self) -> WebElement:
+        return self.wait_for(self.button_target_population)
 
-    def getLoadingRows(self) -> WebElement:
-        return self.wait_for(self.loadingRows)
+    def get_loading_rows(self) -> WebElement:
+        return self.wait_for(self.loading_rows)
 
-    def getColumnName(self) -> WebElement:
-        return self.wait_for(self.name).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+    def get_column_name(self) -> WebElement:
+        return self.wait_for(self.name).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
-    def getColumnStatus(self) -> WebElement:
-        return self.wait_for(self.status).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+    def get_column_status(self) -> WebElement:
+        return self.wait_for(self.status).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
-    def getColumnNumOfHouseholds(self) -> WebElement:
-        return self.wait_for(self.numOfHouseholds).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+    def get_column_num_of_households(self) -> WebElement:
+        return self.wait_for(self.num_of_households).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
-    def getColumnDateCreated(self) -> WebElement:
-        return self.wait_for(self.dateCreated).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+    def get_column_date_created(self) -> WebElement:
+        return self.wait_for(self.date_created).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
-    def getColumnLastEdited(self) -> WebElement:
-        return self.wait_for(self.lastEdited).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+    def get_column_last_edited(self) -> WebElement:
+        return self.wait_for(self.last_edited).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
-    def getColumnCreatedBy(self) -> WebElement:
-        return self.wait_for(self.createdBy).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+    def get_column_created_by(self) -> WebElement:
+        return self.wait_for(self.created_by).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
-    def disappearLoadingRows(self) -> WebElement:
+    def disappear_loading_rows(self) -> WebElement:
         try:
-            self.getLoadingRows()
+            self.get_loading_rows()
         except BaseException:
-            self.getStatusContainer()
-        return self.wait_for_disappear(self.loadingRows)
+            self.get_status_container()
+        return self.wait_for_disappear(self.loading_rows)

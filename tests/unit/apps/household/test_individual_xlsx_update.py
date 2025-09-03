@@ -5,10 +5,11 @@ from pathlib import Path
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import (
@@ -168,10 +169,10 @@ class TestIndividualXlsxUpdate(BaseTestCase):
         assert self.individuals[3].family_name == "Dąbrowska"
 
     def test_raise_error_when_invalid_columns(self) -> None:
-        with self.assertRaises(InvalidColumnsError) as context:
+        with pytest.raises(InvalidColumnsError) as context:
             IndividualXlsxUpdate(self.xlsx_update_invalid_file)
 
-        assert "Invalid columns" in str(context.exception)
+        assert "Invalid columns" in str(context.value)
 
     def test_complex_update_individual(self) -> None:
         # Given
@@ -209,9 +210,7 @@ class TestIndividualXlsxUpdate(BaseTestCase):
         assert self.individuals[3].birth_date == datetime.date(1985, 8, 12)
 
     def test_raise_error_when_invalid_phone_number(self) -> None:
-        with self.assertRaises(ValidationError) as context:
+        with pytest.raises(ValidationError) as context:
             IndividualXlsxUpdate(self.xlsx_update_invalid_phone_no_file).update_individuals()
 
-        assert str({"phone_no": [f"Invalid phone number for individual {self.individuals[0]}."]}) == str(
-            context.exception
-        )
+        assert str({"phone_no": [f"Invalid phone number for individual {self.individuals[0]}."]}) == str(context.value)

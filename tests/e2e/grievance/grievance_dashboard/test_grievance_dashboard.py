@@ -2,13 +2,13 @@ from datetime import timedelta
 from random import choice
 from typing import Optional
 
-import pytest
 from django.utils import timezone
+import pytest
+
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket
@@ -135,25 +135,35 @@ class TestSmokeGrievanceDashboard:
         self,
         active_program: Program,
         add_grievances: None,
-        pageGrievanceDashboard: GrievanceDashboard,
+        page_grievance_dashboard: GrievanceDashboard,
     ) -> None:
-        pageGrievanceDashboard.getNavGrievance().click()
-        pageGrievanceDashboard.getNavGrievanceDashboard().click()
+        page_grievance_dashboard.get_nav_grievance().click()
+        page_grievance_dashboard.get_nav_grievance_dashboard().click()
 
-        assert "Grievance Dashboard" in pageGrievanceDashboard.getPageHeaderTitle().text
-        assert "100" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
-        assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated().text
-        assert "75" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated().text
-        assert "40" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
-        assert "15" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
-        assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
-        assert "421.25 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        assert "Grievance Dashboard" in page_grievance_dashboard.get_page_header_title().text
+        assert "100" in page_grievance_dashboard.get_total_number_of_tickets_top_number().text
         assert (
-            "515 days"
-            in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "25"
+            in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_system_generated().text
         )
         assert (
-            "365 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+            "75" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
+        )
+        assert "40" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text
+        assert "15" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        )
+        assert "25" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        )
+        assert "421.25 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
+        assert (
+            "515 days"
+            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
+        )
+        assert (
+            "365 days"
+            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
         )
         GrievanceTicket._meta.get_field("updated_at").auto_now = True
 
@@ -161,45 +171,67 @@ class TestSmokeGrievanceDashboard:
         self,
         active_program: Program,
         grievances: [GrievanceTicket],
-        pageGrievanceDashboard: GrievanceDashboard,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        page_grievance_dashboard: GrievanceDashboard,
+        page_grievance_tickets: GrievanceTickets,
+        page_grievance_details_page: GrievanceDetailsPage,
         download_path: str,
     ) -> None:
-        pageGrievanceTickets.getNavGrievance().click()
-        pageGrievanceDashboard.getNavGrievanceDashboard().click()
-        assert "Grievance Dashboard" in pageGrievanceDashboard.getPageHeaderTitle().text
-        assert "3" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
-        assert "1" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated().text
-        assert "2" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated().text
-        assert "0" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
-        assert "0" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
-        assert "0" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
-        assert "0 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        page_grievance_tickets.get_nav_grievance().click()
+        page_grievance_dashboard.get_nav_grievance_dashboard().click()
+        assert "Grievance Dashboard" in page_grievance_dashboard.get_page_header_title().text
+        assert "3" in page_grievance_dashboard.get_total_number_of_tickets_top_number().text
         assert (
-            "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "1"
+            in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_system_generated().text
         )
-        assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+        assert (
+            "2" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
+        )
+        assert "0" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        )
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        )
+        assert "0 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
+        assert "0 days" in (
+            page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
+        )
+        assert "0 days" in (
+            page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
+        )
 
-        pageGrievanceTickets.getNavGrievance().click()
-        pageGrievanceTickets.getTicketListRow()[0].click()
-        pageGrievanceDetailsPage.getButtonAssignToMe().click()
-        pageGrievanceDetailsPage.getButtonSetInProgress().click()
-        pageGrievanceDetailsPage.getButtonCloseTicket().click()
-        pageGrievanceTickets.getButtonConfirm().click()
-        pageGrievanceTickets.wait_for_text("Closed", pageGrievanceTickets.statusContainer)
-        pageGrievanceTickets.getNavGrievance().click()
-        pageGrievanceDashboard.getNavGrievanceDashboard().click()
-        assert "3" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
-        assert "1" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated().text
-        assert "2" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated().text
-        assert "0" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
-        assert "1" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
-        assert "20.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        page_grievance_tickets.get_nav_grievance().click()
+        page_grievance_tickets.get_ticket_list_row()[0].click()
+        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.get_button_set_in_progress().click()
+        page_grievance_details_page.get_button_close_ticket().click()
+        page_grievance_tickets.get_button_confirm().click()
+        page_grievance_tickets.wait_for_text("Closed", page_grievance_tickets.status_container)
+        page_grievance_tickets.get_nav_grievance().click()
+        page_grievance_dashboard.get_nav_grievance_dashboard().click()
+        assert "3" in page_grievance_dashboard.get_total_number_of_tickets_top_number().text
         assert (
-            "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "1"
+            in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_system_generated().text
         )
         assert (
-            "20 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+            "2" in page_grievance_dashboard.get_labelized_field_container_total_number_of_tickets_user_generated().text
         )
-        assert "1" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
+        assert "0" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_system_generated().text
+        )
+        assert "1" in (
+            page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
+        )
+        assert "20.00 days" in page_grievance_dashboard.get_tickets_average_resolution_top_number().text
+        assert (
+            "0 days"
+            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_system_generated().text
+        )
+        assert (
+            "20 days"
+            in page_grievance_dashboard.get_labelized_field_container_tickets_average_resolution_user_generated().text
+        )
+        assert "1" in page_grievance_dashboard.get_total_number_of_closed_tickets_top_number().text

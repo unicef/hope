@@ -59,8 +59,7 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
             current = 1
             final = 1
 
-        if current > final:
-            current = final
+        current = min(current, final)
 
         def page_number_to_url(page_number: int) -> str:
             if page_number == 1:

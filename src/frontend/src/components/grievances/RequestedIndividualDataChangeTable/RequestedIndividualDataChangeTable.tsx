@@ -104,12 +104,7 @@ export function RequestedIndividualDataChangeTable({
     'name',
   );
   const accountFinancialInstitutionsDict = useArrayToDict(
-    data?.accountFinancialInstitutionChoices,
-    'value',
-    'name',
-  );
-  const accountFinancialInstitutionsDict = useArrayToDict(
-    data?.accountFinancialInstitutionChoices,
+    individualChoicesData?.accountFinancialInstitutionChoices,
     'value',
     'name',
   );
@@ -122,7 +117,8 @@ export function RequestedIndividualDataChangeTable({
     !countriesDict ||
     !documentTypeDict ||
     !identityTypeDict ||
-    !accountFinancialInstitutionsDict
+    !accountFinancialInstitutionsDict ||
+    individualLoading
   ) {
     return <LoadingComponent />;
   }
@@ -195,18 +191,20 @@ export function RequestedIndividualDataChangeTable({
             />
           ))
         : null}
-      {accounts?.length ? accounts.map((account, index) => (
-        <AccountTable
-          key={account.id}
-          values={values}
-          isEdit={isEdit}
-          ticket={ticket}
-          setFieldValue={setFieldValue}
-          index={index}
-          account={account}
-          accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
-        />
-      )) : null}
+      {accounts?.length
+        ? accounts.map((account, index) => (
+            <AccountTable
+              key={account.id}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              index={index}
+              account={account}
+              accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
+            />
+          ))
+        : null}
       {accountsToEdit?.length
         ? accountsToEdit.map((account, index) => (
             <AccountToEditTable

@@ -1,18 +1,18 @@
 from typing import Callable, Dict, Optional
 from unittest.mock import Mock, patch
 
-import pytest
 from django.core.cache import cache
 from django.http import Http404
 from django.test import RequestFactory
 from django.urls import reverse
+import pytest
+from rest_framework import status
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from rest_framework import status
-
 from hope.apps.account.models import RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea

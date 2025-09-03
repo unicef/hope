@@ -4,6 +4,7 @@ import json
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -12,7 +13,6 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import DataCollectingType
 from hope.apps.geo import models as geo_models
 from hope.apps.geo.models import Area, AreaType
@@ -35,7 +35,7 @@ from hope.contrib.aurora.services.nigeria_people_registration_service import (
 class TestNigeriaPeopleRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         generate_delivery_mechanisms()
         country = geo_models.Country.objects.create(name="Nigeria")
         area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)

@@ -2,14 +2,14 @@
 
 import uuid
 
+from django.conf import settings
 import django.contrib.postgres.fields
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
 import mptt.fields
-from django.conf import settings
-from django.db import migrations, models
 
 import hope.apps.core.models
 
@@ -99,14 +99,16 @@ class Migration(migrations.Migration):
                     "deduplication_golden_record_duplicates_percentage",
                     models.IntegerField(
                         default=50,
-                        help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
+                        help_text="If percentage of duplicates is higher or equal to this setting,"
+                        " deduplication is aborted",
                     ),
                 ),
                 (
                     "deduplication_golden_record_duplicates_allowed",
                     models.IntegerField(
                         default=5,
-                        help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
+                        help_text="If amount of duplicates for single individual exceeds this limit deduplication"
+                        " is aborted",
                     ),
                 ),
                 (

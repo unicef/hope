@@ -1,9 +1,10 @@
 import datetime
 
-import pytz
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+import pytz
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -11,7 +12,6 @@ from extras.test_utils.factories.aurora import (
     RegistrationFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import DataCollectingType
 from hope.apps.geo import models as geo_models
 from hope.apps.household.models import (
@@ -36,7 +36,7 @@ from hope.contrib.aurora.services.czech_republic_flex_registration_service impor
 class TestCzechRepublicRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         document_types_to_create = []
 
         document_mapping = {

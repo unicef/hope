@@ -1,5 +1,6 @@
+from collections import defaultdict
+from functools import cached_property, lru_cache
 import logging
-from functools import lru_cache
 from typing import Any
 from uuid import UUID
 
@@ -7,6 +8,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -218,7 +220,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
-        """Return list of program ids that the user (or user's partner) has permissions for in the given business area."""
+        """Return list of program ids that the user (or user's partner) has permissions in selected business area."""
         from hope.apps.program.models import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
@@ -284,7 +286,36 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
         return permissions_set
 
-    @property
+    @cached_property
+    def all_permissions_in_business_areas(self) -> dict[str, set[str]]:
+        """Return a dictionary mapping business area IDs to sets of permissions for the user.
+
+        Permissions are retrieved from RoleAssignments of the user and their partner, for all business areas
+        associated with the user.
+        """
+        content_types_dict = {
+            str(pk): app_label for pk, app_label in ContentType.objects.values_list("id", "app_label")
+        }
+        role_assignments = (
+            RoleAssignment.objects.filter(Q(partner__user=self) | Q(user=self))
+            .select_related("role", "group")
+            .prefetch_related("group__permissions")
+            .exclude(expiry_date__lt=timezone.now())
+        )
+        permissions_per_business_area = defaultdict(set)
+        for role_assignment in role_assignments:
+            if role_assignment.role.permissions is not None:
+                permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                    role_assignment.role.permissions
+                )
+            if role_assignment.group is not None:
+                permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                    f"{content_types_dict[str(perm.content_type_id)]}.{perm.codename}"
+                    for perm in role_assignment.group.permissions.all()
+                )
+        return permissions_per_business_area
+
+    @cached_property
     def business_areas(self) -> QuerySet[BusinessArea]:
         role_assignments = RoleAssignment.objects.filter(Q(user=self) | Q(partner__user=self)).exclude(
             expiry_date__lt=timezone.now()
@@ -358,6 +389,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
         )
+        indexes = [
+            # Optimize JOIN queries between User and Partner in permissions methods
+            models.Index(fields=["partner", "id"], name="idx_user_partner_id"),
+        ]
 
 
 class HorizontalChoiceArrayField(ArrayField):
@@ -457,6 +492,14 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
                 name="unique_partner_role_business_area_no_program",
                 condition=Q(partner__isnull=False, program__isnull=True),
             ),
+        ]
+        indexes = [
+            # Optimize user role assignment queries with expiry_date filtering
+            models.Index(fields=["user", "expiry_date"], name="idx_ra_user_exp"),
+            # Optimize partner + business_area queries with expiry_date filtering
+            models.Index(fields=["partner", "business_area", "expiry_date"], name="idx_ra_partner_ba_exp"),
+            # Optimize business_area queries with expiry_date filtering
+            models.Index(fields=["business_area", "expiry_date"], name="idx_ra_ba_exp"),
         ]
 
     def clean(self) -> None:
@@ -593,7 +636,8 @@ class IncompatibleRolesManager(models.Manager):
             raise ValidationError(
                 {
                     "role": _(
-                        f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+                        f"This role is incompatible with "
+                        f"{', '.join([userrole.role.name for userrole in incompatible_userroles])}"
                     )
                 }
             )

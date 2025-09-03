@@ -102,7 +102,8 @@ class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
 
             if r1[1] != r2[0]:
                 raise forms.ValidationError(
-                    f"Whole range of [0 , ∞] is not covered, please cover range between [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
+                    f"Whole range of [0 , ∞] is not covered, please cover range between [{r1[0]}, {r1[1] or '∞'})"
+                    f" [{r2[0]}, {r2[1] or '∞'})"
                 )
 
         if ranges[-1][1] is not None:
@@ -265,7 +266,8 @@ class BusinessAreaAdmin(
                     if RoleAssignment.objects.filter(partner=partner, business_area=business_area).exists():
                         self.message_user(
                             request,
-                            f"You cannot remove {partner.name} because it has existing role assignments in this business area.",
+                            f"You cannot remove {partner.name}"
+                            f" because it has existing role assignments in this business area.",
                             messages.ERROR,
                         )
                         return HttpResponseRedirect(request.get_full_path())

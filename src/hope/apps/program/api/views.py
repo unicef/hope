@@ -4,7 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
+from django.db.models import Case, Count, IntegerField, Prefetch, Q, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -33,6 +33,7 @@ from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
     CountActionMixin,
+    PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -125,11 +126,15 @@ class ProgramViewSet(
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
         user = self.request.user
-        allowed_programs = queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id))
+        allowed_programs = list(
+            queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id)).values_list(
+                "id", flat=True
+            )
+        )
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
-                id__in=allowed_programs.values_list("id", flat=True),
+                id__in=allowed_programs,
             )
             .exclude(data_collecting_type__code="unknown")
             .annotate(
@@ -138,6 +143,13 @@ class ProgramViewSet(
                     When(status=Program.ACTIVE, then=Value(2)),
                     When(status=Program.FINISHED, then=Value(3)),
                     output_field=IntegerField(),
+                )
+            )
+            .annotate(
+                annotate_number_of_households_with_tp_in_program=Count(
+                    "payment__household_id",
+                    filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
+                    distinct=True,
                 )
             )
             .prefetch_related(
@@ -316,7 +328,8 @@ class ProgramViewSet(
         # update partner access for ALL_PARTNERS_ACCESS type if it was not changed but the partners need to be refetched
         if partner_access == old_partner_access and partner_access == Program.ALL_PARTNERS_ACCESS:
             create_program_partner_access([], program, partner_access)
-        # update partner access only for SELECTED_PARTNERS_ACCESS type, since update to NONE and ALL are handled through signal
+        # update partner access only for SELECTED_PARTNERS_ACCESS type,
+        # since update to NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
@@ -469,12 +482,14 @@ class ProgramCycleViewSet(
         "partial_update": ProgramCycleUpdateSerializer,
     }
     permissions_by_action = {
-        "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST],
         "retrieve": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
         "create": [Permissions.PM_PROGRAMME_CYCLE_CREATE],
         "update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
         "partial_update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
         "destroy": [Permissions.PM_PROGRAMME_CYCLE_DELETE],
+        "finish": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
+        "reactivate": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
     }
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -505,17 +520,16 @@ class ProgramCycleViewSet(
             raise ValidationError("Only Draft Programme Cycle can be deleted.")
 
         if program_cycle.program.cycles.count() == 1:
-            raise ValidationError("Don’t allow to delete last Cycle.")
+            raise ValidationError("Don't allow to delete last Cycle.")
 
         if program_cycle.payment_plans.exists():
-            raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
+            raise ValidationError("Don't allow to delete Cycle with assigned Target Population")
 
         program_cycle.delete()
 
     @action(
         detail=True,
         methods=["post"],
-        PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE],
     )
     def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
@@ -525,7 +539,6 @@ class ProgramCycleViewSet(
     @action(
         detail=True,
         methods=["post"],
-        PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE],
     )
     def reactivate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
@@ -535,6 +548,7 @@ class ProgramCycleViewSet(
 
 class BeneficiaryGroupViewSet(
     mixins.ListModelMixin,
+    PermissionsMixin,
     GenericViewSet,
 ):
     permission_classes = [IsAuthenticated]

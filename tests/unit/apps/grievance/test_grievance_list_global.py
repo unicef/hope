@@ -1,18 +1,18 @@
 from datetime import datetime
 from typing import Any, Callable
 
-import pytest
 from django.utils import timezone
+from freezegun import freeze_time
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-from freezegun import freeze_time
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.program.models import Program
@@ -727,4 +727,4 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 30
+        assert len(response.json()) == 29

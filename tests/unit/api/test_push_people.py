@@ -1,8 +1,12 @@
 import base64
 from io import BytesIO
-from typing import Any
 
+from parameterized import parameterized
+from PIL import Image
 import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -10,12 +14,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from parameterized import parameterized
-from PIL import Image
-from rest_framework import status
-from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
-
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hope.api.models import Grant
 from hope.apps.core.models import DataCollectingType
@@ -33,6 +31,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class TestPushPeople(HOPEApiTestCase):
@@ -273,7 +272,7 @@ class TestPushPeople(HOPEApiTestCase):
         ]
     )
     def test_upload_single_person_with_phone_number(
-        self, _: Any, field_name: str, phone_number: str, expected_value: bool
+        self, helper: str, field_name: str, phone_number: str, expected_value: bool
     ) -> None:
         data = [
             {
@@ -306,7 +305,7 @@ class TestPushPeople(HOPEApiTestCase):
             ("null-village", None, ""),
         ]
     )
-    def test_push_single_person_with_village(self, _: Any, village: str, expected_value: str) -> None:
+    def test_push_single_person_with_village(self, helper: str, village: str, expected_value: str) -> None:
         data = [
             {
                 "residence_status": "IDP",

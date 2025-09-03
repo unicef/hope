@@ -2,8 +2,8 @@ import abc
 import base64
 import hashlib
 import logging
-import uuid
 from typing import TYPE_CHECKING, Any, Iterable
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(AuroraProcessor, abc.ABC):
-    PROCESS_FLEX_RECORDS_TASK = process_flex_records_task
+    process_flex_records_task = process_flex_records_task
 
     def __init__(self, registration: Registration) -> None:
         self.registration = registration
@@ -187,9 +187,9 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             del data["photo"]  # Remove the base64 from data since we're handling it as a file
 
         if model_form is None:
-            ModelClassForm = modelform_factory(model_class, fields=list(data.keys()) + list(files.keys()))
+            ModelClassForm = modelform_factory(model_class, fields=list(data.keys()) + list(files.keys()))  # noqa
         else:
-            ModelClassForm = modelform_factory(
+            ModelClassForm = modelform_factory(  # noqa
                 model_class,
                 form=model_form,
                 fields=list(data.keys()) + list(files.keys()),
@@ -203,6 +203,6 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
     def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> ContentFile | Any:
         if certificate_picture:
             format_image = "jpg"
-            name = hashlib.md5(document_number.encode()).hexdigest()
+            name = hashlib.sha256(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture

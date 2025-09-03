@@ -1,15 +1,15 @@
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Tuple
 
-import factory
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse
 from django_webtest import WebTest
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
+import factory
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
 from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 
@@ -22,7 +22,7 @@ factories_registry = {}
 
 
 class AutoRegisterFactoryMetaClass(FactoryMetaClass):
-    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:
+    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:  # noqa
         new_class = super().__new__(mcs, class_name, bases, attrs)
         factories_registry[new_class._meta.model] = new_class
         return new_class

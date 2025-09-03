@@ -1,8 +1,8 @@
-import logging
 from io import BytesIO
+import logging
 
-import requests
 from django.utils import timezone
+import requests
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hope.apps.core.kobo.api import KoboAPI

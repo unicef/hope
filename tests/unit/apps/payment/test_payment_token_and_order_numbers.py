@@ -1,11 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.geo.models import Country
 from hope.apps.household.models import Household
 from hope.apps.payment.models import Payment, PaymentPlan
@@ -52,10 +53,10 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
 
     def test_generate_token_and_order_numbers_for_payments(self) -> None:
         for payment in self.payment_plan.eligible_payments.all():
-            payment = generate_token_and_order_numbers(payment)
+            enriched_payment = generate_token_and_order_numbers(payment)
 
-            assert len(str(payment.order_number)) == 9
-            assert len(str(payment.token_number)) == 7
+            assert len(str(enriched_payment.order_number)) == 9
+            assert len(str(enriched_payment.token_number)) == 7
 
     def test_check_if_token_or_order_number_exists_per_program(self) -> None:
         payment = Payment.objects.first()
@@ -71,7 +72,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
     def test_validation_token_must_not_has_the_same_digit_more_than_three_times(
         self,
     ) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             payment_token_and_order_number_validator(1111111)
 
     def test_validation_save_payment_with_exists_token_or_order_number(self) -> None:
@@ -85,7 +86,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         payment_1.order_number = order_number
         payment_1.save()
 
-        with self.assertRaises(IntegrityError):
-            payment_2.token_number = token_number
-            payment_2.order_number = order_number
+        payment_2.token_number = token_number
+        payment_2.order_number = order_number
+        with pytest.raises(IntegrityError):
             payment_2.save(update_fields=["order_number", "token_number"])

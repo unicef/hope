@@ -4,14 +4,14 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from django_webtest import WebTest
+from parameterized import parameterized
+from rest_framework import status
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from parameterized import parameterized
-from rest_framework import status
-
 from hope.admin.business_area import AcceptanceProcessThresholdFormset
 from hope.admin.data_collecting_type import DataCollectingTypeForm
 from hope.apps.account.models import RoleAssignment
@@ -123,7 +123,8 @@ class TestDataCollectingTypeForm(TestCase):
         assert not form.is_valid()
         assert (
             form.errors["compatible_types"][0]
-            == f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: ['{str(standard_dct.label)}']"
+            == f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: "
+            f"['{str(standard_dct.label)}']"
         )
 
 

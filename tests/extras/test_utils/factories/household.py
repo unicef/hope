@@ -1,16 +1,16 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-import factory
 from django.conf import settings
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+import factory
 from factory import enums, fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.geo import models as geo_models
 from hope.apps.household.models import (
     HUMANITARIAN_PARTNER,

@@ -1,152 +1,153 @@
 from time import sleep
 
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class PaymentModule(BaseComponents):
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    filtersTotalEntitledQuantityFrom = 'div[data-cy="filters-total-entitled-quantity-from"]'
-    filtersTotalEntitledQuantityTo = 'div[data-cy="filters-total-entitled-quantity-to"]'
-    datePickerFilterFrom = 'div[data-cy="date-picker-filter-From"]'
-    datePickerFilterTo = 'div[data-cy="date-picker-filter-To"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    filters_total_entitled_quantity_from = 'div[data-cy="filters-total-entitled-quantity-from"]'
+    filters_total_entitled_quantity_to = 'div[data-cy="filters-total-entitled-quantity-to"]'
+    date_picker_filter_from = 'div[data-cy="date-picker-filter-From"]'
+    date_picker_filter_to = 'div[data-cy="date-picker-filter-To"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_title = 'h6[data-cy="table-title"]'
+    table_label = 'span[data-cy="table-label"]'
+    status_container = 'div[data-cy="status-container"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
     rows = '[role="checkbox"]'
 
-    def getBusinessAreaContainer(self) -> WebElement:
-        return self.wait_for(self.businessAreaContainer)
+    def get_business_area_container(self) -> WebElement:
+        return self.wait_for(self.business_area_container)
 
-    def getGlobalProgramFilterContainer(self) -> WebElement:
-        return self.wait_for(self.globalProgramFilterContainer)
+    def get_global_program_filter_container(self) -> WebElement:
+        return self.wait_for(self.global_program_filter_container)
 
-    def getGlobalProgramFilter(self) -> WebElement:
-        return self.wait_for(self.globalProgramFilter)
+    def get_global_program_filter(self) -> WebElement:
+        return self.wait_for(self.global_program_filter)
 
-    def getMenuUserProfile(self) -> WebElement:
-        return self.wait_for(self.menuUserProfile)
+    def get_menu_user_profile(self) -> WebElement:
+        return self.wait_for(self.menu_user_profile)
 
-    def getSideNav(self) -> WebElement:
-        return self.wait_for(self.sideNav)
+    def get_side_nav(self) -> WebElement:
+        return self.wait_for(self.side_nav)
 
-    def getDrawerItems(self) -> WebElement:
-        return self.wait_for(self.drawerItems)
+    def get_drawer_items(self) -> WebElement:
+        return self.wait_for(self.drawer_items)
 
-    def getNavCountryDashboard(self) -> WebElement:
-        return self.wait_for(self.navCountryDashboard)
+    def get_nav_country_dashboard(self) -> WebElement:
+        return self.wait_for(self.nav_country_dashboard)
 
-    def getNavRegistrationDataImport(self) -> WebElement:
-        return self.wait_for(self.navRegistrationDataImport)
+    def get_nav_registration_data_import(self) -> WebElement:
+        return self.wait_for(self.nav_registration_data_import)
 
-    def getNavProgramPopulation(self) -> WebElement:
-        return self.wait_for(self.navProgramPopulation)
+    def get_nav_program_population(self) -> WebElement:
+        return self.wait_for(self.nav_program_population)
 
-    def getNavIndividuals(self) -> WebElement:
-        return self.wait_for(self.navIndividuals)
+    def get_nav_individuals(self) -> WebElement:
+        return self.wait_for(self.nav_individuals)
 
-    def getNavProgramDetails(self) -> WebElement:
-        return self.wait_for(self.navProgramDetails)
+    def get_nav_program_details(self) -> WebElement:
+        return self.wait_for(self.nav_program_details)
 
-    def getNavTargeting(self) -> WebElement:
-        return self.wait_for(self.navTargeting)
+    def get_nav_targeting(self) -> WebElement:
+        return self.wait_for(self.nav_targeting)
 
-    def getNavPaymentModule(self) -> WebElement:
-        return self.wait_for(self.navPaymentModule)
+    def get_nav_payment_module(self) -> WebElement:
+        return self.wait_for(self.nav_payment_module)
 
-    def getNavPaymentVerification(self) -> WebElement:
-        return self.wait_for(self.navPaymentVerification)
+    def get_nav_payment_verification(self) -> WebElement:
+        return self.wait_for(self.nav_payment_verification)
 
-    def getNavGrievance(self) -> WebElement:
-        return self.wait_for(self.navGrievance)
+    def get_nav_grievance(self) -> WebElement:
+        return self.wait_for(self.nav_grievance)
 
-    def getNavGrievanceTickets(self) -> WebElement:
-        return self.wait_for(self.navGrievanceTickets)
+    def get_nav_grievance_tickets(self) -> WebElement:
+        return self.wait_for(self.nav_grievance_tickets)
 
-    def getNavGrievanceDashboard(self) -> WebElement:
-        return self.wait_for(self.navGrievanceDashboard)
+    def get_nav_grievance_dashboard(self) -> WebElement:
+        return self.wait_for(self.nav_grievance_dashboard)
 
-    def getNavFeedback(self) -> WebElement:
-        return self.wait_for(self.navFeedback)
+    def get_nav_feedback(self) -> WebElement:
+        return self.wait_for(self.nav_feedback)
 
-    def getNavAccountability(self) -> WebElement:
-        return self.wait_for(self.navAccountability)
+    def get_nav_accountability(self) -> WebElement:
+        return self.wait_for(self.nav_accountability)
 
-    def getNavCommunication(self) -> WebElement:
-        return self.wait_for(self.navCommunication)
+    def get_nav_communication(self) -> WebElement:
+        return self.wait_for(self.nav_communication)
 
-    def getNavSurveys(self) -> WebElement:
-        return self.wait_for(self.navSurveys)
+    def get_nav_surveys(self) -> WebElement:
+        return self.wait_for(self.nav_surveys)
 
-    def getNavProgrammeUsers(self) -> WebElement:
-        return self.wait_for(self.navProgrammeUsers)
+    def get_nav_programme_users(self) -> WebElement:
+        return self.wait_for(self.nav_programme_users)
 
-    def getNavProgramLog(self) -> WebElement:
-        return self.wait_for(self.navProgramLog)
+    def get_nav_program_log(self) -> WebElement:
+        return self.wait_for(self.nav_program_log)
 
-    def getNavResourcesKnowledgeBase(self) -> WebElement:
-        return self.wait_for(self.navResourcesKnowledgeBase)
+    def get_nav_resources_knowledge_base(self) -> WebElement:
+        return self.wait_for(self.nav_resources_knowledge_base)
 
-    def getNavResourcesConversations(self) -> WebElement:
-        return self.wait_for(self.navResourcesConversations)
+    def get_nav_resources_conversations(self) -> WebElement:
+        return self.wait_for(self.nav_resources_conversations)
 
-    def getNavResourcesToolsAndMaterials(self) -> WebElement:
-        return self.wait_for(self.navResourcesToolsAndMaterials)
+    def get_nav_resources_tools_and_materials(self) -> WebElement:
+        return self.wait_for(self.nav_resources_tools_and_materials)
 
-    def getNavResourcesReleaseNote(self) -> WebElement:
-        return self.wait_for(self.navResourcesReleaseNote)
+    def get_nav_resources_release_note(self) -> WebElement:
+        return self.wait_for(self.nav_resources_release_note)
 
-    def getMainContent(self) -> WebElement:
-        return self.wait_for(self.mainContent)
+    def get_main_content(self) -> WebElement:
+        return self.wait_for(self.main_content)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getFiltersTotalEntitledQuantityFrom(self) -> WebElement:
-        return self.wait_for(self.filtersTotalEntitledQuantityFrom)
+    def get_filters_total_entitled_quantity_from(self) -> WebElement:
+        return self.wait_for(self.filters_total_entitled_quantity_from)
 
-    def getFiltersTotalEntitledQuantityTo(self) -> WebElement:
-        return self.wait_for(self.filtersTotalEntitledQuantityTo)
+    def get_filters_total_entitled_quantity_to(self) -> WebElement:
+        return self.wait_for(self.filters_total_entitled_quantity_to)
 
-    def getDatePickerFilterFrom(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterFrom)
+    def get_date_picker_filter_from(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter_from)
 
-    def getDatePickerFilterTo(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterTo)
+    def get_date_picker_filter_to(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter_to)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getTableLabel(self) -> [WebElement]:
-        return self.get_elements(self.tableLabel)
+    def get_table_label(self) -> [WebElement]:
+        return self.get_elements(self.table_label)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getRows(self) -> [WebElement]:
+    def get_rows(self) -> [WebElement]:
         self.wait_for(self.rows)
         return self.get_elements(self.rows)
 
-    def getRow(self, number: int) -> WebElement:
+    def get_row(self, number: int) -> WebElement:
         self.wait_for(self.rows)
         try:
             sleep(0.5)

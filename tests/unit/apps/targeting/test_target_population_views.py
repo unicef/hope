@@ -1,11 +1,14 @@
 import json
 from typing import Callable
 
-import freezegun
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+import freezegun
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -13,9 +16,6 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import PaymentPlan
 
@@ -38,24 +38,35 @@ class TestTargetPopulationViews:
             status=PaymentPlan.Status.TP_OPEN,
             name="Test TP 1",
         )
+        self.tp1.created_at = "2022-01-01T04:00:00Z"
+        self.tp1.save()
+
         self.tp2 = PaymentPlanFactory(
             business_area=self.afghanistan,
             program_cycle=self.program1.cycles.first(),
             status=PaymentPlan.Status.TP_LOCKED,
             name="Test TP 2",
         )
+        self.tp2.created_at = "2022-01-01T03:00:00Z"
+        self.tp2.save()
+
         self.tp3 = PaymentPlanFactory(
             business_area=self.afghanistan,
             program_cycle=self.program1.cycles.first(),
             status=PaymentPlan.Status.OPEN,
             name="Test 3 TP",
         )
+        self.tp3.created_at = "2022-01-01T02:00:00Z"
+        self.tp3.save()
+
         self.tp_program2 = PaymentPlanFactory(
             business_area=self.afghanistan,
             program_cycle=self.program2.cycles.first(),
             status=PaymentPlan.Status.OPEN,
             name="Test TP Program 2",
         )
+        self.tp_program2.created_at = "2022-01-01T01:00:00Z"
+        self.tp_program2.save()
 
         self.url_list = reverse(
             "api:payments:target-populations-list",
@@ -138,7 +149,7 @@ class TestTargetPopulationViews:
             "name": self.tp1.name,
             "status": self.tp1.get_status_display().upper(),
             "created_by": self.tp1.created_by.get_full_name(),
-            "created_at": "2022-01-01T00:00:00Z",
+            "created_at": "2022-01-01T04:00:00Z",
             "total_households_count": self.tp1.total_households_count,
             "total_individuals_count": self.tp1.total_individuals_count,
             "updated_at": "2022-01-01T00:00:00Z",
@@ -150,7 +161,7 @@ class TestTargetPopulationViews:
             "name": self.tp2.name,
             "status": self.tp2.get_status_display().upper(),
             "created_by": self.tp2.created_by.get_full_name(),
-            "created_at": "2022-01-01T00:00:00Z",
+            "created_at": "2022-01-01T03:00:00Z",
         }
         for key, value in expected_2.items():
             assert response_json[1][key] == value
@@ -159,7 +170,7 @@ class TestTargetPopulationViews:
             "name": self.tp3.name,
             "status": "ASSIGNED",
             "created_by": self.tp3.created_by.get_full_name(),
-            "created_at": "2022-01-01T00:00:00Z",
+            "created_at": "2022-01-01T02:00:00Z",
         }
         assert "id" in response_json[2]
         for key, value in expected_3.items():
