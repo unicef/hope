@@ -200,7 +200,7 @@ class TestPeoplePDUXlsxUpload:
         assert "IMPORT" in page_individuals.get_button_import_submit().text
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_pdu_updates().click()
+        page_individuals.get_tab_offline_edits().click()
         for i in range(5):
             periodic_data_update_upload = PDUXlsxUpload.objects.first()
             if periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL:
@@ -250,7 +250,7 @@ class TestPeoplePDUXlsxUpload:
         page_individuals.get_dialog_import()
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_pdu_updates().click()
+        page_individuals.get_tab_offline_edits().click()
         page_individuals.get_status_container()
         periodic_data_update_upload = PDUXlsxUpload.objects.first()
         assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
