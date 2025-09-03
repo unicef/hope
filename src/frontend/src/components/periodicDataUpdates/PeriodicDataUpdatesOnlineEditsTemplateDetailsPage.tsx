@@ -321,12 +321,14 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         (acc, [, field]) => {
           const f = field as PduField;
           const backendKey = f.fieldName;
+          console.log('backendKey', backendKey);
+
           acc[backendKey] = {
-            roundNumber: f.roundNumber,
+            round_number: f.roundNumber,
             value: f.value,
             subtype: f.subtype,
-            isEditable: f.isEditable,
-            fieldName: backendKey,
+            is_editable: f.isEditable,
+            field_name: backendKey,
           };
           return acc;
         },
@@ -377,6 +379,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       to: `/${baseUrl}/population/individuals`,
     },
   ];
+  console.log('allPduFields', allPduFields);
 
   return (
     <>
