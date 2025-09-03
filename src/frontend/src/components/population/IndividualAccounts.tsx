@@ -10,9 +10,12 @@ import { FC } from 'react';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 
 interface IndividualAccountsProps {
   individual: IndividualDetail;
+  choicesData: IndividualChoices;
 }
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
@@ -24,6 +27,7 @@ const Overview = styled(Paper)<{ theme?: Theme }>`
 
 export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   individual,
+  choicesData,
 }) => {
   const permissions = usePermissions();
   const canViewDeliveryMechanisms = hasPermissions(
@@ -32,6 +36,11 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const accountFinancialInstitutionsDict = useArrayToDict(
+    choicesData.accountFinancialInstitutionChoices,
+    'value',
+    'name',
+  );
 
   if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
     return null;
@@ -50,13 +59,18 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
             <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.accountType}</Typography>
               <Grid container spacing={3}>
-                {Object.entries(tabData).map(([key, value], idx) => (
+                {Object.entries(tabData).map(([key, value], idx) => {
+                  if (key === 'financial_institution') {
+                    value = accountFinancialInstitutionsDict[value as string];
+                  }
+                  return (
                   <Grid key={idx} size={{ xs: 3 }}>
                     <LabelizedField label={key.replace(/_/g, ' ')}>
                       {renderSomethingOrDash(value)}
                     </LabelizedField>
                   </Grid>
-                ))}
+                );
+})}
               </Grid>
               {index < individual.accounts.length - 1 && <DividerLine />}
             </Grid>
