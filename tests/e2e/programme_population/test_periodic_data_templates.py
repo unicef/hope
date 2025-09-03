@@ -154,15 +154,15 @@ class TestPeriodicDataTemplates:
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         status = page_individuals.get_template_status(periodic_data_update_template.pk).text
-        assert status == "NOT SCHEDULED"
+        assert status == "Not scheduled"
         page_individuals.get_export_btn(periodic_data_update_template.pk).click()
         for _ in range(10):
             status = page_individuals.get_template_status(periodic_data_update_template.pk).text
-            if status == "EXPORTED":
+            if status == "Exported":
                 break
             sleep(1)
         else:
-            assert status == "EXPORTED"
+            assert status == "Exported"
         page_individuals.get_download_btn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (
@@ -203,7 +203,7 @@ class TestPeriodicDataTemplates:
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
 
-        page_pdu_xlsx_templates.get_pdu_templates_btn().click()
+        page_pdu_xlsx_templates.get_tab_offline_templates().click()
         assert str(index) in page_pdu_xlsx_templates.get_template_id(index).text
         assert (
             str(periodic_data_update_template.number_of_records)
@@ -254,7 +254,7 @@ class TestPeriodicDataTemplates:
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
 
-        page_pdu_xlsx_templates.get_pdu_templates_btn().click()
+        page_pdu_xlsx_templates.get_tab_offline_templates().click()
 
         btn = page_pdu_xlsx_templates.get_template_details_btn(index)
         btn.find_element(By.TAG_NAME, "button").click()
@@ -294,6 +294,7 @@ class TestPeriodicDataTemplates:
         page_pdu_xlsx_templates_details.get_submit_button().click()
         page_pdu_xlsx_templates_details.get_checkbox(string_attribute.name).click()
         page_pdu_xlsx_templates_details.get_submit_button().click()
+        page_pdu_xlsx_templates_details.get_submit_button().click()  # skip optional name
         page_pdu_xlsx_templates.get_new_template_button()  # wait for the page to load
         assert PDUXlsxTemplate.objects.count() == 1
         periodic_data_update_template = PDUXlsxTemplate.objects.first()
