@@ -97,7 +97,7 @@ class DeduplicationEngineAPI(BaseAPI):
     def bulk_upload_images(self, deduplication_set_id: str, images: list[DeduplicationImage]) -> list:
         response_data = [
             self._bulk_upload_image_batch(deduplication_set_id, batch)
-            for batch in batched(images, config.DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE)
+            for batch in batched(images, config.DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE, strict=False)
         ]
         return reduce(add, response_data, [])
 

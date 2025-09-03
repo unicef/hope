@@ -1,6 +1,5 @@
 from unittest import mock
 
-import pytest
 from django.contrib import messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
@@ -8,17 +7,18 @@ from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from parameterized import parameterized
+import pytest
 from rest_framework import status
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+from hope.admin.utils import PaymentPlanCeleryTasksMixin
 from hope.apps.account.models import User
+from hope.apps.core.models import FileTemp
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
-from hope.apps.core.models import FileTemp
-from hope.admin.utils import PaymentPlanCeleryTasksMixin
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):
@@ -200,5 +200,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             assert response.status_code == status.HTTP_302_FOUND
             assert (
                 list(messages.get_messages(response.wsgi_request))[-1].message
-                == f"There is no current {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx} for this payment plan"
+                == f"There is no current"
+                   f" {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx}"
+                   f" for this payment plan"
             )

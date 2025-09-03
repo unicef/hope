@@ -632,7 +632,6 @@ class TestPaymentGatewayService(BaseTestCase):
         AccountFactory(
             number="123456789",
             individual=primary_collector,
-            number="123456789",
             data={
                 "provider": "Provider",
                 "service_provider_code": "CBA",

@@ -1,21 +1,20 @@
 import base64
 import os
-import tempfile
 from pathlib import Path
+import tempfile
 from typing import Any
 from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test.utils import override_settings
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
-
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.models import (
@@ -26,6 +25,7 @@ from hope.apps.household.models import (
 from hope.apps.payment.models import AccountType
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class CreateLaxIndividualsTests(HOPEApiTestCase):
@@ -332,7 +332,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                     side_effect=fail_after_files_exist,
                 ):
-                    with self.assertRaises(RuntimeError):
+                    with pytest.raises(RuntimeError):
                         self.client.post(self.url, [individual_data], format="json")
 
                 leftover_files = [os.path.join(root, f) for root, _, files in os.walk(media_root) for f in files]

@@ -164,7 +164,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     XlsxError(
                         self.sheetname,
                         cell.coordinate,
-                        f"Payment {payment_id}: Delivery date ({delivery_date}) cannot be greater than today's date, and cannot be before Programme's start date",
+                        f"Payment {payment_id}: Delivery date ({delivery_date}) cannot be greater than today's date,"
+                        f" and cannot be before Programme's start date",
                     )
                 )
         except Exception:

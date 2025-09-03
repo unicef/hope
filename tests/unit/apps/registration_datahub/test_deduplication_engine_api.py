@@ -1,6 +1,6 @@
 import dataclasses
-import os
 from itertools import batched, repeat
+import os
 from unittest import mock
 from unittest.mock import call, patch
 import uuid
@@ -76,7 +76,7 @@ class DeduplicationEngineApiTest(TestCase):
             )
             for i in range(2)
         ]
-        batches = [list(batch) for batch in batched(images, 1)]
+        batches = [list(batch) for batch in batched(images, 1, strict=False)]
 
         mock_post.side_effect = zip(batches, repeat(200))
 

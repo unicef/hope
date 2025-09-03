@@ -1,17 +1,16 @@
 from django.core.management import call_command
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import PendingIndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
-
 from hope.api.models import Grant
 from hope.apps.household.models import PendingHousehold
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class CreateLaxHouseholdsTests(HOPEApiTestCase):
