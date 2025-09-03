@@ -157,11 +157,13 @@ const PeriodicDataUpdatePendingForMerge = () => {
   });
 
   const results = data?.results ?? [];
-  const allIds = results.map((row: any) => row.id);
+  const authorizedIds = results
+    .filter((row: any) => row.isAuthorized)
+    .map((row: any) => row.id);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setSelected(allIds);
+      setSelected(authorizedIds);
     } else {
       setSelected([]);
     }
@@ -223,6 +225,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
       <TableCell>
         <StatusBox
           status={row.status}
+          statusDisplay={row.statusDisplay}
           statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
         />
       </TableCell>

@@ -1,11 +1,13 @@
 import React from 'react';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import {
   Table,
   TableHead,
   TableRow,
   TableBody,
   TableCell,
-  Checkbox,
   TextField,
   Button,
 } from '@mui/material';
@@ -17,6 +19,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { t } from 'i18next';
 import { PduField } from './PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 type Individual = {
   individualUuid?: string;
@@ -42,6 +45,7 @@ type PeriodicDataUpdateEditableTableProps = {
   handleSaveRow: (rowIdx: number) => void;
   canSave: boolean;
   templateStatus: string;
+  isAuthorized: boolean;
 };
 
 const StickyHeaderCell = ({ shouldScroll, children }) => (
@@ -73,7 +77,9 @@ const PeriodicDataUpdateEditableTable: React.FC<
   handleSaveRow,
   canSave,
   templateStatus,
+  isAuthorized,
 }) => {
+  const { baseUrl } = useBaseUrl();
   const shouldScroll = editRows.length > 10 || allPduFields.length > 6;
   const TableContent = (
     <Table>
@@ -151,7 +157,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                 <TableCell>
                   {individual.individualUuid ? (
                     <BlackLink
-                      to={`/population/individuals/${individual.individualUuid}`}
+                      to={`/${baseUrl}/population/individuals/${individual.individualUuid}`}
                     >
                       {individual.unicefId}
                     </BlackLink>
@@ -214,15 +220,13 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                gap: 8,
                               }}
                             >
-                              <Checkbox
-                                checked={field.value === true}
-                                indeterminate={
-                                  field.value === null ||
-                                  field.value === undefined
-                                }
-                                onChange={(e) => {
+                              <span
+                                style={{ cursor: 'pointer' }}
+                                title={t('Set YES')}
+                                onClick={() => {
                                   setEditRows((prev) => {
                                     const updated = [...prev];
                                     const pduFieldsObj = {
@@ -230,7 +234,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                     };
                                     pduFieldsObj[fieldKey] = {
                                       ...pduFieldsObj[fieldKey],
-                                      value: e.target.checked,
+                                      value: true,
                                     };
                                     updated[idx] = {
                                       ...updated[idx],
@@ -239,14 +243,47 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                     return updated;
                                   });
                                 }}
-                                sx={{
-                                  display: 'block',
-                                  margin: '0 auto',
+                              >
+                                <CheckIcon
+                                  fontSize="small"
+                                  style={{
+                                    color:
+                                      field.value === true ? 'green' : '#ccc',
+                                  }}
+                                />
+                              </span>
+                              <span
+                                style={{ cursor: 'pointer' }}
+                                title={t('Set NO')}
+                                onClick={() => {
+                                  setEditRows((prev) => {
+                                    const updated = [...prev];
+                                    const pduFieldsObj = {
+                                      ...updated[idx].pduFields,
+                                    };
+                                    pduFieldsObj[fieldKey] = {
+                                      ...pduFieldsObj[fieldKey],
+                                      value: false,
+                                    };
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      pduFields: pduFieldsObj,
+                                    };
+                                    return updated;
+                                  });
                                 }}
-                              />
-                              <Button
-                                variant="outlined"
-                                size="small"
+                              >
+                                <CloseIcon
+                                  fontSize="small"
+                                  style={{
+                                    color:
+                                      field.value === false ? 'red' : '#ccc',
+                                  }}
+                                />
+                              </span>
+                              <span
+                                style={{ cursor: 'pointer' }}
+                                title={t('Clear')}
                                 onClick={() => {
                                   setEditRows((prev) => {
                                     const updated = [...prev];
@@ -264,10 +301,15 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                     return updated;
                                   });
                                 }}
-                                title={t('Clear')}
                               >
-                                {t('Clear')}
-                              </Button>
+                                <CheckBoxOutlineBlankIcon
+                                  fontSize="small"
+                                  style={{
+                                    color:
+                                      field.value == null ? '#888' : '#ccc',
+                                  }}
+                                />
+                              </span>
                             </div>
                           ) : (
                             <TextField
@@ -307,7 +349,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                               }}
                             />
                           )
-                        ) : // Display mode: show value as plain text for non-editable fields, and for editable fields when not editing
+                        ) : // Display mode: show value as icon for BOOL, plain text for others
                         field.subtype === 'DATE' ? (
                           field.value ? (
                             <UniversalMoment>{field.value}</UniversalMoment>
@@ -315,13 +357,17 @@ const PeriodicDataUpdateEditableTable: React.FC<
                             <span style={{ color: '#aaa' }}>{t('-')}</span>
                           )
                         ) : field.subtype === 'BOOL' ? (
-                          <span>
-                            {field.value === true
-                              ? t('True')
-                              : field.value === false
-                                ? t('False')
-                                : t('-')}
-                          </span>
+                          field.value === true ? (
+                            <span style={{ color: 'green' }}>
+                              <CheckIcon fontSize="small" />
+                            </span>
+                          ) : field.value === false ? (
+                            <span style={{ color: 'red' }}>
+                              <CloseIcon fontSize="small" />
+                            </span>
+                          ) : (
+                            <span style={{ color: '#aaa' }}>{t('-')}</span>
+                          )
                         ) : field.value !== undefined &&
                           field.value !== null &&
                           field.value !== '' ? (
@@ -388,6 +434,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                         variant="outlined"
                         color="primary"
                         size="small"
+                        disabled={!isAuthorized}
                         onClick={() =>
                           setEditingRows((prev) => {
                             const updated = new Set(prev);
