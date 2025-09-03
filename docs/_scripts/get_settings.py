@@ -22,10 +22,10 @@ TERMS = {}
 index = "guide-adm/hope/settings.md"
 
 FILE = "https://raw.githubusercontent.com/unicef/hope/develop/backend/hope/config/env.py"
-res = requests.get(FILE)
+res = requests.get(FILE, timeout=10)
 buf = StringIO(res.text)
-execCode = compile(res.text, "mulstring", "exec")
-exec(execCode)
+exec_code = compile(res.text, "mulstring", "exec")
+exec(exec_code)  # noqa
 for k, v in DEFAULTS.items():
     TERMS[k] = MASK.format(name=k, type=v[0], default=v[1])
 

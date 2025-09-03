@@ -1,13 +1,13 @@
 import dataclasses
 import os
-import uuid
 from itertools import batched, repeat
 from unittest import mock
 from unittest.mock import call, patch
+import uuid
 
-import pytest
 from constance.test import override_config
 from django.test import TestCase
+import pytest
 
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,

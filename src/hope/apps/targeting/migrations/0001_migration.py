@@ -3,12 +3,12 @@
 import uuid
 
 import concurrency.fields
+from django.conf import settings
 import django.contrib.postgres.fields.citext
 import django.core.validators
+from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
-from django.conf import settings
-from django.db import migrations, models
 
 import hope.apps.targeting.services.targeting_service
 import hope.apps.utils.models
@@ -84,7 +84,8 @@ class Migration(migrations.Migration):
                     "flag_exclude_if_active_adjudication_ticket",
                     models.BooleanField(
                         default=False,
-                        help_text="Exclude households with individuals (members or collectors) that have active adjudication ticket(s).",
+                        help_text="Exclude households with individuals (members or collectors)"
+                        " that have active adjudication ticket(s).",
                     ),
                 ),
                 (
@@ -328,7 +329,8 @@ class Migration(migrations.Migration):
                 (
                     "program",
                     models.ForeignKey(
-                        help_text="Set only when the target population moves from draft to\n            candidate list frozen state (approved)",
+                        help_text="Set only when the target population moves from draft to\n"
+                        "            candidate list frozen state (approved)",
                         on_delete=django.db.models.deletion.PROTECT,
                         to="program.program",
                     ),

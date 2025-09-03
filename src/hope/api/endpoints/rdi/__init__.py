@@ -1,7 +1,9 @@
-from hope.api.endpoints.rdi.base import CompleteRDIView  # noqa: F401
-from hope.api.endpoints.rdi.base import CreateRDIView  # noqa: F401
-from hope.api.endpoints.rdi.base import PushLaxToRDIView  # noqa: F401
-from hope.api.endpoints.rdi.base import PushToRDIView  # noqa: F401
+from hope.api.endpoints.rdi.base import (
+    CompleteRDIView,  # noqa: F401
+    CreateRDIView,  # noqa: F401
+    PushLaxToRDIView,  # noqa: F401
+    PushToRDIView,  # noqa: F401
+)
 from hope.api.endpoints.rdi.delegate_people import DelegatePeopleRDIView  # noqa: F401
 from hope.api.endpoints.rdi.lax import (  # noqa: F401
     CreateLaxHouseholds,

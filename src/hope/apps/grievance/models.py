@@ -1,6 +1,6 @@
-import logging
 from decimal import Decimal
 from itertools import chain
+import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
@@ -699,6 +699,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     individual_data = JSONField(null=True)
+    # TODO: deprecated will be removed in next release as update Roles moved into TicketHouseholdDataUpdateDetails
     role_reassign_data = JSONField(default=dict)
 
     @property

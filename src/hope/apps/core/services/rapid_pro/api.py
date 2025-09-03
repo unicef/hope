@@ -1,20 +1,20 @@
-import logging
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+import logging
 from typing import Any
 from uuid import UUID
 
-import requests
 from constance import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
+import requests
 
 from hope.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
 
-class TokenNotProvided(Exception):
+class TokenNotProvidedError(Exception):
     pass
 
 
@@ -51,7 +51,7 @@ class RapidProAPI:
         token = getattr(business_area, RapidProAPI.mode_to_token_dict[mode], None)
         self.url = business_area.rapid_pro_host or settings.RAPID_PRO_URL
         if not token:
-            raise TokenNotProvided(f"Token is not set for {business_area.name}.")
+            raise TokenNotProvidedError(f"Token is not set for {business_area.name}.")
         self._client.headers.update({"Authorization": f"Token {token}"})
 
     def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> dict:

@@ -2,9 +2,10 @@ from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 from django.core.cache import cache
 from django.utils import timezone
+import pytest
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -13,7 +14,6 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.celery_tasks import (
     invalidate_permissions_cache_for_user_if_expired_role,

@@ -3,11 +3,11 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-import pytest
 from django.conf import settings
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.registration_data.models import KoboImportData
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,

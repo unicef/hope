@@ -1,11 +1,12 @@
+from decimal import Decimal
 import json
 import os
-from decimal import Decimal
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -20,7 +21,6 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.models import ROLE_PRIMARY
@@ -630,6 +630,7 @@ class TestPaymentGatewayService(BaseTestCase):
         primary_collector = self.payments[0].collector
         fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, name="ABC")
         AccountFactory(
+            number="123456789",
             individual=primary_collector,
             number="123456789",
             data={
@@ -819,7 +820,7 @@ class TestPaymentGatewayService(BaseTestCase):
         payment.save()
         payment.collector.save()
         with self.assertRaisesMessage(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
@@ -842,7 +843,7 @@ class TestPaymentGatewayService(BaseTestCase):
         )
 
         with self.assertRaisesMessage(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
+            PaymentGatewayAPI.PaymentGatewayAPIError,
             f"Not found snapshot for Payment {payment.unicef_id}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
@@ -935,9 +936,8 @@ class TestPaymentGatewayService(BaseTestCase):
         s = Mock()
         bad_status = "bad_status"
         s.value = bad_status
-        with self.assertRaisesRegex(
-            PaymentGatewayAPI.PaymentGatewayAPIException,
-            "Can't set invalid Payment Instruction status:",
+        with pytest.raises(
+            PaymentGatewayAPI.PaymentGatewayAPIError, match="Can't set invalid Payment Instruction status:"
         ):
             PaymentGatewayAPI().change_payment_instruction_status(
                 s,

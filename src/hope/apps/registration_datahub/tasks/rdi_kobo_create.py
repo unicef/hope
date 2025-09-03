@@ -1,6 +1,6 @@
+from collections import defaultdict
 import json
 import logging
-from collections import defaultdict
 from typing import Any
 
 from dateutil.parser import parse
@@ -18,8 +18,7 @@ from hope.apps.core.kobo.common import (
 )
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import chunks, rename_dict_keys
-from hope.apps.geo.models import Area
-from hope.apps.geo.models import Country as GeoCountry
+from hope.apps.geo.models import Area, Country as GeoCountry
 from hope.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,

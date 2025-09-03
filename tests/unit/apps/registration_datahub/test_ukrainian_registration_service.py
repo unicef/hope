@@ -5,6 +5,7 @@ from typing import Dict
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.aurora import (
     OrganizationFactory,
@@ -13,7 +14,6 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.models import (
@@ -48,7 +48,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -129,7 +129,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
         files = {
             "individuals": [
                 {
-                    "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",  # noqa
                 }
             ]
         }

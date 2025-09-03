@@ -48,7 +48,7 @@ export const householdDataRow = (
   const householdValue = field?.isFlexField
     ? household.flexFields[fieldName]
     : household[camelCase(fieldName)];
-  console.log('householdValue', householdValue, household, camelCase(fieldName));
+
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue

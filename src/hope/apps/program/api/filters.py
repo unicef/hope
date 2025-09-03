@@ -38,10 +38,9 @@ class ProgramCycleFilter(UpdatedAtFilter):
             "total_delivered_quantity_usd_to",
         ]
 
-    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        values = value.split(" ")
+    def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
         q_obj = Q()
-        for value in values:
+        for value in values.split(" "):
             q_obj |= Q(Q(title__istartswith=value))
         return qs.filter(q_obj)
 
@@ -151,10 +150,9 @@ class ProgramFilter(UpdatedAtFilter):
 
         return queryset
 
-    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        values = value.split(" ")
+    def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
         q_obj = Q()
-        for value in values:
+        for value in values.split(" "):
             q_obj |= Q(name__istartswith=value)
         return qs.filter(q_obj)
 

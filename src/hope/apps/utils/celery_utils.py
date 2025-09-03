@@ -1,7 +1,7 @@
 from typing import Any
 
 
-class CeleryConnectionException(Exception):
+class CeleryConnectionError(Exception):
     pass
 
 
@@ -50,7 +50,7 @@ def get_all_celery_tasks(queue_name: str) -> list:
     all_tasks = []
 
     if not is_celery_working(celery_app):
-        raise CeleryConnectionException
+        raise CeleryConnectionError
 
     with celery_app.pool.acquire(block=True) as conn:
         tasks = None

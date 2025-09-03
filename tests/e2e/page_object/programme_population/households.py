@@ -1,124 +1,125 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class Households(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    hhFiltersSearch = 'div[data-cy="hh-filters-search"]'
-    filterDocumentType = 'div[data-cy="filters-document-type"]'
-    hhFiltersResidenceStatus = 'div[data-cy="hh-filters-residence-status"]'
-    hhFiltersAdmin2 = 'div[data-cy="hh-filters-admin2"]'
-    adminLevel2Input = 'div[data-cy="Admin Level 2-input"]'
-    hhFiltersHouseholdSizeFrom = 'div[data-cy="hh-filters-household-size-from"]'
-    hhFiltersHouseholdSizeTo = 'div[data-cy="hh-filters-household-size-to"]'
-    hhFiltersOrderBy = 'div[data-cy="hh-filters-order-by"]'
-    hhFiltersStatus = 'div[data-cy="hh-filters-status"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    pageDetailsContainer = 'div[data-cy="page-details-container"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    sanctionListPossibleMatch = 'th[data-cy="sanction-list-possible-match"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    householdId = 'th[data-cy="household-id"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    hh_filters_search = 'div[data-cy="hh-filters-search"]'
+    filter_document_type = 'div[data-cy="filters-document-type"]'
+    hh_filters_residence_status = 'div[data-cy="hh-filters-residence-status"]'
+    hh_filters_admin2 = 'div[data-cy="hh-filters-admin2"]'
+    admin_level_2_input = 'div[data-cy="Admin Level 2-input"]'
+    hh_filters_household_size_from = 'div[data-cy="hh-filters-household-size-from"]'
+    hh_filters_household_size_to = 'div[data-cy="hh-filters-household-size-to"]'
+    hh_filters_order_by = 'div[data-cy="hh-filters-order-by"]'
+    hh_filters_status = 'div[data-cy="hh-filters-status"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    page_details_container = 'div[data-cy="page-details-container"]'
+    table_title = 'h6[data-cy="table-title"]'
+    sanction_list_possible_match = 'th[data-cy="sanction-list-possible-match"]'
+    table_label = 'span[data-cy="table-label"]'
+    household_id = 'th[data-cy="household-id"]'
     status = 'th[data-cy="status"]'
-    householdHeadName = 'th[data-cy="household-head-name"]'
-    householdSize = 'th[data-cy="household-size"]'
-    householdLocation = 'th[data-cy="household-location"]'
-    householdResidenceStatus = 'th[data-cy="household-residence-status"]'
-    householdTotalCashReceived = 'th[data-cy="household-total-cash-received"]'
-    householdRegistrationDate = 'th[data-cy="household-registration-date"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    householdTableRow = 'tr[data-cy="household-table-row"]'
+    household_head_name = 'th[data-cy="household-head-name"]'
+    household_size = 'th[data-cy="household-size"]'
+    household_location = 'th[data-cy="household-location"]'
+    household_residence_status = 'th[data-cy="household-residence-status"]'
+    household_total_cash_received = 'th[data-cy="household-total-cash-received"]'
+    household_registration_date = 'th[data-cy="household-registration-date"]'
+    table_row = 'tr[data-cy="table-row"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    household_table_row = 'tr[data-cy="household-table-row"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getHhFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.hhFiltersSearch)
+    def get_hh_filters_search(self) -> WebElement:
+        return self.wait_for(self.hh_filters_search)
 
-    def getFilterDocumentType(self) -> WebElement:
-        return self.wait_for(self.filterDocumentType)
+    def get_filter_document_type(self) -> WebElement:
+        return self.wait_for(self.filter_document_type)
 
-    def getHhFiltersResidenceStatus(self) -> WebElement:
-        return self.wait_for(self.hhFiltersResidenceStatus)
+    def get_hh_filters_residence_status(self) -> WebElement:
+        return self.wait_for(self.hh_filters_residence_status)
 
-    def getHhFiltersAdmin2(self) -> WebElement:
-        return self.wait_for(self.hhFiltersAdmin2)
+    def get_hh_filters_admin2(self) -> WebElement:
+        return self.wait_for(self.hh_filters_admin2)
 
-    def getAdminLevel2Input(self) -> WebElement:
-        return self.wait_for(self.adminLevel2Input)
+    def get_admin_level_2_input(self) -> WebElement:
+        return self.wait_for(self.admin_level_2_input)
 
-    def getHhFiltersHouseholdSizeFrom(self) -> WebElement:
-        return self.wait_for(self.hhFiltersHouseholdSizeFrom)
+    def get_hh_filters_household_size_from(self) -> WebElement:
+        return self.wait_for(self.hh_filters_household_size_from)
 
-    def getHhFiltersHouseholdSizeTo(self) -> WebElement:
-        return self.wait_for(self.hhFiltersHouseholdSizeTo)
+    def get_hh_filters_household_size_to(self) -> WebElement:
+        return self.wait_for(self.hh_filters_household_size_to)
 
-    def getHhFiltersOrderBy(self) -> WebElement:
-        return self.wait_for(self.hhFiltersOrderBy)
+    def get_hh_filters_order_by(self) -> WebElement:
+        return self.wait_for(self.hh_filters_order_by)
 
-    def getHhFiltersStatus(self) -> WebElement:
-        return self.wait_for(self.hhFiltersStatus)
+    def get_hh_filters_status(self) -> WebElement:
+        return self.wait_for(self.hh_filters_status)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getPageDetailsContainer(self) -> WebElement:
-        return self.wait_for(self.pageDetailsContainer)
+    def get_page_details_container(self) -> WebElement:
+        return self.wait_for(self.page_details_container)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getSanctionListPossibleMatch(self) -> WebElement:
-        return self.wait_for(self.sanctionListPossibleMatch)
+    def get_sanction_list_possible_match(self) -> WebElement:
+        return self.wait_for(self.sanction_list_possible_match)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getHouseholdId(self) -> WebElement:
-        return self.wait_for(self.householdId)
+    def get_household_id(self) -> WebElement:
+        return self.wait_for(self.household_id)
 
-    def getStatus(self) -> WebElement:
+    def get_status(self) -> WebElement:
         return self.wait_for(self.status)
 
-    def getHouseholdHeadName(self) -> WebElement:
-        return self.wait_for(self.householdHeadName)
+    def get_household_head_name(self) -> WebElement:
+        return self.wait_for(self.household_head_name)
 
-    def getHouseholdSize(self) -> WebElement:
-        return self.wait_for(self.householdSize)
+    def get_household_size(self) -> WebElement:
+        return self.wait_for(self.household_size)
 
-    def getHouseholdLocation(self) -> WebElement:
-        return self.wait_for(self.householdLocation)
+    def get_household_location(self) -> WebElement:
+        return self.wait_for(self.household_location)
 
-    def getHouseholdResidenceStatus(self) -> WebElement:
-        return self.wait_for(self.householdResidenceStatus)
+    def get_household_residence_status(self) -> WebElement:
+        return self.wait_for(self.household_residence_status)
 
-    def getHouseholdTotalCashReceived(self) -> WebElement:
-        return self.wait_for(self.householdTotalCashReceived)
+    def get_household_total_cash_received(self) -> WebElement:
+        return self.wait_for(self.household_total_cash_received)
 
-    def getHouseholdRegistrationDate(self) -> WebElement:
-        return self.wait_for(self.householdRegistrationDate)
+    def get_household_registration_date(self) -> WebElement:
+        return self.wait_for(self.household_registration_date)
 
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def get_table_row(self) -> WebElement:
+        return self.wait_for(self.table_row)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getHouseholdTableRows(self) -> WebElement:
-        return self.wait_for(self.householdTableRow)
+    def get_household_table_rows(self) -> WebElement:
+        return self.wait_for(self.household_table_row)
 
-    def getHouseholdsRows(self) -> list[WebElement]:
-        self.getHouseholdTableRows()
-        return self.get_elements(self.householdTableRow)
+    def get_households_rows(self) -> list[WebElement]:
+        self.get_household_table_rows()
+        return self.get_elements(self.household_table_row)
 
-    def getHouseholdsRowByNumber(self, number: int) -> WebElement:
-        return self.getHouseholdsRows()[number]
+    def get_households_row_by_number(self, number: int) -> WebElement:
+        return self.get_households_rows()[number]

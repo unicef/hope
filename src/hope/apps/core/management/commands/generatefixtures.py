@@ -1,12 +1,13 @@
-import random
-import time
 from argparse import ArgumentParser
 from decimal import Decimal
 from functools import partial
+import secrets
+import time
 from typing import TYPE_CHECKING, Any, Callable
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
+
 from extras.test_utils.factories.account import UserFactory, create_superuser
 from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
@@ -30,7 +31,6 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-
 from hope.apps.account.models import RoleAssignment
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo.models import Area
@@ -118,10 +118,10 @@ class Command(BaseCommand):
                 program=program,
                 business_area=business_area,
             )
-            rules = TargetingCriteriaRuleFactory.create_batch(random.randint(1, 3), payment_plan=payment_plan)
+            rules = TargetingCriteriaRuleFactory.create_batch(secrets.randbelow(3) + 1, payment_plan=payment_plan)
 
             for rule in rules:
-                TargetingCriteriaRuleFilterFactory.create_batch(random.randint(1, 5), targeting_criteria_rule=rule)
+                TargetingCriteriaRuleFilterFactory.create_batch(secrets.randbelow(5) + 1, targeting_criteria_rule=rule)
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
                 household, individuals = create_household_for_fixtures(
@@ -150,10 +150,10 @@ class Command(BaseCommand):
                 ).quantize(Decimal(".01"))
                 payment.save()
 
-                should_create_grievance = random.choice((True, False))
+                should_create_grievance = secrets.choice((True, False))
                 if should_create_grievance:
-                    grievance_type = random.choice(("feedback", "sensitive", "complaint"))
-                    should_contain_payment_record = random.choice((True, False))
+                    grievance_type = secrets.choice(("feedback", "sensitive", "complaint"))
+                    should_contain_payment_record = secrets.choice((True, False))
                     switch_dict: dict[str, Callable[[], GrievanceTicket]] = {
                         "feedback": partial(
                             GrievanceTicketFactory,
@@ -168,13 +168,13 @@ class Command(BaseCommand):
                         "sensitive": partial(
                             SensitiveGrievanceTicketWithoutExtrasFactory,
                             household=household,
-                            individual=random.choice(individuals),
+                            individual=secrets.choice(individuals),
                             payment=payment if should_contain_payment_record else None,
                         ),
                         "complaint": partial(
                             GrievanceComplaintTicketWithoutExtrasFactory,
                             household=household,
-                            individual=random.choice(individuals),
+                            individual=secrets.choice(individuals),
                             payment=payment if should_contain_payment_record else None,
                         ),
                     }

@@ -1,5 +1,7 @@
-import pytest
 from django.utils import timezone
+import pytest
+from pytz import utc
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -11,8 +13,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from pytz import utc
-
 from hope.apps.geo.models import Area
 from hope.apps.household.models import Household
 from hope.apps.payment.models import DeliveryMechanism, Payment

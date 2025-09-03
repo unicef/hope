@@ -1,7 +1,8 @@
 from datetime import datetime
 
-import pytest
 from dateutil.relativedelta import relativedelta
+import pytest
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
@@ -22,14 +23,11 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.payment.models import PaymentVerification as PV
-from hope.apps.payment.models import PaymentVerificationPlan
+from hope.apps.payment.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan
 from hope.apps.program.models import BeneficiaryGroup, Program
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 
@@ -154,7 +152,7 @@ def add_household() -> None:
 def payment_verification_creator(
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     payment_plan_id: str = "PP-0060-22-11223344",
-) -> PV:
+) -> PaymentVerification:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -199,7 +197,7 @@ def payment_verification_creator(
     return PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
-        status=PV.STATUS_PENDING,
+        status=PaymentVerification.STATUS_PENDING,
     )
 
 
@@ -286,12 +284,12 @@ def create_programs() -> None:
 class TestSmokeFilters:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
-        filters.selectGlobalProgramFilter("Test Programm")
+        filters.select_global_program_filter("Test Programm")
 
         programs = {
             "Registration Data Import": [
-                filters.filterSearch,
-                filters.importedByInput,
+                filters.filter_search,
+                filters.imported_by_input,
                 filters.selectFilter,
                 filters.filterStatus,
                 filters.filterSizeMin,
@@ -411,7 +409,7 @@ class TestSmokeFilters:
             ],
         }
 
-        for nav_menu in programs:
+        for nav_menu, locators in programs.items():
             if nav_menu == "Feedback":
                 filters.wait_for('[data-cy="nav-Grievance"]').click()
             if nav_menu == "Items":
@@ -423,79 +421,7 @@ class TestSmokeFilters:
 
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
 
-            for locator in programs[nav_menu]:
-                try:
-                    filters.wait_for(locator, timeout=20)
-                except BaseException:
-                    raise Exception(f"Element {locator} not found on the {nav_menu} page.")
-
-    @pytest.mark.xfail(reason="UNSTABLE")
-    def test_filters_all_programs(self, create_programs: None, filters: Filters) -> None:
-        all_programs = {
-            "Country Dashboard": [
-                filters.globalProgramFilter,
-                filters.globalProgramFilterContainer,
-            ],
-            "Programmes": [
-                filters.filtersDataCollectingType,
-                filters.filtersBudgetMax,
-                filters.filtersBudgetMin,
-                filters.filtersNumberOfHouseholdsMin,
-                filters.filtersNumberOfHouseholdsMax,
-                filters.filtersSector,
-                filters.filtersStartDate,
-                filters.filtersEndDate,
-                filters.filtersStatus,
-                filters.filtersSearch,
-            ],
-            "Grievance": [
-                filters.filtersSearch,
-                filters.selectFilter,
-                filters.filtersDocumentType,
-                filters.filtersDocumentNumber,
-                filters.filtersProgram,
-                filters.programmeInput,
-                filters.selectFilter,
-                filters.filtersStatus,
-                filters.filtersFsp,
-                filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo,
-                filters.selectFilter,
-                filters.filtersCategory,
-                filters.filtersAdminLevel,
-                filters.filtersAssignee,
-                filters.assignedToInput,
-                filters.filtersCreatedByAutocomplete,
-                filters.filtersRegistrationDataImport,
-                filters.filtersPreferredLanguage,
-                filters.filtersPriority,
-                filters.filtersUrgency,
-                filters.filtersActiveTickets,
-                filters.filtersProgramState,
-            ],
-            "Feedback": [
-                filters.filtersSearch,
-                filters.filtersProgram,
-                filters.programmeInput,
-                filters.selectFilter,
-                filters.filtersIssueType,
-                filters.filtersCreatedByAutocomplete,
-                filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo,
-                filters.selectFilter,
-                filters.filtersProgramState,
-            ],
-            "Activity Log": [
-                filters.filtersResidenceStatus,
-                filters.filtersSearch,
-                filters.userInput,
-                filters.selectFilter,
-            ],
-        }
-
-        for nav_menu in all_programs:
-            filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
-            for locator in all_programs[nav_menu]:
+            for locator in locators:
                 try:
                     filters.wait_for(locator, timeout=20)
                 except BaseException:
@@ -537,41 +463,41 @@ class TestSmokeFilters:
         add_household: None,
         add_grievance_tickets: None,
         filters: Filters,
-        pageProgrammeDetails: ProgrammeDetails,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
-        filters.selectGlobalProgramFilter("Test Programm")
-        assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
 
         for element in module[0]:
             filters.wait_for(f'[data-cy="nav-{element}').click()
 
-        assert filters.waitForNumberOfRows(2)
-        filters.getFilterByLocator(module[1]).send_keys("Wrong value")
-        filters.getButtonFiltersApply().click()
-        assert filters.waitForNumberOfRows(0)
-        filters.getButtonFiltersClear().click()
-        assert filters.waitForNumberOfRows(2)
-        filters.getFilterByLocator(module[1]).send_keys(module[2])
-        filters.getButtonFiltersApply().click()
-        assert filters.waitForNumberOfRows(1)
+        assert filters.wait_for_number_of_rows(2)
+        filters.get_filter_by_locator(module[1]).send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+        filters.get_filter_by_locator(module[1]).send_keys(module[2])
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)
 
     @pytest.mark.night
     @pytest.mark.skip("ToDo")
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        page_grievance_tickets: GrievanceTickets,
+        page_grievance_new_ticket: NewTicket,
+        page_grievance_details_page: GrievanceDetailsPage,
         filters: Filters,
     ) -> None:
-        pageGrievanceTickets.getNavGrievance().click()
-        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
-        pageGrievanceTickets.getButtonNewTicket().click()
+        page_grievance_tickets.get_nav_grievance().click()
+        assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
+        page_grievance_tickets.get_button_new_ticket().click()
 
     @pytest.mark.skip("ToDo")
     def test_payment_verification_details_filters(
         self,
-        pageGrievanceTickets: GrievanceTickets,
+        page_grievance_tickets: GrievanceTickets,
         filters: Filters,
     ) -> None:
-        pageGrievanceTickets.getNavPaymentVerification().click()
+        page_grievance_tickets.get_nav_payment_verification().click()

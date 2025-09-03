@@ -1,8 +1,8 @@
 import json
 import operator
 
-import openpyxl
 from django.db import transaction
+import openpyxl
 
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import ImportData
@@ -45,12 +45,11 @@ class ValidateXlsxImport:
                     if not any(cell.value for cell in row):
                         continue
                     number_of_individuals += 1
-        else:
-            if people_sheet:
-                for row in people_sheet.iter_rows(min_row=3):
-                    if not any(cell.value for cell in row):
-                        continue
-                    number_of_individuals += 1
+        elif people_sheet:
+            for row in people_sheet.iter_rows(min_row=3):
+                if not any(cell.value for cell in row):
+                    continue
+                number_of_individuals += 1
         import_data.number_of_households = number_of_households
         import_data.number_of_individuals = number_of_individuals
         import_data.save()

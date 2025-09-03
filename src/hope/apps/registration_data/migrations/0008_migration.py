@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
             name="exclude_external_collectors",
             field=models.BooleanField(
                 default=False,
-                help_text="Exclude external alternate collectors from the RDI. This is used for the RDI created from the program population.",
+                help_text="Exclude external alternate collectors from the RDI. "
+                "This is used for the RDI created from the program population.",
             ),
         ),
     ]

@@ -2,10 +2,13 @@ import datetime
 from enum import Enum
 from typing import Any
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -23,9 +26,6 @@ from extras.test_utils.factories.program import (
     ProgramCycleFactory,
     ProgramFactory,
 )
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.program.models import Program, ProgramCycle
@@ -290,7 +290,7 @@ class TestProgramList:
             self.afghanistan,
             program_afghanistan2,
         )
-        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions + 1)
+        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
         # cached data with another call
         _test_response_len_and_queries(2, no_queries_cached)
 

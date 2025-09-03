@@ -2,6 +2,8 @@ import datetime
 
 from django.core.management import call_command
 from django.test import TestCase
+from freezegun import freeze_time
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -15,8 +17,6 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from freezegun import freeze_time
-
 from hope.apps.household.models import Household, Individual, IndividualIdentity
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
@@ -26,7 +26,7 @@ class TestRegistrationDataModels(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
         partner = PartnerFactory()

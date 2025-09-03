@@ -1,8 +1,10 @@
 from datetime import date
 
-import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import CountryFactory
@@ -14,7 +16,6 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
@@ -95,7 +96,7 @@ class TestAddIndividualService(TestCase):
         self.ticket_details.save()
 
         service = AddIndividualService(self.ticket, {})
-        with self.assertRaises(ValidationError):
+        with pytest.raises(DRFValidationError):
             service.close(UserFactory())
         assert Document.objects.filter(document_number="123456").count() == 1
 

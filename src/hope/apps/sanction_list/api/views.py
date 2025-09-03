@@ -14,7 +14,7 @@ from hope.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.registration_datahub.validators import XlsxException, XLSXValidator
+from hope.apps.registration_datahub.validators import XlsxError, XLSXValidator
 from hope.apps.sanction_list.api.serializers import (
     CheckAgainstSanctionListCreateSerializer,
     CheckAgainstSanctionListSerializer,
@@ -67,7 +67,7 @@ class SanctionListIndividualViewSet(
         user = request.user
         try:
             self.validate(file=file)
-        except XlsxException as e:
+        except XlsxError as e:
             return Response(
                 CheckAgainstSanctionListSerializer({"ok": False, "errors": e.errors}).data,
                 status=status.HTTP_400_BAD_REQUEST,

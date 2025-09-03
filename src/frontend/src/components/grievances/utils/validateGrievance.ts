@@ -54,7 +54,12 @@ export function validate(
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
-            const { required } = householdFieldsDict[el.fieldName];
+            const fieldDef = householdFieldsDict[el.fieldName];
+            if (!fieldDef) {
+              // Optionally add a specific error for missing field definition
+              return;
+            }
+            const { required } = fieldDef;
             if (el.fieldValue === 0) {
               delete errors.householdDataUpdateFields;
             } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
@@ -269,6 +274,7 @@ export function validateUsingSteps(
         // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName &&
+        !values.roles?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
@@ -279,7 +285,12 @@ export function validateUsingSteps(
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
-            const { required } = householdFieldsDict[el.fieldName];
+            const fieldDef = householdFieldsDict[el.fieldName];
+            if (!fieldDef) {
+              // Optionally add a specific error for missing field definition
+              return;
+            }
+            const { required } = fieldDef;
             if (el.fieldValue === 0) {
               delete errors.householdDataUpdateFields;
             } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
@@ -402,7 +413,8 @@ export function validateUsingSteps(
             }
             acc.dynamicFields?.forEach((field) => {
               if (!field.key || !field.value) {
-                errors.individualDataUpdateFieldsAccounts = 'New Account fields need to have both key/value';
+                errors.individualDataUpdateFieldsAccounts =
+                  'New Account fields need to have both key/value';
               }
             });
           });
@@ -421,7 +433,8 @@ export function validateUsingSteps(
             }
             acc.dynamicFields?.forEach((field) => {
               if (!field.key || !field.value) {
-                errors.individualDataUpdateFieldsAccounts = 'Edited Account fields need to have both key/value';
+                errors.individualDataUpdateFieldsAccounts =
+                  'Edited Account fields need to have both key/value';
               }
             });
           });

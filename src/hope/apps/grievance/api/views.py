@@ -772,8 +772,8 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
-        individual_approve_data = input_data.get("individual_approve_data")
-        flex_fields_approve_data = input_data.get("flex_fields_approve_data")
+        individual_approve_data = input_data.get("individual_approve_data", {})
+        flex_fields_approve_data = input_data.get("flex_fields_approve_data", {})
         user = request.user
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
@@ -811,7 +811,7 @@ class GrievanceTicketGlobalViewSet(
         for field_name, item in individual_data.items():
             field_to_approve = individual_approve_data.get(field_name)
             if field_name in documents_mapping:
-                for index, document_data in enumerate(individual_data[field_name]):
+                for index, document_data in enumerate(item):
                     approved_documents_indexes = documents_mapping.get(field_name, [])
                     document_data["approve_status"] = index in approved_documents_indexes
             elif field_name == "flex_fields":
@@ -844,8 +844,8 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
-        household_approve_data = input_data.get("household_approve_data")
-        flex_fields_approve_data = input_data.get("flex_fields_approve_data")
+        household_approve_data = input_data.get("household_approve_data", {})
+        flex_fields_approve_data = input_data.get("flex_fields_approve_data", {})
         user = self.request.user
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
@@ -873,6 +873,15 @@ class GrievanceTicketGlobalViewSet(
                     household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
                         flex_field_name
                     )
+            elif field_name == "roles":
+                approve_lookup = {
+                    role["individual_id"]: str(role.get("approve_status", "")).lower() == "true"
+                    for role in household_approve_data.get("roles", [])
+                }
+                household_data["roles"] = [
+                    {**role, "approve_status": approve_lookup.get(role["individual_id"], False)}
+                    for role in household_data.get("roles", [])
+                ]
             elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
             else:

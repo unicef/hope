@@ -1,9 +1,9 @@
-import hashlib
-import logging
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
+import hashlib
+import logging
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
@@ -153,7 +153,6 @@ class PaymentPlan(
             "currency",
             "dispersion_start_date",
             "dispersion_end_date",
-            "name",
             "start_date",
             "end_date",
             "background_action_status",
@@ -721,7 +720,8 @@ class PaymentPlan(
             self.unsuccessful_payments()
             .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
             .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan
+                # within the same cycle (contains excluded from other follow-ups)
                 household_id__in=Payment.objects.filter(
                     is_follow_up=True,
                     parent__source_payment_plan=self,
@@ -1940,7 +1940,8 @@ class Payment(
         max_length=64,
         blank=True,
         null=True,
-        help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector",
+        help_text="Use this field for reconciliation data when funds are collected by someone other than "
+        "the designated collector or the alternate collector",
     )
     additional_document_type = models.CharField(
         max_length=128,
@@ -2314,7 +2315,8 @@ class PaymentDataCollector(Account):
         if not dm_config:
             return True
 
-        for field in dm_config.required_fields:
+        for field_value in dm_config.required_fields:
+            field = field_value
             if fsp_name_mapping := fsp_names_mappings.get(field):
                 field = fsp_name_mapping.hope_name
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)

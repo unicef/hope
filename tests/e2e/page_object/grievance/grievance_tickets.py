@@ -1,156 +1,157 @@
 from time import sleep
 
-from e2e.page_object.base_components import BaseComponents
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class GrievanceTickets(BaseComponents):
     # Locators
-    titlePage = 'h5[data-cy="page-header-title"]'
-    searchFilter = 'div[data-cy="filters-search"]'
-    documentTypeFilter = 'div[data-cy="filters-document-type"]'
-    ticketId = 'li[data-value="ticket_id"]'
-    householdId = 'li[data-value="ticket_hh_id"]'
-    familyName = 'li[data-value="full_name"]'
-    tabSystemGenerated = 'button[data-cy="tab-SYSTEM-GENERATED"]'
-    tabUserGenerated = 'button[data-cy="tab-USER-GENERATED"]'
-    buttonCloseTicket = 'button[data-cy="button-close-ticket"]'
-    buttonConfirm = 'button[data-cy="button-confirm"]'
-    creationDateFromFilter = 'div[data-cy="filters-creation-date-from"]'
-    creationDateToFilter = 'div[data-cy="filters-creation-date-to"]'
-    statusFilter = 'div[data-cy="filters-status"]'
-    fspFilter = 'div[data-cy="filters-fsp"]'
-    categoryFilter = 'div[data-cy="filters-category"]'
-    assigneeFilter = 'div[data-cy="filters-assignee"]'
-    adminLevelFilter = 'div[data-cy="filters-admin-level-2"]'
-    registrationDataImportFilter = 'div[data-cy="filters-registration-data-import"]'
-    preferredLanguageFilter = 'div[data-cy="filters-preferred-language"]'
-    priorityFilter = 'div[data-cy="filters-priority'
-    urgencyFilter = 'div[data-cy="filters-urgency'
-    activeTicketsFilter = 'div[data-cy="filters-active-tickets'
-    similarityScoreFromFilter = 'div[data-cy="filters-similarity-score-from'
-    similarityScoreToFilter = 'div[data-cy="filters-similarity-score-to'
-    buttonApply = 'button[data-cy="button-filters-apply"]'
-    buttonClear = 'button[data-cy="button-filters-clear"]'
-    buttonNewTicket = 'a[data-cy="button-new-ticket"]'
-    tabTitle = 'h6[data-cy="table-title"]'
-    tabTicketID = 'th[data-cy="ticket-id"]'
-    tabStatus = 'th[data-cy="status"]'
-    tabAssignedTo = 'th[data-cy="assignedTo"]'
-    tabCategory = 'th[data-cy="category"]'
-    tabIssueType = 'th[data-cy="issueType"]'
-    tabHouseholdID = 'th[data-cy="householdId"]'
-    tabPriority = 'th[data-cy="priority"]'
-    tabUrgency = 'th[data-cy="urgency"]'
-    tabLinkedTickets = 'th[data-cy="linkedTickets"]'
-    tabCreationData = 'th[data-cy="createdAt"]'
-    tabLastModifiedDate = 'th[data-cy="userModified"]'
-    tabTotalDays = 'th[data-cy="totalDays"]'
-    ticketListRow = 'tr[role="checkbox"]'
-    statusOptions = 'li[role="option"]'
-    filtersCreatedBy = 'div[data-cy="filters-created-by-input"]'
-    selectAll = 'span[data-cy="checkbox-select-all"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    buttonAssign = 'button[data-cy="button-Assign"]'
-    buttonSetPriority = 'button[data-cy="button-Set priority"]'
-    buttonSetUrgency = 'button[data-cy="button-Set Urgency"]'
-    buttonAddNote = 'button[data-cy="button-add note"]'
-    selectedTickets = 'span[data-cy="selected-tickets"]'
-    buttonCancel = 'button[data-cy="button-cancel"]'
-    buttonSave = 'button[data-cy="button-save"]'
+    title_page = 'h5[data-cy="page-header-title"]'
+    search_filter = 'div[data-cy="filters-search"]'
+    document_type_filter = 'div[data-cy="filters-document-type"]'
+    ticket_id = 'li[data-value="ticket_id"]'
+    household_id = 'li[data-value="ticket_hh_id"]'
+    family_name = 'li[data-value="full_name"]'
+    tab_system_generated = 'button[data-cy="tab-SYSTEM-GENERATED"]'
+    tab_user_generated = 'button[data-cy="tab-USER-GENERATED"]'
+    button_close_ticket = 'button[data-cy="button-close-ticket"]'
+    button_confirm = 'button[data-cy="button-confirm"]'
+    creation_date_from_filter = 'div[data-cy="filters-creation-date-from"]'
+    creation_date_to_filter = 'div[data-cy="filters-creation-date-to"]'
+    status_filter = 'div[data-cy="filters-status"]'
+    fsp_filter = 'div[data-cy="filters-fsp"]'
+    category_filter = 'div[data-cy="filters-category"]'
+    assignee_filter = 'div[data-cy="filters-assignee"]'
+    admin_level_filter = 'div[data-cy="filters-admin-level-2"]'
+    registration_data_import_filter = 'div[data-cy="filters-registration-data-import"]'
+    preferred_language_filter = 'div[data-cy="filters-preferred-language"]'
+    priority_filter = 'div[data-cy="filters-priority'
+    urgency_filter = 'div[data-cy="filters-urgency'
+    active_tickets_filter = 'div[data-cy="filters-active-tickets'
+    similarity_score_from_filter = 'div[data-cy="filters-similarity-score-from'
+    similarity_score_to_filter = 'div[data-cy="filters-similarity-score-to'
+    button_apply = 'button[data-cy="button-filters-apply"]'
+    button_clear = 'button[data-cy="button-filters-clear"]'
+    button_new_ticket = 'a[data-cy="button-new-ticket"]'
+    tab_title = 'h6[data-cy="table-title"]'
+    tab_ticket_id = 'th[data-cy="ticket-id"]'
+    tab_status = 'th[data-cy="status"]'
+    tab_assigned_to = 'th[data-cy="assignedTo"]'
+    tab_category = 'th[data-cy="category"]'
+    tab_issue_type = 'th[data-cy="issueType"]'
+    tab_household_id = 'th[data-cy="householdId"]'
+    tab_priority = 'th[data-cy="priority"]'
+    tab_urgency = 'th[data-cy="urgency"]'
+    tab_linked_tickets = 'th[data-cy="linkedTickets"]'
+    tab_creation_data = 'th[data-cy="createdAt"]'
+    tab_last_modified_date = 'th[data-cy="userModified"]'
+    tab_total_days = 'th[data-cy="totalDays"]'
+    ticket_list_row = 'tr[role="checkbox"]'
+    status_options = 'li[role="option"]'
+    filters_created_by = 'div[data-cy="filters-created-by-input"]'
+    select_all = 'span[data-cy="checkbox-select-all"]'
+    table_label = 'span[data-cy="table-label"]'
+    button_assign = 'button[data-cy="button-Assign"]'
+    button_set_priority = 'button[data-cy="button-Set priority"]'
+    button_set_urgency = 'button[data-cy="button-Set Urgency"]'
+    button_add_note = 'button[data-cy="button-add note"]'
+    selected_tickets = 'span[data-cy="selected-tickets"]'
+    button_cancel = 'button[data-cy="button-cancel"]'
+    button_save = 'button[data-cy="button-save"]'
     dropdown = 'tbody[data-cy="dropdown"]'
-    statusContainer = '[data-cy="status-container"]'
-    dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
-    daysFilterPopup = (
+    status_container = '[data-cy="status-container"]'
+    date_title_filter_popup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
+    days_filter_popup = (
         'div[class="MuiPickersSlideTransition-transitionContainer MuiPickersCalendar-transitionContainer"]'
     )
 
     # Texts
-    textTitle = "Grievance Tickets"
-    textTabTitle = "Grievance Tickets List"
+    text_title = "Grievance Tickets"
+    text_tab_title = "Grievance Tickets List"
 
     # Elements
-    def getDropdown(self) -> WebElement:
+    def get_dropdown(self) -> WebElement:
         return self.wait_for(self.dropdown)
 
-    def getStatusContainer(self) -> [WebElement]:
-        self.wait_for(self.statusContainer)
-        return self.get_elements(self.statusContainer)
+    def get_status_container(self) -> [WebElement]:
+        self.wait_for(self.status_container)
+        return self.get_elements(self.status_container)
 
-    def getButtonCancel(self) -> WebElement:
-        return self.wait_for(self.buttonCancel)
+    def get_button_cancel(self) -> WebElement:
+        return self.wait_for(self.button_cancel)
 
-    def getButtonSave(self) -> WebElement:
-        return self.wait_for(self.buttonSave)
+    def get_button_save(self) -> WebElement:
+        return self.wait_for(self.button_save)
 
-    def getSelectedTickets(self) -> WebElement:
-        return self.wait_for(self.selectedTickets)
+    def get_selected_tickets(self) -> WebElement:
+        return self.wait_for(self.selected_tickets)
 
-    def getGrievanceTitle(self) -> WebElement:
-        return self.wait_for(self.titlePage)
+    def get_grievance_title(self) -> WebElement:
+        return self.wait_for(self.title_page)
 
-    def getTabTitle(self) -> WebElement:
-        return self.wait_for(self.tabTitle)
+    def get_tab_title(self) -> WebElement:
+        return self.wait_for(self.tab_title)
 
-    def getSearchFilter(self) -> WebElement:
-        return self.wait_for(self.searchFilter)
+    def get_search_filter(self) -> WebElement:
+        return self.wait_for(self.search_filter)
 
-    def getTicketTypeFilter(self) -> WebElement:
-        return self.wait_for(self.documentTypeFilter)
+    def get_ticket_type_filter(self) -> WebElement:
+        return self.wait_for(self.document_type_filter)
 
-    def getCreationDateFromFilter(self) -> WebElement:
-        return self.wait_for(self.creationDateFromFilter)
+    def get_creation_date_from_filter(self) -> WebElement:
+        return self.wait_for(self.creation_date_from_filter)
 
-    def getCreationDateToFilter(self) -> WebElement:
-        return self.wait_for(self.creationDateToFilter)
+    def get_creation_date_to_filter(self) -> WebElement:
+        return self.wait_for(self.creation_date_to_filter)
 
-    def getStatusFilter(self) -> WebElement:
-        return self.wait_for(self.statusFilter)
+    def get_status_filter(self) -> WebElement:
+        return self.wait_for(self.status_filter)
 
-    def getFspFilter(self) -> WebElement:
-        return self.wait_for(self.fspFilter)
+    def get_fsp_filter(self) -> WebElement:
+        return self.wait_for(self.fsp_filter)
 
-    def getCategoryFilter(self) -> WebElement:
-        return self.wait_for(self.categoryFilter)
+    def get_category_filter(self) -> WebElement:
+        return self.wait_for(self.category_filter)
 
-    def getAssigneeFilter(self) -> WebElement:
-        return self.wait_for(self.assigneeFilter)
+    def get_assignee_filter(self) -> WebElement:
+        return self.wait_for(self.assignee_filter)
 
-    def getAdminLevelFilter(self) -> WebElement:
-        return self.wait_for(self.adminLevelFilter)
+    def get_admin_level_filter(self) -> WebElement:
+        return self.wait_for(self.admin_level_filter)
 
-    def getRegistrationDataImportFilter(self) -> WebElement:
-        return self.wait_for(self.registrationDataImportFilter)
+    def get_registration_data_import_filter(self) -> WebElement:
+        return self.wait_for(self.registration_data_import_filter)
 
-    def getPreferredLanguageFilter(self) -> WebElement:
-        return self.wait_for(self.preferredLanguageFilter)
+    def get_preferred_language_filter(self) -> WebElement:
+        return self.wait_for(self.preferred_language_filter)
 
-    def getPriorityFilter(self) -> WebElement:
-        return self.wait_for(self.priorityFilter)
+    def get_priority_filter(self) -> WebElement:
+        return self.wait_for(self.priority_filter)
 
-    def getUrgencyFilter(self) -> WebElement:
-        return self.wait_for(self.urgencyFilter)
+    def get_urgency_filter(self) -> WebElement:
+        return self.wait_for(self.urgency_filter)
 
-    def getActiveTicketsFilter(self) -> WebElement:
-        return self.wait_for(self.activeTicketsFilter)
+    def get_active_tickets_filter(self) -> WebElement:
+        return self.wait_for(self.active_tickets_filter)
 
-    def getFiltersCreatedBy(self) -> WebElement:
-        return self.wait_for(self.filtersCreatedBy)
+    def get_filters_created_by(self) -> WebElement:
+        return self.wait_for(self.filters_created_by)
 
-    def getSimilarityScoreFromFilter(self) -> WebElement:
-        return self.wait_for(self.similarityScoreFromFilter)
+    def get_similarity_score_from_filter(self) -> WebElement:
+        return self.wait_for(self.similarity_score_from_filter)
 
-    def getSimilarityScoreToFilter(self) -> WebElement:
-        return self.wait_for(self.similarityScoreToFilter)
+    def get_similarity_score_to_filter(self) -> WebElement:
+        return self.wait_for(self.similarity_score_to_filter)
 
-    def getButtonApply(self) -> WebElement:
-        return self.wait_for(self.buttonApply)
+    def get_button_apply(self) -> WebElement:
+        return self.wait_for(self.button_apply)
 
-    def getButtonClear(self) -> WebElement:
-        return self.wait_for(self.buttonClear)
+    def get_button_clear(self) -> WebElement:
+        return self.wait_for(self.button_clear)
 
-    def getButtonNewTicket(self) -> WebElement:
+    def get_button_new_ticket(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:
         self.driver.execute_script(
             """
@@ -159,103 +160,103 @@ class GrievanceTickets(BaseComponents):
             """
         )
         sleep(2)
-        return self.get(self.buttonNewTicket)
+        return self.get(self.button_new_ticket)
 
-    def getTicketID(self) -> WebElement:
-        return self.wait_for(self.ticketId)
+    def get_ticket_id(self) -> WebElement:
+        return self.wait_for(self.ticket_id)
 
-    def getHouseholdID(self) -> WebElement:
-        return self.wait_for(self.householdId)
+    def get_household_id(self) -> WebElement:
+        return self.wait_for(self.household_id)
 
-    def getFamilyName(self) -> WebElement:
-        return self.wait_for(self.familyName)
+    def get_family_name(self) -> WebElement:
+        return self.wait_for(self.family_name)
 
-    def getTabTicketID(self) -> WebElement:
-        return self.wait_for(self.tabTicketID)
+    def get_tab_ticket_id(self) -> WebElement:
+        return self.wait_for(self.tab_ticket_id)
 
-    def getTabStatus(self) -> WebElement:
-        return self.wait_for(self.tabStatus)
+    def get_tab_status(self) -> WebElement:
+        return self.wait_for(self.tab_status)
 
-    def getTabAssignedTo(self) -> WebElement:
-        return self.wait_for(self.tabAssignedTo)
+    def get_tab_assigned_to(self) -> WebElement:
+        return self.wait_for(self.tab_assigned_to)
 
-    def getTabCategory(self) -> WebElement:
-        return self.wait_for(self.tabCategory)
+    def get_tab_category(self) -> WebElement:
+        return self.wait_for(self.tab_category)
 
-    def getTabIssueType(self) -> WebElement:
-        return self.wait_for(self.tabIssueType)
+    def get_tab_issue_type(self) -> WebElement:
+        return self.wait_for(self.tab_issue_type)
 
-    def getTabHouseholdID(self) -> WebElement:
-        return self.wait_for(self.tabHouseholdID)
+    def get_tab_household_id(self) -> WebElement:
+        return self.wait_for(self.tab_household_id)
 
-    def getTabPriority(self) -> WebElement:
-        return self.wait_for(self.tabPriority)
+    def get_tab_priority(self) -> WebElement:
+        return self.wait_for(self.tab_priority)
 
-    def getTabUrgency(self) -> WebElement:
-        return self.wait_for(self.tabUrgency)
+    def get_tab_urgency(self) -> WebElement:
+        return self.wait_for(self.tab_urgency)
 
-    def getTabLinkedTickets(self) -> WebElement:
-        return self.wait_for(self.tabLinkedTickets)
+    def get_tab_linked_tickets(self) -> WebElement:
+        return self.wait_for(self.tab_linked_tickets)
 
-    def getTabCreationData(self) -> WebElement:
-        return self.wait_for(self.tabCreationData)
+    def get_tab_creation_data(self) -> WebElement:
+        return self.wait_for(self.tab_creation_data)
 
-    def getTabLastModifiedDate(self) -> WebElement:
-        return self.wait_for(self.tabLastModifiedDate)
+    def get_tab_last_modified_date(self) -> WebElement:
+        return self.wait_for(self.tab_last_modified_date)
 
-    def getTabTotalDays(self) -> WebElement:
-        return self.wait_for(self.tabTotalDays)
+    def get_tab_total_days(self) -> WebElement:
+        return self.wait_for(self.tab_total_days)
 
-    def getTabSystemGenerated(self) -> WebElement:
-        return self.wait_for(self.tabSystemGenerated)
+    def get_tab_system_generated(self) -> WebElement:
+        return self.wait_for(self.tab_system_generated)
 
-    def getTabUserGenerated(self) -> WebElement:
-        return self.wait_for(self.tabUserGenerated)
+    def get_tab_user_generated(self) -> WebElement:
+        return self.wait_for(self.tab_user_generated)
 
-    def getTicketListRow(self) -> [WebElement]:
-        self.wait_for(self.ticketListRow)
-        return self.get_elements(self.ticketListRow)
+    def get_ticket_list_row(self) -> [WebElement]:
+        self.wait_for(self.ticket_list_row)
+        return self.get_elements(self.ticket_list_row)
 
-    def getTableLabel(self) -> [WebElement]:
-        return self.get_elements(self.tableLabel)
+    def get_table_label(self) -> [WebElement]:
+        return self.get_elements(self.table_label)
 
-    def getDateTitleFilterPopup(self) -> WebElement:
-        return self.wait_for(self.dateTitleFilterPopup)
+    def get_date_title_filter_popup(self) -> WebElement:
+        return self.wait_for(self.date_title_filter_popup)
 
-    def getDaysFilterPopup(self) -> WebElement:
-        return self.wait_for(self.daysFilterPopup)
+    def get_days_filter_popup(self) -> WebElement:
+        return self.wait_for(self.days_filter_popup)
 
-    def getOptions(self) -> WebElement:
-        return self.wait_for(self.statusOptions)
+    def get_options(self) -> WebElement:
+        return self.wait_for(self.status_options)
 
-    def getSelectAll(self) -> WebElement:
-        return self.wait_for(self.selectAll)
+    def get_select_all(self) -> WebElement:
+        return self.wait_for(self.select_all)
 
-    def getButtonAssign(self) -> WebElement:
-        return self.wait_for(self.buttonAssign)
+    def get_button_assign(self) -> WebElement:
+        return self.wait_for(self.button_assign)
 
-    def getButtonSetPriority(self) -> WebElement:
-        return self.wait_for(self.buttonSetPriority)
+    def get_button_set_priority(self) -> WebElement:
+        return self.wait_for(self.button_set_priority)
 
-    def getButtonSetUrgency(self) -> WebElement:
-        return self.wait_for(self.buttonSetUrgency)
+    def get_button_set_urgency(self) -> WebElement:
+        return self.wait_for(self.button_set_urgency)
 
-    def getButtonAddNote(self) -> WebElement:
-        return self.wait_for(self.buttonAddNote)
+    def get_button_add_note(self) -> WebElement:
+        return self.wait_for(self.button_add_note)
 
-    def getButtonCloseTicket(self) -> WebElement:
-        return self.wait_for(self.buttonCloseTicket)
+    def get_button_close_ticket(self) -> WebElement:
+        return self.wait_for(self.button_close_ticket)
 
-    def getButtonConfirm(self) -> WebElement:
-        return self.wait_for(self.buttonConfirm)
+    def get_button_confirm(self) -> WebElement:
+        return self.wait_for(self.button_confirm)
 
-    def checkIfTextExistInArow(self, row_index: int, text: str, max_attempts: int = 5) -> None:
+    def check_if_text_exist_in_a_row(self, row_index: int, text: str, max_attempts: int = 5) -> None:
         attempt = 0
         exception = None
         while attempt < max_attempts:
             try:
-                self.waitForRows()
-                self.waitForRowWithText(row_index, text)
+                self.wait_for_rows()
+                self.wait_for_row_with_text(row_index, text)
                 return
             except StaleElementReferenceException as e:
                 attempt += 1

@@ -31,7 +31,6 @@ export type AddIndividualData = {
     commsDisability?: string;
     whoAnswersPhone?: string;
     whoAnswersAltPhone?: string;
-    role: string;
     businessArea?: string;
     documents?: Array<IndividualDocument>;
     identities?: Array<IndividualIdentityGT>;

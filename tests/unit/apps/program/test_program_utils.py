@@ -3,9 +3,10 @@ import json
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 from django.core.cache import cache
 from django.test import TestCase
+import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -17,7 +18,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.models import (
     ROLE_ALTERNATE,
@@ -290,20 +290,20 @@ class TestEnrolHouseholdToProgram(TestCase):
         assert hh_count + 1 == Household.objects.count()
         assert ind_count + 2 == Individual.objects.count()
 
-    @patch("hope.apps.program.utils.randint")
-    def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
-        mock_randint.side_effect = [1111, 5555]
+    @patch("hope.apps.program.utils.randbelow")
+    def test_generate_rdi_unique_name_when_conflicts(self, mock_randbelow: Any) -> None:
+        mock_randbelow.side_effect = [1111, 5555]
         RegistrationDataImportFactory(
             business_area=self.program1.business_area,
             name="RDI for enroll households to Programme: Program 1",
         )
         result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1 (1111)"
+        expected_name = "RDI for enroll households to Programme: Program 1 (2111)"
         assert result == expected_name
 
-    @patch("hope.apps.program.utils.randint")
-    def test_generate_rdi_unique_name_no_conflicts(self, mock_randint: Any) -> None:
-        mock_randint.return_value = 3333
+    @patch("hope.apps.program.utils.randbelow")
+    def test_generate_rdi_unique_name_no_conflicts(self, mock_randbelow: Any) -> None:
+        mock_randbelow.return_value = 3333
         result = generate_rdi_unique_name(self.program1)
         expected_name = "RDI for enroll households to Programme: Program 1"
         assert result == expected_name

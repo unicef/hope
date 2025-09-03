@@ -162,7 +162,7 @@ def get_individual_snapshot(individual: Individual, payment: Payment | None = No
 
 def get_needs_adjudication_tickets_count(individual: Individual) -> int:
     golden_records_count = TicketNeedsAdjudicationDetails.objects.filter(golden_records_individual=individual).count()
-    PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+    PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
     possible_duplicates_count = (
         PossibleDuplicateThrough.objects.filter(individual=individual)
         .distinct("ticketneedsadjudicationdetails")

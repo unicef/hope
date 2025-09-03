@@ -180,11 +180,11 @@ def filter_based_on_partner_areas_2(
         if not programs_for_business_area:
             return queryset.model.objects.none()
 
-        for program_id in programs_for_business_area:
-            program_q = Q(**{lookup_id: id_container(program_id)})
+        for prog_id in programs_for_business_area:
+            program_q = Q(**{lookup_id: id_container(prog_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
             # apply admin area limits if partner has restrictions
-            area_limits = user.partner.get_area_limits_for_program(program_id)
+            area_limits = user.partner.get_area_limits_for_program(prog_id)
             areas_query = Q(admin2__in=area_limits) if area_limits.exists() else Q()
 
             filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
@@ -240,7 +240,8 @@ def validate_all_individuals_before_close_needs_adjudication(
 
     if not distinct_qs and (not withdrawn_in_all_possible_duplicates or not duplicates_qs):
         raise ValidationError(
-            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is "
+            "withdrawn or duplicate"
         )
 
     for individual in all_possible_duplicates:

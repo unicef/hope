@@ -23,14 +23,14 @@ class LogEntryFilter(FilterSet):
     def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
         values = value.split(" ")
         q_obj = Q()
-        for value in values:
-            if value.lower() == "system":
+        for element in values:
+            if element.lower() == "system":
                 q_obj |= Q(user__isnull=True)
-            q_obj |= Q(content_type__model__startswith=value)
-            q_obj |= Q(object_id__startswith=value)
-            q_obj |= Q(action__startswith=value)
-            q_obj |= Q(object_repr__startswith=value)
-            q_obj |= Q(timestamp__startswith=value)
+            q_obj |= Q(content_type__model__startswith=element)
+            q_obj |= Q(object_id__startswith=element)
+            q_obj |= Q(action__startswith=element)
+            q_obj |= Q(object_repr__startswith=element)
+            q_obj |= Q(timestamp__startswith=element)
         return qs.filter(q_obj)
 
     def filter_by_user_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":

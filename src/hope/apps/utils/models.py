@@ -1,11 +1,11 @@
 import base64
+from functools import cached_property
 import hashlib
 import json
 import logging
 import sys
-import warnings
-from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
+import warnings
 
 import celery
 from celery import states
@@ -383,7 +383,7 @@ class SignatureMixin(models.Model):
 
     def update_signature_hash(self) -> None:
         if hasattr(self, "signature_fields") and isinstance(self.signature_fields, list | tuple):
-            sha1 = hashlib.sha1()
+            sha1 = hashlib.sha1()  # noqa
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
 
@@ -511,7 +511,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         return None
 
     @classproperty
-    def task_handler(cls) -> Callable[[Any], Any]:
+    def task_handler(cls) -> Callable[[Any], Any]:  # noqa
         import importlib
 
         module_path, func_name = cls.celery_task_name.rsplit(".", 1)

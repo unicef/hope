@@ -2,6 +2,8 @@ import os
 from time import sleep
 
 import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
@@ -14,8 +16,6 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from selenium.webdriver.common.by import By
-
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.household.models import Individual
 from hope.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
@@ -129,7 +129,7 @@ class TestPeriodicDataTemplates:
         clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
+        page_individuals: Individuals,
         individual: Individual,
         download_path: str,
     ) -> None:
@@ -149,24 +149,26 @@ class TestPeriodicDataTemplates:
                 }
             ],
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
-        status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
+        status = page_individuals.get_template_status(periodic_data_update_template.pk).text
         assert status == "NOT SCHEDULED"
-        pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
+        page_individuals.get_export_btn(periodic_data_update_template.pk).click()
         for _ in range(10):
-            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            status = page_individuals.get_template_status(periodic_data_update_template.pk).text
             if status == "EXPORTED":
                 break
             sleep(1)
         else:
             assert status == "EXPORTED"
-        pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
+        page_individuals.get_download_btn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (
-            pageIndividuals.check_file_exists(os.path.join(download_path, periodic_data_update_template.file.file.name))
+            page_individuals.check_file_exists(
+                os.path.join(download_path, periodic_data_update_template.file.file.name)
+            )
             is True
         )
 
@@ -175,8 +177,8 @@ class TestPeriodicDataTemplates:
         self,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+        page_individuals: Individuals,
+        page_periodic_data_update_templates: PeriodicDatUpdateTemplates,
     ) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
             program=program,
@@ -196,35 +198,35 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
 
-        pagePeriodicDataUpdateTemplates.getPduTemplatesBtn().click()
-        assert str(index) in pagePeriodicDataUpdateTemplates.getTemplateId(index).text
+        page_periodic_data_update_templates.get_pdu_templates_btn().click()
+        assert str(index) in page_periodic_data_update_templates.get_template_id(index).text
         assert (
             str(periodic_data_update_template.number_of_records)
-            in pagePeriodicDataUpdateTemplates.getTemplateRecords(index).text
+            in page_periodic_data_update_templates.get_template_records(index).text
         )
         assert (
             f"{periodic_data_update_template.created_at:%-d %b %Y}"
-            in pagePeriodicDataUpdateTemplates.getTemplateCreatedAt(index).text
+            in page_periodic_data_update_templates.get_template_created_at(index).text
         )
         assert (
             periodic_data_update_template.created_by.get_full_name()
-            in pagePeriodicDataUpdateTemplates.getTemplateCreatedBy(index).text
+            in page_periodic_data_update_templates.get_template_created_by(index).text
         )
 
-        assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
+        assert "EXPORTED" in page_periodic_data_update_templates.get_template_status(index).text
 
     @pytest.mark.night
     def test_periodic_data_template_details(
         self,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+        page_individuals: Individuals,
+        page_periodic_data_update_templates: PeriodicDatUpdateTemplates,
         individual: Individual,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
@@ -247,23 +249,23 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
 
-        pagePeriodicDataUpdateTemplates.getPduTemplatesBtn().click()
+        page_periodic_data_update_templates.get_pdu_templates_btn().click()
 
-        btn = pagePeriodicDataUpdateTemplates.getTemplateDetailsBtn(index)
+        btn = page_periodic_data_update_templates.get_template_details_btn(index)
         btn.find_element(By.TAG_NAME, "button").click()
-        pagePeriodicDataUpdateTemplates.getDetailModal()
+        page_periodic_data_update_templates.get_detail_modal()
 
-        assert string_attribute.label["English(EN)"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
-        assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
-        assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateTemplates.getTemplateRoundName(0).text
+        assert string_attribute.label["English(EN)"] in page_periodic_data_update_templates.get_template_field(0).text
+        assert str(rounds_data[0]["round"]) in page_periodic_data_update_templates.get_template_round_number(0).text
+        assert rounds_data[0]["round_name"] in page_periodic_data_update_templates.get_template_round_name(0).text
         assert (
             str(rounds_data[0]["number_of_records"])
-            in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
+            in page_periodic_data_update_templates.get_template_number_of_individuals(0).text
         )
 
     @pytest.mark.night
@@ -271,46 +273,48 @@ class TestPeriodicDataTemplates:
         self,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
-        pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
+        page_individuals: Individuals,
+        page_periodic_data_update_templates: PeriodicDatUpdateTemplates,
+        page_periodic_data_update_templates_details: PeriodicDatUpdateTemplatesDetails,
         individual: Individual,
         download_path: str,
         clear_downloaded_files: None,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
 
-        pagePeriodicDataUpdateTemplates.getNewTemplateButton().click()
-        pagePeriodicDataUpdateTemplatesDetails.getFiltersRegistrationDataImport().click()
+        page_periodic_data_update_templates.get_new_template_button().click()
+        page_periodic_data_update_templates_details.get_filters_registration_data_import().click()
 
-        pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name)
-        pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
-        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
-        pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
-        pagePeriodicDataUpdateTemplates.getNewTemplateButton()  # wait for the page to load
+        page_periodic_data_update_templates_details.select_listbox_element(individual.registration_data_import.name)
+        page_periodic_data_update_templates_details.get_submit_button().click()
+        page_periodic_data_update_templates_details.get_checkbox(string_attribute.name).click()
+        page_periodic_data_update_templates_details.get_submit_button().click()
+        page_periodic_data_update_templates.get_new_template_button()  # wait for the page to load
         assert PeriodicDataUpdateTemplate.objects.count() == 1
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.first()
         assert (
             str(periodic_data_update_template.id)
-            in pagePeriodicDataUpdateTemplates.getTemplateId(periodic_data_update_template.id).text
+            in page_periodic_data_update_templates.get_template_id(periodic_data_update_template.id).text
         )
 
         for _ in range(10):
-            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            status = page_individuals.get_template_status(periodic_data_update_template.pk).text
             if status == "EXPORTED":
                 break
             sleep(1)
         else:
             assert status == "EXPORTED"
 
-        pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
+        page_individuals.get_download_btn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (
-            pageIndividuals.check_file_exists(os.path.join(download_path, periodic_data_update_template.file.file.name))
+            page_individuals.check_file_exists(
+                os.path.join(download_path, periodic_data_update_template.file.file.name)
+            )
             is True
         )

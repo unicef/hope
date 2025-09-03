@@ -1,5 +1,5 @@
-import logging
 from argparse import ArgumentParser
+import logging
 from typing import Any
 
 from django.conf import settings

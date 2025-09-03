@@ -1,16 +1,16 @@
-import uuid
 from io import BytesIO
 from pathlib import Path
+import uuid
 
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.core.models import BusinessArea
 from hope.apps.registration_data.models import ImportData, KoboImportedSubmission
 from hope.apps.registration_data.services.mark_submissions import MarkSubmissions
@@ -22,7 +22,7 @@ class TestMarkSubmissions(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         create_afghanistan()
 
         cls.business_area = BusinessArea.objects.first()

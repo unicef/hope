@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import List
 
-import pytest
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
@@ -17,8 +19,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
-
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.household.models import HOST, SEEING, Individual
 from hope.apps.payment.models import Payment
@@ -55,7 +55,7 @@ def add_people(social_worker_program: Program) -> List:
         )
         individual = individuals[0]
         create_individual_document(individual)
-    yield [individual, household]
+    return [individual, household]
 
 
 @pytest.fixture
@@ -122,139 +122,143 @@ def get_social_program_with_dct_type_and_name(
 
 @pytest.mark.usefixtures("login")
 class TestSmokePeople:
-    def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program")
-        pagePeople.getNavPeople().click()
-        assert "People" in pagePeople.getTableTitle().text
-        assert "Individual ID" in pagePeople.getIndividualId().text
-        assert "Individual" in pagePeople.getIndividualName().text
-        assert "Type" in pagePeople.getIndividualAge().text
-        assert "Gender" in pagePeople.getIndividualSex().text
-        assert "Administrative Level 2" in pagePeople.getIndividualLocation().text
-        assert "Rows per page: 10 0–0 of 0" in pagePeople.getTablePagination().text.replace("\n", " ")
+    def test_smoke_page_people(self, social_worker_program: Program, page_people: People) -> None:
+        page_people.select_global_program_filter("Worker Program")
+        page_people.get_nav_people().click()
+        assert "People" in page_people.get_table_title().text
+        assert "Individual ID" in page_people.get_individual_id().text
+        assert "Individual" in page_people.get_individual_name().text
+        assert "Type" in page_people.get_individual_age().text
+        assert "Gender" in page_people.get_individual_sex().text
+        assert "Administrative Level 2" in page_people.get_individual_location().text
+        assert "Rows per page: 10 0–0 of 0" in page_people.get_table_pagination().text.replace("\n", " ")
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_page_details_people(
         self,
         add_people: None,
-        pagePeople: People,
-        pagePeopleDetails: PeopleDetails,
+        page_people: People,
+        page_people_details: PeopleDetails,
         filters: Filters,
     ) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program")
-        pagePeople.getNavPeople().click()
-        assert "People" in pagePeople.getTableTitle().text
-        unicef_id = pagePeople.getIndividualTableRow(0).text.split(" ")[0]
-        pagePeople.getIndividualTableRow(0).click()
+        page_people.select_global_program_filter("Worker Program")
+        page_people.get_nav_people().click()
+        assert "People" in page_people.get_table_title().text
+        unicef_id = page_people.get_individual_table_row(0).text.split(" ")[0]
+        page_people.get_individual_table_row(0).click()
         individual = Individual.objects.filter(unicef_id=unicef_id).first()
-        assert f"Individual ID: {individual.unicef_id}" in pagePeopleDetails.getPageHeaderTitle().text
-        assert individual.full_name in pagePeopleDetails.getLabelFullName().text
-        assert individual.given_name in pagePeopleDetails.getLabelGivenName().text
-        assert individual.middle_name if individual.middle_name else "-" in pagePeopleDetails.getLabelMiddleName().text
-        assert individual.family_name in pagePeopleDetails.getLabelFamilyName().text
-        assert individual.sex.lower().replace("_", " ") in pagePeopleDetails.getLabelGender().text.lower()
-        assert pagePeopleDetails.getLabelAge().text
-        assert individual.birth_date.strftime("%-d %b %Y") in pagePeopleDetails.getLabelDateOfBirth().text
-        assert pagePeopleDetails.getLabelEstimatedDateOfBirth().text
-        assert individual.marital_status.lower() in pagePeopleDetails.getLabelMaritalStatus().text.lower()
-        assert "Not provided" in pagePeopleDetails.getLabelWorkStatus().text
-        assert pagePeopleDetails.getLabelPregnant().text
-        assert pagePeopleDetails.getLabelRole().text
+        assert f"Individual ID: {individual.unicef_id}" in page_people_details.get_page_header_title().text
+        assert individual.full_name in page_people_details.get_label_full_name().text
+        assert individual.given_name in page_people_details.get_label_given_name().text
+        assert (
+            individual.middle_name
+            if individual.middle_name
+            else "-" in page_people_details.get_label_middle_name().text
+        )
+        assert individual.family_name in page_people_details.get_label_family_name().text
+        assert individual.sex.lower().replace("_", " ") in page_people_details.get_label_gender().text.lower()
+        assert page_people_details.get_label_age().text
+        assert individual.birth_date.strftime("%-d %b %Y") in page_people_details.get_label_date_of_birth().text
+        assert page_people_details.get_label_estimated_date_of_birth().text
+        assert individual.marital_status.lower() in page_people_details.get_label_marital_status().text.lower()
+        assert "Not provided" in page_people_details.get_label_work_status().text
+        assert page_people_details.get_label_pregnant().text
+        assert page_people_details.get_label_role().text
         assert (
             individual.preferred_language
             if individual.preferred_language
-            else "-" in pagePeopleDetails.getLabelPreferredLanguage().text
+            else "-" in page_people_details.get_label_preferred_language().text
         )
-        assert "Non-displaced | Host" in pagePeopleDetails.getLabelResidenceStatus().text
+        assert "Non-displaced | Host" in page_people_details.get_label_residence_status().text
         assert (
             individual.household.country
             if individual.household.country
-            else "-" in pagePeopleDetails.getLabelCountry().text
+            else "-" in page_people_details.get_label_country().text
         )
         assert (
             individual.household.country_origin
             if individual.household.country_origin
-            else "-" in pagePeopleDetails.getLabelCountryOfOrigin().text
+            else "-" in page_people_details.get_label_country_of_origin().text
         )
         assert (
             individual.household.address
             if individual.household.address
-            else "-" in pagePeopleDetails.getLabelAddress().text
+            else "-" in page_people_details.get_label_address().text
         )
         assert (
             individual.household.village
             if individual.household.village
-            else "-" in pagePeopleDetails.getLabelVilage().text
+            else "-" in page_people_details.get_label_vilage().text
         )
         assert (
             individual.household.zip_code
             if individual.household.zip_code
-            else "-" in pagePeopleDetails.getLabelZipCode().text
+            else "-" in page_people_details.get_label_zip_code().text
         )
         assert (
             individual.household.admin1
             if individual.household.admin1
-            else "-" in pagePeopleDetails.getLabelAdministrativeLevel1().text
+            else "-" in page_people_details.get_label_administrative_level_1().text
         )
         assert (
             individual.household.admin2
             if individual.household.admin2
-            else "-" in pagePeopleDetails.getLabelAdministrativeLevel2().text
+            else "-" in page_people_details.get_label_administrative_level_2().text
         )
         assert (
             individual.household.admin3
             if individual.household.admin3
-            else "-" in pagePeopleDetails.getLabelAdministrativeLevel3().text
+            else "-" in page_people_details.get_label_administrative_level_3().text
         )
         assert (
             individual.household.admin4
             if individual.household.admin4
-            else "-" in pagePeopleDetails.getLabelAdministrativeLevel4().text
+            else "-" in page_people_details.get_label_administrative_level_4().text
         )
         assert (
             individual.household.geopoint
             if individual.household.geopoint
-            else "-" in pagePeopleDetails.getLabelGeolocation().text
+            else "-" in page_people_details.get_label_geolocation().text
         )
-        assert pagePeopleDetails.getLabelDataCollectingType().text
-        assert pagePeopleDetails.getLabelObservedDisabilities().text
-        assert pagePeopleDetails.getLabelSeeingDisabilitySeverity().text
-        assert pagePeopleDetails.getLabelHearingDisabilitySeverity().text
-        assert pagePeopleDetails.getLabelPhysicalDisabilitySeverity().text
-        assert pagePeopleDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
-        assert pagePeopleDetails.getLabelCommunicatingDisabilitySeverity().text
-        assert "Not Disabled" in pagePeopleDetails.getLabelDisability().text
-        assert pagePeopleDetails.getLabelIssued().text
-        assert pagePeopleDetails.getLabelEmail().text
-        assert pagePeopleDetails.getLabelPhoneNumber().text
-        assert pagePeopleDetails.getLabelAlternativePhoneNumber().text
-        assert pagePeopleDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text
-        assert pagePeopleDetails.getLabelLinkedGrievances().text
-        assert pagePeopleDetails.getLabelWalletName().text
-        assert pagePeopleDetails.getLabelBlockchainName().text
-        assert pagePeopleDetails.getLabelWalletAddress().text
-        assert "Rows per page: 5 0–0 of 0" in pagePeopleDetails.getTablePagination().text.replace("\n", " ")
-        assert pagePeopleDetails.getLabelSource().text
-        assert pagePeopleDetails.getLabelImportName().text
-        assert pagePeopleDetails.getLabelRegistrationDate().text
-        assert pagePeopleDetails.getLabelUserName().text
+        assert page_people_details.get_label_data_collecting_type().text
+        assert page_people_details.get_label_observed_disabilities().text
+        assert page_people_details.get_label_seeing_disability_severity().text
+        assert page_people_details.get_label_hearing_disability_severity().text
+        assert page_people_details.get_label_physical_disability_severity().text
+        assert page_people_details.get_label_remembering_or_concentrating_disability_severity().text
+        assert page_people_details.get_label_communicating_disability_severity().text
+        assert "Not Disabled" in page_people_details.get_label_disability().text
+        assert page_people_details.get_label_issued().text
+        assert page_people_details.get_label_email().text
+        assert page_people_details.get_label_phone_number().text
+        assert page_people_details.get_label_alternative_phone_number().text
+        assert page_people_details.get_label_date_of_last_screening_against_sanctions_list().text
+        assert page_people_details.get_label_linked_grievances().text
+        assert page_people_details.get_label_wallet_name().text
+        assert page_people_details.get_label_blockchain_name().text
+        assert page_people_details.get_label_wallet_address().text
+        assert "Rows per page: 5 0–0 of 0" in page_people_details.get_table_pagination().text.replace("\n", " ")
+        assert page_people_details.get_label_source().text
+        assert page_people_details.get_label_import_name().text
+        assert page_people_details.get_label_registration_date().text
+        assert page_people_details.get_label_user_name().text
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_people_happy_path(
         self,
         add_people_with_payment_record: Payment,
-        pagePeople: People,
-        pagePeopleDetails: PeopleDetails,
+        page_people: People,
+        page_people_details: PeopleDetails,
     ) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program")
-        pagePeople.getNavPeople().click()
-        pagePeople.getIndividualTableRow(0).click()
-        assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
-        pagePeopleDetails.waitForRows()
-        assert len(pagePeopleDetails.getRows()) == 1
-        assert "21.36" in pagePeopleDetails.getRows()[0].text
-        assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
-        assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text
+        page_people.select_global_program_filter("Worker Program")
+        page_people.get_nav_people().click()
+        page_people.get_individual_table_row(0).click()
+        assert "21.36" in page_people_details.get_label_total_cash_received().text
+        page_people_details.wait_for_rows()
+        assert len(page_people_details.get_rows()) == 1
+        assert "21.36" in page_people_details.get_rows()[0].text
+        assert "DELIVERED FULLY" in page_people_details.get_rows()[0].text
+        assert add_people_with_payment_record.unicef_id in page_people_details.get_rows()[0].text
 
 
 @pytest.mark.usefixtures("login")
@@ -270,65 +274,65 @@ class TestPeople:
     )
     def test_check_people_data_after_grievance_ticket_processed(
         self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        page_grievance_tickets: GrievanceTickets,
+        page_grievance_new_ticket: NewTicket,
+        page_grievance_details_page: GrievanceDetailsPage,
         add_people: List,
         test_data: dict,
-        pagePeople: People,
-        pagePeopleDetails: PeopleDetails,
+        page_people: People,
+        page_people_details: PeopleDetails,
     ) -> None:
-        pageGrievanceTickets.getNavGrievance().click()
-        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
-        pageGrievanceTickets.getButtonNewTicket().click()
-        pageGrievanceNewTicket.getSelectCategory().click()
-        pageGrievanceNewTicket.select_option_by_name(str(test_data["category"]))
-        pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
-        pageGrievanceNewTicket.select_listbox_element(str(test_data["type"]))
-        assert test_data["category"] in pageGrievanceNewTicket.getSelectCategory().text
-        assert test_data["type"] in pageGrievanceNewTicket.getIssueType().text
-        pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.getHouseholdTab()
-        pageGrievanceNewTicket.getIndividualTab().click()
-        pageGrievanceNewTicket.getIndividualTableRows(0).click()
-        pageGrievanceDetailsPage.screenshot("0")
-        pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.getReceivedConsent().click()
-        pageGrievanceNewTicket.getButtonNext().click()
+        page_grievance_tickets.get_nav_grievance().click()
+        assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
+        page_grievance_tickets.get_button_new_ticket().click()
+        page_grievance_new_ticket.get_select_category().click()
+        page_grievance_new_ticket.select_option_by_name(str(test_data["category"]))
+        page_grievance_new_ticket.get_issue_type().click()
+        page_grievance_new_ticket.element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
+        page_grievance_new_ticket.select_listbox_element(str(test_data["type"]))
+        assert test_data["category"] in page_grievance_new_ticket.get_select_category().text
+        assert test_data["type"] in page_grievance_new_ticket.get_issue_type().text
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.get_individual_tab().click()
+        page_grievance_new_ticket.get_individual_table_rows(0).click()
+        page_grievance_details_page.screenshot("0")
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.get_button_next().click()
 
-        pageGrievanceNewTicket.getDescription().send_keys("Add Member - TEST")
-        pageGrievanceNewTicket.getButtonAddNewField().click()
-        pageGrievanceNewTicket.getIndividualFieldName(0).click()
-        pageGrievanceNewTicket.select_listbox_element("Gender")
-        pageGrievanceNewTicket.getInputIndividualData("Gender").click()
-        pageGrievanceNewTicket.select_listbox_element("Female")
-        pageGrievanceNewTicket.getIndividualFieldName(1).click()
-        pageGrievanceNewTicket.select_listbox_element("Preferred language")
-        pageGrievanceNewTicket.getInputIndividualData("Preferred language").click()
-        pageGrievanceNewTicket.select_listbox_element("English | English")
+        page_grievance_new_ticket.get_description().send_keys("Add Member - TEST")
+        page_grievance_new_ticket.get_button_add_new_field().click()
+        page_grievance_new_ticket.get_individual_field_name(0).click()
+        page_grievance_new_ticket.select_listbox_element("Gender")
+        page_grievance_new_ticket.get_input_individual_data("Gender").click()
+        page_grievance_new_ticket.select_listbox_element("Female")
+        page_grievance_new_ticket.get_individual_field_name(1).click()
+        page_grievance_new_ticket.select_listbox_element("Preferred language")
+        page_grievance_new_ticket.get_input_individual_data("Preferred language").click()
+        page_grievance_new_ticket.select_listbox_element("English | English")
 
-        pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceDetailsPage.getCheckboxIndividualData()
-        row0 = pageGrievanceDetailsPage.getRows()[0].text.split(" ")
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_details_page.get_checkbox_individual_data()
+        row0 = page_grievance_details_page.get_rows()[0].text.split(" ")
         assert "Gender" in row0[0]
         assert "Female" in row0[-1]
 
-        row1 = pageGrievanceDetailsPage.getRows()[1].text.split(" ")
+        row1 = page_grievance_details_page.get_rows()[1].text.split(" ")
         assert "Preferred Language" in f"{row1[0]} {row1[1]}"
         assert "English" in row1[-1]
-        pageGrievanceDetailsPage.getButtonAssignToMe().click()
-        pageGrievanceDetailsPage.getButtonSetInProgress().click()
-        pageGrievanceDetailsPage.getButtonSendForApproval().click()
-        pageGrievanceDetailsPage.getButtonCloseTicket()
-        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()
-        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
-        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
-        pageGrievanceDetailsPage.getButtonApproval().click()
-        pageGrievanceDetailsPage.getButtonConfirm().click()
-        pageGrievanceDetailsPage.getButtonCloseTicket().click()
-        pageGrievanceDetailsPage.getButtonConfirm().click()
-        assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
-        pagePeople.selectGlobalProgramFilter("Worker Program")
-        pagePeople.getNavPeople().click()
-        pagePeople.getIndividualTableRow(0).click()
+        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.get_button_set_in_progress().click()
+        page_grievance_details_page.get_button_send_for_approval().click()
+        page_grievance_details_page.get_button_close_ticket()
+        page_grievance_details_page.get_checkbox_requested_data_change()
+        page_grievance_details_page.get_checkbox_requested_data_change()[0].find_element(By.TAG_NAME, "input").click()
+        page_grievance_details_page.get_checkbox_requested_data_change()[1].find_element(By.TAG_NAME, "input").click()
+        page_grievance_details_page.get_button_approval().click()
+        page_grievance_details_page.get_button_confirm().click()
+        page_grievance_details_page.get_button_close_ticket().click()
+        page_grievance_details_page.get_button_confirm().click()
+        assert "Ticket ID" in page_grievance_details_page.get_title().text
+        page_people.select_global_program_filter("Worker Program")
+        page_people.get_nav_people().click()
+        page_people.get_individual_table_row(0).click()

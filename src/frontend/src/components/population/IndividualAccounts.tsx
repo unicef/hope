@@ -16,11 +16,12 @@ import { FC } from 'react';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 
 interface IndividualAccountsProps {
   individual: IndividualDetail;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: IndividualChoices;
 }
 
 const Overview = styled(Paper)<{ theme?: Theme }>`

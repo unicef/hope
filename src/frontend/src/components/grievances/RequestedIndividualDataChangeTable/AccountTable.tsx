@@ -36,14 +36,14 @@ export interface AccountsTableProps {
 }
 
 export function AccountTable({
-                                values,
-                                isEdit,
-                                ticket,
-                                setFieldValue,
-                                index,
-                                account,
-                                accountFinancialInstitutionsDict,
-                              }: AccountsTableProps): ReactElement {
+  values,
+  isEdit,
+  ticket,
+  setFieldValue,
+  index,
+  account,
+  accountFinancialInstitutionsDict,
+}: AccountsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedAccounts } = values;
 

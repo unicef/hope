@@ -4,6 +4,7 @@ from unittest import mock
 from constance.test import override_config
 from django.core.management import call_command
 from django.test import TestCase, override_settings
+
 from extras.test_utils.factories.account import (
     RoleAssignmentFactory,
     RoleFactory,
@@ -23,7 +24,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
 from hope.apps.geo.models import Area
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.models import Household
@@ -37,7 +37,7 @@ class TestFinishVerificationPlan(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
+        call_command("init_geo_fixtures")
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()

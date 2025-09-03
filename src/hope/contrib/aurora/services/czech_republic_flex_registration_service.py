@@ -9,8 +9,7 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hope.apps.geo.models import Area
-from hope.apps.geo.models import Country as GeoCountry
+from hope.apps.geo.models import Area, Country as GeoCountry
 from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.apps.household.models import (
     GOVERNMENT_PARTNER,
@@ -101,10 +100,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         needs_assessment: dict,
         registration_data_import: RegistrationDataImport,
     ) -> dict:
-        address = household_address.get("address_h_c", "")
-        village = household_address.get("village_h_c", "")
-        zip_code = household_address.get("zip_code_h_c", "")
-
         household_data = {
             "registration_data_import": registration_data_import,
             "program": registration_data_import.program,
@@ -134,11 +129,11 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         if consent_sharing_2 == "y" or consent_sharing_2 is True:
             household_data["consent_sharing"].append(HUMANITARIAN_PARTNER)
 
-        if address:
+        if address := household_address.get("address_h_c"):
             household_data["address"] = address
-        if village:
+        if village := household_address.get("village_h_c"):
             household_data["village"] = village
-        if zip_code:
+        if zip_code := household_address.get("zip_code_h_c"):
             household_data["zip_code"] = zip_code
 
         admin1 = household_address.get("admin1_h_c", "")

@@ -1,5 +1,5 @@
-import random
 import re
+import secrets
 
 from django.core.exceptions import ValidationError
 
@@ -7,7 +7,9 @@ from django.core.exceptions import ValidationError
 def generate_numeric_token(digit_number: int = 3) -> int:
     while True:
         # Token and Order Number must not start with 0
-        token = random.randint(10 ** (digit_number - 1), (10**digit_number) - 1)
+        lower = 10 ** (digit_number - 1)
+        upper = (10**digit_number) - 1
+        token = secrets.randbelow(upper - lower + 1) + lower
         # Token and Order Number must not have the same digit more than 3 times in a row
         if not has_repeated_digits_more_than_3_times(token):
             return token

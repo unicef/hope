@@ -1,10 +1,9 @@
+from functools import cached_property
 import logging
 import re
-from functools import cached_property
 from typing import Any, Generator
 from uuid import UUID
 
-import requests
 from admin_extra_buttons.decorators import button
 from constance import config
 from django.conf import settings
@@ -16,6 +15,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
 from django.utils.crypto import get_random_string
+import requests
 from requests import Response
 
 from hope.apps.account.models import User
@@ -43,7 +43,7 @@ The HOPE team.
 class DjAdminManager:
     regex = re.compile(r'class="errorlist"><li>(.*)(?=<\/li>)')
 
-    class ResponseException(Exception):
+    class ResponseError(Exception):
         pass
 
     def __init__(self, kf_host: str = settings.KOBO_URL) -> None:
@@ -73,12 +73,12 @@ class DjAdminManager:
         if self._last_response.status_code not in status:
             msg = f"Unexpected code:{self._last_response.status_code} not in {status}: {custom_error}"
             self._last_error = self._last_response
-            raise self.ResponseException(msg)
+            raise self.ResponseError(msg)
 
         if location and (redir_to := self._last_response.headers.get("location", "N/A")) != location:
             msg = f"Unexpected redirect:{redir_to} <> {location}: {custom_error}"
             self._last_error = self._last_response
-            raise self.ResponseException(msg)
+            raise self.ResponseError(msg)
 
     @cached_property
     def client(self) -> requests.Session:
@@ -115,7 +115,7 @@ class DjAdminManager:
                 )
                 self.assert_response(302, self.admin_url)
             except Exception as e:
-                raise self.ResponseException(
+                raise self.ResponseError(
                     f"Unable to login to Kobo at "
                     f"{self.login_url}: {e.__class__.__name__} {e}. "
                     f"Check KOBO_ADMIN_CREDENTIALS value"

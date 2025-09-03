@@ -1,13 +1,16 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
-import pytest
 from constance.test import override_config
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.accountability import (
     CommunicationMessageFactory,
@@ -25,9 +28,6 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
@@ -145,14 +145,11 @@ class TestHouseholdList:
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
             }
-            assert household_result["program"] == {
-                "id": str(household.program.id),
-                "name": household.program.name,
-                "slug": household.program.slug,
-                "programme_code": household.program.programme_code,
-                "status": household.program.status,
-                "screen_beneficiary": household.program.screen_beneficiary,
-            }
+
+            assert household_result["program_id"] == str(household.program.id)
+            assert household_result["program_name"] == household.program.name
+            assert household_result["program_id"] == str(household.program.id)
+            assert household_result["program_name"] == household.program.name
             assert household_result["status"] == household.status
             assert household_result["size"] == household.size
             assert household_result["residence_status"] == household.get_residence_status_display()
@@ -288,7 +285,7 @@ class TestHouseholdList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 25
+            assert len(ctx.captured_queries) == 18
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -309,7 +306,7 @@ class TestHouseholdList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 20
+            assert len(ctx.captured_queries) == 13
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -319,7 +316,7 @@ class TestHouseholdList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 20
+            assert len(ctx.captured_queries) == 13
 
         self.household2.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -334,7 +331,7 @@ class TestHouseholdList:
                 etag_third_call,
                 etag_changed_areas,
             ]
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 13
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -497,6 +494,11 @@ class TestHouseholdDetail:
                 "geopoint": Point(self.geopoint),
             },
             individuals_data=[{}, {}],
+        )
+        self.primary_role = IndividualRoleInHouseholdFactory(
+            individual=self.individuals[0],
+            household=self.household,
+            role=ROLE_PRIMARY,
         )
 
         duplicated_individual = self.individuals[1]
@@ -665,6 +667,16 @@ class TestHouseholdDetail:
         assert data["org_name_enumerator"] == self.household.org_name_enumerator
         assert data["registration_method"] == self.household.registration_method
         assert data["consent_sharing"] == list(self.household.consent_sharing)
+        assert data["roles_in_household"] == [
+            {
+                "id": str(self.primary_role.id),
+                "role": ROLE_PRIMARY,
+                "individual": {
+                    "id": str(self.individuals[0].id),
+                    "unicef_id": self.individuals[0].unicef_id,
+                },
+            }
+        ]
 
     @pytest.mark.parametrize(
         "permissions",
@@ -1084,14 +1096,8 @@ class TestHouseholdGlobalViewSet:
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
             }
-            assert household_result_first["program"] == {
-                "id": str(household.program.id),
-                "name": household.program.name,
-                "slug": household.program.slug,
-                "programme_code": household.program.programme_code,
-                "status": household.program.status,
-                "screen_beneficiary": household.program.screen_beneficiary,
-            }
+            assert household_result_first["program_id"] == household.program.id
+            assert household_result_first["program_name"] == household.program.name
             assert household_result_first["status"] == household.status
             assert household_result_first["size"] == household.size
             assert household_result_first["residence_status"] == household.get_residence_status_display()

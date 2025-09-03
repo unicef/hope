@@ -1,99 +1,100 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class AccountabilitySurveys(BaseComponents):
     # Locators
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonNewSurvey = 'button[data-cy="button-new-survey"]'
-    filtersSearch = 'div[data-cy="filters-search"]'
-    filtersTargetPopulationAutocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
-    targetPopulationInput = 'div[data-cy="Target Population-input"]'
-    filtersCreatedByAutocomplete = 'div[data-cy="filters-created-by-autocomplete"]'
-    createdByInput = 'div[data-cy="Created by-input"]'
-    filtersCreationDateFrom = 'div[data-cy="filters-creation-date-from"]'
-    filtersCreationDateTo = 'div[data-cy="filters-creation-date-to"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    menuItemRapidPro = 'li[data-cy="menu-item-rapid-pro"]'
-    menuItemRapidProText = 'div[data-cy="menu-item-rapid-pro-text"]'
-    menuItemSmsText = 'li[data-cy="menu-item-sms-text"]'
-    menuItemManual = 'li[data-cy="menu-item-manual"]'
-    menuItemManualText = 'div[data-cy="menu-item-manual-text"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    button_new_survey = 'button[data-cy="button-new-survey"]'
+    filters_search = 'div[data-cy="filters-search"]'
+    filters_target_population_autocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
+    target_population_input = 'div[data-cy="Target Population-input"]'
+    filters_created_by_autocomplete = 'div[data-cy="filters-created-by-autocomplete"]'
+    created_by_input = 'div[data-cy="Created by-input"]'
+    filters_creation_date_from = 'div[data-cy="filters-creation-date-from"]'
+    filters_creation_date_to = 'div[data-cy="filters-creation-date-to"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_title = 'h6[data-cy="table-title"]'
+    table_label = 'span[data-cy="table-label"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    menu_item_rapid_pro = 'li[data-cy="menu-item-rapid-pro"]'
+    menu_item_rapid_pro_text = 'div[data-cy="menu-item-rapid-pro-text"]'
+    menu_item_sms_text = 'li[data-cy="menu-item-sms-text"]'
+    menu_item_manual = 'li[data-cy="menu-item-manual"]'
+    menu_item_manual_text = 'div[data-cy="menu-item-manual-text"]'
     rows = 'tr[role="checkbox"]'
 
     # Texts
-    textTitlePage = "Surveys"
-    textNewSurvey = "New Survey"
-    textTargetPopulationFilter = "Target Population"
-    textTabCreatedBy = "Created by"
+    text_title_page = "Surveys"
+    text_new_survey = "New Survey"
+    text_target_population_filter = "Target Population"
+    text_tab_created_by = "Created by"
 
     # Elements
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getButtonNewSurvey(self) -> WebElement:
-        return self.wait_for(self.buttonNewSurvey)
+    def get_button_new_survey(self) -> WebElement:
+        return self.wait_for(self.button_new_survey)
 
-    def getFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.filtersSearch)
+    def get_filters_search(self) -> WebElement:
+        return self.wait_for(self.filters_search)
 
-    def getFiltersTargetPopulationAutocomplete(self) -> WebElement:
-        return self.wait_for(self.filtersTargetPopulationAutocomplete)
+    def get_filters_target_population_autocomplete(self) -> WebElement:
+        return self.wait_for(self.filters_target_population_autocomplete)
 
-    def getTargetPopulationInput(self) -> WebElement:
-        return self.wait_for(self.targetPopulationInput)
+    def get_target_population_input(self) -> WebElement:
+        return self.wait_for(self.target_population_input)
 
-    def getFiltersCreatedByAutocomplete(self) -> WebElement:
-        return self.wait_for(self.filtersCreatedByAutocomplete)
+    def get_filters_created_by_autocomplete(self) -> WebElement:
+        return self.wait_for(self.filters_created_by_autocomplete)
 
-    def getCreatedByInput(self) -> WebElement:
-        return self.wait_for(self.createdByInput)
+    def get_created_by_input(self) -> WebElement:
+        return self.wait_for(self.created_by_input)
 
-    def getFiltersCreationDateFrom(self) -> WebElement:
-        return self.wait_for(self.filtersCreationDateFrom)
+    def get_filters_creation_date_from(self) -> WebElement:
+        return self.wait_for(self.filters_creation_date_from)
 
-    def getFiltersCreationDateTo(self) -> WebElement:
-        return self.wait_for(self.filtersCreationDateTo)
+    def get_filters_creation_date_to(self) -> WebElement:
+        return self.wait_for(self.filters_creation_date_to)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getTableLabel(self) -> [WebElement]:
-        self.wait_for(self.tableLabel)
-        return self.get_elements(self.tableLabel)
+    def get_table_label(self) -> [WebElement]:
+        self.wait_for(self.table_label)
+        return self.get_elements(self.table_label)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getMenuItemRapidPro(self) -> WebElement:
-        return self.wait_for(self.menuItemRapidPro)
+    def get_menu_item_rapid_pro(self) -> WebElement:
+        return self.wait_for(self.menu_item_rapid_pro)
 
-    def getMenuItemRapidProText(self) -> WebElement:
-        return self.wait_for(self.menuItemRapidProText)
+    def get_menu_item_rapid_pro_text(self) -> WebElement:
+        return self.wait_for(self.menu_item_rapid_pro_text)
 
-    def getMenuItemSmsText(self) -> WebElement:
-        return self.wait_for(self.menuItemSmsText)
+    def get_menu_item_sms_text(self) -> WebElement:
+        return self.wait_for(self.menu_item_sms_text)
 
-    def getMenuItemManual(self) -> WebElement:
-        return self.wait_for(self.menuItemManual)
+    def get_menu_item_manual(self) -> WebElement:
+        return self.wait_for(self.menu_item_manual)
 
-    def getMenuItemManualText(self) -> WebElement:
-        return self.wait_for(self.menuItemManualText)
+    def get_menu_item_manual_text(self) -> WebElement:
+        return self.wait_for(self.menu_item_manual_text)
 
-    def getRows(self) -> [WebElement]:
+    def get_rows(self) -> [WebElement]:
         self.wait_for(self.rows)
         return self.get_elements(self.rows)

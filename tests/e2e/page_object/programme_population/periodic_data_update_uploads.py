@@ -1,117 +1,118 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class PeriodicDataUpdateUploads(BaseComponents):
-    navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
-    navProgramDetails = 'a[data-cy="nav-Programme Details"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    tabIndividuals = 'button[data-cy="tab-individuals"]'
-    tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'
+    nav_program_population = 'a[data-cy="nav-Programme Population"]'
+    nav_program_details = 'a[data-cy="nav-Programme Details"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    tab_individuals = 'button[data-cy="tab-individuals"]'
+    tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
     title = 'h6[data-cy="title"]'
-    newTemplateButton = 'a[data-cy="new-template-button"]'
-    buttonImport = 'button[data-cy="button-import"]'
-    pduTemplates = 'button[data-cy="pdu-templates"]'
-    pduUpdates = 'button[data-cy="pdu-updates"]'
-    headCellImportId = 'th[data-cy="head-cell-import-id"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    headCellTemplateId = 'th[data-cy="head-cell-template-id"]'
-    headCellImportDate = 'th[data-cy="head-cell-import-date"]'
-    headCellImportedBy = 'th[data-cy="head-cell-imported-by"]'
-    headCellDetails = 'th[data-cy="head-cell-details"]'
-    headCellStatus = 'th[data-cy="head-cell-status"]'
-    updateRow = 'tr[data-cy="update-row-{}"]'
-    updateId = 'td[data-cy="update-id-{}"]'
-    updateTemplate = 'td[data-cy="update-template-{}"]'
-    updateCreatedAt = 'td[data-cy="update-created-at-{}"]'
-    updateCreatedBy = 'td[data-cy="update-created-by-{}"]'
-    updateDetails = 'td[data-cy="update-details-{}"]'
-    updateStatus = 'td[data-cy="update-status-{}"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
+    new_template_button = 'a[data-cy="new-template-button"]'
+    button_import = 'button[data-cy="button-import"]'
+    pdu_templates = 'button[data-cy="pdu-templates"]'
+    pdu_updates = 'button[data-cy="pdu-updates"]'
+    head_cell_import_id = 'th[data-cy="head-cell-import-id"]'
+    table_label = 'span[data-cy="table-label"]'
+    head_cell_template_id = 'th[data-cy="head-cell-template-id"]'
+    head_cell_import_date = 'th[data-cy="head-cell-import-date"]'
+    head_cell_imported_by = 'th[data-cy="head-cell-imported-by"]'
+    head_cell_details = 'th[data-cy="head-cell-details"]'
+    head_cell_status = 'th[data-cy="head-cell-status"]'
+    update_row = 'tr[data-cy="update-row-{}"]'
+    update_id = 'td[data-cy="update-id-{}"]'
+    update_template = 'td[data-cy="update-template-{}"]'
+    update_created_at = 'td[data-cy="update-created-at-{}"]'
+    update_created_by = 'td[data-cy="update-created-by-{}"]'
+    update_details = 'td[data-cy="update-details-{}"]'
+    update_status = 'td[data-cy="update-status-{}"]'
+    status_container = 'div[data-cy="status-container"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
 
-    def getNavProgramPopulation(self) -> WebElement:
-        return self.wait_for(self.navProgramPopulation)
+    def get_nav_program_population(self) -> WebElement:
+        return self.wait_for(self.nav_program_population)
 
-    def getNavProgramDetails(self) -> WebElement:
-        return self.wait_for(self.navProgramDetails)
+    def get_nav_program_details(self) -> WebElement:
+        return self.wait_for(self.nav_program_details)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getTabIndividuals(self) -> WebElement:
-        return self.wait_for(self.tabIndividuals)
+    def get_tab_individuals(self) -> WebElement:
+        return self.wait_for(self.tab_individuals)
 
-    def getTabPeriodicDataUpdates(self) -> WebElement:
-        return self.wait_for(self.tabPeriodicDataUpdates)
+    def get_tab_periodic_data_updates(self) -> WebElement:
+        return self.wait_for(self.tab_periodic_data_updates)
 
-    def getTitle(self) -> WebElement:
+    def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
-    def getNewTemplateButton(self) -> WebElement:
-        return self.wait_for(self.newTemplateButton)
+    def get_new_template_button(self) -> WebElement:
+        return self.wait_for(self.new_template_button)
 
-    def getButtonImport(self) -> WebElement:
-        return self.wait_for(self.buttonImport)
+    def get_button_import(self) -> WebElement:
+        return self.wait_for(self.button_import)
 
-    def getPduTemplates(self) -> WebElement:
-        return self.wait_for(self.pduTemplates)
+    def get_pdu_templates(self) -> WebElement:
+        return self.wait_for(self.pdu_templates)
 
-    def getPduUpdates(self) -> WebElement:
-        return self.wait_for(self.pduUpdates)
+    def get_pdu_updates(self) -> WebElement:
+        return self.wait_for(self.pdu_updates)
 
-    def getHeadCellImportId(self) -> WebElement:
-        return self.wait_for(self.headCellImportId)
+    def get_head_cell_import_id(self) -> WebElement:
+        return self.wait_for(self.head_cell_import_id)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getHeadCellTemplateId(self) -> WebElement:
-        return self.wait_for(self.headCellTemplateId)
+    def get_head_cell_template_id(self) -> WebElement:
+        return self.wait_for(self.head_cell_template_id)
 
-    def getHeadCellImportDate(self) -> WebElement:
-        return self.wait_for(self.headCellImportDate)
+    def get_head_cell_import_date(self) -> WebElement:
+        return self.wait_for(self.head_cell_import_date)
 
-    def getHeadCellImportedBy(self) -> WebElement:
-        return self.wait_for(self.headCellImportedBy)
+    def get_head_cell_imported_by(self) -> WebElement:
+        return self.wait_for(self.head_cell_imported_by)
 
-    def getHeadCellDetails(self) -> WebElement:
-        return self.wait_for(self.headCellDetails)
+    def get_head_cell_details(self) -> WebElement:
+        return self.wait_for(self.head_cell_details)
 
-    def getHeadCellStatus(self) -> WebElement:
-        return self.wait_for(self.headCellStatus)
+    def get_head_cell_status(self) -> WebElement:
+        return self.wait_for(self.head_cell_status)
 
-    def getupdateRow(self, index: int) -> WebElement:
-        locator = self.updateRow.format(index)
+    def get_update_row(self, index: int) -> WebElement:
+        locator = self.update_row.format(index)
         return self.wait_for(locator)
 
-    def getUpdateId(self, index: int) -> WebElement:
-        locator = self.updateId.format(index)
+    def get_update_id(self, index: int) -> WebElement:
+        locator = self.update_id.format(index)
         return self.wait_for(locator, timeout=120)
 
-    def getUpdateTemplate(self, index: int) -> WebElement:
-        locator = self.updateTemplate.format(index)
+    def get_update_template(self, index: int) -> WebElement:
+        locator = self.update_template.format(index)
         return self.wait_for(locator)
 
-    def getUpdateCreatedAt(self, index: int) -> WebElement:
-        locator = self.updateCreatedAt.format(index)
+    def get_update_created_at(self, index: int) -> WebElement:
+        locator = self.update_created_at.format(index)
         return self.wait_for(locator)
 
-    def getUpdateCreatedBy(self, index: int) -> WebElement:
-        locator = self.updateCreatedBy.format(index)
+    def get_update_created_by(self, index: int) -> WebElement:
+        locator = self.update_created_by.format(index)
         return self.wait_for(locator)
 
-    def getUpdateDetails(self, index: int) -> WebElement:
-        locator = self.updateDetails.format(index)
+    def get_update_details(self, index: int) -> WebElement:
+        locator = self.update_details.format(index)
         return self.wait_for(locator)
 
-    def getUpdateStatus(self, index: int) -> WebElement:
-        locator = self.updateStatus.format(index)
+    def get_update_status(self, index: int) -> WebElement:
+        locator = self.update_status.format(index)
         return self.wait_for(locator)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
