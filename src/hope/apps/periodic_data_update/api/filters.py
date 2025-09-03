@@ -15,9 +15,7 @@ class PDUOnlineEditFilter(UpdatedAtFilter):
 
 
 class UserAvailableFilter(filters.FilterSet):
-    search = filters.CharFilter(
-        method="search_filter", help_text="Search users by first name, last name or email."
-    )
+    search = filters.CharFilter(method="search_filter", help_text="Search users by first name, last name or email.")
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet[User]:
         values = value.split()
