@@ -852,7 +852,7 @@ class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
 
 
 # TODO move new admin to new dev structure
-class WesternUnionQCFFileReportInline(admin.TabularInline):
+class WesternUnionPaymentPlanReportInline(admin.TabularInline):
     model = WesternUnionPaymentPlanReport
     extra = 0
     can_delete = False
@@ -864,8 +864,8 @@ class WesternUnionQCFFileReportInline(admin.TabularInline):
 
 
 @admin.register(WesternUnionInvoice)
-class WesternUnionQCFFileAdmin(admin.ModelAdmin):
-    inlines = [WesternUnionQCFFileReportInline]
+class WesternUnionInvoiceAdmin(admin.ModelAdmin):
+    inlines = [WesternUnionPaymentPlanReportInline]
     list_display = ["name", "payment_plans_list"]
 
     search_fields = ["name", "reports__payment_plan__unicef_id", "reports__payment_plan__name"]
@@ -887,7 +887,7 @@ class WesternUnionQCFFileAdmin(admin.ModelAdmin):
 
 
 @admin.register(WesternUnionPaymentPlanReport)
-class WesternUnionQCFFileReportAdmin(admin.ModelAdmin):
+class WesternUnionPaymentPlanReportAdmin(admin.ModelAdmin):
     list_display = ["id", "qcf_file", "payment_plan"]
     readonly_fields = ["download_link"]
 
