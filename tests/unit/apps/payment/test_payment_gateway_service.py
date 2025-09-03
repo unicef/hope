@@ -630,9 +630,9 @@ class TestPaymentGatewayService(BaseTestCase):
         primary_collector = self.payments[0].collector
         fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, name="ABC")
         AccountFactory(
+            number="123456789",
             individual=primary_collector,
             data={
-                "number": "123456789",
                 "provider": "Provider",
                 "service_provider_code": "CBA",
             },

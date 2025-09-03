@@ -32,6 +32,7 @@ export interface AccountsTableProps {
   setFieldValue;
   index;
   account;
+  accountFinancialInstitutionsDict;
 }
 
 export function AccountTable({
@@ -41,6 +42,8 @@ export function AccountTable({
   setFieldValue,
   index,
   account,
+  accountFinancialInstitutionsDict,
+
 }: AccountsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedAccounts } = values;
@@ -88,14 +91,19 @@ export function AccountTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.entries(account.value.data_fields).map(([key, value]) => (
+          {Object.entries(account.value.data_fields).map(([key, value]) => {
+            if (key === 'financial_institution') {
+              value = accountFinancialInstitutionsDict[value as string];
+            }
+            return (
             <TableRow key={key}>
               <TableCell align="left"></TableCell>
               <TableCell align="left">{key}</TableCell>
               <TableCell align="left">{String(value)}</TableCell>
               <TableCell align="left"></TableCell>
             </TableRow>
-          ))}
+          );
+})}
         </TableBody>
       </StyledTable>
     </>

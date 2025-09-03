@@ -140,7 +140,7 @@ class TestXlsxExportTargetingService(BaseTestCase):
 
         assert (
             service._accounts_info(individual) == "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
-            " 'name_of_cardholder': 'Marek', 'number': '123'}, "
+            " 'name_of_cardholder': 'Marek', 'number': '123', 'financial_institution': ''}, "
             "{'provider': 'Provider', 'delivery_phone_number': '123456789', "
-            "'service_provider_code': 'ABC', 'number': '321'}"
+            "'service_provider_code': 'ABC', 'number': '321', 'financial_institution': ''}"
         )
