@@ -105,25 +105,25 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
 
 export function customSnakeCase(str: string): string {
   return (
-      str
-          // Insert _ between lowercase and uppercase
-          .replace(/([a-z])([A-Z])/g, '$1_$2')
-          // Insert _ between letter and number
-          .replace(/([a-zA-Z])([0-9])/g, '$1_$2')
-          // Insert _ between number and letter
-          .replace(/([0-9])([a-zA-Z])/g, '$1_$2')
-          // Replace age group numbers like 05, 611, 1217, 1859, 60 with correct underscores
-          .replace(/_0(\d)(_|$)/g, '_0_$1$2') // 05 -> 0_5
-          .replace(/_6(\d{2})(_|$)/g, '_6_$1$2') // 611 -> 6_11
-          .replace(/_1(\d{2})(_|$)/g, '_1_$1$2') // 1217, 1859 -> 12_17, 18_59
-          .replace(/_6_0(_|$)/g, '_60$1') // 60 stays as 60 (optional, if you want _60 not _6_0)
-          .toLowerCase()
+    str
+      // Insert _ between lowercase and uppercase
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      // Insert _ between letter and number
+      .replace(/([a-zA-Z])([0-9])/g, '$1_$2')
+      // Insert _ between number and letter
+      .replace(/([0-9])([a-zA-Z])/g, '$1_$2')
+      // Replace age group numbers like 05, 611, 1217, 1859, 60 with correct underscores
+      .replace(/_0(\d)(_|$)/g, '_0_$1$2') // 05 -> 0_5
+      .replace(/_6(\d{2})(_|$)/g, '_6_$1$2') // 611 -> 6_11
+      .replace(/_1(\d{2})(_|$)/g, '_1_$1$2') // 1217, 1859 -> 12_17, 18_59
+      .replace(/_6_0(_|$)/g, '_60$1') // 60 stays as 60 (optional, if you want _60 not _6_0)
+      .toLowerCase()
   );
 }
 export function processFormData(
-    obj: any,
-    form?: FormData,
-    parentKey?: string,
+  obj: any,
+  form?: FormData,
+  parentKey?: string,
 ): FormData {
   const formData = form || new FormData();
 
@@ -180,7 +180,7 @@ export function processFormData(
   return formData;
 }
 export const getFormData = (
-    options: ApiRequestOptions,
+  options: ApiRequestOptions,
 ): FormData | undefined => {
   if (!options.formData) {
     return undefined;
@@ -280,7 +280,20 @@ export const sendRequest = async (
   if (isFormData(formData)) {
     requestBody = formData; // send as-is
   } else if (body) {
-    requestBody = JSON.stringify(deepUnderscore(JSON.parse(body)));
+    try {
+      const parsedBody = JSON.parse(body);
+      const transformedBody = deepUnderscore(parsedBody);
+
+      // If pduFields exists, preserve its value under the transformed key
+      if ('pduFields' in parsedBody && 'pdu_fields' in transformedBody) {
+        transformedBody.pdu_fields = parsedBody.pduFields;
+      }
+
+      requestBody = JSON.stringify(transformedBody);
+    } catch (e) {
+      // fallback: send as-is if parsing fails
+      requestBody = body;
+    }
   }
   const request: RequestInit = {
     headers,
@@ -298,7 +311,16 @@ export const sendRequest = async (
   let response = await fetch(url, request);
   const content = await response.json();
   response.json = async () => {
-    return deepCamelize(content);
+    let camelized = deepCamelize(content);
+    // Special handling for pdu_fields
+    if ('pdu_fields' in content && 'pduFields' in camelized) {
+      camelized.pduFields = content.pdu_fields;
+    }
+    // Special handling for flex_fields
+    if ('flex_fields' in content && 'flexFields' in camelized) {
+      camelized.flexFields = content.flex_fields;
+    }
+    return camelized;
   };
   return response;
 };
