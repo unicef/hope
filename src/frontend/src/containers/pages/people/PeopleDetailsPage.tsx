@@ -126,7 +126,7 @@ const PeopleDetailsPage = (): ReactElement => {
 
   if (
     !individual ||
-    !individualChoicesLoading ||
+    !individualChoicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
     permissions === null
