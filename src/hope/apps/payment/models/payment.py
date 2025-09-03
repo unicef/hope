@@ -2445,3 +2445,79 @@ class PaymentPlanSupportingDocument(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class WesternUnionInvoice(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    file = models.ForeignKey(
+        FileTemp,
+        related_name="+",
+        help_text="WU QCF File",
+        on_delete=models.DO_NOTHING,
+        null=True,
+    )
+    payments = models.ManyToManyField(
+        "Payment",
+        through="WesternUnionInvoicePayment",
+        related_name="invoices",
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = "Western Union Invoice"
+        verbose_name_plural = "Western Union Invoices"
+
+
+class WesternUnionPaymentPlanReport(models.Model):
+    qcf_file = models.ForeignKey(
+        WesternUnionInvoice,
+        related_name="reports",
+        help_text="WU QCF File",
+        on_delete=models.DO_NOTHING,
+    )
+    report_file = models.ForeignKey(
+        FileTemp,
+        related_name="+",
+        help_text="WU QCF Report File",
+        on_delete=models.DO_NOTHING,
+        null=True,
+    )
+    payment_plan = models.ForeignKey(
+        PaymentPlan,
+        related_name="qcf_reports",
+        on_delete=models.CASCADE,
+    )
+    sent = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.payment_plan.name} - sent: {self.sent}"
+
+    class Meta:
+        verbose_name = "Western Union Payment Plan Report"
+        verbose_name_plural = "Western Union Payment Plan Reports"
+
+
+class WesternUnionInvoicePayment(models.Model):
+    STATUS_PAID_OR_DELIVERED = "2"
+    STATUS_CANCELLED = "6"
+    STATUS_PURGED = "7"
+    TRANSACTION_STATUS_CHOICES = [
+        (STATUS_PAID_OR_DELIVERED, "Paid or delivered"),
+        (STATUS_CANCELLED, "Cancelled"),
+        (STATUS_PURGED, "Purged"),
+    ]
+
+    western_union_invoice = models.ForeignKey(
+        "WesternUnionInvoice",
+        on_delete=models.CASCADE,
+    )
+    payment = models.ForeignKey(
+        "Payment",
+        on_delete=models.CASCADE,
+    )
+    transaction_status = models.CharField(
+        max_length=1,
+        choices=TRANSACTION_STATUS_CHOICES,
+    )

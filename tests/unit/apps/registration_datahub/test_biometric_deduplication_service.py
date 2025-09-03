@@ -89,10 +89,10 @@ class BiometricDeduplicationServiceTest(TestCase):
         service = BiometricDeduplicationService()
         deduplication_set_id = str(uuid.uuid4())
 
-        mock_get_deduplication_set.return_value = {"state": "Clean", "error": None}
+        mock_get_deduplication_set.return_value = dict(state="Ready")
 
         data = service.get_deduplication_set(deduplication_set_id)
-        assert data == DeduplicationSetData(state="Clean")
+        assert data == DeduplicationSetData(state="Ready", error="")
 
         mock_get_deduplication_set.assert_called_once_with(deduplication_set_id)
 
@@ -575,7 +575,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         deduplication_set_id = str(uuid.uuid4())
         service = BiometricDeduplicationService()
 
-        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean"))
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Ready"))
 
         results_data = [
             {
@@ -617,8 +617,21 @@ class BiometricDeduplicationServiceTest(TestCase):
         deduplication_set_id = str(uuid.uuid4())
         service = BiometricDeduplicationService()
 
-        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean"))
-        service.get_deduplication_set_results = mock.Mock(side_effect=Exception("An error occurred"))
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Ready"))
+        service.mark_rdis_as_error = mock.Mock()
+
+        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+
+        service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
+        service.mark_rdis_as_error.assert_called_once_with(deduplication_set_id)
+
+    def test_fetch_biometric_deduplication_results_and_process_dedup_engine_error(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        service = BiometricDeduplicationService()
+
+        service.get_deduplication_set = mock.Mock(
+            return_value=DeduplicationSetData(state="Failed", error="Dedup Error")
+        )
         service.mark_rdis_as_error = mock.Mock()
 
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)

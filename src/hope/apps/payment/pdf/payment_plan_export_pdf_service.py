@@ -2,7 +2,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, F, Q, Sum
 from django.urls import reverse
 
 from hope.apps.core.utils import encode_id_base64
@@ -73,6 +73,16 @@ class PaymentPlanPDFExportService:
         authorization = approval_process.approvals.filter(type=Approval.AUTHORIZATION).first()
         release = approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
 
+        failed_base = Q(status__in=Payment.FAILED_STATUSES + Payment.NOT_DELIVERED_STATUSES)
+        failed_partial_qs = self.payment_plan.eligible_payments.filter(status=Payment.STATUS_DISTRIBUTION_PARTIAL)
+        failed_partial_local = (
+            failed_partial_qs.aggregate(total=Sum(F("entitlement_quantity") - F("delivered_quantity")))["total"] or 0
+        )
+        failed_partial_usd = (
+            failed_partial_qs.aggregate(total=Sum(F("entitlement_quantity_usd") - F("delivered_quantity_usd")))["total"]
+            or 0
+        )
+
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
             pending_usd=Sum(
@@ -83,10 +93,18 @@ class PaymentPlanPDFExportService:
             reconciled=Count("id", filter=Q(status__in=Payment.DELIVERED_STATUSES)),  # Redeemed
             reconciled_usd=Sum("delivered_quantity_usd", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
             reconciled_local=Sum("delivered_quantity", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
-            failed=Count("id", filter=Q(status__in=Payment.FAILED_STATUSES)),  # Unredeemed
-            failed_usd=Sum("delivered_quantity_usd", filter=Q(status__in=Payment.FAILED_STATUSES)),
-            failed_local=Sum("delivered_quantity", filter=Q(status__in=Payment.FAILED_STATUSES)),
+            failed=Count("id", filter=failed_base),
+            failed_usd=Sum("entitlement_quantity_usd", filter=failed_base),
+            failed_local=Sum("entitlement_quantity", filter=failed_base),
         )
+
+        # Normalize None → 0
+        for key in ["pending_usd", "pending_local", "reconciled_usd", "reconciled_local", "failed_usd", "failed_local"]:
+            reconciliation_qs[key] = reconciliation_qs[key] or 0
+
+        # Add partials in Python (cannot mix inside aggregate)
+        reconciliation_qs["failed_usd"] += failed_partial_usd
+        reconciliation_qs["failed_local"] += failed_partial_local
 
         pdf_context_data = {
             "title": self.payment_plan.unicef_id,

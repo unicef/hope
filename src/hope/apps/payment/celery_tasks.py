@@ -867,3 +867,46 @@ class CheckRapidProVerificationTask:
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_record_verification.received_amount = received_amount
         return payment_record_verification
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
+    from datetime import datetime, timedelta
+
+    from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+
+    try:
+        service = QCFReportsService()
+        service.process_files_since(datetime.now() - timedelta(hours=24))
+
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
+    from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
+    from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+
+    with cache.lock(
+        f"send_qcf_email_notifications_{qcf_report_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        qcf_report = WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id)
+        try:
+            set_sentry_business_area_tag(qcf_report.payment_plan.business_area.name)
+
+            service = QCFReportsService()
+            service.send_notification_emails(qcf_report)
+            qcf_report.sent = True
+            qcf_report.save()
+
+        except Exception as e:
+            logger.exception(f"Failed to send QCF report emails for {qcf_report}")
+            raise self.retry(exc=e)
