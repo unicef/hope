@@ -33,6 +33,7 @@ from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
     CountActionMixin,
+    PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -547,6 +548,7 @@ class ProgramCycleViewSet(
 
 class BeneficiaryGroupViewSet(
     mixins.ListModelMixin,
+    PermissionsMixin,
     GenericViewSet,
 ):
     permission_classes = [IsAuthenticated]
