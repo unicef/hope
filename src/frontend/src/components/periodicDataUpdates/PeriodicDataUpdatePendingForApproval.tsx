@@ -144,7 +144,6 @@ const PeriodicDataUpdatePendingForApproval = () => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
     await bulkApprove(ids);
   };
-  // ...existing code...
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
@@ -164,11 +163,13 @@ const PeriodicDataUpdatePendingForApproval = () => {
   });
 
   const results = data?.results ?? [];
-  const allIds = results.map((row: any) => row.id);
+  const authorizedIds = results
+    .filter((row: any) => row.isAuthorized)
+    .map((row: any) => row.id);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setSelected(allIds);
+      setSelected(authorizedIds);
     } else {
       setSelected([]);
     }
@@ -228,6 +229,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
       <TableCell>
         <StatusBox
           status={row.status}
+          statusDisplay={row.statusDisplay}
           statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
         />
       </TableCell>

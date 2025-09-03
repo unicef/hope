@@ -606,6 +606,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           handleSaveRow={handleSaveRow}
           canSave={canSave}
           templateStatus={status}
+          isAuthorized={isAuthorized}
         />
       </Box>
     </>

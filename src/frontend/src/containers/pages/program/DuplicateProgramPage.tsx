@@ -271,7 +271,7 @@ const DuplicateProgramPage = (): ReactElement => {
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
-        areas: partner.areas.map((area) => area.id),
+        areas: partner?.areas?.map((area) => area?.id) || [],
         areaAccess: partner.areaAccess,
       })),
     partnerAccess: partnerAccess,
