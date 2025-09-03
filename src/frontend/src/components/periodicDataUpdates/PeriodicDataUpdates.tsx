@@ -83,7 +83,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
                     label="Offline Templates"
                     data-cy="pdu-offline-templates"
                   />
-                  <Tab label="Offline Edits" data-cy="pdu-offline-templates" />
+                  <Tab label="Offline Edits" data-cy="pdu-offline-edits" />
                   <Tab label="Online Edits" data-cy="pdu-online-edits" />
                 </Tabs>
               </Box>
