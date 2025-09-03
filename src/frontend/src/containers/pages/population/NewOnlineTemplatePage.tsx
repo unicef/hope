@@ -51,7 +51,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
       });
       showMessage(t('Template created successfully.'));
       navigate(
-        `/${baseUrl}/population/individuals?tab=periodic-data-updates&subtab=online-edits`,
+        `/${baseUrl}/population/${isPeople ? 'people' : 'individuals'}?tab=periodic-data-updates&subtab=online-edits`,
       );
     },
     onError: (error: any) => {
@@ -138,7 +138,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: beneficiaryGroup?.memberLabelPlural,
-      to: `/${baseUrl}/population/individuals`,
+      to: `/${baseUrl}/population/${isPeople ? 'people' : 'individuals'}`,
     },
   ];
 
