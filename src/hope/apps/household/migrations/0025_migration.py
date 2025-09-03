@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddIndex(
+        migrations.AddIndexConcurrently(
             model_name="household",
             index=models.Index(
                 condition=models.Q(("is_removed", False), ("rdi_merge_status", "MERGED")),
