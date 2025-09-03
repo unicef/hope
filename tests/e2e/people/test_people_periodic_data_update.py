@@ -195,12 +195,13 @@ class TestPeoplePDUXlsxUpload:
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
+        page_individuals.get_tab_offline_edits().click()
         page_individuals.get_button_import().click()
         page_individuals.get_dialog_import()
         assert "IMPORT" in page_individuals.get_button_import_submit().text
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_tab_offline_edits().click()
+        page_individuals.get_status_container()
         for i in range(5):
             periodic_data_update_upload = PDUXlsxUpload.objects.first()
             if periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL:
@@ -250,12 +251,11 @@ class TestPeoplePDUXlsxUpload:
         page_individuals.get_dialog_import()
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_tab_offline_edits().click()
         page_individuals.get_status_container()
         periodic_data_update_upload = PDUXlsxUpload.objects.first()
         assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
-        assert page_individuals.get_status_container().text == "FAILED"
-        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "FAILED"
+        assert page_individuals.get_status_container().text == "Failed"
+        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Failed"
         page_individuals.get_update_details_btn(periodic_data_update_upload.pk).click()
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert page_individuals.get_pdu_form_errors().text == error_text
@@ -299,4 +299,4 @@ class TestPeoplePDUXlsxUpload:
         assert str(pdu_upload.template.id) in page_pdu_xlsx_uploads.get_update_template(index).text
         assert f"{pdu_upload.created_at:%-d %b %Y}" in page_pdu_xlsx_uploads.get_update_created_at(index).text
         assert pdu_upload.created_by.get_full_name() in page_pdu_xlsx_uploads.get_update_created_by(index).text
-        assert "SUCCESSFUL" in page_pdu_xlsx_uploads.get_update_status(index).text
+        assert "Successful" in page_pdu_xlsx_uploads.get_update_status(index).text
