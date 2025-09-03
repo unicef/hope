@@ -16,12 +16,11 @@ from elasticsearch_dsl import connections
 import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
-from hope.models.partner import Partner
-from hope.models.role import Role
 
 
 @pytest.fixture(autouse=True)
 def create_unicef_partner(db: Any) -> None:
+    from hope.models.partner import Partner
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     return Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
@@ -29,18 +28,21 @@ def create_unicef_partner(db: Any) -> None:
 @pytest.fixture(scope="class", autouse=True)
 def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
     with django_db_blocker.unblock():
+        from hope.models.partner import Partner
         unicef, _ = Partner.objects.get_or_create(name="UNICEF")
         Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
 @pytest.fixture(autouse=True)
 def create_role_with_all_permissions(db: Any) -> None:
+    from hope.models.role import Role
     return Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(scope="class", autouse=True)
 def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
     with django_db_blocker.unblock():
+        from hope.models.role import Role
         Role.objects.get_or_create(name="Role with all permissions")
 
 
