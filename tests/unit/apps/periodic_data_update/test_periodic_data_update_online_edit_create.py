@@ -177,6 +177,8 @@ class TestPDUOnlineEditCreate:
                 "last_name": self.household2.individuals.first().family_name,
                 "pdu_fields": {
                     "vaccination_records_update": {
+                        "field_name": "vaccination_records_update",
+                        "label": "Vaccination Records Update",
                         "round_number": 2,
                         "round_name": "February vaccination",
                         "value": None,
@@ -185,6 +187,8 @@ class TestPDUOnlineEditCreate:
                         "is_editable": True,
                     },
                     "health_records_update": {
+                        "field_name": "health_records_update",
+                        "label": "Health Records Update",
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
@@ -233,6 +237,8 @@ class TestPDUOnlineEditCreate:
                 "last_name": self.household2.individuals.first().family_name,
                 "pdu_fields": {
                     "vaccination_records_update": {
+                        "field_name": "vaccination_records_update",
+                        "label": "Vaccination Records Update",
                         "round_number": 2,
                         "round_name": "February vaccination",
                         "value": None,
@@ -241,6 +247,8 @@ class TestPDUOnlineEditCreate:
                         "is_editable": True,
                     },
                     "health_records_update": {
+                        "field_name": "health_records_update",
+                        "label": "Health Records Update",
                         "round_number": 4,
                         "round_name": "April",
                         "value": None,
