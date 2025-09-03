@@ -346,11 +346,10 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
-
-    payment_plan.exchange_rate = payment_plan.get_exchange_rate()
-    payment_plan.save(update_fields=["exchange_rate"])
-    payment_plan.refresh_from_db(fields=["exchange_rate"])
     try:
+        payment_plan.exchange_rate = payment_plan.get_exchange_rate()
+        payment_plan.save(update_fields=["exchange_rate"])
+        payment_plan.refresh_from_db(fields=["exchange_rate"])
         updates = []
         with transaction.atomic():
             for payment in payment_plan.eligible_payments:
@@ -366,8 +365,6 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
 
     except Exception as e:
         logger.exception("PaymentPlan Update Exchange Rate On Release Payments Error")
-        payment_plan.background_action_status_steficon_error()
-        payment_plan.save()
         raise self.retry(exc=e)
 
 
