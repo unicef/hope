@@ -214,7 +214,7 @@ class TestPeoplePDUXlsxUpload:
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
-        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "SUCCESSFUL"
+        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Successful"
         page_individuals.screenshot("0")
 
     @pytest.mark.night

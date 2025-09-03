@@ -645,3 +645,147 @@ class TestPDUOnlineEditBulkMerge:
             self.individual1.flex_fields[self.string_attribute.name]["1"]["collection_date"] == initial_collection_date
         )
         assert self.individual1.flex_fields[self.decimal_attribute.name]["1"]["value"] is None
+
+    def test_bulk_merge_validate_value_string_invalid(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_ONLINE_MERGE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        pdu_edit = PDUOnlineEditFactory(
+            business_area=self.afghanistan,
+            program=self.program,
+            status=PDUOnlineEdit.Status.APPROVED,
+            authorized_users=[self.user],
+            edit_data=[
+                {
+                    "individual_uuid": str(self.individual1.id),
+                    "pdu_fields": {
+                        self.string_attribute.name: {
+                            "value": 123,  # Invalid: should be string
+                            "subtype": PeriodicFieldData.STRING,
+                            "round_number": 1,
+                            "collection_date": "2024-01-15",
+                            "is_editable": True,
+                        }
+                    },
+                }
+            ],
+        )
+
+        data = {"ids": [pdu_edit.id]}
+        response = self.api_client.post(self.url_bulk_merge, data=data)
+        assert response.status_code == status.HTTP_200_OK
+
+        pdu_edit.refresh_from_db()
+        assert pdu_edit.status == PDUOnlineEdit.Status.FAILED_MERGE
+
+    def test_bulk_merge_validate_value_bool_invalid(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_ONLINE_MERGE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        pdu_edit = PDUOnlineEditFactory(
+            business_area=self.afghanistan,
+            program=self.program,
+            status=PDUOnlineEdit.Status.APPROVED,
+            authorized_users=[self.user],
+            edit_data=[
+                {
+                    "individual_uuid": str(self.individual1.id),
+                    "pdu_fields": {
+                        self.boolean_attribute.name: {
+                            "value": "true",  # Invalid: should be boolean
+                            "subtype": PeriodicFieldData.BOOL,
+                            "round_number": 1,
+                            "collection_date": "2024-01-15",
+                            "is_editable": True,
+                        }
+                    },
+                }
+            ],
+        )
+
+        data = {"ids": [pdu_edit.id]}
+        response = self.api_client.post(self.url_bulk_merge, data=data)
+        assert response.status_code == status.HTTP_200_OK
+
+        pdu_edit.refresh_from_db()
+        assert pdu_edit.status == PDUOnlineEdit.Status.FAILED_MERGE
+
+    def test_bulk_merge_validate_value_decimal_invalid(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_ONLINE_MERGE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        pdu_edit = PDUOnlineEditFactory(
+            business_area=self.afghanistan,
+            program=self.program,
+            status=PDUOnlineEdit.Status.APPROVED,
+            authorized_users=[self.user],
+            edit_data=[
+                {
+                    "individual_uuid": str(self.individual1.id),
+                    "pdu_fields": {
+                        self.decimal_attribute.name: {
+                            "value": "123.45",  # Invalid: should be number
+                            "subtype": PeriodicFieldData.DECIMAL,
+                            "round_number": 1,
+                            "collection_date": "2024-01-15",
+                            "is_editable": True,
+                        }
+                    },
+                }
+            ],
+        )
+
+        data = {"ids": [pdu_edit.id]}
+        response = self.api_client.post(self.url_bulk_merge, data=data)
+        assert response.status_code == status.HTTP_200_OK
+
+        pdu_edit.refresh_from_db()
+        assert pdu_edit.status == PDUOnlineEdit.Status.FAILED_MERGE
+
+    def test_bulk_merge_validate_value_date_invalid(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PDU_ONLINE_MERGE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        pdu_edit = PDUOnlineEditFactory(
+            business_area=self.afghanistan,
+            program=self.program,
+            status=PDUOnlineEdit.Status.APPROVED,
+            authorized_users=[self.user],
+            edit_data=[
+                {
+                    "individual_uuid": str(self.individual1.id),
+                    "pdu_fields": {
+                        self.date_attribute.name: {
+                            "value": "2024/01/15",  # Invalid: wrong format
+                            "subtype": PeriodicFieldData.DATE,
+                            "round_number": 1,
+                            "collection_date": "2024-01-15",
+                            "is_editable": True,
+                        }
+                    },
+                }
+            ],
+        )
+
+        data = {"ids": [pdu_edit.id]}
+        response = self.api_client.post(self.url_bulk_merge, data=data)
+        assert response.status_code == status.HTTP_200_OK
+
+        pdu_edit.refresh_from_db()
+        assert pdu_edit.status == PDUOnlineEdit.Status.FAILED_MERGE
