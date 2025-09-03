@@ -14,6 +14,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { GreyText } from '@components/core/GreyText';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -40,6 +41,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   const { t } = useTranslation();
   const [error, setError] = useState<any>(null);
   const canPDUUpload = hasPermissions(PERMISSIONS.PDU_UPLOAD, permissions);
+  const queryClient = useQueryClient();
 
   const handleFileUpload = async (): Promise<void> => {
     if (fileToImport) {
@@ -54,6 +56,9 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
           },
         );
         showMessage(t('File uploaded successfully'));
+        queryClient.invalidateQueries({
+          queryKey: ['periodicDataUpdateUploads'],
+        });
         setOpenImport(false);
         setFileToImport(null);
       } catch (uploadError: any) {
