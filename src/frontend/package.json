@@ -12,7 +12,6 @@
     "test": "vitest",
     "preview": "vite preview",
     "download-dev-openapi": "wget --no-check-certificate -O data/openapi.yml http://localhost:8080/api/rest/",
-    "enhance-openapi-enums": "node enhance_openapi_enums.js",
     "generate-rest-api-types": "yarn generate-rest-api-types-camelcase",
     "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node enhance_and_camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false"
   },
