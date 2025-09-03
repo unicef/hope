@@ -176,10 +176,10 @@ DEFAULTS = {
     "AZURE_ACCOUNT_KEY": (str, ""),
     "GDAL_LIBRARY_PATH": (str, None),
     "GEOS_LIBRARY_PATH": (str, None),
-    "WESTERN_UNION_FTP_SERVER": (str, ""),
-    "WESTERN_UNION_FTP_PORT": (int, 22),
-    "WESTERN_UNION_FTP_USERNAME": (str, ""),
-    "WESTERN_UNION_FTP_PASSWORD": (str, ""),
+    "FTP_WESTERN_UNION_SERVER": (str, ""),
+    "FTP_WESTERN_UNION_PORT": (int, 22),
+    "FTP_WESTERN_UNION_USERNAME": (str, ""),
+    "FTP_WESTERN_UNION_PASSWORD": (str, ""),
 }
 
 env = SmartEnv(**DEFAULTS)
