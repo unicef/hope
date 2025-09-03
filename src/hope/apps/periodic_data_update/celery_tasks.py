@@ -72,9 +72,11 @@ def generate_pdu_online_edit_data_task(self: Any, pdu_online_edit_id: int, filte
         pdu_online_edit.number_of_records = len(edit_data)
         pdu_online_edit.status = PDUOnlineEdit.Status.NEW
         pdu_online_edit.save(update_fields=["edit_data", "number_of_records", "status"])
-    except Exception:
+    except Exception as e:
+        logger.exception("Failed to generate PDU online edit data: %s", e)
         pdu_online_edit.status = PDUOnlineEdit.Status.FAILED_CREATE
         pdu_online_edit.save(update_fields=["status"])
+        raise
     return True
 
 
@@ -94,9 +96,11 @@ def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> bool:
             service.merge_edit_data()
             pdu_online_edit.status = PDUOnlineEdit.Status.MERGED
             pdu_online_edit.save(update_fields=["status"])
-        except Exception:
+        except Exception as e:
+            logger.exception("Failed to merge PDU online edit data: %s", e)
             pdu_online_edit.status = PDUOnlineEdit.Status.FAILED_MERGE
             pdu_online_edit.save(update_fields=["status"])
+            raise
         return True
 
 

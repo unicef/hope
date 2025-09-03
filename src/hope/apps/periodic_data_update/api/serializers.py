@@ -67,8 +67,8 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: dict[str, Any]) -> PDUXlsxTemplate:
         request = self.context["request"]
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-        program_slug = self.context["request"].parser_context["kwargs"]["program_slug"]
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = request.parser_context["kwargs"]["program_slug"]
         validated_data["created_by"] = request.user
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         validated_data["business_area"] = get_object_or_404(BusinessArea, slug=business_area_slug)

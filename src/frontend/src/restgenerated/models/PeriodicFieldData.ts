@@ -8,7 +8,7 @@ export type PeriodicFieldData = {
     numberOfRounds: number;
     roundsNames?: Array<string>;
     /**
-     * Number of rounds already used in templates and cannot be used again in template creation again.
+     * Number of rounds already used in templates and cannot be used in template creation again.
      */
     roundsCovered?: number;
 };
