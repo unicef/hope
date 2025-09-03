@@ -290,6 +290,7 @@ class GrievanceTicketViewSet(
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
+    program_model_field_is_many = True
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -481,6 +482,8 @@ class GrievanceTicketGlobalViewSet(
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
+    program_model_field_is_many = True
+
     parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_queryset(self) -> QuerySet:
