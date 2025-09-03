@@ -8,7 +8,7 @@
  * * `NEED_INVESTIGATION` - Need Investigation
  * * `INVALID` - Invalid
  */
-export enum DocumentStatusEnum {
+export enum DocumentSerializerUploadStatusEnum {
     PENDING = 'PENDING',
     VALID = 'VALID',
     NEED_INVESTIGATION = 'NEED_INVESTIGATION',

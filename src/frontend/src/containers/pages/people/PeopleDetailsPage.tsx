@@ -123,10 +123,9 @@ const PeopleDetailsPage = (): ReactElement => {
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-
   if (
     !individual ||
-    !individualChoicesLoading ||
+    !individualChoicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
     permissions === null

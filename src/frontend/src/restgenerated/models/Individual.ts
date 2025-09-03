@@ -2,18 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Account } from './Account';
+import type { AccountLax } from './AccountLax';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
-import type { Document } from './Document';
+import type { DocumentSerializerLax } from './DocumentSerializerLax';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
-import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SeeingDisabilityEnum } from './SeeingDisabilityEnum';
 import type { SelfcareDisabilityEnum } from './SelfcareDisabilityEnum';
@@ -23,23 +22,16 @@ export type Individual = {
     firstRegistrationDate?: string;
     lastRegistrationDate?: string;
     readonly household: string;
-    role?: string;
     observedDisability?: string;
-    countryOrigin?: string;
     maritalStatus?: string;
-    documents?: Array<Document>;
+    documents?: Array<DocumentSerializerLax>;
     birthDate: string;
-    accounts?: Array<Account>;
-    photo?: string;
-    rdiMergeStatus?: RdiMergeStatusEnum;
-    isRemoved?: boolean;
+    accounts?: Array<AccountLax>;
+    photo?: string | null;
+    individualId: string;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
-    /**
-     * Individual ID
-     */
-    individualId?: string;
     /**
      * Full Name of the Beneficiary
      */

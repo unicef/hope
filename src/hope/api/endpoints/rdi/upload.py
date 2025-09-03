@@ -79,7 +79,7 @@ class HouseholdValidator:
             raise ValidationError(errs)
 
 
-class DocumentSerializer(serializers.ModelSerializer):
+class DocumentSerializerUpload(serializers.ModelSerializer):
     type = serializers.ChoiceField(
         choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value], label) for (value, label) in IDENTIFICATION_TYPE_CHOICE],
         required=True,
@@ -99,7 +99,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class AccountSerializerUpload(serializers.ModelSerializer):
     account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
     number = serializers.CharField(allow_blank=True, required=False)
     financial_institution = serializers.PrimaryKeyRelatedField(
@@ -120,9 +120,9 @@ class IndividualSerializer(serializers.ModelSerializer):
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     country_origin = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
-    documents = DocumentSerializer(many=True, required=False)
+    documents = DocumentSerializerUpload(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
-    accounts = AccountSerializer(many=True, required=False)
+    accounts = AccountSerializerUpload(many=True, required=False)
     photo = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
