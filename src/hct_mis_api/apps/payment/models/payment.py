@@ -881,8 +881,10 @@ class PaymentPlan(
 
     @property
     def currency_exchange_date(self) -> datetime:
-        if self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED] and (
-            approval := self.approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
+        if (
+                self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+                and (process := self.approval_process.first())
+                and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
         ):
             return approval.created_at.date()
         else:
