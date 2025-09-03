@@ -24,8 +24,7 @@ export const PeoplePage = (): ReactElement => {
   const location = useLocation();
   const { programHasPdu = false } = useProgramContext();
   const { businessArea } = useBaseUrl();
-  const isNewTemplateJustCreated =
-    location.state?.isNewTemplateJustCreated || false;
+
   const permissions = usePermissions();
   const { data: householdChoicesData, isLoading: householdChoicesLoading } =
     useQuery<HouseholdChoices>({
@@ -59,9 +58,9 @@ export const PeoplePage = (): ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const [currentTab, setCurrentTab] = useState(
-    isNewTemplateJustCreated ? 1 : 0,
-  );
+  const tabParam = new URLSearchParams(location.search).get('tab');
+  const initialTab = tabParam === 'periodic-data-updates' ? 1 : 0;
+  const [currentTab, setCurrentTab] = useState(initialTab);
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({

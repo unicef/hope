@@ -19,7 +19,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
   const searchParams = new URLSearchParams(location.search);
   const subtabParam = searchParams.get('subtab');
   const initialTab =
-    subtabParam === 'offline-edits'
+    subtabParam === 'offline-templates'
       ? 1
       : subtabParam === 'online-edits'
         ? 2
@@ -30,7 +30,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
     const subtabParamEffect = new URLSearchParams(location.search).get(
       'subtab',
     );
-    if (subtabParamEffect === 'offline-edits' && value !== 1) {
+    if (subtabParamEffect === 'offline-templates' && value !== 1) {
       setValue(1);
     } else if (subtabParamEffect === 'online-edits' && value !== 2) {
       setValue(2);
@@ -54,7 +54,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
     setValue(newValue);
     const tabParam = searchParams.get('tab') || 'periodic-data-updates';
     let subtab = 'offline-templates';
-    if (newValue === 1) subtab = 'offline-edits';
+    if (newValue === 1) subtab = 'offline-templates';
     if (newValue === 2) subtab = 'online-edits';
     navigate(
       { search: `?tab=${tabParam}&subtab=${subtab}` },
@@ -83,7 +83,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
                     label="Offline Templates"
                     data-cy="pdu-offline-templates"
                   />
-                  <Tab label="Offline Edits" data-cy="pdu-offline-edits" />
+                  <Tab label="Offline Edits" data-cy="pdu-offline-templates" />
                   <Tab label="Online Edits" data-cy="pdu-online-edits" />
                 </Tabs>
               </Box>

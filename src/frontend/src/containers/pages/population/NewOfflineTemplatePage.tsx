@@ -190,9 +190,9 @@ const NewOfflineTemplatePage = (): ReactElement => {
       {
         onSuccess: () => {
           showMessage(t('Template created successfully.'));
-          navigate(`/${baseUrl}/population/individuals`, {
-            state: { isNewTemplateJustCreated: true },
-          });
+          navigate(
+            `/${baseUrl}/population/individuals?tab=periodic-data-updates&subtab=offline-templates`,
+          );
         },
         onError: (error: any) => {
           showApiErrorMessages(
