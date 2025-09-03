@@ -63,8 +63,8 @@ export function RegistrationIndividualBioData({
     <Grid key={doc.id} size={{ xs: 3 }}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={doc.type}>
-            {doc.image ? (
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
               <DocumentRegistrationPhotoModal
                 documentNumber={doc.documentNumber}
                 documentId={doc.id}
@@ -75,7 +75,7 @@ export function RegistrationIndividualBioData({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{doc.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{doc.country.name}</LabelizedField>
       </Box>
     </Grid>
   ));
