@@ -91,6 +91,7 @@ class PDUXlsxTemplateViewSet(
         return super().list(request, *args, **kwargs)
 
     # export the template during template creation
+    @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
         pdu_template = serializer.save()
         pdu_template.queue()
@@ -232,6 +233,7 @@ class PDUOnlineEditViewSet(
             )
         )
 
+    @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
         filters = serializer.validated_data.get("filters", {})
         rounds_data = serializer.validated_data.get("rounds_data", [])
