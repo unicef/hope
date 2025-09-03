@@ -218,7 +218,7 @@ class TestPeriodicDataTemplates:
             in page_pdu_xlsx_templates.get_template_created_by(index).text
         )
 
-        assert "EXPORTED" in page_pdu_xlsx_templates.get_template_status(index).text
+        assert "Exported" in page_pdu_xlsx_templates.get_template_status(index).text
 
     @pytest.mark.night
     def test_periodic_data_template_details(
@@ -305,11 +305,11 @@ class TestPeriodicDataTemplates:
 
         for _ in range(10):
             status = page_individuals.get_template_status(periodic_data_update_template.pk).text
-            if status == "EXPORTED":
+            if status == "Exported":
                 break
             sleep(1)
         else:
-            assert status == "EXPORTED"
+            assert status == "Exported"
 
         page_individuals.get_download_btn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()

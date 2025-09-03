@@ -198,7 +198,7 @@ class TestPDUXlsxUpload:
         assert "IMPORT" in page_individuals.get_button_import_submit().text
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_pdu_updates().click()
+        page_individuals.get_tab_offline_edits().click()
         periodic_data_update_upload = PDUXlsxUpload.objects.first()
         assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
@@ -244,7 +244,7 @@ class TestPDUXlsxUpload:
         page_individuals.get_dialog_import()
         page_individuals.upload_file(tmp_file.name)
         page_individuals.get_button_import_submit().click()
-        page_individuals.get_pdu_updates().click()
+        page_individuals.get_tab_offline_edits().click()
         page_individuals.get_status_container()
         periodic_data_update_upload = PDUXlsxUpload.objects.first()
         assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
@@ -344,4 +344,4 @@ class TestPDUXlsxUpload:
         assert str(pdu_upload.template.id) in page_pdu_xlsx_uploads.get_update_template(index).text
         assert f"{pdu_upload.created_at:%-d %b %Y}" in page_pdu_xlsx_uploads.get_update_created_at(index).text
         assert pdu_upload.created_by.get_full_name() in page_pdu_xlsx_uploads.get_update_created_by(index).text
-        assert "SUCCESSFUL" in page_pdu_xlsx_uploads.get_update_status(index).text
+        assert "Successful" in page_pdu_xlsx_uploads.get_update_status(index).text
