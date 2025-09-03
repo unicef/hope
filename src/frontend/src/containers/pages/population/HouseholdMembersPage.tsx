@@ -27,8 +27,6 @@ export const HouseholdMembersPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { businessArea } = useBaseUrl();
-  const isNewTemplateJustCreated =
-    location.state?.isNewTemplateJustCreated || false;
 
   const permissions = usePermissions();
 
@@ -65,11 +63,7 @@ export const HouseholdMembersPage = (): ReactElement => {
 
   // Tab index: 0 = individuals, 1 = periodic-data-updates
   const tabParam = new URLSearchParams(location.search).get('tab');
-  const initialTab = isNewTemplateJustCreated
-    ? 1
-    : tabParam === 'periodic-data-updates'
-      ? 1
-      : 0;
+  const initialTab = tabParam === 'periodic-data-updates' ? 1 : 0;
   const [currentTab, setCurrentTab] = useState(initialTab);
 
   useEffect(() => {

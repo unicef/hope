@@ -50,9 +50,9 @@ const NewOnlineTemplatePage = (): ReactElement => {
         queryKey: ['periodicFields', businessArea, programId, programId],
       });
       showMessage(t('Template created successfully.'));
-      navigate(`/${baseUrl}/population/individuals`, {
-        state: { isNewTemplateJustCreated: true },
-      });
+      navigate(
+        `/${baseUrl}/population/individuals?tab=periodic-data-updates&subtab=online-edits`,
+      );
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage, t('Failed to create template.'));
