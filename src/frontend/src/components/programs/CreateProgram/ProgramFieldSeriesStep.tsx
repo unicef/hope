@@ -135,7 +135,7 @@ export const ProgramFieldSeriesStep = ({
                               );
                             }}
                             component={FormikSelectField}
-                            choices={[...Array(20).keys()].map((n) => {
+                            choices={[...Array(100).keys()].map((n) => {
                               const isDisabled =
                                 values.editMode &&
                                 fieldDisabled &&
