@@ -1039,13 +1039,15 @@ class TestIndividualDetail:
             "card_expiry_date__bank": "2022-01-01",
             "card_number__bank": "123",
             "name_of_cardholder__bank": "Marek",
+            "financial_institution": "",
+            "number": "",
         }
         assert account_2["data_fields"] == {
             "service_provider_code__mobile": "ABC",
             "delivery_phone_number__mobile": "123456789",
             "provider__mobile": "Provider",
-            "financial_institution": '',
-            "number": ""
+            "financial_institution": "",
+            "number": "",
         }
 
         assert data["linked_grievances"] == [
