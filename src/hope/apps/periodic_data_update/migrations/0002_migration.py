@@ -6,7 +6,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def migrate_celery_task_results_ids(apps, schema_editor):
+def migrate_celery_task_results_ids(apps, schema_editor):  # pragma: no cover
     """Migrate from curr_async_result_id to celery_tasks_results_ids.
 
     This uses the specific task name for each model in bulk.
