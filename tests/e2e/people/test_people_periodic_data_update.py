@@ -245,6 +245,7 @@ class TestPeoplePDUXlsxUpload:
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
+        page_individuals.get_tab_offline_edits().click()
         page_individuals.get_button_import().click()
         page_individuals.get_dialog_import()
         page_individuals.upload_file(tmp_file.name)
@@ -292,7 +293,7 @@ class TestPeoplePDUXlsxUpload:
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
-        page_pdu_xlsx_templates.get_pdu_updates_btn().click()
+        page_individuals.get_tab_offline_edits().click()
         index = pdu_upload.id
         assert str(index) in page_pdu_xlsx_uploads.get_update_id(index).text
         assert str(pdu_upload.template.id) in page_pdu_xlsx_uploads.get_update_template(index).text

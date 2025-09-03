@@ -10,11 +10,11 @@ class PDUXlsxTemplates(BaseComponents):
     page_header_title = 'h5[data-cy="page-header-title"]'
     tab_individuals = 'button[data-cy="tab-individuals"]'
     tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
+    tab_offline_templates = 'button[data-cy="pdu-offline-templates"]'
+    tab_offline_edits = 'button[data-cy="pdu-offline-edits"]'
     title = 'h6[data-cy="title"]'
     new_template_button = 'a[data-cy="new-template-button"]'
     button_import = 'button[data-cy="button-import"]'
-    pdu_templates_btn = 'button[data-cy="pdu-templates"]'
-    pdu_updates_btn = 'button[data-cy="pdu-updates"]'
     head_cell_template_id = 'th[data-cy="head-cell-template-id"]'
     table_label = 'span[data-cy="table-label"]'
     head_cell_number_of_records = 'th[data-cy="head-cell-number-of-records"]'
@@ -58,6 +58,12 @@ class PDUXlsxTemplates(BaseComponents):
     def get_tab_periodic_data_updates(self) -> WebElement:
         return self.wait_for(self.tab_periodic_data_updates)
 
+    def get_tab_offline_templates(self) -> WebElement:
+        return self.wait_for(self.tab_offline_templates)
+
+    def get_tab_offline_edits(self) -> WebElement:
+        return self.wait_for(self.tab_offline_edits)
+
     def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
@@ -66,12 +72,6 @@ class PDUXlsxTemplates(BaseComponents):
 
     def get_button_import(self) -> WebElement:
         return self.wait_for(self.button_import)
-
-    def get_pdu_templates_btn(self) -> WebElement:
-        return self.wait_for(self.pdu_templates_btn)
-
-    def get_pdu_updates_btn(self) -> WebElement:
-        return self.wait_for(self.pdu_updates_btn)
 
     def get_head_cell_template_id(self) -> WebElement:
         return self.wait_for(self.head_cell_template_id)
