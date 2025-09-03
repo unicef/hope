@@ -15,7 +15,6 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.core.models import (
     DataCollectingType,
     FlexibleAttribute,

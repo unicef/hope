@@ -12,9 +12,9 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from hope.apps.payment.forms import TemplateSelectForm
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.forms import TemplateSelectForm
 from hope.apps.payment.models import (
     Payment,
     PaymentHouseholdSnapshot,
