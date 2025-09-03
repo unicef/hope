@@ -9,10 +9,10 @@ from hct_mis_api.apps.core.services.ftp_client import FTPClient
 
 
 class WesternUnionFTPClient(FTPClient):
-    HOST = getattr(settings, "WESTERN_UNION_FTP_SERVER", "")
-    PORT = getattr(settings, "WESTERN_UNION_FTP_PORT", 22)
-    USERNAME = getattr(settings, "WESTERN_UNION_FTP_USERNAME", "")
-    PASSWORD = getattr(settings, "WESTERN_UNION_FTP_PASSWORD", "")
+    HOST = getattr(settings, "FTP_WESTERN_UNION_SERVER", "")
+    PORT = getattr(settings, "FTP_WESTERN_UNION_PORT", 22)
+    USERNAME = getattr(settings, "FTP_WESTERN_UNION_USERNAME", "")
+    PASSWORD = getattr(settings, "FTP_WESTERN_UNION_PASSWORD", "")
 
     QCF_PREFIX_PATTERN = re.compile(r"^QCF-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
 
