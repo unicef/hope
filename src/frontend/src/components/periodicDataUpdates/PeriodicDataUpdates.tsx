@@ -1,7 +1,7 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { Box, Tab, Tabs, Fade, Paper } from '@mui/material';
-import { ChangeEvent, ReactElement, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { ChangeEvent, ReactElement, useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
@@ -12,9 +12,35 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { PeriodicDataUpdatesOfflineTemplates } from './PeriodicDataUpdatesOfflineTemplates';
 import { PeriodicDataUpdatesOfflineEdits } from './PeriodicDataUpdatesOfflineEdits';
 import PeriodicDataUpdatesOnlineEdits from './PeriodicDataUpdatesOnlineEdits';
-
 export const PeriodicDataUpdates = (): ReactElement => {
-  const [value, setValue] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Nested tab logic: tab=periodic-data-updates&subtab=offline-templates
+  const searchParams = new URLSearchParams(location.search);
+  const subtabParam = searchParams.get('subtab');
+  const initialTab =
+    subtabParam === 'offline-edits'
+      ? 1
+      : subtabParam === 'online-edits'
+        ? 2
+        : 0;
+  const [value, setValue] = useState(initialTab);
+
+  useEffect(() => {
+    const subtabParamEffect = new URLSearchParams(location.search).get(
+      'subtab',
+    );
+    if (subtabParamEffect === 'offline-edits' && value !== 1) {
+      setValue(1);
+    } else if (subtabParamEffect === 'online-edits' && value !== 2) {
+      setValue(2);
+    } else if (
+      (subtabParamEffect === 'offline-templates' || !subtabParamEffect) &&
+      value !== 0
+    ) {
+      setValue(0);
+    }
+  }, [location.search, value]);
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
@@ -26,6 +52,14 @@ export const PeriodicDataUpdates = (): ReactElement => {
 
   const handleChange = (_event: ChangeEvent<object>, newValue: number) => {
     setValue(newValue);
+    const tabParam = searchParams.get('tab') || 'periodic-data-updates';
+    let subtab = 'offline-templates';
+    if (newValue === 1) subtab = 'offline-edits';
+    if (newValue === 2) subtab = 'online-edits';
+    navigate(
+      { search: `?tab=${tabParam}&subtab=${subtab}` },
+      { replace: true },
+    );
   };
 
   const newTemplatePath = isSocialDctType
