@@ -307,10 +307,14 @@ export const sendRequest = async (
 
   onCancel(() => controller.abort());
   let  response = await fetch(url, request);
-  if (response?.status == 403) {
-    window.location.href = '/access-denied/';
-  }
   const content = await response.json();
+  try {
+    if (response?.status == 403&&content?.detail!=="Authentication credentials were not provided.") {
+      window.location.href = '/access-denied/';
+    }
+  }catch (error) {
+    console.error(error);
+  }
   response.json = async () => {
     let camelized = deepCamelize(content);
     // Special handling for pdu_fields
