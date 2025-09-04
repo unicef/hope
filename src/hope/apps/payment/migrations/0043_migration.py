@@ -5,32 +5,44 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0042_migration'),
+        ("payment", "0042_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='westernunioninvoice',
-            options={'verbose_name': 'Western Union Invoice', 'verbose_name_plural': 'Western Union Invoices'},
+            name="westernunioninvoice",
+            options={"verbose_name": "Western Union Invoice", "verbose_name_plural": "Western Union Invoices"},
         ),
         migrations.AlterModelOptions(
-            name='westernunionpaymentplanreport',
-            options={'verbose_name': 'Western Union Payment Plan Report', 'verbose_name_plural': 'Western Union Payment Plan Reports'},
+            name="westernunionpaymentplanreport",
+            options={
+                "verbose_name": "Western Union Payment Plan Report",
+                "verbose_name_plural": "Western Union Payment Plan Reports",
+            },
         ),
         migrations.CreateModel(
-            name='WesternUnionInvoicePayment',
+            name="WesternUnionInvoicePayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('transaction_status', models.CharField(choices=[('2', 'Paid or delivered'), ('6', 'Cancelled'), ('7', 'Purged')], max_length=1)),
-                ('payment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='payment.payment')),
-                ('western_union_invoice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='payment.westernunioninvoice')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "transaction_status",
+                    models.CharField(
+                        choices=[("2", "Paid or delivered"), ("6", "Cancelled"), ("7", "Purged")], max_length=1
+                    ),
+                ),
+                ("payment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.payment")),
+                (
+                    "western_union_invoice",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.westernunioninvoice"),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='westernunioninvoice',
-            name='payments',
-            field=models.ManyToManyField(related_name='invoices', through='payment.WesternUnionInvoicePayment', to='payment.Payment'),
+            model_name="westernunioninvoice",
+            name="payments",
+            field=models.ManyToManyField(
+                related_name="invoices", through="payment.WesternUnionInvoicePayment", to="payment.Payment"
+            ),
         ),
     ]

@@ -35,7 +35,7 @@ class BiometricDeduplicationService:
     DEDUP_STATE_READY = "Ready"
     DEDUP_STATE_FAILED = "Failed"
 
-    class BiometricDeduplicationServiceException(Exception):
+    class BiometricDeduplicationServiceError(Exception):
         pass
 
     def __init__(self) -> None:

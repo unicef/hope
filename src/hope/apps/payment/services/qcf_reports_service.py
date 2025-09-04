@@ -1,33 +1,32 @@
+from collections import defaultdict
 import csv
 import dataclasses
+from datetime import datetime
 import io
 import logging
-import zipfile
-from collections import defaultdict
-from datetime import datetime
 from tempfile import NamedTemporaryFile
-from typing import IO, List, Tuple
+from typing import IO
+import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.template.loader import render_to_string
-
 import openpyxl
 from openpyxl.styles import Font
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.celery_tasks import send_qcf_report_email_notifications
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.payment.models.payment import (
+from hope.apps.account.models import User
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.models import FileTemp
+from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications
+from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.payment.models.payment import (
     WesternUnionInvoice,
     WesternUnionInvoicePayment,
     WesternUnionPaymentPlanReport,
 )
-from hct_mis_api.apps.payment.services.western_union_ftp import WesternUnionFTPClient
+from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class QCFReportPaymentPlanData:
     charges_total: float = dataclasses.field(init=False)
     refunds_total: float = dataclasses.field(init=False)
     fees_total: float = dataclasses.field(init=False)
-    payments_data: List[QCFReportPaymentRowData]
+    payments_data: list[QCFReportPaymentRowData]
 
     def __post_init__(self) -> None:
         self.principal_total = sum(p.principal_amount for p in self.payments_data if p.principal_amount >= 0) or 0
@@ -63,7 +62,7 @@ class QCFReportPaymentPlanData:
 
 
 class QCFReportsService:
-    class QCFReportsServiceException(Exception):
+    class QCFReportsServiceError(Exception):
         pass
 
     def process_zip_file(self, file_content: io.BytesIO, wu_qcf_file: WesternUnionInvoice) -> None:
@@ -75,7 +74,7 @@ class QCFReportsService:
 
     def process_files_since(self, date_from: datetime) -> None:
         ftp_client = WesternUnionFTPClient()
-        files: List[Tuple[str, io.BytesIO]] = ftp_client.get_files_since(date_from)
+        files: list[tuple[str, io.BytesIO]] = ftp_client.get_files_since(date_from)
         for filename, file_like in files:
             if not WesternUnionInvoice.objects.filter(name=filename).exists():
                 wu_qcf_file = self.store_qcf_file(filename, file_like)
@@ -104,7 +103,7 @@ class QCFReportsService:
         return wu_qcf_file
 
     def link_payments_with_invoice(
-        self, wu_qcf_file: WesternUnionInvoice, payment_raw_data: List[Tuple[Payment, list]]
+        self, wu_qcf_file: WesternUnionInvoice, payment_raw_data: list[tuple[Payment, list]]
     ) -> None:
         objs = []
         for payment, fields in payment_raw_data:
@@ -125,11 +124,11 @@ class QCFReportsService:
         try:
             decoded_content = file_content.decode("utf-8")
         except UnicodeDecodeError:
-            raise self.QCFReportsServiceException(f"Could not decode QCF report file {filename}")
+            raise self.QCFReportsServiceError(f"Could not decode QCF report file {filename}")
 
         lines = list(csv.reader(io.StringIO(decoded_content)))
         for fields in lines[1:-1]:
-            payment_unicef_id = f"RC{fields[9].strip('\"')}"
+            payment_unicef_id = f"RC{fields[9].strip('"')}"
 
             try:
                 payment = Payment.objects.get(unicef_id=payment_unicef_id)
@@ -168,8 +167,8 @@ class QCFReportsService:
                 )
 
     def generate_report(
-        self, payment_plan: PaymentPlan, payment_raw_data: List[Tuple[Payment, list]]
-    ) -> Tuple[str, openpyxl.Workbook]:
+        self, payment_plan: PaymentPlan, payment_raw_data: list[tuple[Payment, list]]
+    ) -> tuple[str, openpyxl.Workbook]:
         no_of_qcf_reports_for_pp = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
         report_filename = (
             f"QCF_{payment_plan.business_area.slug}_{payment_plan.unicef_id}_{no_of_qcf_reports_for_pp + 1}.xlsx"
@@ -181,7 +180,7 @@ class QCFReportsService:
                 "funds_commitment_group__funds_commitment_number", "funds_commitment_item"
             )
         )
-        payments_data: List[QCFReportPaymentRowData] = []
+        payments_data: list[QCFReportPaymentRowData] = []
         for payment, fields in payment_raw_data:
             report_mtcn = fields[1]
             mtcn_match: bool = str(report_mtcn) == str(payment.fsp_auth_code)
@@ -258,8 +257,7 @@ class QCFReportsService:
         return wb
 
     def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
-        """
-        # TODO refactor to 'dev' new perms
+        """# TODO refactor to 'dev' new perms
         role_assignments = RoleAssignment.objects.filter(
             role__permissions__contains=[Permissions.RECEIVE_PARSED_WU_QCF.name],
             business_area=business_area,
@@ -267,7 +265,7 @@ class QCFReportsService:
         users = User.objects.filter(
             Q(role_assignments__in=role_assignments) |
             Q(partner__role_assignments__in=role_assignments)
-        ).distinct()
+        ).distinct().
         """
         business_area = report.payment_plan.business_area
         users = [
@@ -275,7 +273,6 @@ class QCFReportsService:
             for user in User.objects.all()
             if user.has_permission(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
-        print(users)
         for user in users:
             self.send_report_email_to_user(user, report)
 

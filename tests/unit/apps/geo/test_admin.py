@@ -4,25 +4,19 @@ from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.test import Client, override_settings
 from django.urls import reverse
-from django_webtest import WebTest
-
-import pytest
 from django_webtest import DjangoTestApp
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from factory import fuzzy
 from flaky import flaky
+import pytest
 from webtest import Upload
 
 from extras.test_utils.factories.account import UserFactory
-from hope.apps.account.models import User
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Country
-from hope.admin.geo import AreaAdmin
-from hope.apps.account.models import Partner, User
+from hope.apps.account.models import User
 from hope.apps.geo.models import Area, AreaType
 
-
 pytestmark = pytest.mark.django_db
+
 
 @pytest.fixture
 def superuser() -> User:
@@ -46,6 +40,7 @@ def test_data() -> None:
     def test_modeladmin_str(self) -> None:
         ma = ModelAdmin(Area, self.site)
         assert str(ma) == "geo.ModelAdmin"
+
 
 @pytest.fixture
 def app() -> DjangoTestApp:
@@ -93,6 +88,7 @@ def test_login(app: DjangoTestApp, client: Client, superuser: User) -> None:
         assert AreaType.objects.count() == 4, "Two new area types created"
         assert Area.objects.count() == 8, "Two new area created"
 
+
 @flaky(max_runs=3, min_passes=1)
 @patch("hope.apps.geo.admin.import_areas_from_csv_task.delay")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
@@ -131,7 +127,7 @@ def test_upload(mock_task_delay: Mock, app: DjangoTestApp, client: Client, super
 
 
 @pytest.mark.parametrize(
-    "csv_content, expected_message",
+    ("csv_content", "expected_message"),
     [
         (b"Country,Province,District,Admin0,Adm1,Adm2\n", "CSV file is empty."),
         (

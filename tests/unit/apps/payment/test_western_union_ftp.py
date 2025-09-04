@@ -1,14 +1,13 @@
-import io
 from datetime import datetime, timedelta
+import io
 from typing import Any, Generator
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
-
 import pytest
 
-from hct_mis_api.apps.payment.services.western_union_ftp import WesternUnionFTPClient
+from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 
 
 class WesternUnionFTPClientMock(WesternUnionFTPClient):
@@ -30,13 +29,16 @@ def mock_sftp() -> Generator[dict[str, Any], None, None]:
     mock_transport: MagicMock = MagicMock()
     mock_sftp_client: MagicMock = MagicMock()
 
-    with patch(
-        "hct_mis_api.apps.core.services.ftp_client.paramiko.Transport",
-        return_value=mock_transport,
-    ) as mock_transport_cls, patch(
-        "hct_mis_api.apps.core.services.ftp_client.paramiko.SFTPClient.from_transport",
-        return_value=mock_sftp_client,
-    ) as mock_sftp_cls:
+    with (
+        patch(
+            "hope.apps.core.services.ftp_client.paramiko.Transport",
+            return_value=mock_transport,
+        ) as mock_transport_cls,
+        patch(
+            "hope.apps.core.services.ftp_client.paramiko.SFTPClient.from_transport",
+            return_value=mock_sftp_client,
+        ) as mock_sftp_cls,
+    ):
         yield {
             "transport_cls": mock_transport_cls,
             "sftp_cls": mock_sftp_cls,
@@ -74,21 +76,22 @@ class TestWesternUnionFTPClient(TestCase):
             self.make_attr("QCF-999-ABC-20240101.zip", old_time),  # too old
         ]
 
-        with mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs), mock.patch.object(
-            ftp_client, "download", return_value=io.BytesIO(b"fake content")
-        ) as mock_download:
+        with (
+            mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
+            mock.patch.object(ftp_client, "download", return_value=io.BytesIO(b"fake content")) as mock_download,
+        ):
             results = ftp_client.get_files_since(now - timedelta(days=1))
 
-            self.assertEqual(len(results), 1)
+            assert len(results) == 1
             fname, filelike = results[0]
-            self.assertEqual(fname, "QCF-123-XYZ-20250101.zip")
-            self.assertIsInstance(filelike, io.BytesIO)
-            self.assertEqual(filelike.getvalue(), b"fake content")
+            assert fname == "QCF-123-XYZ-20250101.zip"
+            assert isinstance(filelike, io.BytesIO)
+            assert filelike.getvalue() == b"fake content"
 
             mock_download.assert_called_once_with("QCF-123-XYZ-20250101.zip")
 
     def test_init_raises_if_missing_credentials(self) -> None:
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             WesternUnionFTPClientMockNoCredentials()
 
     def test_disconnect_closes_resources(
@@ -121,5 +124,5 @@ class TestWesternUnionFTPClient(TestCase):
 
         fl = ftp_client.download("remote.txt")
         ftp_client.client.getfo.assert_called_once()
-        self.assertIsInstance(fl, io.BytesIO)
-        self.assertEqual(fl.read(), b"hello world")
+        assert isinstance(fl, io.BytesIO)
+        assert fl.read() == b"hello world"

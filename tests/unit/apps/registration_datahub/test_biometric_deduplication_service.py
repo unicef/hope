@@ -89,7 +89,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         service = BiometricDeduplicationService()
         deduplication_set_id = str(uuid.uuid4())
 
-        mock_get_deduplication_set.return_value = dict(state="Ready")
+        mock_get_deduplication_set.return_value = {"state": "Ready"}
 
         data = service.get_deduplication_set(deduplication_set_id)
         assert data == DeduplicationSetData(state="Ready", error="")

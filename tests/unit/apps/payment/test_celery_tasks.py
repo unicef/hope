@@ -317,15 +317,15 @@ class TestPaymentCeleryTask(TestCase):
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_runs_service_process_files_since(self, mock_service_cls: Mock) -> None:
         mock_service = mock_service_cls.return_value
         periodic_sync_payment_plan_invoices_western_union_ftp()
         mock_service.process_files_since.assert_called_once()
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger.exception")
-    @patch("hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp.retry")
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.celery_tasks.logger.exception")
+    @patch("hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp.retry")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_runs_service_process_files_since_retries_on_exception(
         self,
         mock_service_cls: Mock,
@@ -335,14 +335,14 @@ class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
         mock_service = mock_service_cls.return_value
         mock_service.process_files_since.side_effect = Exception("test")
         mock_retry.side_effect = Retry("forced retry test")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             periodic_sync_payment_plan_invoices_western_union_ftp()
         mock_logger_exception.assert_called_once()
         mock_retry.assert_called_once()
 
 
 class SendQCFReportEmailNotificationsTests(TestCase):
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_sends_email_and_marks_sent(
         self,
         mock_service_cls: Mock,
@@ -359,11 +359,11 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
         mock_service.send_notification_emails.assert_called_once_with(qcf_report)
         qcf_report.refresh_from_db()
-        self.assertTrue(qcf_report.sent)
+        assert qcf_report.sent
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger.exception")
-    @patch("hct_mis_api.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.celery_tasks.logger.exception")
+    @patch("hope.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_sends_email_and_marks_sent_retries_on_exception(
         self,
         mock_service_cls: Mock,
@@ -380,7 +380,7 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         mock_service.send_notification_emails.side_effect = Exception("test abc")
 
         mock_retry.side_effect = Retry("forced retry test")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
         mock_logger_exception.assert_called_once()
         mock_retry.assert_called_once()

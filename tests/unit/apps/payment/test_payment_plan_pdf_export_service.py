@@ -113,11 +113,11 @@ class TestPaymentPlanPDFExportService(TestCase):
         assert filename2 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
 
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_pdf_summary_reconciliation(self, generate_pdf_from_html_mock: Any, get_link_mock: Any) -> None:
@@ -128,23 +128,21 @@ class TestPaymentPlanPDFExportService(TestCase):
         pdf_context_data = kwargs["data"]
         pdf_reconciliation_qs = pdf_context_data["reconciliation"]
 
-        self.assertEqual(pdf_reconciliation_qs["pending_usd"], 20.0)
-        self.assertEqual(pdf_reconciliation_qs["pending_local"], 10.0)
-        self.assertEqual(pdf_reconciliation_qs["reconciled_usd"], 30.0)
-        self.assertEqual(pdf_reconciliation_qs["reconciled_local"], 15.0)
-        self.assertEqual(pdf_reconciliation_qs["failed_usd"], 210.0)
-        self.assertEqual(pdf_reconciliation_qs["failed_local"], 105.0)
-        self.assertEqual(
+        assert pdf_reconciliation_qs["pending_usd"] == 20.0
+        assert pdf_reconciliation_qs["pending_local"] == 10.0
+        assert pdf_reconciliation_qs["reconciled_usd"] == 30.0
+        assert pdf_reconciliation_qs["reconciled_local"] == 15.0
+        assert pdf_reconciliation_qs["failed_usd"] == 210.0
+        assert pdf_reconciliation_qs["failed_local"] == 105.0
+        assert self.payment_plan.total_entitled_quantity == (
             pdf_reconciliation_qs["failed_local"]
             + pdf_reconciliation_qs["reconciled_local"]
-            + pdf_reconciliation_qs["pending_local"],
-            self.payment_plan.total_entitled_quantity,
+            + pdf_reconciliation_qs["pending_local"]
         )
-        self.assertEqual(
+        assert self.payment_plan.total_entitled_quantity_usd == (
             pdf_reconciliation_qs["failed_usd"]
             + pdf_reconciliation_qs["reconciled_usd"]
-            + pdf_reconciliation_qs["pending_usd"],
-            self.payment_plan.total_entitled_quantity_usd,
+            + pdf_reconciliation_qs["pending_usd"]
         )
 
     def test_get_email_context(self) -> None:
