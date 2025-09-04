@@ -123,7 +123,6 @@ const PeopleDetailsPage = (): ReactElement => {
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-
   if (
     !individual ||
     !individualChoicesData ||
