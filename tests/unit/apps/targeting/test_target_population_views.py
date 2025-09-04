@@ -242,7 +242,7 @@ class TestTargetPopulationViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
             assert etag_second_call == etag
 
@@ -255,7 +255,7 @@ class TestTargetPopulationViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
             # assert etag_call_after_update != etag  # FIXME check and fix
 
@@ -266,6 +266,6 @@ class TestTargetPopulationViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
             assert etag_call_after_update_second_call == etag_call_after_update

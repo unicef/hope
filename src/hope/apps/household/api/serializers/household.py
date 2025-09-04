@@ -450,7 +450,12 @@ class IndividualChoicesSerializer(serializers.Serializer):
         return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
 
     def get_account_financial_institution_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()]
+        business_area = self.context.get("business_area")
+        fis = FinancialInstitution.objects.all()
+        if business_area:
+            fis = fis.filter(country__business_areas=business_area).distinct()
+
+        return [{"name": x.name, "value": x.id} for x in fis]
 
 
 class HouseholdSmallSerializer(serializers.ModelSerializer):
