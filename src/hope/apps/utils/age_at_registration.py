@@ -10,5 +10,5 @@ def calculate_age_at_registration(
 ) -> int | None:
     try:
         return relativedelta(created_at.date(), parser.parse(birth_date).date()).years
-    except Exception:
+    except ValueError:
         return None

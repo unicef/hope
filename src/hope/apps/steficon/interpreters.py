@@ -27,7 +27,7 @@ class Interpreter:
         try:
             self.execute()
             return True
-        except Exception as e:
+        except RuleError as e:
             logger.warning(e)
             raise ValidationError(str(e))
 
@@ -77,7 +77,7 @@ class PythonExec(Interpreter):
             try:
                 mod = importlib.import_module(module_name)
                 gl["__builtins__"][module_name] = mod
-            except Exception as e:
+            except ImportError as e:
                 logger.exception(e)
 
         pts = self.get_result()
@@ -97,7 +97,8 @@ class PythonExec(Interpreter):
                 line_number=line_number,
                 traceback=None,
             )
-        except Exception as err:
+        except (TypeError, ValueError, NameError, AttributeError, IndexError, KeyError, ZeroDivisionError) as err:
+            logger.warning(err)
             error_class = err.__class__.__name__
             detail = err.args[0]
             cl, exc, tb = sys.exc_info()
@@ -132,7 +133,7 @@ class PythonExec(Interpreter):
         try:
             compile(self.init_string, "<code>", mode="exec")
             return True
-        except Exception as e:
+        except SyntaxError as e:
             logger.warning(e)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]

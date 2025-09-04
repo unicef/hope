@@ -36,6 +36,8 @@ class Individuals(BaseComponents):
 
     # PDU
     tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
+    tab_offline_templates = 'button[data-cy="pdu-offline-templates"]'
+    tab_offline_edits = 'button[data-cy="pdu-offline-edits"]'
     button_import = 'button[data-cy="button-import"]'
     dialog_import = 'div[data-cy="dialog-import"]'
     file_input = 'input[data-cy="file-input"]'
@@ -47,7 +49,6 @@ class Individuals(BaseComponents):
     update_details_btn = 'button[data-cy="update-details-btn-{}"]'
     download_btn = 'a[data-cy="download-btn-{}"]'
     export_btn = 'button[data-cy="export-btn-{}"]'
-    pdu_updates = 'button[data-cy="pdu-updates"]'
     status_container = '[data-cy="status-container"]'
     pdu_form_errors = 'div[data-cy="pdu-form-errors"]'
     pdu_upload_error = 'div[data-cy="pdu-upload-error"]'
@@ -138,6 +139,12 @@ class Individuals(BaseComponents):
     def get_tab_periodic_data_updates(self) -> WebElement:
         return self.wait_for(self.tab_periodic_data_updates)
 
+    def get_tab_offline_templates(self) -> WebElement:
+        return self.wait_for(self.tab_offline_templates)
+
+    def get_tab_offline_edits(self) -> WebElement:
+        return self.wait_for(self.tab_offline_edits)
+
     def get_button_import(self) -> WebElement:
         return self.wait_for(self.button_import)
 
@@ -164,9 +171,6 @@ class Individuals(BaseComponents):
 
     def get_update_details_btn(self, pk: Union[int, str]) -> WebElement:
         return self.wait_for(self.update_details_btn.format(pk))
-
-    def get_pdu_updates(self) -> WebElement:
-        return self.wait_for(self.pdu_updates)
 
     def get_status_container(self) -> WebElement:
         return self.wait_for(self.status_container)

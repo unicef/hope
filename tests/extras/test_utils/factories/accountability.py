@@ -101,7 +101,7 @@ class CommunicationMessageFactory(DjangoModelFactory):
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cash_plan_payment_verification_summary(obj, create: bool, extracted: bool, **kwargs: Any) -> None:  # noqa: N805
         if not create:
             return
 

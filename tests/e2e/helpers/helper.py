@@ -227,7 +227,7 @@ class Common:
         try:
             self.wait_for(select_option).click()
             self.wait_for_disappear(select_option)
-        except BaseException:
+        except TimeoutException:
             sleep(1)
             self.wait_for(select_option).click()
             self.wait_for_disappear(select_option)
@@ -240,7 +240,7 @@ class Common:
         actions.send_keys(Keys.ESCAPE).perform()
         try:
             self.wait_for_disappear(select_option)
-        except BaseException:
+        except TimeoutException:
             sleep(1)
             self.wait_for(select_option).click()
             self.wait_for_disappear(select_option)
@@ -291,7 +291,7 @@ class Common:
         for ii in ids:
             try:
                 logger.info(f"{ii.text}: {ii.get_attribute(attribute)}")
-            except BaseException:
+            except TimeoutException:
                 logger.info(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:

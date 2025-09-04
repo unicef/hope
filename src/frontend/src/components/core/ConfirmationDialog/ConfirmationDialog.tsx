@@ -1,3 +1,4 @@
+import React, { FC, ReactElement } from 'react';
 import {
   Button,
   Dialog,
@@ -6,7 +7,6 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { FC, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
@@ -16,7 +16,7 @@ export interface ConfirmationDialogOptions {
   title?: string;
   content?: string | ReactElement;
   continueText?: string;
-  extraContent?: string;
+  extraContent?: React.ReactNode;
   warningContent?: string | null;
   disabled?: boolean;
   type?: 'error' | 'primary';

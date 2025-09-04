@@ -20,6 +20,7 @@ from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from jsoneditor.forms import JSONEditor
+import requests
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
 from hope.apps.account.models import Partner, RoleAssignment
@@ -340,7 +341,7 @@ class BusinessAreaAdmin(
                         messages.error(request, error)
                     else:
                         messages.success(request, "Connection successful")
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             context["form"] = form
 
@@ -358,7 +359,7 @@ class BusinessAreaAdmin(
                 task = MarkSubmissions(business_area)
                 result = task.execute()
                 self.message_user(request, result["message"], messages.SUCCESS)
-            except Exception as e:
+            except ValueError as e:
                 logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))

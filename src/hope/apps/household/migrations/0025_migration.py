@@ -5,6 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    atomic = False
     dependencies = [
         ("household", "0024_migration"),
     ]
