@@ -214,10 +214,10 @@
                     );
 
                     const topProgramGroup = {
-                            all: () => programGroup.all().slice(0, 30), // Top 30 programs
+                            all: () => programGroup.filter(d => d.value > 1).slice(0, 30), // Top 30 programs
                         };
                     const topAdmin1Group = {
-                        all: () => admin1Group.all().slice(0, 30), // Top 30 admin1
+                        all: () => admin1Group.filter(d => d.value > 1).slice(0, 30), // Top 30 admin1
                     };
                     const monthGroup = monthDim
                         .group()
