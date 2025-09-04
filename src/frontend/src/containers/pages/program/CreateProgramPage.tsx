@@ -25,6 +25,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   mapPartnerChoicesWithoutUnicef,
   showApiErrorMessages,
+  deepUnderscore,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -172,12 +173,16 @@ export const CreateProgramPage = (): ReactElement => {
     };
 
     const pduFieldsWithReplacedNulls = values.pduFields.map(transformPduField);
-
-    const pduFieldsToSend = pduFieldsWithReplacedNulls.every(arePduFieldsEqual)
+    const pduFieldsToSendRaw = pduFieldsWithReplacedNulls.every(
+      arePduFieldsEqual,
+    )
       ? null
       : pduFieldsWithReplacedNulls.length > 0
         ? pduFieldsWithReplacedNulls
         : null;
+    const pduFieldsToSend = pduFieldsToSendRaw
+      ? deepUnderscore(pduFieldsToSendRaw)
+      : null;
 
     try {
       const programData: ProgramCreate = {
@@ -291,6 +296,7 @@ export const CreateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
+        console.log('errors', errors);
         const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
           userPartnerChoices,
           values.partners,
