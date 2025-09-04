@@ -11,6 +11,7 @@ from django.template.response import TemplateResponse
 from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.steficon.debug import get_error_info
+from hope.apps.steficon.exception import RuleError
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -98,7 +99,7 @@ try:  # pragma: no cover
                             self.message_user(request, f"{len(elements)} scores calculated")
                         else:
                             self.message_user(request, "No records found", messages.WARNING)
-                    except Exception as e:
+                    except (ValueError, RuleError) as e:
                         logger.warning(e)
                         context["exception"] = e
                         context["rule_error"] = get_error_info(e)

@@ -2,8 +2,10 @@ from datetime import timedelta
 import logging
 from typing import Any
 
+from django.db import Error
 from django.db.models import Q
 from django.utils import timezone
+from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionError, RequestError
 
 from hope.apps.core.celery import app
 from hope.apps.grievance.models import GrievanceTicket
@@ -32,13 +34,18 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
         )
         from hope.apps.household.models import Individual
 
-        individual = Individual.objects.get(id=individual_id)
+        try:
+            individual = Individual.objects.get(id=individual_id)
+        except Individual.DoesNotExist as e:
+            logger.warning(e)
+            return
+
         if individual:
             business_area_name = individual.business_area.name
             set_sentry_business_area_tag(business_area_name)
 
         deduplicate_and_check_against_sanctions_list_task_single_individual(should_populate_index, individual)
-    except Exception as e:
+    except (Individual.DoesNotExist, Error, ElasticsearchConnectionError, RequestError) as e:
         logger.warning(e)
         raise self.retry(exc=e)
 

@@ -56,7 +56,7 @@ export function LookUpRegistrationDataImportTableRowCommunication({
             }}
             value={registrationDataImport.id}
             name="radio-button-household"
-            inputProps={{ 'aria-label': registrationDataImport.id }}
+            slotProps={{ input: { 'aria-label': registrationDataImport.id } }}
           />
         </TableCell>
       )}

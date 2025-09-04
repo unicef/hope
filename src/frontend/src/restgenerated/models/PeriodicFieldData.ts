@@ -7,5 +7,9 @@ export type PeriodicFieldData = {
     subtype: SubtypeEnum;
     numberOfRounds: number;
     roundsNames?: Array<string>;
+    /**
+     * Number of rounds already used in templates and cannot be used in template creation again.
+     */
+    roundsCovered?: number;
 };
 

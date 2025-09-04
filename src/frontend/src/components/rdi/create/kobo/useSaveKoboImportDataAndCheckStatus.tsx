@@ -56,7 +56,6 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     },
     enabled: !!importDataId,
     refetchInterval: (data) => {
-      console.log('Polling kobo import data status...', data);
       // Stop polling if status is final
       if (
         data &&

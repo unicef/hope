@@ -24,6 +24,7 @@ import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  deepUnderscore,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
   showApiErrorMessages,
@@ -170,12 +171,16 @@ const DuplicateProgramPage = (): ReactElement => {
     };
 
     const pduFieldsWithReplacedNulls = values.pduFields.map(transformPduField);
-
-    const pduFieldsToSend = pduFieldsWithReplacedNulls.every(arePduFieldsEqual)
-      ? []
+    const pduFieldsToSendRaw = pduFieldsWithReplacedNulls.every(
+      arePduFieldsEqual,
+    )
+      ? null
       : pduFieldsWithReplacedNulls.length > 0
         ? pduFieldsWithReplacedNulls
-        : [];
+        : null;
+    const pduFieldsToSend = pduFieldsToSendRaw
+      ? deepUnderscore(pduFieldsToSendRaw)
+      : null;
 
     try {
       const programData = {
@@ -271,7 +276,7 @@ const DuplicateProgramPage = (): ReactElement => {
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
-        areas: partner.areas.map((area) => area.id),
+        areas: partner?.areas?.map((area) => area?.id) || [],
         areaAccess: partner.areaAccess,
       })),
     partnerAccess: partnerAccess,

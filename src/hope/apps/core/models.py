@@ -355,8 +355,13 @@ class PeriodicFieldData(models.Model):
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
-    rounds_names = ArrayField(models.CharField(max_length=255), default=list)
+    rounds_names = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     number_of_rounds = models.IntegerField()
+    rounds_covered = models.PositiveSmallIntegerField(
+        default=0,
+        blank=True,
+        help_text="Number of rounds already used in templates and cannot be used in template creation again.",
+    )
 
     class Meta:
         verbose_name = "Periodic Field Data"
@@ -364,6 +369,15 @@ class PeriodicFieldData(models.Model):
 
     def __str__(self) -> str:
         return f"Periodic Field Data: {self.pk}"
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self) -> None:
+        if self.rounds_covered > self.number_of_rounds:
+            raise ValidationError({"rounds_covered": "Used rounds cannot exceed the total number of rounds."})
+        super().clean()
 
 
 class XLSXKoboTemplateManager(models.Manager):

@@ -12,9 +12,9 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
@@ -22,12 +22,11 @@ import { IndividualsListTable } from '../../tables/population/IndividualsListTab
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const { programHasPdu, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { businessArea } = useBaseUrl();
-  const isNewTemplateJustCreated =
-    location.state?.isNewTemplateJustCreated || false;
 
   const permissions = usePermissions();
 
@@ -62,9 +61,23 @@ export const HouseholdMembersPage = (): ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const [currentTab, setCurrentTab] = useState(
-    isNewTemplateJustCreated ? 1 : 0,
-  );
+  // Tab index: 0 = individuals, 1 = periodic-data-updates
+  const tabParam = new URLSearchParams(location.search).get('tab');
+  const initialTab = tabParam === 'periodic-data-updates' ? 1 : 0;
+  const [currentTab, setCurrentTab] = useState(initialTab);
+
+  useEffect(() => {
+    // Sync tab with URL param on location change
+    const tabParamEffect = new URLSearchParams(location.search).get('tab');
+    if (tabParamEffect === 'periodic-data-updates' && currentTab !== 1) {
+      setCurrentTab(1);
+    } else if (
+      (tabParamEffect === 'individuals' || !tabParamEffect) &&
+      currentTab !== 0
+    ) {
+      setCurrentTab(0);
+    }
+  }, [location.search, currentTab]);
 
   const canViewPDUListAndDetails = hasPermissions(
     PERMISSIONS.PDU_VIEW_LIST_AND_DETAILS,
@@ -75,6 +88,25 @@ export const HouseholdMembersPage = (): ReactElement => {
     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
     permissions,
   );
+
+  const handleTabChange = (newValue: number): void => {
+    setCurrentTab(newValue);
+    if (newValue === 0) {
+      navigate(
+        {
+          search: '?tab=individuals',
+        },
+        { replace: true },
+      );
+    } else if (newValue === 1) {
+      navigate(
+        {
+          search: '?tab=periodic-data-updates',
+        },
+        { replace: true },
+      );
+    }
+  };
 
   if (individualChoicesLoading) return <LoadingComponent />;
 
@@ -90,7 +122,7 @@ export const HouseholdMembersPage = (): ReactElement => {
           <Tabs
             value={currentTab}
             onChange={(_, newValue) => {
-              setCurrentTab(newValue);
+              handleTabChange(newValue);
             }}
           >
             <Tab
