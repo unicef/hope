@@ -2,6 +2,7 @@ import csv
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Generator, Union
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_sync.mixin import SyncMixin
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -158,7 +159,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",
