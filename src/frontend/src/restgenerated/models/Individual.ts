@@ -27,7 +27,7 @@ export type Individual = {
     documents?: Array<Document>;
     birthDate: string;
     accounts?: Array<Account>;
-    photo?: string;
+    photo?: string | null;
     individualId: string;
     removedDate?: string | null;
     lastSyncAt?: string | null;
