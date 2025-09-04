@@ -13,10 +13,6 @@ from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-
-from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.household.models import Individual
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.utils.exceptions import log_and_raise
 
 

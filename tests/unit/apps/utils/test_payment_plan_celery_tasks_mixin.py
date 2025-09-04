@@ -199,8 +199,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             )
             assert response.status_code == status.HTTP_302_FOUND
             assert (
-                list(messages.get_messages(response.wsgi_request))[-1].message
-                == f"There is no current"
-                   f" {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx}"
-                   f" for this payment plan"
+                list(messages.get_messages(response.wsgi_request))[-1].message == f"There is no current"
+                f" {PaymentPlanCeleryTasksMixin.import_payment_plan_payment_list_per_fsp_from_xlsx}"
+                f" for this payment plan"
             )

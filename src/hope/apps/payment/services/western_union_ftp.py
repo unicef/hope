@@ -1,7 +1,6 @@
+from datetime import datetime
 import io
 import re
-from datetime import datetime
-from typing import List, Tuple
 
 from django.conf import settings
 
@@ -18,15 +17,10 @@ class WesternUnionFTPClient(FTPClient):
 
     def print_files(self) -> None:
         files = self.list_files_w_attrs()
-        for attr in files:
-            print(
-                {
-                    "filename": attr.filename,
-                    "modified": datetime.fromtimestamp(attr.st_mtime),
-                }
-            )
+        for _attr in files:
+            pass
 
-    def get_files_since(self, date_from: datetime) -> List[Tuple[str, io.BytesIO]]:
+    def get_files_since(self, date_from: datetime) -> list[tuple[str, io.BytesIO]]:
         files = [f for f in self.list_files_w_attrs() if datetime.fromtimestamp(f.st_mtime) >= date_from]
         return_files = []
         for f in files:

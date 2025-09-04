@@ -249,7 +249,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
 
                 self.message_user(
                     request,
-                    (f"Found {new_areas_count} new areas to create. " "The import is running in the background."),
+                    (f"Found {new_areas_count} new areas to create. The import is running in the background."),
                     messages.SUCCESS,
                 )
                 return redirect("admin:geo_area_changelist")

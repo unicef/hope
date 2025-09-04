@@ -2462,12 +2462,12 @@ class WesternUnionInvoice(models.Model):
         related_name="invoices",
     )
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         verbose_name = "Western Union Invoice"
         verbose_name_plural = "Western Union Invoices"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class WesternUnionPaymentPlanReport(models.Model):
@@ -2491,12 +2491,12 @@ class WesternUnionPaymentPlanReport(models.Model):
     )
     sent = models.BooleanField(default=False)
 
-    def __str__(self) -> str:
-        return f"{self.payment_plan.name} - sent: {self.sent}"
-
     class Meta:
         verbose_name = "Western Union Payment Plan Report"
         verbose_name_plural = "Western Union Payment Plan Reports"
+
+    def __str__(self) -> str:
+        return f"{self.payment_plan.name} - sent: {self.sent}"
 
 
 class WesternUnionInvoicePayment(models.Model):
@@ -2521,3 +2521,6 @@ class WesternUnionInvoicePayment(models.Model):
         max_length=1,
         choices=TRANSACTION_STATUS_CHOICES,
     )
+
+    def __str__(self) -> str:
+        return f"{self.payment.unicef_id} - {self.transaction_status}"

@@ -5,37 +5,69 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0010_migration'),
-        ('payment', '0041_migration'),
+        ("core", "0010_migration"),
+        ("payment", "0041_migration"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WesternUnionInvoice',
+            name="WesternUnionInvoice",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('file', models.ForeignKey(help_text='WU QCF File', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='core.filetemp')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255, unique=True)),
+                (
+                    "file",
+                    models.ForeignKey(
+                        help_text="WU QCF File",
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="+",
+                        to="core.filetemp",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Western Union QCF File',
-                'verbose_name_plural': 'Western Union QCF Files',
+                "verbose_name": "Western Union QCF File",
+                "verbose_name_plural": "Western Union QCF Files",
             },
         ),
         migrations.CreateModel(
-            name='WesternUnionPaymentPlanReport',
+            name="WesternUnionPaymentPlanReport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sent', models.BooleanField(default=False)),
-                ('payment_plan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='qcf_reports', to='payment.paymentplan')),
-                ('qcf_file', models.ForeignKey(help_text='WU QCF File', on_delete=django.db.models.deletion.DO_NOTHING, related_name='reports', to='payment.westernunioninvoice')),
-                ('report_file', models.ForeignKey(help_text='WU QCF Report File', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='core.filetemp')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("sent", models.BooleanField(default=False)),
+                (
+                    "payment_plan",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="qcf_reports",
+                        to="payment.paymentplan",
+                    ),
+                ),
+                (
+                    "qcf_file",
+                    models.ForeignKey(
+                        help_text="WU QCF File",
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="reports",
+                        to="payment.westernunioninvoice",
+                    ),
+                ),
+                (
+                    "report_file",
+                    models.ForeignKey(
+                        help_text="WU QCF Report File",
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="+",
+                        to="core.filetemp",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Western Union QCF File Report',
-                'verbose_name_plural': 'Western Union QCF File Reports',
+                "verbose_name": "Western Union QCF File Report",
+                "verbose_name_plural": "Western Union QCF File Reports",
             },
         ),
     ]

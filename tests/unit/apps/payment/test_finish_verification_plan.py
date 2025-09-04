@@ -4,6 +4,7 @@ from unittest import mock
 from constance.test import override_config
 from django.core.management import call_command
 from django.test import TestCase, override_settings
+import pytest
 
 from extras.test_utils.factories.account import (
     RoleAssignmentFactory,
@@ -27,7 +28,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.geo.models import Area
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.models import Household
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan, Payment
+from hope.apps.payment.models import Payment, PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -114,7 +115,7 @@ class TestFinishVerificationPlan(TestCase):
 
     def test_finish_verification_if_pp_not_finished_yet(self) -> None:
         Payment.objects.all().update(status=Payment.STATUS_PENDING)
-        self.assertFalse(self.verification.payment_plan.is_reconciled)
-        with self.assertRaises(Exception) as e:
+        assert not self.verification.payment_plan.is_reconciled
+        with pytest.raises(Exception) as e:
             VerificationPlanStatusChangeServices(self.verification).finish()
-        self.assertEqual(e.exception.message, "You can finish only if reconciliation is finalized")
+        assert e.value.message == "You can finish only if reconciliation is finalized"

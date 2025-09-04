@@ -1,12 +1,11 @@
 import csv
 import logging
 
+from celery import shared_task
 from django.db import transaction
 
-from celery import shared_task
-
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +13,7 @@ logger = logging.getLogger(__name__)
 @shared_task
 @sentry_tags
 def import_areas_from_csv_task(csv_data: str) -> None:
-    """
-    Import areas from a CSV file in a background task.
-    """
+    """Import areas from a CSV file in a background task."""
     reader = csv.DictReader(csv_data.splitlines())
     rows = list(reader)
 
