@@ -91,7 +91,7 @@ class TestWesternUnionFTPClient(TestCase):
             mock_download.assert_called_once_with("QCF-123-XYZ-20250101.zip")
 
     def test_init_raises_if_missing_credentials(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Missing FTP value"):
             WesternUnionFTPClientMockNoCredentials()
 
     def test_disconnect_closes_resources(
