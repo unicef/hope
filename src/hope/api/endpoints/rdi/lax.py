@@ -58,7 +58,7 @@ class IndividualsBulkStaging:
     saved_file_fields: list = field(default_factory=list)
 
 
-class DocumentSerializer(serializers.ModelSerializer):
+class DocumentSerializerLax(serializers.ModelSerializer):
     type = serializers.ChoiceField(
         choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value], label) for (value, label) in IDENTIFICATION_TYPE_CHOICE],
         required=True,
@@ -74,7 +74,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         fields = ["type", "country", "image", "document_number", "issuance_date", "expiry_date"]
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class AccountLaxSerializer(serializers.ModelSerializer):
     type = serializers.SlugRelatedField(
         source="account_type",
         slug_field="key",
@@ -98,9 +98,9 @@ class IndividualSerializer(serializers.ModelSerializer):
     household = serializers.ReadOnlyField()
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
-    documents = DocumentSerializer(many=True, required=False)
+    documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
-    accounts = AccountSerializer(many=True, required=False)
+    accounts = AccountLaxSerializer(many=True, required=False)
     photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
 
