@@ -307,7 +307,7 @@ export const sendRequest = async (
 
   onCancel(() => controller.abort());
   let  response = await fetch(url, request);
-  if (response?.status === 401 || response?.status == 403) {
+  if (response?.status == 403) {
     window.location.href = '/access-denied/';
   }
   const content = await response.json();
