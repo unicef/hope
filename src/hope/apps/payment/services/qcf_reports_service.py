@@ -257,7 +257,8 @@ class QCFReportsService:
         return wb
 
     def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
-        """# TODO refactor to 'dev' new perms
+        """# TODO refactor to 'dev' new perms.
+
         role_assignments = RoleAssignment.objects.filter(
             role__permissions__contains=[Permissions.RECEIVE_PARSED_WU_QCF.name],
             business_area=business_area,

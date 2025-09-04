@@ -5,6 +5,7 @@ from constance.test import override_config
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import (
     RoleAssignmentFactory,
@@ -116,6 +117,6 @@ class TestFinishVerificationPlan(TestCase):
     def test_finish_verification_if_pp_not_finished_yet(self) -> None:
         Payment.objects.all().update(status=Payment.STATUS_PENDING)
         assert not self.verification.payment_plan.is_reconciled
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ValidationError) as e:
             VerificationPlanStatusChangeServices(self.verification).finish()
         assert e.value.message == "You can finish only if reconciliation is finalized"
