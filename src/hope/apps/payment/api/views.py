@@ -1586,6 +1586,8 @@ class TargetPopulationViewSet(
                 steficon_rule_targeting=payment_plan.steficon_rule_targeting,
                 steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
                 program_cycle=program_cycle,
+                financial_service_provider=payment_plan.financial_service_provider,
+                delivery_mechanism=payment_plan.delivery_mechanism,
             )
             PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
             payment_plan_copy.save()
