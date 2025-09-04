@@ -395,6 +395,8 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [
