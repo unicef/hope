@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Account = {
+export type DocumentType = {
     readonly id: string;
-    readonly name: string;
-    readonly dataFields: Record<string, any>;
-    accountType: number;
+    label: string;
+    key: string;
 };
 

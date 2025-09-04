@@ -54,7 +54,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
       </Title>
       <Grid container spacing={6}>
         {individual.accounts.map((mechanism, index) => {
-          const tabData = JSON.parse(mechanism.data);
+          const tabData = mechanism.dataFields;
           return (
             <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.accountType}</Typography>
