@@ -105,7 +105,7 @@ export const ProgrammeTimeSeriesFields = ({
             <TableBody>
               {rows.length > 0 ? (
                 rows.map((row) => (
-                  <TableRow key={row.key}>
+                  <TableRow key={row.fieldName}>
                     <TableCell component="th" scope="row">
                       {row.fieldName}
                     </TableCell>

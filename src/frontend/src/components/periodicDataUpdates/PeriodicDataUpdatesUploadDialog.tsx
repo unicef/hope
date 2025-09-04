@@ -14,6 +14,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { GreyText } from '@components/core/GreyText';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -21,11 +22,12 @@ const Error = styled.div`
 `;
 
 const UploadIcon = styled(Publish)`
-  color: #043f91;
+  color: #fff;
 `;
 
 const DisabledUploadIcon = styled(Publish)`
-  color: #00000042;
+  color: #fff;
+  opacity: 0.5;
 `;
 
 export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
@@ -39,13 +41,13 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   const { t } = useTranslation();
   const [error, setError] = useState<any>(null);
   const canPDUUpload = hasPermissions(PERMISSIONS.PDU_UPLOAD, permissions);
+  const queryClient = useQueryClient();
 
   const handleFileUpload = async (): Promise<void> => {
     if (fileToImport) {
       setIsLoading(true);
       setError(null);
       try {
-
         await RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate(
           {
             businessAreaSlug: businessArea,
@@ -54,6 +56,9 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
           },
         );
         showMessage(t('File uploaded successfully'));
+        queryClient.invalidateQueries({
+          queryKey: ['periodicDataUpdateUploads'],
+        });
         setOpenImport(false);
         setFileToImport(null);
       } catch (uploadError: any) {
@@ -79,6 +84,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
     <>
       <Box key="import">
         <ButtonTooltip
+          variant="contained"
           startIcon={!isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />}
           color="primary"
           data-cy="button-import"

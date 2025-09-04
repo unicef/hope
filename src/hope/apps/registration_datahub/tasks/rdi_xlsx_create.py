@@ -34,7 +34,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
-    PeriodicDataUpdateImportService,
+    PDUXlsxImportService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -434,9 +434,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 collection_date = self.registration_data_import.created_at.date()
             else:
                 collection_date = self._handle_date_field(collection_date_cell)
-            PeriodicDataUpdateImportService.set_round_value(
-                individual, flexible_attribute.name, 1, value, collection_date
-            )
+            PDUXlsxImportService.set_round_value(individual, flexible_attribute.name, 1, value, collection_date)
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: dict[str, dict[str, Callable]] = {

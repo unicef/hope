@@ -14,6 +14,7 @@ from flags.models import FlagState
 import pytest
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -58,11 +59,11 @@ from e2e.page_object.programme_population.households_details import HouseholdsDe
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.individuals_details import IndividualsDetails
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
+    PDUXlsxTemplates,
+    PDUXlsxTemplatesDetails,
 )
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
+    PDUXlsxUploads,
 )
 from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
@@ -215,7 +216,7 @@ def download_path(worker_id: str) -> str:
     try:
         assert worker_id is not None
         yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
-    except BaseException:
+    except (AssertionError, TimeoutException):
         yield settings.DOWNLOAD_DIRECTORY
 
 
@@ -372,21 +373,21 @@ def page_individuals_details(request: FixtureRequest, browser: Chrome) -> Indivi
 
 
 @pytest.fixture
-def page_periodic_data_update_templates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
-    return PeriodicDatUpdateTemplates(browser)
+def page_pdu_xlsx_templates(request: FixtureRequest, browser: Chrome) -> PDUXlsxTemplates:
+    return PDUXlsxTemplates(browser)
 
 
 @pytest.fixture
-def page_periodic_data_update_templates_details(
+def page_pdu_xlsx_templates_details(
     request: FixtureRequest,
     browser: Chrome,
-) -> PeriodicDatUpdateTemplatesDetails:
-    return PeriodicDatUpdateTemplatesDetails(browser)
+) -> PDUXlsxTemplatesDetails:
+    return PDUXlsxTemplatesDetails(browser)
 
 
 @pytest.fixture
-def page_periodic_data_uploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
-    return PeriodicDataUpdateUploads(browser)
+def page_pdu_xlsx_uploads(request: FixtureRequest, browser: Chrome) -> PDUXlsxUploads:
+    return PDUXlsxUploads(browser)
 
 
 @pytest.fixture

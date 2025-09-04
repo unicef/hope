@@ -213,7 +213,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     _hope_status,
                     _quantity,
                 ) = get_payment_delivered_quantity_status_and_value(self.payout_amount, entitlement_quantity)
-            except Exception:
+            except ValueError:
                 logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status

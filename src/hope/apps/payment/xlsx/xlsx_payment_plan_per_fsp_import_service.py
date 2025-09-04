@@ -168,7 +168,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                         f" and cannot be before Programme's start date",
                     )
                 )
-        except Exception:
+        except ValueError:
             self.errors.append(
                 XlsxError(
                     self.sheetname,
@@ -259,7 +259,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     ) -> tuple[str, Decimal | None]:
         try:
             status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)
-        except Exception:
+        except ValueError:
             raise self.XlsxPaymentPlanImportPerFspServiceError(
                 f"Invalid delivered_quantity {delivered_quantity} provided for payment_id {payment_id}"
             )
