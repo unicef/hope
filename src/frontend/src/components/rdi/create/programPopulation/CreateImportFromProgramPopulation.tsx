@@ -143,7 +143,6 @@ export const CreateImportFromProgramPopulationForm = ({
       labelEn: element.name,
       value: element.id,
     }));
-  console.log('filteredProgramChoices', filteredProgramChoices);
 
   return (
     <FormikProvider value={formik}>
