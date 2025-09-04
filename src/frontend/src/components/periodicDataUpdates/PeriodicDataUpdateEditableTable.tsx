@@ -10,6 +10,7 @@ import {
   TableCell,
   TextField,
   Button,
+  Typography,
 } from '@mui/material';
 import { format } from 'date-fns';
 import { Box } from '@mui/system';
@@ -456,7 +457,17 @@ const PeriodicDataUpdateEditableTable: React.FC<
   );
   return (
     <Box pt={6}>
-      <BaseSection p={0} title="Periodic Data Update">
+      <BaseSection
+        p={0}
+        containerPadding={{ py: 3, px: 0 }}
+        title={
+          <Box p={6}>
+            <Typography data-cy="title" variant="h6">
+              Periodic Data Update
+            </Typography>
+          </Box>
+        }
+      >
         <div
           style={{
             width: '100%',
