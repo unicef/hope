@@ -395,7 +395,7 @@ export class RestService {
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/{business_area}/rdi/{rdi}/push/lax/households',
+            url: '/api/rest/{business_area}/rdi/{rdi}/push/lax/households/',
             path: {
                 'business_area': businessArea,
                 'rdi': rdi,
@@ -420,7 +420,7 @@ export class RestService {
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/{business_area}/rdi/{rdi}/push/lax/individuals',
+            url: '/api/rest/{business_area}/rdi/{rdi}/push/lax/individuals/',
             path: {
                 'business_area': businessArea,
                 'rdi': rdi,
@@ -10583,7 +10583,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10652,7 +10652,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10680,7 +10680,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10710,7 +10710,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10740,7 +10740,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10770,7 +10770,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10804,7 +10804,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10838,7 +10838,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10868,7 +10868,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10902,7 +10902,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10930,7 +10930,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -10958,7 +10958,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
@@ -11015,7 +11015,7 @@ export class RestService {
         });
     }
     /**
-     * Provide an authorization check for the requesting user.
+     * Provides an authorization check for the requesting user.
      *
      * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
      * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.

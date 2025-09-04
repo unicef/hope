@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type Account = {
-    accountType: string;
+    type: string;
     number?: string;
     financialInstitution?: number;
     data?: any;
