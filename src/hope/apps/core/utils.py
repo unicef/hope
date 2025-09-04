@@ -458,7 +458,7 @@ def decode_and_get_payment_object(encoded_id: str, required: bool) -> Any | None
         qs = Payment.objects.filter(excluded=False, conflicted=False)
         try:
             return qs.get(id=decoded_id)
-        except Exception:
+        except ObjectDoesNotExist:
             raise Http404
     return None
 

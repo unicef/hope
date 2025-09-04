@@ -1,7 +1,10 @@
 import re
 
+from rest_framework.exceptions import ValidationError
+
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.models import Individual
+from hope.apps.periodic_data_update.models import PDUOnlineEdit, PDUXlsxTemplate
 from hope.apps.program.models import Program
 
 
@@ -44,3 +47,21 @@ def populate_pdu_new_rounds_with_null_values(program: Program) -> None:
         populate_pdu_with_null_values(program, ind.flex_fields)
         individuals.append(ind)
     Individual.all_merge_status_objects.bulk_update(individuals, ["flex_fields"])
+
+
+def update_rounds_covered_for_template(pdu_template: PDUXlsxTemplate | PDUOnlineEdit, rounds_data: list[dict]) -> None:
+    field_to_round_map = {item["field"]: item["round"] for item in rounds_data}
+    field_names = field_to_round_map.keys()
+
+    pdu_fields_to_update = FlexibleAttribute.objects.filter(
+        program=pdu_template.program, name__in=field_names, pdu_data__isnull=False
+    ).select_related("pdu_data")
+
+    for field in pdu_fields_to_update:
+        new_round = field_to_round_map.get(field.name)
+        pdu_data = field.pdu_data
+        if new_round <= pdu_data.rounds_covered:
+            field_label = field.label.get("English(EN)") or field.name
+            raise ValidationError(f"Template for round {new_round} of field '{field_label}' has already been created.")
+        pdu_data.rounds_covered = new_round
+        pdu_data.save(update_fields=["rounds_covered"])

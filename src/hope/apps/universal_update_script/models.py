@@ -72,6 +72,15 @@ class UniversalUpdate(
         help_text="Unicef IDs used only to generate template file",
     )
 
+    celery_task_names = {
+        "generate_universal_individual_update_template": (
+            "hope.apps.universal_update_script.celery_tasks.generate_universal_individual_update_template"
+        ),
+        "run_universal_individual_update": (
+            "hope.apps.universal_update_script.celery_tasks.run_universal_individual_update"
+        ),
+    }
+
     class Meta:
         permissions = [
             ("can_run_universal_update", "Can run universal update"),

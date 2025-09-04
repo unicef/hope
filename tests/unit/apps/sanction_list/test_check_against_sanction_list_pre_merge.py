@@ -42,8 +42,6 @@ def sanction_list(db: Any) -> "SanctionList":
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @pytest.mark.elasticsearch
 class TestSanctionListPreMerge(TestCase):
-    databases = "__all__"
-
     TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
 
     @classmethod

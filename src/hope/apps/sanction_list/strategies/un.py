@@ -124,7 +124,7 @@ class LoadSanctionListXMLTask:
                                 date=parsed_date.date(),
                             )
                         )
-                    except Exception:  # pragma: no cover
+                    except ValueError:  # pragma: no cover
                         logger.log("Cannot parse date")
                 elif type_of_date == "BETWEEN":
                     from_year: str = date_of_birth_tag.find("FROM_YEAR").text or ""

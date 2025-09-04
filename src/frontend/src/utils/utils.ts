@@ -1,3 +1,21 @@
+// Status color for periodic data updates online edits
+export function periodicDataUpdatesOnlineEditsStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'NEW':
+      return theme.hctPalette.gray;
+    case 'READY':
+      return theme.hctPalette.orange;
+    case 'APPROVED':
+      return theme.hctPalette.green;
+    case 'MERGED':
+      return theme.hctPalette.darkerBlue;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Choice } from '@restgenerated/models/Choice';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
@@ -373,6 +391,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    NEW: theme.hctPalette.gray,
     EXPORTED: theme.hctPalette.green,
     FAILED: theme.hctPalette.red,
     TO_EXPORT: theme.hctPalette.gray,
